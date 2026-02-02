@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Composition Set - Jen et ses Saints</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-header: #f8f9fa;
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --border-color: #e8eaed;
+            --accent-blue: #0056D2;
+            --court-blue: #2563eb;
+            --court-orange: #f59e0b;
+            --win-color: #34a853;
+            --loss-color: #ea4335;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', 'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .app-container {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .back-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: var(--bg-header);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            color: var(--text-primary);
+        }
+
+        .back-btn:hover {
+            background: var(--border-color);
+        }
+
+        .header-content {
+            flex: 1;
+        }
+
+        .header-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .header-subtitle {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 1px;
+        }
+
+        .set-badge {
+            background: var(--accent-blue);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* Court container */
+        .court-container {
+            background: var(--court-blue);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 12px;
+        }
+
+        .court {
+            position: relative;
+            width: 100%;
+            max-width: 200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Team labels */
+        .team-label {
+            text-align: center;
+            color: white;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 10px;
+            font-weight: 500;
+            padding: 3px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .team-label.home {
+            order: 5;
+        }
+
+        .team-label.away {
+            order: 1;
+        }
+
+        /* Court halves */
+        .court-half {
+            background: var(--court-orange);
+            border: 2px solid white;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 8px 4px;
+            position: relative;
+            aspect-ratio: 1 / 1;
+            justify-content: space-around;
+        }
+
+        .court-half.away {
+            order: 2;
+            border-bottom: none;
+            border-radius: 3px 3px 0 0;
+        }
+
+        .court-half.home {
+            order: 4;
+            border-top: none;
+            border-radius: 0 0 3px 3px;
+        }
+
+        .court-row {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .court-row.single {
+            justify-content: center;
+        }
+
+        /* Net */
+        .net {
+            order: 3;
+            height: 4px;
+            background: white;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .net::before,
+        .net::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .net::before {
+            left: -4px;
+        }
+
+        .net::after {
+            right: -4px;
+        }
+
+        /* Position slots */
+        .position-slot {
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px dashed rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            margin: auto;
+            transition: all 0.2s;
+        }
+
+        .position-slot:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .position-slot.drag-over {
+            background: rgba(255, 255, 255, 0.6);
+            border-color: white;
+            transform: scale(1.1);
+        }
+
+        .position-slot.filled {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid white;
+        }
+
+        .position-slot .player-tag {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        /* Position labels */
+        .position-label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+
+        /* Players bench */
+        .bench-section {
+            margin-bottom: 10px;
+        }
+
+        .bench-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .bench-count {
+            font-size: 11px;
+            color: var(--text-secondary);
+            background: var(--bg-header);
+            padding: 2px 6px;
+            border-radius: 8px;
+        }
+
+        .bench {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-height: 36px;
+            padding: 8px;
+            background: var(--bg-header);
+            border-radius: 8px;
+            border: 1px dashed var(--border-color);
+        }
+
+        .bench.drag-over {
+            background: #e8f4ff;
+            border-color: var(--accent-blue);
+        }
+
+        /* Player tags */
+        .player-tag {
+            padding: 5px 10px;
+            border-radius: 14px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: grab;
+            user-select: none;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .player-tag:active {
+            cursor: grabbing;
+        }
+
+        .player-tag.home {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .player-tag.away {
+            background: var(--loss-color);
+            color: white;
+        }
+
+        .player-tag.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+
+        /* Validate button */
+        .validate-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            padding: 12px;
+            background: var(--win-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: auto;
+        }
+
+        .validate-btn:hover {
+            background: #2d9147;
+        }
+
+        .validate-btn:disabled {
+            background: var(--border-color);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        /* Status message */
+        .status-message {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .status-message.warning {
+            color: var(--loss-color);
+        }
+
+        .status-message.success {
+            color: var(--win-color);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%;
+            max-width: 360px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #fef3c7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .modal-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .modal-message {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            background: white;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel:hover {
+            background: var(--bg-header);
+        }
+
+        .btn-confirm {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: var(--loss-color);
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-confirm:hover {
+            background: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <button class="back-btn" onclick="handleBack()">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                </svg>
+            </button>
+            <div class="header-content">
+                <h1 class="header-title">Composition de départ</h1>
+                <p class="header-subtitle" id="matchInfo">Set 1</p>
+            </div>
+            <span class="set-badge">SET 1</span>
+        </header>
+
+        <!-- Court -->
+        <div class="court-container">
+            <div class="court">
+                <div class="team-label away" id="awayTeamLabel">Adversaire</div>
+                <div class="court-half away" id="courtAway">
+                    <div class="court-row">
+                        <div class="position-slot" data-team="away" data-position="1"></div>
+                        <div class="position-slot" data-team="away" data-position="2"></div>
+                        <div class="position-slot" data-team="away" data-position="3"></div>
+                    </div>
+                    <div class="court-row single">
+                        <div class="position-slot" data-team="away" data-position="4"></div>
+                    </div>
+                </div>
+                <div class="net"></div>
+                <div class="court-half home" id="courtHome">
+                    <div class="court-row single">
+                        <div class="position-slot" data-team="home" data-position="1"></div>
+                    </div>
+                    <div class="court-row">
+                        <div class="position-slot" data-team="home" data-position="2"></div>
+                        <div class="position-slot" data-team="home" data-position="3"></div>
+                        <div class="position-slot" data-team="home" data-position="4"></div>
+                    </div>
+                </div>
+                <div class="team-label home">Jen et ses Saints</div>
+            </div>
+        </div>
+
+        <!-- Home bench -->
+        <div class="bench-section">
+            <div class="bench-title">
+                🔵 Jen et ses Saints
+                <span class="bench-count" id="homeCount">0/4</span>
+            </div>
+            <div class="bench" id="homeBench" data-team="home">
+                <!-- Players tags generated dynamically -->
+            </div>
+        </div>
+
+        <!-- Away bench -->
+        <div class="bench-section">
+            <div class="bench-title">
+                🔴 <span id="awayTeamName">Adversaire</span>
+                <span class="bench-count" id="awayCount">0/4</span>
+            </div>
+            <div class="bench" id="awayBench" data-team="away">
+                <!-- Players tags generated dynamically -->
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div class="status-message" id="statusMessage">
+            Placez 4 joueurs de chaque équipe sur le terrain
+        </div>
+
+        <!-- Validate button -->
+        <button class="validate-btn" id="validateBtn" onclick="validateComposition()" disabled>
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            Commencer le Set 1
+        </button>
+    </div>
+
+    <!-- Modal retour -->
+    <div class="modal-overlay" id="backModal" onclick="closeBackModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-icon">
+                <svg width="24" height="24" fill="#d97706" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+            </div>
+            <h3 class="modal-title">Annuler le match ?</h3>
+            <p class="modal-message">Voulez-vous annuler ce match ? Toutes les données seront perdues.</p>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeBackModal()">Continuer</button>
+                <button class="btn-confirm" onclick="confirmCancel()">Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Récupérer les données du match
+        const currentMatch = JSON.parse(localStorage.getItem('volleyball_current_match')) || null;
+        
+        // État des positions (4v4)
+        let homePositions = { 1: null, 2: null, 3: null, 4: null };
+        let awayPositions = { 1: null, 2: null, 3: null, 4: null };
+        
+        // Joueurs disponibles
+        let homePlayers = [];
+        let awayPlayers = [];
+
+        // Élément en cours de drag
+        let draggedElement = null;
+        let draggedTeam = null;
+        let draggedPlayer = null;
+        let sourceContainer = null;
+
+        // Initialisation
+        function init() {
+            if (!currentMatch) {
+                window.location.href = 'nouveau-match.html';
+                return;
+            }
+
+            // Récupérer les joueurs
+            homePlayers = currentMatch.players || [];
+            awayPlayers = currentMatch.adversePlayers || [];
+
+            // Mettre à jour les labels
+            document.getElementById('awayTeamLabel').textContent = currentMatch.opponent;
+            document.getElementById('awayTeamName').textContent = currentMatch.opponent;
+            document.getElementById('matchInfo').textContent = `vs ${currentMatch.opponent}`;
+
+            // Rendre les bancs
+            renderBenches();
+
+            // Setup drag and drop
+            setupDragAndDrop();
+
+            // Mise à jour du statut
+            updateStatus();
+        }
+
+        // Rendre les bancs
+        function renderBenches() {
+            const homeBench = document.getElementById('homeBench');
+            const awayBench = document.getElementById('awayBench');
+
+            // Home players
+            homeBench.innerHTML = homePlayers.map((player, index) => `
+                <div class="player-tag home" 
+                     draggable="true" 
+                     data-team="home" 
+                     data-player-index="${index}"
+                     data-player-name="${player.prenom}">
+                    ${player.prenom}
+                </div>
+            `).join('');
+
+            // Away players
+            awayBench.innerHTML = awayPlayers.map((player, index) => `
+                <div class="player-tag away" 
+                     draggable="true" 
+                     data-team="away" 
+                     data-player-index="${index}"
+                     data-player-name="${player}">
+                    ${player}
+                </div>
+            `).join('');
+        }
+
+        // Setup Drag and Drop
+        function setupDragAndDrop() {
+            // Drag start
+            document.addEventListener('dragstart', (e) => {
+                if (e.target.classList.contains('player-tag')) {
+                    draggedElement = e.target;
+                    draggedTeam = e.target.dataset.team;
+                    draggedPlayer = e.target.dataset.playerName;
+                    sourceContainer = e.target.parentElement;
+                    e.target.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                }
+            });
+
+            // Drag end
+            document.addEventListener('dragend', (e) => {
+                if (e.target.classList.contains('player-tag')) {
+                    e.target.classList.remove('dragging');
+                    draggedElement = null;
+                    draggedTeam = null;
+                    draggedPlayer = null;
+                    sourceContainer = null;
+                }
+                
+                // Remove all drag-over classes
+                document.querySelectorAll('.drag-over').forEach(el => {
+                    el.classList.remove('drag-over');
+                });
+            });
+
+            // Drag over slots
+            document.querySelectorAll('.position-slot').forEach(slot => {
+                slot.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    if (slot.dataset.team === draggedTeam) {
+                        slot.classList.add('drag-over');
+                        e.dataTransfer.dropEffect = 'move';
+                    }
+                });
+
+                slot.addEventListener('dragleave', (e) => {
+                    slot.classList.remove('drag-over');
+                });
+
+                slot.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    slot.classList.remove('drag-over');
+                    
+                    if (slot.dataset.team !== draggedTeam) return;
+
+                    const position = slot.dataset.position;
+                    const positions = slot.dataset.team === 'home' ? homePositions : awayPositions;
+
+                    // Si le slot a déjà un joueur, le remettre au banc
+                    if (slot.children.length > 0) {
+                        const existingTag = slot.children[0];
+                        const bench = slot.dataset.team === 'home' 
+                            ? document.getElementById('homeBench')
+                            : document.getElementById('awayBench');
+                        bench.appendChild(existingTag);
+                    }
+
+                    // Si le joueur vient d'un autre slot, libérer l'ancien
+                    if (sourceContainer && sourceContainer.classList.contains('position-slot')) {
+                        const oldPosition = sourceContainer.dataset.position;
+                        const oldPositions = sourceContainer.dataset.team === 'home' ? homePositions : awayPositions;
+                        oldPositions[oldPosition] = null;
+                        sourceContainer.classList.remove('filled');
+                    }
+
+                    // Placer le joueur
+                    slot.appendChild(draggedElement);
+                    slot.classList.add('filled');
+                    positions[position] = draggedPlayer;
+
+                    updateStatus();
+                });
+            });
+
+            // Drag over benches (pour retirer du terrain)
+            document.querySelectorAll('.bench').forEach(bench => {
+                bench.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    if (bench.dataset.team === draggedTeam) {
+                        bench.classList.add('drag-over');
+                        e.dataTransfer.dropEffect = 'move';
+                    }
+                });
+
+                bench.addEventListener('dragleave', (e) => {
+                    bench.classList.remove('drag-over');
+                });
+
+                bench.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    bench.classList.remove('drag-over');
+                    
+                    if (bench.dataset.team !== draggedTeam) return;
+
+                    // Si le joueur vient d'un slot, libérer la position
+                    if (sourceContainer && sourceContainer.classList.contains('position-slot')) {
+                        const position = sourceContainer.dataset.position;
+                        const positions = sourceContainer.dataset.team === 'home' ? homePositions : awayPositions;
+                        positions[position] = null;
+                        sourceContainer.classList.remove('filled');
+                    }
+
+                    bench.appendChild(draggedElement);
+                    updateStatus();
+                });
+            });
+        }
+
+        // Mise à jour du statut
+        function updateStatus() {
+            const homeOnCourt = Object.values(homePositions).filter(p => p !== null).length;
+            const awayOnCourt = Object.values(awayPositions).filter(p => p !== null).length;
+
+            document.getElementById('homeCount').textContent = `${homeOnCourt}/4`;
+            document.getElementById('awayCount').textContent = `${awayOnCourt}/4`;
+
+            const statusEl = document.getElementById('statusMessage');
+            const validateBtn = document.getElementById('validateBtn');
+
+            if (homeOnCourt === 4 && awayOnCourt === 4) {
+                statusEl.textContent = '✓ Composition complète !';
+                statusEl.className = 'status-message success';
+                validateBtn.disabled = false;
+            } else {
+                const homeMissing = 4 - homeOnCourt;
+                const awayMissing = 4 - awayOnCourt;
+                let message = [];
+                if (homeMissing > 0) message.push(`${homeMissing} joueur(s) manquant(s) chez Jen`);
+                if (awayMissing > 0) message.push(`${awayMissing} joueur(s) manquant(s) chez l'adversaire`);
+                statusEl.textContent = message.join(' • ');
+                statusEl.className = 'status-message warning';
+                validateBtn.disabled = true;
+            }
+        }
+
+        // Valider la composition
+        function validateComposition() {
+            // Sauvegarder les compositions dans le match
+            const matchData = {
+                ...currentMatch,
+                sets: [{
+                    setNumber: 1,
+                    homeLineup: { ...homePositions },
+                    awayLineup: { ...awayPositions },
+                    homeScore: 0,
+                    awayScore: 0,
+                    points: []
+                }]
+            };
+
+            localStorage.setItem('volleyball_current_match', JSON.stringify(matchData));
+            
+            // Aller à la page de configuration du set
+            window.location.href = 'match-set-config.html';
+        }
+
+        // Retour
+        function handleBack() {
+            document.getElementById('backModal').classList.add('active');
+        }
+
+        function closeBackModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('backModal').classList.remove('active');
+        }
+
+        function confirmCancel() {
+            localStorage.removeItem('volleyball_current_match');
+            window.location.href = 'nouveau-match.html';
+        }
+
+        // Init
+        init();
+    </script>
+</body>
+</html>
