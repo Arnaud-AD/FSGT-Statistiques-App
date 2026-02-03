@@ -712,8 +712,8 @@
 
         function handleBack() {
             if (currentView === 'type') {
-                // Retour vers le menu principal - toujours demander confirmation
-                document.getElementById('modalOverlay').classList.add('active');
+                // Retour vers le menu principal - pas de confirmation car rien n'a été fait
+                window.location.href = 'index.html';
             } else {
                 // Retour vers le choix du type
                 currentView = 'type';
