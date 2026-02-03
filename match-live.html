@@ -1256,6 +1256,273 @@
             background: #dc2626;
             color: white;
         }
+
+        /* Bouton Fin du Set */
+        .control-btn.end-set {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+
+        .control-btn.end-set:active {
+            background: #fde68a;
+        }
+
+        /* Modal fin de set */
+        .end-set-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .end-set-overlay.active {
+            display: flex;
+        }
+
+        .end-set-modal {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            width: 92%;
+            max-width: 400px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .end-set-icon {
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .end-set-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 17px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .end-set-subtitle {
+            font-size: 12px;
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .end-set-score-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 14px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .end-set-score-display .team {
+            text-align: center;
+            flex: 1;
+        }
+
+        .end-set-score-display .team-name {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .end-set-score-display .team-pts {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .end-set-score-display .team-pts.winner {
+            color: #16a34a;
+        }
+
+        .end-set-score-display .team-pts.loser {
+            color: #dc2626;
+        }
+
+        .end-set-score-display .vs {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .end-set-winner {
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            color: #16a34a;
+            margin-bottom: 16px;
+        }
+
+        /* Choix de raison (cas manuel) */
+        .end-set-reasons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .end-set-reason-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .end-set-reason-btn:active {
+            transform: scale(0.98);
+        }
+
+        .end-set-reason-btn.selected {
+            border-color: var(--accent-blue);
+            background: #eff6ff;
+        }
+
+        .end-set-reason-btn .reason-icon {
+            font-size: 20px;
+            width: 30px;
+            text-align: center;
+        }
+
+        .end-set-reason-btn .reason-text {
+            flex: 1;
+        }
+
+        .end-set-reason-btn .reason-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .end-set-reason-btn .reason-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* Score réel (pour cas caméra) */
+        .end-set-real-score {
+            display: none;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        .end-set-real-score.visible {
+            display: block;
+        }
+
+        .end-set-real-score-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .end-set-real-score-inputs {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .end-set-real-score-inputs .team-input {
+            text-align: center;
+        }
+
+        .end-set-real-score-inputs .team-input label {
+            display: block;
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .end-set-real-score-inputs .team-input input {
+            width: 60px;
+            padding: 8px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: 'Google Sans', sans-serif;
+        }
+
+        .end-set-real-score-inputs .input-sep {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding-top: 18px;
+        }
+
+        /* Stats recap */
+        .end-set-stats-recap {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .end-set-stats-recap .stat-highlight {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Actions */
+        .end-set-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .end-set-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .end-set-btn.cancel {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .end-set-btn.confirm {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .end-set-btn.confirm:disabled {
+            background: #93c5fd;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -1299,6 +1566,12 @@
                             <path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/>
                         </svg>
                         Changement
+                    </button>
+                    <button class="control-btn end-set" id="btnEndSet" onclick="openEndSetModal('manual')" title="Terminer le set" style="display: none;">
+                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/>
+                        </svg>
+                        Fin du Set
                     </button>
                 </div>
                 <div class="control-bar-right">
@@ -1403,6 +1676,13 @@
                     </div>
                 </div>
 
+                <!-- Service filet (visible pendant serve_end) -->
+                <div id="serviceNetFaultSection" class="hidden">
+                    <div class="tags-grid">
+                        <button class="action-tag faute" onclick="handleServiceNetFault()">🥅 Service filet</button>
+                    </div>
+                </div>
+
                 <!-- Server continue indicator -->
                 <div id="serverContinue" class="hidden">
                     <div class="server-continue-banner" id="serverContinueBanner">
@@ -1418,19 +1698,19 @@
                     </div>
                 </div>
 
-                <!-- Service filet (visible pendant serve_end) -->
-                <div id="serviceNetFaultSection" class="hidden">
-                    <div class="tags-grid">
-                        <button class="action-tag faute" onclick="handleServiceNetFault()">🥅 Service filet</button>
-                    </div>
-                </div>
-
                 <!-- Options 2ème touche (visible uniquement pendant la phase passe) -->
                 <div id="secondTouchOptions" class="hidden">
                     <div class="tags-title">Ou action en 2ème touche</div>
                     <div class="tags-grid">
                         <button class="action-tag second-touch" onclick="handleSecondTouch('deuxieme_main')">✋ Deuxième main</button>
                         <button class="action-tag second-touch" onclick="handleSecondTouch('attaque_directe')">⚡ Attaque directe</button>
+                    </div>
+                </div>
+
+                <!-- Faute de passe (visible pendant phase pass) -->
+                <div id="passFaultSection" class="hidden">
+                    <div class="tags-grid">
+                        <button class="action-tag faute" onclick="handlePassFault()">❌ Faute de passe</button>
                     </div>
                 </div>
 
@@ -1586,6 +1866,74 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modal fin de set -->
+        <div class="end-set-overlay" id="endSetOverlay">
+            <div class="end-set-modal" onclick="event.stopPropagation()">
+                <div class="end-set-icon" id="endSetIcon">🏆</div>
+                <div class="end-set-title" id="endSetTitle">Fin du Set</div>
+                <div class="end-set-subtitle" id="endSetSubtitle"></div>
+                
+                <!-- Score actuel -->
+                <div class="end-set-score-display" id="endSetScoreDisplay">
+                    <div class="team">
+                        <div class="team-name">Jen et ses Saints</div>
+                        <div class="team-pts" id="endSetHomeScore">0</div>
+                    </div>
+                    <div class="vs">—</div>
+                    <div class="team">
+                        <div class="team-name" id="endSetAwayName">Adversaire</div>
+                        <div class="team-pts" id="endSetAwayScore">0</div>
+                    </div>
+                </div>
+                
+                <div class="end-set-winner" id="endSetWinner"></div>
+
+                <!-- Choix raison (mode manuel uniquement) -->
+                <div class="end-set-reasons" id="endSetReasons" style="display:none;">
+                    <button class="end-set-reason-btn" onclick="selectEndReason('camera')">
+                        <span class="reason-icon">📹</span>
+                        <div class="reason-text">
+                            <div class="reason-title">Problème caméra</div>
+                            <div class="reason-desc">Batterie, chute, obstruction… Saisir le score réel</div>
+                        </div>
+                    </button>
+                    <button class="end-set-reason-btn" onclick="selectEndReason('time')">
+                        <span class="reason-icon">⏱️</span>
+                        <div class="reason-text">
+                            <div class="reason-title">Fin du créneau</div>
+                            <div class="reason-desc">Le set se termine sur le score actuel</div>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Score réel (mode caméra) -->
+                <div class="end-set-real-score" id="endSetRealScore">
+                    <div class="end-set-real-score-title">Score réel de fin de set</div>
+                    <div class="end-set-real-score-inputs">
+                        <div class="team-input">
+                            <label>Jen et ses Saints</label>
+                            <input type="number" id="realScoreHome" min="0" max="99" value="0">
+                        </div>
+                        <div class="input-sep">—</div>
+                        <div class="team-input">
+                            <label id="realScoreAwayLabel">Adversaire</label>
+                            <input type="number" id="realScoreAway" min="0" max="99" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recap stats -->
+                <div class="end-set-stats-recap" id="endSetStatsRecap"></div>
+
+                <!-- Actions -->
+                <div class="end-set-actions">
+                    <button class="end-set-btn cancel" id="endSetCancelBtn" onclick="closeEndSetModal()">Annuler</button>
+                    <button class="end-set-btn cancel" id="endSetBackBtn" onclick="returnToGameForCorrection()">← Corriger</button>
+                    <button class="end-set-btn confirm" id="endSetConfirmBtn" onclick="confirmEndSet()">Valider</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1604,7 +1952,8 @@
             currentAction: {}, // action en cours
             rally: [], // toutes les actions du point en cours
             homeScore: 0,
-            awayScore: 0
+            awayScore: 0,
+            setEnded: false
         };
 
         // Statistiques du set
@@ -1819,6 +2168,8 @@
                 'direct_return_end': '<span class="highlight">Retour direct</span> — Cliquez où arrive le retour',
                 'pass': '<span class="highlight">Passe</span> — Sélectionnez le passeur',
                 'pass_end': '<span class="highlight">Passe</span> — Cliquez où arrive la passe',
+                'pass_fault_end': '<span class="highlight">Faute de passe</span> — Cliquez où arrive la passe',
+                'pass_fault_player': '<span class="highlight">Faute de passe</span> — Qui fait la faute ?',
                 'second_touch_player': '<span class="highlight">2ème touche</span> — Qui fait la 2ème touche ?',
                 'attack_player': '<span class="highlight">Attaque</span> — Sélectionnez l\'attaquant',
                 'attack_type': '<span class="highlight">Attaque</span> — Choisissez le type',
@@ -1834,6 +2185,12 @@
             const btnSub = document.getElementById('btnSubstitute');
             if (btnSub) {
                 btnSub.style.display = (gameState.phase === 'server_selection' || gameState.phase === 'serve_start') ? 'flex' : 'none';
+            }
+            
+            // Afficher le bouton Fin du Set pendant la sélection du serveur ou au début du service
+            const btnEnd = document.getElementById('btnEndSet');
+            if (btnEnd) {
+                btnEnd.style.display = (gameState.phase === 'server_selection' || gameState.phase === 'serve_start') ? 'flex' : 'none';
             }
         }
 
@@ -1927,6 +2284,8 @@
                 handleReceptionEnd(clickData);
             } else if (gameState.phase === 'pass_end') {
                 handlePassEnd(clickData);
+            } else if (gameState.phase === 'pass_fault_end') {
+                handlePassFaultEnd(clickData);
             } else if (gameState.phase === 'defense_end') {
                 handleDefenseEnd(clickData);
             }
@@ -1988,6 +2347,9 @@
                     break;
                 case 'pass_end':
                     handlePassEnd(clickData);
+                    break;
+                case 'pass_fault_end':
+                    handlePassFaultEnd(clickData);
                     break;
                 case 'attack_end':
                     handleAttackEnd(clickData);
@@ -2359,6 +2721,75 @@
             renderPlayerSelection(gameState.attackingTeam, 'Qui fait la 2ème touche ?');
         }
 
+        function handlePassFault() {
+            // Le passeur a déjà été sélectionné en phase 'pass'
+            // On doit maintenant demander où la passe est arrivée
+            // Récupérer le passeur sélectionné depuis le dernier clic joueur
+            // Le passeur n'a pas encore été enregistré comme action, 
+            // il faut le chercher dans currentAction s'il existe, sinon dans le dernier joueur sélectionné
+            
+            // Si on n'a pas encore de passeur sélectionné (on est encore en 'pass' = sélection passeur),
+            // on ne peut pas faire de faute sans passeur
+            // Mais le bouton est visible dès la phase 'pass', il faut d'abord sélectionner le passeur
+            // En fait le bouton "Faute de passe" est visible pendant 'pass' mais ne devrait être cliquable
+            // qu'après avoir sélectionné un passeur... 
+            // ALTERNATIVE: on demande qui fait la faute puis où elle arrive
+            
+            gameState.passFault = true;
+            gameState.phase = 'pass_fault_player';
+            updatePhase();
+            hideAllSections();
+            renderPlayerSelection(gameState.attackingTeam, 'Qui fait la faute de passe ?');
+        }
+
+        function selectPassFaultPlayer(playerName) {
+            gameState.currentAction = {
+                type: 'pass',
+                subType: 'fault',
+                player: playerName,
+                team: gameState.attackingTeam
+            };
+            gameState.phase = 'pass_fault_end';
+            updatePhase();
+            hideAllSections();
+            
+            // Activer zone out + highlight terrain de l'équipe
+            document.getElementById('outArea').classList.add('active');
+            highlightCourt(gameState.attackingTeam);
+            
+            // Afficher labels OUT
+            const attackingCourtSide = getCourtSideForTeam(gameState.attackingTeam);
+            document.getElementById('outLabelTop').style.display = 'block';
+            document.getElementById('outLabelBottom').style.display = 'block';
+        }
+
+        function handlePassFaultEnd(clickData) {
+            gameState.currentAction.endPos = clickData;
+            addMarker(clickData, 'fault');
+            
+            // Désactiver la zone out
+            document.getElementById('outArea').classList.remove('active');
+            
+            // Tracer flèche depuis la réception/défense précédente
+            const lastAction = gameState.rally[gameState.rally.length - 1];
+            if (lastAction && lastAction.endPos) {
+                drawArrow(lastAction.endPos, clickData, 'fault');
+            } else if (lastAction && lastAction.isDirectReturn && lastAction.directReturnEndPos) {
+                drawArrow(lastAction.directReturnEndPos, clickData, 'fault');
+            }
+            
+            // Sauvegarder l'action
+            gameState.rally.push({ ...gameState.currentAction });
+            
+            // Point pour l'adversaire
+            const otherTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+            awardPoint(otherTeam);
+            endRally();
+            
+            // Reset flag
+            gameState.passFault = false;
+        }
+
         function selectSecondTouchPlayer(playerName) {
             // Créer directement une action d'attaque avec le type pré-défini
             gameState.currentAction = {
@@ -2682,7 +3113,8 @@
             // Sauvegarder
             saveCurrentSet();
 
-            // Vérifier fin de set
+            // Vérifier fin de set (met le flag setEnded si c'est fini)
+            gameState.setEnded = false;
             checkSetEnd();
         }
 
@@ -2692,10 +3124,231 @@
 
             // Set gagné à 25 avec 2 points d'écart
             if ((home >= 25 || away >= 25) && Math.abs(home - away) >= 2) {
-                // Fin du set !
-                alert(`Fin du set ! Score: ${home} - ${away}`);
-                // TODO: gérer la fin du set et le passage au suivant
+                gameState.setEnded = true;
+                openEndSetModal('auto');
             }
+        }
+
+        // ==================== FIN DU SET ====================
+        let endSetState = {
+            mode: null,     // 'auto', 'manual'
+            reason: null,   // null, 'camera', 'time'
+        };
+
+        function openEndSetModal(mode) {
+            endSetState.mode = mode;
+            endSetState.reason = null;
+
+            const opponent = currentMatch.opponent || 'Adversaire';
+            const home = gameState.homeScore;
+            const away = gameState.awayScore;
+
+            // Mettre à jour les noms
+            document.getElementById('endSetAwayName').textContent = opponent;
+            document.getElementById('realScoreAwayLabel').textContent = opponent;
+
+            // Score
+            const homeEl = document.getElementById('endSetHomeScore');
+            const awayEl = document.getElementById('endSetAwayScore');
+            homeEl.textContent = home;
+            awayEl.textContent = away;
+
+            // Reset des classes winner/loser
+            homeEl.classList.remove('winner', 'loser');
+            awayEl.classList.remove('winner', 'loser');
+
+            if (mode === 'auto') {
+                // Fin automatique — on sait qui a gagné
+                const winner = home > away ? 'home' : 'away';
+                const winnerName = winner === 'home' ? 'Jen et ses Saints' : opponent;
+                
+                homeEl.classList.add(home > away ? 'winner' : 'loser');
+                awayEl.classList.add(away > home ? 'winner' : 'loser');
+
+                document.getElementById('endSetIcon').textContent = '🏆';
+                document.getElementById('endSetTitle').textContent = 'Fin du Set !';
+                document.getElementById('endSetSubtitle').textContent = `Set ${setIndex + 1} terminé — 25 points atteints`;
+                document.getElementById('endSetWinner').textContent = `🎉 ${winnerName} remporte le set`;
+                document.getElementById('endSetWinner').style.display = 'block';
+                document.getElementById('endSetReasons').style.display = 'none';
+                document.getElementById('endSetRealScore').classList.remove('visible');
+                document.getElementById('endSetCancelBtn').style.display = 'none';
+                document.getElementById('endSetBackBtn').style.display = 'block';
+                document.getElementById('endSetConfirmBtn').textContent = 'Set suivant →';
+                document.getElementById('endSetConfirmBtn').disabled = false;
+            } else {
+                // Mode manuel
+                document.getElementById('endSetIcon').textContent = '🏁';
+                document.getElementById('endSetTitle').textContent = 'Terminer le set ?';
+                document.getElementById('endSetSubtitle').textContent = `Set ${setIndex + 1} — Score actuel`;
+                document.getElementById('endSetWinner').style.display = 'none';
+                document.getElementById('endSetReasons').style.display = 'flex';
+                document.getElementById('endSetRealScore').classList.remove('visible');
+                document.getElementById('endSetCancelBtn').style.display = 'block';
+                document.getElementById('endSetBackBtn').style.display = 'none';
+                document.getElementById('endSetConfirmBtn').textContent = 'Terminer le set';
+                document.getElementById('endSetConfirmBtn').disabled = true; // Attendre le choix de raison
+
+                // Reset les boutons raison
+                document.querySelectorAll('.end-set-reason-btn').forEach(b => b.classList.remove('selected'));
+            }
+
+            // Stats recap
+            buildEndSetStatsRecap();
+
+            // Pré-remplir score réel avec score actuel
+            document.getElementById('realScoreHome').value = home;
+            document.getElementById('realScoreAway').value = away;
+
+            document.getElementById('endSetOverlay').classList.add('active');
+        }
+
+        function selectEndReason(reason) {
+            endSetState.reason = reason;
+
+            // Highlight du bouton
+            document.querySelectorAll('.end-set-reason-btn').forEach(b => b.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+
+            if (reason === 'camera') {
+                document.getElementById('endSetRealScore').classList.add('visible');
+                document.getElementById('endSetConfirmBtn').textContent = 'Terminer avec score réel';
+            } else {
+                document.getElementById('endSetRealScore').classList.remove('visible');
+                document.getElementById('endSetConfirmBtn').textContent = 'Terminer sur le score actuel';
+            }
+
+            document.getElementById('endSetConfirmBtn').disabled = false;
+        }
+
+        function closeEndSetModal() {
+            document.getElementById('endSetOverlay').classList.remove('active');
+        }
+
+        function returnToGameForCorrection() {
+            // Fermer la modal
+            closeEndSetModal();
+            
+            // Réinitialiser le flag de fin de set
+            gameState.setEnded = false;
+            
+            // Retour à la sélection du serveur pour pouvoir utiliser "Annuler point"
+            gameState.rally = [];
+            gameState.currentAction = {};
+            gameState.currentServer = null;
+            
+            clearMarkers();
+            clearArrows();
+            hideServiceZones();
+            hideReceptionQualityZones();
+            highlightCourt(null);
+            
+            gameState.phase = 'server_selection';
+            updatePhase();
+            renderServerSelection();
+        }
+
+        function buildEndSetStatsRecap() {
+            const points = currentSet.points || [];
+            const totalPoints = points.length;
+            
+            if (totalPoints === 0) {
+                document.getElementById('endSetStatsRecap').innerHTML = 'Aucun point enregistré dans ce set.';
+                return;
+            }
+
+            // Compter les aces et fautes de service
+            let aces = 0, faultesServ = 0;
+            for (const pt of points) {
+                for (const action of pt.rally) {
+                    if (action.type === 'service' && action.result === 'ace') aces++;
+                    if (action.type === 'service' && (action.result === 'fault' || action.result === 'fault_out' || action.result === 'fault_net')) faultesServ++;
+                }
+            }
+
+            document.getElementById('endSetStatsRecap').innerHTML = `
+                <span class="stat-highlight">${totalPoints}</span> points joués
+                ${aces > 0 ? ` • <span class="stat-highlight">${aces}</span> ace${aces > 1 ? 's' : ''}` : ''}
+                ${faultesServ > 0 ? ` • <span class="stat-highlight">${faultesServ}</span> faute${faultesServ > 1 ? 's' : ''} au service` : ''}
+            `;
+        }
+
+        function confirmEndSet() {
+            let finalHome = gameState.homeScore;
+            let finalAway = gameState.awayScore;
+            let endReason = 'auto';
+
+            if (endSetState.mode === 'manual') {
+                if (!endSetState.reason) return;
+                endReason = endSetState.reason;
+
+                if (endSetState.reason === 'camera') {
+                    finalHome = parseInt(document.getElementById('realScoreHome').value) || 0;
+                    finalAway = parseInt(document.getElementById('realScoreAway').value) || 0;
+                    
+                    // Validation basique
+                    if (finalHome === finalAway) {
+                        alert('Le score ne peut pas être à égalité en fin de set.');
+                        return;
+                    }
+                }
+                // Pour 'time', on garde le score actuel
+                if (endSetState.reason === 'time' && finalHome === finalAway) {
+                    alert('Le score est à égalité. Jouez au moins un point supplémentaire ou utilisez "Problème caméra" pour saisir un score différent.');
+                    return;
+                }
+            }
+
+            // Sauvegarder le résultat du set
+            currentSet.finalHomeScore = finalHome;
+            currentSet.finalAwayScore = finalAway;
+            currentSet.endReason = endReason;
+            currentSet.completed = true;
+            currentSet.winner = finalHome > finalAway ? 'home' : 'away';
+            currentSet.statsHomeScore = gameState.homeScore;
+            currentSet.statsAwayScore = gameState.awayScore;
+
+            // Déterminer le prochain serveur (alternance entre sets)
+            // Le premier serveur du set change à chaque set
+            const firstServerThisSet = currentSet.firstServingTeam || currentSet.servingTeam;
+            const nextServingTeam = firstServerThisSet === 'home' ? 'away' : 'home';
+
+            // Sauvegarder qui a servi en premier dans ce set
+            if (!currentSet.firstServingTeam) {
+                currentSet.firstServingTeam = currentSet.servingTeam;
+            }
+
+            // Changement de côté terrain (la caméra reste fixe)
+            const currentCameraSide = currentSet.cameraSide || 'home';
+            const nextCameraSide = currentCameraSide === 'home' ? 'away' : 'home';
+
+            // Préparer le squelette du set suivant
+            const nextSetNumber = (currentSet.setNumber || 1) + 1;
+            const nextSet = {
+                setNumber: nextSetNumber,
+                homeLineup: { ...currentSet.homeLineup },  // Copier la composition
+                awayLineup: { ...currentSet.awayLineup },
+                homeScore: 0,
+                awayScore: 0,
+                points: [],
+                cameraSide: nextCameraSide,
+                servingTeam: nextServingTeam,
+                firstServingTeam: nextServingTeam,
+                previousSetReady: true  // Flag pour que la composition sache qu'on vient d'un set terminé
+            };
+
+            // Ajouter le set suivant au match
+            currentMatch.sets.push(nextSet);
+
+            // Sauvegarder
+            currentMatch.sets[setIndex] = currentSet;
+            localStorage.setItem('volleyball_current_match', JSON.stringify(currentMatch));
+
+            // Fermer la modal
+            closeEndSetModal();
+
+            // Aller à la composition du set suivant
+            window.location.href = 'match-set-composition.html';
         }
 
         function endRally() {
@@ -2712,6 +3365,15 @@
 
             // Mettre à jour les statistiques
             recalculateAllStats();
+
+            // Si le set est terminé, ne pas préparer le prochain point
+            if (gameState.setEnded) {
+                gameState.rally = [];
+                gameState.currentAction = {};
+                clearMarkers();
+                clearArrows();
+                return;
+            }
 
             // Reset pour le prochain point
             gameState.rally = [];
@@ -2874,6 +3536,7 @@
             // Afficher les options de 2ème touche uniquement en phase passe
             if (gameState.phase === 'pass') {
                 document.getElementById('secondTouchOptions').classList.remove('hidden');
+                document.getElementById('passFaultSection').classList.remove('hidden');
             }
         }
 
@@ -2884,6 +3547,9 @@
                     break;
                 case 'pass':
                     selectPasser(playerName);
+                    break;
+                case 'pass_fault_player':
+                    selectPassFaultPlayer(playerName);
                     break;
                 case 'second_touch_player':
                     selectSecondTouchPlayer(playerName);
@@ -2907,6 +3573,7 @@
             document.getElementById('serverContinue').classList.add('hidden');
             document.getElementById('playerSelection').classList.add('hidden');
             document.getElementById('secondTouchOptions').classList.add('hidden');
+            document.getElementById('passFaultSection').classList.add('hidden');
             document.getElementById('serviceNetFaultSection').classList.add('hidden');
             document.getElementById('attackTypeSelection').classList.add('hidden');
             document.getElementById('resultSelection').classList.add('hidden');
@@ -3146,6 +3813,24 @@
                     // Retour à la sélection du passeur
                     gameState.phase = 'pass';
                     renderPlayerSelection(gameState.attackingTeam, 'Qui fait la passe ?');
+                    redrawRally();
+                    break;
+
+                case 'pass_fault_player':
+                    // Retour à la sélection du passeur (phase pass normale)
+                    gameState.passFault = false;
+                    gameState.phase = 'pass';
+                    renderPlayerSelection(gameState.attackingTeam, 'Qui fait la passe ?');
+                    redrawRally();
+                    break;
+
+                case 'pass_fault_end':
+                    // Retour à la sélection du joueur fautif
+                    gameState.phase = 'pass_fault_player';
+                    updatePhase();
+                    hideAllSections();
+                    document.getElementById('outArea').classList.remove('active');
+                    renderPlayerSelection(gameState.attackingTeam, 'Qui fait la faute de passe ?');
                     redrawRally();
                     break;
 
