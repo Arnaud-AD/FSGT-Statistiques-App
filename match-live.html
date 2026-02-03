@@ -1150,6 +1150,112 @@
             font-size: 15px;
             font-weight: 700;
         }
+
+        /* Undo point modal */
+        .undo-point-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .undo-point-overlay.active {
+            display: flex;
+        }
+
+        .undo-point-modal {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            width: 90%;
+            max-width: 380px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .undo-point-title {
+            font-size: 15px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 12px;
+            color: #dc2626;
+        }
+
+        .undo-point-summary {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .undo-point-score {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-family: 'Google Sans', sans-serif;
+        }
+
+        .undo-point-score .score-before {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-decoration: line-through;
+        }
+
+        .undo-point-score .score-arrow {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .undo-point-score .score-after {
+            font-size: 20px;
+            font-weight: 700;
+            color: #16a34a;
+        }
+
+        .undo-point-detail {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .undo-point-detail .label {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .undo-point-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .undo-point-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .undo-point-btn.keep {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .undo-point-btn.remove {
+            background: #dc2626;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -1466,6 +1572,20 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modal annuler dernier point -->
+        <div class="undo-point-overlay" id="undoPointOverlay" onclick="closeUndoPointModal(event)">
+            <div class="undo-point-modal" onclick="event.stopPropagation()">
+                <div class="undo-point-title">⚠️ Annuler le dernier point ?</div>
+                <div class="undo-point-summary" id="undoPointSummary">
+                    <!-- Rempli dynamiquement -->
+                </div>
+                <div class="undo-point-actions">
+                    <button class="undo-point-btn keep" onclick="closeUndoPointModal()">Garder</button>
+                    <button class="undo-point-btn remove" onclick="confirmUndoLastPoint()">Supprimer ce point</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1630,6 +1750,12 @@
             gameState.servingTeam = currentSet.servingTeam || 'away';
             gameState.homeScore = currentSet.homeScore || 0;
             gameState.awayScore = currentSet.awayScore || 0;
+
+            // Sauvegarder le score initial (bonus) si pas encore fait
+            if (currentSet.initialHomeScore === undefined) {
+                currentSet.initialHomeScore = gameState.homeScore;
+                currentSet.initialAwayScore = gameState.awayScore;
+            }
 
             // Mettre à jour l'affichage
             updateLabels();
@@ -2579,6 +2705,8 @@
                 rally: [...gameState.rally],
                 homeScore: gameState.homeScore,
                 awayScore: gameState.awayScore,
+                servingTeam: gameState.rally[0]?.team || gameState.servingTeam,
+                server: gameState.rally[0]?.player || null,
                 timestamp: Date.now()
             });
 
@@ -3185,6 +3313,19 @@
         }
 
         function cancelPoint() {
+            // Si on est au début d'un point (sélection serveur ou serve_start avec même serveur)
+            // → proposer d'annuler le dernier point validé
+            if (gameState.phase === 'server_selection' || 
+                (gameState.phase === 'serve_start' && gameState.currentServer && gameState.rally.length === 0)) {
+                if (currentSet.points && currentSet.points.length > 0) {
+                    showUndoPointModal();
+                } else {
+                    alert('Aucun point à annuler.');
+                }
+                return;
+            }
+            
+            // Sinon, on est en cours de rally → annuler le rally en cours
             if (!confirm('Annuler ce point et recommencer ?')) {
                 return;
             }
@@ -3205,6 +3346,142 @@
             highlightCourt(null);
 
             // Retour à la sélection du serveur
+            gameState.phase = 'server_selection';
+            updatePhase();
+            renderServerSelection();
+        }
+
+        // ==================== ANNULER DERNIER POINT VALIDÉ ====================
+        function showUndoPointModal() {
+            const points = currentSet.points;
+            const lastPoint = points[points.length - 1];
+            const rally = lastPoint.rally;
+            
+            // Calculer le score avant ce point
+            const prevPoint = points.length >= 2 ? points[points.length - 2] : null;
+            const scoreBefore = prevPoint 
+                ? `${prevPoint.homeScore} - ${prevPoint.awayScore}` 
+                : `${currentSet.homeScore || 0} - ${currentSet.awayScore || 0}`;
+            
+            // Score initial (bonus inclus)
+            const initialHome = currentSet.initialHomeScore || 0;
+            const initialAway = currentSet.initialAwayScore || 0;
+            const scoreBeforeHome = prevPoint ? prevPoint.homeScore : initialHome;
+            const scoreBeforeAway = prevPoint ? prevPoint.awayScore : initialAway;
+            
+            // Info service
+            const serviceAction = rally.find(a => a.type === 'service');
+            const serverName = serviceAction ? serviceAction.player : '?';
+            const serverTeam = serviceAction ? serviceAction.team : '?';
+            const serverTeamName = serverTeam === 'home' ? 'Jen et ses Saints' : (currentMatch.opponent || 'Adversaire');
+            
+            // Qui a marqué ?
+            const whoScored = lastPoint.homeScore > scoreBeforeHome ? 'home' : 'away';
+            const whoScoredName = whoScored === 'home' ? 'Jen et ses Saints' : (currentMatch.opponent || 'Adversaire');
+            
+            // Dernière action significative
+            const lastAction = rally[rally.length - 1];
+            let lastActionDesc = '';
+            if (lastAction) {
+                const actionLabels = {
+                    'service': 'Service',
+                    'reception': 'Réception',
+                    'pass': 'Passe',
+                    'attack': 'Attaque',
+                    'block': 'Block',
+                    'defense': 'Défense'
+                };
+                const actionLabel = actionLabels[lastAction.type] || lastAction.type;
+                
+                if (lastAction.type === 'service') {
+                    if (lastAction.result === 'ace') lastActionDesc = `Ace de ${lastAction.player}`;
+                    else if (lastAction.result === 'fault' || lastAction.result === 'fault_out' || lastAction.result === 'fault_net') lastActionDesc = `Faute au service de ${lastAction.player}`;
+                    else lastActionDesc = `Service de ${lastAction.player}`;
+                } else if (lastAction.type === 'attack') {
+                    if (lastAction.result === 'point') lastActionDesc = `Attaque gagnante de ${lastAction.player}`;
+                    else if (lastAction.attackType === 'faute') lastActionDesc = `Faute d'attaque de ${lastAction.player}`;
+                    else if (lastAction.result === 'out') lastActionDesc = `Attaque out de ${lastAction.player}`;
+                    else lastActionDesc = `${actionLabel} de ${lastAction.player}`;
+                } else if (lastAction.type === 'reception') {
+                    if (lastAction.isDirectReturnWinner) lastActionDesc = `Retour gagnant de ${lastAction.player}`;
+                    else if (lastAction.quality?.label === 'Faute') lastActionDesc = `Faute réception de ${lastAction.player}`;
+                    else lastActionDesc = `${actionLabel} de ${lastAction.player}`;
+                } else {
+                    lastActionDesc = `${actionLabel}${lastAction.player ? ' de ' + lastAction.player : ''}`;
+                }
+            }
+            
+            // Construire le HTML
+            const summaryEl = document.getElementById('undoPointSummary');
+            summaryEl.innerHTML = `
+                <div class="undo-point-score">
+                    <span class="score-before">${lastPoint.homeScore} - ${lastPoint.awayScore}</span>
+                    <span class="score-arrow">→</span>
+                    <span class="score-after">${scoreBeforeHome} - ${scoreBeforeAway}</span>
+                </div>
+                <div class="undo-point-detail">
+                    <div><span class="label">🏐 Service :</span> ${serverName} (${serverTeamName})</div>
+                    <div><span class="label">🏆 Point pour :</span> ${whoScoredName}</div>
+                    <div><span class="label">📋 Dernière action :</span> ${lastActionDesc}</div>
+                    <div style="margin-top:6px; font-size:11px; color:#9ca3af;">Point n°${points.length} • ${new Date(lastPoint.timestamp).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</div>
+                </div>
+            `;
+            
+            document.getElementById('undoPointOverlay').classList.add('active');
+        }
+
+        function closeUndoPointModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('undoPointOverlay').classList.remove('active');
+        }
+
+        function confirmUndoLastPoint() {
+            const points = currentSet.points;
+            if (!points || points.length === 0) return;
+            
+            // Retirer le dernier point
+            const removedPoint = points.pop();
+            
+            // Restaurer le score
+            const prevPoint = points.length > 0 ? points[points.length - 1] : null;
+            const initialHome = currentSet.initialHomeScore || 0;
+            const initialAway = currentSet.initialAwayScore || 0;
+            
+            gameState.homeScore = prevPoint ? prevPoint.homeScore : initialHome;
+            gameState.awayScore = prevPoint ? prevPoint.awayScore : initialAway;
+            
+            // Restaurer l'équipe au service
+            // Le serveur du point supprimé avait servi pour son équipe
+            // Si cette équipe a perdu le point, le service avait changé → on rétablit
+            const serviceAction = removedPoint.rally.find(a => a.type === 'service');
+            if (serviceAction) {
+                gameState.servingTeam = serviceAction.team;
+            }
+            
+            // Réinitialiser le serveur (on ne sait pas forcément qui servait avant)
+            gameState.currentServer = null;
+            
+            // Mettre à jour l'affichage
+            updateScore();
+            
+            // Recalculer les stats
+            recalculateAllStats();
+            
+            // Sauvegarder
+            saveCurrentSet();
+            
+            // Fermer la modal
+            closeUndoPointModal();
+            
+            // Reset pour nouveau point
+            gameState.rally = [];
+            gameState.currentAction = {};
+            clearMarkers();
+            clearArrows();
+            hideServiceZones();
+            hideReceptionQualityZones();
+            highlightCourt(null);
+            
             gameState.phase = 'server_selection';
             updatePhase();
             renderServerSelection();
