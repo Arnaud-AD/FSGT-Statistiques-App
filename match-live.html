@@ -1040,16 +1040,16 @@
 
         /* Zones pour terrain du haut (filet en bas) - demi-cercles vers le haut */
         #qualityZonesTop .quality-zone.average {
-            width: 70%;
-            height: 35%;
+            width: 95%;
+            height: 47%;
             bottom: -3px;
             border-radius: 50% 50% 0 0;
             border-bottom: none;
         }
 
         #qualityZonesTop .quality-zone.good {
-            width: 50%;
-            height: 25%;
+            width: 60%;
+            height: 30%;
             bottom: -3px;
             border-radius: 50% 50% 0 0;
             border-bottom: none;
@@ -1065,16 +1065,16 @@
 
         /* Zones pour terrain du bas (filet en haut) - demi-cercles vers le bas */
         #qualityZonesBottom .quality-zone.average {
-            width: 70%;
-            height: 35%;
+            width: 95%;
+            height: 47%;
             top: -3px;
             border-radius: 0 0 50% 50%;
             border-top: none;
         }
 
         #qualityZonesBottom .quality-zone.good {
-            width: 50%;
-            height: 25%;
+            width: 60%;
+            height: 30%;
             top: -3px;
             border-radius: 0 0 50% 50%;
             border-top: none;
@@ -2019,12 +2019,12 @@
             
             // Calcul basé sur la forme des demi-cercles
             // Zone excellente: width 30%, height 22% → elliptique (x/15, y/22)
-            // Zone positive: width 50%, height 25% → demi-cercle (rayon 25)
-            // Zone jouable: width 70%, height 35% → demi-cercle (rayon 35)
+            // Zone positive: width 60%, height 30% → demi-cercle (rayon 30)
+            // Zone jouable: width 95%, height 47% → demi-cercle (rayon 47)
             
             const perfectRatio = Math.sqrt(Math.pow(distX / 15, 2) + Math.pow(distanceFromNet / 22, 2));
-            const goodRatio = Math.sqrt(Math.pow(distX / 25, 2) + Math.pow(distanceFromNet / 25, 2));
-            const averageRatio = Math.sqrt(Math.pow(distX / 35, 2) + Math.pow(distanceFromNet / 35, 2));
+            const goodRatio = Math.sqrt(Math.pow(distX / 30, 2) + Math.pow(distanceFromNet / 30, 2));
+            const averageRatio = Math.sqrt(Math.pow(distX / 47, 2) + Math.pow(distanceFromNet / 47, 2));
             
             if (perfectRatio <= 1) {
                 return { score: 4, label: 'Excellente' };
