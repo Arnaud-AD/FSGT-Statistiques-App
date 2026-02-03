@@ -1020,72 +1020,66 @@
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            background: transparent;
+            opacity: 0.5;
         }
 
         .quality-zone.perfect {
-            border: 3px solid #22c55e;
+            background: #22c55e;
             z-index: 3;
         }
 
         .quality-zone.good {
-            border: 3px solid #3b82f6;
+            background: #3b82f6;
             z-index: 2;
         }
 
         .quality-zone.average {
-            border: 3px solid #ef4444;
+            background: #ef4444;
             z-index: 1;
         }
 
         /* Zones pour terrain du haut (filet en bas) - demi-cercles vers le haut */
         #qualityZonesTop .quality-zone.average {
-            width: 95%;
-            height: 47%;
-            bottom: -3px;
+            width: 100%;
+            height: 80%;
+            bottom: 0;
             border-radius: 50% 50% 0 0;
-            border-bottom: none;
         }
 
         #qualityZonesTop .quality-zone.good {
-            width: 60%;
-            height: 30%;
-            bottom: -3px;
+            width: 70%;
+            height: 55%;
+            bottom: 0;
             border-radius: 50% 50% 0 0;
-            border-bottom: none;
         }
 
         #qualityZonesTop .quality-zone.perfect {
-            width: 30%;
-            height: 22%;
-            bottom: -3px;
+            width: 40%;
+            height: 30%;
+            bottom: 0;
             border-radius: 50% 50% 0 0;
-            border-bottom: none;
         }
 
         /* Zones pour terrain du bas (filet en haut) - demi-cercles vers le bas */
         #qualityZonesBottom .quality-zone.average {
-            width: 95%;
-            height: 47%;
-            top: -3px;
+            width: 100%;
+            height: 80%;
+            top: 0;
             border-radius: 0 0 50% 50%;
-            border-top: none;
         }
 
         #qualityZonesBottom .quality-zone.good {
-            width: 60%;
-            height: 30%;
-            top: -3px;
+            width: 70%;
+            height: 55%;
+            top: 0;
             border-radius: 0 0 50% 50%;
-            border-top: none;
         }
 
         #qualityZonesBottom .quality-zone.perfect {
-            width: 30%;
-            height: 22%;
-            top: -3px;
+            width: 40%;
+            height: 30%;
+            top: 0;
             border-radius: 0 0 50% 50%;
-            border-top: none;
         }
 
         /* Légende de qualité */
@@ -1128,6 +1122,33 @@
 
         .legend-dot.poor {
             background: #9ca3af;
+        }
+
+        /* Server continue banner */
+        .server-continue-banner {
+            text-align: center;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #dbeafe, #eff6ff);
+            border: 2px solid #3b82f6;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1d4ed8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .server-continue-banner.away {
+            background: linear-gradient(135deg, #fee2e2, #fef2f2);
+            border-color: #ef4444;
+            color: #dc2626;
+        }
+
+        .server-continue-banner .server-name {
+            font-size: 15px;
+            font-weight: 700;
         }
     </style>
 </head>
@@ -1273,6 +1294,13 @@
                     <div class="tags-title">Qui sert ?</div>
                     <div class="tags-grid" id="serverTags">
                         <!-- Generated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Server continue indicator -->
+                <div id="serverContinue" class="hidden">
+                    <div class="server-continue-banner" id="serverContinueBanner">
+                        🏐 <span class="server-name" id="serverContinueName">Joueur</span> toujours au service
                     </div>
                 </div>
 
@@ -1676,10 +1704,10 @@
             };
             phaseEl.innerHTML = phases[gameState.phase] || '';
             
-            // Afficher le bouton Changement uniquement pendant la sélection du serveur
+            // Afficher le bouton Changement pendant la sélection du serveur ou au début du service
             const btnSub = document.getElementById('btnSubstitute');
             if (btnSub) {
-                btnSub.style.display = gameState.phase === 'server_selection' ? 'flex' : 'none';
+                btnSub.style.display = (gameState.phase === 'server_selection' || gameState.phase === 'serve_start') ? 'flex' : 'none';
             }
         }
 
@@ -1723,6 +1751,23 @@
             hideAllSections();
             highlightCourt(null);
             showServiceZone();
+        }
+
+        function showServerContinueBanner() {
+            const banner = document.getElementById('serverContinue');
+            const bannerInner = document.getElementById('serverContinueBanner');
+            const nameSpan = document.getElementById('serverContinueName');
+            
+            nameSpan.textContent = gameState.currentServer;
+            
+            // Style selon l'équipe
+            if (gameState.servingTeam === 'away') {
+                bannerInner.classList.add('away');
+            } else {
+                bannerInner.classList.remove('away');
+            }
+            
+            banner.classList.remove('hidden');
         }
 
         // ==================== GESTION DU TERRAIN ====================
@@ -2017,14 +2062,14 @@
             // Distance horizontale depuis le centre (en %)
             const distX = Math.abs(clickData.x - 50);
             
-            // Calcul basé sur la forme des demi-cercles
-            // Zone excellente: width 30%, height 22% → elliptique (x/15, y/22)
-            // Zone positive: width 60%, height 30% → demi-cercle (rayon 30)
-            // Zone jouable: width 95%, height 47% → demi-cercle (rayon 47)
+            // Calcul basé sur la forme elliptique des demi-cercles
+            // Zone parfaite: width 40%, height 30% → ratio x/20, y/30
+            // Zone correcte: width 70%, height 55% → ratio x/35, y/55
+            // Zone moyenne: width 100%, height 80% → ratio x/50, y/80
             
-            const perfectRatio = Math.sqrt(Math.pow(distX / 15, 2) + Math.pow(distanceFromNet / 22, 2));
-            const goodRatio = Math.sqrt(Math.pow(distX / 30, 2) + Math.pow(distanceFromNet / 30, 2));
-            const averageRatio = Math.sqrt(Math.pow(distX / 47, 2) + Math.pow(distanceFromNet / 47, 2));
+            const perfectRatio = Math.sqrt(Math.pow(distX / 20, 2) + Math.pow(distanceFromNet / 30, 2));
+            const goodRatio = Math.sqrt(Math.pow(distX / 35, 2) + Math.pow(distanceFromNet / 55, 2));
+            const averageRatio = Math.sqrt(Math.pow(distX / 50, 2) + Math.pow(distanceFromNet / 80, 2));
             
             if (perfectRatio <= 1) {
                 return { score: 4, label: 'Excellente' };
@@ -2504,7 +2549,9 @@
             // Changement de service si l'équipe qui reçoit gagne le point
             if (team !== gameState.servingTeam) {
                 gameState.servingTeam = team;
+                gameState.currentServer = null; // Nouveau serveur à choisir
             }
+            // Si team === servingTeam, currentServer reste (même serveur continue)
 
             // Sauvegarder
             saveCurrentSet();
@@ -2546,10 +2593,25 @@
             hideServiceZones();
             hideReceptionQualityZones();
 
-            // Nouveau service
-            gameState.phase = 'server_selection';
-            updatePhase();
-            renderServerSelection();
+            if (gameState.currentServer) {
+                // Même serveur continue — skip la sélection
+                gameState.phase = 'serve_start';
+                gameState.currentAction = {
+                    type: 'service',
+                    player: gameState.currentServer,
+                    team: gameState.servingTeam
+                };
+                updatePhase();
+                hideAllSections();
+                showServerContinueBanner();
+                highlightCourt(null);
+                showServiceZone();
+            } else {
+                // Nouveau serveur à choisir
+                gameState.phase = 'server_selection';
+                updatePhase();
+                renderServerSelection();
+            }
         }
 
         function recalculateAllStats() {
@@ -2714,6 +2776,7 @@
 
         function hideAllSections() {
             document.getElementById('serverSelection').classList.add('hidden');
+            document.getElementById('serverContinue').classList.add('hidden');
             document.getElementById('playerSelection').classList.add('hidden');
             document.getElementById('secondTouchOptions').classList.add('hidden');
             document.getElementById('serviceNetFaultSection').classList.add('hidden');
