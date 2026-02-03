@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Composition - Jen et ses Saints</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-header: #f8f9fa;
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --border-color: #e8eaed;
+            --accent-orange: #ff6b35;
+            --accent-blue: #0056D2;
+            --accent-gold: #D4A400;
+            --win-color: #34a853;
+            --loss-color: #ea4335;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', 'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .app-container {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: var(--bg-header);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            color: var(--text-primary);
+        }
+
+        .back-btn:hover {
+            background: var(--border-color);
+        }
+
+        .header-content {
+            flex: 1;
+        }
+
+        .header-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .header-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* Match info card */
+        .match-info-card {
+            background: var(--bg-header);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .match-info-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .match-info-icon {
+            font-size: 24px;
+        }
+
+        .match-info-details {
+            flex: 1;
+        }
+
+        .match-opponent {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .match-meta {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .location-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .location-badge.domicile {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .location-badge.exterieur {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .level-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            background: #f3e8ff;
+            color: #7c3aed;
+            margin-left: 8px;
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 24px;
+            flex: 1;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .presence-count {
+            font-size: 13px;
+            color: var(--text-secondary);
+            background: var(--bg-header);
+            padding: 4px 12px;
+            border-radius: 12px;
+        }
+
+        .presence-count.warning {
+            background: #fee2e2;
+            color: var(--loss-color);
+        }
+
+        .presence-count.ok {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        /* Players list */
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .player-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .player-item:hover {
+            background: var(--bg-header);
+        }
+
+        .player-item.absent {
+            opacity: 0.5;
+            background: var(--bg-header);
+        }
+
+        .player-checkbox {
+            width: 22px;
+            height: 22px;
+            accent-color: var(--accent-blue);
+            cursor: pointer;
+        }
+
+        .player-info {
+            flex: 1;
+        }
+
+        .player-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .player-postes {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .poste-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .poste-passeur { background: #d1fae5; color: #059669; }
+        .poste-libero { background: #f3e8ff; color: #7c3aed; }
+        .poste-r4 { background: #dbeafe; color: #2563eb; }
+        .poste-pointu { background: #fee2e2; color: #dc2626; }
+
+        /* Validate button */
+        .validate-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 16px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: auto;
+        }
+
+        .validate-btn:hover {
+            background: #0047b3;
+        }
+
+        .validate-btn:disabled {
+            background: var(--border-color);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .modal-players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .modal-player {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: var(--bg-header);
+            border-radius: 8px;
+        }
+
+        .modal-player-name {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .modal-player-postes {
+            display: flex;
+            gap: 4px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-modify {
+            flex: 1;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            background: white;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-modify:hover {
+            background: var(--bg-header);
+        }
+
+        .btn-confirm {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            background: var(--win-color);
+            color: white;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-confirm:hover {
+            background: #2d9147;
+        }
+
+        /* Back modal */
+        .modal-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #fef3c7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .modal-message {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .btn-cancel-match {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            background: var(--loss-color);
+            color: white;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel-match:hover {
+            background: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <button class="back-btn" onclick="handleBack()">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                </svg>
+            </button>
+            <div class="header-content">
+                <h1 class="header-title">Composition</h1>
+                <p class="header-subtitle">Jen et ses Saints</p>
+            </div>
+        </header>
+
+        <!-- Match info -->
+        <div class="match-info-card" id="matchInfoCard">
+            <!-- Rempli dynamiquement -->
+        </div>
+
+        <!-- Section joueurs -->
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">Joueurs présents</h2>
+                <span class="presence-count" id="presenceCount">0 présents</span>
+            </div>
+
+            <div class="players-list" id="playersList">
+                <!-- Joueurs générés dynamiquement -->
+            </div>
+        </section>
+
+        <!-- Bouton valider -->
+        <button class="validate-btn" id="validateBtn" onclick="openConfirmModal()">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            Valider la composition
+        </button>
+    </div>
+
+    <!-- Modal confirmation composition -->
+    <div class="modal-overlay" id="confirmModal" onclick="closeConfirmModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h3 class="modal-title">Joueurs présents au match</h3>
+            <div class="modal-players-list" id="modalPlayersList">
+                <!-- Liste générée dynamiquement -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn-modify" onclick="closeConfirmModal()">Modifier</button>
+                <button class="btn-confirm" onclick="confirmComposition()">Valider</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal retour -->
+    <div class="modal-overlay" id="backModal" onclick="closeBackModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-icon">
+                <svg width="24" height="24" fill="#d97706" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+            </div>
+            <h3 class="modal-title">Annuler la création ?</h3>
+            <p class="modal-message">Voulez-vous annuler la création de ce match ? Les données non enregistrées seront perdues.</p>
+            <div class="modal-actions">
+                <button class="btn-modify" onclick="closeBackModal()">Continuer</button>
+                <button class="btn-cancel-match" onclick="confirmCancel()">Annuler le match</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Récupérer les données
+        const currentMatch = JSON.parse(localStorage.getItem('volleyball_current_match')) || null;
+        const players = JSON.parse(localStorage.getItem('volleyball_players')) || [];
+        
+        // État des présences (tous présents par défaut)
+        let presences = {};
+        players.forEach((player, index) => {
+            presences[index] = true;
+        });
+
+        // Afficher les infos du match
+        function renderMatchInfo() {
+            const container = document.getElementById('matchInfoCard');
+            
+            if (!currentMatch) {
+                container.innerHTML = '<p>Aucun match sélectionné</p>';
+                return;
+            }
+
+            if (currentMatch.type === 'championnat') {
+                const locationClass = currentMatch.location === 'domicile' ? 'domicile' : 'exterieur';
+                const locationLabel = currentMatch.location === 'domicile' ? 'Domicile' : 'Extérieur';
+                container.innerHTML = `
+                    <div class="match-info-row">
+                        <span class="match-info-icon">🏐</span>
+                        <div class="match-info-details">
+                            <div class="match-opponent">vs ${currentMatch.opponent}</div>
+                            <div class="match-meta">
+                                Match ${currentMatch.matchNumber} • 
+                                <span class="location-badge ${locationClass}">${locationLabel}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (currentMatch.type === 'ginette') {
+                container.innerHTML = `
+                    <div class="match-info-row">
+                        <span class="match-info-icon">🏆</span>
+                        <div class="match-info-details">
+                            <div class="match-opponent">vs ${currentMatch.opponent}</div>
+                            <div class="match-meta">
+                                ${currentMatch.round}
+                                <span class="level-badge">${currentMatch.level}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Classe CSS pour le poste
+        function getPosteClass(poste) {
+            const classes = {
+                'Passeur': 'passeur',
+                'Libéro': 'libero',
+                'R4': 'r4',
+                'Pointu': 'pointu'
+            };
+            return classes[poste] || 'r4';
+        }
+
+        // Afficher la liste des joueurs
+        function renderPlayersList() {
+            const container = document.getElementById('playersList');
+            
+            if (players.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>Aucun joueur dans l'équipe</p>
+                        <a href="equipe.html">Ajouter des joueurs</a>
+                    </div>
+                `;
+                document.getElementById('validateBtn').disabled = true;
+                return;
+            }
+
+            container.innerHTML = players.map((player, index) => {
+                const postes = Array.isArray(player.poste) ? player.poste : [player.poste];
+                const posteBadges = postes.map(p => 
+                    `<span class="poste-badge poste-${getPosteClass(p)}">${p}</span>`
+                ).join('');
+                const isPresent = presences[index];
+                
+                return `
+                    <label class="player-item ${isPresent ? '' : 'absent'}">
+                        <div class="player-info">
+                            <div class="player-name">${player.prenom}</div>
+                            <div class="player-postes">${posteBadges}</div>
+                        </div>
+                        <input type="checkbox" 
+                               class="player-checkbox" 
+                               ${isPresent ? 'checked' : ''} 
+                               onchange="togglePresence(${index})">
+                    </label>
+                `;
+            }).join('');
+
+            updatePresenceCount();
+        }
+
+        // Toggle présence
+        function togglePresence(index) {
+            presences[index] = !presences[index];
+            renderPlayersList();
+        }
+
+        // Mise à jour du compteur
+        function updatePresenceCount() {
+            const count = Object.values(presences).filter(p => p).length;
+            const countEl = document.getElementById('presenceCount');
+            const validateBtn = document.getElementById('validateBtn');
+            
+            countEl.textContent = `${count} présent${count > 1 ? 's' : ''}`;
+            
+            if (count < 4) {
+                countEl.classList.add('warning');
+                countEl.classList.remove('ok');
+                validateBtn.disabled = true;
+            } else {
+                countEl.classList.remove('warning');
+                countEl.classList.add('ok');
+                validateBtn.disabled = false;
+            }
+        }
+
+        // Obtenir les joueurs présents
+        function getPresentPlayers() {
+            return players.filter((player, index) => presences[index]);
+        }
+
+        // Ouvrir modal confirmation
+        function openConfirmModal() {
+            const presentPlayers = getPresentPlayers();
+            const container = document.getElementById('modalPlayersList');
+            
+            container.innerHTML = presentPlayers.map(player => {
+                const postes = Array.isArray(player.poste) ? player.poste : [player.poste];
+                const posteBadges = postes.map(p => 
+                    `<span class="poste-badge poste-${getPosteClass(p)}">${p}</span>`
+                ).join('');
+                
+                return `
+                    <div class="modal-player">
+                        <span class="modal-player-name">${player.prenom}</span>
+                        <div class="modal-player-postes">${posteBadges}</div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        // Fermer modal confirmation
+        function closeConfirmModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('confirmModal').classList.remove('active');
+        }
+
+        // Confirmer la composition
+        function confirmComposition() {
+            const presentPlayers = getPresentPlayers();
+            
+            // Sauvegarder la composition dans le match courant
+            const matchData = {
+                ...currentMatch,
+                players: presentPlayers,
+                timestamp: Date.now()
+            };
+            
+            localStorage.setItem('volleyball_current_match', JSON.stringify(matchData));
+            
+            // Rediriger vers la page de composition adverse
+            window.location.href = 'match-adverse.html';
+        }
+
+        // Retour
+        function handleBack() {
+            document.getElementById('backModal').classList.add('active');
+        }
+
+        function closeBackModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('backModal').classList.remove('active');
+        }
+
+        function confirmCancel() {
+            localStorage.removeItem('volleyball_current_match');
+            window.location.href = 'nouveau-match.html';
+        }
+
+        // Init
+        renderMatchInfo();
+        renderPlayersList();
+    </script>
+</body>
+</html>

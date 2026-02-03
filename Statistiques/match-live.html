@@ -1,0 +1,3399 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Live - Jen et ses Saints</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-header: #f8f9fa;
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --border-color: #e8eaed;
+            --accent-blue: #0056D2;
+            --accent-orange: #ff6b35;
+            --court-blue: #2563eb;
+            --court-orange: #f59e0b;
+            --win-color: #34a853;
+            --loss-color: #ea4335;
+            --home-color: #0056D2;
+            --away-color: #ea4335;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', 'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            max-width: 600px;
+            margin: 0 auto;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header Score */
+        .score-header {
+            background: linear-gradient(135deg, var(--court-blue) 0%, #1e40af 100%);
+            color: white;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .score-header-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .back-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .set-indicator {
+            background: rgba(255,255,255,0.2);
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .score-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .team-score {
+            text-align: center;
+        }
+
+        .team-name {
+            font-size: 9px;
+            opacity: 0.8;
+            margin-bottom: 1px;
+            max-width: 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .team-points {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .score-separator {
+            font-size: 18px;
+            opacity: 0.6;
+        }
+
+        .serving-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-orange);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 8px 12px;
+        }
+
+        /* Phase indicator */
+        .phase-indicator {
+            text-align: center;
+            padding: 6px 12px;
+            background: var(--bg-header);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .phase-indicator .highlight {
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        /* Court container */
+        .court-container {
+            background: var(--court-blue);
+            border-radius: 10px;
+            padding: 8px;
+            margin-bottom: 10px;
+            position: relative;
+            overflow: visible;
+        }
+
+        /* Zone out cliquable autour du terrain */
+        .out-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            cursor: crosshair;
+            display: none;
+            z-index: 1;
+        }
+
+        .out-area.active {
+            display: block;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(107, 114, 128, 0.15),
+                rgba(107, 114, 128, 0.15) 10px,
+                rgba(107, 114, 128, 0.05) 10px,
+                rgba(107, 114, 128, 0.05) 20px
+            );
+            border: 2px dashed rgba(107, 114, 128, 0.5);
+            border-radius: 10px;
+            animation: pulse-out 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-out {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .out-area-label {
+            position: absolute;
+            background: rgba(107, 114, 128, 0.9);
+            color: white;
+            font-size: 9px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .out-area-label.top {
+            top: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .out-area-label.bottom {
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .out-area-label.left {
+            left: 4px;
+            top: 50%;
+            transform: translateY(-50%) rotate(-90deg);
+        }
+
+        .out-area-label.right {
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%) rotate(90deg);
+        }
+
+        .court {
+            position: relative;
+            width: 100%;
+            max-width: 180px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            z-index: 2;
+            overflow: visible;
+        }
+
+        .team-label {
+            text-align: center;
+            color: white;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 9px;
+            font-weight: 500;
+            padding: 2px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .court-half {
+            background: var(--court-orange);
+            border: 2px solid white;
+            position: relative;
+            aspect-ratio: 1 / 1;
+            cursor: crosshair;
+            overflow: visible;
+        }
+
+        .court-half.away {
+            border-bottom: none;
+            border-radius: 3px 3px 0 0;
+        }
+
+        .court-half.home {
+            border-top: none;
+            border-radius: 0 0 3px 3px;
+        }
+
+        .court-half.inactive {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .court-half.target {
+            box-shadow: inset 0 0 20px rgba(255,255,255,0.5);
+        }
+
+        /* Court lines */
+        .court-half::before {
+            content: '';
+            position: absolute;
+            top: 33.33%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(255,255,255,0.5);
+        }
+
+        .court-half::after {
+            content: '';
+            position: absolute;
+            top: 66.66%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(255,255,255,0.5);
+        }
+
+        /* Net */
+        .net {
+            height: 4px;
+            background: white;
+            position: relative;
+        }
+
+        .net::before,
+        .net::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .net::before { left: -4px; }
+        .net::after { right: -4px; }
+
+        /* Click markers */
+        .click-marker {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 12;
+            pointer-events: none;
+            border: 2px solid white;
+        }
+
+        .click-marker.service {
+            background: #6b7280;
+        }
+
+        .click-marker.reception {
+            background: #3b82f6;
+        }
+
+        .click-marker.pass {
+            background: #1f2937;
+        }
+
+        .click-marker.attack {
+            background: #ef4444;
+        }
+
+        .click-marker.attack-feinte {
+            background: #f97316;
+        }
+
+        .click-marker.attack-relance {
+            background: #faef00;
+        }
+
+        .click-marker.attack-second {
+            background: #22d3ee;
+        }
+
+        .click-marker.defense {
+            background: #8b5cf6;
+        }
+
+        .click-marker.block {
+            background: #8b5cf6;
+        }
+
+        /* Trajectory arrow */
+        .trajectory-line {
+            position: absolute;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* Tags container */
+        .tags-container {
+            margin-bottom: 8px;
+        }
+
+        .tags-title {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-align: center;
+        }
+
+        .tags-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .player-tag {
+            padding: 8px 14px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .player-tag.home {
+            background: #e8f0fe;
+            color: var(--home-color);
+        }
+
+        .player-tag.home:hover,
+        .player-tag.home.selected {
+            background: var(--home-color);
+            color: white;
+        }
+
+        .player-tag.away {
+            background: #fee2e2;
+            color: var(--away-color);
+        }
+
+        .player-tag.away:hover,
+        .player-tag.away.selected {
+            background: var(--away-color);
+            color: white;
+        }
+
+        /* Action tags */
+        .action-tag {
+            padding: 8px 14px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid var(--border-color);
+            background: white;
+        }
+
+        .action-tag:hover {
+            border-color: var(--accent-blue);
+            background: #e8f0fe;
+        }
+
+        .action-tag.smash {
+            border-color: var(--win-color);
+            color: var(--win-color);
+        }
+
+        .action-tag.smash:hover {
+            background: var(--win-color);
+            color: white;
+        }
+
+        .action-tag.feinte {
+            border-color: var(--accent-orange);
+            color: var(--accent-orange);
+        }
+
+        .action-tag.feinte:hover {
+            background: var(--accent-orange);
+            color: white;
+        }
+
+        .action-tag.relance {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .action-tag.relance:hover {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .action-tag.bloc-direct {
+            border-color: #8b5cf6;
+            color: #8b5cf6;
+        }
+
+        .action-tag.bloc-direct:hover {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .action-tag.faute {
+            border-color: var(--loss-color);
+            color: var(--loss-color);
+        }
+
+        .action-tag.faute:hover {
+            background: var(--loss-color);
+            color: white;
+        }
+
+        .action-tag.ace {
+            border-color: var(--win-color);
+            color: var(--win-color);
+        }
+
+        .action-tag.ace:hover {
+            background: var(--win-color);
+            color: white;
+        }
+
+        .action-tag.direct-return {
+            border-color: #ea580c;
+            color: #ea580c;
+        }
+
+        .action-tag.direct-return:hover {
+            background: #ea580c;
+            color: white;
+        }
+
+        .action-tag.direct-return-winner {
+            border-color: #22c55e;
+            color: #22c55e;
+        }
+
+        .action-tag.direct-return-winner:hover {
+            background: #22c55e;
+            color: white;
+        }
+
+        .action-tag.second-touch {
+            border-color: #22d3ee;
+            color: #0891b2;
+        }
+
+        .action-tag.second-touch:hover {
+            background: #22d3ee;
+            color: #1f2937;
+        }
+
+        /* Result tags */
+        .result-tag {
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .result-tag.point {
+            background: #d1fae5;
+            color: #059669;
+            border: 2px solid #059669;
+        }
+
+        .result-tag.point:hover {
+            background: #059669;
+            color: white;
+        }
+
+        .result-tag.defended {
+            background: #fef3c7;
+            color: #d97706;
+            border: 2px solid #d97706;
+        }
+
+        .result-tag.defended:hover {
+            background: #d97706;
+            color: white;
+        }
+
+        .result-tag.blocked {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 2px solid #dc2626;
+        }
+
+        .result-tag.blocked:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+        /* Hidden */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Control bar */
+        .control-bar {
+            display: flex;
+            gap: 8px;
+            padding: 6px 12px;
+            justify-content: space-between;
+        }
+
+        .control-bar-left {
+            display: flex;
+            gap: 8px;
+        }
+
+        .control-bar-right {
+            display: flex;
+            gap: 8px;
+        }
+
+        .control-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            opacity: 0.7;
+        }
+
+        .control-btn:hover {
+            opacity: 1;
+        }
+
+        .control-btn.substitute {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .control-btn.substitute:hover {
+            background: #1d4ed8;
+            color: white;
+        }
+
+        .control-btn.cancel {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .control-btn.cancel:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+        .control-btn.undo {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .control-btn.undo:hover {
+            background: #374151;
+            color: white;
+        }
+
+        /* Modal de changement */
+        .sub-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sub-modal-overlay.active {
+            display: flex;
+        }
+
+        .sub-modal {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            width: 90%;
+            max-width: 350px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .sub-modal-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .sub-modal-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .sub-modal-tab {
+            flex: 1;
+            padding: 6px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            background: white;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .sub-modal-tab.active {
+            border-color: var(--accent-blue);
+            background: #dbeafe;
+        }
+
+        .sub-modal-tab.home.active {
+            border-color: var(--accent-orange);
+            background: #ffedd5;
+        }
+
+        .sub-modal-section {
+            margin-bottom: 12px;
+        }
+
+        .sub-modal-label {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .sub-player-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .sub-player-btn {
+            padding: 6px 10px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            background: white;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .sub-player-btn.out-selected {
+            border-color: #dc2626;
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .sub-player-btn.in-selected {
+            border-color: #16a34a;
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .sub-no-player {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .sub-modal-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .sub-modal-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .sub-modal-btn.cancel {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .sub-modal-btn.confirm {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .sub-modal-btn.confirm:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Tableau de statistiques du set */
+        .stats-section {
+            margin-top: 20px;
+            padding: 0 10px;
+        }
+
+        .stats-table-container {
+            background: var(--bg-header);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .stats-table-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stats-table {
+            width: 100%;
+            font-size: 10px;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .stats-table th {
+            background: #f0f0f0;
+            padding: 4px 2px;
+            text-align: center;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .stats-table th.player-col {
+            text-align: left;
+            padding-left: 6px;
+            width: 55px;
+        }
+
+        .stats-table th.section-header {
+            background: #e0e0e0;
+            font-weight: 700;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .stats-table td {
+            padding: 3px 2px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stats-table td.player-name {
+            text-align: left;
+            padding-left: 6px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .stats-table tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .stats-table tbody tr:hover {
+            background: #f0f0f0;
+        }
+
+        .stats-table tr.total-row {
+            background: #e8e8e8 !important;
+            font-weight: 600;
+        }
+
+        .stats-table tr.total-row td {
+            border-top: 2px solid #ccc;
+        }
+
+        .stats-table .positive {
+            color: #27ae60;
+        }
+
+        .stats-table .negative {
+            color: #e74c3c;
+        }
+
+        /* SVG Arrow */
+        svg.arrow-svg {
+            position: absolute;
+            top: -50px;
+            left: -50px;
+            width: calc(100% + 100px);
+            height: calc(100% + 100px);
+            pointer-events: none;
+            z-index: 15;
+            overflow: visible;
+        }
+
+        .arrow-line {
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+        }
+
+        .arrow-line.service {
+            stroke: #6b7280;
+        }
+
+        .arrow-line.reception {
+            stroke: #3b82f6;
+        }
+
+        .arrow-line.pass {
+            stroke: #1f2937;
+        }
+
+        .arrow-line.attack {
+            stroke: #ef4444;
+        }
+
+        .arrow-line.attack-feinte {
+            stroke: #f97316;
+        }
+
+        .arrow-line.attack-relance {
+            stroke: #faef00;
+        }
+
+        .arrow-line.attack-second {
+            stroke: #22d3ee;
+        }
+
+        .arrow-line.defense {
+            stroke: #8b5cf6;
+        }
+
+        .arrow-line.block {
+            stroke: #8b5cf6;
+        }
+
+        /* Arrowheads par couleur */
+        .arrow-head-service { fill: #6b7280; }
+        .arrow-head-reception { fill: #3b82f6; }
+        .arrow-head-pass { fill: #1f2937; }
+        .arrow-head-attack { fill: #ef4444; }
+        .arrow-head-attack-feinte { fill: #f97316; }
+        .arrow-head-attack-relance { fill: #faef00; }
+        .arrow-head-attack-second { fill: #22d3ee; }
+        .arrow-head-defense { fill: #8b5cf6; }
+        .arrow-head-block { fill: #8b5cf6; }
+
+        /* Out zone indicator */
+        .out-zone {
+            position: absolute;
+            background: rgba(234, 67, 53, 0.1);
+            pointer-events: none;
+        }
+
+        /* Service zone */
+        .service-zone {
+            background: rgba(156, 163, 175, 0.5);
+            border: 2px dashed rgba(255, 255, 255, 0.8);
+            cursor: crosshair;
+            visibility: hidden;
+            pointer-events: none;
+            position: relative;
+        }
+
+        .service-zone.active {
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .service-zone.top {
+            border-radius: 3px 3px 0 0;
+            border-bottom: none;
+            height: 40px;
+        }
+
+        .service-zone.bottom {
+            border-radius: 0 0 3px 3px;
+            border-top: none;
+            height: 40px;
+        }
+
+        .service-zone-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 9px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.8;
+        }
+
+        /* Zones de qualité de réception */
+        .reception-quality-zones {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            overflow: hidden;
+        }
+
+        .reception-quality-zones.active {
+            opacity: 1;
+        }
+
+        .quality-zone {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0.5;
+        }
+
+        .quality-zone.perfect {
+            background: #22c55e;
+            z-index: 3;
+        }
+
+        .quality-zone.good {
+            background: #3b82f6;
+            z-index: 2;
+        }
+
+        .quality-zone.average {
+            background: #ef4444;
+            z-index: 1;
+        }
+
+        /* Zones pour terrain du haut (filet en bas) - demi-cercles vers le haut */
+        #qualityZonesTop .quality-zone.average {
+            width: 100%;
+            height: 80%;
+            bottom: 0;
+            border-radius: 50% 50% 0 0;
+        }
+
+        #qualityZonesTop .quality-zone.good {
+            width: 70%;
+            height: 55%;
+            bottom: 0;
+            border-radius: 50% 50% 0 0;
+        }
+
+        #qualityZonesTop .quality-zone.perfect {
+            width: 40%;
+            height: 30%;
+            bottom: 0;
+            border-radius: 50% 50% 0 0;
+        }
+
+        /* Zones pour terrain du bas (filet en haut) - demi-cercles vers le bas */
+        #qualityZonesBottom .quality-zone.average {
+            width: 100%;
+            height: 80%;
+            top: 0;
+            border-radius: 0 0 50% 50%;
+        }
+
+        #qualityZonesBottom .quality-zone.good {
+            width: 70%;
+            height: 55%;
+            top: 0;
+            border-radius: 0 0 50% 50%;
+        }
+
+        #qualityZonesBottom .quality-zone.perfect {
+            width: 40%;
+            height: 30%;
+            top: 0;
+            border-radius: 0 0 50% 50%;
+        }
+
+        /* Légende de qualité */
+        .quality-legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 8px;
+            background: var(--bg-header);
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.perfect {
+            background: #22c55e;
+        }
+
+        .legend-dot.good {
+            background: #3b82f6;
+        }
+
+        .legend-dot.average {
+            background: #ef4444;
+        }
+
+        .legend-dot.poor {
+            background: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Score Header -->
+        <header class="score-header">
+            <div class="score-header-left">
+                <button class="back-btn" onclick="handleBack()">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                    </svg>
+                </button>
+                <span class="set-indicator" id="setIndicator">SET 1</span>
+            </div>
+            <div class="score-display">
+                <div class="team-score" id="homeScoreDisplay">
+                    <div class="team-name">Jen et ses Saints</div>
+                    <div class="team-points" id="homePoints">0</div>
+                </div>
+                <span class="score-separator">-</span>
+                <div class="team-score" id="awayScoreDisplay">
+                    <div class="team-name" id="awayTeamName">Adversaire</div>
+                    <div class="team-points" id="awayPoints">0</div>
+                </div>
+            </div>
+            <div class="serving-indicator" id="servingIndicator" title="Au service"></div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Phase Indicator -->
+            <div class="phase-indicator" id="phaseIndicator">
+                <span class="highlight">Service</span> — Sélectionnez le serveur
+            </div>
+
+            <!-- Control buttons (toujours visibles, position fixe) -->
+            <div class="control-bar">
+                <div class="control-bar-left">
+                    <button class="control-btn substitute" id="btnSubstitute" onclick="openSubModal()" title="Changement" style="display: none;">
+                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/>
+                        </svg>
+                        Changement
+                    </button>
+                </div>
+                <div class="control-bar-right">
+                    <button class="control-btn undo" onclick="undoLastAction()" title="Retour">
+                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/>
+                        </svg>
+                        Retour
+                    </button>
+                    <button class="control-btn cancel" onclick="cancelPoint()" title="Annuler le point">
+                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                        </svg>
+                        Annuler point
+                    </button>
+                </div>
+            </div>
+
+            <!-- Court -->
+            <div class="court-container" id="courtContainer">
+                <!-- Zone out cliquable (visible pendant serve_end) -->
+                <div class="out-area" id="outArea">
+                    <span class="out-area-label top" id="outLabelTop">OUT</span>
+                    <span class="out-area-label bottom" id="outLabelBottom">OUT</span>
+                    <span class="out-area-label left">OUT</span>
+                    <span class="out-area-label right">OUT</span>
+                </div>
+                
+                <div class="court" id="court">
+                    <!-- Zone de service haut -->
+                    <div class="service-zone top" id="serviceZoneTop">
+                        <span class="service-zone-label">Zone de service</span>
+                    </div>
+                    
+                    <div class="team-label" id="topTeamLabel">Adversaire</div>
+                    <div class="court-half away" id="courtTop" data-team="away">
+                        <!-- Zones de qualité de réception -->
+                        <div class="reception-quality-zones" id="qualityZonesTop">
+                            <div class="quality-zone average"></div>
+                            <div class="quality-zone good"></div>
+                            <div class="quality-zone perfect"></div>
+                        </div>
+                    </div>
+                    <div class="net"></div>
+                    <div class="court-half home" id="courtBottom" data-team="home">
+                        <!-- Zones de qualité de réception -->
+                        <div class="reception-quality-zones" id="qualityZonesBottom">
+                            <div class="quality-zone average"></div>
+                            <div class="quality-zone good"></div>
+                            <div class="quality-zone perfect"></div>
+                        </div>
+                    </div>
+                    <div class="team-label" id="bottomTeamLabel">Jen et ses Saints</div>
+                    
+                    <!-- Zone de service bas -->
+                    <div class="service-zone bottom" id="serviceZoneBottom">
+                        <span class="service-zone-label">Zone de service</span>
+                    </div>
+                </div>
+                
+                <!-- SVG for arrows (dans court-container pour couvrir la zone out) -->
+                <svg class="arrow-svg" id="arrowSvg">
+                    <defs>
+                        <marker id="arrowhead-service" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon class="arrow-head-service" points="0 0, 10 3.5, 0 7" />
+                        </marker>
+                        <marker id="arrowhead-reception" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon class="arrow-head-reception" points="0 0, 10 3.5, 0 7" />
+                        </marker>
+                        <marker id="arrowhead-pass" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon class="arrow-head-pass" points="0 0, 10 3.5, 0 7" />
+                        </marker>
+                        <marker id="arrowhead-attack" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon class="arrow-head-attack" points="0 0, 10 3.5, 0 7" />
+                        </marker>
+                        <marker id="arrowhead-attack-feinte" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon class="arrow-head-attack-feinte" points="0 0, 10 3.5, 0 7" />
+                        </marker>
+                        <marker id="arrowhead-attack-relance" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon class="arrow-head-attack-relance" points="0 0, 10 3.5, 0 7" />
+                        </marker>
+                        <marker id="arrowhead-attack-second" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon class="arrow-head-attack-second" points="0 0, 10 3.5, 0 7" />
+                        </marker>
+                        <marker id="arrowhead-defense" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon class="arrow-head-defense" points="0 0, 10 3.5, 0 7" />
+                        </marker>
+                        <marker id="arrowhead-block" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon class="arrow-head-block" points="0 0, 10 3.5, 0 7" />
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+
+            <!-- Tags Container -->
+            <div class="tags-container" id="tagsContainer">
+                <!-- Server selection (initial) -->
+                <div id="serverSelection">
+                    <div class="tags-title">Qui sert ?</div>
+                    <div class="tags-grid" id="serverTags">
+                        <!-- Generated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Player selection -->
+                <div id="playerSelection" class="hidden">
+                    <div class="tags-title" id="playerSelectionTitle">Sélectionnez le joueur</div>
+                    <div class="tags-grid" id="playerTags">
+                        <!-- Generated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Service filet (visible pendant serve_end) -->
+                <div id="serviceNetFaultSection" class="hidden">
+                    <div class="tags-grid">
+                        <button class="action-tag faute" onclick="handleServiceNetFault()">🥅 Service filet</button>
+                    </div>
+                </div>
+
+                <!-- Options 2ème touche (visible uniquement pendant la phase passe) -->
+                <div id="secondTouchOptions" class="hidden">
+                    <div class="tags-title">Ou action en 2ème touche</div>
+                    <div class="tags-grid">
+                        <button class="action-tag second-touch" onclick="handleSecondTouch('deuxieme_main')">✋ Deuxième main</button>
+                        <button class="action-tag second-touch" onclick="handleSecondTouch('attaque_directe')">⚡ Attaque directe</button>
+                    </div>
+                </div>
+
+                <!-- Attack type selection -->
+                <div id="attackTypeSelection" class="hidden">
+                    <div class="tags-title">Type d'attaque</div>
+                    <div class="tags-grid">
+                        <button class="action-tag smash" onclick="selectAttackType('smash')">💪 Smash</button>
+                        <button class="action-tag feinte" onclick="selectAttackType('feinte')">🎯 Feinte</button>
+                        <button class="action-tag relance" onclick="selectAttackType('relance')">↩️ Relance</button>
+                        <button class="action-tag bloc-direct" onclick="selectAttackType('bloc_direct')">🙌 Bloc direct</button>
+                        <button class="action-tag faute" onclick="selectAttackType('faute')">❌ Faute</button>
+                    </div>
+                </div>
+
+                <!-- Result selection -->
+                <div id="resultSelection" class="hidden">
+                    <div class="tags-title">Résultat de l'attaque</div>
+                    <div class="tags-grid">
+                        <button class="result-tag point" onclick="selectResult('point')">✓ Point</button>
+                        <button class="result-tag defended" onclick="selectResult('defended')">🛡️ Défendu</button>
+                        <button class="result-tag blocked" onclick="selectResult('blocked')">✋ Blockée</button>
+                    </div>
+                </div>
+
+                <!-- Faute de réception / Retour direct -->
+                <div id="receptionFaultSection" class="hidden">
+                    <div class="tags-grid">
+                        <button class="action-tag faute" onclick="handleReceptionFault()">❌ Faute réception</button>
+                        <button class="action-tag direct-return" onclick="handleDirectReturn()">↩️ Retour direct</button>
+                        <button class="action-tag direct-return-winner" onclick="handleDirectReturnWinner()">✅ Retour gagnant</button>
+                    </div>
+                    <div class="quality-legend">
+                        <span class="legend-item"><span class="legend-dot perfect"></span>Excellente 4/4</span>
+                        <span class="legend-item"><span class="legend-dot good"></span>Positive 3/4</span>
+                        <span class="legend-item"><span class="legend-dot average"></span>Jouable 2/4</span>
+                        <span class="legend-item"><span class="legend-dot poor"></span>Négative 1/4</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Tableau de statistiques du set -->
+        <div class="stats-section">
+            <!-- Tableau équipe domicile -->
+            <div class="stats-table-container">
+                <div class="stats-table-title">📊 <span id="homeTeamStatsTitle">Jen et ses Saints</span></div>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th class="player-col" rowspan="2">Joueur</th>
+                            <th colspan="3" class="section-header">Service</th>
+                            <th colspan="5" class="section-header">Réception</th>
+                            <th colspan="5" class="section-header">Attaque</th>
+                            <th class="section-header">Bloc</th>
+                        </tr>
+                        <tr>
+                            <th>Tot</th>
+                            <th>Ace</th>
+                            <th>FS</th>
+                            <th>Tot</th>
+                            <th>Ft</th>
+                            <th>+</th>
+                            <th>J</th>
+                            <th>-</th>
+                            <th>Tot</th>
+                            <th>FD</th>
+                            <th>Bl</th>
+                            <th>+</th>
+                            <th>-</th>
+                            <th>Bl</th>
+                        </tr>
+                    </thead>
+                    <tbody id="homeStatsBody">
+                        <!-- Généré dynamiquement -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Tableau équipe adverse -->
+            <div class="stats-table-container">
+                <div class="stats-table-title">📊 <span id="awayTeamStatsTitle">Adversaire</span></div>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th class="player-col" rowspan="2">Joueur</th>
+                            <th colspan="3" class="section-header">Service</th>
+                            <th colspan="5" class="section-header">Réception</th>
+                            <th colspan="5" class="section-header">Attaque</th>
+                            <th class="section-header">Bloc</th>
+                        </tr>
+                        <tr>
+                            <th>Tot</th>
+                            <th>Ace</th>
+                            <th>FS</th>
+                            <th>Tot</th>
+                            <th>Ft</th>
+                            <th>+</th>
+                            <th>J</th>
+                            <th>-</th>
+                            <th>Tot</th>
+                            <th>FD</th>
+                            <th>Bl</th>
+                            <th>+</th>
+                            <th>-</th>
+                            <th>Bl</th>
+                        </tr>
+                    </thead>
+                    <tbody id="awayStatsBody">
+                        <!-- Généré dynamiquement -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Modal de changement -->
+        <div class="sub-modal-overlay" id="subModalOverlay" onclick="closeSubModal(event)">
+            <div class="sub-modal" onclick="event.stopPropagation()">
+                <div class="sub-modal-title">🔄 Changement de joueur</div>
+                
+                <div class="sub-modal-tabs">
+                    <button class="sub-modal-tab home active" id="subTabHome" onclick="switchSubTeam('home')">Jen et ses Saints</button>
+                    <button class="sub-modal-tab away" id="subTabAway" onclick="switchSubTeam('away')">Adversaire</button>
+                </div>
+                
+                <div class="sub-modal-section">
+                    <div class="sub-modal-label">🔴 Joueur qui SORT :</div>
+                    <div class="sub-player-grid" id="subPlayersOut"></div>
+                </div>
+                
+                <div class="sub-modal-section">
+                    <div class="sub-modal-label">🟢 Joueur qui ENTRE :</div>
+                    <div class="sub-player-grid" id="subPlayersIn"></div>
+                </div>
+                
+                <div class="sub-modal-actions">
+                    <button class="sub-modal-btn cancel" onclick="closeSubModal()">Annuler</button>
+                    <button class="sub-modal-btn confirm" id="subConfirmBtn" onclick="confirmSub()" disabled>Confirmer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== DONNÉES ====================
+        const currentMatch = JSON.parse(localStorage.getItem('volleyball_current_match')) || null;
+        let currentSet = null;
+        let setIndex = 0;
+
+        // État du jeu
+        let gameState = {
+            phase: 'server_selection', // server_selection, serve_start, serve_end, reception, pass, attack_player, attack_type, attack_start, attack_end, result, defense, defense_end, etc.
+            servingTeam: 'away', // qui sert actuellement
+            attackingTeam: 'home', // qui attaque actuellement
+            currentServer: null,
+            clicks: [], // positions cliquées
+            currentAction: {}, // action en cours
+            rally: [], // toutes les actions du point en cours
+            homeScore: 0,
+            awayScore: 0
+        };
+
+        // Statistiques du set
+        let setStats = {
+            home: {}, // { playerName: { service: {tot, ace, fs}, reception: {tot, faute, positive, jouable, negative}, attack: {tot, fd, bl, plus, minus}, block: {bl} } }
+            away: {}
+        };
+
+        function initPlayerStats(playerName) {
+            return {
+                service: { tot: 0, ace: 0, fs: 0 },
+                reception: { tot: 0, faute: 0, positive: 0, jouable: 0, negative: 0 },
+                attack: { tot: 0, fd: 0, bl: 0, plus: 0, minus: 0 },
+                block: { bl: 0 }
+            };
+        }
+
+        function initSetStats() {
+            setStats = { home: {}, away: {} };
+            
+            // Initialiser les stats pour les joueurs de l'équipe home
+            if (currentSet && currentSet.homeLineup) {
+                Object.values(currentSet.homeLineup).forEach(name => {
+                    if (name) setStats.home[name] = initPlayerStats(name);
+                });
+            }
+            
+            // Initialiser les stats pour les joueurs de l'équipe adverse
+            if (currentSet && currentSet.awayLineup) {
+                Object.values(currentSet.awayLineup).forEach(name => {
+                    if (name) setStats.away[name] = initPlayerStats(name);
+                });
+            }
+            
+            renderStatsTables();
+        }
+
+        function renderStatsTables() {
+            renderStatsTable('home', 'homeStatsBody');
+            renderStatsTable('away', 'awayStatsBody');
+        }
+
+        function renderStatsTable(team, bodyId) {
+            const tbody = document.getElementById(bodyId);
+            const stats = setStats[team];
+            const players = Object.keys(stats);
+            
+            // Calculer les totaux
+            const totals = {
+                service: { tot: 0, ace: 0, fs: 0 },
+                reception: { tot: 0, faute: 0, positive: 0, jouable: 0, negative: 0 },
+                attack: { tot: 0, fd: 0, bl: 0, plus: 0, minus: 0 },
+                block: { bl: 0 }
+            };
+            
+            let html = '';
+            
+            players.forEach(playerName => {
+                const p = stats[playerName];
+                
+                // Additionner aux totaux
+                totals.service.tot += p.service.tot;
+                totals.service.ace += p.service.ace;
+                totals.service.fs += p.service.fs;
+                totals.reception.tot += p.reception.tot;
+                totals.reception.faute += p.reception.faute;
+                totals.reception.positive += p.reception.positive;
+                totals.reception.jouable += p.reception.jouable;
+                totals.reception.negative += p.reception.negative;
+                totals.attack.tot += p.attack.tot;
+                totals.attack.fd += p.attack.fd;
+                totals.attack.bl += p.attack.bl;
+                totals.attack.plus += p.attack.plus;
+                totals.attack.minus += p.attack.minus;
+                totals.block.bl += p.block.bl;
+                
+                html += `
+                    <tr>
+                        <td class="player-name">${playerName}</td>
+                        <td>${p.service.tot || '-'}</td>
+                        <td class="${p.service.ace > 0 ? 'positive' : ''}">${p.service.ace || '-'}</td>
+                        <td class="${p.service.fs > 0 ? 'negative' : ''}">${p.service.fs || '-'}</td>
+                        <td>${p.reception.tot || '-'}</td>
+                        <td class="${p.reception.faute > 0 ? 'negative' : ''}">${p.reception.faute || '-'}</td>
+                        <td class="${p.reception.positive > 0 ? 'positive' : ''}">${p.reception.positive || '-'}</td>
+                        <td>${p.reception.jouable || '-'}</td>
+                        <td class="${p.reception.negative > 0 ? 'negative' : ''}">${p.reception.negative || '-'}</td>
+                        <td>${p.attack.tot || '-'}</td>
+                        <td class="${p.attack.fd > 0 ? 'negative' : ''}">${p.attack.fd || '-'}</td>
+                        <td class="${p.attack.bl > 0 ? 'negative' : ''}">${p.attack.bl || '-'}</td>
+                        <td class="${p.attack.plus > 0 ? 'positive' : ''}">${p.attack.plus || '-'}</td>
+                        <td class="${p.attack.minus > 0 ? 'negative' : ''}">${p.attack.minus || '-'}</td>
+                        <td class="${p.block.bl > 0 ? 'positive' : ''}">${p.block.bl || '-'}</td>
+                    </tr>
+                `;
+            });
+            
+            // Ligne total
+            html += `
+                <tr class="total-row">
+                    <td class="player-name">TOTAL</td>
+                    <td>${totals.service.tot || '-'}</td>
+                    <td class="${totals.service.ace > 0 ? 'positive' : ''}">${totals.service.ace || '-'}</td>
+                    <td class="${totals.service.fs > 0 ? 'negative' : ''}">${totals.service.fs || '-'}</td>
+                    <td>${totals.reception.tot || '-'}</td>
+                    <td class="${totals.reception.faute > 0 ? 'negative' : ''}">${totals.reception.faute || '-'}</td>
+                    <td class="${totals.reception.positive > 0 ? 'positive' : ''}">${totals.reception.positive || '-'}</td>
+                    <td>${totals.reception.jouable || '-'}</td>
+                    <td class="${totals.reception.negative > 0 ? 'negative' : ''}">${totals.reception.negative || '-'}</td>
+                    <td>${totals.attack.tot || '-'}</td>
+                    <td class="${totals.attack.fd > 0 ? 'negative' : ''}">${totals.attack.fd || '-'}</td>
+                    <td class="${totals.attack.bl > 0 ? 'negative' : ''}">${totals.attack.bl || '-'}</td>
+                    <td class="${totals.attack.plus > 0 ? 'positive' : ''}">${totals.attack.plus || '-'}</td>
+                    <td class="${totals.attack.minus > 0 ? 'negative' : ''}">${totals.attack.minus || '-'}</td>
+                    <td class="${totals.block.bl > 0 ? 'positive' : ''}">${totals.block.bl || '-'}</td>
+                </tr>
+            `;
+            
+            tbody.innerHTML = html;
+        }
+
+        // Configuration caméra (qui est en bas)
+        let cameraSide = 'home'; // 'home' = Jen en bas, 'away' = adversaire en bas
+
+        // ==================== INITIALISATION ====================
+        function init() {
+            if (!currentMatch) {
+                window.location.href = 'nouveau-match.html';
+                return;
+            }
+
+            // Récupérer le set actuel
+            setIndex = (currentMatch.sets?.length || 1) - 1;
+            currentSet = currentMatch.sets?.[setIndex];
+
+            if (!currentSet) {
+                window.location.href = 'match-set-composition.html';
+                return;
+            }
+
+            // Configuration
+            cameraSide = currentSet.cameraSide || 'home';
+            gameState.servingTeam = currentSet.servingTeam || 'away';
+            gameState.homeScore = currentSet.homeScore || 0;
+            gameState.awayScore = currentSet.awayScore || 0;
+
+            // Mettre à jour l'affichage
+            updateLabels();
+            updateScore();
+            updatePhase();
+            renderServerSelection();
+            setupCourtListeners();
+            
+            // Initialiser les statistiques du set
+            initSetStats();
+            
+            // Mettre à jour les titres des tableaux de stats
+            const opponent = currentMatch.opponent || 'Adversaire';
+            document.getElementById('homeTeamStatsTitle').textContent = 'Jen et ses Saints';
+            document.getElementById('awayTeamStatsTitle').textContent = opponent;
+        }
+
+        // ==================== AFFICHAGE ====================
+        function updateLabels() {
+            const opponent = currentMatch.opponent || 'Adversaire';
+            
+            document.getElementById('awayTeamName').textContent = opponent;
+            document.getElementById('setIndicator').textContent = `SET ${setIndex + 1}`;
+
+            // Labels du terrain selon côté caméra
+            if (cameraSide === 'home') {
+                document.getElementById('topTeamLabel').textContent = opponent;
+                document.getElementById('bottomTeamLabel').textContent = 'Jen et ses Saints';
+            } else {
+                document.getElementById('topTeamLabel').textContent = 'Jen et ses Saints';
+                document.getElementById('bottomTeamLabel').textContent = opponent;
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('homePoints').textContent = gameState.homeScore;
+            document.getElementById('awayPoints').textContent = gameState.awayScore;
+
+            // Indicateur de service
+            const indicator = document.getElementById('servingIndicator');
+            const homeDisplay = document.getElementById('homeScoreDisplay');
+            const awayDisplay = document.getElementById('awayScoreDisplay');
+
+            if (gameState.servingTeam === 'home') {
+                homeDisplay.style.opacity = '1';
+                awayDisplay.style.opacity = '0.6';
+            } else {
+                homeDisplay.style.opacity = '0.6';
+                awayDisplay.style.opacity = '1';
+            }
+        }
+
+        function updatePhase() {
+            const phaseEl = document.getElementById('phaseIndicator');
+            const phases = {
+                'server_selection': '<span class="highlight">Service</span> — Sélectionnez le serveur',
+                'serve_start': '<span class="highlight">Service</span> — Cliquez le point de départ',
+                'serve_end': '<span class="highlight">Service</span> — Cliquez le point d\'arrivée',
+                'reception': '<span class="highlight">Réception</span> — Sélectionnez le réceptionneur',
+                'reception_end': '<span class="highlight">Réception</span> — Cliquez où arrive la réception',
+                'direct_return_end': '<span class="highlight">Retour direct</span> — Cliquez où arrive le retour',
+                'pass': '<span class="highlight">Passe</span> — Sélectionnez le passeur',
+                'pass_end': '<span class="highlight">Passe</span> — Cliquez où arrive la passe',
+                'second_touch_player': '<span class="highlight">2ème touche</span> — Qui fait la 2ème touche ?',
+                'attack_player': '<span class="highlight">Attaque</span> — Sélectionnez l\'attaquant',
+                'attack_type': '<span class="highlight">Attaque</span> — Choisissez le type',
+                'attack_end': '<span class="highlight">Attaque</span> — Cliquez où arrive l\'attaque',
+                'result': '<span class="highlight">Résultat</span> — Qu\'est-ce qui s\'est passé ?',
+                'block_end': '<span class="highlight">Block</span> — Cliquez où arrive le block',
+                'defense': '<span class="highlight">Défense</span> — Sélectionnez le défenseur',
+                'defense_end': '<span class="highlight">Défense</span> — Cliquez où arrive la défense'
+            };
+            phaseEl.innerHTML = phases[gameState.phase] || '';
+            
+            // Afficher le bouton Changement uniquement pendant la sélection du serveur
+            const btnSub = document.getElementById('btnSubstitute');
+            if (btnSub) {
+                btnSub.style.display = gameState.phase === 'server_selection' ? 'flex' : 'none';
+            }
+        }
+
+        // ==================== SÉLECTION SERVEUR ====================
+        function renderServerSelection() {
+            const container = document.getElementById('serverTags');
+            const servingTeam = gameState.servingTeam;
+            
+            let players = [];
+            if (servingTeam === 'home') {
+                players = currentMatch.players || [];
+            } else {
+                players = (currentMatch.adversePlayers || []).map(name => ({ prenom: name }));
+            }
+
+            // Filtrer pour n'avoir que les 4 joueurs sur le terrain
+            const lineup = servingTeam === 'home' 
+                ? currentSet.homeLineup 
+                : currentSet.awayLineup;
+            
+            const onCourtPlayers = Object.values(lineup).filter(p => p !== null);
+
+            container.innerHTML = onCourtPlayers.map((playerName, idx) => `
+                <button class="player-tag ${servingTeam}" onclick="selectServer('${playerName}')">
+                    ${playerName}
+                </button>
+            `).join('');
+
+            showSection('serverSelection');
+        }
+
+        function selectServer(playerName) {
+            gameState.currentServer = playerName;
+            gameState.currentAction = {
+                type: 'service',
+                player: playerName,
+                team: gameState.servingTeam
+            };
+            gameState.phase = 'serve_start';
+            updatePhase();
+            hideAllSections();
+            highlightCourt(null);
+            showServiceZone();
+        }
+
+        // ==================== GESTION DU TERRAIN ====================
+        function setupCourtListeners() {
+            const courtTop = document.getElementById('courtTop');
+            const courtBottom = document.getElementById('courtBottom');
+            const serviceZoneTop = document.getElementById('serviceZoneTop');
+            const serviceZoneBottom = document.getElementById('serviceZoneBottom');
+            const outArea = document.getElementById('outArea');
+
+            courtTop.addEventListener('click', (e) => handleCourtClick(e, 'top'));
+            courtBottom.addEventListener('click', (e) => handleCourtClick(e, 'bottom'));
+            serviceZoneTop.addEventListener('click', (e) => handleServiceZoneClick(e, 'top'));
+            serviceZoneBottom.addEventListener('click', (e) => handleServiceZoneClick(e, 'bottom'));
+            outArea.addEventListener('click', (e) => handleOutAreaClick(e));
+        }
+
+        function handleOutAreaClick(event) {
+            // Calculer la position relative au container
+            const container = document.getElementById('courtContainer');
+            const rect = container.getBoundingClientRect();
+            const x = ((event.clientX - rect.left) / rect.width) * 100;
+            const y = ((event.clientY - rect.top) / rect.height) * 100;
+            
+            // Marquer comme "out" (hors terrain)
+            const clickData = { x, y, courtSide: 'out' };
+            
+            if (gameState.phase === 'serve_end') {
+                handleServeEnd(clickData);
+            } else if (gameState.phase === 'reception_end') {
+                handleReceptionEnd(clickData);
+            } else if (gameState.phase === 'pass_end') {
+                handlePassEnd(clickData);
+            } else if (gameState.phase === 'defense_end') {
+                handleDefenseEnd(clickData);
+            }
+        }
+
+        function handleServiceZoneClick(event, zoneSide) {
+            if (gameState.phase !== 'serve_start') return;
+
+            const rect = event.currentTarget.getBoundingClientRect();
+            const x = ((event.clientX - rect.left) / rect.width) * 100;
+            const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+            const clickData = { x, y, courtSide: zoneSide === 'top' ? 'service_top' : 'service_bottom' };
+            handleServeStart(clickData);
+        }
+
+        function showServiceZone() {
+            const serviceZoneTop = document.getElementById('serviceZoneTop');
+            const serviceZoneBottom = document.getElementById('serviceZoneBottom');
+            
+            // Masquer les deux d'abord
+            serviceZoneTop.classList.remove('active');
+            serviceZoneBottom.classList.remove('active');
+
+            // Afficher la bonne zone selon l'équipe qui sert
+            const servingCourtSide = getCourtSideForTeam(gameState.servingTeam);
+            
+            if (servingCourtSide === 'top') {
+                serviceZoneTop.classList.add('active');
+            } else {
+                serviceZoneBottom.classList.add('active');
+            }
+        }
+
+        function hideServiceZones() {
+            document.getElementById('serviceZoneTop').classList.remove('active');
+            document.getElementById('serviceZoneBottom').classList.remove('active');
+        }
+
+        function handleCourtClick(event, courtSide) {
+            const rect = event.currentTarget.getBoundingClientRect();
+            const x = ((event.clientX - rect.left) / rect.width) * 100;
+            const y = ((event.clientY - rect.top) / rect.height) * 100;
+
+            const clickData = { x, y, courtSide };
+
+            switch (gameState.phase) {
+                case 'serve_start':
+                    handleServeStart(clickData);
+                    break;
+                case 'serve_end':
+                    handleServeEnd(clickData);
+                    break;
+                case 'reception_end':
+                    handleReceptionEnd(clickData);
+                    break;
+                case 'direct_return_end':
+                    handleDirectReturnEnd(clickData);
+                    break;
+                case 'pass_end':
+                    handlePassEnd(clickData);
+                    break;
+                case 'attack_end':
+                    handleAttackEnd(clickData);
+                    break;
+                case 'block_end':
+                    handleBlockEnd(clickData);
+                    break;
+                case 'defense_end':
+                    handleDefenseEnd(clickData);
+                    break;
+            }
+        }
+
+        function handleServeStart(clickData) {
+            gameState.currentAction.startPos = clickData;
+            addMarker(clickData, 'service');
+            gameState.phase = 'serve_end';
+            updatePhase();
+            
+            // Masquer la zone de service
+            hideServiceZones();
+            
+            // Activer la zone out pour permettre les clics hors terrain
+            document.getElementById('outArea').classList.add('active');
+            
+            // Masquer le label OUT côté serveur, afficher les autres
+            const servingCourtSide = getCourtSideForTeam(gameState.servingTeam);
+            document.getElementById('outLabelTop').style.display = servingCourtSide === 'top' ? 'none' : 'block';
+            document.getElementById('outLabelBottom').style.display = servingCourtSide === 'bottom' ? 'none' : 'block';
+            
+            // Afficher le bouton service filet
+            document.getElementById('serviceNetFaultSection').classList.remove('hidden');
+            
+            // Highlight receiving team's court
+            const receivingTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
+            highlightCourt(receivingTeam);
+        }
+
+        function handleServeEnd(clickData) {
+            gameState.currentAction.endPos = clickData;
+            // On ne dessine pas de flèche ici, elle sera dessinée à la réception
+            // On garde le marker pour montrer où le service est allé
+            addMarker(clickData, 'service');
+            
+            // Désactiver la zone out et le bouton filet
+            document.getElementById('outArea').classList.remove('active');
+            document.getElementById('serviceNetFaultSection').classList.add('hidden');
+
+            // Vérifier si service faute (hors du terrain receveur)
+            const receivingTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
+            const expectedCourtSide = getCourtSideForTeam(receivingTeam);
+
+            if (clickData.courtSide !== expectedCourtSide) {
+                // Service faute out ! On dessine la flèche quand même pour montrer l'erreur
+                drawArrow(gameState.currentAction.startPos, clickData, 'service');
+                handleServiceFaultOut();
+            } else {
+                // Service bon, passer à la réception
+                gameState.rally.push({ ...gameState.currentAction });
+                gameState.attackingTeam = receivingTeam;
+                gameState.phase = 'reception';
+                updatePhase();
+                renderPlayerSelection(receivingTeam, 'Qui réceptionne ?');
+            }
+        }
+
+        function handleServiceFault() {
+            // Marquer le service comme fault (générique, utilisé par bouton depuis reception)
+            gameState.currentAction.result = 'fault';
+            gameState.rally.push({ ...gameState.currentAction });
+            
+            // Point pour l'équipe qui reçoit
+            const receivingTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
+            awardPoint(receivingTeam);
+            endRally();
+        }
+
+        function handleServiceFaultOut() {
+            // Service out (hors terrain)
+            gameState.currentAction.result = 'fault_out';
+            gameState.rally.push({ ...gameState.currentAction });
+            
+            // Point pour l'équipe qui reçoit
+            const receivingTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
+            awardPoint(receivingTeam);
+            endRally();
+        }
+
+        function handleServiceNetFault() {
+            // Service dans le filet
+            document.getElementById('outArea').classList.remove('active');
+            document.getElementById('serviceNetFaultSection').classList.add('hidden');
+            
+            gameState.currentAction.result = 'fault_net';
+            gameState.rally.push({ ...gameState.currentAction });
+            
+            // Point pour l'équipe qui reçoit
+            const receivingTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
+            awardPoint(receivingTeam);
+            endRally();
+        }
+
+        function handleAceFromReception() {
+            // Ace signalé pendant la sélection du réceptionneur
+            hideAllSections();
+            
+            // Retrouver l'action de service et la marquer comme ace
+            const serviceAction = gameState.rally.find(a => a.type === 'service');
+            if (serviceAction) {
+                serviceAction.result = 'ace';
+            }
+            
+            // Tracer la flèche du service
+            if (serviceAction && serviceAction.startPos && serviceAction.endPos) {
+                drawArrow(serviceAction.startPos, serviceAction.endPos, 'service');
+            }
+            
+            // Point pour l'équipe qui sert
+            awardPoint(gameState.servingTeam);
+            endRally();
+        }
+
+        // ==================== RÉCEPTION ====================
+        function selectReceptioner(playerName) {
+            gameState.currentAction = {
+                type: 'reception',
+                player: playerName,
+                team: gameState.attackingTeam
+            };
+            gameState.phase = 'reception_end';
+            updatePhase();
+            hideAllSections();
+            highlightCourt(gameState.attackingTeam);
+            
+            // Afficher les zones de qualité et le bouton faute
+            showReceptionQualityZones();
+            document.getElementById('receptionFaultSection').classList.remove('hidden');
+            
+            // Activer la zone out pour les réceptions hors terrain
+            document.getElementById('outArea').classList.add('active');
+            // Masquer les labels OUT côté adverse (on ne réceptionne pas chez l'adversaire)
+            const receivingCourtSide = getCourtSideForTeam(gameState.attackingTeam);
+            document.getElementById('outLabelTop').style.display = receivingCourtSide === 'top' ? 'block' : 'none';
+            document.getElementById('outLabelBottom').style.display = receivingCourtSide === 'bottom' ? 'block' : 'none';
+        }
+
+        function handleReceptionEnd(clickData) {
+            gameState.currentAction.endPos = clickData;
+            
+            // Désactiver la zone out
+            document.getElementById('outArea').classList.remove('active');
+            
+            // Calculer la qualité de la réception selon la zone
+            // Si c'est hors terrain, c'est automatiquement une réception négative (1/4)
+            let quality;
+            if (clickData.courtSide === 'out') {
+                quality = { score: 1, label: 'Négative' };
+            } else {
+                quality = calculateReceptionQuality(clickData);
+            }
+            gameState.currentAction.quality = quality;
+            
+            addMarker(clickData, 'reception');
+            
+            // Masquer les zones de qualité
+            hideReceptionQualityZones();
+            document.getElementById('receptionFaultSection').classList.add('hidden');
+            
+            // Tracer flèche du SERVICE depuis son point de départ jusqu'au point de contact (endPos du service)
+            const serviceAction = gameState.rally.find(a => a.type === 'service');
+            if (serviceAction && serviceAction.startPos && serviceAction.endPos) {
+                drawArrow(serviceAction.startPos, serviceAction.endPos, 'service');
+                
+                // Tracer flèche de RÉCEPTION depuis le point de contact jusqu'à l'arrivée de la réception
+                drawArrow(serviceAction.endPos, clickData, 'reception');
+            }
+
+            gameState.rally.push({ ...gameState.currentAction });
+            gameState.phase = 'pass';
+            updatePhase();
+            renderPlayerSelection(gameState.attackingTeam, 'Qui fait la passe ?');
+        }
+
+        function calculateReceptionQuality(clickData) {
+            // Calculer la distance par rapport au filet
+            const courtSide = getCourtSideForTeam(gameState.attackingTeam);
+            
+            // Distance depuis le filet (en %)
+            let distanceFromNet;
+            if (courtSide === 'top') {
+                // Terrain du haut : filet en bas (y=100%)
+                distanceFromNet = 100 - clickData.y;
+            } else {
+                // Terrain du bas : filet en haut (y=0%)
+                distanceFromNet = clickData.y;
+            }
+            
+            // Distance horizontale depuis le centre (en %)
+            const distX = Math.abs(clickData.x - 50);
+            
+            // Calcul basé sur la forme elliptique des demi-cercles
+            // Zone parfaite: width 40%, height 30% → ratio x/20, y/30
+            // Zone correcte: width 70%, height 55% → ratio x/35, y/55
+            // Zone moyenne: width 100%, height 80% → ratio x/50, y/80
+            
+            const perfectRatio = Math.sqrt(Math.pow(distX / 20, 2) + Math.pow(distanceFromNet / 30, 2));
+            const goodRatio = Math.sqrt(Math.pow(distX / 35, 2) + Math.pow(distanceFromNet / 55, 2));
+            const averageRatio = Math.sqrt(Math.pow(distX / 50, 2) + Math.pow(distanceFromNet / 80, 2));
+            
+            if (perfectRatio <= 1) {
+                return { score: 4, label: 'Excellente' };
+            } else if (goodRatio <= 1) {
+                return { score: 3, label: 'Positive' };
+            } else if (averageRatio <= 1) {
+                return { score: 2, label: 'Jouable' };
+            } else {
+                return { score: 1, label: 'Négative' };
+            }
+        }
+
+        function showReceptionQualityZones() {
+            const courtSide = getCourtSideForTeam(gameState.attackingTeam);
+            if (courtSide === 'top') {
+                document.getElementById('qualityZonesTop').classList.add('active');
+            } else {
+                document.getElementById('qualityZonesBottom').classList.add('active');
+            }
+        }
+
+        function hideReceptionQualityZones() {
+            document.getElementById('qualityZonesTop').classList.remove('active');
+            document.getElementById('qualityZonesBottom').classList.remove('active');
+        }
+
+        function handleReceptionFault() {
+            // Faute de réception = point pour l'équipe qui sert (ace)
+            gameState.currentAction.quality = { score: 0, label: 'Faute' };
+            gameState.currentAction.endPos = null;
+            gameState.rally.push({ ...gameState.currentAction });
+            
+            // Marquer le service comme ace
+            const serviceAction = gameState.rally.find(a => a.type === 'service');
+            if (serviceAction) {
+                serviceAction.result = 'ace';
+            }
+            
+            // Masquer les zones
+            hideReceptionQualityZones();
+            document.getElementById('receptionFaultSection').classList.add('hidden');
+            
+            // Tracer flèche du service quand même
+            if (serviceAction && serviceAction.startPos && serviceAction.endPos) {
+                drawArrow(serviceAction.startPos, serviceAction.endPos, 'service');
+            }
+            
+            // Point pour l'équipe qui sert
+            awardPoint(gameState.servingTeam);
+            endRally();
+        }
+
+        function handleDirectReturn() {
+            // Retour direct = la balle va dans le terrain adverse, ils doivent défendre
+            // Considéré comme une faute (0/4) car non maîtrisé
+            gameState.currentAction.quality = { score: 0, label: 'Faute' };
+            gameState.currentAction.isDirectReturn = true;
+            
+            // Le point de contact de la réception = l'arrivée du service
+            const serviceAction = gameState.rally.find(a => a.type === 'service');
+            if (serviceAction && serviceAction.endPos) {
+                gameState.currentAction.endPos = serviceAction.endPos;
+                // Ajouter un marker au point de contact
+                addMarker(serviceAction.endPos, 'reception');
+            }
+            
+            // Ne pas encore pusher dans rally, on attend le clic de l'arrivée
+            
+            // Masquer les zones
+            hideReceptionQualityZones();
+            document.getElementById('receptionFaultSection').classList.add('hidden');
+            
+            // Tracer flèche du service
+            if (serviceAction && serviceAction.startPos && serviceAction.endPos) {
+                drawArrow(serviceAction.startPos, serviceAction.endPos, 'service');
+            }
+            
+            // L'équipe adverse (qui servait) doit maintenant défendre
+            const defendingTeam = gameState.servingTeam;
+            
+            // Mettre en surbrillance le terrain de l'équipe qui défend (qui servait)
+            highlightCourt(defendingTeam);
+            
+            // Phase pour cliquer l'arrivée du retour direct
+            gameState.phase = 'direct_return_end';
+            updatePhase();
+            hideAllSections();
+        }
+
+        function handleDirectReturnEnd(clickData) {
+            // Enregistrer l'arrivée du retour direct
+            gameState.currentAction.directReturnEndPos = clickData;
+            gameState.rally.push({ ...gameState.currentAction });
+            
+            // Tracer la flèche du retour direct (depuis réception vers arrivée)
+            const receptionStartPos = gameState.currentAction.endPos; // endPos de la réception = point de contact
+            if (receptionStartPos) {
+                drawArrow(receptionStartPos, clickData, 'reception');
+            }
+            
+            // Ajouter un marker pour l'arrivée
+            addMarker(clickData, 'reception');
+            
+            // L'équipe adverse (qui servait) doit maintenant défendre
+            const defendingTeam = gameState.servingTeam;
+            gameState.attackingTeam = defendingTeam;
+            
+            gameState.phase = 'defense';
+            updatePhase();
+            renderPlayerSelection(defendingTeam, 'Qui défend ?');
+        }
+
+        function handleDirectReturnWinner() {
+            // Retour direct gagnant = point direct pour l'équipe qui réceptionne
+            gameState.currentAction.quality = { score: 0, label: 'Retour gagnant' };
+            gameState.currentAction.isDirectReturnWinner = true;
+            gameState.rally.push({ ...gameState.currentAction });
+            
+            // Masquer les zones
+            hideReceptionQualityZones();
+            document.getElementById('receptionFaultSection').classList.add('hidden');
+            
+            // Tracer flèche du service
+            const serviceAction = gameState.rally.find(a => a.type === 'service');
+            if (serviceAction && serviceAction.startPos && serviceAction.endPos) {
+                drawArrow(serviceAction.startPos, serviceAction.endPos, 'service');
+            }
+            
+            // Point pour l'équipe qui réceptionne (attackingTeam)
+            awardPoint(gameState.attackingTeam);
+            endRally();
+        }
+
+        // ==================== PASSE ====================
+        function selectPasser(playerName) {
+            gameState.currentAction = {
+                type: 'pass',
+                player: playerName,
+                team: gameState.attackingTeam
+            };
+            gameState.phase = 'pass_end';
+            updatePhase();
+            hideAllSections();
+            highlightCourt(gameState.attackingTeam);
+            
+            // Activer la zone out pour les passes hors terrain
+            document.getElementById('outArea').classList.add('active');
+            // Masquer les labels OUT côté adverse (on ne passe pas chez l'adversaire)
+            const attackingCourtSide = getCourtSideForTeam(gameState.attackingTeam);
+            document.getElementById('outLabelTop').style.display = attackingCourtSide === 'top' ? 'block' : 'none';
+            document.getElementById('outLabelBottom').style.display = attackingCourtSide === 'bottom' ? 'block' : 'none';
+        }
+
+        function handleSecondTouch(type) {
+            // Attaque en 2ème touche (deuxieme_main ou attaque_directe)
+            // On sauvegarde le type et on demande qui fait l'action
+            gameState.secondTouchType = type;
+            gameState.phase = 'second_touch_player';
+            updatePhase();
+            hideAllSections();
+            renderPlayerSelection(gameState.attackingTeam, 'Qui fait la 2ème touche ?');
+        }
+
+        function selectSecondTouchPlayer(playerName) {
+            // Créer directement une action d'attaque avec le type pré-défini
+            gameState.currentAction = {
+                type: 'attack',
+                player: playerName,
+                team: gameState.attackingTeam,
+                attackType: gameState.secondTouchType
+            };
+            
+            // Passer directement à attack_end
+            gameState.phase = 'attack_end';
+            updatePhase();
+            hideAllSections();
+            
+            // Highlight terrain adverse
+            const defendingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+            highlightCourt(defendingTeam);
+        }
+
+        function handlePassEnd(clickData) {
+            gameState.currentAction.endPos = clickData;
+            addMarker(clickData, 'pass');
+            
+            // Désactiver la zone out
+            document.getElementById('outArea').classList.remove('active');
+
+            // Tracer flèche depuis la réception ou défense
+            const lastAction = gameState.rally[gameState.rally.length - 1];
+            if (lastAction && lastAction.endPos) {
+                drawArrow(lastAction.endPos, clickData, 'pass');
+            } else if (lastAction && lastAction.isDirectReturn && lastAction.directReturnEndPos) {
+                // Cas après défense sur retour direct
+                drawArrow(lastAction.directReturnEndPos, clickData, 'pass');
+            }
+
+            gameState.rally.push({ ...gameState.currentAction });
+            gameState.phase = 'attack_player';
+            updatePhase();
+            renderPlayerSelection(gameState.attackingTeam, 'Qui attaque ?');
+        }
+
+        // ==================== ATTAQUE ====================
+        function selectAttacker(playerName) {
+            gameState.currentAction = {
+                type: 'attack',
+                player: playerName,
+                team: gameState.attackingTeam
+            };
+            
+            // Si c'est une attaque directe depuis la défense, marquer le type
+            if (gameState.defenseDirectAttack) {
+                gameState.currentAction.isDefenseDirectAttack = true;
+                gameState.defenseDirectAttack = false; // Reset le flag
+            }
+            
+            gameState.phase = 'attack_type';
+            updatePhase();
+            showSection('attackTypeSelection');
+        }
+
+        function selectAttackType(type) {
+            gameState.currentAction.attackType = type;
+
+            if (type === 'faute') {
+                // Faute directe = point pour l'adversaire
+                const otherTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+                gameState.rally.push({ ...gameState.currentAction });
+                awardPoint(otherTeam);
+                endRally();
+            } else if (type === 'bloc_direct') {
+                // Bloc direct encaissé = point pour l'adversaire (différent de faute pour les stats)
+                const otherTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+                gameState.rally.push({ ...gameState.currentAction });
+                awardPoint(otherTeam);
+                endRally();
+            } else {
+                // Passer directement à attack_end (le départ sera la position de la passe)
+                gameState.phase = 'attack_end';
+                updatePhase();
+                hideAllSections();
+                
+                // Highlight terrain adverse pour l'arrivée de l'attaque
+                const defendingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+                highlightCourt(defendingTeam);
+            }
+        }
+
+        function handleAttackEnd(clickData) {
+            gameState.currentAction.endPos = clickData;
+            
+            // Déterminer le type de marker/flèche selon le type d'attaque
+            let arrowType = 'attack';
+            if (gameState.currentAction.attackType === 'feinte') {
+                arrowType = 'attack-feinte';
+            } else if (gameState.currentAction.attackType === 'relance') {
+                arrowType = 'attack-relance';
+            } else if (gameState.currentAction.attackType === 'deuxieme_main' || gameState.currentAction.attackType === 'attaque_directe') {
+                arrowType = 'attack-second';
+            }
+            
+            addMarker(clickData, arrowType);
+            
+            // Tracer flèche depuis la passe (ou réception/défense si 2ème touche, ou action précédente si attaque directe défense)
+            const lastAction = gameState.rally[gameState.rally.length - 1];
+            
+            if (gameState.currentAction.isDefenseDirectAttack) {
+                // Attaque directe depuis la défense: la flèche part de l'action précédente (attaque adverse, block, ou retour direct)
+                if (lastAction && lastAction.type === 'reception' && lastAction.isDirectReturn && lastAction.directReturnEndPos) {
+                    drawArrow(lastAction.directReturnEndPos, clickData, arrowType);
+                } else if (lastAction && lastAction.type === 'defense' && lastAction.isDirectReturn && lastAction.directReturnEndPos) {
+                    drawArrow(lastAction.directReturnEndPos, clickData, arrowType);
+                } else if (lastAction && lastAction.endPos) {
+                    drawArrow(lastAction.endPos, clickData, arrowType);
+                }
+            } else if (lastAction && lastAction.endPos) {
+                drawArrow(lastAction.endPos, clickData, arrowType);
+            }
+
+            // Vérifier si attaque faute (hors du terrain défenseur)
+            const defendingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+            const expectedCourtSide = getCourtSideForTeam(defendingTeam);
+
+            if (clickData.courtSide !== expectedCourtSide) {
+                // Attaque out = point pour l'adversaire
+                gameState.currentAction.result = 'out';
+                gameState.rally.push({ ...gameState.currentAction });
+                awardPoint(defendingTeam);
+                endRally();
+            } else {
+                // Attaque dans le terrain, demander le résultat
+                gameState.rally.push({ ...gameState.currentAction });
+                gameState.phase = 'result';
+                updatePhase();
+                showSection('resultSelection');
+            }
+        }
+
+        function selectResult(result) {
+            const lastAction = gameState.rally[gameState.rally.length - 1];
+            lastAction.result = result;
+
+            if (result === 'point') {
+                // Point pour l'équipe qui attaque
+                awardPoint(gameState.attackingTeam);
+                endRally();
+            } else if (result === 'defended') {
+                // Défendu : l'autre équipe défend et va contre-attaquer
+                const newAttackingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+                gameState.attackingTeam = newAttackingTeam;
+                gameState.phase = 'defense';
+                updatePhase();
+                renderPlayerSelection(newAttackingTeam, 'Qui défend ?');
+            } else if (result === 'blocked') {
+                // Blockée : on demande d'abord où arrive le block
+                gameState.currentAction = {
+                    type: 'block',
+                    team: gameState.attackingTeam === 'home' ? 'away' : 'home' // L'équipe qui a bloqué
+                };
+                gameState.phase = 'block_end';
+                updatePhase();
+                hideAllSections();
+                // Le block arrive sur le terrain de l'attaquant
+                highlightCourt(gameState.attackingTeam);
+            }
+        }
+
+        // ==================== BLOCK ====================
+        function handleBlockEnd(clickData) {
+            gameState.currentAction.endPos = clickData;
+            addMarker(clickData, 'block');
+
+            // Tracer flèche du block depuis l'arrivée de l'attaque jusqu'à l'arrivée du block
+            const lastAttack = [...gameState.rally].reverse().find(a => a.type === 'attack');
+            if (lastAttack && lastAttack.endPos) {
+                drawArrow(lastAttack.endPos, clickData, 'block');
+            }
+
+            gameState.rally.push({ ...gameState.currentAction });
+
+            // Passer à la défense (même équipe que l'attaquant)
+            gameState.phase = 'defense';
+            updatePhase();
+            renderPlayerSelection(gameState.attackingTeam, 'Qui défend ?');
+        }
+
+        // ==================== DÉFENSE ====================
+        function selectDefender(playerName) {
+            gameState.currentAction = {
+                type: 'defense',
+                player: playerName,
+                team: gameState.attackingTeam
+            };
+            gameState.phase = 'defense_end';
+            updatePhase();
+            hideAllSections();
+            
+            // Permettre de cliquer sur les deux terrains (défense peut aller chez l'adversaire)
+            highlightCourt(null); // Pas de highlight spécifique, les deux terrains sont cliquables
+            
+            // Activer la zone out pour les défenses hors terrain
+            document.getElementById('outArea').classList.add('active');
+            // Afficher tous les labels OUT sauf celui côté adverse (la balle peut y aller mais pas en out)
+            const defendingCourtSide = getCourtSideForTeam(gameState.attackingTeam);
+            document.getElementById('outLabelTop').style.display = defendingCourtSide === 'top' ? 'block' : 'none';
+            document.getElementById('outLabelBottom').style.display = defendingCourtSide === 'bottom' ? 'block' : 'none';
+        }
+
+        function handleDefenseEnd(clickData) {
+            // Désactiver la zone out
+            document.getElementById('outArea').classList.remove('active');
+            
+            // Vérifier si la défense va dans le terrain adverse
+            const defendingTeam = gameState.attackingTeam;
+            const defendingCourtSide = getCourtSideForTeam(defendingTeam);
+            const oppositeCourtSide = defendingCourtSide === 'top' ? 'bottom' : 'top';
+            
+            // Si le clic est sur le terrain adverse, c'est un retour direct de défense
+            if (clickData.courtSide === oppositeCourtSide) {
+                handleDefenseDirectReturn(clickData);
+                return;
+            }
+            
+            gameState.currentAction.endPos = clickData;
+            addMarker(clickData, 'defense');
+
+            // Tracer flèche depuis l'action précédente
+            const prevAction = gameState.rally[gameState.rally.length - 1];
+            
+            if (prevAction && prevAction.type === 'reception' && prevAction.isDirectReturn && prevAction.directReturnEndPos) {
+                // Cas du retour direct : la flèche part du point d'arrivée du retour direct
+                drawArrow(prevAction.directReturnEndPos, clickData, 'defense');
+            } else if (prevAction && prevAction.type === 'defense' && prevAction.isDirectReturn && prevAction.directReturnEndPos) {
+                // Cas du retour direct de défense précédente
+                drawArrow(prevAction.directReturnEndPos, clickData, 'defense');
+            } else if (prevAction && prevAction.endPos) {
+                if (prevAction.type === 'block') {
+                    drawArrow(prevAction.endPos, clickData, 'defense');
+                } else if (prevAction.type === 'attack') {
+                    drawArrow(prevAction.endPos, clickData, 'defense');
+                }
+            }
+
+            gameState.rally.push({ ...gameState.currentAction });
+            
+            // Passer à la passe
+            gameState.phase = 'pass';
+            updatePhase();
+            renderPlayerSelection(gameState.attackingTeam, 'Qui fait la passe ?');
+        }
+
+        function handleDefenseDirectReturn(clickData) {
+            // La défense va directement dans le terrain adverse
+            gameState.currentAction.isDirectReturn = true;
+            gameState.currentAction.directReturnEndPos = clickData;
+            
+            // Trouver le point de départ de la défense (depuis l'action précédente)
+            const prevAction = gameState.rally[gameState.rally.length - 1];
+            let defenseStartPos = null;
+            
+            if (prevAction && prevAction.type === 'reception' && prevAction.isDirectReturn && prevAction.directReturnEndPos) {
+                defenseStartPos = prevAction.directReturnEndPos;
+            } else if (prevAction && prevAction.type === 'defense' && prevAction.isDirectReturn && prevAction.directReturnEndPos) {
+                defenseStartPos = prevAction.directReturnEndPos;
+            } else if (prevAction && prevAction.endPos) {
+                defenseStartPos = prevAction.endPos;
+            }
+            
+            gameState.currentAction.endPos = defenseStartPos; // Le point de contact de la défense
+            
+            // Ajouter markers
+            if (defenseStartPos) {
+                addMarker(defenseStartPos, 'defense');
+            }
+            addMarker(clickData, 'defense');
+            
+            // Tracer la flèche de la défense vers le terrain adverse
+            if (defenseStartPos) {
+                drawArrow(defenseStartPos, clickData, 'defense');
+            }
+            
+            gameState.rally.push({ ...gameState.currentAction });
+            
+            // L'équipe adverse doit maintenant défendre
+            const newDefendingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+            gameState.attackingTeam = newDefendingTeam;
+            
+            // Mettre en surbrillance le terrain de l'équipe qui va défendre
+            highlightCourt(newDefendingTeam);
+            
+            gameState.phase = 'defense';
+            updatePhase();
+            renderPlayerSelection(newDefendingTeam, 'Qui défend ?');
+        }
+
+        function handleDefenseDirectAttack() {
+            // Attaque directe depuis la défense (sans passe)
+            // On passe directement à la sélection de l'attaquant
+            gameState.defenseDirectAttack = true; // Flag pour savoir qu'on vient de la défense
+            gameState.phase = 'attack_player';
+            updatePhase();
+            hideAllSections();
+            renderPlayerSelection(gameState.attackingTeam, 'Qui attaque ?');
+        }
+
+        // ==================== GESTION DES POINTS ====================
+        function awardPoint(team) {
+            if (team === 'home') {
+                gameState.homeScore++;
+            } else {
+                gameState.awayScore++;
+            }
+            updateScore();
+
+            // Changement de service si l'équipe qui reçoit gagne le point
+            if (team !== gameState.servingTeam) {
+                gameState.servingTeam = team;
+            }
+
+            // Sauvegarder
+            saveCurrentSet();
+
+            // Vérifier fin de set
+            checkSetEnd();
+        }
+
+        function checkSetEnd() {
+            const home = gameState.homeScore;
+            const away = gameState.awayScore;
+
+            // Set gagné à 25 avec 2 points d'écart
+            if ((home >= 25 || away >= 25) && Math.abs(home - away) >= 2) {
+                // Fin du set !
+                alert(`Fin du set ! Score: ${home} - ${away}`);
+                // TODO: gérer la fin du set et le passage au suivant
+            }
+        }
+
+        function endRally() {
+            // Sauvegarder le rally
+            if (!currentSet.points) currentSet.points = [];
+            currentSet.points.push({
+                rally: [...gameState.rally],
+                homeScore: gameState.homeScore,
+                awayScore: gameState.awayScore,
+                timestamp: Date.now()
+            });
+
+            // Mettre à jour les statistiques
+            recalculateAllStats();
+
+            // Reset pour le prochain point
+            gameState.rally = [];
+            gameState.currentAction = {};
+            clearMarkers();
+            clearArrows();
+            hideServiceZones();
+            hideReceptionQualityZones();
+
+            // Nouveau service
+            gameState.phase = 'server_selection';
+            updatePhase();
+            renderServerSelection();
+        }
+
+        function recalculateAllStats() {
+            // Réinitialiser les stats
+            initSetStats();
+            
+            // Parcourir tous les points enregistrés
+            if (currentSet.points) {
+                for (const point of currentSet.points) {
+                    for (const action of point.rally) {
+                        updateStatFromAction(action);
+                    }
+                }
+            }
+            
+            renderStatsTables();
+        }
+
+        function updateStatFromAction(action) {
+            const team = action.team;
+            const player = action.player;
+            
+            if (!player || !team) return;
+            
+            // S'assurer que le joueur existe dans les stats
+            if (!setStats[team][player]) {
+                setStats[team][player] = initPlayerStats(player);
+            }
+            
+            const stats = setStats[team][player];
+            
+            switch (action.type) {
+                case 'service':
+                    stats.service.tot++;
+                    if (action.result === 'ace') {
+                        stats.service.ace++;
+                    } else if (action.result === 'fault' || action.result === 'fault_out' || action.result === 'fault_net') {
+                        stats.service.fs++;
+                    }
+                    break;
+                    
+                case 'reception':
+                    stats.reception.tot++;
+                    if (action.quality) {
+                        switch (action.quality.label) {
+                            case 'Excellente':
+                                stats.reception.positive++;
+                                break;
+                            case 'Positive':
+                                stats.reception.positive++;
+                                break;
+                            case 'Jouable':
+                                stats.reception.jouable++;
+                                break;
+                            case 'Négative':
+                                stats.reception.negative++;
+                                break;
+                            case 'Faute':
+                                stats.reception.faute++;
+                                break;
+                            case 'Retour gagnant':
+                                // Retour gagnant n'est pas une faute
+                                break;
+                        }
+                    }
+                    break;
+                    
+                case 'attack':
+                    stats.attack.tot++;
+                    if (action.attackType === 'faute') {
+                        stats.attack.fd++;
+                        stats.attack.minus++;
+                    } else if (action.attackType === 'bloc_direct') {
+                        stats.attack.bl++;
+                        stats.attack.minus++;
+                    } else if (action.result === 'point') {
+                        stats.attack.plus++;
+                    } else if (action.result === 'out') {
+                        stats.attack.fd++;
+                        stats.attack.minus++;
+                    } else if (action.result === 'blocked') {
+                        stats.attack.bl++;
+                        stats.attack.minus++;
+                    }
+                    // defended = ni plus ni minus
+                    break;
+                    
+                case 'block':
+                    // Block réussi (le block a été enregistré donc il a perturbé l'attaque)
+                    stats.block.bl++;
+                    break;
+            }
+        }
+
+        // ==================== HELPERS ====================
+        function getCourtSideForTeam(team) {
+            // Retourne 'top' ou 'bottom' selon le côté caméra
+            if (cameraSide === 'home') {
+                return team === 'home' ? 'bottom' : 'top';
+            } else {
+                return team === 'home' ? 'top' : 'bottom';
+            }
+        }
+
+        function renderPlayerSelection(team, title) {
+            const container = document.getElementById('playerTags');
+            document.getElementById('playerSelectionTitle').textContent = title;
+
+            const lineup = team === 'home' ? currentSet.homeLineup : currentSet.awayLineup;
+            const players = Object.values(lineup).filter(p => p !== null);
+
+            let html = players.map(playerName => `
+                <button class="player-tag ${team}" onclick="handlePlayerSelection('${playerName}')">
+                    ${playerName}
+                </button>
+            `).join('');
+            
+            // Ajouter le bouton Ace en phase reception
+            if (gameState.phase === 'reception') {
+                html += `<button class="action-tag ace" onclick="handleAceFromReception()">🎯 Ace</button>`;
+            }
+            
+            // Ajouter le bouton Attaque directe en phase defense
+            if (gameState.phase === 'defense') {
+                html += `<button class="action-tag direct-return" onclick="handleDefenseDirectAttack()">⚡ Attaque directe</button>`;
+            }
+            
+            container.innerHTML = html;
+
+            showSection('playerSelection');
+            
+            // Afficher les options de 2ème touche uniquement en phase passe
+            if (gameState.phase === 'pass') {
+                document.getElementById('secondTouchOptions').classList.remove('hidden');
+            }
+        }
+
+        function handlePlayerSelection(playerName) {
+            switch (gameState.phase) {
+                case 'reception':
+                    selectReceptioner(playerName);
+                    break;
+                case 'pass':
+                    selectPasser(playerName);
+                    break;
+                case 'second_touch_player':
+                    selectSecondTouchPlayer(playerName);
+                    break;
+                case 'attack_player':
+                    selectAttacker(playerName);
+                    break;
+                case 'defense':
+                    selectDefender(playerName);
+                    break;
+            }
+        }
+
+        function showSection(sectionId) {
+            hideAllSections();
+            document.getElementById(sectionId).classList.remove('hidden');
+        }
+
+        function hideAllSections() {
+            document.getElementById('serverSelection').classList.add('hidden');
+            document.getElementById('playerSelection').classList.add('hidden');
+            document.getElementById('secondTouchOptions').classList.add('hidden');
+            document.getElementById('serviceNetFaultSection').classList.add('hidden');
+            document.getElementById('attackTypeSelection').classList.add('hidden');
+            document.getElementById('resultSelection').classList.add('hidden');
+            document.getElementById('receptionFaultSection').classList.add('hidden');
+            document.getElementById('outArea').classList.remove('active');
+            hideReceptionQualityZones();
+        }
+
+        function highlightCourt(team) {
+            const courtTop = document.getElementById('courtTop');
+            const courtBottom = document.getElementById('courtBottom');
+
+            courtTop.classList.remove('target', 'inactive');
+            courtBottom.classList.remove('target', 'inactive');
+
+            if (team === null) {
+                // Pas de highlight
+                return;
+            }
+
+            const targetSide = getCourtSideForTeam(team);
+
+            if (targetSide === 'top') {
+                courtTop.classList.add('target');
+                courtBottom.classList.add('inactive');
+            } else {
+                courtBottom.classList.add('target');
+                courtTop.classList.add('inactive');
+            }
+        }
+
+        function addMarker(pos, actionType) {
+            const courtContainer = document.getElementById('courtContainer');
+            const courtTop = document.getElementById('courtTop');
+            const courtBottom = document.getElementById('courtBottom');
+            const serviceZoneTop = document.getElementById('serviceZoneTop');
+            const serviceZoneBottom = document.getElementById('serviceZoneBottom');
+
+            const marker = document.createElement('div');
+            marker.className = `click-marker ${actionType}`;
+
+            // Calculer la position absolue dans le courtContainer
+            const containerRect = courtContainer.getBoundingClientRect();
+            
+            // Cas spécial : clic en dehors du terrain (out)
+            if (pos.courtSide === 'out') {
+                const left = (pos.x / 100) * containerRect.width;
+                const top = (pos.y / 100) * containerRect.height;
+                
+                marker.style.left = `${left}px`;
+                marker.style.top = `${top}px`;
+                courtContainer.appendChild(marker);
+                return;
+            }
+            
+            let targetElement;
+            
+            if (pos.courtSide === 'service_top') {
+                targetElement = serviceZoneTop;
+            } else if (pos.courtSide === 'service_bottom') {
+                targetElement = serviceZoneBottom;
+            } else if (pos.courtSide === 'top') {
+                targetElement = courtTop;
+            } else {
+                targetElement = courtBottom;
+            }
+            
+            const targetRect = targetElement.getBoundingClientRect();
+            const offsetTop = targetRect.top - containerRect.top;
+            const offsetLeft = targetRect.left - containerRect.left;
+            const left = (pos.x / 100) * targetRect.width + offsetLeft;
+            const top = (pos.y / 100) * targetRect.height + offsetTop;
+
+            marker.style.left = `${left}px`;
+            marker.style.top = `${top}px`;
+
+            courtContainer.appendChild(marker);
+        }
+
+        function drawArrow(from, to, actionType) {
+            const svg = document.getElementById('arrowSvg');
+            const courtContainer = document.getElementById('courtContainer');
+            const courtTop = document.getElementById('courtTop');
+            const courtBottom = document.getElementById('courtBottom');
+            const serviceZoneTop = document.getElementById('serviceZoneTop');
+            const serviceZoneBottom = document.getElementById('serviceZoneBottom');
+            const containerRect = courtContainer.getBoundingClientRect();
+            
+            // Décalage du SVG (il est positionné à -50px, -50px)
+            const svgOffset = 50;
+
+            // Calculer les positions
+            function getAbsolutePos(pos) {
+                // Cas spécial : position out (en dehors du terrain)
+                if (pos.courtSide === 'out') {
+                    const left = (pos.x / 100) * containerRect.width + svgOffset;
+                    const top = (pos.y / 100) * containerRect.height + svgOffset;
+                    return { x: left, y: top };
+                }
+                
+                let targetElement;
+                
+                if (pos.courtSide === 'service_top') {
+                    targetElement = serviceZoneTop;
+                } else if (pos.courtSide === 'service_bottom') {
+                    targetElement = serviceZoneBottom;
+                } else if (pos.courtSide === 'top') {
+                    targetElement = courtTop;
+                } else {
+                    targetElement = courtBottom;
+                }
+                
+                const targetRect = targetElement.getBoundingClientRect();
+                const offsetTop = targetRect.top - containerRect.top + svgOffset;
+                const offsetLeft = targetRect.left - containerRect.left + svgOffset;
+                const left = (pos.x / 100) * targetRect.width + offsetLeft;
+                const top = (pos.y / 100) * targetRect.height + offsetTop;
+                return { x: left, y: top };
+            }
+
+            const startPos = getAbsolutePos(from);
+            const endPos = getAbsolutePos(to);
+
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('class', `arrow-line ${actionType}`);
+            line.setAttribute('x1', startPos.x);
+            line.setAttribute('y1', startPos.y);
+            line.setAttribute('x2', endPos.x);
+            line.setAttribute('y2', endPos.y);
+            line.setAttribute('marker-end', `url(#arrowhead-${actionType})`);
+
+            svg.appendChild(line);
+        }
+
+        function clearMarkers() {
+            document.querySelectorAll('.click-marker').forEach(m => m.remove());
+        }
+
+        function clearArrows() {
+            const svg = document.getElementById('arrowSvg');
+            svg.querySelectorAll('line').forEach(l => l.remove());
+        }
+
+        function undoLastAction() {
+            // Si on est à la sélection du serveur, rien à annuler
+            if (gameState.phase === 'server_selection') {
+                return;
+            }
+
+            // Effacer les markers et flèches
+            clearMarkers();
+            clearArrows();
+
+            // Déterminer l'état précédent selon la phase actuelle
+            switch (gameState.phase) {
+                case 'serve_start':
+                    // Retour à la sélection du serveur
+                    gameState.phase = 'server_selection';
+                    gameState.currentAction = {};
+                    hideServiceZones();
+                    renderServerSelection();
+                    break;
+
+                case 'serve_end':
+                    // Retour au début du service
+                    gameState.phase = 'serve_start';
+                    gameState.currentAction = {
+                        type: 'service',
+                        player: gameState.currentServer,
+                        team: gameState.servingTeam
+                    };
+                    hideAllSections();
+                    highlightCourt(null);
+                    showServiceZone();
+                    break;
+
+                case 'reception':
+                    // Retour à serve_end
+                    gameState.phase = 'serve_end';
+                    // Récupérer les données du service depuis le rally
+                    const serviceFromRally = gameState.rally.pop(); // Retirer le service du rally
+                    if (serviceFromRally) {
+                        // Garder seulement startPos, on va re-cliquer endPos
+                        gameState.currentAction = {
+                            type: 'service',
+                            player: serviceFromRally.player,
+                            team: serviceFromRally.team,
+                            startPos: serviceFromRally.startPos
+                        };
+                    }
+                    hideAllSections();
+                    const recvTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
+                    highlightCourt(recvTeam);
+                    // Redessiner (juste le marker de départ du service)
+                    redrawRally();
+                    // Ajouter le marker de départ du service en cours
+                    if (gameState.currentAction.startPos) {
+                        addMarker(gameState.currentAction.startPos, 'service');
+                    }
+                    break;
+
+                case 'reception_end':
+                    // Retour à la sélection du réceptionneur
+                    gameState.phase = 'reception';
+                    hideReceptionQualityZones();
+                    document.getElementById('receptionFaultSection').classList.add('hidden');
+                    renderPlayerSelection(gameState.attackingTeam, 'Qui réceptionne ?');
+                    redrawRally();
+                    break;
+
+                case 'direct_return_end':
+                    // Retour à reception_end (avant le clic sur retour direct)
+                    gameState.phase = 'reception_end';
+                    gameState.currentAction.isDirectReturn = false;
+                    gameState.currentAction.quality = null;
+                    hideAllSections();
+                    highlightCourt(gameState.attackingTeam);
+                    showReceptionQualityZones();
+                    document.getElementById('receptionFaultSection').classList.remove('hidden');
+                    redrawRally();
+                    break;
+
+                case 'pass':
+                    // Retour à reception_end
+                    gameState.phase = 'reception_end';
+                    // Récupérer la réception depuis le rally
+                    const receptionFromRally = gameState.rally.pop();
+                    if (receptionFromRally) {
+                        gameState.currentAction = { ...receptionFromRally };
+                    }
+                    hideAllSections();
+                    highlightCourt(gameState.attackingTeam);
+                    redrawRally();
+                    break;
+
+                case 'pass_end':
+                    // Retour à la sélection du passeur
+                    gameState.phase = 'pass';
+                    renderPlayerSelection(gameState.attackingTeam, 'Qui fait la passe ?');
+                    redrawRally();
+                    break;
+
+                case 'second_touch_player':
+                    // Retour à la sélection du passeur (phase pass)
+                    gameState.phase = 'pass';
+                    gameState.secondTouchType = null;
+                    renderPlayerSelection(gameState.attackingTeam, 'Qui fait la passe ?');
+                    redrawRally();
+                    break;
+
+                case 'attack_player':
+                    // Vérifier si on vient d'une attaque directe depuis la défense
+                    if (gameState.defenseDirectAttack || (gameState.currentAction && gameState.currentAction.isDefenseDirectAttack)) {
+                        // Retour à la sélection du défenseur
+                        gameState.defenseDirectAttack = false;
+                        gameState.phase = 'defense';
+                        renderPlayerSelection(gameState.attackingTeam, 'Qui défend ?');
+                        redrawRally();
+                    } else {
+                        // Retour à pass_end
+                        gameState.phase = 'pass_end';
+                        // Récupérer la passe depuis le rally
+                        const passFromRally = gameState.rally.pop();
+                        if (passFromRally) {
+                            // Garder tout sauf endPos qu'on va re-cliquer
+                            gameState.currentAction = {
+                                type: 'pass',
+                                player: passFromRally.player,
+                                team: passFromRally.team,
+                                startPos: passFromRally.startPos
+                            };
+                        }
+                        hideAllSections();
+                        highlightCourt(gameState.attackingTeam);
+                        // Activer la zone out pour les passes
+                        document.getElementById('outArea').classList.add('active');
+                        const attackingCourtSide = getCourtSideForTeam(gameState.attackingTeam);
+                        document.getElementById('outLabelTop').style.display = attackingCourtSide === 'top' ? 'block' : 'none';
+                        document.getElementById('outLabelBottom').style.display = attackingCourtSide === 'bottom' ? 'block' : 'none';
+                        redrawRally();
+                    }
+                    break;
+
+                case 'attack_type':
+                    // Retour à la sélection de l'attaquant
+                    // Si c'était une attaque directe depuis la défense, remettre le flag
+                    if (gameState.currentAction && gameState.currentAction.isDefenseDirectAttack) {
+                        gameState.defenseDirectAttack = true;
+                    }
+                    gameState.phase = 'attack_player';
+                    renderPlayerSelection(gameState.attackingTeam, 'Qui attaque ?');
+                    redrawRally();
+                    break;
+
+                case 'attack_end':
+                    // Retour au choix du type d'attaque
+                    gameState.phase = 'attack_type';
+                    showSection('attackTypeSelection');
+                    redrawRally();
+                    break;
+
+                case 'result':
+                    // Retour à attack_end
+                    gameState.phase = 'attack_end';
+                    // Récupérer l'attaque depuis le rally
+                    const attackFromRally = gameState.rally.pop();
+                    if (attackFromRally) {
+                        // Garder tout sauf endPos qu'on va re-cliquer
+                        gameState.currentAction = {
+                            type: 'attack',
+                            player: attackFromRally.player,
+                            team: attackFromRally.team,
+                            attackType: attackFromRally.attackType,
+                            startPos: attackFromRally.startPos
+                        };
+                    }
+                    hideAllSections();
+                    const defTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+                    highlightCourt(defTeam);
+                    redrawRally();
+                    break;
+
+                case 'defense':
+                    // Retour au résultat, au block_end, au direct_return_end, ou à la défense précédente
+                    const lastActionForDefense = gameState.rally[gameState.rally.length - 1];
+                    
+                    if (lastActionForDefense && lastActionForDefense.type === 'reception' && lastActionForDefense.isDirectReturn) {
+                        // C'était après un retour direct de réception, retourner à direct_return_end
+                        gameState.phase = 'direct_return_end';
+                        const directReturnFromRally = gameState.rally.pop();
+                        if (directReturnFromRally) {
+                            gameState.currentAction = { ...directReturnFromRally };
+                            // Enlever le directReturnEndPos car on va le re-cliquer
+                            delete gameState.currentAction.directReturnEndPos;
+                        }
+                        // Remettre l'équipe qui attaque à celle qui a fait le retour direct
+                        gameState.attackingTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
+                        hideAllSections();
+                        highlightCourt(gameState.servingTeam);
+                        redrawRally();
+                    } else if (lastActionForDefense && lastActionForDefense.type === 'defense' && lastActionForDefense.isDirectReturn) {
+                        // C'était après un retour direct de défense, retourner à defense_end de l'action précédente
+                        const directReturnDefense = gameState.rally.pop();
+                        // Remettre l'équipe qui attaque à celle qui a fait le retour direct
+                        gameState.attackingTeam = directReturnDefense.team;
+                        gameState.currentAction = { 
+                            type: 'defense',
+                            player: directReturnDefense.player,
+                            team: directReturnDefense.team
+                        };
+                        gameState.phase = 'defense_end';
+                        hideAllSections();
+                        highlightCourt(null);
+                        document.getElementById('outArea').classList.add('active');
+                        const defendingCourtSide = getCourtSideForTeam(gameState.attackingTeam);
+                        document.getElementById('outLabelTop').style.display = defendingCourtSide === 'top' ? 'block' : 'none';
+                        document.getElementById('outLabelBottom').style.display = defendingCourtSide === 'bottom' ? 'block' : 'none';
+                        redrawRally();
+                    } else if (lastActionForDefense && lastActionForDefense.type === 'block') {
+                        // C'était après un block, retourner à block_end
+                        gameState.phase = 'block_end';
+                        const blockFromRally = gameState.rally.pop();
+                        if (blockFromRally) {
+                            // Garder tout sauf endPos qu'on va re-cliquer
+                            gameState.currentAction = {
+                                type: 'block',
+                                player: blockFromRally.player,
+                                team: blockFromRally.team,
+                                startPos: blockFromRally.startPos
+                            };
+                        }
+                        hideAllSections();
+                        highlightCourt(gameState.attackingTeam);
+                        redrawRally();
+                    } else {
+                        // C'était après un defended, retour au résultat
+                        gameState.phase = 'result';
+                        showSection('resultSelection');
+                        // Vérifier si c'était defended (équipe changée)
+                        const lastAttackAct = gameState.rally[gameState.rally.length - 1];
+                        if (lastAttackAct && lastAttackAct.result === 'defended') {
+                            gameState.attackingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+                        }
+                        redrawRally();
+                    }
+                    break;
+
+                case 'block_end':
+                    // Retour au résultat
+                    gameState.phase = 'result';
+                    showSection('resultSelection');
+                    redrawRally();
+                    break;
+
+                case 'defense_end':
+                    // Retour à la sélection du défenseur
+                    gameState.phase = 'defense';
+                    renderPlayerSelection(gameState.attackingTeam, 'Qui défend ?');
+                    redrawRally();
+                    break;
+            }
+
+            updatePhase();
+        }
+
+        function cancelPoint() {
+            if (!confirm('Annuler ce point et recommencer ?')) {
+                return;
+            }
+
+            // Reset complet du point
+            gameState.rally = [];
+            gameState.currentAction = {};
+            gameState.currentServer = null;
+            
+            // Remettre l'équipe qui attaque
+            const receivingTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
+            gameState.attackingTeam = receivingTeam;
+
+            clearMarkers();
+            clearArrows();
+            hideServiceZones();
+            hideReceptionQualityZones();
+            highlightCourt(null);
+
+            // Retour à la sélection du serveur
+            gameState.phase = 'server_selection';
+            updatePhase();
+            renderServerSelection();
+        }
+
+        function redrawRally() {
+            // Redessiner tous les markers et flèches du rally actuel
+            clearMarkers();
+            clearArrows();
+
+            // Redessiner le service si présent
+            const serviceAction = gameState.rally.find(a => a.type === 'service');
+            if (serviceAction) {
+                if (serviceAction.startPos) {
+                    addMarker(serviceAction.startPos, 'service');
+                }
+                if (serviceAction.endPos) {
+                    addMarker(serviceAction.endPos, 'service');
+                }
+            }
+
+            // Redessiner les autres actions
+            for (let i = 0; i < gameState.rally.length; i++) {
+                const action = gameState.rally[i];
+                
+                if (action.type === 'reception') {
+                    if (action.endPos) {
+                        addMarker(action.endPos, 'reception');
+                    }
+                    // Dessiner flèche service
+                    if (serviceAction && serviceAction.startPos && serviceAction.endPos) {
+                        drawArrow(serviceAction.startPos, serviceAction.endPos, 'service');
+                        // Dessiner la flèche de réception
+                        if (action.endPos) {
+                            drawArrow(serviceAction.endPos, action.endPos, 'reception');
+                        }
+                        // Si retour direct avec position d'arrivée, dessiner la flèche du retour
+                        if (action.isDirectReturn && action.directReturnEndPos) {
+                            addMarker(action.directReturnEndPos, 'reception');
+                            drawArrow(action.endPos, action.directReturnEndPos, 'reception');
+                        }
+                    }
+                } else if (action.type === 'pass') {
+                    if (action.endPos) {
+                        addMarker(action.endPos, 'pass');
+                    }
+                    // Trouver l'action précédente pour la flèche
+                    const prevAction = gameState.rally[i - 1];
+                    if (prevAction && prevAction.endPos && action.endPos) {
+                        drawArrow(prevAction.endPos, action.endPos, 'pass');
+                    }
+                } else if (action.type === 'attack') {
+                    // Déterminer le type de marker/flèche selon le type d'attaque
+                    let arrowType = 'attack';
+                    if (action.attackType === 'feinte') {
+                        arrowType = 'attack-feinte';
+                    } else if (action.attackType === 'relance') {
+                        arrowType = 'attack-relance';
+                    } else if (action.attackType === 'deuxieme_main' || action.attackType === 'attaque_directe') {
+                        arrowType = 'attack-second';
+                    }
+                    
+                    if (action.endPos) {
+                        addMarker(action.endPos, arrowType);
+                    }
+                    // Trouver l'action précédente (passe, ou réception/défense si 2ème touche)
+                    const prevAction = gameState.rally[i - 1];
+                    if (prevAction && prevAction.endPos && action.endPos) {
+                        drawArrow(prevAction.endPos, action.endPos, arrowType);
+                    }
+                } else if (action.type === 'block') {
+                    if (action.endPos) {
+                        addMarker(action.endPos, 'block');
+                    }
+                    // Trouver l'attaque précédente
+                    const lastAttack = [...gameState.rally.slice(0, i)].reverse().find(a => a.type === 'attack');
+                    if (lastAttack && lastAttack.endPos && action.endPos) {
+                        drawArrow(lastAttack.endPos, action.endPos, 'block');
+                    }
+                } else if (action.type === 'defense') {
+                    if (action.endPos) {
+                        addMarker(action.endPos, 'defense');
+                    }
+                    // Si c'est un retour direct de défense, afficher aussi le point d'arrivée
+                    if (action.isDirectReturn && action.directReturnEndPos) {
+                        addMarker(action.directReturnEndPos, 'defense');
+                        if (action.endPos) {
+                            drawArrow(action.endPos, action.directReturnEndPos, 'defense');
+                        }
+                    } else {
+                        // Trouver l'action précédente (block, attack, ou retour direct)
+                        const prevAction = gameState.rally[i - 1];
+                        if (prevAction && prevAction.type === 'reception' && prevAction.isDirectReturn && prevAction.directReturnEndPos) {
+                            // Cas du retour direct de réception : flèche depuis directReturnEndPos
+                            if (action.endPos) {
+                                drawArrow(prevAction.directReturnEndPos, action.endPos, 'defense');
+                            }
+                        } else if (prevAction && prevAction.type === 'defense' && prevAction.isDirectReturn && prevAction.directReturnEndPos) {
+                            // Cas du retour direct de défense précédente : flèche depuis directReturnEndPos
+                            if (action.endPos) {
+                                drawArrow(prevAction.directReturnEndPos, action.endPos, 'defense');
+                            }
+                        } else if (prevAction && prevAction.endPos && action.endPos) {
+                            drawArrow(prevAction.endPos, action.endPos, 'defense');
+                        }
+                    }
+                }
+            }
+        }
+
+        function saveCurrentSet() {
+            currentSet.homeScore = gameState.homeScore;
+            currentSet.awayScore = gameState.awayScore;
+            currentMatch.sets[setIndex] = currentSet;
+            localStorage.setItem('volleyball_current_match', JSON.stringify(currentMatch));
+        }
+
+        // ==================== CHANGEMENT DE JOUEUR ====================
+        let subState = {
+            team: 'home',
+            playerOut: null,
+            playerIn: null
+        };
+
+        function openSubModal() {
+            subState = { team: 'home', playerOut: null, playerIn: null };
+            
+            // Mettre à jour le nom de l'équipe adverse
+            document.getElementById('subTabAway').textContent = currentMatch.opponent || 'Adversaire';
+            
+            // Afficher l'onglet home
+            document.getElementById('subTabHome').classList.add('active');
+            document.getElementById('subTabAway').classList.remove('active');
+            
+            renderSubLists();
+            document.getElementById('subModalOverlay').classList.add('active');
+        }
+
+        function closeSubModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('subModalOverlay').classList.remove('active');
+        }
+
+        function switchSubTeam(team) {
+            subState.team = team;
+            subState.playerOut = null;
+            subState.playerIn = null;
+            
+            document.getElementById('subTabHome').classList.toggle('active', team === 'home');
+            document.getElementById('subTabAway').classList.toggle('active', team === 'away');
+            
+            renderSubLists();
+        }
+
+        function renderSubLists() {
+            const team = subState.team;
+            const lineup = team === 'home' ? currentSet.homeLineup : currentSet.awayLineup;
+            const onCourt = Object.values(lineup).filter(p => p !== null);
+            
+            // Joueurs sur le terrain (qui peuvent sortir)
+            const outContainer = document.getElementById('subPlayersOut');
+            if (onCourt.length > 0) {
+                outContainer.innerHTML = onCourt.map(name => `
+                    <button class="sub-player-btn ${subState.playerOut === name ? 'out-selected' : ''}" 
+                            onclick="selectSubOut('${name}')">${name}</button>
+                `).join('');
+            } else {
+                outContainer.innerHTML = '<span class="sub-no-player">Aucun joueur</span>';
+            }
+            
+            // Remplaçants (qui peuvent entrer)
+            const inContainer = document.getElementById('subPlayersIn');
+            let bench = [];
+            
+            if (team === 'home') {
+                const allPlayers = currentMatch.players || [];
+                bench = allPlayers.filter(p => !onCourt.includes(p.prenom)).map(p => p.prenom);
+            } else {
+                const allAway = currentMatch.adversePlayers || [];
+                bench = allAway.filter(name => !onCourt.includes(name));
+            }
+            
+            if (bench.length > 0) {
+                inContainer.innerHTML = bench.map(name => `
+                    <button class="sub-player-btn ${subState.playerIn === name ? 'in-selected' : ''}" 
+                            onclick="selectSubIn('${name}')">${name}</button>
+                `).join('');
+            } else {
+                inContainer.innerHTML = '<span class="sub-no-player">Pas de remplaçant</span>';
+            }
+            
+            updateSubConfirm();
+        }
+
+        function selectSubOut(name) {
+            subState.playerOut = name;
+            renderSubLists();
+        }
+
+        function selectSubIn(name) {
+            subState.playerIn = name;
+            renderSubLists();
+        }
+
+        function updateSubConfirm() {
+            const btn = document.getElementById('subConfirmBtn');
+            btn.disabled = !(subState.playerOut && subState.playerIn);
+        }
+
+        function confirmSub() {
+            const { team, playerOut, playerIn } = subState;
+            if (!playerOut || !playerIn) return;
+            
+            const lineup = team === 'home' ? currentSet.homeLineup : currentSet.awayLineup;
+            
+            // Trouver la position du joueur qui sort
+            let pos = null;
+            for (const p in lineup) {
+                if (lineup[p] === playerOut) {
+                    pos = p;
+                    break;
+                }
+            }
+            
+            if (!pos) {
+                alert('Erreur: joueur non trouvé');
+                return;
+            }
+            
+            // Effectuer le changement
+            lineup[pos] = playerIn;
+            
+            // Ajouter les stats du nouveau joueur
+            const statsTeam = team === 'home' ? setStats.home : setStats.away;
+            if (!statsTeam[playerIn]) {
+                statsTeam[playerIn] = initPlayerStats(playerIn);
+            }
+            
+            // Sauvegarder
+            saveCurrentSet();
+            
+            // Mettre à jour les affichages
+            renderStatsTables();
+            renderServerSelection();
+            
+            // Fermer la modal
+            closeSubModal();
+        }
+
+        function handleBack() {
+            if (confirm('Voulez-vous quitter le match en cours ? Les données seront sauvegardées.')) {
+                saveCurrentSet();
+                window.location.href = 'index.html';
+            }
+        }
+
+        // ==================== INIT ====================
+        init();
+    </script>
+</body>
+</html>
