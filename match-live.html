@@ -311,6 +311,7 @@
             height: 4px;
             background: white;
             position: relative;
+            z-index: 5;
         }
 
         .net::before,
@@ -327,6 +328,39 @@
 
         .net::before { left: -4px; }
         .net::after { right: -4px; }
+
+        /* Zone cliquable autour du filet (visible pendant serve_end) */
+        .net-click-zone {
+            position: absolute;
+            top: -8px;
+            left: -2px;
+            right: -2px;
+            height: 20px;
+            z-index: 15;
+            cursor: pointer;
+            pointer-events: none;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .net-click-zone.active {
+            pointer-events: auto;
+            background: rgba(239, 68, 68, 0.15);
+            border: 2px dashed rgba(239, 68, 68, 0.5);
+        }
+
+        .net-click-zone.active::after {
+            content: '🥅 FILET';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 11px;
+            font-weight: 700;
+            color: #dc2626;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
 
         /* Click markers */
         .click-marker {
@@ -681,9 +715,9 @@
             background: white;
             border-radius: 12px;
             padding: 16px;
-            width: 90%;
-            max-width: 350px;
-            max-height: 80vh;
+            width: 92%;
+            max-width: 380px;
+            max-height: 85vh;
             overflow-y: auto;
         }
 
@@ -721,48 +755,140 @@
             background: #ffedd5;
         }
 
-        .sub-modal-section {
+        /* Mini court in modal */
+        .sub-mini-court {
+            background: var(--court-orange);
+            border-radius: 8px;
+            padding: 12px 8px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .sub-court-row {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 8px;
+        }
+
+        .sub-court-row.front {
+            justify-content: center;
             margin-bottom: 12px;
         }
 
-        .sub-modal-label {
+        .sub-court-row.front::after {
+            content: '';
+            position: absolute;
+            left: 8px;
+            right: 8px;
+            top: 52px;
+            height: 2px;
+            background: rgba(255,255,255,0.4);
+            border-top: 1px dashed rgba(255,255,255,0.6);
+        }
+
+        .sub-court-slot {
+            width: 80px;
+            min-height: 52px;
+            background: rgba(255,255,255,0.25);
+            border: 2px dashed rgba(255,255,255,0.6);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            cursor: pointer;
+            transition: all 0.15s;
+            position: relative;
+        }
+
+        .sub-court-slot.selected {
+            border-color: #fbbf24;
+            background: rgba(251,191,36,0.3);
+            box-shadow: 0 0 0 2px #fbbf24;
+        }
+
+        .sub-court-slot.drag-over {
+            border-color: white;
+            background: rgba(255,255,255,0.4);
+            transform: scale(1.05);
+        }
+
+        .sub-court-slot .slot-role {
+            font-size: 9px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.8);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sub-court-slot .slot-player {
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .sub-court-slot.empty .slot-player {
+            font-size: 10px;
+            color: rgba(255,255,255,0.5);
+            font-style: italic;
+        }
+
+        /* Bench in modal */
+        .sub-bench-section {
+            margin-bottom: 10px;
+        }
+
+        .sub-bench-label {
             font-size: 11px;
             font-weight: 500;
             color: var(--text-secondary);
             margin-bottom: 6px;
         }
 
-        .sub-player-grid {
+        .sub-bench-grid {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
+            min-height: 32px;
         }
 
-        .sub-player-btn {
-            padding: 6px 10px;
+        .sub-bench-player {
+            padding: 6px 12px;
             border: 2px solid var(--border-color);
             border-radius: 6px;
             background: white;
             font-size: 11px;
+            font-weight: 500;
             cursor: pointer;
+            transition: all 0.15s;
         }
 
-        .sub-player-btn.out-selected {
-            border-color: #dc2626;
-            background: #fee2e2;
-            color: #dc2626;
-        }
-
-        .sub-player-btn.in-selected {
+        .sub-bench-player.selected {
             border-color: #16a34a;
             background: #dcfce7;
             color: #16a34a;
+        }
+
+        .sub-bench-player.drag-over {
+            border-color: #3b82f6;
+            background: #dbeafe;
         }
 
         .sub-no-player {
             font-size: 11px;
             color: var(--text-secondary);
             font-style: italic;
+        }
+
+        .sub-modal-hint {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 10px;
+            line-height: 1.4;
         }
 
         .sub-modal-actions {
@@ -1000,6 +1126,70 @@
         }
 
         /* Zones de qualité de réception */
+        /* Position zones for reception auto-select */
+        .position-zones {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .position-zones.active {
+            opacity: 1;
+        }
+
+        .position-zones.active .position-zone {
+            pointer-events: auto;
+        }
+
+        .position-zone {
+            position: absolute;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid transparent;
+            transition: all 0.15s;
+        }
+
+        .position-zone:hover {
+            filter: brightness(1.1);
+            border-color: white;
+        }
+
+        .zone-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+            text-align: center;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            line-height: 1.3;
+            pointer-events: none;
+        }
+
+        /* Bottom court: back = bottom portion */
+        #positionZonesBottom .position-zone {
+            bottom: 0;
+            height: 66%;
+        }
+        #positionZonesBottom .position-zone[data-zone="left"] { left: 0; width: 33.33%; border-radius: 0 0 0 3px; }
+        #positionZonesBottom .position-zone[data-zone="center"] { left: 33.33%; width: 33.34%; }
+        #positionZonesBottom .position-zone[data-zone="right"] { right: 0; width: 33.33%; border-radius: 0 0 3px 0; }
+
+        /* Top court: back = top portion */
+        #positionZonesTop .position-zone {
+            top: 0;
+            height: 66%;
+        }
+        #positionZonesTop .position-zone[data-zone="left"] { left: 0; width: 33.33%; border-radius: 3px 0 0 0; }
+        #positionZonesTop .position-zone[data-zone="center"] { left: 33.33%; width: 33.34%; }
+        #positionZonesTop .position-zone[data-zone="right"] { right: 0; width: 33.33%; border-radius: 0 3px 0 0; }
+
         .reception-quality-zones {
             position: absolute;
             top: 0;
@@ -1608,6 +1798,12 @@
                     
                     <div class="team-label" id="topTeamLabel">Adversaire</div>
                     <div class="court-half away" id="courtTop" data-team="away">
+                        <!-- Zones de position (pour auto-sélection réception) -->
+                        <div class="position-zones" id="positionZonesTop">
+                            <div class="position-zone" data-zone="left"></div>
+                            <div class="position-zone" data-zone="center"></div>
+                            <div class="position-zone" data-zone="right"></div>
+                        </div>
                         <!-- Zones de qualité de réception -->
                         <div class="reception-quality-zones" id="qualityZonesTop">
                             <div class="quality-zone average"></div>
@@ -1615,8 +1811,16 @@
                             <div class="quality-zone perfect"></div>
                         </div>
                     </div>
-                    <div class="net"></div>
+                    <div class="net" id="netZone">
+                        <div class="net-click-zone" id="netClickZone"></div>
+                    </div>
                     <div class="court-half home" id="courtBottom" data-team="home">
+                        <!-- Zones de position (pour auto-sélection réception) -->
+                        <div class="position-zones" id="positionZonesBottom">
+                            <div class="position-zone" data-zone="left"></div>
+                            <div class="position-zone" data-zone="center"></div>
+                            <div class="position-zone" data-zone="right"></div>
+                        </div>
                         <!-- Zones de qualité de réception -->
                         <div class="reception-quality-zones" id="qualityZonesBottom">
                             <div class="quality-zone average"></div>
@@ -1676,13 +1880,6 @@
                     </div>
                 </div>
 
-                <!-- Service filet (visible pendant serve_end) -->
-                <div id="serviceNetFaultSection" class="hidden">
-                    <div class="tags-grid">
-                        <button class="action-tag faute" onclick="handleServiceNetFault()">🥅 Service filet</button>
-                    </div>
-                </div>
-
                 <!-- Server continue indicator -->
                 <div id="serverContinue" class="hidden">
                     <div class="server-continue-banner" id="serverContinueBanner">
@@ -1707,10 +1904,19 @@
                     </div>
                 </div>
 
-                <!-- Faute de passe (visible pendant phase pass) -->
+                <!-- Faute de passe (visible pendant phase pass_end) -->
                 <div id="passFaultSection" class="hidden">
                     <div class="tags-grid">
                         <button class="action-tag faute" onclick="handlePassFault()">❌ Faute de passe</button>
+                    </div>
+                </div>
+
+                <!-- Résultat faute de passe (visible quand passe arrive IN chez adversaire) -->
+                <div id="passFaultResultSection" class="hidden">
+                    <div class="tags-title">La passe est arrivée chez l'adversaire</div>
+                    <div class="tags-grid">
+                        <button class="action-tag point" onclick="handlePassFaultResult('point')">🏆 Point direct</button>
+                        <button class="action-tag defense" onclick="handlePassFaultResult('defense')">🛡️ Défendu</button>
                     </div>
                 </div>
 
@@ -1748,6 +1954,12 @@
                         <span class="legend-item"><span class="legend-dot good"></span>Positive 3/4</span>
                         <span class="legend-item"><span class="legend-dot average"></span>Jouable 2/4</span>
                         <span class="legend-item"><span class="legend-dot poor"></span>Négative 1/4</span>
+                    </div>
+                </div>
+
+                <div id="serveAceSection" class="hidden">
+                    <div class="tags-grid">
+                        <button class="action-tag ace" onclick="activateAceMode()">🎯 Ace</button>
                     </div>
                 </div>
             </div>
@@ -1829,26 +2041,49 @@
         <!-- Modal de changement -->
         <div class="sub-modal-overlay" id="subModalOverlay" onclick="closeSubModal(event)">
             <div class="sub-modal" onclick="event.stopPropagation()">
-                <div class="sub-modal-title">🔄 Changement de joueur</div>
+                <div class="sub-modal-title">🔄 Changement / Positions</div>
                 
                 <div class="sub-modal-tabs">
                     <button class="sub-modal-tab home active" id="subTabHome" onclick="switchSubTeam('home')">Jen et ses Saints</button>
                     <button class="sub-modal-tab away" id="subTabAway" onclick="switchSubTeam('away')">Adversaire</button>
                 </div>
+
+                <div class="sub-modal-hint">Cliquez 2 joueurs sur le terrain pour échanger leurs positions.<br>Cliquez un remplaçant puis un joueur sur le terrain pour substituer.</div>
                 
-                <div class="sub-modal-section">
-                    <div class="sub-modal-label">🔴 Joueur qui SORT :</div>
-                    <div class="sub-player-grid" id="subPlayersOut"></div>
+                <!-- Mini court -->
+                <div class="sub-mini-court" id="subMiniCourt">
+                    <div class="sub-court-row front">
+                        <div class="sub-court-slot" id="subSlotPasseur" onclick="subSlotClick('Passeur')">
+                            <span class="slot-role">Passeur</span>
+                            <span class="slot-player">—</span>
+                        </div>
+                    </div>
+                    <div class="sub-court-row">
+                        <div class="sub-court-slot" id="subSlotR4" onclick="subSlotClick('R4')">
+                            <span class="slot-role">R4</span>
+                            <span class="slot-player">—</span>
+                        </div>
+                        <div class="sub-court-slot" id="subSlotCentre" onclick="subSlotClick('Centre')">
+                            <span class="slot-role">Centre</span>
+                            <span class="slot-player">—</span>
+                        </div>
+                        <div class="sub-court-slot" id="subSlotPointu" onclick="subSlotClick('Pointu')">
+                            <span class="slot-role">Pointu</span>
+                            <span class="slot-player">—</span>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="sub-modal-section">
-                    <div class="sub-modal-label">🟢 Joueur qui ENTRE :</div>
-                    <div class="sub-player-grid" id="subPlayersIn"></div>
+
+                <!-- Bench -->
+                <div class="sub-bench-section">
+                    <div class="sub-bench-label">🪑 Remplaçants :</div>
+                    <div class="sub-bench-grid" id="subBenchGrid">
+                        <!-- Generated dynamically -->
+                    </div>
                 </div>
                 
                 <div class="sub-modal-actions">
-                    <button class="sub-modal-btn cancel" onclick="closeSubModal()">Annuler</button>
-                    <button class="sub-modal-btn confirm" id="subConfirmBtn" onclick="confirmSub()" disabled>Confirmer</button>
+                    <button class="sub-modal-btn cancel" onclick="closeSubModal()">Fermer</button>
                 </div>
             </div>
         </div>
@@ -1953,7 +2188,10 @@
             rally: [], // toutes les actions du point en cours
             homeScore: 0,
             awayScore: 0,
-            setEnded: false
+            setEnded: false,
+            receptionAutoSelected: false, // true si le réceptionneur a été auto-sélectionné via zone pendant serve_end
+            passAutoSelected: false, // true si le passeur a été auto-sélectionné (réception excellente)
+            aceMode: false // true si l'utilisateur a cliqué Ace pendant serve_end
         };
 
         // Statistiques du set
@@ -2169,9 +2407,10 @@
                 'pass': '<span class="highlight">Passe</span> — Sélectionnez le passeur',
                 'pass_end': '<span class="highlight">Passe</span> — Cliquez où arrive la passe',
                 'pass_fault_end': '<span class="highlight">Faute de passe</span> — Cliquez où arrive la passe',
+                'pass_fault_result': '<span class="highlight">Faute de passe</span> — Résultat ?',
                 'second_touch_player': '<span class="highlight">2ème touche</span> — Qui fait la 2ème touche ?',
                 'attack_player': '<span class="highlight">Attaque</span> — Sélectionnez l\'attaquant',
-                'attack_type': '<span class="highlight">Attaque</span> — Choisissez le type',
+                'attack_type': '<span class="highlight">Attaque</span> — Type ou cliquez le terrain = smash',
                 'attack_end': '<span class="highlight">Attaque</span> — Cliquez où arrive l\'attaque',
                 'result': '<span class="highlight">Résultat</span> — Qu\'est-ce qui s\'est passé ?',
                 'block_end': '<span class="highlight">Block</span> — Cliquez où arrive le block',
@@ -2226,7 +2465,8 @@
             gameState.currentAction = {
                 type: 'service',
                 player: playerName,
-                team: gameState.servingTeam
+                team: gameState.servingTeam,
+                role: getPlayerRole(gameState.servingTeam, playerName)
             };
             gameState.phase = 'serve_start';
             updatePhase();
@@ -2265,6 +2505,63 @@
             serviceZoneTop.addEventListener('click', (e) => handleServiceZoneClick(e, 'top'));
             serviceZoneBottom.addEventListener('click', (e) => handleServiceZoneClick(e, 'bottom'));
             outArea.addEventListener('click', (e) => handleOutAreaClick(e));
+            
+            // Zone filet cliquable
+            const netClickZone = document.getElementById('netClickZone');
+            netClickZone.addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleNetZoneClick(e);
+            });
+            
+            // Position zones click handlers (auto-select receiver)
+            document.querySelectorAll('.position-zone').forEach(zone => {
+                zone.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const player = e.currentTarget.dataset.player;
+                    if (!player) return;
+                    
+                    if (gameState.phase === 'reception') {
+                        // Sélection manuelle: auto-sélection du réceptionneur via zone
+                        hidePositionZones();
+                        selectReceptioner(player);
+                    } else if (gameState.phase === 'serve_end') {
+                        // Clic dans une zone pendant serve_end
+                        const courtHalf = e.currentTarget.closest('.court-half');
+                        const rect = courtHalf.getBoundingClientRect();
+                        const x = ((e.clientX - rect.left) / rect.width) * 100;
+                        const y = ((e.clientY - rect.top) / rect.height) * 100;
+                        const courtSide = courtHalf.id === 'courtTop' ? 'top' : 'bottom';
+                        const clickData = { x, y, courtSide };
+                        
+                        if (gameState.aceMode) {
+                            // Mode Ace: traiter comme un clic terrain normal
+                            handleServeEnd(clickData);
+                            return;
+                        }
+                        
+                        // NOUVEAU: auto-sélection directe du réceptionneur
+                        // Enregistrer le point d'arrivée du service
+                        gameState.currentAction.endPos = clickData;
+                        addMarker(clickData, 'service');
+                        
+                        // Désactiver les zones serve_end
+                        document.getElementById('outArea').classList.remove('active');
+                        document.getElementById('netClickZone').classList.remove('active');
+                        hidePositionZones();
+                        
+                        // Pousser l'action de service dans le rally
+                        gameState.rally.push({ ...gameState.currentAction });
+                        
+                        // Configurer la réception auto-sélectionnée
+                        const receivingTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
+                        gameState.attackingTeam = receivingTeam;
+                        gameState.receptionAutoSelected = true;
+                        
+                        // Auto-sélection du réceptionneur (passe directement en reception_end)
+                        selectReceptioner(player);
+                    }
+                });
+            });
         }
 
         function handleOutAreaClick(event) {
@@ -2285,6 +2582,13 @@
                 handlePassEnd(clickData);
             } else if (gameState.phase === 'pass_fault_end') {
                 handlePassFaultEnd(clickData);
+            } else if (gameState.phase === 'attack_type') {
+                // Clic OUT direct = smash out
+                gameState.currentAction.attackType = 'smash';
+                gameState.phase = 'attack_end';
+                handleAttackEnd(clickData);
+            } else if (gameState.phase === 'attack_end') {
+                handleAttackEnd(clickData);
             } else if (gameState.phase === 'defense_end') {
                 handleDefenseEnd(clickData);
             }
@@ -2353,6 +2657,12 @@
                 case 'attack_end':
                     handleAttackEnd(clickData);
                     break;
+                case 'attack_type':
+                    // Clic direct sur le terrain = smash par défaut
+                    gameState.currentAction.attackType = 'smash';
+                    gameState.phase = 'attack_end';
+                    handleAttackEnd(clickData);
+                    break;
                 case 'block_end':
                     handleBlockEnd(clickData);
                     break;
@@ -2379,12 +2689,18 @@
             document.getElementById('outLabelTop').style.display = servingCourtSide === 'top' ? 'none' : 'block';
             document.getElementById('outLabelBottom').style.display = servingCourtSide === 'bottom' ? 'none' : 'block';
             
-            // Afficher le bouton service filet
-            document.getElementById('serviceNetFaultSection').classList.remove('hidden');
+            // Activer la zone filet cliquable
+            document.getElementById('netClickZone').classList.add('active');
             
             // Highlight receiving team's court
             const receivingTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
             highlightCourt(receivingTeam);
+            
+            // Show position zones for auto-selection during serve landing
+            showPositionZones(receivingTeam);
+            
+            // Show Ace button
+            document.getElementById('serveAceSection').classList.remove('hidden');
         }
 
         function handleServeEnd(clickData) {
@@ -2393,9 +2709,10 @@
             // On garde le marker pour montrer où le service est allé
             addMarker(clickData, 'service');
             
-            // Désactiver la zone out et le bouton filet
+            // Désactiver la zone out et la zone filet
             document.getElementById('outArea').classList.remove('active');
-            document.getElementById('serviceNetFaultSection').classList.add('hidden');
+            document.getElementById('netClickZone').classList.remove('active');
+            hidePositionZones();
 
             // Vérifier si service faute (hors du terrain receveur)
             const receivingTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
@@ -2403,14 +2720,25 @@
 
             if (clickData.courtSide !== expectedCourtSide) {
                 // Service faute out ! On dessine la flèche quand même pour montrer l'erreur
+                gameState.aceMode = false;
                 drawArrow(gameState.currentAction.startPos, clickData, 'service');
                 handleServiceFaultOut();
+            } else if (gameState.aceMode) {
+                // Mode Ace : le service atterrit IN, point direct
+                gameState.aceMode = false;
+                drawArrow(gameState.currentAction.startPos, clickData, 'service');
+                gameState.currentAction.result = 'ace';
+                gameState.rally.push({ ...gameState.currentAction });
+                awardPoint(gameState.servingTeam);
+                endRally();
             } else {
-                // Service bon, passer à la réception
+                // Service bon, passer à la réception (sélection manuelle)
                 gameState.rally.push({ ...gameState.currentAction });
                 gameState.attackingTeam = receivingTeam;
+                gameState.receptionAutoSelected = false;
                 gameState.phase = 'reception';
                 updatePhase();
+                showPositionZones(receivingTeam);
                 renderPlayerSelection(receivingTeam, 'Qui réceptionne ?');
             }
         }
@@ -2437,10 +2765,30 @@
             endRally();
         }
 
-        function handleServiceNetFault() {
-            // Service dans le filet
+        function handleNetZoneClick(event) {
+            if (gameState.phase !== 'serve_end') return;
+            
+            // Capturer les coordonnées relatives au courtContainer
+            const container = document.getElementById('courtContainer');
+            const rect = container.getBoundingClientRect();
+            const x = ((event.clientX - rect.left) / rect.width) * 100;
+            const y = ((event.clientY - rect.top) / rect.height) * 100;
+            
+            const clickData = { x, y, courtSide: 'net' };
+            
+            // Sauvegarder la position d'arrivée (pour les stats/patterns)
+            gameState.currentAction.endPos = clickData;
+            addMarker(clickData, 'fault');
+            
+            // Tracer la flèche du service vers le filet
+            if (gameState.currentAction.startPos) {
+                drawArrow(gameState.currentAction.startPos, clickData, 'service');
+            }
+            
+            // Désactiver zones
             document.getElementById('outArea').classList.remove('active');
-            document.getElementById('serviceNetFaultSection').classList.add('hidden');
+            document.getElementById('netClickZone').classList.remove('active');
+            hidePositionZones();
             
             gameState.currentAction.result = 'fault_net';
             gameState.rally.push({ ...gameState.currentAction });
@@ -2449,6 +2797,14 @@
             const receivingTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
             awardPoint(receivingTeam);
             endRally();
+        }
+
+        function activateAceMode() {
+            gameState.aceMode = true;
+            document.getElementById('serveAceSection').classList.add('hidden');
+            hidePositionZones();
+            // Update phase text
+            document.getElementById('phaseText').innerHTML = '<span class="highlight">Ace !</span> — Cliquez où le service atterrit';
         }
 
         function handleAceFromReception() {
@@ -2476,7 +2832,8 @@
             gameState.currentAction = {
                 type: 'reception',
                 player: playerName,
-                team: gameState.attackingTeam
+                team: gameState.attackingTeam,
+                role: getPlayerRole(gameState.attackingTeam, playerName)
             };
             gameState.phase = 'reception_end';
             updatePhase();
@@ -2527,6 +2884,32 @@
             }
 
             gameState.rally.push({ ...gameState.currentAction });
+            
+            // Si réception excellente (4/4), auto-sélectionner le passeur
+            if (quality.score === 4) {
+                const passeur = getPlayerByRole(gameState.attackingTeam, 'Passeur');
+                if (passeur) {
+                    gameState.passAutoSelected = true;
+                    gameState.currentAction = {
+                        type: 'pass',
+                        player: passeur,
+                        team: gameState.attackingTeam,
+                        role: 'Passeur'
+                    };
+                    gameState.phase = 'pass_end';
+                    updatePhase();
+                    hideAllSections();
+                    highlightCourt(gameState.attackingTeam);
+                    document.getElementById('passFaultSection').classList.remove('hidden');
+                    document.getElementById('outArea').classList.add('active');
+                    const attackingCourtSide = getCourtSideForTeam(gameState.attackingTeam);
+                    document.getElementById('outLabelTop').style.display = attackingCourtSide === 'top' ? 'block' : 'none';
+                    document.getElementById('outLabelBottom').style.display = attackingCourtSide === 'bottom' ? 'block' : 'none';
+                    return;
+                }
+            }
+            
+            gameState.passAutoSelected = false;
             gameState.phase = 'pass';
             updatePhase();
             renderPlayerSelection(gameState.attackingTeam, 'Qui fait la passe ?');
@@ -2692,10 +3075,12 @@
 
         // ==================== PASSE ====================
         function selectPasser(playerName) {
+            gameState.passAutoSelected = false;
             gameState.currentAction = {
                 type: 'pass',
                 player: playerName,
-                team: gameState.attackingTeam
+                team: gameState.attackingTeam,
+                role: getPlayerRole(gameState.attackingTeam, playerName)
             };
             gameState.phase = 'pass_end';
             updatePhase();
@@ -2730,11 +3115,11 @@
             updatePhase();
             hideAllSections();
             
-            // Activer zone out + highlight terrain de l'équipe
+            // Permettre de cliquer partout (les 2 terrains + out)
             document.getElementById('outArea').classList.add('active');
-            highlightCourt(gameState.attackingTeam);
             document.getElementById('outLabelTop').style.display = 'block';
             document.getElementById('outLabelBottom').style.display = 'block';
+            highlightCourt(null); // Les deux terrains actifs
         }
 
         function handlePassFaultEnd(clickData) {
@@ -2752,13 +3137,47 @@
                 drawArrow(lastAction.directReturnEndPos, clickData, 'fault');
             }
             
-            // Sauvegarder l'action
-            gameState.rally.push({ ...gameState.currentAction });
+            // Vérifier où la passe a atterri
+            const defendingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+            const defendingCourtSide = getCourtSideForTeam(defendingTeam);
             
-            // Point pour l'adversaire
-            const otherTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
-            awardPoint(otherTeam);
-            endRally();
+            if (clickData.courtSide === defendingCourtSide) {
+                // Passe arrivée IN chez l'adversaire → point direct ou défense ?
+                gameState.rally.push({ ...gameState.currentAction });
+                gameState.phase = 'pass_fault_result';
+                updatePhase();
+                hideAllSections();
+                showPassFaultResult();
+            } else {
+                // Passe arrivée sur son propre terrain ou OUT → faute, point adversaire
+                gameState.rally.push({ ...gameState.currentAction });
+                const otherTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+                awardPoint(otherTeam);
+                endRally();
+            }
+        }
+
+        function showPassFaultResult() {
+            // Afficher les options : point direct ou défendu
+            const section = document.getElementById('passFaultResultSection');
+            section.classList.remove('hidden');
+        }
+
+        function handlePassFaultResult(result) {
+            document.getElementById('passFaultResultSection').classList.add('hidden');
+            
+            if (result === 'point') {
+                // Point direct pour l'équipe qui a fait la passe (la balle est tombée chez l'adversaire)
+                awardPoint(gameState.attackingTeam);
+                endRally();
+            } else if (result === 'defense') {
+                // L'adversaire défend → passer en mode défense pour l'adversaire
+                const defendingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+                gameState.attackingTeam = defendingTeam;
+                gameState.phase = 'defense';
+                updatePhase();
+                renderPlayerSelection(defendingTeam, 'Qui défend ?');
+            }
         }
 
         function selectSecondTouchPlayer(playerName) {
@@ -2767,7 +3186,8 @@
                 type: 'attack',
                 player: playerName,
                 team: gameState.attackingTeam,
-                attackType: gameState.secondTouchType
+                attackType: gameState.secondTouchType,
+                role: getPlayerRole(gameState.attackingTeam, playerName)
             };
             
             // Passer directement à attack_end
@@ -2807,7 +3227,8 @@
             gameState.currentAction = {
                 type: 'attack',
                 player: playerName,
-                team: gameState.attackingTeam
+                team: gameState.attackingTeam,
+                role: getPlayerRole(gameState.attackingTeam, playerName)
             };
             
             // Si c'est une attaque directe depuis la défense, marquer le type
@@ -2819,6 +3240,14 @@
             gameState.phase = 'attack_type';
             updatePhase();
             showSection('attackTypeSelection');
+            
+            // Activer le terrain adverse pour permettre un clic direct = smash
+            const defendingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+            highlightCourt(defendingTeam);
+            document.getElementById('outArea').classList.add('active');
+            const defendingCourtSide = getCourtSideForTeam(defendingTeam);
+            document.getElementById('outLabelTop').style.display = defendingCourtSide === 'top' ? 'none' : 'block';
+            document.getElementById('outLabelBottom').style.display = defendingCourtSide === 'bottom' ? 'none' : 'block';
         }
 
         function selectAttackType(type) {
@@ -2845,6 +3274,7 @@
                 // Highlight terrain adverse pour l'arrivée de l'attaque
                 const defendingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
                 highlightCourt(defendingTeam);
+                document.getElementById('outArea').classList.add('active');
             }
         }
 
@@ -2951,7 +3381,8 @@
             gameState.currentAction = {
                 type: 'defense',
                 player: playerName,
-                team: gameState.attackingTeam
+                team: gameState.attackingTeam,
+                role: getPlayerRole(gameState.attackingTeam, playerName)
             };
             gameState.phase = 'defense_end';
             updatePhase();
@@ -3468,6 +3899,87 @@
         }
 
         // ==================== HELPERS ====================
+        // ==================== POSITION ROLES ====================
+        const POSITION_ROLES = {
+            home: { 1: 'Passeur', 2: 'R4', 3: 'Centre', 4: 'Pointu' },
+            away: { 4: 'Passeur', 1: 'R4', 2: 'Centre', 3: 'Pointu' }
+        };
+
+        const ROLE_COLORS = {
+            'R4': '#3b82f6',
+            'Centre': '#ef4444',
+            'Pointu': '#22c55e'
+        };
+
+        function getPlayerByRole(team, role) {
+            const lineup = team === 'home' ? currentSet.homeLineup : currentSet.awayLineup;
+            const roles = POSITION_ROLES[team];
+            for (const [pos, r] of Object.entries(roles)) {
+                if (r === role) return lineup[pos];
+            }
+            return null;
+        }
+
+        function getPlayerRole(team, playerName) {
+            const lineup = team === 'home' ? currentSet.homeLineup : currentSet.awayLineup;
+            const roles = POSITION_ROLES[team];
+            for (const [pos, name] of Object.entries(lineup)) {
+                if (name === playerName) return roles[pos] || null;
+            }
+            return null;
+        }
+
+        function showPositionZones(team) {
+            const courtSide = getCourtSideForTeam(team);
+            const zonesId = courtSide === 'top' ? 'positionZonesTop' : 'positionZonesBottom';
+            const zones = document.getElementById(zonesId);
+            
+            const lineup = team === 'home' ? currentSet.homeLineup : currentSet.awayLineup;
+            
+            // Position numbers for back row roles
+            let r4Pos, centrePos, pointuPos;
+            if (team === 'home') {
+                r4Pos = 2; centrePos = 3; pointuPos = 4;
+            } else {
+                r4Pos = 1; centrePos = 2; pointuPos = 3;
+            }
+            
+            // Map viewer-left/center/right based on court side
+            // Bottom court: R4 à gauche, Centre au milieu, Pointu à droite (comme composition home)
+            // Top court: miroir (Pointu à gauche, Centre au milieu, R4 à droite)
+            let mapping;
+            if (courtSide === 'bottom') {
+                mapping = [
+                    { player: lineup[r4Pos], role: 'R4', color: ROLE_COLORS['R4'] },
+                    { player: lineup[centrePos], role: 'Centre', color: ROLE_COLORS['Centre'] },
+                    { player: lineup[pointuPos], role: 'Pointu', color: ROLE_COLORS['Pointu'] }
+                ];
+            } else {
+                // Top court: mirrored left-right
+                mapping = [
+                    { player: lineup[pointuPos], role: 'Pointu', color: ROLE_COLORS['Pointu'] },
+                    { player: lineup[centrePos], role: 'Centre', color: ROLE_COLORS['Centre'] },
+                    { player: lineup[r4Pos], role: 'R4', color: ROLE_COLORS['R4'] }
+                ];
+            }
+            
+            const zoneElements = zones.querySelectorAll('.position-zone');
+            mapping.forEach((m, i) => {
+                zoneElements[i].style.background = m.color + '40';
+                zoneElements[i].style.borderColor = m.color + '80';
+                zoneElements[i].innerHTML = `<span class="zone-label">${m.role}<br>${m.player}</span>`;
+                zoneElements[i].dataset.player = m.player;
+                zoneElements[i].dataset.role = m.role;
+            });
+            
+            zones.classList.add('active');
+        }
+
+        function hidePositionZones() {
+            document.getElementById('positionZonesTop').classList.remove('active');
+            document.getElementById('positionZonesBottom').classList.remove('active');
+        }
+
         function getCourtSideForTeam(team) {
             // Retourne 'top' ou 'bottom' selon le côté caméra
             if (cameraSide === 'home') {
@@ -3541,12 +4053,15 @@
             document.getElementById('playerSelection').classList.add('hidden');
             document.getElementById('secondTouchOptions').classList.add('hidden');
             document.getElementById('passFaultSection').classList.add('hidden');
-            document.getElementById('serviceNetFaultSection').classList.add('hidden');
+            document.getElementById('passFaultResultSection').classList.add('hidden');
+            document.getElementById('netClickZone').classList.remove('active');
             document.getElementById('attackTypeSelection').classList.add('hidden');
             document.getElementById('resultSelection').classList.add('hidden');
             document.getElementById('receptionFaultSection').classList.add('hidden');
+            document.getElementById('serveAceSection').classList.add('hidden');
             document.getElementById('outArea').classList.remove('active');
             hideReceptionQualityZones();
+            hidePositionZones();
         }
 
         function highlightCourt(team) {
@@ -3705,6 +4220,19 @@
                     break;
 
                 case 'serve_end':
+                    if (gameState.aceMode) {
+                        // Just deactivate ace mode, stay in serve_end
+                        gameState.aceMode = false;
+                        const aceRecvTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
+                        showPositionZones(aceRecvTeam);
+                        document.getElementById('serveAceSection').classList.remove('hidden');
+                        updatePhase();
+                        // Redraw start marker
+                        if (gameState.currentAction.startPos) {
+                            addMarker(gameState.currentAction.startPos, 'service');
+                        }
+                        break;
+                    }
                     // Retour au début du service
                     gameState.phase = 'serve_start';
                     gameState.currentAction = {
@@ -3734,6 +4262,16 @@
                     hideAllSections();
                     const recvTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
                     highlightCourt(recvTeam);
+                    // Réactiver zone out et zone filet
+                    document.getElementById('outArea').classList.add('active');
+                    document.getElementById('netClickZone').classList.add('active');
+                    // Afficher les zones de position pour auto-sélection
+                    showPositionZones(recvTeam);
+                    // Afficher le bouton Ace
+                    document.getElementById('serveAceSection').classList.remove('hidden');
+                    const servCourtSide = getCourtSideForTeam(gameState.servingTeam);
+                    document.getElementById('outLabelTop').style.display = servCourtSide === 'top' ? 'none' : 'block';
+                    document.getElementById('outLabelBottom').style.display = servCourtSide === 'bottom' ? 'none' : 'block';
                     // Redessiner (juste le marker de départ du service)
                     redrawRally();
                     // Ajouter le marker de départ du service en cours
@@ -3743,12 +4281,49 @@
                     break;
 
                 case 'reception_end':
-                    // Retour à la sélection du réceptionneur
-                    gameState.phase = 'reception';
-                    hideReceptionQualityZones();
-                    document.getElementById('receptionFaultSection').classList.add('hidden');
-                    renderPlayerSelection(gameState.attackingTeam, 'Qui réceptionne ?');
-                    redrawRally();
+                    if (gameState.receptionAutoSelected) {
+                        // Auto-sélectionné: retour combiné à serve_end
+                        gameState.phase = 'serve_end';
+                        gameState.receptionAutoSelected = false;
+                        // Retirer le service du rally
+                        const autoServiceAction = gameState.rally.pop();
+                        if (autoServiceAction) {
+                            gameState.currentAction = {
+                                type: 'service',
+                                player: autoServiceAction.player,
+                                team: autoServiceAction.team,
+                                startPos: autoServiceAction.startPos,
+                                role: autoServiceAction.role
+                            };
+                        }
+                        hideAllSections();
+                        hideReceptionQualityZones();
+                        document.getElementById('receptionFaultSection').classList.add('hidden');
+                        const autoRecvTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
+                        highlightCourt(autoRecvTeam);
+                        // Réactiver zone out et zone filet
+                        document.getElementById('outArea').classList.add('active');
+                        document.getElementById('netClickZone').classList.add('active');
+                        showPositionZones(autoRecvTeam);
+                        // Afficher le bouton Ace
+                        document.getElementById('serveAceSection').classList.remove('hidden');
+                        // Labels OUT corrects
+                        const autoSrvCourtSide = getCourtSideForTeam(gameState.servingTeam);
+                        document.getElementById('outLabelTop').style.display = autoSrvCourtSide === 'top' ? 'none' : 'block';
+                        document.getElementById('outLabelBottom').style.display = autoSrvCourtSide === 'bottom' ? 'none' : 'block';
+                        redrawRally();
+                        if (gameState.currentAction.startPos) {
+                            addMarker(gameState.currentAction.startPos, 'service');
+                        }
+                    } else {
+                        // Retour standard à la sélection du réceptionneur
+                        gameState.phase = 'reception';
+                        hideReceptionQualityZones();
+                        document.getElementById('receptionFaultSection').classList.add('hidden');
+                        showPositionZones(gameState.attackingTeam);
+                        renderPlayerSelection(gameState.attackingTeam, 'Qui réceptionne ?');
+                        redrawRally();
+                    }
                     break;
 
                 case 'direct_return_end':
@@ -3777,10 +4352,30 @@
                     break;
 
                 case 'pass_end':
-                    // Retour à la sélection du passeur
-                    gameState.phase = 'pass';
-                    renderPlayerSelection(gameState.attackingTeam, 'Qui fait la passe ?');
-                    redrawRally();
+                    if (gameState.passAutoSelected) {
+                        // Auto-sélectionné: retour combiné à reception_end
+                        gameState.phase = 'reception_end';
+                        gameState.passAutoSelected = false;
+                        // Récupérer la réception depuis le rally
+                        const autoReceptionAction = gameState.rally.pop();
+                        if (autoReceptionAction) {
+                            gameState.currentAction = { ...autoReceptionAction };
+                        }
+                        hideAllSections();
+                        highlightCourt(gameState.attackingTeam);
+                        showReceptionQualityZones();
+                        document.getElementById('receptionFaultSection').classList.remove('hidden');
+                        document.getElementById('outArea').classList.add('active');
+                        const autoAttCourtSide = getCourtSideForTeam(gameState.attackingTeam);
+                        document.getElementById('outLabelTop').style.display = autoAttCourtSide === 'top' ? 'block' : 'none';
+                        document.getElementById('outLabelBottom').style.display = autoAttCourtSide === 'bottom' ? 'block' : 'none';
+                        redrawRally();
+                    } else {
+                        // Retour standard à la sélection du passeur
+                        gameState.phase = 'pass';
+                        renderPlayerSelection(gameState.attackingTeam, 'Qui fait la passe ?');
+                        redrawRally();
+                    }
                     break;
 
                 case 'pass_fault_end':
@@ -3792,6 +4387,20 @@
                     document.getElementById('passFaultSection').classList.remove('hidden');
                     document.getElementById('outArea').classList.add('active');
                     highlightCourt(gameState.attackingTeam);
+                    redrawRally();
+                    break;
+
+                case 'pass_fault_result':
+                    // Retour à pass_fault_end — retirer le marker et l'action du rally
+                    gameState.rally.pop();
+                    gameState.currentAction.endPos = undefined;
+                    gameState.phase = 'pass_fault_end';
+                    updatePhase();
+                    hideAllSections();
+                    document.getElementById('outArea').classList.add('active');
+                    document.getElementById('outLabelTop').style.display = 'block';
+                    document.getElementById('outLabelBottom').style.display = 'block';
+                    highlightCourt(null);
                     redrawRally();
                     break;
 
@@ -3827,6 +4436,7 @@
                         }
                         hideAllSections();
                         highlightCourt(gameState.attackingTeam);
+                        document.getElementById('passFaultSection').classList.remove('hidden');
                         // Activer la zone out pour les passes
                         document.getElementById('outArea').classList.add('active');
                         const attackingCourtSide = getCourtSideForTeam(gameState.attackingTeam);
@@ -4248,21 +4858,18 @@
         // ==================== CHANGEMENT DE JOUEUR ====================
         let subState = {
             team: 'home',
-            playerOut: null,
-            playerIn: null
+            selectedSlot: null,   // Position number on court
+            selectedBench: null   // Bench player name
         };
 
         function openSubModal() {
-            subState = { team: 'home', playerOut: null, playerIn: null };
+            subState = { team: 'home', selectedSlot: null, selectedBench: null };
             
-            // Mettre à jour le nom de l'équipe adverse
             document.getElementById('subTabAway').textContent = currentMatch.opponent || 'Adversaire';
-            
-            // Afficher l'onglet home
             document.getElementById('subTabHome').classList.add('active');
             document.getElementById('subTabAway').classList.remove('active');
             
-            renderSubLists();
+            renderSubModal();
             document.getElementById('subModalOverlay').classList.add('active');
         }
 
@@ -4272,34 +4879,42 @@
         }
 
         function switchSubTeam(team) {
-            subState.team = team;
-            subState.playerOut = null;
-            subState.playerIn = null;
+            subState = { team, selectedSlot: null, selectedBench: null };
             
             document.getElementById('subTabHome').classList.toggle('active', team === 'home');
             document.getElementById('subTabAway').classList.toggle('active', team === 'away');
             
-            renderSubLists();
+            renderSubModal();
         }
 
-        function renderSubLists() {
+        function getPosForRole(team, role) {
+            const roles = POSITION_ROLES[team];
+            for (const [pos, r] of Object.entries(roles)) {
+                if (r === role) return pos;
+            }
+            return null;
+        }
+
+        function renderSubModal() {
             const team = subState.team;
             const lineup = team === 'home' ? currentSet.homeLineup : currentSet.awayLineup;
+            
+            // Update court slots by role
+            const roleList = ['Passeur', 'R4', 'Centre', 'Pointu'];
+            roleList.forEach(role => {
+                const slotEl = document.getElementById('subSlot' + role);
+                const playerSpan = slotEl.querySelector('.slot-player');
+                const pos = getPosForRole(team, role);
+                const playerName = lineup[pos];
+                
+                playerSpan.textContent = playerName || '—';
+                slotEl.classList.toggle('empty', !playerName);
+                slotEl.classList.toggle('selected', subState.selectedSlot === role);
+            });
+            
+            // Update bench
+            const benchGrid = document.getElementById('subBenchGrid');
             const onCourt = Object.values(lineup).filter(p => p !== null);
-            
-            // Joueurs sur le terrain (qui peuvent sortir)
-            const outContainer = document.getElementById('subPlayersOut');
-            if (onCourt.length > 0) {
-                outContainer.innerHTML = onCourt.map(name => `
-                    <button class="sub-player-btn ${subState.playerOut === name ? 'out-selected' : ''}" 
-                            onclick="selectSubOut('${name}')">${name}</button>
-                `).join('');
-            } else {
-                outContainer.innerHTML = '<span class="sub-no-player">Aucun joueur</span>';
-            }
-            
-            // Remplaçants (qui peuvent entrer)
-            const inContainer = document.getElementById('subPlayersIn');
             let bench = [];
             
             if (team === 'home') {
@@ -4311,70 +4926,92 @@
             }
             
             if (bench.length > 0) {
-                inContainer.innerHTML = bench.map(name => `
-                    <button class="sub-player-btn ${subState.playerIn === name ? 'in-selected' : ''}" 
-                            onclick="selectSubIn('${name}')">${name}</button>
+                benchGrid.innerHTML = bench.map(name => `
+                    <div class="sub-bench-player ${subState.selectedBench === name ? 'selected' : ''}" 
+                         onclick="subBenchClick('${name}')">${name}</div>
                 `).join('');
             } else {
-                inContainer.innerHTML = '<span class="sub-no-player">Pas de remplaçant</span>';
+                benchGrid.innerHTML = '<span class="sub-no-player">Pas de remplaçant</span>';
             }
-            
-            updateSubConfirm();
         }
 
-        function selectSubOut(name) {
-            subState.playerOut = name;
-            renderSubLists();
-        }
-
-        function selectSubIn(name) {
-            subState.playerIn = name;
-            renderSubLists();
-        }
-
-        function updateSubConfirm() {
-            const btn = document.getElementById('subConfirmBtn');
-            btn.disabled = !(subState.playerOut && subState.playerIn);
-        }
-
-        function confirmSub() {
-            const { team, playerOut, playerIn } = subState;
-            if (!playerOut || !playerIn) return;
-            
+        function subSlotClick(role) {
+            const team = subState.team;
             const lineup = team === 'home' ? currentSet.homeLineup : currentSet.awayLineup;
+            const pos = getPosForRole(team, role);
             
-            // Trouver la position du joueur qui sort
-            let pos = null;
-            for (const p in lineup) {
-                if (lineup[p] === playerOut) {
-                    pos = p;
-                    break;
+            if (subState.selectedBench) {
+                // Bench player selected → substitute into this slot
+                const benchPlayer = subState.selectedBench;
+                
+                lineup[pos] = benchPlayer;
+                
+                const statsTeam = team === 'home' ? setStats.home : setStats.away;
+                if (!statsTeam[benchPlayer]) {
+                    statsTeam[benchPlayer] = initPlayerStats(benchPlayer);
                 }
+                
+                subState.selectedBench = null;
+                saveCurrentSet();
+                renderStatsTables();
+                renderServerSelection();
+                renderSubModal();
+                
+            } else if (subState.selectedSlot !== null) {
+                if (subState.selectedSlot === role) {
+                    // Deselect
+                    subState.selectedSlot = null;
+                    renderSubModal();
+                } else {
+                    // Swap positions between the two roles
+                    const pos1 = getPosForRole(team, subState.selectedSlot);
+                    const pos2 = pos;
+                    const temp = lineup[pos1];
+                    lineup[pos1] = lineup[pos2];
+                    lineup[pos2] = temp;
+                    
+                    subState.selectedSlot = null;
+                    saveCurrentSet();
+                    renderSubModal();
+                }
+            } else {
+                // Select this slot
+                subState.selectedSlot = role;
+                subState.selectedBench = null;
+                renderSubModal();
             }
-            
-            if (!pos) {
-                alert('Erreur: joueur non trouvé');
-                return;
+        }
+
+        function subBenchClick(playerName) {
+            if (subState.selectedSlot !== null) {
+                // Court slot selected → substitute bench player into that slot
+                const team = subState.team;
+                const lineup = team === 'home' ? currentSet.homeLineup : currentSet.awayLineup;
+                const pos = getPosForRole(team, subState.selectedSlot);
+                
+                lineup[pos] = playerName;
+                
+                const statsTeam = team === 'home' ? setStats.home : setStats.away;
+                if (!statsTeam[playerName]) {
+                    statsTeam[playerName] = initPlayerStats(playerName);
+                }
+                
+                subState.selectedSlot = null;
+                saveCurrentSet();
+                renderStatsTables();
+                renderServerSelection();
+                renderSubModal();
+                
+            } else if (subState.selectedBench === playerName) {
+                // Deselect
+                subState.selectedBench = null;
+                renderSubModal();
+            } else {
+                // Select this bench player
+                subState.selectedBench = playerName;
+                subState.selectedSlot = null;
+                renderSubModal();
             }
-            
-            // Effectuer le changement
-            lineup[pos] = playerIn;
-            
-            // Ajouter les stats du nouveau joueur
-            const statsTeam = team === 'home' ? setStats.home : setStats.away;
-            if (!statsTeam[playerIn]) {
-                statsTeam[playerIn] = initPlayerStats(playerIn);
-            }
-            
-            // Sauvegarder
-            saveCurrentSet();
-            
-            // Mettre à jour les affichages
-            renderStatsTables();
-            renderServerSelection();
-            
-            // Fermer la modal
-            closeSubModal();
         }
 
         function handleBack() {

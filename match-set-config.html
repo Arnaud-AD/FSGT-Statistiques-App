@@ -741,6 +741,22 @@
             document.getElementById('mixiteAwayTeam').textContent = currentMatch.opponent;
             document.getElementById('finalScoreAwayLabel').textContent = currentMatch.opponent;
 
+            // Pré-remplir les options si le set a déjà des données (venant d'un set précédent)
+            const setIndex = currentSetNumber - 1;
+            const currentSet = currentMatch.sets?.[setIndex];
+            if (currentSet) {
+                // Caméra côté
+                if (currentSet.cameraSide) {
+                    const cameraRadio = document.getElementById(currentSet.cameraSide === 'home' ? 'cameraHome' : 'cameraAway');
+                    if (cameraRadio) cameraRadio.checked = true;
+                }
+                // Équipe au service
+                if (currentSet.servingTeam) {
+                    const servingRadio = document.getElementById(currentSet.servingTeam === 'home' ? 'servingHome' : 'servingAway');
+                    if (servingRadio) servingRadio.checked = true;
+                }
+            }
+
             updateScorePreview();
             updateFinalScorePreview();
         }

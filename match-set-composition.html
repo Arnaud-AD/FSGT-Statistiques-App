@@ -248,6 +248,31 @@
             text-align: center;
         }
 
+        /* Role labels under slots */
+        .slot-with-role {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .role-label {
+            font-size: 8px;
+            font-weight: 700;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 1px 6px;
+            border-radius: 6px;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .role-label.passeur { background: rgba(255,255,255,0.3); }
+        .role-label.r4 { background: #3b82f6; }
+        .role-label.centre { background: #ef4444; }
+        .role-label.pointu { background: #22c55e; }
+
         /* Players bench */
         .bench-section {
             margin-bottom: 10px;
@@ -480,23 +505,47 @@
                 <div class="team-label away" id="awayTeamLabel">Adversaire</div>
                 <div class="court-half away" id="courtAway">
                     <div class="court-row">
-                        <div class="position-slot" data-team="away" data-position="1"></div>
-                        <div class="position-slot" data-team="away" data-position="2"></div>
-                        <div class="position-slot" data-team="away" data-position="3"></div>
+                        <div class="slot-with-role">
+                            <span class="role-label pointu">Pointu</span>
+                            <div class="position-slot" data-team="away" data-position="3"></div>
+                        </div>
+                        <div class="slot-with-role">
+                            <span class="role-label centre">Centre</span>
+                            <div class="position-slot" data-team="away" data-position="2"></div>
+                        </div>
+                        <div class="slot-with-role">
+                            <span class="role-label r4">R4</span>
+                            <div class="position-slot" data-team="away" data-position="1"></div>
+                        </div>
                     </div>
                     <div class="court-row single">
-                        <div class="position-slot" data-team="away" data-position="4"></div>
+                        <div class="slot-with-role">
+                            <div class="position-slot" data-team="away" data-position="4"></div>
+                            <span class="role-label passeur">Passeur</span>
+                        </div>
                     </div>
                 </div>
                 <div class="net"></div>
                 <div class="court-half home" id="courtHome">
                     <div class="court-row single">
-                        <div class="position-slot" data-team="home" data-position="1"></div>
+                        <div class="slot-with-role">
+                            <div class="position-slot" data-team="home" data-position="1"></div>
+                            <span class="role-label passeur">Passeur</span>
+                        </div>
                     </div>
                     <div class="court-row">
-                        <div class="position-slot" data-team="home" data-position="2"></div>
-                        <div class="position-slot" data-team="home" data-position="3"></div>
-                        <div class="position-slot" data-team="home" data-position="4"></div>
+                        <div class="slot-with-role">
+                            <div class="position-slot" data-team="home" data-position="2"></div>
+                            <span class="role-label r4">R4</span>
+                        </div>
+                        <div class="slot-with-role">
+                            <div class="position-slot" data-team="home" data-position="3"></div>
+                            <span class="role-label centre">Centre</span>
+                        </div>
+                        <div class="slot-with-role">
+                            <div class="position-slot" data-team="home" data-position="4"></div>
+                            <span class="role-label pointu">Pointu</span>
+                        </div>
                     </div>
                 </div>
                 <div class="team-label home">Jen et ses Saints</div>
