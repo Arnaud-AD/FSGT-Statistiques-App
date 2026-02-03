@@ -2169,7 +2169,6 @@
                 'pass': '<span class="highlight">Passe</span> — Sélectionnez le passeur',
                 'pass_end': '<span class="highlight">Passe</span> — Cliquez où arrive la passe',
                 'pass_fault_end': '<span class="highlight">Faute de passe</span> — Cliquez où arrive la passe',
-                'pass_fault_player': '<span class="highlight">Faute de passe</span> — Qui fait la faute ?',
                 'second_touch_player': '<span class="highlight">2ème touche</span> — Qui fait la 2ème touche ?',
                 'attack_player': '<span class="highlight">Attaque</span> — Sélectionnez l\'attaquant',
                 'attack_type': '<span class="highlight">Attaque</span> — Choisissez le type',
@@ -2703,6 +2702,9 @@
             hideAllSections();
             highlightCourt(gameState.attackingTeam);
             
+            // Afficher le bouton faute de passe
+            document.getElementById('passFaultSection').classList.remove('hidden');
+            
             // Activer la zone out pour les passes hors terrain
             document.getElementById('outArea').classList.add('active');
             // Masquer les labels OUT côté adverse (on ne passe pas chez l'adversaire)
@@ -2722,33 +2724,8 @@
         }
 
         function handlePassFault() {
-            // Le passeur a déjà été sélectionné en phase 'pass'
-            // On doit maintenant demander où la passe est arrivée
-            // Récupérer le passeur sélectionné depuis le dernier clic joueur
-            // Le passeur n'a pas encore été enregistré comme action, 
-            // il faut le chercher dans currentAction s'il existe, sinon dans le dernier joueur sélectionné
-            
-            // Si on n'a pas encore de passeur sélectionné (on est encore en 'pass' = sélection passeur),
-            // on ne peut pas faire de faute sans passeur
-            // Mais le bouton est visible dès la phase 'pass', il faut d'abord sélectionner le passeur
-            // En fait le bouton "Faute de passe" est visible pendant 'pass' mais ne devrait être cliquable
-            // qu'après avoir sélectionné un passeur... 
-            // ALTERNATIVE: on demande qui fait la faute puis où elle arrive
-            
-            gameState.passFault = true;
-            gameState.phase = 'pass_fault_player';
-            updatePhase();
-            hideAllSections();
-            renderPlayerSelection(gameState.attackingTeam, 'Qui fait la faute de passe ?');
-        }
-
-        function selectPassFaultPlayer(playerName) {
-            gameState.currentAction = {
-                type: 'pass',
-                subType: 'fault',
-                player: playerName,
-                team: gameState.attackingTeam
-            };
+            // Le passeur est déjà sélectionné dans currentAction (phase pass_end)
+            gameState.currentAction.subType = 'fault';
             gameState.phase = 'pass_fault_end';
             updatePhase();
             hideAllSections();
@@ -2756,9 +2733,6 @@
             // Activer zone out + highlight terrain de l'équipe
             document.getElementById('outArea').classList.add('active');
             highlightCourt(gameState.attackingTeam);
-            
-            // Afficher labels OUT
-            const attackingCourtSide = getCourtSideForTeam(gameState.attackingTeam);
             document.getElementById('outLabelTop').style.display = 'block';
             document.getElementById('outLabelBottom').style.display = 'block';
         }
@@ -2785,9 +2759,6 @@
             const otherTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
             awardPoint(otherTeam);
             endRally();
-            
-            // Reset flag
-            gameState.passFault = false;
         }
 
         function selectSecondTouchPlayer(playerName) {
@@ -3533,10 +3504,9 @@
 
             showSection('playerSelection');
             
-            // Afficher les options de 2ème touche uniquement en phase passe
+            // Afficher les options de 2ème touche uniquement en phase passe (sélection du passeur)
             if (gameState.phase === 'pass') {
                 document.getElementById('secondTouchOptions').classList.remove('hidden');
-                document.getElementById('passFaultSection').classList.remove('hidden');
             }
         }
 
@@ -3547,9 +3517,6 @@
                     break;
                 case 'pass':
                     selectPasser(playerName);
-                    break;
-                case 'pass_fault_player':
-                    selectPassFaultPlayer(playerName);
                     break;
                 case 'second_touch_player':
                     selectSecondTouchPlayer(playerName);
@@ -3816,21 +3783,15 @@
                     redrawRally();
                     break;
 
-                case 'pass_fault_player':
-                    // Retour à la sélection du passeur (phase pass normale)
-                    gameState.passFault = false;
-                    gameState.phase = 'pass';
-                    renderPlayerSelection(gameState.attackingTeam, 'Qui fait la passe ?');
-                    redrawRally();
-                    break;
-
                 case 'pass_fault_end':
-                    // Retour à la sélection du joueur fautif
-                    gameState.phase = 'pass_fault_player';
+                    // Retour à pass_end (le passeur est déjà sélectionné)
+                    gameState.currentAction.subType = undefined;
+                    gameState.phase = 'pass_end';
                     updatePhase();
                     hideAllSections();
-                    document.getElementById('outArea').classList.remove('active');
-                    renderPlayerSelection(gameState.attackingTeam, 'Qui fait la faute de passe ?');
+                    document.getElementById('passFaultSection').classList.remove('hidden');
+                    document.getElementById('outArea').classList.add('active');
+                    highlightCourt(gameState.attackingTeam);
                     redrawRally();
                     break;
 
