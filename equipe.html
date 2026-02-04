@@ -181,27 +181,6 @@
             color: #dc2626;
         }
 
-        .genre-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .genre-h {
-            background: #dbeafe;
-            color: #2563eb;
-        }
-
-        .genre-f {
-            background: #fce7f3;
-            color: #db2777;
-        }
-
         .actions-cell {
             text-align: right;
         }
@@ -454,7 +433,6 @@
                     <thead>
                         <tr>
                             <th>Prénom</th>
-                            <th>Genre</th>
                             <th>Poste</th>
                             <th></th>
                         </tr>
@@ -489,14 +467,6 @@
                 <div class="form-group">
                     <label class="form-label" for="prenom">Prénom</label>
                     <input type="text" class="form-input" id="prenom" placeholder="Entrer le prénom" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label" for="genre">Genre</label>
-                    <select class="form-select" id="genre" required>
-                        <option value="">Sélectionner</option>
-                        <option value="H">Homme</option>
-                        <option value="F">Femme</option>
-                    </select>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Poste(s)</label>
@@ -550,7 +520,6 @@
                     return `
                     <tr>
                         <td>${player.prenom}</td>
-                        <td><span class="genre-badge genre-${player.genre.toLowerCase()}">${player.genre}</span></td>
                         <td>${posteBadges}</td>
                         <td class="actions-cell">
                             <button class="action-btn" onclick="editPlayer(${index})" title="Modifier">
@@ -588,7 +557,6 @@
             const title = document.getElementById('modalTitle');
             const editIndex = document.getElementById('editIndex');
             const prenom = document.getElementById('prenom');
-            const genre = document.getElementById('genre');
             const checkboxes = document.querySelectorAll('input[name="poste"]');
 
             // Reset checkboxes
@@ -598,7 +566,6 @@
                 title.textContent = 'Modifier le joueur';
                 editIndex.value = editIdx;
                 prenom.value = players[editIdx].prenom;
-                genre.value = players[editIdx].genre;
                 
                 // Cocher les postes existants
                 const postes = Array.isArray(players[editIdx].poste) ? players[editIdx].poste : [players[editIdx].poste];
@@ -611,7 +578,6 @@
                 title.textContent = 'Ajouter un joueur';
                 editIndex.value = -1;
                 prenom.value = '';
-                genre.value = '';
             }
 
             modal.classList.add('active');
@@ -629,7 +595,6 @@
             event.preventDefault();
             const editIndex = parseInt(document.getElementById('editIndex').value);
             const prenom = document.getElementById('prenom').value.trim();
-            const genre = document.getElementById('genre').value;
             
             // Récupérer les postes cochés
             const checkboxes = document.querySelectorAll('input[name="poste"]:checked');
@@ -641,9 +606,9 @@
             }
 
             if (editIndex >= 0) {
-                players[editIndex] = { prenom, genre, poste: postes };
+                players[editIndex] = { prenom, poste: postes };
             } else {
-                players.push({ prenom, genre, poste: postes });
+                players.push({ prenom, poste: postes });
             }
 
             localStorage.setItem('volleyball_players', JSON.stringify(players));
