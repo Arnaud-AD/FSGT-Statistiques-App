@@ -575,9 +575,10 @@
         </div>
     </div>
 
+    <script src="storage.js"></script>
     <script>
         // Récupérer les données
-        const currentMatch = JSON.parse(localStorage.getItem('volleyball_current_match')) || null;
+        const currentMatch = Storage.getCurrentMatch();
         
         // Liste des joueurs adverses
         let adversePlayers = [];
@@ -739,7 +740,7 @@
                 adversePlayers: adversePlayers
             };
             
-            localStorage.setItem('volleyball_current_match', JSON.stringify(matchData));
+            Storage.saveCurrentMatch(matchData);
             
             // Rediriger vers la page de composition du set
             window.location.href = 'match-set-composition.html';
@@ -756,7 +757,7 @@
         }
 
         function confirmCancel() {
-            localStorage.removeItem('volleyball_current_match');
+            Storage.cancelCurrentMatch();
             window.location.href = 'nouveau-match.html';
         }
 

@@ -13,17 +13,14 @@
             --text-secondary: #5f6368;
             --border-color: #e8eaed;
             --accent-orange: #ff6b35;
+            --accent-orange-dark: #e55a2b;
             --accent-blue: #0056D2;
             --accent-gold: #D4A400;
             --win-color: #34a853;
             --loss-color: #ea4335;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Roboto', 'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -41,7 +38,6 @@
             min-height: 100vh;
         }
 
-        /* Header */
         .header {
             display: flex;
             align-items: center;
@@ -52,477 +48,290 @@
         }
 
         .back-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: none;
+            width: 40px; height: 40px;
+            border-radius: 50%; border: none;
             background: var(--bg-header);
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             transition: all 0.2s;
             color: var(--text-primary);
         }
+        .back-btn:hover { background: var(--border-color); }
 
-        .back-btn:hover {
-            background: var(--border-color);
-        }
-
-        .header-content {
-            flex: 1;
-        }
-
+        .header-content { flex: 1; }
         .header-title {
             font-family: 'Google Sans', sans-serif;
-            font-size: 20px;
-            font-weight: 500;
+            font-size: 20px; font-weight: 500;
             color: var(--text-primary);
         }
-
         .header-subtitle {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-top: 2px;
+            font-size: 13px; color: var(--text-secondary); margin-top: 2px;
         }
 
-        /* Views */
-        .view {
-            display: none;
-            flex: 1;
-            flex-direction: column;
-        }
+        .view { display: none; flex: 1; flex-direction: column; }
+        .view.active { display: flex; }
 
-        .view.active {
-            display: flex;
-        }
-
-        /* Type de match - Boutons */
+        /* Type de match */
         .match-type-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            justify-content: center;
-            padding: 20px 0;
+            flex: 1; display: flex; flex-direction: column;
+            gap: 16px; justify-content: center; padding: 20px 0;
         }
-
         .match-type-btn {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            padding: 28px 24px;
-            border: 2px solid var(--border-color);
-            border-radius: 16px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background: var(--bg-primary);
+            display: flex; align-items: center; gap: 20px;
+            padding: 28px 24px; border: 2px solid var(--border-color);
+            border-radius: 16px; cursor: pointer;
+            transition: all 0.2s ease; background: var(--bg-primary);
         }
-
         .match-type-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-
-        .match-type-btn.championnat {
-            border-color: var(--accent-blue);
-        }
-
-        .match-type-btn.championnat:hover {
-            background: #f0f7ff;
-        }
-
-        .match-type-btn.ginette {
-            border-color: var(--accent-gold);
-        }
-
-        .match-type-btn.ginette:hover {
-            background: #fffbeb;
-        }
+        .match-type-btn.championnat { border-color: var(--accent-blue); }
+        .match-type-btn.championnat:hover { background: #f0f7ff; }
+        .match-type-btn.ginette { border-color: var(--accent-gold); }
+        .match-type-btn.ginette:hover { background: #fffbeb; }
 
         .match-type-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
+            width: 56px; height: 56px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; background: transparent;
         }
-
-        .match-type-icon.championnat {
-            background: transparent;
-        }
-
-        .match-type-icon.ginette {
-            background: transparent;
-        }
-
-        .match-type-content {
-            flex: 1;
-        }
-
+        .match-type-content { flex: 1; }
         .match-type-title {
             font-family: 'Google Sans', sans-serif;
-            font-size: 18px;
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 4px;
+            font-size: 18px; font-weight: 500;
+            color: var(--text-primary); margin-bottom: 4px;
         }
-
-        .match-type-desc {
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .match-type-arrow {
-            color: var(--text-secondary);
-            font-size: 24px;
-        }
+        .match-type-desc { font-size: 13px; color: var(--text-secondary); }
+        .match-type-arrow { color: var(--text-secondary); font-size: 24px; }
 
         /* Liste des matchs */
         .section-title {
             font-family: 'Google Sans', sans-serif;
-            font-size: 16px;
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 16px;
+            font-size: 16px; font-weight: 500;
+            color: var(--text-primary); margin-bottom: 16px;
         }
-
         .matches-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            overflow-y: auto;
-            flex: 1;
+            display: flex; flex-direction: column; gap: 8px;
+            overflow-y: auto; flex: 1;
         }
 
+        /* Sections (En cours / À jouer / Terminés) */
+        .section-group { margin-bottom: 20px; }
+        .section-group:last-child { margin-bottom: 0; }
+        .section-group.completed-section { margin-top: 32px; }
+        .section-header {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 10px; padding: 0 4px;
+        }
+        .section-header-icon { font-size: 14px; }
+        .section-header-label {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 12px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .section-header-label.in-progress { color: var(--accent-orange); }
+        .section-header-label.to-play { color: var(--accent-blue); }
+        .section-header-label.completed { color: var(--win-color); }
+        .section-header-count {
+            font-size: 11px; color: var(--text-secondary);
+            background: var(--bg-header); padding: 1px 7px; border-radius: 10px;
+        }
+
+        /* Match items */
         .match-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
+            display: flex; align-items: center; gap: 12px;
+            padding: 16px; border: 1px solid var(--border-color);
+            border-radius: 12px; cursor: pointer; transition: all 0.2s;
+        }
+        .match-item:hover { border-color: var(--accent-blue); background: #f8faff; }
+
+        .match-item.in-progress {
+            border-color: var(--accent-orange); background: #fff8f4;
+        }
+        .match-item.in-progress:hover {
+            border-color: var(--accent-orange); background: #fff0e6;
         }
 
-        .match-item:hover {
-            border-color: var(--accent-blue);
-            background: #f8faff;
+        .match-item.completed-match {
+            border-color: var(--border-color); background: var(--bg-header);
+            cursor: default;
         }
-
-        .match-item.played {
-            opacity: 0.5;
-            pointer-events: none;
-            background: var(--bg-header);
+        .match-item.completed-match:hover {
+            border-color: var(--border-color); background: #f0f1f3;
         }
 
         .match-number {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
+            width: 28px; height: 28px; border-radius: 50%;
             background: var(--bg-header);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 600;
+            color: var(--text-secondary); flex-shrink: 0;
         }
-
-        .match-info {
-            flex: 1;
-        }
-
+        .match-info { flex: 1; }
         .match-opponent {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 2px;
+            font-size: 14px; font-weight: 500;
+            color: var(--text-primary); margin-bottom: 2px;
         }
-
         .match-location {
-            font-size: 12px;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            font-size: 12px; color: var(--text-secondary);
+            display: flex; align-items: center; gap: 4px;
         }
+        .match-arrow { color: var(--text-secondary); font-size: 18px; }
 
         .location-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 500;
+            display: inline-block; padding: 2px 8px;
+            border-radius: 4px; font-size: 11px; font-weight: 500;
+        }
+        .location-badge.domicile { background: #d1fae5; color: #059669; }
+        .location-badge.exterieur { background: #fee2e2; color: #dc2626; }
+
+        .match-status {
+            font-size: 11px; color: var(--text-secondary); margin-top: 2px;
+        }
+        .match-status .set-score { font-weight: 600; color: var(--accent-orange); }
+
+        .match-result-badge {
+            display: inline-block; padding: 2px 8px;
+            border-radius: 4px; font-size: 11px; font-weight: 600;
+        }
+        .match-result-badge.win { background: #d1fae5; color: #059669; }
+        .match-result-badge.loss { background: #fee2e2; color: #dc2626; }
+
+        .match-sets-detail {
+            font-size: 11px; color: var(--text-secondary); margin-top: 2px;
         }
 
-        .location-badge.domicile {
-            background: #d1fae5;
-            color: #059669;
+        /* Action buttons */
+        .match-actions { display: flex; gap: 6px; align-items: center; }
+        .match-action-btn {
+            padding: 6px 12px; border: none; border-radius: 6px;
+            font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s;
         }
-
-        .location-badge.exterieur {
-            background: #fee2e2;
-            color: #dc2626;
+        .match-action-btn.resume { background: var(--accent-orange); color: white; }
+        .match-action-btn.resume:hover { background: var(--accent-orange-dark); }
+        .match-action-btn.menu {
+            background: var(--bg-header); color: var(--text-secondary);
+            padding: 6px 8px; font-size: 16px; line-height: 1;
         }
-
-        .match-arrow {
-            color: var(--text-secondary);
-            font-size: 18px;
+        .match-action-btn.menu:hover { background: var(--border-color); }
+        .match-action-btn.delete {
+            background: transparent; color: var(--text-secondary);
+            padding: 6px 8px; font-size: 16px; line-height: 1;
+            border: none; border-radius: 50%;
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
         }
+        .match-action-btn.delete:hover { background: #fee2e2; color: var(--loss-color); }
 
-        /* Empty state */
+        /* Context menu */
+        .context-menu-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 90;
+        }
+        .context-menu-overlay.active { display: block; }
+        .context-menu {
+            position: fixed; background: white; border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            padding: 4px 0; min-width: 180px; z-index: 91;
+        }
+        .context-menu-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 16px; font-size: 13px; cursor: pointer;
+            transition: background 0.15s; border: none; background: none;
+            width: 100%; text-align: left; color: var(--text-primary);
+        }
+        .context-menu-item:hover { background: var(--bg-header); }
+        .context-menu-item.danger { color: #dc2626; }
+        .context-menu-item svg { flex-shrink: 0; }
+
         .empty-state {
-            text-align: center;
-            padding: 48px 24px;
-            color: var(--text-secondary);
+            text-align: center; padding: 48px 24px; color: var(--text-secondary);
         }
-
         .empty-state svg {
-            width: 64px;
-            height: 64px;
-            margin-bottom: 16px;
-            opacity: 0.5;
+            width: 64px; height: 64px; margin-bottom: 16px; opacity: 0.5;
         }
+        .empty-state p { font-size: 14px; }
 
-        .empty-state p {
-            font-size: 14px;
-        }
-
-        /* Confirmation dialog */
+        /* Modal */
         .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
+            display: none; position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5); z-index: 100;
+            align-items: center; justify-content: center;
         }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
+        .modal-overlay.active { display: flex; }
         .modal {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            width: 90%;
-            max-width: 360px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            text-align: center;
+            background: white; border-radius: 16px; padding: 24px;
+            width: 90%; max-width: 360px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); text-align: center;
         }
-
         .modal-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
+            width: 48px; height: 48px; border-radius: 50%;
             background: #fef3c7;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             margin: 0 auto 16px;
         }
-
         .modal-title {
             font-family: 'Google Sans', sans-serif;
-            font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 8px;
+            font-size: 18px; font-weight: 500; margin-bottom: 8px;
         }
-
         .modal-message {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 24px;
-            line-height: 1.5;
+            font-size: 14px; color: var(--text-secondary);
+            line-height: 1.5; margin-bottom: 24px;
         }
-
-        .modal-actions {
-            display: flex;
-            gap: 12px;
+        .modal-actions { display: flex; gap: 12px; }
+        .btn-cancel, .btn-confirm {
+            flex: 1; padding: 12px; border: none; border-radius: 8px;
+            font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s;
         }
+        .btn-cancel { background: var(--bg-header); color: var(--text-primary); }
+        .btn-cancel:hover { background: var(--border-color); }
+        .btn-confirm { background: #dc2626; color: white; }
+        .btn-confirm:hover { background: #b91c1c; }
 
-        .btn-cancel {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            background: white;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-cancel:hover {
-            background: var(--bg-header);
-        }
-
-        .btn-confirm {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            background: var(--loss-color);
-            color: white;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-confirm:hover {
-            background: #dc2626;
-        }
-
-        /* Ginette rounds */
-        .ginette-rounds {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
+        /* Ginette */
+        .ginette-rounds { display: flex; flex-direction: column; gap: 8px; }
         .round-btn {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 16px 20px;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
+            display: flex; align-items: center; gap: 16px;
+            padding: 16px 20px; border: 1px solid var(--border-color);
+            border-radius: 12px; cursor: pointer; transition: all 0.2s;
             background: var(--bg-primary);
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: left;
         }
-
-        .round-btn:hover {
-            border-color: var(--accent-gold);
-            background: #fffbeb;
-        }
-
-        .round-btn.finale {
-            border-color: var(--accent-gold);
-            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-        }
-
-        .round-btn.finale:hover {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        }
-
+        .round-btn:hover { border-color: var(--accent-gold); background: #fffbeb; }
+        .round-btn.finale { border-color: var(--accent-gold); }
         .round-number {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
+            width: 32px; height: 32px; border-radius: 50%;
             background: var(--bg-header);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 600; color: var(--text-secondary);
         }
+        .round-icon { font-size: 24px; }
+        .round-name { flex: 1; font-size: 14px; font-weight: 500; text-align: left; }
+        .round-arrow { color: var(--text-secondary); font-size: 18px; }
 
-        .round-btn.finale .round-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            flex-shrink: 0;
-        }
-
-        .round-name {
-            flex: 1;
-            font-family: 'Google Sans', sans-serif;
-            font-size: 15px;
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        .round-arrow {
-            color: var(--text-secondary);
-            font-size: 20px;
-        }
-
-        /* Form styles for Ginette modal */
-        .form-group {
-            margin-bottom: 16px;
-            text-align: left;
-        }
-
+        .form-group { margin-bottom: 16px; text-align: left; }
         .form-label {
-            display: block;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
+            display: block; font-size: 13px; font-weight: 500;
+            margin-bottom: 6px; color: var(--text-primary);
         }
-
-        .form-input {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-            transition: border-color 0.2s;
+        .form-input, .form-select {
+            width: 100%; padding: 12px; border: 1px solid var(--border-color);
+            border-radius: 8px; font-size: 14px; font-family: inherit;
         }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--accent-blue);
+        .form-input:focus, .form-select:focus {
+            outline: none; border-color: var(--accent-blue);
         }
-
-        .form-select {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-            background: white;
-            cursor: pointer;
-        }
-
-        .form-select:focus {
-            outline: none;
-            border-color: var(--accent-blue);
-        }
-
         .btn-save {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            background: var(--accent-gold);
-            color: white;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
+            flex: 1; padding: 12px; border: none;
+            background: var(--accent-gold); color: white;
+            border-radius: 8px; font-size: 14px; font-weight: 500;
+            cursor: pointer; transition: all 0.2s;
         }
-
-        .btn-save:hover {
-            background: #b8960a;
-        }
+        .btn-save:hover { background: #b8960a; }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- Header -->
         <header class="header">
             <button class="back-btn" onclick="handleBack()">
                 <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
@@ -535,12 +344,12 @@
             </div>
         </header>
 
-        <!-- Vue 1: Choix du type de match -->
+        <!-- Vue 1: Choix du type -->
         <div class="view active" id="viewType">
             <div class="match-type-section">
                 <button class="match-type-btn championnat" onclick="showChampionnat()">
                     <div class="match-type-icon championnat">
-                        <span style="font-size: 40px;">🏐</span>
+                        <span style="font-size: 40px;">🏅</span>
                     </div>
                     <div class="match-type-content">
                         <div class="match-type-title">Championnat</div>
@@ -562,15 +371,13 @@
             </div>
         </div>
 
-        <!-- Vue 2: Liste des matchs Championnat -->
+        <!-- Vue 2: Championnat -->
         <div class="view" id="viewChampionnat">
             <h2 class="section-title">Sélectionner le match</h2>
-            <div class="matches-list" id="matchesList">
-                <!-- Matchs générés dynamiquement -->
-            </div>
+            <div class="matches-list" id="matchesList"></div>
         </div>
 
-        <!-- Vue 3: Ginette - Tours -->
+        <!-- Vue 3: Ginette -->
         <div class="view" id="viewGinette">
             <h2 class="section-title">Sélectionner le tour</h2>
             <div class="ginette-rounds">
@@ -608,18 +415,18 @@
         </div>
     </div>
 
-    <!-- Modal Ginette - Saisie adversaire -->
+    <!-- Modal Ginette -->
     <div class="modal-overlay" id="ginetteModalOverlay" onclick="closeGinetteModal(event)">
         <div class="modal" onclick="event.stopPropagation()">
             <h3 class="modal-title" id="ginetteModalTitle">1er Tour</h3>
             <form id="ginetteForm" onsubmit="saveGinetteMatch(event)">
                 <input type="hidden" id="ginetteRound" value="">
                 <div class="form-group">
-                    <label class="form-label" for="ginetteOpponent">Nom de l'équipe</label>
-                    <input type="text" class="form-input" id="ginetteOpponent" placeholder="Entrer le nom de l'équipe" required>
+                    <label class="form-label" for="ginetteOpponent">Nom de l’équipe</label>
+                    <input type="text" class="form-input" id="ginetteOpponent" placeholder="Entrer le nom de l’équipe" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="ginetteLevel">Niveau de l'équipe</label>
+                    <label class="form-label" for="ginetteLevel">Niveau de l’équipe</label>
                     <select class="form-select" id="ginetteLevel" required>
                         <option value="">Sélectionner un niveau</option>
                         <optgroup label="Compétition">
@@ -643,7 +450,7 @@
         </div>
     </div>
 
-    <!-- Modal de confirmation -->
+    <!-- Modal confirmation -->
     <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
         <div class="modal" onclick="event.stopPropagation()">
             <div class="modal-icon">
@@ -660,8 +467,12 @@
         </div>
     </div>
 
+    <!-- Menu contextuel -->
+    <div class="context-menu-overlay" id="contextMenuOverlay" onclick="closeContextMenu()"></div>
+    <div class="context-menu" id="contextMenu" style="display:none;"></div>
+
+    <script src="storage.js"></script>
     <script>
-        // Liste des matchs du championnat
         const championnatMatches = [
             { opponent: "Red Hot Sucy Pépère", location: "extérieur" },
             { opponent: "Manu Andy-sport", location: "domicile" },
@@ -683,13 +494,8 @@
             { opponent: "Les Rescapés", location: "extérieur" }
         ];
 
-        // État de la vue actuelle
         let currentView = 'type';
-        
-        // Matchs joués (stockés en localStorage)
-        let playedMatches = JSON.parse(localStorage.getItem('volleyball_played_matches')) || [];
 
-        // Navigation
         function showView(viewId) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
@@ -698,7 +504,7 @@
         function showChampionnat() {
             currentView = 'championnat';
             document.getElementById('headerTitle').textContent = 'Championnat';
-            document.getElementById('headerSubtitle').textContent = 'Sélectionner le match';
+            document.getElementById('headerSubtitle').textContent = 'Gérer les matchs';
             renderMatchesList();
             showView('viewChampionnat');
         }
@@ -712,10 +518,8 @@
 
         function handleBack() {
             if (currentView === 'type') {
-                // Retour vers le menu principal - pas de confirmation car rien n'a été fait
                 window.location.href = 'index.html';
             } else {
-                // Retour vers le choix du type
                 currentView = 'type';
                 document.getElementById('headerTitle').textContent = 'Nouveau Match';
                 document.getElementById('headerSubtitle').textContent = 'Choisir le type de match';
@@ -732,66 +536,197 @@
             window.location.href = 'index.html';
         }
 
-        // Rendu de la liste des matchs
+        // ==================== RENDU 3 SECTIONS ====================
         function renderMatchesList() {
             const container = document.getElementById('matchesList');
-            
-            const availableMatches = championnatMatches.filter((match, index) => {
+            const allStored = Storage.getAllMatches();
+
+            const inProgress = [];
+            const toPlay = [];
+            const completed = [];
+
+            championnatMatches.forEach((match, index) => {
                 const matchId = `champ_${index}`;
-                return !playedMatches.includes(matchId);
+                const stored = allStored.find(m => m.id === matchId);
+                if (stored) {
+                    if (stored.status === 'completed') {
+                        completed.push({ ...match, index, matchId, stored });
+                    } else {
+                        inProgress.push({ ...match, index, matchId, stored });
+                    }
+                } else {
+                    toPlay.push({ ...match, index, matchId });
+                }
             });
 
-            if (availableMatches.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <svg fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                        </svg>
-                        <p>Tous les matchs ont été joués !</p>
-                    </div>
-                `;
-                return;
+            // Ginette matches
+            allStored.filter(m => m.type === 'ginette').forEach(stored => {
+                const entry = { opponent: stored.opponent, location: stored.round || '', index: -1, matchId: stored.id, stored };
+                if (stored.status === 'completed') completed.push(entry);
+                else inProgress.push(entry);
+            });
+
+            let html = '';
+
+            if (inProgress.length > 0) {
+                html += sectionHeader('⚡', 'En cours', 'in-progress', inProgress.length);
+                inProgress.forEach(m => { html += renderInProgress(m); });
+            }
+            if (toPlay.length > 0) {
+                html += sectionHeader('📋', 'À jouer', 'to-play', toPlay.length);
+                toPlay.forEach(m => { html += renderToPlay(m); });
+            }
+            if (completed.length > 0) {
+                html += sectionHeader('✅', 'Terminés', 'completed', completed.length);
+                completed.forEach(m => { html += renderCompleted(m); });
             }
 
-            container.innerHTML = championnatMatches.map((match, index) => {
-                const matchId = `champ_${index}`;
-                const isPlayed = playedMatches.includes(matchId);
-                const locationClass = match.location === 'domicile' ? 'domicile' : 'exterieur';
-                const locationLabel = match.location === 'domicile' ? 'Domicile' : 'Extérieur';
-
-                if (isPlayed) return ''; // Ne pas afficher les matchs joués
-
-                return `
-                    <div class="match-item" onclick="selectMatch(${index})">
-                        <div class="match-number">${index + 1}</div>
-                        <div class="match-info">
-                            <div class="match-opponent">${match.opponent}</div>
-                            <div class="match-location">
-                                <span class="location-badge ${locationClass}">${locationLabel}</span>
-                            </div>
-                        </div>
-                        <span class="match-arrow">›</span>
-                    </div>
-                `;
-            }).join('');
+            if (!html) html = '<div class="empty-state"><p>Aucun match disponible</p></div>';
+            container.innerHTML = html;
         }
 
-        // Sélectionner un match
+        function sectionHeader(icon, label, css, count) {
+            const extraClass = css === 'completed' ? ' completed-section' : '';
+            return `<div class="section-group${extraClass}"><div class="section-header">
+                <span class="section-header-icon">${icon}</span>
+                <span class="section-header-label ${css}">${label}</span>
+                <span class="section-header-count">${count}</span>
+            </div></div>`;
+        }
+
+        function renderInProgress(m) {
+            const locClass = m.location === 'domicile' ? 'domicile' : 'exterieur';
+            const locLabel = m.location === 'domicile' ? 'Domicile' : (m.location === 'extérieur' ? 'Extérieur' : m.location);
+            const sc = Storage.getSetScore(m.stored);
+            const lastSet = m.stored.sets ? m.stored.sets[m.stored.sets.length - 1] : null;
+            const setNum = m.stored.sets ? m.stored.sets.length : 0;
+            const live = lastSet && !lastSet.completed ? ` (${lastSet.homeScore||0}-${lastSet.awayScore||0})` : '';
+            return `<div class="match-item in-progress">
+                <div class="match-number">${m.index >= 0 ? m.index+1 : '•'}</div>
+                <div class="match-info">
+                    <div class="match-opponent">${m.opponent}</div>
+                    <div class="match-location"><span class="location-badge ${locClass}">${locLabel}</span></div>
+                    <div class="match-status">Set ${setNum} • Sets : <span class="set-score">${sc.homeWins}-${sc.awayWins}</span>${live}</div>
+                </div>
+                <div class="match-actions">
+                    <button class="match-action-btn resume" onclick="resumeMatch('${m.matchId}')">Reprendre</button>
+                    <button class="match-action-btn menu" onclick="openMenu(event,'${m.matchId}','in_progress')">⋮</button>
+                </div>
+            </div>`;
+        }
+
+        function renderToPlay(m) {
+            const locClass = m.location === 'domicile' ? 'domicile' : 'exterieur';
+            const locLabel = m.location === 'domicile' ? 'Domicile' : 'Extérieur';
+            return `<div class="match-item" onclick="selectMatch(${m.index})">
+                <div class="match-number">${m.index+1}</div>
+                <div class="match-info">
+                    <div class="match-opponent">${m.opponent}</div>
+                    <div class="match-location"><span class="location-badge ${locClass}">${locLabel}</span></div>
+                </div>
+                <span class="match-arrow">›</span>
+            </div>`;
+        }
+
+        function renderCompleted(m) {
+            const rc = m.stored.result || 'draw';
+            const rl = m.stored.result === 'win' ? 'Victoire' : (m.stored.result === 'loss' ? 'Défaite' : 'Nul');
+            const ss = `${m.stored.setsWon||0}-${m.stored.setsLost||0}`;
+            const detail = m.stored.sets ? m.stored.sets.filter(s=>s.completed).map(s=>`${s.finalHomeScore}-${s.finalAwayScore}`).join(', ') : '';
+            return `<div class="match-item completed-match">
+                <div class="match-number">${m.index >= 0 ? m.index+1 : '•'}</div>
+                <div class="match-info">
+                    <div class="match-opponent">${m.opponent}</div>
+                    <div class="match-location"><span class="match-result-badge ${rc}">${rl} ${ss}</span></div>
+                    ${detail ? `<div class="match-sets-detail">${detail}</div>` : ''}
+                </div>
+                <div class="match-actions">
+                    <button class="match-action-btn delete" onclick="event.stopPropagation();confirmDeleteMatch('${m.matchId}','${m.opponent.replace(/'/g, "\\'")}',${m.stored.setsWon||0},${m.stored.setsLost||0})" title="Supprimer et rejouer">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    </button>
+                    <button class="match-action-btn menu" onclick="openMenu(event,'${m.matchId}','completed')">⋮</button>
+                </div>
+            </div>`;
+        }
+
+        // ==================== ACTIONS ====================
         function selectMatch(index) {
             const match = championnatMatches[index];
-            // Stocker le match sélectionné
-            localStorage.setItem('volleyball_current_match', JSON.stringify({
-                id: `champ_${index}`,
-                type: 'championnat',
-                opponent: match.opponent,
-                location: match.location,
-                matchNumber: index + 1
-            }));
-            // Rediriger vers la configuration du match
+            const data = {
+                id: `champ_${index}`, type: 'championnat', status: 'in_progress',
+                opponent: match.opponent, location: match.location,
+                matchNumber: index + 1, timestamp: Date.now()
+            };
+            Storage.saveMatch(data);
+            Storage.setCurrentMatchId(data.id);
             window.location.href = 'match-config.html';
         }
 
-        // Ginette - Ouvrir modal
+        function resumeMatch(matchId) {
+            const match = Storage.getMatchById(matchId);
+            if (!match) return;
+            Storage.setCurrentMatchId(matchId);
+            window.location.href = Storage.getResumeTarget(match);
+        }
+
+        // ==================== MENU CONTEXTUEL ====================
+        function openMenu(event, matchId, status) {
+            event.stopPropagation();
+            const menu = document.getElementById('contextMenu');
+            const overlay = document.getElementById('contextMenuOverlay');
+            let items = '';
+            if (status === 'in_progress') {
+                items = `
+                    <button class="context-menu-item" onclick="resumeMatch('${matchId}');closeContextMenu()">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Reprendre
+                    </button>
+                    <button class="context-menu-item danger" onclick="confirmDelete('${matchId}')">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Supprimer
+                    </button>`;
+            } else {
+                items = `
+                    <button class="context-menu-item" onclick="viewMatchStats('${matchId}')">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg> Voir les stats
+                    </button>
+                    <button class="context-menu-item danger" onclick="confirmDelete('${matchId}')">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Supprimer et rejouer
+                    </button>`;
+            }
+            menu.innerHTML = items;
+            menu.style.display = 'block';
+            const rect = event.currentTarget.getBoundingClientRect();
+            menu.style.top = (rect.bottom + 4) + 'px';
+            menu.style.right = (window.innerWidth - rect.right) + 'px';
+            menu.style.left = 'auto';
+            overlay.classList.add('active');
+        }
+
+        function closeContextMenu() {
+            document.getElementById('contextMenu').style.display = 'none';
+            document.getElementById('contextMenuOverlay').classList.remove('active');
+        }
+
+        function confirmDelete(matchId) {
+            closeContextMenu();
+            if (confirm('Supprimer ce match et toutes ses données ?')) {
+                Storage.deleteMatch(matchId);
+                renderMatchesList();
+            }
+        }
+
+        function confirmDeleteMatch(matchId, opponent, setsWon, setsLost) {
+            if (confirm('Supprimer ce match ?\n' + opponent + ' (' + setsWon + '-' + setsLost + ')')) {
+                Storage.deleteMatch(matchId);
+                renderMatchesList();
+            }
+        }
+
+        function viewMatchStats(matchId) {
+            closeContextMenu();
+            window.location.href = `historique.html?match=${encodeURIComponent(matchId)}`;
+        }
+
+        // ==================== GINETTE ====================
         function openGinetteModal(round) {
             document.getElementById('ginetteRound').value = round;
             document.getElementById('ginetteModalTitle').textContent = round;
@@ -801,29 +736,22 @@
             document.getElementById('ginetteOpponent').focus();
         }
 
-        // Ginette - Fermer modal
         function closeGinetteModal(event) {
             if (event && event.target !== event.currentTarget) return;
             document.getElementById('ginetteModalOverlay').classList.remove('active');
         }
 
-        // Ginette - Sauvegarder et continuer
         function saveGinetteMatch(event) {
             event.preventDefault();
-            const round = document.getElementById('ginetteRound').value;
-            const opponent = document.getElementById('ginetteOpponent').value.trim();
-            const level = document.getElementById('ginetteLevel').value;
-
-            // Stocker le match Ginette sélectionné
-            localStorage.setItem('volleyball_current_match', JSON.stringify({
-                id: `ginette_${Date.now()}`,
-                type: 'ginette',
-                round: round,
-                opponent: opponent,
-                level: level
-            }));
-
-            // Rediriger vers la configuration du match
+            const data = {
+                id: `ginette_${Date.now()}`, type: 'ginette', status: 'in_progress',
+                round: document.getElementById('ginetteRound').value,
+                opponent: document.getElementById('ginetteOpponent').value.trim(),
+                level: document.getElementById('ginetteLevel').value,
+                timestamp: Date.now()
+            };
+            Storage.saveMatch(data);
+            Storage.setCurrentMatchId(data.id);
             window.location.href = 'match-config.html';
         }
 

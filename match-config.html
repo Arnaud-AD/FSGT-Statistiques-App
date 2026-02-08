@@ -294,9 +294,28 @@
         }
 
         .empty-state a {
-            color: var(--accent-blue);
-            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+            padding: 14px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 14px;
             font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .empty-state a:hover {
+            background: #0047b3;
         }
 
         /* Modal */
@@ -511,10 +530,11 @@
         </div>
     </div>
 
+    <script src="storage.js"></script>
     <script>
         // Récupérer les données
-        const currentMatch = JSON.parse(localStorage.getItem('volleyball_current_match')) || null;
-        const players = JSON.parse(localStorage.getItem('volleyball_players')) || [];
+        const currentMatch = Storage.getCurrentMatch();
+        const players = Storage.getPlayers();
         
         // État des présences (tous présents par défaut)
         let presences = {};
@@ -581,7 +601,12 @@
                 container.innerHTML = `
                     <div class="empty-state">
                         <p>Aucun joueur dans l'équipe</p>
-                        <a href="equipe.html">Ajouter des joueurs</a>
+                        <a href="equipe.html">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                            </svg>
+                            Ajouter des joueurs
+                        </a>
                     </div>
                 `;
                 document.getElementById('validateBtn').disabled = true;
@@ -681,7 +706,7 @@
                 timestamp: Date.now()
             };
             
-            localStorage.setItem('volleyball_current_match', JSON.stringify(matchData));
+            Storage.saveCurrentMatch(matchData);
             
             // Rediriger vers la page de composition adverse
             window.location.href = 'match-adverse.html';
@@ -698,7 +723,7 @@
         }
 
         function confirmCancel() {
-            localStorage.removeItem('volleyball_current_match');
+            Storage.cancelCurrentMatch();
             window.location.href = 'nouveau-match.html';
         }
 

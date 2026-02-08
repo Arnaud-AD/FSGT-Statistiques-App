@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc:*)",
+      "Bash(file:*)",
+      "Bash(grep:*)",
+      "Bash(xargs -I {} sh -c 'echo \"\"=== {} ===\"\" && grep -i \"\"charset\"\" \"\"{}\"\" | head -2')",
+      "Bash(iconv:*)",
+      "Bash(python3:*)",
+      "Bash(ls:*)",
+      "Bash(xxd:*)",
+      "Bash(node:*)"
+    ]
+  }
+}

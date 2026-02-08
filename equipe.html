@@ -497,9 +497,10 @@
         </div>
     </div>
 
+    <script src="storage.js"></script>
     <script>
         // Données des joueurs (stockées en localStorage)
-        let players = JSON.parse(localStorage.getItem('volleyball_players')) || [];
+        let players = Storage.getPlayers();
 
         // Rendu du tableau
         function renderTable() {

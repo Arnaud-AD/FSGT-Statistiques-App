@@ -210,21 +210,29 @@
             height: 50px;
             margin: auto;
             transition: all 0.2s;
+            cursor: pointer;
         }
 
         .position-slot:hover {
             background: rgba(255, 255, 255, 0.4);
         }
 
-        .position-slot.drag-over {
+        .position-slot.highlight {
             background: rgba(255, 255, 255, 0.6);
-            border-color: white;
-            transform: scale(1.1);
+            border-color: #fbbf24;
+            border-style: solid;
+            animation: slot-pulse 1.2s ease-in-out infinite;
+        }
+
+        @keyframes slot-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
         }
 
         .position-slot.filled {
             background: rgba(255, 255, 255, 0.9);
             border: 2px solid white;
+            cursor: pointer;
         }
 
         .position-slot .player-tag {
@@ -308,25 +316,16 @@
             border: 1px dashed var(--border-color);
         }
 
-        .bench.drag-over {
-            background: #e8f4ff;
-            border-color: var(--accent-blue);
-        }
-
         /* Player tags */
         .player-tag {
             padding: 5px 10px;
             border-radius: 14px;
             font-size: 11px;
             font-weight: 500;
-            cursor: grab;
+            cursor: pointer;
             user-select: none;
             transition: all 0.15s;
             white-space: nowrap;
-        }
-
-        .player-tag:active {
-            cursor: grabbing;
         }
 
         .player-tag.home {
@@ -339,9 +338,82 @@
             color: white;
         }
 
-        .player-tag.dragging {
-            opacity: 0.5;
-            transform: scale(0.95);
+        .player-tag.selected {
+            outline: 3px solid #fbbf24;
+            outline-offset: 1px;
+            transform: scale(1.08);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            animation: selected-pulse 1.2s ease-in-out infinite;
+        }
+
+        @keyframes selected-pulse {
+            0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+            50% { box-shadow: 0 2px 12px rgba(251, 191, 36, 0.5); }
+        }
+
+        /* Blocker config */
+        .blocker-config {
+            margin-top: 12px;
+            padding: 10px;
+            background: var(--bg-header);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .blocker-config-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-align: center;
+        }
+
+        .blocker-config-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .blocker-config-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .blocker-toggle {
+            display: flex;
+            gap: 4px;
+        }
+
+        .blocker-toggle-btn {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 2px solid var(--border-color);
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .blocker-toggle-btn.home.active {
+            border-color: #0056D2;
+            background: #0056D2;
+            color: white;
+        }
+
+        .blocker-toggle-btn.away.active {
+            border-color: #ea4335;
+            background: #ea4335;
+            color: white;
+        }
+
+        /* Court half disabled state */
+        .court-half.disabled {
+            opacity: 0.3;
+            pointer-events: none;
         }
 
         /* Validate button */
@@ -574,9 +646,43 @@
             </div>
         </div>
 
+        <!-- Blocker config -->
+        <div class="blocker-config">
+            <div class="blocker-config-title">Qui bloque (face au R4 adverse)</div>
+            <div class="blocker-config-row">
+                <span class="blocker-config-label">🔵 Jen :</span>
+                <div class="blocker-toggle" id="homeBlockerRightToggle">
+                    <button class="blocker-toggle-btn home active" onclick="setBlockerRight('home', 'Pointu')">Pointu</button>
+                    <button class="blocker-toggle-btn home" onclick="setBlockerRight('home', 'Passeur')">Passeur</button>
+                </div>
+            </div>
+            <div class="blocker-config-row" style="margin-top: 6px;">
+                <span class="blocker-config-label">🔴 <span id="awayBlockerLabel">Adv.</span> :</span>
+                <div class="blocker-toggle" id="awayBlockerRightToggle">
+                    <button class="blocker-toggle-btn away active" onclick="setBlockerRight('away', 'Pointu')">Pointu</button>
+                    <button class="blocker-toggle-btn away" onclick="setBlockerRight('away', 'Passeur')">Passeur</button>
+                </div>
+            </div>
+            <div class="blocker-config-title" style="margin-top: 8px;">Bloqueur principal (2/3 du filet)</div>
+            <div class="blocker-config-row">
+                <span class="blocker-config-label">🔵 Jen :</span>
+                <div class="blocker-toggle" id="homePrimaryBlockerToggle">
+                    <button class="blocker-toggle-btn home" onclick="setPrimaryBlocker('home', 'R4')">R4</button>
+                    <button class="blocker-toggle-btn home active" onclick="setPrimaryBlocker('home', 'right')">Pointu/Passeur</button>
+                </div>
+            </div>
+            <div class="blocker-config-row" style="margin-top: 6px;">
+                <span class="blocker-config-label">🔴 <span id="awayPrimaryLabel">Adv.</span> :</span>
+                <div class="blocker-toggle" id="awayPrimaryBlockerToggle">
+                    <button class="blocker-toggle-btn away" onclick="setPrimaryBlocker('away', 'R4')">R4</button>
+                    <button class="blocker-toggle-btn away active" onclick="setPrimaryBlocker('away', 'right')">Pointu/Passeur</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Status -->
         <div class="status-message" id="statusMessage">
-            Placez 4 joueurs de chaque équipe sur le terrain
+            Cliquez un joueur puis une position sur le terrain
         </div>
 
         <!-- Validate button -->
@@ -605,11 +711,18 @@
         </div>
     </div>
 
+    <script src="storage.js"></script>
     <script>
         // Récupérer les données du match
-        const currentMatch = JSON.parse(localStorage.getItem('volleyball_current_match')) || null;
+        const currentMatch = Storage.getCurrentMatch();
         
         // État des positions (4v4)
+        
+        // Déterminer le set actuel (dernier set non complété, ou set 1 si nouveau match)
+        const currentSetIndex = currentMatch ? Math.max(0, (currentMatch.sets || []).length - 1) : 0;
+        const existingSet = currentMatch?.sets?.[currentSetIndex];
+        const currentSetNumber = existingSet?.setNumber || (currentSetIndex + 1);
+        
         let homePositions = { 1: null, 2: null, 3: null, 4: null };
         let awayPositions = { 1: null, 2: null, 3: null, 4: null };
         
@@ -617,11 +730,17 @@
         let homePlayers = [];
         let awayPlayers = [];
 
-        // Élément en cours de drag
-        let draggedElement = null;
-        let draggedTeam = null;
-        let draggedPlayer = null;
-        let sourceContainer = null;
+        // Config bloqueurs
+        // blockerRight : qui bloque côté droit du filet (Passeur ou Pointu)
+        // primaryBlocker : qui est le bloqueur principal, 2/3 du filet ('right' = bloqueur droit, 'R4')
+        let homeBlockerRight = existingSet?.homeBlockerRight || 'Pointu';
+        let awayBlockerRight = existingSet?.awayBlockerRight || 'Pointu';
+        let homePrimaryBlocker = existingSet?.homePrimaryBlocker || 'right';
+        let awayPrimaryBlocker = existingSet?.awayPrimaryBlocker || 'right';
+
+        // État de la sélection click-and-click
+        let selectedPlayer = null;  // { name, team, element, source }
+        // source: 'bench' ou 'slot' (+ position si slot)
 
         // Initialisation
         function init() {
@@ -639,14 +758,34 @@
             document.getElementById('awayTeamName').textContent = currentMatch.opponent;
             document.getElementById('matchInfo').textContent = `vs ${currentMatch.opponent}`;
 
-            // Rendre les bancs
+            // Afficher le bon numéro de set
+            document.querySelector('.set-badge').textContent = `SET ${currentSetNumber}`;
+            document.getElementById('validateBtn').innerHTML = `
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+                Commencer le Set ${currentSetNumber}
+            `;
+
+            // Rendre les bancs (tous les joueurs disponibles)
             renderBenches();
 
-            // Setup drag and drop
-            setupDragAndDrop();
+            // Setup click handlers
+            setupClickHandlers();
 
             // Mise à jour du statut
             updateStatus();
+
+            // Labels adversaire pour config bloqueur
+            const oppLabel = (currentMatch.opponent || 'Adv.').substring(0, 8);
+            document.getElementById('awayBlockerLabel').textContent = oppLabel;
+            document.getElementById('awayPrimaryLabel').textContent = oppLabel;
+
+            // Afficher l'état des toggles bloqueur
+            updateBlockerRightToggle('home', homeBlockerRight);
+            updateBlockerRightToggle('away', awayBlockerRight);
+            updatePrimaryBlockerToggle('home', homePrimaryBlocker);
+            updatePrimaryBlockerToggle('away', awayPrimaryBlocker);
         }
 
         // Rendre les bancs
@@ -657,7 +796,6 @@
             // Home players
             homeBench.innerHTML = homePlayers.map((player, index) => `
                 <div class="player-tag home" 
-                     draggable="true" 
                      data-team="home" 
                      data-player-index="${index}"
                      data-player-name="${player.prenom}">
@@ -668,7 +806,6 @@
             // Away players
             awayBench.innerHTML = awayPlayers.map((player, index) => `
                 <div class="player-tag away" 
-                     draggable="true" 
                      data-team="away" 
                      data-player-index="${index}"
                      data-player-name="${player}">
@@ -677,116 +814,233 @@
             `).join('');
         }
 
-        // Setup Drag and Drop
-        function setupDragAndDrop() {
-            // Drag start
-            document.addEventListener('dragstart', (e) => {
-                if (e.target.classList.contains('player-tag')) {
-                    draggedElement = e.target;
-                    draggedTeam = e.target.dataset.team;
-                    draggedPlayer = e.target.dataset.playerName;
-                    sourceContainer = e.target.parentElement;
-                    e.target.classList.add('dragging');
-                    e.dataTransfer.effectAllowed = 'move';
-                }
-            });
-
-            // Drag end
-            document.addEventListener('dragend', (e) => {
-                if (e.target.classList.contains('player-tag')) {
-                    e.target.classList.remove('dragging');
-                    draggedElement = null;
-                    draggedTeam = null;
-                    draggedPlayer = null;
-                    sourceContainer = null;
-                }
-                
-                // Remove all drag-over classes
-                document.querySelectorAll('.drag-over').forEach(el => {
-                    el.classList.remove('drag-over');
-                });
-            });
-
-            // Drag over slots
-            document.querySelectorAll('.position-slot').forEach(slot => {
-                slot.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    if (slot.dataset.team === draggedTeam) {
-                        slot.classList.add('drag-over');
-                        e.dataTransfer.dropEffect = 'move';
-                    }
-                });
-
-                slot.addEventListener('dragleave', (e) => {
-                    slot.classList.remove('drag-over');
-                });
-
-                slot.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    slot.classList.remove('drag-over');
-                    
-                    if (slot.dataset.team !== draggedTeam) return;
-
-                    const position = slot.dataset.position;
-                    const positions = slot.dataset.team === 'home' ? homePositions : awayPositions;
-
-                    // Si le slot a déjà un joueur, le remettre au banc
-                    if (slot.children.length > 0) {
-                        const existingTag = slot.children[0];
-                        const bench = slot.dataset.team === 'home' 
-                            ? document.getElementById('homeBench')
-                            : document.getElementById('awayBench');
-                        bench.appendChild(existingTag);
-                    }
-
-                    // Si le joueur vient d'un autre slot, libérer l'ancien
-                    if (sourceContainer && sourceContainer.classList.contains('position-slot')) {
-                        const oldPosition = sourceContainer.dataset.position;
-                        const oldPositions = sourceContainer.dataset.team === 'home' ? homePositions : awayPositions;
-                        oldPositions[oldPosition] = null;
-                        sourceContainer.classList.remove('filled');
-                    }
-
-                    // Placer le joueur
-                    slot.appendChild(draggedElement);
-                    slot.classList.add('filled');
-                    positions[position] = draggedPlayer;
-
-                    updateStatus();
-                });
-            });
-
-            // Drag over benches (pour retirer du terrain)
+        // Setup Click Handlers
+        function setupClickHandlers() {
+            // Clic sur les joueurs du banc (délégation d'événements)
             document.querySelectorAll('.bench').forEach(bench => {
-                bench.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    if (bench.dataset.team === draggedTeam) {
-                        bench.classList.add('drag-over');
-                        e.dataTransfer.dropEffect = 'move';
+                bench.addEventListener('click', (e) => {
+                    const tag = e.target.closest('.player-tag');
+                    if (!tag) {
+                        // Clic sur le banc vide = désélectionner
+                        clearSelection();
+                        return;
+                    }
+                    handlePlayerClick(tag);
+                });
+            });
+
+            // Clic sur les slots du terrain
+            document.querySelectorAll('.position-slot').forEach(slot => {
+                slot.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    handleSlotClick(slot);
+                });
+
+                // Clic sur un tag joueur dans un slot
+                slot.addEventListener('click', (e) => {
+                    const tag = e.target.closest('.player-tag');
+                    if (tag) {
+                        e.stopPropagation();
+                        handleSlotClick(slot);
                     }
                 });
+            });
 
-                bench.addEventListener('dragleave', (e) => {
-                    bench.classList.remove('drag-over');
-                });
+            // Clic ailleurs = désélectionner
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.player-tag') && 
+                    !e.target.closest('.position-slot') &&
+                    !e.target.closest('.bench')) {
+                    clearSelection();
+                }
+            });
+        }
 
-                bench.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    bench.classList.remove('drag-over');
+        function handlePlayerClick(tag) {
+            const team = tag.dataset.team;
+            const name = tag.dataset.playerName;
+
+            // Si on re-clique sur le même joueur ←’ désélectionner
+            if (selectedPlayer && selectedPlayer.name === name && selectedPlayer.team === team) {
+                clearSelection();
+                return;
+            }
+
+            // Sélectionner ce joueur
+            clearSelection();
+            selectedPlayer = { 
+                name, 
+                team, 
+                element: tag,
+                source: 'bench'
+            };
+            tag.classList.add('selected');
+            updateCourtHighlight();
+        }
+
+        function handleSlotClick(slot) {
+            const slotTeam = slot.dataset.team;
+            const position = slot.dataset.position;
+            const positions = slotTeam === 'home' ? homePositions : awayPositions;
+            const isFilled = positions[position] !== null;
+
+            if (selectedPlayer) {
+                // Un joueur est sélectionné
+                if (selectedPlayer.team !== slotTeam) {
+                    // Mauvaise équipe ←’ ignorer
+                    return;
+                }
+
+                if (selectedPlayer.source === 'bench') {
+                    // Joueur du banc ←’ placer sur le slot
                     
-                    if (bench.dataset.team !== draggedTeam) return;
-
-                    // Si le joueur vient d'un slot, libérer la position
-                    if (sourceContainer && sourceContainer.classList.contains('position-slot')) {
-                        const position = sourceContainer.dataset.position;
-                        const positions = sourceContainer.dataset.team === 'home' ? homePositions : awayPositions;
-                        positions[position] = null;
-                        sourceContainer.classList.remove('filled');
+                    // Si le slot est déjà occupé, remettre l'existant au banc
+                    if (isFilled) {
+                        removePlayerFromSlot(slotTeam, position);
                     }
 
-                    bench.appendChild(draggedElement);
-                    updateStatus();
-                });
+                    // Placer le joueur sélectionné
+                    placePlayerOnSlot(selectedPlayer.name, selectedPlayer.team, selectedPlayer.element, slot, position);
+
+                } else if (selectedPlayer.source === 'slot') {
+                    // Joueur d'un autre slot ←’ swap ou déplacer
+                    if (selectedPlayer.position === position) {
+                        // Même slot ←’ remettre au banc
+                        removePlayerFromSlot(slotTeam, position);
+                        clearSelection();
+                        updateStatus();
+                        return;
+                    }
+
+                    // Si le slot cible est occupé ←’ swap
+                    if (isFilled) {
+                        const existingName = positions[position];
+                        const existingTag = slot.querySelector('.player-tag');
+
+                        // Mettre le joueur existant dans l'ancien slot du sélectionné
+                        const oldSlot = selectedPlayer.element.parentElement;
+                        const oldPosition = selectedPlayer.position;
+                        
+                        positions[oldPosition] = existingName;
+                        oldSlot.innerHTML = '';
+                        existingTag.dataset.playerName = existingName;
+                        oldSlot.appendChild(existingTag);
+                        oldSlot.classList.add('filled');
+                    } else {
+                        // Slot vide ←’ juste déplacer
+                        const oldSlot = selectedPlayer.element.parentElement;
+                        const oldPosition = selectedPlayer.position;
+                        positions[oldPosition] = null;
+                        oldSlot.innerHTML = '';
+                        oldSlot.classList.remove('filled');
+                    }
+
+                    // Placer le joueur sélectionné dans le nouveau slot
+                    positions[position] = selectedPlayer.name;
+                    slot.innerHTML = '';
+                    const tag = createPlayerTag(selectedPlayer.name, selectedPlayer.team);
+                    slot.appendChild(tag);
+                    slot.classList.add('filled');
+                }
+
+                clearSelection();
+                updateStatus();
+
+            } else {
+                // Aucun joueur sélectionné
+                if (isFilled) {
+                    // Sélectionner le joueur sur le terrain
+                    const tag = slot.querySelector('.player-tag');
+                    if (!tag) return;
+                    
+                    selectedPlayer = {
+                        name: positions[position],
+                        team: slotTeam,
+                        element: tag,
+                        source: 'slot',
+                        position: position
+                    };
+                    tag.classList.add('selected');
+                    updateCourtHighlight();
+                }
+            }
+        }
+
+        function placePlayerOnSlot(name, team, sourceTag, slot, position) {
+            const positions = team === 'home' ? homePositions : awayPositions;
+
+            // Retirer du banc
+            sourceTag.remove();
+
+            // Créer le tag dans le slot
+            const tag = createPlayerTag(name, team);
+            slot.innerHTML = '';
+            slot.appendChild(tag);
+            slot.classList.add('filled');
+            positions[position] = name;
+
+            clearSelection();
+            updateStatus();
+        }
+
+        function removePlayerFromSlot(team, position) {
+            const positions = team === 'home' ? homePositions : awayPositions;
+            const playerName = positions[position];
+            if (!playerName) return;
+
+            // Retrouver le slot
+            const slot = document.querySelector(`.position-slot[data-team="${team}"][data-position="${position}"]`);
+            if (!slot) return;
+
+            // Remettre au banc
+            const bench = document.getElementById(team === 'home' ? 'homeBench' : 'awayBench');
+            const tag = createPlayerTag(playerName, team);
+            bench.appendChild(tag);
+
+            // Vider le slot
+            slot.innerHTML = '';
+            slot.classList.remove('filled');
+            positions[position] = null;
+        }
+
+        function createPlayerTag(name, team) {
+            const tag = document.createElement('div');
+            tag.className = `player-tag ${team}`;
+            tag.dataset.team = team;
+            tag.dataset.playerName = name;
+            tag.textContent = name;
+            return tag;
+        }
+
+        function clearSelection() {
+            if (selectedPlayer) {
+                selectedPlayer.element.classList.remove('selected');
+                selectedPlayer = null;
+            }
+            // Retirer tous les highlights
+            document.querySelectorAll('.player-tag.selected').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.position-slot.highlight').forEach(el => el.classList.remove('highlight'));
+            document.getElementById('courtHome').classList.remove('disabled');
+            document.getElementById('courtAway').classList.remove('disabled');
+        }
+
+        function updateCourtHighlight() {
+            if (!selectedPlayer) return;
+
+            const team = selectedPlayer.team;
+
+            // Griser le terrain de l'autre équipe
+            if (team === 'home') {
+                document.getElementById('courtAway').classList.add('disabled');
+                document.getElementById('courtHome').classList.remove('disabled');
+            } else {
+                document.getElementById('courtHome').classList.add('disabled');
+                document.getElementById('courtAway').classList.remove('disabled');
+            }
+
+            // Highlight les slots disponibles de la bonne équipe
+            document.querySelectorAll(`.position-slot[data-team="${team}"]`).forEach(slot => {
+                slot.classList.add('highlight');
             });
         }
 
@@ -802,7 +1056,7 @@
             const validateBtn = document.getElementById('validateBtn');
 
             if (homeOnCourt === 4 && awayOnCourt === 4) {
-                statusEl.textContent = '✓ Composition complète !';
+                statusEl.textContent = '✔ Composition complète !';
                 statusEl.className = 'status-message success';
                 validateBtn.disabled = false;
             } else {
@@ -817,24 +1071,75 @@
             }
         }
 
+        // Config bloqueur droit (Passeur ou Pointu)
+        function setBlockerRight(team, role) {
+            if (team === 'home') {
+                homeBlockerRight = role;
+            } else {
+                awayBlockerRight = role;
+            }
+            updateBlockerRightToggle(team, role);
+        }
+
+        function updateBlockerRightToggle(team, activeRole) {
+            const toggleId = team === 'home' ? 'homeBlockerRightToggle' : 'awayBlockerRightToggle';
+            const buttons = document.getElementById(toggleId).querySelectorAll('.blocker-toggle-btn');
+            buttons.forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.trim() === activeRole);
+            });
+        }
+
+        // Config bloqueur principal (R4 ou right)
+        function setPrimaryBlocker(team, value) {
+            if (team === 'home') {
+                homePrimaryBlocker = value;
+            } else {
+                awayPrimaryBlocker = value;
+            }
+            updatePrimaryBlockerToggle(team, value);
+        }
+
+        function updatePrimaryBlockerToggle(team, activeValue) {
+            const toggleId = team === 'home' ? 'homePrimaryBlockerToggle' : 'awayPrimaryBlockerToggle';
+            const buttons = document.getElementById(toggleId).querySelectorAll('.blocker-toggle-btn');
+            buttons.forEach(btn => {
+                if (activeValue === 'R4') {
+                    btn.classList.toggle('active', btn.textContent.trim() === 'R4');
+                } else {
+                    btn.classList.toggle('active', btn.textContent.trim() === 'Pointu/Passeur');
+                }
+            });
+        }
+
         // Valider la composition
         function validateComposition() {
-            // Sauvegarder les compositions dans le match
-            const matchData = {
-                ...currentMatch,
-                sets: [{
-                    setNumber: 1,
+            // Mettre à jour le set courant (existant ou nouveau)
+            if (currentMatch.sets && currentMatch.sets[currentSetIndex]) {
+                // Set déjà créé par confirmEndSet — mettre à jour la composition
+                currentMatch.sets[currentSetIndex].homeLineup = { ...homePositions };
+                currentMatch.sets[currentSetIndex].awayLineup = { ...awayPositions };
+                currentMatch.sets[currentSetIndex].homeBlockerRight = homeBlockerRight;
+                currentMatch.sets[currentSetIndex].awayBlockerRight = awayBlockerRight;
+                currentMatch.sets[currentSetIndex].homePrimaryBlocker = homePrimaryBlocker;
+                currentMatch.sets[currentSetIndex].awayPrimaryBlocker = awayPrimaryBlocker;
+            } else {
+                // Premier set — créer le tableau
+                if (!currentMatch.sets) currentMatch.sets = [];
+                currentMatch.sets[currentSetIndex] = {
+                    setNumber: currentSetNumber,
                     homeLineup: { ...homePositions },
                     awayLineup: { ...awayPositions },
+                    homeBlockerRight: homeBlockerRight,
+                    awayBlockerRight: awayBlockerRight,
+                    homePrimaryBlocker: homePrimaryBlocker,
+                    awayPrimaryBlocker: awayPrimaryBlocker,
                     homeScore: 0,
                     awayScore: 0,
                     points: []
-                }]
-            };
+                };
+            }
 
-            localStorage.setItem('volleyball_current_match', JSON.stringify(matchData));
-            
-            // Aller à la page de configuration du set
+            Storage.saveCurrentMatch(currentMatch);
             window.location.href = 'match-set-config.html';
         }
 
@@ -849,7 +1154,7 @@
         }
 
         function confirmCancel() {
-            localStorage.removeItem('volleyball_current_match');
+            Storage.cancelCurrentMatch();
             window.location.href = 'nouveau-match.html';
         }
 

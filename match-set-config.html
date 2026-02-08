@@ -719,9 +719,10 @@
         </div>
     </div>
 
+    <script src="storage.js"></script>
     <script>
         // Récupérer les données du match
-        const currentMatch = JSON.parse(localStorage.getItem('volleyball_current_match')) || null;
+        const currentMatch = Storage.getCurrentMatch();
         
         // Numéro du set actuel
         const currentSetNumber = currentMatch?.sets?.length || 1;
@@ -831,7 +832,7 @@
                 }
             }
 
-            localStorage.setItem('volleyball_current_match', JSON.stringify(currentMatch));
+            Storage.saveCurrentMatch(currentMatch);
 
             // Si filmé, aller à match-live, sinon demander si nouveau set ou fin de match
             if (isFilmed) {
