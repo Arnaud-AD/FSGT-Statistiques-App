@@ -1051,8 +1051,8 @@
                     for (const [name, data] of Object.entries(s.stats[teamKey])) {
                         if (!playerTotals[name]) {
                             playerTotals[name] = {
-                                service: { tot: 0, ace: 0, fser: 0 },
-                                reception: { tot: 0, rplus: 0, rminus: 0, frec: 0 },
+                                service: { tot: 0, ace: 0, splus: 0, fser: 0, recSumAdv: 0, recCountAdv: 0 },
+                                reception: { tot: 0, r4: 0, r3: 0, r2: 0, r1: 0, frec: 0 },
                                 attack: { tot: 0, attplus: 0, attminus: 0, bp: 0, fatt: 0 },
                                 defense: { tot: 0, defplus: 0, defminus: 0, fdef: 0 },
                                 block: { tot: 0, blcplus: 0, blcminus: 0, fblc: 0 }
@@ -1063,12 +1063,17 @@
                         // Service
                         t.service.tot += (data.service?.tot || 0);
                         t.service.ace += (data.service?.ace || 0);
+                        t.service.splus += (data.service?.splus || 0);
                         t.service.fser += (data.service?.fs || data.service?.fser || 0);
+                        t.service.recSumAdv += (data.service?.recSumAdv || 0);
+                        t.service.recCountAdv += (data.service?.recCountAdv || 0);
 
                         // Réception
                         t.reception.tot += (data.reception?.tot || 0);
-                        t.reception.rplus += (data.reception?.positive || data.reception?.rplus || 0);
-                        t.reception.rminus += (data.reception?.negative || data.reception?.rminus || 0);
+                        t.reception.r4 += (data.reception?.r4 || 0);
+                        t.reception.r3 += (data.reception?.r3 || 0);
+                        t.reception.r2 += (data.reception?.r2 || 0);
+                        t.reception.r1 += (data.reception?.r1 || 0);
                         t.reception.frec += (data.reception?.faute || data.reception?.frec || 0);
 
                         // Attaque
@@ -1103,8 +1108,8 @@
 
                 // Calcul des totaux
                 const totals = {
-                    service: { tot: 0, ace: 0, fser: 0 },
-                    reception: { tot: 0, rplus: 0, rminus: 0, frec: 0 },
+                    service: { tot: 0, ace: 0, splus: 0, fser: 0, recSumAdv: 0, recCountAdv: 0 },
+                    reception: { tot: 0, r4: 0, r3: 0, r2: 0, r1: 0, frec: 0 },
                     attack: { tot: 0, attplus: 0, attminus: 0, bp: 0, fatt: 0 },
                     defense: { tot: 0, defplus: 0, defminus: 0, fdef: 0 },
                     block: { tot: 0, blcplus: 0, blcminus: 0, fblc: 0 }
@@ -1114,10 +1119,15 @@
                     const p = playerTotals[name];
                     totals.service.tot += p.service.tot;
                     totals.service.ace += p.service.ace;
+                    totals.service.splus += p.service.splus;
                     totals.service.fser += p.service.fser;
+                    totals.service.recSumAdv += p.service.recSumAdv;
+                    totals.service.recCountAdv += p.service.recCountAdv;
                     totals.reception.tot += p.reception.tot;
-                    totals.reception.rplus += p.reception.rplus;
-                    totals.reception.rminus += p.reception.rminus;
+                    totals.reception.r4 += p.reception.r4;
+                    totals.reception.r3 += p.reception.r3;
+                    totals.reception.r2 += p.reception.r2;
+                    totals.reception.r1 += p.reception.r1;
                     totals.reception.frec += p.reception.frec;
                     totals.attack.tot += p.attack.tot;
                     totals.attack.attplus += p.attack.attplus;
@@ -1145,45 +1155,69 @@
                 });
                 html += '<div class="player-name total-row">Total</div></div>';
 
+                // Helper pour calculer la moyenne service (Moy)
+                function srvMoy(p) {
+                    const count = p.service.recCountAdv + p.service.ace;
+                    if (count === 0) return '-';
+                    const moy = p.service.recSumAdv / count;
+                    return moy.toFixed(1);
+                }
+                function srvMoyClass(p) {
+                    const count = p.service.recCountAdv + p.service.ace;
+                    if (count === 0) return '';
+                    const moy = p.service.recSumAdv / count;
+                    if (moy <= 1.5) return 'positive';
+                    if (moy >= 3.0) return 'negative';
+                    return '';
+                }
+
                 // ===== SERVICE =====
                 html += '<div class="stat-table-card">' +
                     '<div class="stat-table-header service">Service</div>' +
                     '<table class="detail-stats-table"><thead><tr>' +
-                    '<th>Tot</th><th>Ace</th><th>FS</th>' +
+                    '<th>Tot</th><th>Ace</th><th>S+</th><th>FS</th><th>Moy</th>' +
                     '</tr></thead><tbody>';
                 players.forEach(name => {
                     const p = playerTotals[name];
                     html += '<tr>' +
                         '<td>' + (p.service.tot || '-') + '</td>' +
                         cell(p.service.ace, 'positive') +
+                        cell(p.service.splus, 'positive') +
                         cell(p.service.fser, 'negative') +
+                        '<td class="' + srvMoyClass(p) + '">' + srvMoy(p) + '</td>' +
                     '</tr>';
                 });
                 html += '<tr class="total-row">' +
                     '<td>' + (totals.service.tot || '-') + '</td>' +
                     cell(totals.service.ace, 'positive') +
+                    cell(totals.service.splus, 'positive') +
                     cell(totals.service.fser, 'negative') +
+                    '<td class="' + srvMoyClass({ service: totals.service }) + '">' + srvMoy({ service: totals.service }) + '</td>' +
                 '</tr></tbody></table></div>';
 
                 // ===== RÉCEPTION =====
                 html += '<div class="stat-table-card">' +
                     '<div class="stat-table-header reception">Réception</div>' +
                     '<table class="detail-stats-table"><thead><tr>' +
-                    '<th>Tot</th><th>R+</th><th>R-</th><th>FR</th>' +
+                    '<th>Tot</th><th>R4</th><th>R3</th><th>R2</th><th>R1</th><th>FR</th>' +
                     '</tr></thead><tbody>';
                 players.forEach(name => {
                     const p = playerTotals[name];
                     html += '<tr>' +
                         '<td>' + (p.reception.tot || '-') + '</td>' +
-                        cell(p.reception.rplus, 'positive') +
-                        cell(p.reception.rminus, 'neutral') +
+                        cell(p.reception.r4, 'positive') +
+                        cell(p.reception.r3, 'positive') +
+                        cell(p.reception.r2, 'neutral') +
+                        cell(p.reception.r1, 'negative') +
                         cell(p.reception.frec, 'negative') +
                     '</tr>';
                 });
                 html += '<tr class="total-row">' +
                     '<td>' + (totals.reception.tot || '-') + '</td>' +
-                    cell(totals.reception.rplus, 'positive') +
-                    cell(totals.reception.rminus, 'neutral') +
+                    cell(totals.reception.r4, 'positive') +
+                    cell(totals.reception.r3, 'positive') +
+                    cell(totals.reception.r2, 'neutral') +
+                    cell(totals.reception.r1, 'negative') +
                     cell(totals.reception.frec, 'negative') +
                 '</tr></tbody></table></div>';
 

@@ -132,10 +132,13 @@ function confirmUndoLastPoint() {
     gameState.defenseAutoSelected = false;
     gameState.defenseAutoPlayer = null;
     gameState.defenseFaultShortcut = false;
+    delete gameState.blocOutPending;
+    delete gameState.blocOutAttackingTeam;
     clearMarkers();
     clearArrows();
     hideServiceZones();
     hideReceptionQualityZones();
+    hideDefenseQualityZones();
     hideAttackZones();
     hideDefenseZones();
     highlightCourt(null);

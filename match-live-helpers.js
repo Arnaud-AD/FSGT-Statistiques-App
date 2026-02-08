@@ -610,6 +610,9 @@ function handlePlayerSelection(playerName) {
         case 'attack_net_block_player':
             selectAttackNetBlocker(playerName);
             break;
+        case 'bloc_out_player':
+            selectBlocOutPlayer(playerName);
+            break;
     }
 }
 
@@ -637,6 +640,7 @@ function hideAllSections() {
     document.getElementById('defenseDirectAttackSection').classList.add('hidden');
     document.getElementById('defenseFaultSection').classList.add('hidden');
     document.getElementById('defenseFaultTrajectory').classList.add('hidden');
+    document.getElementById('blocOutTrajectory').classList.add('hidden');
     document.getElementById('serveAceSection').classList.add('hidden');
     document.getElementById('outArea').classList.remove('active');
     hideReceptionQualityZones();
@@ -1504,6 +1508,11 @@ function undoLastAction() {
                 if (lastAttackAct && lastAttackAct.result === 'defended') {
                     gameState.attackingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
                 }
+                // Ré-afficher les zones de défense sur le terrain du défenseur
+                if (lastAttackAct && lastAttackAct.role) {
+                    const defTeamForZones = gameState.attackingTeam === 'home' ? 'away' : 'home';
+                    showDefenseZones(defTeamForZones, lastAttackAct.role);
+                }
                 redrawRally();
             }
             break;
@@ -1512,6 +1521,14 @@ function undoLastAction() {
             // Retour au résultat
             gameState.phase = 'result';
             showSection('resultSelection');
+            // Ré-afficher les zones de défense
+            {
+                const lastAttackForBlock = [...gameState.rally].reverse().find(a => a.type === 'attack');
+                if (lastAttackForBlock && lastAttackForBlock.role) {
+                    const defTeamBlock = gameState.attackingTeam === 'home' ? 'away' : 'home';
+                    showDefenseZones(defTeamBlock, lastAttackForBlock.role);
+                }
+            }
             redrawRally();
             break;
 
@@ -1583,6 +1600,7 @@ function cancelPoint() {
     clearArrows();
     hideServiceZones();
     hideReceptionQualityZones();
+    hideDefenseQualityZones();
     hideAttackZones();
     hideDefenseZones();
     highlightCourt(null);
@@ -1596,6 +1614,8 @@ function cancelPoint() {
     gameState.defenseAutoSelected = false;
     gameState.defenseAutoPlayer = null;
     gameState.defenseFaultShortcut = false;
+    delete gameState.blocOutPending;
+    delete gameState.blocOutAttackingTeam;
 
     // Retour à la sélection du serveur
     gameState.phase = 'server_selection';

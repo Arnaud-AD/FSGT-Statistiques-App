@@ -113,6 +113,10 @@
                             <div class="quality-zone good"></div>
                             <div class="quality-zone perfect"></div>
                         </div>
+                        <!-- Zone de qualité de défense (D+) -->
+                        <div class="defense-quality-zones" id="defQualityZonesTop">
+                            <div class="defense-quality-zone positive"></div>
+                        </div>
                     </div>
                     <div class="net" id="netZone">
                         <div class="net-click-zone" id="netClickZone">
@@ -143,6 +147,10 @@
                             <div class="quality-zone average"></div>
                             <div class="quality-zone good"></div>
                             <div class="quality-zone perfect"></div>
+                        </div>
+                        <!-- Zone de qualité de défense (D+) -->
+                        <div class="defense-quality-zones" id="defQualityZonesBottom">
+                            <div class="defense-quality-zone positive"></div>
                         </div>
                     </div>
                     <div class="team-label" id="bottomTeamLabel">Jen et ses Saints</div>
@@ -254,8 +262,8 @@
                     <div class="tags-title">Résultat de l'attaque</div>
                     <div class="tags-grid">
                         <button class="action-tag point" onclick="selectResult('point')">✔ Point</button>
-                        <button class="action-tag defended" onclick="selectResult('defended')">🛡️ Défendu</button>
                         <button class="action-tag faute" onclick="selectResult('defense_fault')">❌ Défense faute</button>
+                        <button class="action-tag bloc-out" onclick="selectResult('bloc_out')">💥 Bloc out</button>
                     </div>
                 </div>
 
@@ -302,6 +310,7 @@
                     <div class="tags-title">Attaque dans le filet — Faute ou cliquez le terrain = block</div>
                     <div class="tags-grid">
                         <button class="action-tag faute" onclick="handleAttackNetChoice('faute')">❌ Faute (filet)</button>
+                        <button class="action-tag bloc-out" onclick="handleAttackNetChoice('bloc_out')">💥 Bloc out</button>
                     </div>
                 </div>
 
@@ -312,10 +321,19 @@
                     </div>
                 </div>
 
-                <!-- Défense faute (visible pendant defense_end) -->
+                <!-- Défense faute / Bloc out (visible pendant defense_end) -->
                 <div id="defenseFaultSection" class="hidden">
                     <div class="tags-grid">
                         <button class="action-tag faute" onclick="handleDefenseFault()">❌ Défense faute</button>
+                        <button class="action-tag bloc-out" onclick="handleDefenseBlocOut()">💥 Bloc out</button>
+                    </div>
+                </div>
+
+                <!-- Phase trajectoire bloc out -->
+                <div id="blocOutTrajectory" class="hidden">
+                    <div class="tags-title">Cliquez où va la balle (trajectoire du bloc out)</div>
+                    <div class="tags-grid">
+                        <button class="action-tag" onclick="skipBlocOutTrajectory()">⏩ Passer</button>
                     </div>
                 </div>
 
@@ -602,8 +620,8 @@
 
         function initPlayerStats() {
             return {
-                service:   { tot: 0, ace: 0, fser: 0 },
-                reception: { tot: 0, rplus: 0, rminus: 0, frec: 0 },
+                service:   { tot: 0, ace: 0, splus: 0, fser: 0, recSumAdv: 0, recCountAdv: 0 },
+                reception: { tot: 0, r4: 0, r3: 0, r2: 0, r1: 0, frec: 0 },
                 attack:    { tot: 0, attplus: 0, attminus: 0, bp: 0, fatt: 0 },
                 defense:   { tot: 0, defplus: 0, defminus: 0, fdef: 0 },
                 block:     { tot: 0, blcplus: 0, blcminus: 0, fblc: 0 }
@@ -652,8 +670,8 @@
 
             // Calculer les totaux
             const totals = {
-                service:   { tot: 0, ace: 0, fser: 0 },
-                reception: { tot: 0, rplus: 0, rminus: 0, frec: 0 },
+                service:   { tot: 0, ace: 0, splus: 0, fser: 0, recSumAdv: 0, recCountAdv: 0 },
+                reception: { tot: 0, r4: 0, r3: 0, r2: 0, r1: 0, frec: 0 },
                 attack:    { tot: 0, attplus: 0, attminus: 0, bp: 0, fatt: 0 },
                 defense:   { tot: 0, defplus: 0, defminus: 0, fdef: 0 },
                 block:     { tot: 0, blcplus: 0, blcminus: 0, fblc: 0 }
@@ -663,10 +681,15 @@
                 const p = stats[name];
                 totals.service.tot += p.service.tot;
                 totals.service.ace += p.service.ace;
+                totals.service.splus += p.service.splus;
                 totals.service.fser += p.service.fser;
+                totals.service.recSumAdv += p.service.recSumAdv;
+                totals.service.recCountAdv += p.service.recCountAdv;
                 totals.reception.tot += p.reception.tot;
-                totals.reception.rplus += p.reception.rplus;
-                totals.reception.rminus += p.reception.rminus;
+                totals.reception.r4 += p.reception.r4;
+                totals.reception.r3 += p.reception.r3;
+                totals.reception.r2 += p.reception.r2;
+                totals.reception.r1 += p.reception.r1;
                 totals.reception.frec += p.reception.frec;
                 totals.attack.tot += p.attack.tot;
                 totals.attack.attplus += p.attack.attplus;
@@ -694,45 +717,69 @@
             });
             html += '<div class="player-name total-row">Total</div></div>';
 
+            // Helper pour calculer la moyenne service (Moy)
+            function srvMoy(p) {
+                const count = p.service.recCountAdv + p.service.ace;
+                if (count === 0) return '-';
+                const moy = p.service.recSumAdv / count;
+                return moy.toFixed(1);
+            }
+            function srvMoyClass(p) {
+                const count = p.service.recCountAdv + p.service.ace;
+                if (count === 0) return '';
+                const moy = p.service.recSumAdv / count;
+                if (moy <= 1.5) return 'positive';
+                if (moy >= 3.0) return 'negative';
+                return '';
+            }
+
             // ===== SERVICE =====
             html += '<div class="stat-table-card">' +
                 '<div class="stat-table-header service">Service</div>' +
                 '<table class="detail-stats-table"><thead><tr>' +
-                '<th>Tot</th><th>Ace</th><th>FS</th>' +
+                '<th>Tot</th><th>Ace</th><th>S+</th><th>FS</th><th>Moy</th>' +
                 '</tr></thead><tbody>';
             players.forEach(name => {
                 const p = stats[name];
                 html += '<tr>' +
                     '<td>' + (p.service.tot || '-') + '</td>' +
                     cell(p.service.ace, 'positive') +
+                    cell(p.service.splus, 'positive') +
                     cell(p.service.fser, 'negative') +
+                    '<td class="' + srvMoyClass(p) + '">' + srvMoy(p) + '</td>' +
                 '</tr>';
             });
             html += '<tr class="total-row">' +
                 '<td>' + (totals.service.tot || '-') + '</td>' +
                 cell(totals.service.ace, 'positive') +
+                cell(totals.service.splus, 'positive') +
                 cell(totals.service.fser, 'negative') +
+                '<td class="' + srvMoyClass({ service: totals.service }) + '">' + srvMoy({ service: totals.service }) + '</td>' +
             '</tr></tbody></table></div>';
 
             // ===== RÉCEPTION =====
             html += '<div class="stat-table-card">' +
                 '<div class="stat-table-header reception">Réception</div>' +
                 '<table class="detail-stats-table"><thead><tr>' +
-                '<th>Tot</th><th>R+</th><th>R-</th><th>FR</th>' +
+                '<th>Tot</th><th>R4</th><th>R3</th><th>R2</th><th>R1</th><th>FR</th>' +
                 '</tr></thead><tbody>';
             players.forEach(name => {
                 const p = stats[name];
                 html += '<tr>' +
                     '<td>' + (p.reception.tot || '-') + '</td>' +
-                    cell(p.reception.rplus, 'positive') +
-                    cell(p.reception.rminus, 'neutral') +
+                    cell(p.reception.r4, 'positive') +
+                    cell(p.reception.r3, 'positive') +
+                    cell(p.reception.r2, 'neutral') +
+                    cell(p.reception.r1, 'negative') +
                     cell(p.reception.frec, 'negative') +
                 '</tr>';
             });
             html += '<tr class="total-row">' +
                 '<td>' + (totals.reception.tot || '-') + '</td>' +
-                cell(totals.reception.rplus, 'positive') +
-                cell(totals.reception.rminus, 'neutral') +
+                cell(totals.reception.r4, 'positive') +
+                cell(totals.reception.r3, 'positive') +
+                cell(totals.reception.r2, 'neutral') +
+                cell(totals.reception.r1, 'negative') +
                 cell(totals.reception.frec, 'negative') +
             '</tr></tbody></table></div>';
 
@@ -940,6 +987,8 @@
                 'attack_net_choice': '<span class="highlight">Attaque filet</span> — Faute ou cliquez le terrain = block',
                 'attack_net_block_player': '<span class="highlight">Block au filet</span> — Qui block ?',
                 'attack_net_block_end': '<span class="highlight">Block au filet</span> — Cliquez où arrive le block',
+                'bloc_out_player': '<span class="highlight">Bloc out</span> — Qui a bloqué ?',
+                'bloc_out_trajectory': '<span class="highlight">Bloc out</span> — Cliquez où va la balle',
                 'direct_return_end': '<span class="highlight">Retour direct</span> — Cliquez où arrive le retour',
                 'pass': '<span class="highlight">Passe</span> — Cliquez le terrain (= Passeur) ou sélectionnez un joueur',
                 'pass_end': '<span class="highlight">Passe</span> — _PASSER_ Cliquez où arrive la passe',
@@ -949,7 +998,7 @@
                 'attack_player': '<span class="highlight">Attaque</span> — Cliquez le terrain ou sélectionnez un joueur',
                 'attack_type': '<span class="highlight">Attaque</span> — _ATTACKER_ Type ou cliquez = <span class="phase-smash-badge">💪 Smash</span>',
                 'attack_end': '<span class="highlight">Attaque</span> — _ATTACKER_ Cliquez où arrive l\'attaque',
-                'result': '<span class="highlight">Résultat</span> — Qu\'est-ce qui s\'est passé ?',
+                'result': '<span class="highlight">Résultat</span> — Cliquez le terrain = <span class="phase-defended-badge">🛡️ Défendu</span>',
                 'block_end': '<span class="highlight">Block</span> — Cliquez où arrive le block',
                 'defense': '<span class="highlight">Défense</span> — Sélectionnez le défenseur',
                 'defense_end': '<span class="highlight">Défense</span> — _DEFENDER_ Cliquez où arrive la défense',
@@ -1263,7 +1312,19 @@
                     }
                     if (!clickedPlayer) return;
 
-                    if (gameState.phase === 'defense') {
+                    if (gameState.phase === 'result') {
+                        // Phase résultat : clic zone défense = tout en 1 clic
+                        // Défendu + défenseur + position défense → directement phase passe
+                        const courtHalf = container.closest('.court-half');
+                        const courtRect = courtHalf.getBoundingClientRect();
+                        const cx = ((e.clientX - courtRect.left) / courtRect.width) * 100;
+                        const cy = ((e.clientY - courtRect.top) / courtRect.height) * 100;
+                        const cSide = courtHalf.id === 'courtTop' ? 'top' : 'bottom';
+                        const defClickData = { x: cx, y: cy, courtSide: cSide };
+
+                        handleResultDefenseZoneClick(clickedPlayer, defClickData);
+
+                    } else if (gameState.phase === 'defense') {
                         // Phase defense : auto-sélection du défenseur
                         hideDefenseZones();
                         selectDefender(clickedPlayer);
@@ -1329,7 +1390,19 @@
             // Auto-sélection défenseur via zones de défense prolongées hors terrain
             // Pour les phases où les zones sont visibles, projeter le clic sur le terrain
             // pour déterminer quel défenseur est le plus proche
-            if (gameState.phase === 'defense') {
+            if (gameState.phase === 'result') {
+                // Phase résultat : clic out = auto "Défendu"
+                // Essayer d'identifier le défenseur par zone prolongée
+                const nearestPlayer = findNearestDefenseZonePlayer(event);
+                if (nearestPlayer) {
+                    // Zone identifiée → tout en 1 clic (Défendu + défenseur + position out)
+                    handleResultDefenseZoneClick(nearestPlayer, clickData);
+                } else {
+                    // Pas de zone → juste auto "Défendu", flux normal
+                    selectResult('defended');
+                }
+                return;
+            } else if (gameState.phase === 'defense') {
                 // Après un block, la balle peut sortir du terrain mais être défendue
                 const nearestPlayer = findNearestDefenseZonePlayer(event);
                 if (nearestPlayer) {
@@ -1354,6 +1427,8 @@
                 handleReceptionFaultTrajectoryEnd(clickData);
             } else if (gameState.phase === 'defense_fault_trajectory') {
                 handleDefenseFaultTrajectoryEnd(clickData);
+            } else if (gameState.phase === 'bloc_out_trajectory') {
+                handleBlocOutTrajectoryEnd(clickData);
             } else if (gameState.phase === 'pass_end') {
                 handlePassEnd(clickData);
             } else if (gameState.phase === 'pass') {
@@ -1499,11 +1574,18 @@
                 case 'pass_net_choice':
                     handleNetChoiceCourtClick(clickData, 'pass');
                     break;
+                case 'result':
+                    // Clic terrain en phase résultat = auto "Défendu"
+                    handleResultCourtClick(clickData);
+                    break;
                 case 'defense_end':
                     handleDefenseEnd(clickData);
                     break;
                 case 'defense_fault_trajectory':
                     handleDefenseFaultTrajectoryEnd(clickData);
+                    break;
+                case 'bloc_out_trajectory':
+                    handleBlocOutTrajectoryEnd(clickData);
                     break;
             }
         }
@@ -1999,6 +2081,47 @@
             document.getElementById('qualityZonesBottom').classList.remove('active');
         }
 
+        function showDefenseQualityZones(team) {
+            // Afficher la zone D+ sur le terrain de l'équipe qui défend
+            const defendingTeam = team || gameState.attackingTeam;
+            const courtSide = getCourtSideForTeam(defendingTeam);
+            if (courtSide === 'top') {
+                document.getElementById('defQualityZonesTop').classList.add('active');
+            } else {
+                document.getElementById('defQualityZonesBottom').classList.add('active');
+            }
+        }
+
+        function hideDefenseQualityZones() {
+            document.getElementById('defQualityZonesTop').classList.remove('active');
+            document.getElementById('defQualityZonesBottom').classList.remove('active');
+        }
+
+        function calculateDefenseQuality(clickData) {
+            // Calculer si le clic est dans la zone D+ (demi-cercle proche du filet)
+            const courtSide = getCourtSideForTeam(gameState.attackingTeam);
+
+            // Distance depuis le filet (en %)
+            let distanceFromNet;
+            if (courtSide === 'top') {
+                distanceFromNet = 100 - clickData.y;
+            } else {
+                distanceFromNet = clickData.y;
+            }
+
+            // Distance horizontale depuis le centre (en %)
+            const distX = Math.abs(clickData.x - 50);
+
+            // Zone D+ : demi-ellipse de 43% largeur (semi-axe = 21.5%) et 50% hauteur
+            const ratio = Math.sqrt(Math.pow(distX / 21.5, 2) + Math.pow(distanceFromNet / 50, 2));
+
+            if (ratio <= 1) {
+                return 'positive'; // D+
+            } else {
+                return 'negative'; // D-
+            }
+        }
+
         function handleReceptionFault() {
             // Faute de réception = on entre en mode trajectoire pour savoir où va la balle
             gameState.currentAction.quality = { score: 0, label: 'Faute' };
@@ -2409,6 +2532,39 @@
                 awardPoint(defendingTeam);
                 endRally();
                 
+            } else if (choice === 'bloc_out') {
+                // Bloc out depuis attaque filet : la balle sort du bloc, point pour l'attaquant
+                const blockingTeamBO = gameState.attackingTeam === 'home' ? 'away' : 'home';
+                const lastAttackActionBO = gameState.rally[gameState.rally.length - 1];
+                if (lastAttackActionBO) {
+                    lastAttackActionBO.result = 'bloc_out';
+                }
+
+                // Auto-sélection du bloqueur si disponible
+                if (gameState.autoSelectedBlocker) {
+                    const blocker = gameState.autoSelectedBlocker;
+                    delete gameState.autoSelectedBlocker;
+                    delete gameState.autoSelectedBlockerRole;
+                    gameState.defenseAutoSelected = false;
+                    gameState.defenseAutoPlayer = null;
+                    hideDefenseZones();
+                    // Enregistrer le block out puis demander la trajectoire
+                    gameState.rally.push({
+                        type: 'block',
+                        player: blocker,
+                        team: blockingTeamBO,
+                        role: getPlayerRole(blockingTeamBO, blocker),
+                        result: 'bloc_out'
+                    });
+                    startBlocOutTrajectory();
+                    return;
+                }
+
+                hideDefenseZones();
+                gameState.blocOutPending = true;
+                gameState.phase = 'bloc_out_player';
+                updatePhase();
+                renderPlayerSelection(blockingTeamBO, 'Qui a bloqué ?');
             } else if (choice === 'block') {
                 // Attaque dans le filet ←' l'équipe adverse block
                 const blockingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
@@ -3130,12 +3286,56 @@
                 gameState.phase = 'result';
                 updatePhase();
                 showSection('resultSelection');
+
+                // Activer la zone out pour les défenses hors terrain
+                const defTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+                document.getElementById('outArea').classList.add('active');
+                const defCourtSide = getCourtSideForTeam(defTeam);
+                document.getElementById('outLabelTop').style.display = defCourtSide === 'top' ? 'block' : 'none';
+                document.getElementById('outLabelBottom').style.display = defCourtSide === 'bottom' ? 'block' : 'none';
+
+                // Afficher les zones de défense pour permettre l'auto-sélection
+                // Un clic dans une zone = auto "Défendu" + défenseur pré-sélectionné
+                const attackerRole = gameState.currentAction.role;
+                if (attackerRole) {
+                    showDefenseZones(defTeam, attackerRole);
+                }
             }
+        }
+
+        function handleResultCourtClick(clickData) {
+            // En phase résultat, un clic sur le terrain (hors zone défense) = auto "Défendu"
+            // Passe au flux normal defense (sélection du défenseur)
+            selectResult('defended');
+        }
+
+        function handleResultDefenseZoneClick(defenderName, clickData) {
+            // Clic dans une zone de défense en phase résultat :
+            // 1. Marquer l'attaque comme "defended"
+            const lastAction = gameState.rally[gameState.rally.length - 1];
+            lastAction.result = 'defended';
+
+            // 2. Cacher les zones de défense et le panneau résultat
+            hideDefenseZones();
+            document.getElementById('outArea').classList.remove('active');
+
+            // 3. Changer l'équipe attaquante (celle qui défend va contre-attaquer)
+            const newAttackingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+            gameState.attackingTeam = newAttackingTeam;
+
+            // 4. Passer par selectDefender pour afficher la zone D+ et attendre le clic position
+            gameState.defenseAutoSelected = false;
+            gameState.defenseAutoPlayer = null;
+            selectDefender(defenderName);
         }
 
         function selectResult(result) {
             const lastAction = gameState.rally[gameState.rally.length - 1];
             lastAction.result = result;
+
+            // Cacher les zones de défense et désactiver la zone out affichées en phase result
+            hideDefenseZones();
+            document.getElementById('outArea').classList.remove('active');
 
             if (result === 'point') {
                 // Point pour l'équipe qui attaque
@@ -3193,6 +3393,34 @@
                         renderPlayerSelection(newAttackingTeam, 'Qui défend ?');
                     }
                 }
+            } else if (result === 'bloc_out') {
+                // Bloc out : la balle sort du bloc, point pour l'attaquant
+                const blockingTeamBO = gameState.attackingTeam === 'home' ? 'away' : 'home';
+                gameState.defenseAutoSelected = false;
+                gameState.defenseAutoPlayer = null;
+
+                // Auto-sélection du bloqueur si disponible
+                if (gameState.autoSelectedBlocker) {
+                    const blocker = gameState.autoSelectedBlocker;
+                    delete gameState.autoSelectedBlocker;
+                    delete gameState.autoSelectedBlockerRole;
+                    hideDefenseZones();
+                    gameState.rally.push({
+                        type: 'block',
+                        player: blocker,
+                        team: blockingTeamBO,
+                        role: getPlayerRole(blockingTeamBO, blocker),
+                        result: 'bloc_out'
+                    });
+                    startBlocOutTrajectory();
+                    return;
+                }
+
+                gameState.blocOutPending = true;
+                gameState.phase = 'bloc_out_player';
+                updatePhase();
+                hideAllSections();
+                renderPlayerSelection(blockingTeamBO, 'Qui a bloqué ?');
             } else if (result === 'blocked') {
                 // Blockée : on demande d'abord où arrive le block
                 gameState.defenseAutoSelected = false;
@@ -3207,6 +3435,77 @@
                 // Le block arrive sur le terrain de l'attaquant
                 highlightCourt(gameState.attackingTeam);
             }
+        }
+
+        // ==================== BLOC OUT ====================
+        function selectBlocOutPlayer(playerName) {
+            const blockingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+            const lastAttack = [...gameState.rally].reverse().find(a => a.type === 'attack');
+
+            // Marquer l'attaque comme bloc_out
+            if (lastAttack) {
+                lastAttack.result = 'bloc_out';
+            }
+
+            // Enregistrer le block out dans le rally
+            gameState.rally.push({
+                type: 'block',
+                player: playerName,
+                team: blockingTeam,
+                role: getPlayerRole(blockingTeam, playerName),
+                result: 'bloc_out'
+            });
+
+            delete gameState.blocOutPending;
+            // Passer en mode trajectoire pour enregistrer les coordonnées du bloc out
+            startBlocOutTrajectory();
+        }
+
+        function startBlocOutTrajectory() {
+            gameState.phase = 'bloc_out_trajectory';
+            updatePhase();
+            hideAllSections();
+            document.getElementById('blocOutTrajectory').classList.remove('hidden');
+
+            // Activer les deux terrains et la zone out
+            document.getElementById('outArea').classList.add('active');
+            document.getElementById('outLabelTop').style.display = 'block';
+            document.getElementById('outLabelBottom').style.display = 'block';
+            highlightCourt(null);
+        }
+
+        function handleBlocOutTrajectoryEnd(clickData) {
+            // Enregistrer les coordonnées du bloc out sur le dernier block du rally
+            const lastBlock = [...gameState.rally].reverse().find(a => a.type === 'block');
+            if (lastBlock) {
+                lastBlock.endPos = clickData;
+                // startPos = position de l'attaque au filet
+                const lastAttack = [...gameState.rally].reverse().find(a => a.type === 'attack');
+                if (lastAttack && lastAttack.endPos) {
+                    lastBlock.startPos = lastAttack.endPos;
+                    drawArrow(lastAttack.endPos, clickData, 'block-touch');
+                }
+            }
+            addMarker(clickData, 'block-touch');
+
+            // Désactiver zones
+            document.getElementById('outArea').classList.remove('active');
+            document.getElementById('blocOutTrajectory').classList.add('hidden');
+
+            // Terminer le point — utiliser blocOutAttackingTeam si défini (cas vue défense)
+            const pointWinner = gameState.blocOutAttackingTeam || gameState.attackingTeam;
+            delete gameState.blocOutAttackingTeam;
+            awardPoint(pointWinner);
+            endRally();
+        }
+
+        function skipBlocOutTrajectory() {
+            document.getElementById('outArea').classList.remove('active');
+            document.getElementById('blocOutTrajectory').classList.add('hidden');
+            const pointWinner = gameState.blocOutAttackingTeam || gameState.attackingTeam;
+            delete gameState.blocOutAttackingTeam;
+            awardPoint(pointWinner);
+            endRally();
         }
 
         // ==================== BLOCK ====================
@@ -3261,6 +3560,9 @@
             // Afficher le bouton Défense faute
             document.getElementById('defenseFaultSection').classList.remove('hidden');
 
+            // Afficher la zone de qualité D+
+            showDefenseQualityZones();
+
             // Permettre de cliquer sur les deux terrains (défense peut aller chez l'adversaire)
             highlightCourt(null); // Pas de highlight spécifique, les deux terrains sont cliquables
 
@@ -3273,8 +3575,9 @@
         }
 
         function handleDefenseEnd(clickData) {
-            // Désactiver la zone out
+            // Désactiver la zone out et cacher la zone D+
             document.getElementById('outArea').classList.remove('active');
+            hideDefenseQualityZones();
 
             // Vérifier si la défense va dans le terrain adverse
             const defendingTeam = gameState.attackingTeam;
@@ -3286,7 +3589,14 @@
                 handleDefenseDirectReturn(clickData);
                 return;
             }
-            
+
+            // Calculer la qualité de la défense (D+ ou D-)
+            if (clickData.courtSide === 'out') {
+                gameState.currentAction.defenseQuality = 'negative'; // D-
+            } else {
+                gameState.currentAction.defenseQuality = calculateDefenseQuality(clickData);
+            }
+
             gameState.currentAction.endPos = clickData;
             // startPos = arrivee de l'attaque/block/retour direct precedent
             const prevActionForDefStart = gameState.rally[gameState.rally.length - 1];
@@ -3378,7 +3688,39 @@
         }
 
 
+        function handleDefenseBlocOut() {
+            // Cacher la zone D+
+            hideDefenseQualityZones();
+            // Bloc out depuis la vue défense : le bloc a déjà été enregistré dans le rally
+            // L'équipe qui défend (attackingTeam) perd le point, l'attaquant adverse gagne
+            const defendingTeam = gameState.attackingTeam;
+            const attackingTeam = defendingTeam === 'home' ? 'away' : 'home';
+
+            // Retrouver le dernier bloc dans le rally et marquer comme bloc_out
+            const lastBlock = [...gameState.rally].reverse().find(a => a.type === 'block');
+            if (lastBlock) {
+                lastBlock.result = 'bloc_out';
+            }
+
+            // Retrouver la dernière attaque adverse et marquer comme bloc_out
+            const lastAttack = [...gameState.rally].reverse().find(a => a.type === 'attack');
+            if (lastAttack) {
+                lastAttack.result = 'bloc_out';
+            }
+
+            // Annuler l'action de défense en cours (pas de défense enregistrée)
+            gameState.currentAction = {};
+
+            // Sauvegarder l'équipe attaquante pour le point (avant changement de contexte)
+            gameState.blocOutAttackingTeam = attackingTeam;
+
+            // Passer en mode trajectoire
+            startBlocOutTrajectory();
+        }
+
         function handleDefenseFault() {
+            // Cacher la zone D+
+            hideDefenseQualityZones();
             // Défense faute = passer en mode trajectoire pour savoir où va la balle
             gameState.currentAction.result = 'fault';
 
@@ -4120,107 +4462,231 @@
         function recalculateAllStats() {
             // Réinitialiser les stats
             initSetStats();
-            
+
             // Parcourir tous les points enregistrés
             if (currentSet.points) {
                 for (const point of currentSet.points) {
-                    for (const action of point.rally) {
-                        updateStatFromAction(action);
-                    }
+                    updateStatsFromRally(point.rally);
                 }
             }
-            
+
             renderStatsTables();
         }
 
-        function updateStatFromAction(action) {
-            const team = action.team;
-            const player = action.player;
-
-            if (!team) return;
-            // Bloc sans joueur (cas 'blocked') : on ignore pour les stats joueur
-            if (!player) return;
-
-            // S'assurer que le joueur existe dans les stats
+        // Helper : obtenir les stats d'un joueur (avec init auto)
+        function getPlayerStats(team, player) {
+            if (!team || !player) return null;
             if (!setStats[team][player]) {
                 setStats[team][player] = initPlayerStats();
             }
+            return setStats[team][player];
+        }
 
-            const stats = setStats[team][player];
+        // Qualité de réception → note numérique (pour Moy serveur)
+        function receptionQualityToNote(quality) {
+            if (!quality || !quality.label) return null;
+            switch (quality.label) {
+                case 'Excellente': return 4;
+                case 'Positive':   return 3;
+                case 'Jouable':    return 2;
+                case 'Négative':   return 1;
+                case 'Faute':      return 0;
+                default: return null;
+            }
+        }
 
-            switch (action.type) {
-                case 'service':
-                    stats.service.tot++;
-                    if (action.result === 'ace') {
-                        stats.service.ace++;
-                    } else if (action.result === 'fault' || action.result === 'fault_out' || action.result === 'fault_net') {
-                        stats.service.fser++;
-                    }
-                    break;
+        // Chercher la prochaine action d'un certain type après l'index donné dans le rally
+        function findNextAction(rally, afterIndex, type) {
+            for (let i = afterIndex + 1; i < rally.length; i++) {
+                if (rally[i].type === type) return { action: rally[i], index: i };
+            }
+            return null;
+        }
 
-                case 'reception':
-                    stats.reception.tot++;
-                    if (action.quality) {
-                        switch (action.quality.label) {
-                            case 'Excellente':
-                                stats.reception.rplus++;
-                                break;
-                            case 'Positive':
-                                // Neutre : juste tot++
-                                break;
-                            case 'Jouable':
-                                stats.reception.rminus++;
-                                break;
-                            case 'Négative':
-                                stats.reception.rminus++;
-                                break;
-                            case 'Faute':
-                                stats.reception.frec++;
-                                break;
+        // Chercher la prochaine action "pass" de l'équipe adverse après un index donné
+        function hasPassAfter(rally, afterIndex, oppositeTeam) {
+            for (let i = afterIndex + 1; i < rally.length; i++) {
+                if (rally[i].type === 'pass' && rally[i].team === oppositeTeam) return true;
+            }
+            return false;
+        }
+
+        function updateStatsFromRally(rally) {
+            if (!rally || rally.length === 0) return;
+
+            for (let i = 0; i < rally.length; i++) {
+                const action = rally[i];
+                const team = action.team;
+                const player = action.player;
+
+                if (!team || !player) continue;
+
+                const stats = getPlayerStats(team, player);
+                if (!stats) continue;
+
+                switch (action.type) {
+                    case 'service': {
+                        stats.service.tot++;
+                        if (action.result === 'ace') {
+                            stats.service.ace++;
+                            // Ace = note 0 dans Moy, géré dans srvMoy() : (recSumAdv) / (recCountAdv + ace)
+                        } else if (action.result === 'fault' || action.result === 'fault_out' || action.result === 'fault_net') {
+                            stats.service.fser++;
+                        } else {
+                            // Service in : chercher la réception adverse pour S+ et Moy
+                            const recAction = findNextAction(rally, i, 'reception');
+                            if (recAction) {
+                                const recQuality = recAction.action.quality;
+                                const note = receptionQualityToNote(recQuality);
+                                if (note !== null) {
+                                    stats.service.recSumAdv += note;
+                                    stats.service.recCountAdv++;
+                                    // S+ = faute de réception adverse (note 0)
+                                    if (note === 0) {
+                                        stats.service.splus++;
+                                    }
+                                }
+                            }
                         }
+                        break;
                     }
-                    // Retour gagnant = Att+ pour le réceptionneur
-                    if (action.isDirectReturnWinner) {
+
+                    case 'reception': {
+                        stats.reception.tot++;
+                        if (action.quality) {
+                            switch (action.quality.label) {
+                                case 'Excellente': stats.reception.r4++; break;
+                                case 'Positive':   stats.reception.r3++; break;
+                                case 'Jouable':    stats.reception.r2++; break;
+                                case 'Négative':   stats.reception.r1++; break;
+                                case 'Faute':      stats.reception.frec++; break;
+                            }
+                        }
+                        // Retour gagnant = Att+ pour le réceptionneur
+                        if (action.isDirectReturnWinner) {
+                            stats.attack.tot++;
+                            stats.attack.attplus++;
+                        }
+                        break;
+                    }
+
+                    case 'attack': {
                         stats.attack.tot++;
-                        stats.attack.attplus++;
-                    }
-                    break;
+                        const oppositeTeam = team === 'home' ? 'away' : 'home';
 
-                case 'attack':
-                    stats.attack.tot++;
-                    if (action.attackType === 'faute') {
-                        stats.attack.fatt++;
-                        stats.attack.attminus++;
-                    } else if (action.result === 'fault_net') {
-                        stats.attack.fatt++;
-                        stats.attack.attminus++;
-                    } else if (action.result === 'point') {
-                        stats.attack.attplus++;
-                    } else if (action.result === 'out') {
-                        stats.attack.fatt++;
-                        stats.attack.attminus++;
-                    } else if (action.result === 'blocked') {
-                        stats.attack.bp++;
-                        stats.attack.attminus++;
+                        if (action.attackType === 'faute' || action.result === 'fault_net' || action.result === 'out') {
+                            // FA : faute d'attaque (filet, out, faute technique)
+                            stats.attack.fatt++;
+                        } else if (action.result === 'point') {
+                            // Kill direct → A+
+                            stats.attack.attplus++;
+                        } else if (action.result === 'bloc_out') {
+                            // Bloc out → A+ (l'attaquant gagne le point)
+                            stats.attack.attplus++;
+                        } else if (action.result === 'blocked') {
+                            // BP : bloc pris (la balle revient chez l'attaquant)
+                            stats.attack.bp++;
+                        } else if (action.result === 'defended') {
+                            // Vérifier s'il y a une passe adverse après (= jeu organisé = A-)
+                            // Ou pas de passe = A+ (défense faute, retour direct gagnant adverse, etc.)
+                            if (hasPassAfter(rally, i, oppositeTeam)) {
+                                // L'adversaire a organisé son jeu → A- (neutre)
+                                stats.attack.attminus++;
+                            } else {
+                                // Pas de passe adverse = l'attaque a quand même forcé l'erreur → A+
+                                // Cas : défense faute, retour direct raté, etc.
+                                stats.attack.attplus++;
+                            }
+                        }
+                        break;
                     }
-                    // defended = ni plus ni minus
-                    break;
 
-                case 'defense':
-                    stats.defense.tot++;
-                    if (action.result === 'fault') {
-                        stats.defense.fdef++;
-                        stats.defense.defminus++;
-                    } else {
-                        // Défense réussie (normale ou retour direct)
-                        stats.defense.defplus++;
+                    case 'defense': {
+                        stats.defense.tot++;
+                        if (action.result === 'fault') {
+                            // Vérifier si un bloc précède cette défense dans le même échange
+                            // Si oui → D- (responsabilité partagée avec le bloqueur)
+                            // Si non → FD (100% faute du défenseur)
+                            let hasBlockBefore = false;
+                            for (let j = i - 1; j >= 0; j--) {
+                                if (rally[j].type === 'block' && rally[j].team === team) {
+                                    hasBlockBefore = true;
+                                    break;
+                                }
+                                // On s'arrête si on trouve une passe de la même équipe (nouvel échange)
+                                if (rally[j].type === 'pass' && rally[j].team === team) break;
+                                if (rally[j].type === 'attack' && rally[j].team === team) break;
+                            }
+                            if (hasBlockBefore) {
+                                stats.defense.defminus++; // D- (bloc + défense ratée = responsabilité partagée)
+                            } else {
+                                stats.defense.fdef++; // FD (pas de bloc, défenseur seul responsable)
+                            }
+                        } else {
+                            // Défense réussie : utiliser defenseQuality si disponible
+                            if (action.defenseQuality === 'positive') {
+                                stats.defense.defplus++; // D+ (dans la zone)
+                            } else if (action.defenseQuality === 'negative') {
+                                stats.defense.defminus++; // D- (hors zone)
+                            } else {
+                                // Pas de defenseQuality enregistrée (ancien format) → D+ par défaut
+                                stats.defense.defplus++;
+                            }
+                        }
+                        break;
                     }
-                    break;
 
-                case 'block':
-                    stats.block.tot++;
-                    stats.block.blcplus++;
-                    break;
+                    case 'block': {
+                        stats.block.tot++;
+                        if (action.result === 'bloc_out') {
+                            // FB : bloc out
+                            stats.block.fblc++;
+                        } else if (action.result === 'kill' || action.result === 'point') {
+                            // B+ : bloc kill direct
+                            stats.block.blcplus++;
+                        } else {
+                            // Bloc touché : analyser la suite du rally
+                            // Chercher la première défense après le bloc (peu importe l'équipe)
+                            let blockOutcome = 'unknown';
+                            for (let j = i + 1; j < rally.length; j++) {
+                                if (rally[j].type === 'defense') {
+                                    if (rally[j].result === 'fault') {
+                                        // Défense ratée : qui a raté ?
+                                        if (rally[j].team === team) {
+                                            // L'équipe du bloqueur rate sa défense → FB
+                                            blockOutcome = 'own_defense_fault';
+                                        } else {
+                                            // L'adversaire rate sa défense → B+ (bloc kill indirect)
+                                            blockOutcome = 'opponent_defense_fault';
+                                        }
+                                    } else {
+                                        // Défense réussie → B- (le jeu continue)
+                                        blockOutcome = 'play_continues';
+                                    }
+                                    break;
+                                }
+                                // Si on trouve une passe ou attaque sans défense préalable
+                                // → le jeu a continué → B-
+                                if (rally[j].type === 'pass' || rally[j].type === 'attack') {
+                                    blockOutcome = 'play_continues';
+                                    break;
+                                }
+                            }
+                            if (blockOutcome === 'play_continues') {
+                                stats.block.blcminus++; // B- : bloc touché, neutre, le jeu continue
+                            } else if (blockOutcome === 'own_defense_fault') {
+                                stats.block.fblc++; // FB : bloc qui n'a pas permis la défense de son équipe
+                            } else if (blockOutcome === 'opponent_defense_fault') {
+                                stats.block.blcplus++; // B+ : bloc kill (adversaire rate sa défense)
+                            } else {
+                                // unknown = fin du rally après le bloc sans suite claire
+                                // Probablement le bloc a fait le point → B+
+                                stats.block.blcplus++;
+                            }
+                        }
+                        break;
+                    }
+                }
             }
         }
 

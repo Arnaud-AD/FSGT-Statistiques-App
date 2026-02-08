@@ -161,6 +161,16 @@
             font-size: 0.85em;
         }
 
+        .phase-indicator .phase-defended-badge {
+            display: inline-block;
+            background: #f59e0b;
+            color: #fff;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+        }
+
         /* Court container */
         .court-container {
             background: var(--court-blue);
@@ -653,6 +663,16 @@
 
         .action-tag.point:hover {
             background: #059669;
+            color: white;
+        }
+
+        .action-tag.bloc-out {
+            border-color: #ea580c;
+            color: #ea580c;
+        }
+
+        .action-tag.bloc-out:hover {
+            background: #ea580c;
             color: white;
         }
 
@@ -1651,6 +1671,48 @@
         #qualityZonesBottom .quality-zone.perfect {
             width: 40%;
             height: 30%;
+            top: 0;
+            border-radius: 0 0 50% 50%;
+        }
+
+        /* Zones de qualité de défense (D+) */
+        .defense-quality-zones {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            overflow: hidden;
+        }
+
+        .defense-quality-zones.active {
+            opacity: 1;
+        }
+
+        .defense-quality-zone.positive {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #3b82f6;
+            opacity: 0.4;
+            z-index: 1;
+        }
+
+        /* Terrain du haut (filet en bas) - demi-cercle vers le haut depuis le filet */
+        #defQualityZonesTop .defense-quality-zone.positive {
+            width: 43%;
+            height: 50%;
+            bottom: 0;
+            border-radius: 50% 50% 0 0;
+        }
+
+        /* Terrain du bas (filet en haut) - demi-cercle vers le bas depuis le filet */
+        #defQualityZonesBottom .defense-quality-zone.positive {
+            width: 43%;
+            height: 50%;
             top: 0;
             border-radius: 0 0 50% 50%;
         }
