@@ -658,6 +658,21 @@
                 </div>
             </div>
 
+            <!-- Lien vidéo YouTube -->
+            <div class="option-card">
+                <div class="option-label">
+                    <svg fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22.97.22 1.49v8.68c0 .52-.09 1.02-.22 1.49-.34 1.25-1.33 2.24-2.58 2.58-.47.13-.97.22-1.49.22H6.51c-.52 0-1.02-.09-1.49-.22-1.25-.34-2.24-1.33-2.58-2.58C2.31 17.36 2.22 16.86 2.22 16.34V7.66c0-.52.09-1.02.22-1.49.34-1.25 1.33-2.24 2.58-2.58C5.49 3.46 5.99 3.37 6.51 3.37h10.98c.52 0 1.02.09 1.49.22 1.25.34 2.24 1.33 2.58 2.58z"/>
+                    </svg>
+                    Vidéo YouTube du set
+                </div>
+                <input type="url" id="youtubeUrl"
+                       placeholder="https://www.youtube.com/watch?v=..."
+                       style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px; font-family: inherit; background: white;"
+                       onfocus="this.style.borderColor='var(--accent-blue)'"
+                       onblur="this.style.borderColor='var(--border-color)'">
+            </div>
+
             <!-- Points de mixité -->
             <div class="mixite-section">
                 <div class="mixite-title">
@@ -756,6 +771,10 @@
                     const servingRadio = document.getElementById(currentSet.servingTeam === 'home' ? 'servingHome' : 'servingAway');
                     if (servingRadio) servingRadio.checked = true;
                 }
+                // URL YouTube
+                if (currentSet.youtubeUrl) {
+                    document.getElementById('youtubeUrl').value = currentSet.youtubeUrl;
+                }
             }
 
             updateScorePreview();
@@ -817,6 +836,8 @@
                 currentMatch.sets[setIndex].isFilmed = isFilmed;
                 
                 if (isFilmed) {
+                    const youtubeUrl = document.getElementById('youtubeUrl').value.trim();
+                    currentMatch.sets[setIndex].youtubeUrl = youtubeUrl || '';
                     currentMatch.sets[setIndex].cameraSide = cameraSide;
                     currentMatch.sets[setIndex].servingTeam = servingTeam;
                     currentMatch.sets[setIndex].homeScore = mixiteHome;

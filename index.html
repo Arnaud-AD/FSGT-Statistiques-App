@@ -73,17 +73,16 @@
             margin-top: 2px;
         }
 
-        /* Bandeau match en cours */
+        /* Bandeau match en cours (style harmonisé avec nouveau-match.html) */
         .resume-banner {
             display: none;
             align-items: center;
-            gap: 14px;
-            padding: 14px 18px;
-            background: linear-gradient(135deg, #fff8f4, #fff1eb);
+            gap: 12px;
+            padding: 16px;
+            background: #fff8f4;
             border: 1px solid var(--accent-orange);
             border-radius: 12px;
             margin-bottom: 24px;
-            cursor: pointer;
             transition: all 0.2s ease;
         }
 
@@ -92,27 +91,27 @@
         }
 
         .resume-banner:hover {
-            box-shadow: 0 2px 12px rgba(255, 107, 53, 0.2);
-            transform: translateY(-1px);
+            background: #fff0e6;
         }
 
-        .resume-banner:active {
-            transform: scale(0.98);
-        }
-
-        .resume-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--accent-orange);
+        .resume-section-header {
             display: flex;
             align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
+            gap: 8px;
+            margin-bottom: 10px;
         }
 
-        .resume-icon svg {
-            fill: white;
+        .resume-section-icon {
+            font-size: 14px;
+        }
+
+        .resume-section-label {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--accent-orange);
         }
 
         .resume-content {
@@ -120,26 +119,66 @@
             min-width: 0;
         }
 
-        .resume-title {
-            font-family: 'Google Sans', sans-serif;
+        .resume-opponent {
             font-size: 14px;
             font-weight: 500;
-            color: var(--accent-orange-dark);
+            color: var(--text-primary);
+            margin-bottom: 2px;
         }
 
-        .resume-detail {
+        .resume-location {
             font-size: 12px;
             color: var(--text-secondary);
-            margin-top: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        .resume-arrow {
+        .resume-status {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .resume-status .set-score {
+            font-weight: 600;
             color: var(--accent-orange);
-            font-size: 20px;
-            flex-shrink: 0;
+        }
+
+        .location-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .location-badge.domicile { background: #d1fae5; color: #059669; }
+        .location-badge.exterieur { background: #fee2e2; color: #dc2626; }
+
+        .resume-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .resume-action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .resume-action-btn.resume {
+            background: var(--accent-orange);
+            color: white;
+        }
+
+        .resume-action-btn.resume:hover {
+            background: var(--accent-orange-dark);
         }
 
         /* Menu principal */
@@ -240,15 +279,19 @@
         </header>
 
         <!-- Bandeau match en cours -->
-        <div id="resumeBanner" class="resume-banner" onclick="resumeMatch()">
-            <div class="resume-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-            </div>
+        <div class="resume-section-header" id="resumeSectionHeader" style="display:none;">
+            <span class="resume-section-icon">⚡</span>
+            <span class="resume-section-label">En cours</span>
+        </div>
+        <div id="resumeBanner" class="resume-banner">
             <div class="resume-content">
-                <div class="resume-title">Match en cours</div>
-                <div class="resume-detail" id="resumeDetail"></div>
+                <div class="resume-opponent" id="resumeOpponent"></div>
+                <div class="resume-location" id="resumeLocation"></div>
+                <div class="resume-status" id="resumeStatus"></div>
             </div>
-            <span class="resume-arrow">›</span>
+            <div class="resume-actions">
+                <button class="resume-action-btn resume" onclick="resumeMatch()">Reprendre</button>
+            </div>
         </div>
 
         <!-- Menu principal -->
@@ -308,43 +351,46 @@
         function checkInProgressMatch() {
             const currentId = Storage.getCurrentMatchId();
             const banner = document.getElementById('resumeBanner');
-            const detail = document.getElementById('resumeDetail');
+            const sectionHeader = document.getElementById('resumeSectionHeader');
+
+            let match = null;
 
             if (currentId) {
-                const match = Storage.getMatchById(currentId);
-                if (match && match.status !== 'completed') {
-                    // Construire le détail
-                    const opponent = match.opponent || 'Adversaire';
-                    const setScore = Storage.getSetScore(match);
-                    const setInfo = `Sets ${setScore.homeWins}-${setScore.awayWins}`;
-
-                    // Score du set en cours
-                    let currentSetInfo = '';
-                    if (match.sets && match.sets.length > 0) {
-                        const lastSet = match.sets[match.sets.length - 1];
-                        if (!lastSet.completed) {
-                            const h = lastSet.homeScore || 0;
-                            const a = lastSet.awayScore || 0;
-                            currentSetInfo = ` • Set ${match.sets.length} : ${h}-${a}`;
-                        }
-                    }
-
-                    detail.textContent = `vs ${opponent} — ${setInfo}${currentSetInfo}`;
-                    banner.classList.add('visible');
-                    return;
+                const m = Storage.getMatchById(currentId);
+                if (m && m.status !== 'completed') {
+                    match = m;
                 }
             }
 
             // Vérifier aussi s'il y a un match in_progress sans pointeur actif
-            const allMatches = Storage.getAllMatches();
-            const inProgress = allMatches.find(m => m.status === 'in_progress');
-            if (inProgress) {
-                const opponent = inProgress.opponent || 'Adversaire';
-                const setScore = Storage.getSetScore(inProgress);
-                detail.textContent = `vs ${opponent} — Sets ${setScore.homeWins}-${setScore.awayWins}`;
-                banner.classList.add('visible');
-                banner.dataset.matchId = inProgress.id;
+            if (!match) {
+                const allMatches = Storage.getAllMatches();
+                const inProgress = allMatches.find(m => m.status === 'in_progress');
+                if (inProgress) {
+                    match = inProgress;
+                    banner.dataset.matchId = inProgress.id;
+                }
             }
+
+            if (!match) return;
+
+            const opponent = match.opponent || 'Adversaire';
+            const setScore = Storage.getSetScore(match);
+            const setNum = match.sets ? match.sets.length : 0;
+            const lastSet = match.sets && match.sets.length > 0 ? match.sets[match.sets.length - 1] : null;
+            const live = lastSet && !lastSet.completed ? ` (${lastSet.homeScore||0}-${lastSet.awayScore||0})` : '';
+
+            // Location badge
+            const location = match.location || '';
+            const locClass = location === 'domicile' ? 'domicile' : 'exterieur';
+            const locLabel = location === 'domicile' ? 'Domicile' : (location === 'extérieur' ? 'Extérieur' : '');
+
+            document.getElementById('resumeOpponent').textContent = opponent;
+            document.getElementById('resumeLocation').innerHTML = locLabel ? `<span class="location-badge ${locClass}">${locLabel}</span>` : '';
+            document.getElementById('resumeStatus').innerHTML = `Set ${setNum} • Sets : <span class="set-score">${setScore.homeWins}-${setScore.awayWins}</span>${live}`;
+
+            sectionHeader.style.display = 'flex';
+            banner.classList.add('visible');
         }
 
         function resumeMatch() {

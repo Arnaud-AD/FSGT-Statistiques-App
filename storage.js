@@ -374,3 +374,102 @@ const Storage = {
 
 // Auto-initialize on load
 Storage.init();
+
+// =======================================================================
+// MODE TEST / DÉVELOPPEMENT — À RETIRER UNE FOIS L'APP TERMINÉE
+// Permet d'auto-remplir les joueurs et compositions pour tester rapidement
+// sans devoir tout recréer manuellement après un reset localStorage.
+// =======================================================================
+const DevTestMode = {
+    // Mettre à true pour activer l'auto-remplissage sur chaque page
+    ENABLED: true,
+
+    // Joueurs de test pour Jen et ses Saints
+    HOME_PLAYERS: [
+        { prenom: 'Passeur', poste: ['Passeur'] },
+        { prenom: 'R4', poste: ['R4'] },
+        { prenom: 'Centre', poste: ['Centre'] },
+        { prenom: 'Pointu', poste: ['Pointu'] }
+    ],
+
+    // Joueurs de test pour l'équipe adverse
+    AWAY_PLAYERS: ['Passeur Adv', 'R4 Adv', 'Centre Adv', 'Pointu Adv'],
+
+    /**
+     * Crée le roster de l'équipe si vide (pour equipe.html et match-config.html)
+     * @returns {boolean} true si le roster a été créé
+     */
+    ensureHomePlayers() {
+        if (!this.ENABLED) return false;
+        const existing = Storage.getPlayers();
+        if (existing.length > 0) return false;
+        localStorage.setItem(Storage.KEYS.PLAYERS, JSON.stringify(this.HOME_PLAYERS));
+        console.log('[DEV TEST] Auto-création du roster Jen et ses Saints');
+        return true;
+    },
+
+    /**
+     * Auto-remplit les joueurs adverses dans le match courant (pour match-adverse.html)
+     * @returns {string[]|null} les joueurs adverses ou null si pas d'action
+     */
+    ensureAwayPlayers() {
+        if (!this.ENABLED) return null;
+        const match = Storage.getCurrentMatch();
+        if (!match) return null;
+        if (match.adversePlayers && match.adversePlayers.length > 0) return null;
+        match.adversePlayers = [...this.AWAY_PLAYERS];
+        Storage.saveCurrentMatch(match);
+        console.log('[DEV TEST] Auto-création des joueurs adverses');
+        return this.AWAY_PLAYERS;
+    },
+
+    /**
+     * Auto-place les joueurs sur le terrain (pour match-set-composition.html)
+     * Retourne les positions home et away pré-remplies
+     * @returns {{ home: Object, away: Object }|null}
+     */
+    getAutoLineup() {
+        if (!this.ENABLED) return null;
+        const match = Storage.getCurrentMatch();
+        if (!match) return null;
+
+        const home = {};
+        const away = {};
+        const homePlayers = match.players || [];
+        const awayPlayers = match.adversePlayers || [];
+
+        // Position 1 = Passeur, 2 = R4, 3 = Centre, 4 = Pointu
+        if (homePlayers.length >= 4) {
+            // Trouver le joueur pour chaque poste
+            const findByPoste = (poste) => homePlayers.find(p => {
+                const postes = Array.isArray(p.poste) ? p.poste : [p.poste];
+                return postes.includes(poste);
+            });
+            const passeur = findByPoste('Passeur');
+            const r4 = findByPoste('R4');
+            const centre = findByPoste('Centre');
+            const pointu = findByPoste('Pointu');
+            if (passeur) home[1] = passeur.prenom;
+            if (r4) home[2] = r4.prenom;
+            if (centre) home[3] = centre.prenom;
+            if (pointu) home[4] = pointu.prenom;
+        }
+
+        if (awayPlayers.length >= 4) {
+            // Adversaires : index 0=Passeur(pos4), 1=R4(pos1), 2=Centre(pos2), 3=Pointu(pos3)
+            away[4] = awayPlayers[0]; // Passeur Adv
+            away[1] = awayPlayers[1]; // R4 Adv
+            away[2] = awayPlayers[2]; // Centre Adv
+            away[3] = awayPlayers[3]; // Pointu Adv
+        }
+
+        const allHomeSet = Object.values(home).filter(v => v).length === 4;
+        const allAwaySet = Object.values(away).filter(v => v).length === 4;
+
+        if (allHomeSet && allAwaySet) {
+            console.log('[DEV TEST] Auto-placement des joueurs sur le terrain');
+            return { home, away };
+        }
+        return null;
+    }
+};

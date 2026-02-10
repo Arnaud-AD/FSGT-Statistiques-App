@@ -631,6 +631,11 @@
             }
         }
 
+        // [DEV TEST] Auto-création des joueurs de test si roster vide — À RETIRER
+        if (typeof DevTestMode !== 'undefined' && DevTestMode.ensureHomePlayers()) {
+            players = Storage.getPlayers();
+        }
+
         // Init
         renderTable();
     </script>

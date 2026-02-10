@@ -1158,8 +1158,48 @@
             window.location.href = 'nouveau-match.html';
         }
 
+        // [DEV TEST] Auto-placement des joueurs sur le terrain — À RETIRER
+        function devTestAutoPlace() {
+            if (typeof DevTestMode === 'undefined') return;
+            const lineup = DevTestMode.getAutoLineup();
+            if (!lineup) return;
+
+            // Placer les joueurs home
+            for (const [pos, name] of Object.entries(lineup.home)) {
+                homePositions[pos] = name;
+                const slot = document.querySelector(`.position-slot[data-team="home"][data-position="${pos}"]`);
+                if (slot) {
+                    const tag = createPlayerTag(name, 'home');
+                    slot.innerHTML = '';
+                    slot.appendChild(tag);
+                    slot.classList.add('filled');
+                }
+                // Retirer du banc
+                const benchTag = document.querySelector(`#homeBench .player-tag[data-player-name="${name}"]`);
+                if (benchTag) benchTag.remove();
+            }
+
+            // Placer les joueurs away
+            for (const [pos, name] of Object.entries(lineup.away)) {
+                awayPositions[pos] = name;
+                const slot = document.querySelector(`.position-slot[data-team="away"][data-position="${pos}"]`);
+                if (slot) {
+                    const tag = createPlayerTag(name, 'away');
+                    slot.innerHTML = '';
+                    slot.appendChild(tag);
+                    slot.classList.add('filled');
+                }
+                // Retirer du banc
+                const benchTag = document.querySelector(`#awayBench .player-tag[data-player-name="${name}"]`);
+                if (benchTag) benchTag.remove();
+            }
+
+            updateStatus();
+        }
+
         // Init
         init();
+        devTestAutoPlace();
     </script>
 </body>
 </html>

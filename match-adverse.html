@@ -761,6 +761,14 @@
             window.location.href = 'nouveau-match.html';
         }
 
+        // [DEV TEST] Auto-remplissage des joueurs adverses — À RETIRER
+        if (typeof DevTestMode !== 'undefined') {
+            const autoPlayers = DevTestMode.ensureAwayPlayers();
+            if (autoPlayers) {
+                adversePlayers = [...autoPlayers];
+            }
+        }
+
         // Init
         renderMatchInfo();
         renderPlayersList();
