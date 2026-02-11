@@ -610,7 +610,9 @@
                 </div>
                 <div class="match-actions">
                     <button class="match-action-btn resume" onclick="resumeMatch('${m.matchId}')">Reprendre</button>
-                    <button class="match-action-btn menu" onclick="openMenu(event,'${m.matchId}','in_progress')">⋮</button>
+                    <button class="match-action-btn delete" onclick="event.stopPropagation();confirmDelete('${m.matchId}')" title="Supprimer">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    </button>
                 </div>
             </div>`;
         }
@@ -677,9 +679,6 @@
             let items = '';
             if (status === 'in_progress') {
                 items = `
-                    <button class="context-menu-item" onclick="resumeMatch('${matchId}');closeContextMenu()">
-                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Reprendre
-                    </button>
                     <button class="context-menu-item danger" onclick="confirmDelete('${matchId}')">
                         <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Supprimer
                     </button>`;

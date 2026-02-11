@@ -181,6 +181,24 @@
             background: var(--accent-orange-dark);
         }
 
+        .resume-action-btn.delete {
+            background: transparent;
+            color: var(--text-secondary);
+            padding: 6px 8px;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .resume-action-btn.delete:hover {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
         /* Menu principal */
         .menu-section {
             flex: 1;
@@ -291,6 +309,9 @@
             </div>
             <div class="resume-actions">
                 <button class="resume-action-btn resume" onclick="resumeMatch()">Reprendre</button>
+                <button class="resume-action-btn delete" onclick="deleteCurrentMatch(event)" title="Supprimer">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                </button>
             </div>
         </div>
 
@@ -391,6 +412,21 @@
 
             sectionHeader.style.display = 'flex';
             banner.classList.add('visible');
+        }
+
+        function deleteCurrentMatch(event) {
+            event.stopPropagation();
+            const banner = document.getElementById('resumeBanner');
+            let matchId = banner.dataset.matchId || Storage.getCurrentMatchId();
+            if (!matchId) return;
+            const match = Storage.getMatchById(matchId);
+            if (!match) return;
+            const opponent = match.opponent || 'Adversaire';
+            if (confirm(`Supprimer ce match et toutes ses données ?\n${opponent}`)) {
+                Storage.deleteMatch(matchId);
+                banner.classList.remove('visible');
+                document.getElementById('resumeSectionHeader').style.display = 'none';
+            }
         }
 
         function resumeMatch() {

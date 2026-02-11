@@ -7,6 +7,7 @@ const POSITION_ROLES = {
 };
 
 const ROLE_COLORS = {
+    'Passeur': '#8b5cf6',
     'R4': '#3b82f6',
     'Centre': '#ef4444',
     'Pointu': '#22c55e'
@@ -28,6 +29,25 @@ function getPlayerRole(team, playerName) {
         if (name === playerName) return roles[pos] || null;
     }
     return null;
+}
+
+const ROLE_ORDER = ['Passeur', 'R4', 'Centre', 'Pointu'];
+
+function getLineupPlayers(team) {
+    const lineup = team === 'home' ? currentSet.homeLineup : currentSet.awayLineup;
+    const roles = POSITION_ROLES[team];
+    return ROLE_ORDER
+        .map(role => {
+            const pos = Object.keys(roles).find(k => roles[k] === role);
+            return pos ? lineup[pos] : null;
+        })
+        .filter(p => p !== null);
+}
+
+function getEffectivePlayer() {
+    const player = gameState.overridePlayer || gameState.autoSelectedPlayer;
+    gameState.overridePlayer = null;
+    return player;
 }
 
 function showPositionZones(team) {
@@ -110,7 +130,7 @@ function showAttackZones(team, excludePlayer, visualOnly) {
             // Pointu a fait la passe → zone droite = Passeur (il est physiquement de ce côté)
             rightPlayer = passeurPlayer;
             rightRole = 'Passeur';
-            rightColor = '#8b5cf6';
+            rightColor = ROLE_COLORS['Passeur'];
         }
     }
 
@@ -541,46 +561,140 @@ function getLastTouchPlayer(team) {
     return null;
 }
 
-function renderPlayerSelection(team, title) {
-    const container = document.getElementById('playerTags');
-    document.getElementById('playerSelectionTitle').textContent = title;
+// ==================== SYSTÈME UNIFIÉ OVERRIDE JOUEURS (Phase 2) ====================
 
-    const lineup = team === 'home' ? currentSet.homeLineup : currentSet.awayLineup;
-    let players = Object.values(lineup).filter(p => p !== null);
-
-    // Exclure le dernier toucheur (un joueur ne peut pas toucher 2 fois d'affilée)
-    if (gameState.phase === 'attack_player' || gameState.phase === 'second_touch_player') {
-        const lastToucher = getLastTouchPlayer(team);
-        if (lastToucher) {
-            players = players.filter(p => p !== lastToucher);
-        }
+// Met à jour le bandeau #phaseIndicator avec le joueur auto-sélectionné + action
+// Si playerName est null, affiche "ActionLabel — Sélectionnez le joueur"
+function updatePhaseIndicatorWithPlayer(playerName, role, actionLabel) {
+    const phaseEl = document.getElementById('phaseIndicator');
+    if (playerName) {
+        const color = ROLE_COLORS[role] || '#8b5cf6';
+        phaseEl.innerHTML = `<span class="highlight">${actionLabel}</span> — <span class="phase-player-badge" style="background:${color}">${playerName}</span>`;
+    } else {
+        phaseEl.innerHTML = `<span class="highlight">${actionLabel}</span> — Sélectionnez le joueur`;
     }
+}
 
-    let html = players.map(playerName => `
-        <button class="player-tag ${team}" onclick="handlePlayerSelection('${playerName}')">
-            ${playerName}
-        </button>
-    `).join('');
+// Fonction unifiée pour afficher les tags override/sélection joueur
+// config.mode = 'override' : clic tag = set overridePlayer, attend clic terrain
+// config.mode = 'select'  : clic tag = appelle handlePlayerSelection immédiatement
+function renderOverrideTags(config) {
+    const {
+        team, phaseLabel, autoPlayer = null, autoRole = null,
+        eligiblePlayers, excludePlayers = [], mode = 'override',
+        showAceButton = false
+    } = config;
 
-    // Ajouter le bouton Ace en phase reception
-    if (gameState.phase === 'reception') {
+    // 1. Stocker le joueur auto-sélectionné
+    gameState.autoSelectedPlayer = autoPlayer;
+
+    // 2. Mettre à jour le bandeau
+    updatePhaseIndicatorWithPlayer(autoPlayer, autoRole, phaseLabel);
+
+    // 3. Calculer les joueurs pour les tags (exclure uniquement les exclusions)
+    const tagPlayers = eligiblePlayers.filter(
+        p => !excludePlayers.includes(p)
+    );
+
+    // 4. Rendre les tags
+    const container = document.getElementById('playerTags');
+    document.getElementById('playerSelectionTitle').textContent = '';
+
+    let html = tagPlayers.map(playerName => {
+        const role = getPlayerRole(team, playerName);
+        const color = ROLE_COLORS[role] || '#8b5cf6';
+        const isAuto = (mode === 'override' && playerName === autoPlayer);
+        const selectedClass = isAuto ? ' selected' : '';
+        if (mode === 'override') {
+            return `<button class="player-tag override-tag${selectedClass} ${team}" data-player="${playerName}"
+                        onclick="handleOverrideTag('${playerName}')"
+                        style="--tag-role-color: ${color}; border-color: ${color}; color: ${color}">
+                        ${playerName}
+                    </button>`;
+        } else {
+            return `<button class="player-tag override-tag ${team}" data-player="${playerName}"
+                        onclick="handlePlayerSelection('${playerName}')"
+                        style="--tag-role-color: ${color}; border-color: ${color}; color: ${color}">
+                        ${playerName}
+                    </button>`;
+        }
+    }).join('');
+
+    // Boutons Ace et Faute réception en phase réception
+    if (showAceButton) {
         html += `<button class="action-tag ace" onclick="handleAceFromReception()">🎯 Ace</button>`;
+        html += `<button class="action-tag faute" onclick="handleReceptionFaultFromTags()">❌ Faute réception</button>`;
     }
 
     container.innerHTML = html;
 
-    showSection('playerSelection');
-
-    // En phase defense, afficher aussi le bouton Attaque directe dans sa section dédiée
-    if (gameState.phase === 'defense') {
-        document.getElementById('defenseDirectAttackSection').classList.remove('hidden');
-    }
+    // Ne PAS appeler showSection() pour éviter hideAllSections()
+    document.getElementById('playerSelection').classList.remove('hidden');
 }
 
-// Version allégée pour la défense avec zones auto-select actives :
-// Masque la section joueurs et affiche uniquement le bouton Attaque directe
-function renderDefenseZonesOnly() {
-    document.getElementById('playerSelection').classList.add('hidden');
+// Gère le clic sur un tag override
+function handleOverrideTag(playerName) {
+    if (playerName === gameState.autoSelectedPlayer) {
+        // Clic sur le joueur auto-sélectionné = retour au mode auto
+        gameState.overridePlayer = null;
+    } else if (gameState.overridePlayer === playerName) {
+        // Re-clic sur l'override actif = retour au mode auto
+        gameState.overridePlayer = null;
+    } else {
+        gameState.overridePlayer = playerName;
+    }
+    updateOverrideVisuals();
+}
+
+// Met à jour les visuels des tags override et du bandeau
+function updateOverrideVisuals() {
+    // Le joueur actif = override si défini, sinon auto-sélectionné
+    const activePlayer = gameState.overridePlayer || gameState.autoSelectedPlayer;
+    document.querySelectorAll('.override-tag').forEach(tag => {
+        if (tag.dataset.player === activePlayer) {
+            tag.classList.add('selected');
+        } else {
+            tag.classList.remove('selected');
+        }
+    });
+
+    // Mettre à jour le bandeau avec le joueur effectif (overridé ou auto)
+    const effectivePlayer = gameState.overridePlayer || gameState.autoSelectedPlayer;
+    const team = gameState.attackingTeam;
+    const role = effectivePlayer ? getPlayerRole(team, effectivePlayer) : null;
+
+    // Récupérer le label de phase depuis le bandeau actuel
+    const highlightEl = document.querySelector('#phaseIndicator .highlight');
+    const phaseLabel = highlightEl ? highlightEl.textContent : '';
+
+    updatePhaseIndicatorWithPlayer(effectivePlayer, role, phaseLabel);
+}
+
+// Helper défense unifié : remplace le pattern if/else renderDefenseZonesOnly/renderPlayerSelection
+function renderDefenseSelection(team, attackerRole) {
+    if (attackerRole) {
+        showDefenseZones(team, attackerRole);
+        renderOverrideTags({
+            team,
+            phaseLabel: 'Défense',
+            autoPlayer: null, // La zone fournira l'auto-select
+            autoRole: null,
+            eligiblePlayers: getLineupPlayers(team),
+            excludePlayers: [],
+            mode: 'override'
+        });
+    } else {
+        renderOverrideTags({
+            team,
+            phaseLabel: 'Défense',
+            autoPlayer: null,
+            autoRole: null,
+            eligiblePlayers: getLineupPlayers(team),
+            excludePlayers: [],
+            mode: 'select'
+        });
+    }
+    // Toujours afficher le bouton Attaque directe en défense
     document.getElementById('defenseDirectAttackSection').classList.remove('hidden');
 }
 
@@ -591,9 +705,6 @@ function handlePlayerSelection(playerName) {
             break;
         case 'pass':
             selectPasser(playerName);
-            break;
-        case 'second_touch_player':
-            selectSecondTouchPlayer(playerName);
             break;
         case 'attack_player':
             selectAttacker(playerName);
@@ -641,7 +752,6 @@ function hideAllSections() {
     document.getElementById('defenseFaultSection').classList.add('hidden');
     document.getElementById('defenseFaultTrajectory').classList.add('hidden');
     document.getElementById('blocOutTrajectory').classList.add('hidden');
-    document.getElementById('serveAceSection').classList.add('hidden');
     document.getElementById('outArea').classList.remove('active');
     hideReceptionQualityZones();
     hidePositionZones();
@@ -789,6 +899,10 @@ function undoLastAction() {
         return;
     }
 
+    // Reset override player (Phase 2)
+    gameState.overridePlayer = null;
+    gameState.autoSelectedPlayer = null;
+
     // Effacer les markers, flèches et zones de défense
     clearMarkers();
     clearArrows();
@@ -806,19 +920,6 @@ function undoLastAction() {
             break;
 
         case 'serve_end':
-            if (gameState.aceMode) {
-                // Just deactivate ace mode, stay in serve_end
-                gameState.aceMode = false;
-                const aceRecvTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
-                showPositionZones(aceRecvTeam);
-                document.getElementById('serveAceSection').classList.remove('hidden');
-                updatePhase();
-                // Redraw start marker
-                if (gameState.currentAction.startPos) {
-                    addMarker(gameState.currentAction.startPos, 'service');
-                }
-                break;
-            }
             // Retour au début du service
             gameState.phase = 'serve_start';
             gameState.currentAction = {
@@ -829,6 +930,28 @@ function undoLastAction() {
             hideAllSections();
             highlightCourt(null);
             showServiceZone();
+            break;
+
+        case 'ace_reception':
+            // Retour à la phase reception (tags joueurs)
+            gameState.phase = 'reception';
+            hideAllSections();
+            // Remettre le service result à 'in' (annuler le marquage ace)
+            const aceServiceAction = gameState.rally.find(a => a.type === 'service');
+            if (aceServiceAction) {
+                aceServiceAction.result = 'in';
+            }
+            showPositionZones(gameState.attackingTeam);
+            renderOverrideTags({
+                team: gameState.attackingTeam,
+                phaseLabel: 'Réception',
+                autoPlayer: null,
+                autoRole: null,
+                eligiblePlayers: getLineupPlayers(gameState.attackingTeam),
+                mode: 'override',
+                showAceButton: true
+            });
+            redrawRally();
             break;
 
         case 'reception':
@@ -853,8 +976,6 @@ function undoLastAction() {
             activateNetZone();
             // Afficher les zones de position pour auto-sélection
             showPositionZones(recvTeam);
-            // Afficher le bouton Ace
-            document.getElementById('serveAceSection').classList.remove('hidden');
             const servCourtSide = getCourtSideForTeam(gameState.servingTeam);
             document.getElementById('outLabelTop').style.display = servCourtSide === 'top' ? 'none' : 'block';
             document.getElementById('outLabelBottom').style.display = servCourtSide === 'bottom' ? 'none' : 'block';
@@ -891,8 +1012,6 @@ function undoLastAction() {
                 document.getElementById('outArea').classList.add('active');
                 activateNetZone();
                 showPositionZones(autoRecvTeam);
-                // Afficher le bouton Ace
-                document.getElementById('serveAceSection').classList.remove('hidden');
                 // Labels OUT corrects
                 const autoSrvCourtSide = getCourtSideForTeam(gameState.servingTeam);
                 document.getElementById('outLabelTop').style.display = autoSrvCourtSide === 'top' ? 'none' : 'block';
@@ -907,7 +1026,15 @@ function undoLastAction() {
                 hideReceptionQualityZones();
                 document.getElementById('receptionFaultSection').classList.add('hidden');
                 showPositionZones(gameState.attackingTeam);
-                renderPlayerSelection(gameState.attackingTeam, 'Qui réceptionne ?');
+                renderOverrideTags({
+                    team: gameState.attackingTeam,
+                    phaseLabel: 'Réception',
+                    autoPlayer: null,
+                    autoRole: null,
+                    eligiblePlayers: getLineupPlayers(gameState.attackingTeam),
+                    mode: 'override',
+                    showAceButton: true
+                });
                 redrawRally();
             }
             break;
@@ -1212,20 +1339,6 @@ function undoLastAction() {
             redrawRally();
             break;
 
-        case 'second_touch_player':
-            // Retour à la phase pass combinée
-            gameState.phase = 'pass';
-            gameState.secondTouchType = null;
-            updatePhase();
-            hideAllSections();
-            highlightCourt(null);
-            document.getElementById('outArea').classList.add('active');
-            document.getElementById('outLabelTop').style.display = 'block';
-            document.getElementById('outLabelBottom').style.display = 'block';
-            renderPassPlayerSelection();
-            redrawRally();
-            break;
-
         case 'attack_player':
             // Vérifier si on vient d'une attaque directe depuis une réception filet
             if (gameState.netDirectAttack || (gameState.currentAction && gameState.currentAction.isNetDirectAttack)) {
@@ -1248,12 +1361,7 @@ function undoLastAction() {
                 hideAllSections();
                 // Ré-afficher les zones de défense si on connaît le rôle de l'attaquant
                 const lastAttackForDirectUndo = [...gameState.rally].reverse().find(a => a.type === 'attack');
-                if (lastAttackForDirectUndo && lastAttackForDirectUndo.role) {
-                    renderDefenseZonesOnly();
-                    showDefenseZones(gameState.attackingTeam, lastAttackForDirectUndo.role);
-                } else {
-                    renderPlayerSelection(gameState.attackingTeam, 'Qui défend ?');
-                }
+                renderDefenseSelection(gameState.attackingTeam, lastAttackForDirectUndo ? lastAttackForDirectUndo.role : null);
                 redrawRally();
             } else if (gameState.passAutoSelected) {
                 // Passe auto-sélectionnée (clic terrain en phase pass) : retour à pass
@@ -1540,12 +1648,7 @@ function undoLastAction() {
             // Ré-afficher les zones de défense pour auto-sélection
             {
                 const lastAttackForZones = [...gameState.rally].reverse().find(a => a.type === 'attack');
-                if (lastAttackForZones && lastAttackForZones.role) {
-                    renderDefenseZonesOnly();
-                    showDefenseZones(gameState.attackingTeam, lastAttackForZones.role);
-                } else {
-                    renderPlayerSelection(gameState.attackingTeam, 'Qui défend ?');
-                }
+                renderDefenseSelection(gameState.attackingTeam, lastAttackForZones ? lastAttackForZones.role : null);
             }
             redrawRally();
             break;
@@ -1606,6 +1709,8 @@ function cancelPoint() {
     highlightCourt(null);
 
     // Reset flags d'auto-sélection
+    gameState.overridePlayer = null;
+    gameState.autoSelectedPlayer = null;
     gameState.passAutoSelected = false;
     gameState.attackAutoSelected = false;
     gameState.receptionAutoSelected = false;

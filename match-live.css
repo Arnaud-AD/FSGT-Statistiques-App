@@ -83,6 +83,7 @@
         }
 
 
+
         .youtube-controls {
             display: flex;
             align-items: center;
@@ -271,6 +272,24 @@
         .phase-indicator .highlight {
             color: var(--accent-blue);
             font-weight: 600;
+        }
+
+        .phase-indicator .role-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 2px;
+            vertical-align: middle;
+        }
+
+        .phase-indicator .phase-player-badge {
+            display: inline-block;
+            color: #fff;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
         }
 
         .phase-indicator .phase-smash-badge {
@@ -654,8 +673,8 @@
             color: var(--home-color);
         }
 
-        .player-tag.home:hover,
-        .player-tag.home.selected {
+        .player-tag.home:not(.override-tag):hover,
+        .player-tag.home:not(.override-tag).selected {
             background: var(--home-color);
             color: white;
         }
@@ -665,10 +684,36 @@
             color: var(--away-color);
         }
 
-        .player-tag.away:hover,
-        .player-tag.away.selected {
+        .player-tag.away:not(.override-tag):hover,
+        .player-tag.away:not(.override-tag).selected {
             background: var(--away-color);
             color: white;
+        }
+
+        /* Override tags (Phase 2) — vide (outlined) → plein (selected) */
+        .player-tag.override-tag {
+            background: white;
+            border-width: 2px;
+            border-style: solid;
+            /* border-color et color définis inline via style= (couleur du rôle) */
+            font-weight: 500;
+            padding: 6px 12px;
+            font-size: 11px;
+            transition: all 0.15s ease;
+        }
+
+        .player-tag.override-tag:hover {
+            background: color-mix(in srgb, var(--tag-role-color, currentColor) 12%, white);
+            transform: scale(1.03);
+        }
+
+        .player-tag.override-tag.selected {
+            background: var(--tag-role-color, currentColor);
+            color: white !important;
+            border-color: var(--tag-role-color, currentColor) !important;
+            font-weight: 700;
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
 
         /* Action tags */
@@ -1218,6 +1263,8 @@
         /* Colonne joueur sticky à gauche */
         .stats-players-col {
             flex-shrink: 0;
+            width: 65px;
+            min-width: 65px;
             border-right: 2px solid #dadce0;
             background: white;
             position: sticky;
@@ -1265,8 +1312,7 @@
 
         /* Sous-tableaux par catégorie */
         .stat-table-card {
-            flex: 1;
-            min-width: 0;
+            flex: 1 0 auto;
             border-left: 1px solid #dadce0;
         }
 

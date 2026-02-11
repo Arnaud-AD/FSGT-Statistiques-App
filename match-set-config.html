@@ -880,6 +880,23 @@
 
         // Init
         init();
+
+        // [DEV TEST] Auto-configuration du set (caméra, service, YouTube) — À RETIRER
+        if (typeof DevTestMode !== 'undefined') {
+            const setConfig = DevTestMode.getSetConfig();
+            if (setConfig) {
+                // Caméra côté adverse (away)
+                const cameraRadio = document.getElementById(setConfig.cameraSide === 'home' ? 'cameraHome' : 'cameraAway');
+                if (cameraRadio) cameraRadio.checked = true;
+                // Équipe au service
+                const servingRadio = document.getElementById(setConfig.servingTeam === 'home' ? 'servingHome' : 'servingAway');
+                if (servingRadio) servingRadio.checked = true;
+                // URL YouTube
+                if (setConfig.youtubeUrl) {
+                    document.getElementById('youtubeUrl').value = setConfig.youtubeUrl;
+                }
+            }
+        }
     </script>
 </body>
 </html>

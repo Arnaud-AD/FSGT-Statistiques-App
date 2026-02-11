@@ -395,6 +395,21 @@ const DevTestMode = {
     // Joueurs de test pour l'équipe adverse
     AWAY_PLAYERS: ['Passeur Adv', 'R4 Adv', 'Centre Adv', 'Pointu Adv'],
 
+    // Config bloqueurs de test — À RETIRER
+    // Pour Red Hot Sucy Pépère : Passeur adverse en bloqueur principal
+    BLOCKER_CONFIG: {
+        home: { blockerRight: 'Pointu', primaryBlocker: 'right' },
+        away: { blockerRight: 'Passeur', primaryBlocker: 'right' }
+    },
+
+    // Config set de test — À RETIRER
+    // Sucy côté caméra (away), Jen au service, vidéo YouTube du match
+    SET_CONFIG: {
+        cameraSide: 'away',
+        servingTeam: 'home',
+        youtubeUrl: 'https://www.youtube.com/watch?v=_5YHPt3W6nY&list=PLNR0tSMfwXlVSgtzXMopLcYBGQBR2qZa8'
+    },
+
     /**
      * Crée le roster de l'équipe si vide (pour equipe.html et match-config.html)
      * @returns {boolean} true si le roster a été créé
@@ -471,5 +486,25 @@ const DevTestMode = {
             return { home, away };
         }
         return null;
+    },
+
+    /**
+     * Retourne la config bloqueurs de test (pour match-set-composition.html)
+     * @returns {{ home: { blockerRight, primaryBlocker }, away: { blockerRight, primaryBlocker } }|null}
+     */
+    getBlockerConfig() {
+        if (!this.ENABLED) return null;
+        console.log('[DEV TEST] Auto-configuration des bloqueurs');
+        return this.BLOCKER_CONFIG;
+    },
+
+    /**
+     * Retourne la config set de test (pour match-set-config.html)
+     * @returns {{ cameraSide, servingTeam, youtubeUrl }|null}
+     */
+    getSetConfig() {
+        if (!this.ENABLED) return null;
+        console.log('[DEV TEST] Auto-configuration du set (caméra, service, YouTube)');
+        return this.SET_CONFIG;
     }
 };

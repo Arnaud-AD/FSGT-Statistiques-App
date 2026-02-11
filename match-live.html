@@ -209,25 +209,10 @@
                     </div>
                 </div>
 
-                <!-- Ace button (affiché au-dessus du bandeau server continue) -->
-                <div id="serveAceSection" class="hidden" style="margin-bottom: 8px;">
-                    <div class="tags-grid">
-                        <button class="action-tag ace" onclick="activateAceMode()">🎯 Ace</button>
-                    </div>
-                </div>
-
                 <!-- Server continue indicator -->
                 <div id="serverContinue" class="hidden">
                     <div class="server-continue-banner" id="serverContinueBanner">
                         🏐 <span class="server-name" id="serverContinueName">Joueur</span> toujours au service
-                    </div>
-                </div>
-
-                <!-- Player selection -->
-                <div id="playerSelection" class="hidden">
-                    <div class="tags-title" id="playerSelectionTitle">Sélectionnez le joueur</div>
-                    <div class="tags-grid" id="playerTags">
-                        <!-- Generated dynamically -->
                     </div>
                 </div>
 
@@ -275,9 +260,10 @@
                     </div>
                 </div>
 
-                <!-- Faute de réception -->
+                <!-- Faute de réception + Ace -->
                 <div id="receptionFaultSection" class="hidden">
                     <div class="tags-grid">
+                        <button class="action-tag ace" onclick="handleAceFromReception()">🎯 Ace</button>
                         <button class="action-tag faute" onclick="handleReceptionFault()">❌ Faute réception</button>
                     </div>
                     <div class="quality-legend">
@@ -358,6 +344,14 @@
                     <div class="tags-title">Cliquez où va la balle (trajectoire de la faute)</div>
                     <div class="tags-grid">
                         <button class="action-tag" onclick="skipReceptionFaultTrajectory()">⏩ Passer</button>
+                    </div>
+                </div>
+
+                <!-- Player override/selection tags (en bas pour priorité visuelle aux boutons d'action) -->
+                <div id="playerSelection" class="hidden">
+                    <div class="tags-title" id="playerSelectionTitle">Sélectionnez le joueur</div>
+                    <div class="tags-grid" id="playerTags">
+                        <!-- Generated dynamically -->
                     </div>
                 </div>
 
@@ -827,8 +821,9 @@
             receptionAutoSelected: false, // true si le réceptionneur a été auto-sélectionné via zone pendant serve_end
             passAutoSelected: false, // true si le passeur a été auto-sélectionné (réception excellente)
             attackAutoSelected: false, // true si l'attaquant a été auto-sélectionné via zone pendant pass
-            aceMode: false, // true si l'utilisateur a cliqué Ace pendant serve_end
-            receptionOpponentClickData: null // données du clic terrain adverse pendant reception_end
+            receptionOpponentClickData: null, // données du clic terrain adverse pendant reception_end
+            overridePlayer: null, // joueur manuellement overridé via tag (Phase 2)
+            autoSelectedPlayer: null // joueur auto-sélectionné par zone/logique (Phase 2)
         };
 
         // Statistiques du set (format unifié avec historique)
@@ -1198,7 +1193,7 @@
                 'serve_start': '<span class="highlight">Service</span> — Cliquez le point de départ',
                 'serve_end': '<span class="highlight">Service</span> — Cliquez le point d\'arrivée',
                 'reception': '<span class="highlight">Réception</span> — Sélectionnez le réceptionneur',
-                'reception_end': '<span class="highlight">Réception</span> — Cliquez où arrive la réception',
+                'reception_end': '<span class="highlight">Réception</span> — _RECEIVER_ Cliquez où arrive la réception',
                 'reception_fault_trajectory': '<span class="highlight">Faute réception</span> — Cliquez où va la balle',
                 'reception_opponent_choice': '<span class="highlight">Réception</span> — Que se passe-t-il ?',
                 'reception_net_choice': '<span class="highlight">Réception filet</span> — Att. directe ou cliquez le terrain = block',
@@ -1217,7 +1212,6 @@
                 'pass_end': '<span class="highlight">Passe</span> — _PASSER_ Cliquez où arrive la passe',
                 'pass_fault_end': '<span class="highlight">Faute de passe</span> — Cliquez où arrive la passe',
                 'pass_fault_result': '<span class="highlight">Faute de passe</span> — Résultat ?',
-                'second_touch_player': '<span class="highlight">2ème touche</span> — Qui fait la 2ème touche ?',
                 'attack_player': '<span class="highlight">Attaque</span> — Cliquez le terrain ou sélectionnez un joueur',
                 'attack_type': '<span class="highlight">Attaque</span> — _ATTACKER_ Type ou cliquez = <span class="phase-smash-badge">💪 Smash</span>',
                 'attack_end': '<span class="highlight">Attaque</span> — _ATTACKER_ Cliquez où arrive l\'attaque',
@@ -1230,28 +1224,38 @@
             };
             let phaseText = phases[gameState.phase] || '';
 
+            // Helper : génère un badge joueur coloré par rôle
+            function playerBadge(playerName, role) {
+                const color = ROLE_COLORS[role] || '#8b5cf6';
+                return '<span class="phase-player-badge" style="background:' + color + '">' + playerName + '</span> —';
+            }
+
             // Injecter le nom de l'attaquant dans le bandeau
             if (phaseText.includes('_ATTACKER_')) {
-                const attackerName = gameState.currentAction && gameState.currentAction.player
-                    ? '<strong>' + gameState.currentAction.player + '</strong> —'
-                    : '';
-                phaseText = phaseText.replace('_ATTACKER_', attackerName);
+                const player = gameState.currentAction && gameState.currentAction.player;
+                const role = gameState.currentAction && gameState.currentAction.role;
+                phaseText = phaseText.replace('_ATTACKER_', player ? playerBadge(player, role) : '');
             }
 
             // Injecter le nom du défenseur dans le bandeau
             if (phaseText.includes('_DEFENDER_')) {
-                const defenderName = gameState.currentAction && gameState.currentAction.player
-                    ? '<strong>' + gameState.currentAction.player + '</strong> —'
-                    : '';
-                phaseText = phaseText.replace('_DEFENDER_', defenderName);
+                const player = gameState.currentAction && gameState.currentAction.player;
+                const role = gameState.currentAction && gameState.currentAction.role;
+                phaseText = phaseText.replace('_DEFENDER_', player ? playerBadge(player, role) : '');
+            }
+
+            // Injecter le nom du réceptionneur dans le bandeau
+            if (phaseText.includes('_RECEIVER_')) {
+                const player = gameState.currentAction && gameState.currentAction.player;
+                const role = gameState.currentAction && gameState.currentAction.role;
+                phaseText = phaseText.replace('_RECEIVER_', player ? playerBadge(player, role) : '');
             }
 
             // Injecter le nom du passeur dans le bandeau
             if (phaseText.includes('_PASSER_')) {
-                const passerName = gameState.currentAction && gameState.currentAction.player
-                    ? '<strong>' + gameState.currentAction.player + '</strong> —'
-                    : '';
-                phaseText = phaseText.replace('_PASSER_', passerName);
+                const player = gameState.currentAction && gameState.currentAction.player;
+                const role = gameState.currentAction && gameState.currentAction.role;
+                phaseText = phaseText.replace('_PASSER_', player ? playerBadge(player, role) : '');
             }
 
             // Injecter le joueur auto-sélectionné pour la passe (Passeur ou Pointu si Passeur exclu)
@@ -1260,11 +1264,15 @@
                 const passeur = getPlayerByRole(team, 'Passeur');
                 const lastToucher = getLastTouchPlayer(team);
                 let autoPassName = passeur || 'Passeur';
+                let autoPassRole = 'Passeur';
                 if (passeur && passeur === lastToucher) {
                     const pointu = getPlayerByRole(team, 'Pointu');
-                    autoPassName = (pointu && pointu !== lastToucher) ? pointu : 'Passeur';
+                    if (pointu && pointu !== lastToucher) {
+                        autoPassName = pointu;
+                        autoPassRole = 'Pointu';
+                    }
                 }
-                phaseText = phaseText.replace('_AUTOPASS_', autoPassName);
+                phaseText = phaseText.replace('_AUTOPASS_', '<span class="phase-player-badge" style="background:' + (ROLE_COLORS[autoPassRole] || '#8b5cf6') + '">' + autoPassName + '</span>');
             }
 
             phaseEl.innerHTML = phaseText;
@@ -1381,9 +1389,11 @@
                         handleAceReceptionPlayer(player);
                         return;
                     } else if (gameState.phase === 'reception') {
-                        // Sélection manuelle: auto-sélection du réceptionneur via zone
+                        // Sélection du réceptionneur via zone (ou override si tag cliqué)
+                        const effectivePlayer = gameState.overridePlayer || player;
+                        gameState.overridePlayer = null;
                         hidePositionZones();
-                        selectReceptioner(player);
+                        selectReceptioner(effectivePlayer);
                     } else if (gameState.phase === 'serve_end') {
                         // Clic dans une zone pendant serve_end
                         const courtHalf = e.currentTarget.closest('.court-half');
@@ -1393,24 +1403,7 @@
                         const courtSide = courtHalf.id === 'courtTop' ? 'top' : 'bottom';
                         const clickData = { x, y, courtSide };
 
-                        if (gameState.aceMode) {
-                            // Mode Ace + clic dans zone = ace direct avec attribution au joueur de la zone
-                            gameState.aceMode = false;
-                            gameState.currentAction.endPos = clickData;
-                            addMarker(clickData, 'service');
-                            document.getElementById('outArea').classList.remove('active');
-                            deactivateNetZone();
-                            drawArrow(gameState.currentAction.startPos, clickData, 'service');
-                            gameState.currentAction.result = 'ace';
-                            gameState.rally.push({ ...gameState.currentAction });
-                            // Setter l'équipe en réception pour handleAceReceptionPlayer
-                            const recTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
-                            gameState.aceReceivingTeam = recTeam;
-                            handleAceReceptionPlayer(player);
-                            return;
-                        }
-                        
-                        // NOUVEAU: auto-sélection directe du réceptionneur
+                        // Auto-sélection directe du réceptionneur
                         // Enregistrer le point d'arrivée du service
                         gameState.currentAction.endPos = clickData;
                         addMarker(clickData, 'service');
@@ -1443,15 +1436,19 @@
                     if (e.currentTarget.classList.contains('disabled')) return;
 
                     if (gameState.phase === 'pass') {
-                        // Clic zone pendant passe = auto-passe (Passeur ou Pointu si exclu) + auto-attaquant en 1 clic
+                        // Clic zone pendant passe = auto-passe (ou override) + auto-attaquant en 1 clic
                         const team = gameState.attackingTeam;
                         const passeur = getPlayerByRole(team, 'Passeur');
                         const lastToucher = getLastTouchPlayer(team);
                         if (!passeur) return;
 
-                        // Déterminer le passeur auto-sélectionné
+                        // Déterminer le passeur : override > auto-select
                         let selectedPasser, selectedRole;
-                        if (passeur === lastToucher) {
+                        if (gameState.overridePlayer) {
+                            selectedPasser = gameState.overridePlayer;
+                            selectedRole = getPlayerRole(team, selectedPasser);
+                            gameState.overridePlayer = null;
+                        } else if (passeur === lastToucher) {
                             const pointu = getPlayerByRole(team, 'Pointu');
                             if (!pointu || pointu === lastToucher) return;
                             selectedPasser = pointu;
@@ -1548,8 +1545,10 @@
                         }
 
                     } else if (gameState.phase === 'attack_player') {
+                        const effectiveAttacker = gameState.overridePlayer || attackerPlayer;
+                        gameState.overridePlayer = null;
                         hideAttackZones();
-                        selectAttacker(attackerPlayer);
+                        selectAttacker(effectiveAttacker);
                     }
                 });
             });
@@ -1590,9 +1589,11 @@
                         handleResultDefenseZoneClick(clickedPlayer, defClickData);
 
                     } else if (gameState.phase === 'defense') {
-                        // Phase defense : auto-sélection du défenseur
+                        // Phase defense : sélection du défenseur (override > zone auto)
+                        const effectiveDefender = gameState.overridePlayer || clickedPlayer;
+                        gameState.overridePlayer = null;
                         hideDefenseZones();
-                        selectDefender(clickedPlayer);
+                        selectDefender(effectiveDefender);
 
                     } else if (gameState.phase === 'attack_type' || gameState.phase === 'attack_end') {
                         // Phase attaque : enregistrer le smash + pré-sélectionner le défenseur
@@ -1875,9 +1876,6 @@
             
             // Show position zones for auto-selection during serve landing
             showPositionZones(receivingTeam);
-            
-            // Show Ace button
-            document.getElementById('serveAceSection').classList.remove('hidden');
         }
 
         function handleServeEnd(clickData) {
@@ -1897,31 +1895,24 @@
 
             if (clickData.courtSide !== expectedCourtSide) {
                 // Service faute out ! On dessine la flèche quand même pour montrer l'erreur
-                gameState.aceMode = false;
                 drawArrow(gameState.currentAction.startPos, clickData, 'service');
                 handleServiceFaultOut();
-            } else if (gameState.aceMode) {
-                // Mode Ace : le service atterrit IN, demander qui a raté la réception
-                gameState.aceMode = false;
-                drawArrow(gameState.currentAction.startPos, clickData, 'service');
-                gameState.currentAction.result = 'ace';
-                gameState.rally.push({ ...gameState.currentAction });
-                // Afficher les zones joueurs pour identifier le réceptionneur
-                const receivingTeamAce = gameState.servingTeam === 'home' ? 'away' : 'home';
-                gameState.aceReceivingTeam = receivingTeamAce;
-                gameState.phase = 'ace_reception';
-                updatePhase();
-                showPositionZones(receivingTeamAce);
-                renderAceReceptionSelection(receivingTeamAce);
             } else {
                 // Service bon, passer à la réception (sélection manuelle)
                 gameState.rally.push({ ...gameState.currentAction });
                 gameState.attackingTeam = receivingTeam;
                 gameState.receptionAutoSelected = false;
                 gameState.phase = 'reception';
-                updatePhase();
                 showPositionZones(receivingTeam);
-                renderPlayerSelection(receivingTeam, 'Qui réceptionne ?');
+                renderOverrideTags({
+                    team: receivingTeam,
+                    phaseLabel: 'Réception',
+                    autoPlayer: null,
+                    autoRole: null,
+                    eligiblePlayers: getLineupPlayers(receivingTeam),
+                    mode: 'override',
+                    showAceButton: true
+                });
             }
         }
 
@@ -2151,16 +2142,10 @@
             }
         }
 
-        function activateAceMode() {
-            gameState.aceMode = true;
-            document.getElementById('serveAceSection').classList.add('hidden');
-            // Garder les zones de position visibles pour clic direct sur le joueur ACEé
-            document.getElementById('phaseText').innerHTML = '<span class="highlight">Ace !</span> — Cliquez la zone du joueur ou le terrain';
-        }
-
         function handleAceFromReception() {
-            // Ace signalé pendant la sélection du réceptionneur
-            hideAllSections();
+            // Ace signalé depuis la phase reception (tags joueurs visibles, pas encore de réceptionneur sélectionné)
+            // ou depuis la phase reception_end (réceptionneur déjà sélectionné)
+            const team = gameState.attackingTeam;
 
             // Retrouver l'action de service et la marquer comme ace
             const serviceAction = gameState.rally.find(a => a.type === 'service');
@@ -2173,13 +2158,59 @@
                 drawArrow(serviceAction.startPos, serviceAction.endPos, 'service');
             }
 
-            // Afficher les zones joueurs pour identifier le réceptionneur
-            const receivingTeamAce = gameState.servingTeam === 'home' ? 'away' : 'home';
-            gameState.aceReceivingTeam = receivingTeamAce;
-            gameState.phase = 'ace_reception';
-            updatePhase();
-            showPositionZones(receivingTeamAce);
-            renderAceReceptionSelection(receivingTeamAce);
+            if (gameState.phase === 'reception_end') {
+                // Réceptionneur déjà connu (auto-sélectionné ou choisi via tag)
+                const playerName = gameState.currentAction.player;
+                const receptionAction = {
+                    type: 'reception',
+                    player: playerName,
+                    team: team,
+                    role: getPlayerRole(team, playerName),
+                    quality: { score: 0, label: 'Faute' }
+                };
+                if (serviceAction && serviceAction.endPos) {
+                    receptionAction.startPos = serviceAction.endPos;
+                    receptionAction.endPos = serviceAction.endPos;
+                }
+                gameState.rally.push(receptionAction);
+
+                hideAllSections();
+                hidePositionZones();
+                hideReceptionQualityZones();
+                awardPoint(gameState.servingTeam);
+                endRally();
+            } else {
+                // Phase reception (tags visibles) : demander qui a raté
+                // Utiliser le joueur sélectionné via override/auto s'il y en a un
+                const selectedPlayer = gameState.overridePlayer || gameState.autoSelectedPlayer;
+                if (selectedPlayer) {
+                    const receptionAction = {
+                        type: 'reception',
+                        player: selectedPlayer,
+                        team: team,
+                        role: getPlayerRole(team, selectedPlayer),
+                        quality: { score: 0, label: 'Faute' }
+                    };
+                    if (serviceAction && serviceAction.endPos) {
+                        receptionAction.startPos = serviceAction.endPos;
+                        receptionAction.endPos = serviceAction.endPos;
+                    }
+                    gameState.rally.push(receptionAction);
+
+                    hideAllSections();
+                    hidePositionZones();
+                    gameState.overridePlayer = null;
+                    awardPoint(gameState.servingTeam);
+                    endRally();
+                } else {
+                    // Aucun joueur sélectionné, afficher les tags pour choisir
+                    hideAllSections();
+                    gameState.phase = 'ace_reception';
+                    updatePhase();
+                    showPositionZones(team);
+                    renderAceReceptionSelection(team);
+                }
+            }
         }
 
         function renderAceReceptionSelection(team) {
@@ -2199,7 +2230,7 @@
         }
 
         function handleAceReceptionPlayer(playerName) {
-            const team = gameState.aceReceivingTeam;
+            const team = gameState.attackingTeam;
 
             // Enregistrer une action réception "Faute" (score 0) pour ce joueur
             const receptionAction = {
@@ -2222,7 +2253,6 @@
             // Nettoyage
             hideAllSections();
             hidePositionZones();
-            delete gameState.aceReceivingTeam;
 
             // Point pour l'équipe qui sert
             awardPoint(gameState.servingTeam);
@@ -2254,6 +2284,19 @@
             const receivingCourtSide = getCourtSideForTeam(gameState.attackingTeam);
             document.getElementById('outLabelTop').style.display = receivingCourtSide === 'top' ? 'block' : 'none';
             document.getElementById('outLabelBottom').style.display = receivingCourtSide === 'bottom' ? 'block' : 'none';
+        }
+
+        function handleReceptionFaultFromTags() {
+            // Faute réception depuis les tags (phase reception, pas encore de réceptionneur)
+            // Utiliser le joueur sélectionné via override/auto s'il y en a un
+            const selectedPlayer = gameState.overridePlayer || gameState.autoSelectedPlayer;
+            if (selectedPlayer) {
+                // Sélectionner le réceptionneur puis déclencher la faute
+                selectReceptioner(selectedPlayer);
+                gameState.overridePlayer = null;
+                handleReceptionFault();
+            }
+            // Si aucun joueur sélectionné, ne rien faire (l'utilisateur doit d'abord cliquer un tag)
         }
 
         function handleReceptionEnd(clickData) {
@@ -2604,8 +2647,7 @@
             gameState.attackingTeam = defendingTeam;
             
             gameState.phase = 'defense';
-            updatePhase();
-            renderPlayerSelection(defendingTeam, 'Qui défend ?');
+            renderDefenseSelection(defendingTeam, null);
         }
 
         function handleDirectReturnWinner() {
@@ -2668,8 +2710,7 @@
                 
                 highlightCourt(defendingTeam);
                 gameState.phase = 'defense';
-                updatePhase();
-                renderPlayerSelection(defendingTeam, 'Qui défend ?');
+                renderDefenseSelection(defendingTeam, null);
             }
         }
 
@@ -2715,8 +2756,11 @@
                 // Sélection du bloqueur dans l'équipe au service
                 const blockingTeam = gameState.servingTeam;
                 gameState.phase = 'reception_net_block_player';
-                updatePhase();
-                renderPlayerSelection(blockingTeam, 'Qui block ?');
+                renderOverrideTags({
+                    team: blockingTeam, phaseLabel: 'Block au filet',
+                    autoPlayer: null, autoRole: null,
+                    eligiblePlayers: getLineupPlayers(blockingTeam), mode: 'select'
+                });
             }
         }
 
@@ -2748,8 +2792,11 @@
                 }
 
                 gameState.phase = 'pass_net_block_player';
-                updatePhase();
-                renderPlayerSelection(blockingTeam, 'Qui block ?');
+                renderOverrideTags({
+                    team: blockingTeam, phaseLabel: 'Block au filet',
+                    autoPlayer: null, autoRole: null,
+                    eligiblePlayers: getLineupPlayers(blockingTeam), mode: 'select'
+                });
             }
         }
 
@@ -2805,16 +2852,14 @@
                 // Block va chez l'équipe qui a fait la passe ←' défense pour eux
                 gameState.attackingTeam = passingTeam;
                 gameState.phase = 'defense';
-                updatePhase();
                 document.getElementById('outArea').classList.add('active');
-                renderPlayerSelection(passingTeam, 'Qui défend ?');
+                renderDefenseSelection(passingTeam, null);
             } else if (clickData.courtSide === blockingCourtSide) {
                 // Block revient chez le bloqueur ←' défense pour eux
                 gameState.attackingTeam = blockingTeam;
                 gameState.phase = 'defense';
-                updatePhase();
                 document.getElementById('outArea').classList.add('active');
-                renderPlayerSelection(blockingTeam, 'Qui défend ?');
+                renderDefenseSelection(blockingTeam, null);
             }
         }
 
@@ -2883,7 +2928,7 @@
                 const defendingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
                 awardPoint(defendingTeam);
                 endRally();
-                
+
             } else if (choice === 'bloc_out') {
                 // Bloc out depuis attaque filet : la balle sort du bloc, point pour l'attaquant
                 const blockingTeamBO = gameState.attackingTeam === 'home' ? 'away' : 'home';
@@ -2915,8 +2960,11 @@
                 hideDefenseZones();
                 gameState.blocOutPending = true;
                 gameState.phase = 'bloc_out_player';
-                updatePhase();
-                renderPlayerSelection(blockingTeamBO, 'Qui a bloqué ?');
+                renderOverrideTags({
+                    team: blockingTeamBO, phaseLabel: 'Bloc out',
+                    autoPlayer: null, autoRole: null,
+                    eligiblePlayers: getLineupPlayers(blockingTeamBO), mode: 'select'
+                });
             } else if (choice === 'block') {
                 // Attaque dans le filet ←' l'équipe adverse block
                 const blockingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
@@ -2937,8 +2985,11 @@
 
                 hideDefenseZones();
                 gameState.phase = 'attack_net_block_player';
-                updatePhase();
-                renderPlayerSelection(blockingTeam, 'Qui block ?');
+                renderOverrideTags({
+                    team: blockingTeam, phaseLabel: 'Block au filet',
+                    autoPlayer: null, autoRole: null,
+                    eligiblePlayers: getLineupPlayers(blockingTeam), mode: 'select'
+                });
             }
         }
 
@@ -3015,14 +3066,8 @@
                     selectDefender(autoPlayer);
                 } else {
                     gameState.phase = 'defense';
-                    updatePhase();
                     document.getElementById('outArea').classList.add('active');
-                    if (attackerRoleForZones) {
-                        renderDefenseZonesOnly();
-                        showDefenseZones(attackingTeam, attackerRoleForZones);
-                    } else {
-                        renderPlayerSelection(attackingTeam, 'Qui défend ?');
-                    }
+                    renderDefenseSelection(attackingTeam, attackerRoleForZones);
                 }
             } else if (clickData.courtSide === blockingCourtSide) {
                 // Block revient chez le bloqueur ←' défense pour eux
@@ -3037,14 +3082,8 @@
                     selectDefender(autoPlayer);
                 } else {
                     gameState.phase = 'defense';
-                    updatePhase();
                     document.getElementById('outArea').classList.add('active');
-                    if (attackerRoleForZones) {
-                        renderDefenseZonesOnly();
-                        showDefenseZones(blockingTeam, attackerRoleForZones);
-                    } else {
-                        renderPlayerSelection(blockingTeam, 'Qui défend ?');
-                    }
+                    renderDefenseSelection(blockingTeam, attackerRoleForZones);
                 }
             }
         }
@@ -3107,68 +3146,64 @@
                 // Block va chez l'équipe qui a réceptionné ←' défense pour eux
                 gameState.attackingTeam = receivingTeam;
                 gameState.phase = 'defense';
-                updatePhase();
                 document.getElementById('outArea').classList.add('active');
-                renderPlayerSelection(receivingTeam, 'Qui défend ?');
+                renderDefenseSelection(receivingTeam, null);
             } else if (clickData.courtSide === blockingCourtSide) {
                 // Block revient chez l'équipe qui a blocké ←' défense pour eux
                 // (le block ne compte pas comme une touche au volleyball)
                 gameState.attackingTeam = blockingTeam;
                 gameState.phase = 'defense';
-                updatePhase();
                 document.getElementById('outArea').classList.add('active');
-                renderPlayerSelection(blockingTeam, 'Qui défend ?');
+                renderDefenseSelection(blockingTeam, null);
             }
         }
 
         // ==================== PASSE ====================
-        // Affiche les boutons joueurs non-passeur + options 2ème touche + faute
+        // Affiche les tags override pour la passe + options 2ème touche
         function renderPassPlayerSelection() {
             const team = gameState.attackingTeam;
-            const container = document.getElementById('playerTags');
             const passeur = getPlayerByRole(team, 'Passeur');
             const lastToucher = getLastTouchPlayer(team);
 
             // Si le passeur est le dernier toucheur, il ne peut pas faire la passe
             const passeurExcluded = passeur && passeur === lastToucher;
 
-            // Déterminer le joueur auto-sélectionné par clic terrain
+            // Déterminer le joueur auto-sélectionné
             // Normal : Passeur — Si Passeur exclu : Pointu en remplacement
-            let autoSelectPlayer = null;
+            let autoPlayer = null;
+            let autoRole = null;
             if (passeurExcluded) {
                 const pointu = getPlayerByRole(team, 'Pointu');
                 if (pointu && pointu !== lastToucher) {
-                    autoSelectPlayer = pointu;
+                    autoPlayer = pointu;
+                    autoRole = 'Pointu';
                 }
+            } else {
+                autoPlayer = passeur;
+                autoRole = 'Passeur';
             }
 
-            if (passeurExcluded && autoSelectPlayer) {
-                document.getElementById('playerSelectionTitle').textContent = 'Cliquez le terrain (= ' + autoSelectPlayer + ') ou sélectionnez :';
-                // Afficher les zones d'attaque en excluant le Pointu (il fait la passe)
-                showAttackZones(team, autoSelectPlayer);
-            } else if (passeurExcluded) {
-                // Pointu aussi exclu (cas rare) → sélection manuelle uniquement
-                document.getElementById('playerSelectionTitle').textContent = 'Qui fait la passe ?';
-            } else {
-                document.getElementById('playerSelectionTitle').textContent = 'Cliquez le terrain (= ' + (passeur || 'Passeur') + ') ou sélectionnez :';
-                // Afficher les zones d'attaque pour permettre passe + attaquant en 1 clic
+            // Afficher les zones d'attaque (anticipation visuelle)
+            if (passeurExcluded && autoPlayer) {
+                showAttackZones(team, autoPlayer);
+            } else if (!passeurExcluded) {
                 showAttackZones(team);
             }
 
-            const lineup = team === 'home' ? currentSet.homeLineup : currentSet.awayLineup;
-            const players = Object.values(lineup).filter(p => p !== null && p !== passeur && p !== lastToucher && p !== autoSelectPlayer);
+            // Exclure lastToucher des tags
+            const exclude = [lastToucher].filter(Boolean);
 
-            let html = players.map(playerName => `
-                <button class="player-tag ${team}" onclick="handlePlayerSelection('${playerName}')">
-                    ${playerName}
-                </button>
-            `).join('');
+            renderOverrideTags({
+                team,
+                phaseLabel: 'Passe',
+                autoPlayer,
+                autoRole,
+                eligiblePlayers: getLineupPlayers(team),
+                excludePlayers: exclude,
+                mode: autoPlayer ? 'override' : 'select'
+            });
 
-            container.innerHTML = html;
-            // Ne pas appeler showSection() car il appelle hideAllSections() qui désactive outArea
-            document.getElementById('playerSelection').classList.remove('hidden');
-
-            // Afficher les options de 2ème touche (pas la faute de passe, elle apparaît après sélection du passeur)
+            // Afficher les options de 2ème touche
             document.getElementById('secondTouchOptions').classList.remove('hidden');
         }
         
@@ -3226,10 +3261,14 @@
             const passeur = getPlayerByRole(team, 'Passeur');
             if (!passeur) return;
 
-            // Si le passeur est le dernier toucheur, utiliser le Pointu en remplacement
+            // Déterminer le passeur : override > auto-select
             const lastToucher = getLastTouchPlayer(team);
             let selectedPasser, selectedRole;
-            if (passeur === lastToucher) {
+            if (gameState.overridePlayer) {
+                selectedPasser = gameState.overridePlayer;
+                selectedRole = getPlayerRole(team, selectedPasser);
+                gameState.overridePlayer = null;
+            } else if (passeur === lastToucher) {
                 const pointu = getPlayerByRole(team, 'Pointu');
                 if (!pointu || pointu === lastToucher) return; // Pas de remplacement possible
                 selectedPasser = pointu;
@@ -3320,12 +3359,49 @@
 
         function handleSecondTouch(type) {
             // Attaque en 2ème touche (deuxieme_main ou attaque_directe)
-            // On sauvegarde le type et on demande qui fait l'action
-            gameState.secondTouchType = type;
-            gameState.phase = 'second_touch_player';
+            // Le joueur est celui auto-sélectionné (ou overridé) en phase passe
+            const player = getEffectivePlayer() || gameState.autoSelectedPlayer;
+            if (!player) return;
+
+            const team = gameState.attackingTeam;
+            const role = getPlayerRole(team, player);
+
+            // Créer l'action d'attaque avec le type pré-défini
+            gameState.currentAction = {
+                type: 'attack',
+                player: player,
+                team: team,
+                attackType: type,
+                role: role
+            };
+
+            // Passer directement à attack_end (type déjà connu, pas de choix feinte/relance)
+            gameState.phase = 'attack_end';
             updatePhase();
             hideAllSections();
-            renderPlayerSelection(gameState.attackingTeam, 'Qui fait la 2ème touche ?');
+
+            // Afficher terrain adverse avec zones de défense + filet
+            const defendingTeam = team === 'home' ? 'away' : 'home';
+            highlightCourt(defendingTeam);
+            document.getElementById('outArea').classList.add('active');
+            activateNetZone(true);
+            const defendingCourtSide = getCourtSideForTeam(defendingTeam);
+            document.getElementById('outLabelTop').style.display = defendingCourtSide === 'top' ? 'block' : 'none';
+            document.getElementById('outLabelBottom').style.display = defendingCourtSide === 'bottom' ? 'block' : 'none';
+            if (role) {
+                showDefenseZones(defendingTeam, role);
+            }
+
+            // Override tags pour corriger le joueur si besoin
+            renderOverrideTags({
+                team,
+                phaseLabel: type === 'deuxieme_main' ? '2ème main' : 'Attaque directe',
+                autoPlayer: player,
+                autoRole: role,
+                eligiblePlayers: getLineupPlayers(team),
+                excludePlayers: [getLastTouchPlayer(team)].filter(p => p && p !== player),
+                mode: 'override'
+            });
         }
 
         function handlePassFault() {
@@ -3430,33 +3506,12 @@
                 awardPoint(gameState.attackingTeam);
                 endRally();
             } else if (result === 'defense') {
-                // L'adversaire défend ←’ passer en mode défense pour l'adversaire
+                // L'adversaire défend ←' passer en mode défense pour l'adversaire
                 const defendingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
                 gameState.attackingTeam = defendingTeam;
                 gameState.phase = 'defense';
-                updatePhase();
-                renderPlayerSelection(defendingTeam, 'Qui défend ?');
+                renderDefenseSelection(defendingTeam, null);
             }
-        }
-
-        function selectSecondTouchPlayer(playerName) {
-            // Créer directement une action d'attaque avec le type pré-défini
-            gameState.currentAction = {
-                type: 'attack',
-                player: playerName,
-                team: gameState.attackingTeam,
-                attackType: gameState.secondTouchType,
-                role: getPlayerRole(gameState.attackingTeam, playerName)
-            };
-            
-            // Passer directement à attack_end
-            gameState.phase = 'attack_end';
-            updatePhase();
-            hideAllSections();
-            
-            // Highlight terrain adverse
-            const defendingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
-            highlightCourt(defendingTeam);
         }
 
         function handlePassEnd(clickData) {
@@ -3504,49 +3559,42 @@
 
         // ==================== ATTAQUE ====================
         // Affiche les zones d'attaque + tags joueurs restants pour la sélection de l'attaquant.
-        // Cas standard (après passe auto) : zones R4/Pointu, tag Centre
-        // Cas passe manuelle : zones adaptées (le passeur de fait est exclu et remplacé par Passeur rôle)
-        // Cas attaque directe (defense/filet) : pas de zones, juste les tags
+        // Affiche tags override pour sélection attaquant
+        // Cas standard : zones R4/Pointu sur terrain + tags override (Centre, etc.)
+        // Cas attaque directe (defense/filet) : pas de zones, mode select
         function renderAttackPlayerSelection() {
             const team = gameState.attackingTeam;
             const lastToucher = getLastTouchPlayer(team);
+            const exclude = [lastToucher].filter(Boolean);
 
             // Pas de zones pour les attaques directes (depuis défense ou filet)
             if (gameState.defenseDirectAttack || gameState.netDirectAttack) {
-                renderPlayerSelection(team, 'Qui attaque ?');
+                renderOverrideTags({
+                    team,
+                    phaseLabel: 'Attaque',
+                    autoPlayer: null,
+                    autoRole: null,
+                    eligiblePlayers: getLineupPlayers(team),
+                    excludePlayers: exclude,
+                    mode: 'select'
+                });
                 return;
             }
 
             // Afficher les zones d'attaque en excluant le joueur qui a fait la passe
             showAttackZones(team, lastToucher);
 
-            // Déterminer quels joueurs sont couverts par les zones actives
-            const zonesId = getCourtSideForTeam(team) === 'top' ? 'attackZonesTop' : 'attackZonesBottom';
-            const zoneElements = document.getElementById(zonesId).querySelectorAll('.attack-zone');
-            const zonePlayers = new Set();
-            zoneElements.forEach(z => {
-                if (!z.classList.contains('disabled') && z.dataset.player) {
-                    zonePlayers.add(z.dataset.player);
-                }
+            // Tags override : tous les joueurs sauf lastToucher
+            // (les joueurs dans les zones seront aussi cliquables via terrain)
+            renderOverrideTags({
+                team,
+                phaseLabel: 'Attaque',
+                autoPlayer: null, // La zone fournira l'auto-select au clic
+                autoRole: null,
+                eligiblePlayers: getLineupPlayers(team),
+                excludePlayers: exclude,
+                mode: 'override'
             });
-
-            // Tags = tous les joueurs sauf lastToucher et ceux dans les zones
-            const lineup = team === 'home' ? currentSet.homeLineup : currentSet.awayLineup;
-            const allPlayers = Object.values(lineup).filter(p => p !== null);
-            const tagPlayers = allPlayers.filter(p => p !== lastToucher && !zonePlayers.has(p));
-
-            const container = document.getElementById('playerTags');
-            document.getElementById('playerSelectionTitle').textContent =
-                'Cliquez le terrain ou sélectionnez :';
-
-            let html = tagPlayers.map(playerName => `
-                <button class="player-tag ${team}" onclick="handlePlayerSelection('${playerName}')">
-                    ${playerName}
-                </button>
-            `).join('');
-
-            container.innerHTML = html;
-            document.getElementById('playerSelection').classList.remove('hidden');
         }
 
         function selectAttacker(playerName) {
@@ -3686,6 +3734,28 @@
                 // Afficher la zone Def+ (pas les zones de défense — elles sont affichées plus tôt en phase attaque)
                 hideDefenseZones();
                 showDefenseQualityZones(defTeam);
+
+                // Si un défenseur est pré-sélectionné, afficher les tags override (tous les joueurs)
+                if (gameState.defenseAutoSelected && gameState.defenseAutoPlayer) {
+                    gameState.autoSelectedPlayer = gameState.defenseAutoPlayer;
+                    gameState.overridePlayer = null;
+                    const defAutoRole = getPlayerRole(defTeam, gameState.defenseAutoPlayer);
+                    updatePhaseIndicatorWithPlayer(gameState.defenseAutoPlayer, defAutoRole, 'Résultat');
+                    const container = document.getElementById('playerTags');
+                    const allPlayers = getLineupPlayers(defTeam);
+                    container.innerHTML = allPlayers.map(playerName => {
+                        const role = getPlayerRole(defTeam, playerName);
+                        const color = ROLE_COLORS[role] || '#8b5cf6';
+                        const selectedClass = (playerName === gameState.defenseAutoPlayer) ? ' selected' : '';
+                        return `<button class="player-tag override-tag${selectedClass} ${defTeam}" data-player="${playerName}"
+                                    onclick="handleOverrideTag('${playerName}')"
+                                    style="--tag-role-color: ${color}; border-color: ${color}; color: ${color}">
+                                    ${playerName}
+                                </button>`;
+                    }).join('');
+                    document.getElementById('playerSelectionTitle').textContent = '';
+                    document.getElementById('playerSelection').classList.remove('hidden');
+                }
             }
         }
 
@@ -3806,23 +3876,19 @@
 
                 if (pendingClick && gameState.defenseAutoSelected && gameState.defenseAutoPlayer) {
                     // Position D+/D- connue + défenseur pré-sélectionné → défense complète en 1 clic
-                    const autoPlayer = gameState.defenseAutoPlayer;
+                    // L'override permet de corriger le défenseur pré-sélectionné
+                    const effectiveDefender = gameState.overridePlayer || gameState.defenseAutoPlayer;
+                    gameState.overridePlayer = null;
                     gameState.defenseAutoSelected = false;
                     gameState.defenseAutoPlayer = null;
-                    completeDefenseFromResult(autoPlayer, pendingClick);
+                    completeDefenseFromResult(effectiveDefender, pendingClick);
                 } else if (pendingClick) {
                     // Position D+/D- connue mais pas de défenseur → demander qui défend
                     gameState.pendingDefenseClickData = pendingClick; // re-stocker pour selectDefender
                     gameState.defenseAutoSelected = false;
                     gameState.defenseAutoPlayer = null;
                     gameState.phase = 'defense';
-                    updatePhase();
-                    if (attackerRole) {
-                        renderDefenseZonesOnly();
-                        showDefenseZones(newAttackingTeam, attackerRole);
-                    } else {
-                        renderPlayerSelection(newAttackingTeam, 'Qui défend ?');
-                    }
+                    renderDefenseSelection(newAttackingTeam, attackerRole);
                 } else if (gameState.defenseAutoSelected && gameState.defenseAutoPlayer) {
                     // Défenseur pré-sélectionné mais pas de position → afficher zone D+
                     const autoPlayer = gameState.defenseAutoPlayer;
@@ -3834,13 +3900,7 @@
                 } else {
                     // Rien de pré-sélectionné → flux normal (sélection défenseur + zone D+)
                     gameState.phase = 'defense';
-                    updatePhase();
-                    if (attackerRole) {
-                        renderDefenseZonesOnly();
-                        showDefenseZones(newAttackingTeam, attackerRole);
-                    } else {
-                        renderPlayerSelection(newAttackingTeam, 'Qui défend ?');
-                    }
+                    renderDefenseSelection(newAttackingTeam, attackerRole);
                 }
             } else if (result === 'defense_fault') {
                 // Défense faute directe depuis le résultat d'attaque
@@ -3860,13 +3920,7 @@
                     selectDefender(autoPlayer);
                 } else {
                     gameState.phase = 'defense';
-                    updatePhase();
-                    if (attackerRole) {
-                        renderDefenseZonesOnly();
-                        showDefenseZones(newAttackingTeam, attackerRole);
-                    } else {
-                        renderPlayerSelection(newAttackingTeam, 'Qui défend ?');
-                    }
+                    renderDefenseSelection(newAttackingTeam, attackerRole);
                 }
             } else if (result === 'bloc_out') {
                 // Bloc out : la balle sort du bloc, point pour l'attaquant
@@ -3893,9 +3947,12 @@
 
                 gameState.blocOutPending = true;
                 gameState.phase = 'bloc_out_player';
-                updatePhase();
                 hideAllSections();
-                renderPlayerSelection(blockingTeamBO, 'Qui a bloqué ?');
+                renderOverrideTags({
+                    team: blockingTeamBO, phaseLabel: 'Bloc out',
+                    autoPlayer: null, autoRole: null,
+                    eligiblePlayers: getLineupPlayers(blockingTeamBO), mode: 'select'
+                });
             } else if (result === 'blocked') {
                 // Blockée : on demande d'abord où arrive le block
                 gameState.defenseAutoSelected = false;
@@ -3998,17 +4055,11 @@
 
             // Passer à la défense (même équipe que l'attaquant)
             gameState.phase = 'defense';
-            updatePhase();
             // Activer la zone out pour permettre l'auto-sélection du défenseur hors terrain
             document.getElementById('outArea').classList.add('active');
             // Afficher les zones de défense (basées sur l'attaquant adverse)
             const blockAttackerRole = lastAttack ? lastAttack.role : null;
-            if (blockAttackerRole) {
-                renderDefenseZonesOnly();
-                showDefenseZones(gameState.attackingTeam, blockAttackerRole);
-            } else {
-                renderPlayerSelection(gameState.attackingTeam, 'Qui défend ?');
-            }
+            renderDefenseSelection(gameState.attackingTeam, blockAttackerRole);
         }
 
         // ==================== DÉFENSE ====================
@@ -4167,8 +4218,7 @@
             highlightCourt(newDefendingTeam);
             
             gameState.phase = 'defense';
-            updatePhase();
-            renderPlayerSelection(newDefendingTeam, 'Qui défend ?');
+            renderDefenseSelection(newDefendingTeam, null);
         }
 
 
@@ -4975,7 +5025,9 @@
                 case 'Jouable':    return 2;
                 case 'Négative':   return 1;
                 case 'Faute':      return 0;
-                default: return null;
+                default:
+                    // Labels spéciaux : utiliser le score directement si disponible
+                    return (typeof quality.score === 'number') ? quality.score : null;
             }
         }
 
@@ -5052,6 +5104,11 @@
                                 case 'Jouable':    stats.reception.r2++; break;
                                 case 'Négative':   stats.reception.r1++; break;
                                 case 'Faute':      stats.reception.frec++; break;
+                                default:
+                                    // Labels spéciaux (Retour gagnant, Filet - Att. directe, etc.)
+                                    // Si score = 0, c'est une faute de réception
+                                    if (action.quality.score === 0) stats.reception.frec++;
+                                    break;
                             }
                         }
                         // Retour gagnant = Att+ pour le réceptionneur

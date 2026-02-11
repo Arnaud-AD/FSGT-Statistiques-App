@@ -246,10 +246,10 @@
             font-weight: 500;
         }
 
-        .poste-passeur { background: #d1fae5; color: #059669; }
-        .poste-libero { background: #f3e8ff; color: #7c3aed; }
+        .poste-passeur { background: #ede9fe; color: #7c3aed; }
         .poste-r4 { background: #dbeafe; color: #2563eb; }
-        .poste-pointu { background: #fee2e2; color: #dc2626; }
+        .poste-centre { background: #fee2e2; color: #dc2626; }
+        .poste-pointu { background: #dcfce7; color: #16a34a; }
 
         /* Validate button */
         .validate-btn {
@@ -591,8 +591,8 @@
         function getPosteClass(poste) {
             const classes = {
                 'Passeur': 'passeur',
-                'Libéro': 'libero',
                 'R4': 'r4',
+                'Centre': 'centre',
                 'Pointu': 'pointu'
             };
             return classes[poste] || 'r4';

@@ -162,12 +162,7 @@
         }
 
         .poste-passeur {
-            background: #d1fae5;
-            color: #059669;
-        }
-
-        .poste-libero {
-            background: #f3e8ff;
+            background: #ede9fe;
             color: #7c3aed;
         }
 
@@ -176,9 +171,14 @@
             color: #2563eb;
         }
 
-        .poste-pointu {
+        .poste-centre {
             background: #fee2e2;
             color: #dc2626;
+        }
+
+        .poste-pointu {
+            background: #dcfce7;
+            color: #16a34a;
         }
 
         .actions-cell {
@@ -476,12 +476,12 @@
                             <span class="checkbox-label">Passeur</span>
                         </label>
                         <label class="checkbox-item">
-                            <input type="checkbox" name="poste" value="Libéro">
-                            <span class="checkbox-label">Libéro</span>
-                        </label>
-                        <label class="checkbox-item">
                             <input type="checkbox" name="poste" value="R4">
                             <span class="checkbox-label">R4</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="poste" value="Centre">
+                            <span class="checkbox-label">Centre</span>
                         </label>
                         <label class="checkbox-item">
                             <input type="checkbox" name="poste" value="Pointu">
@@ -545,8 +545,8 @@
         function getPosteClass(poste) {
             const classes = {
                 'Passeur': 'passeur',
-                'Libéro': 'libero',
                 'R4': 'r4',
+                'Centre': 'centre',
                 'Pointu': 'pointu'
             };
             return classes[poste] || 'r4';

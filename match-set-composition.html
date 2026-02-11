@@ -276,7 +276,7 @@
             line-height: 1.3;
         }
 
-        .role-label.passeur { background: rgba(255,255,255,0.3); }
+        .role-label.passeur { background: #8b5cf6; }
         .role-label.r4 { background: #3b82f6; }
         .role-label.centre { background: #ef4444; }
         .role-label.pointu { background: #22c55e; }
@@ -1192,6 +1192,15 @@
                 // Retirer du banc
                 const benchTag = document.querySelector(`#awayBench .player-tag[data-player-name="${name}"]`);
                 if (benchTag) benchTag.remove();
+            }
+
+            // [DEV TEST] Auto-configuration des bloqueurs — À RETIRER
+            const blockerConfig = DevTestMode.getBlockerConfig();
+            if (blockerConfig) {
+                setBlockerRight('home', blockerConfig.home.blockerRight);
+                setBlockerRight('away', blockerConfig.away.blockerRight);
+                setPrimaryBlocker('home', blockerConfig.home.primaryBlocker);
+                setPrimaryBlocker('away', blockerConfig.away.primaryBlocker);
             }
 
             updateStatus();
