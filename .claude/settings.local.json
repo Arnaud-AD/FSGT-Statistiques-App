@@ -9,7 +9,21 @@
       "Bash(python3:*)",
       "Bash(ls:*)",
       "Bash(xxd:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(git checkout:*)",
+      "Bash(gh api:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:arnaud-ad.github.io)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(curl:*)",
+      "Bash(echo:*)",
+      "Bash(chmod:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs:*)",
+      "Bash(git tag:*)",
+      "Bash(gh repo view:*)"
     ]
   }
 }

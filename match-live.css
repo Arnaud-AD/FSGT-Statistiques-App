@@ -164,13 +164,189 @@
         .score-header {
             background: linear-gradient(135deg, var(--court-blue) 0%, #1e40af 100%);
             color: white;
-            padding: 8px 12px;
+            padding: 6px 8px 4px;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
+            flex-direction: column;
             position: sticky;
             top: 0;
             z-index: 50;
+        }
+
+        .score-header-row-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .score-header-row-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 4px;
+            position: relative;
+        }
+
+        .header-controls-left,
+        .header-controls-right {
+            display: flex;
+            gap: 4px;
+        }
+
+        .header-controls-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .header-ctrl-btn {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            opacity: 0.8;
+        }
+
+        .header-ctrl-btn:hover {
+            opacity: 1;
+        }
+
+        .header-ctrl-btn.substitute {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .header-ctrl-btn.substitute:hover {
+            background: #1d4ed8;
+            color: white;
+        }
+
+        .header-ctrl-btn.end-set {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+
+        .header-ctrl-btn.end-set:hover {
+            background: #fde68a;
+        }
+
+        .header-ctrl-btn.undo {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .header-ctrl-btn.undo:hover {
+            background: #374151;
+            color: white;
+        }
+
+        .header-ctrl-btn.cancel {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .header-ctrl-btn.cancel:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+        .header-ctrl-btn.youtube-link {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .header-ctrl-btn.youtube-link:hover {
+            background: #16a34a;
+            color: white;
+        }
+
+        .yt-url-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .yt-url-overlay.active {
+            display: flex;
+        }
+
+        .yt-url-modal {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            width: 90%;
+            max-width: 380px;
+        }
+
+        .yt-url-title {
+            font-size: 15px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 12px;
+            color: #16a34a;
+        }
+
+        .yt-url-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: 'Roboto', sans-serif;
+            box-sizing: border-box;
+            margin-bottom: 12px;
+        }
+
+        .yt-url-input:focus {
+            outline: none;
+            border-color: #16a34a;
+            box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.15);
+        }
+
+        .yt-url-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .yt-url-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+
+        .yt-url-btn.cancel {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .yt-url-btn.confirm {
+            background: #16a34a;
+            color: white;
+        }
+
+        .yt-url-btn.confirm:hover {
+            background: #15803d;
+        }
+
+        .score-header-right-placeholder {
+            width: 60px;
         }
 
         .score-header-left {
@@ -236,34 +412,22 @@
             opacity: 0.6;
         }
 
-        .serving-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--accent-orange);
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(1.2); }
-        }
 
         /* Main content */
         .main-content {
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 8px 12px;
+            padding: 4px 12px;
         }
 
         /* Phase indicator */
         .phase-indicator {
             text-align: center;
-            padding: 6px 12px;
+            padding: 4px 12px;
             background: var(--bg-header);
             border-radius: 8px;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             font-size: 12px;
             font-weight: 500;
             color: var(--text-secondary);
@@ -316,8 +480,8 @@
         .court-container {
             background: var(--court-blue);
             border-radius: 10px;
-            padding: 25px 25px;
-            margin-bottom: 10px;
+            padding: 15px 25px;
+            margin-bottom: 6px;
             position: relative;
             overflow: visible;
         }
@@ -1230,7 +1394,7 @@
 
         /* Tableau de statistiques du set */
         .stats-section {
-            margin-top: 20px;
+            margin-top: 300px;
             padding: 0 10px;
         }
 

@@ -12,26 +12,66 @@
     <div class="app-container">
         <!-- Score Header -->
         <header class="score-header">
-            <div class="score-header-left">
-                <button class="back-btn" onclick="handleBack()">
-                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-                    </svg>
-                </button>
-                <span class="set-indicator" id="setIndicator">SET 1</span>
-            </div>
-            <div class="score-display">
-                <div class="team-score" id="homeScoreDisplay">
-                    <div class="team-name">Jen et ses Saints</div>
-                    <div class="team-points" id="homePoints">0</div>
+            <div class="score-header-row-top">
+                <div class="score-header-left">
+                    <button class="back-btn" onclick="handleBack()">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                        </svg>
+                    </button>
+                    <span class="set-indicator" id="setIndicator">SET 1</span>
                 </div>
-                <span class="score-separator">-</span>
-                <div class="team-score" id="awayScoreDisplay">
-                    <div class="team-name" id="awayTeamName">Adversaire</div>
-                    <div class="team-points" id="awayPoints">0</div>
+                <div class="score-display">
+                    <div class="team-score" id="homeScoreDisplay">
+                        <div class="team-name">Jen et ses Saints</div>
+                        <div class="team-points" id="homePoints">0</div>
+                    </div>
+                    <span class="score-separator">-</span>
+                    <div class="team-score" id="awayScoreDisplay">
+                        <div class="team-name" id="awayTeamName">Adversaire</div>
+                        <div class="team-points" id="awayPoints">0</div>
+                    </div>
+                </div>
+                <div class="score-header-right-placeholder"></div>
+            </div>
+            <div class="score-header-row-bottom">
+                <div class="header-controls-left">
+                    <button class="header-ctrl-btn substitute" id="btnSubstitute" onclick="openSubModal()" title="Changement" style="display: none;">
+                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/>
+                        </svg>
+                        Changement
+                    </button>
+                    <button class="header-ctrl-btn end-set" id="btnEndSet" onclick="openEndSetModal('manual')" title="Terminer le set" style="display: none;">
+                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/>
+                        </svg>
+                        Fin du Set
+                    </button>
+                </div>
+                <div class="header-controls-center">
+                    <button class="header-ctrl-btn youtube-link" id="btnYoutubeLink" onclick="openYoutubeModal()" title="Lien YouTube">
+                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/>
+                        </svg>
+                        YouTube
+                    </button>
+                </div>
+                <div class="header-controls-right">
+                    <button class="header-ctrl-btn undo" onclick="undoLastAction()" title="Retour">
+                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/>
+                        </svg>
+                        Retour
+                    </button>
+                    <button class="header-ctrl-btn cancel" onclick="cancelPoint()" title="Annuler le point">
+                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                        </svg>
+                        Annuler point
+                    </button>
                 </div>
             </div>
-            <div class="serving-indicator" id="servingIndicator" title="Au service"></div>
         </header>
 
         <!-- Main Content -->
@@ -39,38 +79,6 @@
             <!-- Phase Indicator -->
             <div class="phase-indicator" id="phaseIndicator">
                 <span class="highlight">Service</span> — Sélectionnez le serveur
-            </div>
-
-            <!-- Control buttons (toujours visibles, position fixe) -->
-            <div class="control-bar">
-                <div class="control-bar-left">
-                    <button class="control-btn substitute" id="btnSubstitute" onclick="openSubModal()" title="Changement" style="display: none;">
-                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/>
-                        </svg>
-                        Changement
-                    </button>
-                    <button class="control-btn end-set" id="btnEndSet" onclick="openEndSetModal('manual')" title="Terminer le set" style="display: none;">
-                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/>
-                        </svg>
-                        Fin du Set
-                    </button>
-                </div>
-                <div class="control-bar-right">
-                    <button class="control-btn undo" onclick="undoLastAction()" title="Retour">
-                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/>
-                        </svg>
-                        Retour
-                    </button>
-                    <button class="control-btn cancel" onclick="cancelPoint()" title="Annuler le point">
-                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                        </svg>
-                        Annuler point
-                    </button>
-                </div>
             </div>
 
             <!-- Court -->
@@ -608,6 +616,18 @@
 
     </div><!-- /layout-wrapper -->
 
+    <!-- Modal YouTube URL -->
+    <div class="yt-url-overlay" id="ytUrlOverlay" onclick="closeYoutubeModal(event)">
+        <div class="yt-url-modal" onclick="event.stopPropagation()">
+            <div class="yt-url-title">Lien YouTube</div>
+            <input type="url" id="ytUrlInput" class="yt-url-input" placeholder="https://www.youtube.com/watch?v=...">
+            <div class="yt-url-actions">
+                <button class="yt-url-btn cancel" onclick="closeYoutubeModal()">Annuler</button>
+                <button class="yt-url-btn confirm" onclick="confirmYoutubeUrl()">Valider</button>
+            </div>
+        </div>
+    </div>
+
     <script src="storage.js"></script>
     <script src="match-live-helpers.js"></script>
     <script src="match-live-undo.js"></script>
@@ -776,6 +796,50 @@
             } else {
                 initYouTubePlayer(parsed);
             }
+        }
+
+        // ==================== MODAL YOUTUBE URL ====================
+        function openYoutubeModal() {
+            const match = Storage.getCurrentMatch();
+            const si = (match?.sets?.length || 1) - 1;
+            const currentUrl = match?.sets?.[si]?.youtubeUrl || '';
+            const input = document.getElementById('ytUrlInput');
+            input.value = currentUrl;
+            document.getElementById('ytUrlOverlay').classList.add('active');
+            input.focus();
+            input.select();
+        }
+
+        document.getElementById('ytUrlInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); confirmYoutubeUrl(); }
+            if (e.key === 'Escape') { e.preventDefault(); closeYoutubeModal(); }
+        });
+
+        function closeYoutubeModal(e) {
+            if (e && e.target !== e.currentTarget) return;
+            document.getElementById('ytUrlOverlay').classList.remove('active');
+        }
+
+        function confirmYoutubeUrl() {
+            const url = document.getElementById('ytUrlInput').value.trim();
+
+            // Mettre à jour la variable en mémoire ET le localStorage
+            currentSet.youtubeUrl = url;
+            currentMatch.sets[setIndex] = currentSet;
+            Storage.saveCurrentMatch(currentMatch);
+
+            closeYoutubeModal();
+
+            if (url) {
+                loadYouTubeForCurrentSet();
+            } else {
+                document.body.classList.add('classic-mode');
+                document.body.classList.remove('video-mode');
+            }
+        }
+
+        function updateYoutubeButtonState() {
+            // Fonction conservée pour cohérence d'appel (init + confirm)
         }
 
         // Raccourcis clavier pour le player YouTube
@@ -1149,6 +1213,7 @@
 
             // Initialiser le lecteur YouTube si URL disponible
             loadYouTubeForCurrentSet();
+            updateYoutubeButtonState();
         }
 
         // ==================== AFFICHAGE ====================
@@ -1172,8 +1237,6 @@
             document.getElementById('homePoints').textContent = gameState.homeScore;
             document.getElementById('awayPoints').textContent = gameState.awayScore;
 
-            // Indicateur de service
-            const indicator = document.getElementById('servingIndicator');
             const homeDisplay = document.getElementById('homeScoreDisplay');
             const awayDisplay = document.getElementById('awayScoreDisplay');
 
