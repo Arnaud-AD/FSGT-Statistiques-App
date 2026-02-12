@@ -1755,7 +1755,7 @@
         #positionZonesTop .position-zone[data-zone="center"] { left: 33.33%; width: 33.34%; }
         #positionZonesTop .position-zone[data-zone="right"] { right: 0; width: 33.33%; border-radius: 0 3px 0 0; }
 
-        /* Attack zones for attacker auto-select (2 zones: left/right) */
+        /* Attack zones for attacker auto-select (2 ou 3 zones: left/center/right) */
         .attack-zones {
             position: absolute;
             top: 0;
@@ -1802,6 +1802,12 @@
             cursor: default;
         }
 
+        /* Zone centre cachée par défaut (affichée par JS si centreAttack activé) */
+        .attack-zone[data-zone="center"] {
+            display: none;
+        }
+
+        /* === Mode 2 zones (sans centre) — défaut : position/width comme avant === */
         /* Bottom court: zones couvrent tout le terrain (gauche/droite) */
         #attackZonesBottom .attack-zone {
             top: 0;
@@ -1817,6 +1823,98 @@
         }
         #attackZonesTop .attack-zone[data-zone="left"] { left: 0; width: 50%; border-radius: 3px 0 0 0; }
         #attackZonesTop .attack-zone[data-zone="right"] { right: 0; width: 50%; border-radius: 0 3px 0 0; }
+
+        /* === Mode 3 zones (avec centre) — activé via classe .centre-enabled === */
+        /* Override avec ID pour surclasser les règles mode 2 zones (même spécificité ID) */
+        #attackZonesBottom.centre-enabled .attack-zone,
+        #attackZonesTop.centre-enabled .attack-zone {
+            top: 0;
+            left: 0;
+            right: auto;
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+        }
+        /* Mode 3 zones : passer au-dessus du filet (z-index 15) pour que le label centre soit visible */
+        .attack-zones.centre-enabled {
+            z-index: 16;
+        }
+        #attackZonesBottom.centre-enabled .attack-zone[data-zone="center"],
+        #attackZonesTop.centre-enabled .attack-zone[data-zone="center"] {
+            display: flex;
+        }
+
+        /* Labels positionnés au centre visuel de chaque zone clippée (mode 3 zones) */
+        .attack-zones.centre-enabled .attack-zone .zone-label {
+            position: absolute;
+            transform: translate(-50%, -50%);
+        }
+        /* Bottom court : left → centre-gauche, right → centre-droite */
+        #attackZonesBottom.centre-enabled .attack-zone[data-zone="left"] .zone-label { left: 25%; top: 55%; }
+        #attackZonesBottom.centre-enabled .attack-zone[data-zone="right"] .zone-label { left: 75%; top: 55%; }
+        /* Top court : miroir */
+        #attackZonesTop.centre-enabled .attack-zone[data-zone="left"] .zone-label { left: 25%; top: 45%; }
+        #attackZonesTop.centre-enabled .attack-zone[data-zone="right"] .zone-label { left: 75%; top: 45%; }
+
+        /* Label flottant centre — hors du clip-path, au-dessus du filet, non cliquable */
+        .centre-floating-label {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            pointer-events: none;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            color: #fff;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+        #attackZonesBottom .centre-floating-label { top: 0%; }
+        #attackZonesTop .centre-floating-label { bottom: 0%; }
+
+        /* Bottom court (filet en haut Y=0%): demi-cercle centre au filet — rayon 16.65% */
+        #attackZonesBottom.centre-enabled .attack-zone[data-zone="center"] {
+            clip-path: polygon(
+                33.4% 0%, 33.9% 4.3%, 35.6% 8.3%, 38.2% 11.8%, 41.7% 14.4%,
+                45.7% 16.1%, 50% 16.6%, 54.3% 16.1%, 58.3% 14.4%, 61.8% 11.8%,
+                64.4% 8.3%, 66.1% 4.3%, 66.7% 0%
+            );
+        }
+        #attackZonesBottom.centre-enabled .attack-zone[data-zone="left"] {
+            clip-path: polygon(
+                0% 0%, 33.4% 0%, 33.9% 4.3%, 35.6% 8.3%, 38.2% 11.8%, 41.7% 14.4%,
+                45.7% 16.1%, 50% 16.6%, 50% 100%, 0% 100%
+            );
+        }
+        #attackZonesBottom.centre-enabled .attack-zone[data-zone="right"] {
+            clip-path: polygon(
+                100% 0%, 66.7% 0%, 66.1% 4.3%, 64.4% 8.3%, 61.8% 11.8%, 58.3% 14.4%,
+                54.3% 16.1%, 50% 16.6%, 50% 100%, 100% 100%
+            );
+        }
+
+        /* Top court (filet en bas Y=100%): demi-cercle centre en bas — rayon 16.65% */
+        #attackZonesTop.centre-enabled .attack-zone[data-zone="center"] {
+            clip-path: polygon(
+                33.4% 100%, 33.9% 95.7%, 35.6% 91.7%, 38.2% 88.2%, 41.7% 85.6%,
+                45.7% 83.9%, 50% 83.3%, 54.3% 83.9%, 58.3% 85.6%, 61.8% 88.2%,
+                64.4% 91.7%, 66.1% 95.7%, 66.7% 100%
+            );
+        }
+        #attackZonesTop.centre-enabled .attack-zone[data-zone="left"] {
+            clip-path: polygon(
+                0% 100%, 33.4% 100%, 33.9% 95.7%, 35.6% 91.7%, 38.2% 88.2%, 41.7% 85.6%,
+                45.7% 83.9%, 50% 83.3%, 50% 0%, 0% 0%
+            );
+        }
+        #attackZonesTop.centre-enabled .attack-zone[data-zone="right"] {
+            clip-path: polygon(
+                100% 100%, 66.7% 100%, 66.1% 95.7%, 64.4% 91.7%, 61.8% 88.2%, 58.3% 85.6%,
+                54.3% 83.9%, 50% 83.3%, 50% 0%, 100% 0%
+            );
+        }
 
         /* Defense zones for defender auto-select (3 zones: line/diagonal/short) */
         .defense-zones {
@@ -1925,6 +2023,67 @@
         }
         #defenseZonesTop.attack-pointu .defense-zone[data-zone="diagonal"] .zone-label { left: 15%; top: 30%; }
 
+        /* ===== Cas: Attaque Centre — Bottom court (filet en haut) ===== */
+        /* Short (quadrilatère haut-gauche, côté ligne descend jusqu'à 50%) */
+        #defenseZonesBottom.attack-centre-left .defense-zone[data-zone="short"] {
+            clip-path: polygon(0% 0%, 50% 0%, 50% 40%, 0% 50%);
+        }
+        #defenseZonesBottom.attack-centre-left .defense-zone[data-zone="short"] .zone-label { left: 22%; top: 18%; }
+        /* Line : moitié droite complète */
+        #defenseZonesBottom.attack-centre-left .defense-zone[data-zone="line"] {
+            clip-path: polygon(50% 0%, 100% 0%, 100% 100%, 50% 100%);
+        }
+        #defenseZonesBottom.attack-centre-left .defense-zone[data-zone="line"] .zone-label { left: 75%; top: 50%; }
+        /* Diagonal : moitié gauche sous la zone short */
+        #defenseZonesBottom.attack-centre-left .defense-zone[data-zone="diagonal"] {
+            clip-path: polygon(0% 50%, 50% 40%, 50% 100%, 0% 100%);
+        }
+        #defenseZonesBottom.attack-centre-left .defense-zone[data-zone="diagonal"] .zone-label { left: 25%; top: 72%; }
+
+        /* ===== Cas: Attaque Centre — Top court (filet en bas, miroir X+Y) ===== */
+        #defenseZonesTop.attack-centre-left .defense-zone[data-zone="short"] {
+            clip-path: polygon(100% 100%, 50% 100%, 50% 60%, 100% 50%);
+        }
+        #defenseZonesTop.attack-centre-left .defense-zone[data-zone="short"] .zone-label { left: 78%; top: 82%; }
+        #defenseZonesTop.attack-centre-left .defense-zone[data-zone="line"] {
+            clip-path: polygon(50% 100%, 0% 100%, 0% 0%, 50% 0%);
+        }
+        #defenseZonesTop.attack-centre-left .defense-zone[data-zone="line"] .zone-label { left: 25%; top: 50%; }
+        #defenseZonesTop.attack-centre-left .defense-zone[data-zone="diagonal"] {
+            clip-path: polygon(100% 50%, 50% 60%, 50% 0%, 100% 0%);
+        }
+        #defenseZonesTop.attack-centre-left .defense-zone[data-zone="diagonal"] .zone-label { left: 75%; top: 28%; }
+
+        /* ===== Cas: Attaque Centre — Short à DROITE écran (R4 bloque) — Bottom court ===== */
+        #defenseZonesBottom.attack-centre-right .defense-zone[data-zone="short"] {
+            clip-path: polygon(100% 0%, 50% 0%, 50% 40%, 100% 50%);
+        }
+        #defenseZonesBottom.attack-centre-right .defense-zone[data-zone="short"] .zone-label { left: 78%; top: 18%; }
+        /* Line : moitié gauche complète */
+        #defenseZonesBottom.attack-centre-right .defense-zone[data-zone="line"] {
+            clip-path: polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%);
+        }
+        #defenseZonesBottom.attack-centre-right .defense-zone[data-zone="line"] .zone-label { left: 25%; top: 50%; }
+        /* Diagonal : moitié droite sous la zone short */
+        #defenseZonesBottom.attack-centre-right .defense-zone[data-zone="diagonal"] {
+            clip-path: polygon(100% 50%, 50% 40%, 50% 100%, 100% 100%);
+        }
+        #defenseZonesBottom.attack-centre-right .defense-zone[data-zone="diagonal"] .zone-label { left: 75%; top: 72%; }
+
+        /* ===== Cas: Attaque Centre — Short à DROITE écran (R4 bloque) — Top court (miroir X+Y) ===== */
+        #defenseZonesTop.attack-centre-right .defense-zone[data-zone="short"] {
+            clip-path: polygon(0% 100%, 50% 100%, 50% 60%, 0% 50%);
+        }
+        #defenseZonesTop.attack-centre-right .defense-zone[data-zone="short"] .zone-label { left: 22%; top: 82%; }
+        #defenseZonesTop.attack-centre-right .defense-zone[data-zone="line"] {
+            clip-path: polygon(100% 100%, 50% 100%, 50% 0%, 100% 0%);
+        }
+        #defenseZonesTop.attack-centre-right .defense-zone[data-zone="line"] .zone-label { left: 75%; top: 50%; }
+        #defenseZonesTop.attack-centre-right .defense-zone[data-zone="diagonal"] {
+            clip-path: polygon(0% 50%, 50% 60%, 50% 0%, 0% 0%);
+        }
+        #defenseZonesTop.attack-centre-right .defense-zone[data-zone="diagonal"] .zone-label { left: 25%; top: 28%; }
+
         .reception-quality-zones {
             position: absolute;
             top: 0;
@@ -1945,7 +2104,7 @@
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            opacity: 0.5;
+            opacity: 0.6;
         }
 
         .quality-zone.perfect {
@@ -2029,7 +2188,7 @@
             left: 50%;
             transform: translateX(-50%);
             background: #3b82f6;
-            opacity: 0.4;
+            opacity: 0.6;
             z-index: 1;
         }
 

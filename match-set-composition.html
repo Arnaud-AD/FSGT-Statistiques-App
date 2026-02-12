@@ -663,6 +663,21 @@
                     <button class="blocker-toggle-btn away" onclick="setBlockerRight('away', 'Passeur')">Passeur</button>
                 </div>
             </div>
+            <div class="blocker-config-title" style="margin-top: 8px;">Attaque centre</div>
+            <div class="blocker-config-row">
+                <span class="blocker-config-label">🔵 Jen :</span>
+                <div class="blocker-toggle" id="homeCentreAttackToggle">
+                    <button class="blocker-toggle-btn home" onclick="setCentreAttack('home', true)">Oui</button>
+                    <button class="blocker-toggle-btn home active" onclick="setCentreAttack('home', false)">Non</button>
+                </div>
+            </div>
+            <div class="blocker-config-row" style="margin-top: 6px;">
+                <span class="blocker-config-label">🔴 <span id="awayCentreLabel">Adv.</span> :</span>
+                <div class="blocker-toggle" id="awayCentreAttackToggle">
+                    <button class="blocker-toggle-btn away active" onclick="setCentreAttack('away', true)">Oui</button>
+                    <button class="blocker-toggle-btn away" onclick="setCentreAttack('away', false)">Non</button>
+                </div>
+            </div>
             <div class="blocker-config-title" style="margin-top: 8px;">Bloqueur principal (2/3 du filet)</div>
             <div class="blocker-config-row">
                 <span class="blocker-config-label">🔵 Jen :</span>
@@ -737,6 +752,8 @@
         let awayBlockerRight = existingSet?.awayBlockerRight || 'Pointu';
         let homePrimaryBlocker = existingSet?.homePrimaryBlocker || 'right';
         let awayPrimaryBlocker = existingSet?.awayPrimaryBlocker || 'right';
+        let homeCentreAttack = existingSet?.homeCentreAttack === true ? true : false; // défaut false
+        let awayCentreAttack = existingSet?.awayCentreAttack !== false ? true : false; // défaut true
 
         // État de la sélection click-and-click
         let selectedPlayer = null;  // { name, team, element, source }
@@ -780,12 +797,15 @@
             const oppLabel = (currentMatch.opponent || 'Adv.').substring(0, 8);
             document.getElementById('awayBlockerLabel').textContent = oppLabel;
             document.getElementById('awayPrimaryLabel').textContent = oppLabel;
+            document.getElementById('awayCentreLabel').textContent = oppLabel;
 
             // Afficher l'état des toggles bloqueur
             updateBlockerRightToggle('home', homeBlockerRight);
             updateBlockerRightToggle('away', awayBlockerRight);
             updatePrimaryBlockerToggle('home', homePrimaryBlocker);
             updatePrimaryBlockerToggle('away', awayPrimaryBlocker);
+            updateCentreAttackToggle('home', homeCentreAttack);
+            updateCentreAttackToggle('away', awayCentreAttack);
         }
 
         // Rendre les bancs
@@ -1089,6 +1109,25 @@
             });
         }
 
+        // Config attaque centre
+        function setCentreAttack(team, enabled) {
+            if (team === 'home') {
+                homeCentreAttack = enabled;
+            } else {
+                awayCentreAttack = enabled;
+            }
+            updateCentreAttackToggle(team, enabled);
+        }
+
+        function updateCentreAttackToggle(team, enabled) {
+            const toggleId = team === 'home' ? 'homeCentreAttackToggle' : 'awayCentreAttackToggle';
+            const buttons = document.getElementById(toggleId).querySelectorAll('.blocker-toggle-btn');
+            buttons.forEach(btn => {
+                const isYes = btn.textContent.trim() === 'Oui';
+                btn.classList.toggle('active', isYes === enabled);
+            });
+        }
+
         // Config bloqueur principal (R4 ou right)
         function setPrimaryBlocker(team, value) {
             if (team === 'home') {
@@ -1122,6 +1161,8 @@
                 currentMatch.sets[currentSetIndex].awayBlockerRight = awayBlockerRight;
                 currentMatch.sets[currentSetIndex].homePrimaryBlocker = homePrimaryBlocker;
                 currentMatch.sets[currentSetIndex].awayPrimaryBlocker = awayPrimaryBlocker;
+                currentMatch.sets[currentSetIndex].homeCentreAttack = homeCentreAttack;
+                currentMatch.sets[currentSetIndex].awayCentreAttack = awayCentreAttack;
             } else {
                 // Premier set — créer le tableau
                 if (!currentMatch.sets) currentMatch.sets = [];
@@ -1133,6 +1174,8 @@
                     awayBlockerRight: awayBlockerRight,
                     homePrimaryBlocker: homePrimaryBlocker,
                     awayPrimaryBlocker: awayPrimaryBlocker,
+                    homeCentreAttack: homeCentreAttack,
+                    awayCentreAttack: awayCentreAttack,
                     homeScore: 0,
                     awayScore: 0,
                     points: []
@@ -1201,6 +1244,8 @@
                 setBlockerRight('away', blockerConfig.away.blockerRight);
                 setPrimaryBlocker('home', blockerConfig.home.primaryBlocker);
                 setPrimaryBlocker('away', blockerConfig.away.primaryBlocker);
+                if (blockerConfig.home.centreAttack !== undefined) setCentreAttack('home', blockerConfig.home.centreAttack);
+                if (blockerConfig.away.centreAttack !== undefined) setCentreAttack('away', blockerConfig.away.centreAttack);
             }
 
             updateStatus();

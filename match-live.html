@@ -108,6 +108,7 @@
                         <!-- Zones d'attaque (pour auto-sélection attaquant) -->
                         <div class="attack-zones" id="attackZonesTop">
                             <div class="attack-zone" data-zone="left"></div>
+                            <div class="attack-zone" data-zone="center"></div>
                             <div class="attack-zone" data-zone="right"></div>
                         </div>
                         <!-- Zones de défense (pour auto-sélection défenseur) -->
@@ -143,6 +144,7 @@
                         <!-- Zones d'attaque (pour auto-sélection attaquant) -->
                         <div class="attack-zones" id="attackZonesBottom">
                             <div class="attack-zone" data-zone="left"></div>
+                            <div class="attack-zone" data-zone="center"></div>
                             <div class="attack-zone" data-zone="right"></div>
                         </div>
                         <!-- Zones de défense (pour auto-sélection défenseur) -->
@@ -3277,10 +3279,15 @@
             const team = gameState.attackingTeam;
             const courtSide = getCourtSideForTeam(team);
 
-            // Déterminer la position X relative au terrain de l'équipe
-            let xPercent;
+            // Config attaque centre pour cette équipe
+            const centreAttackEnabled = team === 'home'
+                ? (currentSet.homeCentreAttack === true)
+                : (currentSet.awayCentreAttack !== false);
+
+            // Déterminer la position X et Y relative au terrain de l'équipe
+            let xPercent, yPercent;
             if (clickData.courtSide === 'out') {
-                // Clic out : calculer X par rapport au court-half de l'équipe
+                // Clic out : calculer X/Y par rapport au court-half de l'équipe
                 const courtId = courtSide === 'top' ? 'courtTop' : 'courtBottom';
                 const courtEl = document.getElementById(courtId);
                 const container = document.getElementById('courtContainer');
@@ -3288,28 +3295,48 @@
                 const courtRect = courtEl.getBoundingClientRect();
                 const clickAbsX = (clickData.x / 100) * containerRect.width + containerRect.left;
                 xPercent = ((clickAbsX - courtRect.left) / courtRect.width) * 100;
+                yPercent = ((clickData.y / 100) * containerRect.height + containerRect.top - courtRect.top) / courtRect.height * 100;
             } else {
                 xPercent = clickData.x;
+                yPercent = clickData.y;
             }
 
-            // Bottom court : gauche (x<50) = R4, droite (x>=50) = Pointu
-            // Top court : miroir — gauche (x<50) = Pointu, droite (x>=50) = R4
             let role;
-            if (courtSide === 'bottom') {
-                role = xPercent < 50 ? 'R4' : 'Pointu';
-            } else {
-                role = xPercent < 50 ? 'Pointu' : 'R4';
+
+            // Si attaque centre activée, tester d'abord le demi-cercle
+            if (centreAttackEnabled) {
+                // Demi-cercle centré au milieu du filet, rayon 16.65% en X et Y
+                // Bottom court : filet en Y=0%, Top court : filet en Y=100%
+                const filetY = courtSide === 'bottom' ? 0 : 100;
+                const dx = (xPercent - 50) / 16.65;
+                const dy = (yPercent - filetY) / 16.65;
+                // Vérifier que le clic est dans le demi-cercle ET du bon côté du filet
+                const inSemiCircle = (dx * dx + dy * dy <= 1) &&
+                    (courtSide === 'bottom' ? yPercent >= 0 : yPercent <= 100);
+
+                if (inSemiCircle) {
+                    role = 'Centre';
+                }
+            }
+
+            // Sinon : gauche/droite classique
+            if (!role) {
+                if (courtSide === 'bottom') {
+                    role = xPercent < 50 ? 'R4' : 'Pointu';
+                } else {
+                    role = xPercent < 50 ? 'Pointu' : 'R4';
+                }
             }
 
             let player = getPlayerByRole(team, role);
 
             // Si le joueur trouvé est celui qui a fait la passe, il ne peut pas attaquer
             if (player && excludePlayer && player === excludePlayer) {
-                // Pointu exclu côté droit → Passeur prend sa place (il est physiquement de ce côté)
                 if (role === 'Pointu') {
+                    // Pointu exclu côté droit → Passeur prend sa place
                     player = getPlayerByRole(team, 'Passeur');
                 } else {
-                    // R4 exclu côté gauche → pas d'auto-sélection (Passeur n'attaque pas de ce côté)
+                    // R4 ou Centre exclu → pas d'auto-sélection
                     player = null;
                 }
             }

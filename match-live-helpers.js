@@ -86,7 +86,7 @@ function showPositionZones(team) {
     
     const zoneElements = zones.querySelectorAll('.position-zone');
     mapping.forEach((m, i) => {
-        zoneElements[i].style.background = m.color + '40';
+        zoneElements[i].style.background = m.color + 'cc';
         zoneElements[i].style.borderColor = m.color + '80';
         zoneElements[i].innerHTML = `<span class="zone-label">${m.role}<br>${m.player}</span>`;
         zoneElements[i].dataset.player = m.player;
@@ -101,11 +101,10 @@ function hidePositionZones() {
     document.getElementById('positionZonesBottom').classList.remove('active');
 }
 
-// Affiche les 2 zones d'attaque (gauche=R4, droite=Pointu) sur le terrain de l'équipe
-// Si le R4 ou Pointu est le dernier toucheur (passeur), la zone droite bascule sur le Passeur
-// Affiche les 2 zones d'attaque sur le terrain de l'équipe.
+// Affiche les zones d'attaque sur le terrain de l'équipe.
+// 2 zones (R4/Pointu) si centreAttack désactivé, 3 zones (R4/Centre/Pointu) si activé.
 // excludePlayer : joueur qui a fait la passe (ne peut pas attaquer = double touche)
-//   - null/undefined = cas standard phase pass (Passeur rôle fait la passe, zones R4/Pointu)
+//   - null/undefined = cas standard phase pass (Passeur rôle fait la passe)
 //   - nom du joueur = cas passe manuelle (ce joueur est remplacé dans sa zone par le Passeur rôle)
 function showAttackZones(team, excludePlayer, visualOnly) {
     const courtSide = getCourtSideForTeam(team);
@@ -113,29 +112,47 @@ function showAttackZones(team, excludePlayer, visualOnly) {
     const zones = document.getElementById(zonesId);
 
     const r4Player = getPlayerByRole(team, 'R4');
+    const centrePlayer = getPlayerByRole(team, 'Centre');
     const pointuPlayer = getPlayerByRole(team, 'Pointu');
     const passeurPlayer = getPlayerByRole(team, 'Passeur');
 
-    // Zone gauche = R4, Zone droite = Pointu (par défaut)
-    // Si un joueur est exclu (il a fait la passe), sa zone est remplacée par le Passeur (rôle)
+    // Config attaque centre pour cette équipe
+    const centreAttackEnabled = team === 'home'
+        ? (currentSet.homeCentreAttack === true)
+        : (currentSet.awayCentreAttack !== false); // défaut true pour away
+
+    // Zone gauche = R4, Zone centre = Centre, Zone droite = Pointu (par défaut)
     let leftPlayer = r4Player, leftRole = 'R4', leftColor = ROLE_COLORS['R4'], leftDisabled = false;
+    let centerPlayer = centrePlayer, centerRole = 'Centre', centerColor = ROLE_COLORS['Centre'], centerDisabled = false;
     let rightPlayer = pointuPlayer, rightRole = 'Pointu', rightColor = ROLE_COLORS['Pointu'], rightDisabled = false;
 
     if (excludePlayer) {
         if (excludePlayer === r4Player) {
-            // R4 a fait la passe → zone gauche désactivée (Passeur n'attaque pas côté R4)
             leftDisabled = true;
         }
+        if (excludePlayer === centrePlayer) {
+            centerDisabled = true;
+        }
         if (excludePlayer === pointuPlayer) {
-            // Pointu a fait la passe → zone droite = Passeur (il est physiquement de ce côté)
+            // Pointu a fait la passe → zone droite = Passeur (physiquement de ce côté)
             rightPlayer = passeurPlayer;
             rightRole = 'Passeur';
             rightColor = ROLE_COLORS['Passeur'];
         }
     }
 
+    // Activer/désactiver le mode centre sur le conteneur (contrôle les clip-paths CSS)
+    if (centreAttackEnabled) {
+        zones.classList.add('centre-enabled');
+    } else {
+        zones.classList.remove('centre-enabled');
+    }
+
     // Mapping selon le côté du terrain (miroir pour le court top)
-    let leftMapping, rightMapping;
+    // Centre reste au centre (pas de miroir), gauche/droite s'échangent
+    let leftMapping, centerMapping, rightMapping;
+    centerMapping = { player: centerPlayer, role: centerRole, color: centerColor, disabled: centerDisabled };
+
     if (courtSide === 'bottom') {
         leftMapping = { player: leftPlayer, role: leftRole, color: leftColor, disabled: leftDisabled };
         rightMapping = { player: rightPlayer, role: rightRole, color: rightColor, disabled: rightDisabled };
@@ -145,20 +162,39 @@ function showAttackZones(team, excludePlayer, visualOnly) {
         rightMapping = { player: leftPlayer, role: leftRole, color: leftColor, disabled: leftDisabled };
     }
 
-    const zoneElements = zones.querySelectorAll('.attack-zone');
-    const mappings = [leftMapping, rightMapping];
-    mappings.forEach((m, i) => {
-        zoneElements[i].style.background = m.color + '40';
-        zoneElements[i].style.borderColor = m.color + '80';
-        zoneElements[i].innerHTML = `<span class="zone-label">${m.role}<br>${m.player}</span>`;
-        zoneElements[i].dataset.player = m.player;
-        zoneElements[i].dataset.role = m.role;
+    // Helper pour appliquer un mapping à un élément DOM
+    const applyMapping = (el, m) => {
+        // Mode 3 zones : fond quasi-opaque (pas de mélange avec l'orange du terrain)
+        // Mode 2 zones : fond semi-transparent (comportement d'origine)
+        el.style.background = m.color + 'cc';
+        el.style.borderColor = m.color + '80';
+        el.innerHTML = `<span class="zone-label">${m.role}<br>${m.player}</span>`;
+        el.dataset.player = m.player;
+        el.dataset.role = m.role;
         if (m.disabled) {
-            zoneElements[i].classList.add('disabled');
+            el.classList.add('disabled');
         } else {
-            zoneElements[i].classList.remove('disabled');
+            el.classList.remove('disabled');
         }
-    });
+    };
+
+    applyMapping(zones.querySelector('.attack-zone[data-zone="left"]'), leftMapping);
+    applyMapping(zones.querySelector('.attack-zone[data-zone="right"]'), rightMapping);
+    if (centreAttackEnabled) {
+        applyMapping(zones.querySelector('.attack-zone[data-zone="center"]'), centerMapping);
+        // Label flottant hors du clip-path pour qu'il ne soit pas rogné
+        let floatingLabel = zones.querySelector('.centre-floating-label');
+        if (!floatingLabel) {
+            floatingLabel = document.createElement('div');
+            floatingLabel.className = 'centre-floating-label';
+            zones.appendChild(floatingLabel);
+        }
+        floatingLabel.innerHTML = `${centerMapping.role}<br>${centerMapping.player}`;
+        floatingLabel.style.color = centerMapping.disabled ? '#ffffff40' : '#fff';
+        // Cacher le label interne de la zone centre (il serait croppé)
+        const innerLabel = zones.querySelector('.attack-zone[data-zone="center"] .zone-label');
+        if (innerLabel) innerLabel.style.display = 'none';
+    }
 
     zones.classList.add('active');
     if (visualOnly) {
@@ -169,10 +205,13 @@ function showAttackZones(team, excludePlayer, visualOnly) {
 }
 
 function hideAttackZones() {
-    document.getElementById('attackZonesTop').classList.remove('active');
-    document.getElementById('attackZonesTop').classList.remove('visual-only');
-    document.getElementById('attackZonesBottom').classList.remove('active');
-    document.getElementById('attackZonesBottom').classList.remove('visual-only');
+    ['attackZonesTop', 'attackZonesBottom'].forEach(id => {
+        const zones = document.getElementById(id);
+        zones.classList.remove('active', 'visual-only', 'centre-enabled');
+        // Retirer le label flottant centre
+        const floatingLabel = zones.querySelector('.centre-floating-label');
+        if (floatingLabel) floatingLabel.remove();
+    });
 }
 
 // Affiche les 3 zones de défense selon le rôle de l'attaquant adverse
@@ -184,7 +223,7 @@ function showDefenseZones(defendingTeam, attackerRole) {
     const zones = document.getElementById(zonesId);
 
     // Nettoyer les classes de cas précédents
-    zones.classList.remove('attack-r4', 'attack-pointu', 'attack-centre');
+    zones.classList.remove('attack-r4', 'attack-pointu', 'attack-centre-left', 'attack-centre-right');
 
     // Passeur attaque comme le Pointu (même position)
     const effectiveRole = attackerRole === 'Passeur' ? 'Pointu' : attackerRole;
@@ -266,8 +305,44 @@ function showDefenseZones(defendingTeam, attackerRole) {
             line: { player: getPlayerByRole(defendingTeam, lineRole), role: lineRole, color: ROLE_COLORS[lineRole] || '#8b5cf6' },
             diagonal: { player: getPlayerByRole(defendingTeam, diagRole), role: diagRole, color: ROLE_COLORS[diagRole] || '#8b5cf6' }
         };
+    } else if (effectiveRole === 'Centre') {
+        // Centre adverse attaque depuis le milieu du filet
+        // Qui bloque dépend du primaryBlocker :
+        //   primaryBlocker === 'right' → le blockerRight (Pointu/Passeur) bloque
+        //   primaryBlocker === 'R4'    → le R4 bloque (il couvre le centre du filet)
+        const primaryBlocker = defendingTeam === 'home'
+            ? (currentSet.homePrimaryBlocker || 'right')
+            : (currentSet.awayPrimaryBlocker || 'right');
+        const blockerRightRole = defendingTeam === 'home'
+            ? (currentSet.homeBlockerRight || 'Pointu')
+            : (currentSet.awayBlockerRight || 'Pointu');
+        const otherSide = (blockerRightRole === 'Pointu') ? 'Passeur' : 'Pointu';
+
+        // Short du côté du bloqueur (le défenseur court est à côté du bloc) :
+        //   blockerRight bloque → short côté gauche écran bottom (attack-centre-left)
+        //   R4 bloque           → short côté droit écran bottom (attack-centre-right)
+        const isShortLeft = (primaryBlocker !== 'R4');
+        zones.classList.add(isShortLeft ? 'attack-centre-left' : 'attack-centre-right');
+
+        let shortRole, lineRole, diagRole;
+        if (primaryBlocker === 'R4') {
+            // R4 bloque → blockerRight (Pointu) en short à droite, Centre à gauche, otherSide à droite profond
+            shortRole = blockerRightRole;
+            lineRole = 'Centre';     // gauche écran (bottom) = grande zone
+            diagRole = otherSide;    // droite écran (bottom) = zone profonde hors short
+        } else {
+            // blockerRight bloque → R4 en short à gauche, otherSide à droite, Centre à gauche profond
+            shortRole = 'R4';
+            lineRole = otherSide;    // droite écran (bottom)
+            diagRole = 'Centre';     // gauche écran profond (bottom)
+        }
+
+        zoneMapping = {
+            short: { player: getPlayerByRole(defendingTeam, shortRole), role: shortRole, color: ROLE_COLORS[shortRole] || '#8b5cf6' },
+            line: { player: getPlayerByRole(defendingTeam, lineRole), role: lineRole, color: ROLE_COLORS[lineRole] || '#8b5cf6' },
+            diagonal: { player: getPlayerByRole(defendingTeam, diagRole), role: diagRole, color: ROLE_COLORS[diagRole] || '#8b5cf6' }
+        };
     }
-    // TODO: cas 'Centre' à implémenter
 
     if (!zoneMapping) return;
 
@@ -277,7 +352,7 @@ function showDefenseZones(defendingTeam, attackerRole) {
         const zoneType = el.dataset.zone; // 'line', 'diagonal', 'short'
         const m = zoneMapping[zoneType];
         if (m) {
-            el.style.background = m.color + '40';
+            el.style.background = m.color + 'cc';
             el.innerHTML = `<span class="zone-label">${m.role}<br>${m.player}</span>`;
             el.dataset.player = m.player;
             el.dataset.role = m.role;
@@ -290,7 +365,7 @@ function showDefenseZones(defendingTeam, attackerRole) {
 function hideDefenseZones() {
     ['defenseZonesTop', 'defenseZonesBottom'].forEach(id => {
         const el = document.getElementById(id);
-        el.classList.remove('active', 'attack-r4', 'attack-pointu', 'attack-centre');
+        el.classList.remove('active', 'attack-r4', 'attack-pointu', 'attack-centre-left', 'attack-centre-right');
     });
     document.getElementById('defenseDirectAttackSection').classList.add('hidden');
 }
@@ -347,16 +422,42 @@ function findNearestDefenseZonePlayer(event) {
     // Le mapping dépend du type d'attaque ET du court (top/bottom) car :
     //   - Les zones short/line changent de côté entre R4 et Pointu
     //   - Le miroir X+Y du top court inverse aussi les côtés
-    // "behind" → diagonal est toujours correct.
     //
     // Positions des zones par cas :
     //   Bottom + R4 :     short=GAUCHE(filet), line=GAUCHE(fond), diagonal=DROITE
     //   Bottom + Pointu : short=DROITE(filet), line=DROITE(fond), diagonal=GAUCHE
+    //   Bottom + Centre : short=CENTRE(filet), line=GAUCHE(fond), diagonal=DROITE(fond) [symétrique]
     //   Top + R4 :        short=DROITE(filet), line=GAUCHE,       diagonal=DROITE(fond)
     //   Top + Pointu :    short=GAUCHE(filet), line=DROITE,       diagonal=GAUCHE(fond)
+    //   Top + Centre :    short=CENTRE(filet), line=DROITE(fond), diagonal=GAUCHE(fond) [symétrique miroir]
     const isPointuAttack = activeContainer.classList.contains('attack-pointu');
+    const isCentreLeftAttack = activeContainer.classList.contains('attack-centre-left');
+    const isCentreRightAttack = activeContainer.classList.contains('attack-centre-right');
+    const isCentreAttack = isCentreLeftAttack || isCentreRightAttack;
     let targetZone;
-    if (outSector === 'behind') {
+
+    if (isCentreAttack) {
+        // centre-left : line=droite écran (bottom), diagonal=gauche écran (bottom)
+        // centre-right : line=gauche écran (bottom), diagonal=droite écran (bottom) — inversé
+        if (isCentreLeftAttack) {
+            if (outSector === 'behind') {
+                targetZone = xPct < 50 ? 'diagonal' : 'line';
+            } else if (isBottom) {
+                targetZone = outSector === 'left' ? 'diagonal' : 'line';
+            } else {
+                targetZone = outSector === 'left' ? 'line' : 'diagonal';
+            }
+        } else {
+            // centre-right : inversé
+            if (outSector === 'behind') {
+                targetZone = xPct < 50 ? 'line' : 'diagonal';
+            } else if (isBottom) {
+                targetZone = outSector === 'left' ? 'line' : 'diagonal';
+            } else {
+                targetZone = outSector === 'left' ? 'diagonal' : 'line';
+            }
+        }
+    } else if (outSector === 'behind') {
         targetZone = 'diagonal';
     } else if (isBottom && !isPointuAttack) {
         // Bottom + R4 : short+line à gauche, diagonal à droite

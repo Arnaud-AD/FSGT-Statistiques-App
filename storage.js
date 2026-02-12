@@ -398,8 +398,8 @@ const DevTestMode = {
     // Config bloqueurs de test — À RETIRER
     // Pour Red Hot Sucy Pépère : Passeur adverse en bloqueur principal
     BLOCKER_CONFIG: {
-        home: { blockerRight: 'Pointu', primaryBlocker: 'right' },
-        away: { blockerRight: 'Passeur', primaryBlocker: 'right' }
+        home: { blockerRight: 'Pointu', primaryBlocker: 'right', centreAttack: false },
+        away: { blockerRight: 'Passeur', primaryBlocker: 'right', centreAttack: true }
     },
 
     // Config set de test — À RETIRER
