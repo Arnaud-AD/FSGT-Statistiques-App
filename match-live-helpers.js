@@ -44,12 +44,6 @@ function getLineupPlayers(team) {
         .filter(p => p !== null);
 }
 
-function getEffectivePlayer() {
-    const player = gameState.overridePlayer || gameState.autoSelectedPlayer;
-    gameState.overridePlayer = null;
-    return player;
-}
-
 function showPositionZones(team) {
     const courtSide = getCourtSideForTeam(team);
     const zonesId = courtSide === 'top' ? 'positionZonesTop' : 'positionZonesBottom';
@@ -759,20 +753,26 @@ function updatePhaseIndicatorWithPlayer(playerName, role, actionLabel) {
 function renderOverrideTags(config) {
     const {
         team, phaseLabel, autoPlayer = null, autoRole = null,
-        eligiblePlayers, excludePlayers = [], mode = 'override',
+        eligiblePlayers, mode = 'override',
         showAceButton = false
     } = config;
+    // excludePlayers ignoré — on affiche toujours les 4 joueurs
 
-    // 1. Stocker le joueur auto-sélectionné
+    // 1. Stocker le joueur auto-sélectionné et l'équipe des tags
     gameState.autoSelectedPlayer = autoPlayer;
+    gameState.overridePlayer = null; // Reset override à chaque nouveau rendu de tags
+    gameState.overrideTagsTeam = team; // Pour updateOverrideVisuals()
 
     // 2. Mettre à jour le bandeau
     updatePhaseIndicatorWithPlayer(autoPlayer, autoRole, phaseLabel);
 
-    // 3. Calculer les joueurs pour les tags (exclure uniquement les exclusions)
-    const tagPlayers = eligiblePlayers.filter(
-        p => !excludePlayers.includes(p)
-    );
+    // 3. Trier les joueurs dans l'ordre fixe : Passeur → R4 → Centre → Pointu
+    const ROLE_ORDER = ['Passeur', 'R4', 'Centre', 'Pointu'];
+    const tagPlayers = [...eligiblePlayers].sort((a, b) => {
+        const roleA = getPlayerRole(team, a);
+        const roleB = getPlayerRole(team, b);
+        return ROLE_ORDER.indexOf(roleA) - ROLE_ORDER.indexOf(roleB);
+    });
 
     // 4. Rendre les tags
     const container = document.getElementById('playerTags');
@@ -810,6 +810,11 @@ function renderOverrideTags(config) {
     document.getElementById('playerSelection').classList.remove('hidden');
 }
 
+// Helper : retourne le joueur effectif (override ou auto-sélectionné)
+function getEffectivePlayer() {
+    return gameState.overridePlayer || gameState.autoSelectedPlayer;
+}
+
 // Gère le clic sur un tag override
 function handleOverrideTag(playerName) {
     if (playerName === gameState.autoSelectedPlayer) {
@@ -838,7 +843,7 @@ function updateOverrideVisuals() {
 
     // Mettre à jour le bandeau avec le joueur effectif (overridé ou auto)
     const effectivePlayer = gameState.overridePlayer || gameState.autoSelectedPlayer;
-    const team = gameState.attackingTeam;
+    const team = gameState.overrideTagsTeam || gameState.attackingTeam;
     const role = effectivePlayer ? getPlayerRole(team, effectivePlayer) : null;
 
     // Récupérer le label de phase depuis le bandeau actuel
@@ -858,7 +863,6 @@ function renderDefenseSelection(team, attackerRole) {
             autoPlayer: null, // La zone fournira l'auto-select
             autoRole: null,
             eligiblePlayers: getLineupPlayers(team),
-            excludePlayers: [],
             mode: 'override'
         });
     } else {
@@ -868,7 +872,6 @@ function renderDefenseSelection(team, attackerRole) {
             autoPlayer: null,
             autoRole: null,
             eligiblePlayers: getLineupPlayers(team),
-            excludePlayers: [],
             mode: 'select'
         });
     }
@@ -1085,6 +1088,7 @@ function undoLastAction() {
     clearMarkers();
     clearArrows();
     hideDefenseZones();
+    hideDefenseQualityZones();
 
     // Déterminer l'état précédent selon la phase actuelle
     switch (gameState.phase) {

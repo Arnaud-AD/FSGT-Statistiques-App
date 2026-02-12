@@ -891,7 +891,8 @@
             attackAutoSelected: false, // true si l'attaquant a été auto-sélectionné via zone pendant pass
             receptionOpponentClickData: null, // données du clic terrain adverse pendant reception_end
             overridePlayer: null, // joueur manuellement overridé via tag (Phase 2)
-            autoSelectedPlayer: null // joueur auto-sélectionné par zone/logique (Phase 2)
+            autoSelectedPlayer: null, // joueur auto-sélectionné par zone/logique (Phase 2)
+            overrideTagsTeam: null // équipe des tags override affichés (Phase 2)
         };
 
         // Statistiques du set (format unifié avec historique)
@@ -1325,20 +1326,12 @@
                 phaseText = phaseText.replace('_PASSER_', player ? playerBadge(player, role) : '');
             }
 
-            // Injecter le joueur auto-sélectionné pour la passe (Passeur ou Pointu si Passeur exclu)
+            // Injecter le joueur auto-sélectionné pour la passe (toujours le Passeur)
             if (phaseText.includes('_AUTOPASS_')) {
                 const team = gameState.attackingTeam;
                 const passeur = getPlayerByRole(team, 'Passeur');
-                const lastToucher = getLastTouchPlayer(team);
-                let autoPassName = passeur || 'Passeur';
-                let autoPassRole = 'Passeur';
-                if (passeur && passeur === lastToucher) {
-                    const pointu = getPlayerByRole(team, 'Pointu');
-                    if (pointu && pointu !== lastToucher) {
-                        autoPassName = pointu;
-                        autoPassRole = 'Pointu';
-                    }
-                }
+                const autoPassName = passeur || 'Passeur';
+                const autoPassRole = 'Passeur';
                 phaseText = phaseText.replace('_AUTOPASS_', '<span class="phase-player-badge" style="background:' + (ROLE_COLORS[autoPassRole] || '#8b5cf6') + '">' + autoPassName + '</span>');
             }
 
@@ -1457,8 +1450,7 @@
                         return;
                     } else if (gameState.phase === 'reception') {
                         // Sélection du réceptionneur via zone (ou override si tag cliqué)
-                        const effectivePlayer = gameState.overridePlayer || player;
-                        gameState.overridePlayer = null;
+                        const effectivePlayer = getEffectivePlayer() || player;
                         hidePositionZones();
                         selectReceptioner(effectivePlayer);
                     } else if (gameState.phase === 'serve_end') {
@@ -1506,24 +1498,12 @@
                         // Clic zone pendant passe = auto-passe (ou override) + auto-attaquant en 1 clic
                         const team = gameState.attackingTeam;
                         const passeur = getPlayerByRole(team, 'Passeur');
-                        const lastToucher = getLastTouchPlayer(team);
                         if (!passeur) return;
 
-                        // Déterminer le passeur : override > auto-select
-                        let selectedPasser, selectedRole;
-                        if (gameState.overridePlayer) {
-                            selectedPasser = gameState.overridePlayer;
-                            selectedRole = getPlayerRole(team, selectedPasser);
-                            gameState.overridePlayer = null;
-                        } else if (passeur === lastToucher) {
-                            const pointu = getPlayerByRole(team, 'Pointu');
-                            if (!pointu || pointu === lastToucher) return;
-                            selectedPasser = pointu;
-                            selectedRole = 'Pointu';
-                        } else {
-                            selectedPasser = passeur;
-                            selectedRole = 'Passeur';
-                        }
+                        // Déterminer le passeur : override > Passeur par défaut
+                        const effectiveOverride = getEffectivePlayer();
+                        const selectedPasser = effectiveOverride || passeur;
+                        const selectedRole = getPlayerRole(team, selectedPasser);
 
                         // Calculer la position du clic sur le terrain
                         const courtHalf = e.currentTarget.closest('.court-half');
@@ -1612,8 +1592,7 @@
                         }
 
                     } else if (gameState.phase === 'attack_player') {
-                        const effectiveAttacker = gameState.overridePlayer || attackerPlayer;
-                        gameState.overridePlayer = null;
+                        const effectiveAttacker = getEffectivePlayer() || attackerPlayer;
                         hideAttackZones();
                         selectAttacker(effectiveAttacker);
                     }
@@ -1657,8 +1636,7 @@
 
                     } else if (gameState.phase === 'defense') {
                         // Phase defense : sélection du défenseur (override > zone auto)
-                        const effectiveDefender = gameState.overridePlayer || clickedPlayer;
-                        gameState.overridePlayer = null;
+                        const effectiveDefender = getEffectivePlayer() || clickedPlayer;
                         hideDefenseZones();
                         selectDefender(effectiveDefender);
 
@@ -2249,7 +2227,7 @@
             } else {
                 // Phase reception (tags visibles) : demander qui a raté
                 // Utiliser le joueur sélectionné via override/auto s'il y en a un
-                const selectedPlayer = gameState.overridePlayer || gameState.autoSelectedPlayer;
+                const selectedPlayer = getEffectivePlayer();
                 if (selectedPlayer) {
                     const receptionAction = {
                         type: 'reception',
@@ -2337,8 +2315,19 @@
             gameState.phase = 'reception_end';
             updatePhase();
             hideAllSections();
+
+            // Afficher les tags override avec le réceptionneur sélectionné
+            renderOverrideTags({
+                team: gameState.attackingTeam,
+                phaseLabel: 'Réception',
+                autoPlayer: playerName,
+                autoRole: gameState.currentAction.role,
+                eligiblePlayers: getLineupPlayers(gameState.attackingTeam),
+                mode: 'override'
+            });
+
             highlightCourt(gameState.attackingTeam);
-            
+
             // Afficher les zones de qualité et le bouton faute
             showReceptionQualityZones();
             document.getElementById('receptionFaultSection').classList.remove('hidden');
@@ -2356,7 +2345,7 @@
         function handleReceptionFaultFromTags() {
             // Faute réception depuis les tags (phase reception, pas encore de réceptionneur)
             // Utiliser le joueur sélectionné via override/auto s'il y en a un
-            const selectedPlayer = gameState.overridePlayer || gameState.autoSelectedPlayer;
+            const selectedPlayer = getEffectivePlayer();
             if (selectedPlayer) {
                 // Sélectionner le réceptionneur puis déclencher la faute
                 selectReceptioner(selectedPlayer);
@@ -2889,6 +2878,19 @@
             gameState.phase = 'pass_net_block_end';
             updatePhase();
             hideAllSections();
+
+            // Afficher les tags avec le bloqueur sélectionné
+            const passingTeamForTags = gameState.attackingTeam;
+            const blockingTeamForTags = passingTeamForTags === 'home' ? 'away' : 'home';
+            renderOverrideTags({
+                team: blockingTeamForTags,
+                phaseLabel: 'Block au filet',
+                autoPlayer: playerName,
+                autoRole: gameState.currentAction.role,
+                eligiblePlayers: getLineupPlayers(blockingTeamForTags),
+                mode: 'override'
+            });
+
             highlightCourt(null);
             document.getElementById('outArea').classList.add('active');
             document.getElementById('outLabelTop').style.display = 'block';
@@ -3081,6 +3083,17 @@
             gameState.phase = 'attack_net_block_end';
             updatePhase();
             hideAllSections();
+
+            // Afficher les tags avec le bloqueur sélectionné
+            renderOverrideTags({
+                team: blockingTeam,
+                phaseLabel: 'Block au filet',
+                autoPlayer: playerName,
+                autoRole: gameState.currentAction.role,
+                eligiblePlayers: getLineupPlayers(blockingTeam),
+                mode: 'override'
+            });
+
             highlightCourt(null);
             document.getElementById('outArea').classList.add('active');
             document.getElementById('outLabelTop').style.display = 'block';
@@ -3176,10 +3189,20 @@
             gameState.phase = 'reception_net_block_end';
             updatePhase();
             hideAllSections();
-            
+
+            // Afficher les tags avec le bloqueur sélectionné
+            renderOverrideTags({
+                team: blockingTeam,
+                phaseLabel: 'Block au filet',
+                autoPlayer: playerName,
+                autoRole: gameState.currentAction.role,
+                eligiblePlayers: getLineupPlayers(blockingTeam),
+                mode: 'override'
+            });
+
             // Les deux terrains sont cliquables
             highlightCourt(null);
-            
+
             // Activer la zone out
             document.getElementById('outArea').classList.add('active');
             document.getElementById('outLabelTop').style.display = 'block';
@@ -3230,35 +3253,13 @@
         function renderPassPlayerSelection() {
             const team = gameState.attackingTeam;
             const passeur = getPlayerByRole(team, 'Passeur');
-            const lastToucher = getLastTouchPlayer(team);
 
-            // Si le passeur est le dernier toucheur, il ne peut pas faire la passe
-            const passeurExcluded = passeur && passeur === lastToucher;
-
-            // Déterminer le joueur auto-sélectionné
-            // Normal : Passeur — Si Passeur exclu : Pointu en remplacement
-            let autoPlayer = null;
-            let autoRole = null;
-            if (passeurExcluded) {
-                const pointu = getPlayerByRole(team, 'Pointu');
-                if (pointu && pointu !== lastToucher) {
-                    autoPlayer = pointu;
-                    autoRole = 'Pointu';
-                }
-            } else {
-                autoPlayer = passeur;
-                autoRole = 'Passeur';
-            }
+            // Auto-sélection : toujours le Passeur
+            const autoPlayer = passeur || null;
+            const autoRole = passeur ? 'Passeur' : null;
 
             // Afficher les zones d'attaque (anticipation visuelle)
-            if (passeurExcluded && autoPlayer) {
-                showAttackZones(team, autoPlayer);
-            } else if (!passeurExcluded) {
-                showAttackZones(team);
-            }
-
-            // Exclure lastToucher des tags
-            const exclude = [lastToucher].filter(Boolean);
+            showAttackZones(team);
 
             renderOverrideTags({
                 team,
@@ -3266,7 +3267,6 @@
                 autoPlayer,
                 autoRole,
                 eligiblePlayers: getLineupPlayers(team),
-                excludePlayers: exclude,
                 mode: autoPlayer ? 'override' : 'select'
             });
 
@@ -3353,25 +3353,13 @@
             const passeur = getPlayerByRole(team, 'Passeur');
             if (!passeur) return;
 
-            // Déterminer le passeur : override > auto-select
-            const lastToucher = getLastTouchPlayer(team);
-            let selectedPasser, selectedRole;
-            if (gameState.overridePlayer) {
-                selectedPasser = gameState.overridePlayer;
-                selectedRole = getPlayerRole(team, selectedPasser);
-                gameState.overridePlayer = null;
-            } else if (passeur === lastToucher) {
-                const pointu = getPlayerByRole(team, 'Pointu');
-                if (!pointu || pointu === lastToucher) return; // Pas de remplacement possible
-                selectedPasser = pointu;
-                selectedRole = 'Pointu';
-            } else {
-                selectedPasser = passeur;
-                selectedRole = 'Passeur';
-            }
+            // Déterminer le passeur : override > Passeur par défaut
+            const effectiveOverride = getEffectivePlayer();
+            const selectedPasser = effectiveOverride || passeur;
+            const selectedRole = getPlayerRole(team, selectedPasser);
 
             // Déterminer l'attaquant selon le côté du clic
-            const autoAttacker = getAttackerFromClickX(clickData, passeur === lastToucher ? selectedPasser : undefined);
+            const autoAttacker = getAttackerFromClickX(clickData, selectedPasser);
 
             gameState.passAutoSelected = true;
             gameState.attackAutoSelected = !!autoAttacker;
@@ -3431,6 +3419,17 @@
             gameState.phase = 'pass_end';
             updatePhase();
             hideAllSections();
+
+            // Afficher les tags override avec le passeur sélectionné
+            renderOverrideTags({
+                team: gameState.attackingTeam,
+                phaseLabel: 'Passe',
+                autoPlayer: playerName,
+                autoRole: gameState.currentAction.role,
+                eligiblePlayers: getLineupPlayers(gameState.attackingTeam),
+                mode: 'override'
+            });
+
             highlightCourt(gameState.attackingTeam);
 
             // Afficher le bouton faute de passe
@@ -3452,7 +3451,7 @@
         function handleSecondTouch(type) {
             // Attaque en 2ème touche (deuxieme_main ou attaque_directe)
             // Le joueur est celui auto-sélectionné (ou overridé) en phase passe
-            const player = getEffectivePlayer() || gameState.autoSelectedPlayer;
+            const player = getEffectivePlayer();
             if (!player) return;
 
             const team = gameState.attackingTeam;
@@ -3491,7 +3490,6 @@
                 autoPlayer: player,
                 autoRole: role,
                 eligiblePlayers: getLineupPlayers(team),
-                excludePlayers: [getLastTouchPlayer(team)].filter(p => p && p !== player),
                 mode: 'override'
             });
         }
@@ -3657,7 +3655,6 @@
         function renderAttackPlayerSelection() {
             const team = gameState.attackingTeam;
             const lastToucher = getLastTouchPlayer(team);
-            const exclude = [lastToucher].filter(Boolean);
 
             // Pas de zones pour les attaques directes (depuis défense ou filet)
             if (gameState.defenseDirectAttack || gameState.netDirectAttack) {
@@ -3667,7 +3664,6 @@
                     autoPlayer: null,
                     autoRole: null,
                     eligiblePlayers: getLineupPlayers(team),
-                    excludePlayers: exclude,
                     mode: 'select'
                 });
                 return;
@@ -3676,15 +3672,13 @@
             // Afficher les zones d'attaque en excluant le joueur qui a fait la passe
             showAttackZones(team, lastToucher);
 
-            // Tags override : tous les joueurs sauf lastToucher
-            // (les joueurs dans les zones seront aussi cliquables via terrain)
+            // Tags override : tous les joueurs (la zone fournira l'auto-select au clic terrain)
             renderOverrideTags({
                 team,
                 phaseLabel: 'Attaque',
-                autoPlayer: null, // La zone fournira l'auto-select au clic
+                autoPlayer: null,
                 autoRole: null,
                 eligiblePlayers: getLineupPlayers(team),
-                excludePlayers: exclude,
                 mode: 'override'
             });
         }
@@ -3713,7 +3707,17 @@
             gameState.phase = 'attack_type';
             updatePhase();
             showSection('attackTypeSelection');
-            
+
+            // Afficher les tags override avec l'attaquant sélectionné
+            renderOverrideTags({
+                team: gameState.attackingTeam,
+                phaseLabel: 'Attaque',
+                autoPlayer: playerName,
+                autoRole: gameState.currentAction.role,
+                eligiblePlayers: getLineupPlayers(gameState.attackingTeam),
+                mode: 'override'
+            });
+
             // Activer le terrain adverse pour permettre un clic direct = smash
             const defendingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
             highlightCourt(defendingTeam);
@@ -3737,6 +3741,18 @@
             gameState.phase = 'attack_end';
             updatePhase();
             hideAllSections();
+
+            // Afficher les tags override avec l'attaquant
+            const attacker = gameState.currentAction.player;
+            const attackerRoleForTags = gameState.currentAction.role;
+            renderOverrideTags({
+                team: gameState.attackingTeam,
+                phaseLabel: 'Attaque',
+                autoPlayer: attacker,
+                autoRole: attackerRoleForTags,
+                eligiblePlayers: getLineupPlayers(gameState.attackingTeam),
+                mode: 'override'
+            });
 
             // Highlight terrain adverse pour l'arrivée de l'attaque
             const defendingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
@@ -3827,27 +3843,17 @@
                 hideDefenseZones();
                 showDefenseQualityZones(defTeam);
 
-                // Si un défenseur est pré-sélectionné, afficher les tags override (tous les joueurs)
-                if (gameState.defenseAutoSelected && gameState.defenseAutoPlayer) {
-                    gameState.autoSelectedPlayer = gameState.defenseAutoPlayer;
-                    gameState.overridePlayer = null;
-                    const defAutoRole = getPlayerRole(defTeam, gameState.defenseAutoPlayer);
-                    updatePhaseIndicatorWithPlayer(gameState.defenseAutoPlayer, defAutoRole, 'Résultat');
-                    const container = document.getElementById('playerTags');
-                    const allPlayers = getLineupPlayers(defTeam);
-                    container.innerHTML = allPlayers.map(playerName => {
-                        const role = getPlayerRole(defTeam, playerName);
-                        const color = ROLE_COLORS[role] || '#8b5cf6';
-                        const selectedClass = (playerName === gameState.defenseAutoPlayer) ? ' selected' : '';
-                        return `<button class="player-tag override-tag${selectedClass} ${defTeam}" data-player="${playerName}"
-                                    onclick="handleOverrideTag('${playerName}')"
-                                    style="--tag-role-color: ${color}; border-color: ${color}; color: ${color}">
-                                    ${playerName}
-                                </button>`;
-                    }).join('');
-                    document.getElementById('playerSelectionTitle').textContent = '';
-                    document.getElementById('playerSelection').classList.remove('hidden');
-                }
+                // Afficher les tags override pour le résultat (défenseur pré-sélectionné ou non)
+                const defAutoPlayer = (gameState.defenseAutoSelected && gameState.defenseAutoPlayer) ? gameState.defenseAutoPlayer : null;
+                const defAutoRole = defAutoPlayer ? getPlayerRole(defTeam, defAutoPlayer) : null;
+                renderOverrideTags({
+                    team: defTeam,
+                    phaseLabel: 'Résultat',
+                    autoPlayer: defAutoPlayer,
+                    autoRole: defAutoRole,
+                    eligiblePlayers: getLineupPlayers(defTeam),
+                    mode: 'override'
+                });
             }
         }
 
@@ -3969,8 +3975,7 @@
                 if (pendingClick && gameState.defenseAutoSelected && gameState.defenseAutoPlayer) {
                     // Position D+/D- connue + défenseur pré-sélectionné → défense complète en 1 clic
                     // L'override permet de corriger le défenseur pré-sélectionné
-                    const effectiveDefender = gameState.overridePlayer || gameState.defenseAutoPlayer;
-                    gameState.overridePlayer = null;
+                    const effectiveDefender = getEffectivePlayer() || gameState.defenseAutoPlayer;
                     gameState.defenseAutoSelected = false;
                     gameState.defenseAutoPlayer = null;
                     completeDefenseFromResult(effectiveDefender, pendingClick);
@@ -4091,6 +4096,19 @@
             hideAllSections();
             document.getElementById('blocOutTrajectory').classList.remove('hidden');
 
+            // Afficher les tags avec le bloqueur sélectionné
+            const lastBlock = [...gameState.rally].reverse().find(a => a.type === 'block');
+            if (lastBlock && lastBlock.player) {
+                renderOverrideTags({
+                    team: lastBlock.team,
+                    phaseLabel: 'Bloc out',
+                    autoPlayer: lastBlock.player,
+                    autoRole: lastBlock.role,
+                    eligiblePlayers: getLineupPlayers(lastBlock.team),
+                    mode: 'override'
+                });
+            }
+
             // Activer les deux terrains et la zone out
             document.getElementById('outArea').classList.add('active');
             document.getElementById('outLabelTop').style.display = 'block';
@@ -4183,6 +4201,16 @@
             gameState.phase = 'defense_end';
             updatePhase();
             hideAllSections();
+
+            // Afficher les tags override avec le défenseur sélectionné
+            renderOverrideTags({
+                team: gameState.attackingTeam,
+                phaseLabel: 'Défense',
+                autoPlayer: playerName,
+                autoRole: gameState.currentAction.role,
+                eligiblePlayers: getLineupPlayers(gameState.attackingTeam),
+                mode: 'override'
+            });
 
             // Afficher le bouton Défense faute
             document.getElementById('defenseFaultSection').classList.remove('hidden');
