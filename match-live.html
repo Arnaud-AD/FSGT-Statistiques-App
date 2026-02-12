@@ -268,7 +268,6 @@
                     <div class="tags-grid">
                         <button class="action-tag point" onclick="selectResult('point')">✔ Point</button>
                         <button class="action-tag faute" onclick="selectResult('defense_fault')">❌ Défense faute</button>
-                        <button class="action-tag bloc-out" onclick="selectResult('bloc_out')">💥 Bloc out</button>
                     </div>
                 </div>
 
@@ -327,11 +326,11 @@
                     </div>
                 </div>
 
-                <!-- Défense faute / Bloc out (visible pendant defense_end) -->
+                <!-- Défense faute / Point block (visible pendant defense_end) -->
                 <div id="defenseFaultSection" class="hidden">
                     <div class="tags-grid">
+                        <button class="action-tag point" onclick="handleDefensePoint()">✔ Point</button>
                         <button class="action-tag faute" onclick="handleDefenseFault()">❌ Défense faute</button>
-                        <button class="action-tag bloc-out" onclick="handleDefenseBlocOut()">💥 Bloc out</button>
                     </div>
                 </div>
 
@@ -4025,37 +4024,6 @@
                     gameState.phase = 'defense';
                     renderDefenseSelection(newAttackingTeam, attackerRole);
                 }
-            } else if (result === 'bloc_out') {
-                // Bloc out : la balle sort du bloc, point pour l'attaquant
-                const blockingTeamBO = gameState.attackingTeam === 'home' ? 'away' : 'home';
-                gameState.defenseAutoSelected = false;
-                gameState.defenseAutoPlayer = null;
-
-                // Auto-sélection du bloqueur si disponible
-                if (gameState.autoSelectedBlocker) {
-                    const blocker = gameState.autoSelectedBlocker;
-                    delete gameState.autoSelectedBlocker;
-                    delete gameState.autoSelectedBlockerRole;
-                    hideDefenseZones();
-                    gameState.rally.push({
-                        type: 'block',
-                        player: blocker,
-                        team: blockingTeamBO,
-                        role: getPlayerRole(blockingTeamBO, blocker),
-                        result: 'bloc_out'
-                    });
-                    startBlocOutTrajectory();
-                    return;
-                }
-
-                gameState.blocOutPending = true;
-                gameState.phase = 'bloc_out_player';
-                hideAllSections();
-                renderOverrideTags({
-                    team: blockingTeamBO, phaseLabel: 'Bloc out',
-                    autoPlayer: null, autoRole: null,
-                    eligiblePlayers: getLineupPlayers(blockingTeamBO), mode: 'select'
-                });
             } else if (result === 'blocked') {
                 // Blockée : on demande d'abord où arrive le block
                 gameState.defenseAutoSelected = false;
@@ -4352,34 +4320,26 @@
         }
 
 
-        function handleDefenseBlocOut() {
-            // Cacher la zone D+
+        function handleDefensePoint() {
+            // Point adverse : l'attaque a traversé le block et touché le sol
+            // En phase defense_end, attackingTeam = l'équipe qui défend (après le block)
+            // L'attaquant original (qui a marqué le point) est l'équipe adverse
             hideDefenseQualityZones();
-            // Bloc out depuis la vue défense : le bloc a déjà été enregistré dans le rally
-            // L'équipe qui défend (attackingTeam) perd le point, l'attaquant adverse gagne
-            const defendingTeam = gameState.attackingTeam;
-            const attackingTeam = defendingTeam === 'home' ? 'away' : 'home';
+            hideAllSections();
 
-            // Retrouver le dernier bloc dans le rally et marquer comme bloc_out
-            const lastBlock = [...gameState.rally].reverse().find(a => a.type === 'block');
-            if (lastBlock) {
-                lastBlock.result = 'bloc_out';
-            }
+            const attackingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
 
-            // Retrouver la dernière attaque adverse et marquer comme bloc_out
+            // Marquer l'attaque comme point
             const lastAttack = [...gameState.rally].reverse().find(a => a.type === 'attack');
             if (lastAttack) {
-                lastAttack.result = 'bloc_out';
+                lastAttack.result = 'point';
             }
 
-            // Annuler l'action de défense en cours (pas de défense enregistrée)
+            // Annuler l'action de défense en cours
             gameState.currentAction = {};
 
-            // Sauvegarder l'équipe attaquante pour le point (avant changement de contexte)
-            gameState.blocOutAttackingTeam = attackingTeam;
-
-            // Passer en mode trajectoire
-            startBlocOutTrajectory();
+            awardPoint(attackingTeam);
+            endRally();
         }
 
         function handleDefenseFault() {

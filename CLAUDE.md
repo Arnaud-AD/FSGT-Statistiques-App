@@ -1,8 +1,8 @@
-# FSGT-Statistiques-App — V10 (dernière version à jour)
+# FSGT-Statistiques-App — V11 (dernière version à jour)
 
 Application web de statistiques volleyball 4v4 pour l'équipe "Jen et ses Saints" en FSGT.
 
-> **Version** : V10 — Override joueur sur toutes les phases (12 février 2026).
+> **Version** : V11 — Flèches après bloc (12 février 2026).
 
 ## Contexte
 
@@ -406,11 +406,11 @@ Zone semi-circulaire bleue affichée pendant la phase `defense_end` (après auto
 - [ ] Restructuration et nettoyage du code
 - [ ] Vérification cohérence state machine avec tous les nouveaux cas
 
-### Phase 6 — Flèches après bloc (amélioration visuelle)
+### ~~Phase 6 — Flèches après bloc (amélioration visuelle)~~ ✅ TERMINÉE (V11.0)
 **Objectif** : Quand un bloc est déclenché (bloc out, block kill, bloc dévié), le point de départ de la flèche doit être centré sur le filet en hauteur, mais positionné correctement en largeur (position réelle du bloc).
-- [ ] Modifier le point de départ de la flèche post-bloc : Y = centre filet, X = position réelle
-- [ ] Appliquer à tous les cas : bloc out, block kill, bloc dévié
-- [ ] Tests : vérifier visuellement la cohérence des flèches post-bloc
+- [x] Modifier le point de départ de la flèche post-bloc : Y = centre filet, X = position réelle
+- [x] Appliquer à tous les cas : bloc out, block kill, bloc dévié
+- [x] Tests : vérifier visuellement la cohérence des flèches post-bloc
 
 ### Phase 7 — Bloc out : trajectoire en un clic
 **Objectif** : Quand on clique sur le terrain adverse après un bloc, le clic indique déjà où la balle atterrit. Le système ne doit pas redemander la trajectoire.
@@ -481,14 +481,14 @@ Phase 1bis (relance)      ── ✅
 Phase 3 (stats attaque)   ── ✅
 Phase 2 (override joueur) ── ✅
 Phase 4 (défense bloc)    ── ✅ (absorbée par 1 + 1bis)
-Phase 6 (flèches bloc)   ──────────────────────────────────────────→ Phase 5 (debug global)
+Phase 6 (flèches bloc)    ── ✅
 Phase 7 (bloc out 1-clic) ─────────────────────────────────────────→ Phase 5
 Phase 8 (stats side out)  ─────────────────────────────────────────→ Phase 5
 Phase 9 (timeline séries) ─────────────────────────────────────────→ Phase 5
 Phase 5 (debug global)   ─────────────────────────────────────────→ Phase 10 (retrait mode test)
 ```
 
-### Roadmap future (post-V10)
+### Roadmap future (post-V11)
 - Persistance long terme pour analytics multi-matchs/saisons
 - Visualisation des patterns de jeu sur diagrammes terrain
 - Statistiques joueurs sur plusieurs matchs
