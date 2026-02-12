@@ -392,11 +392,11 @@ Zone semi-circulaire bleue affichée pendant la phase `defense_end` (après auto
 - [x] Stats relance conditionnelles : seul Att+ compte (Tot+1, Att+), FA/BP/Att- ignorés
 - [x] Tests : vérifier que les stats se catégorisent correctement
 
-### Phase 4 — Défense contextuelle (bloc/relance)
-**Objectif** : Intégration bloc → défense relance. Si clic "filet" → bloc + système de défense relance adapté. Les zones de défense relance sont déjà implémentées (V9.0), cette phase porte sur l'intégration avec le workflow bloc.
-- [ ] Si clic "filet" → générer bloc + défense adaptée au contexte relance
-- [ ] Gérer la transition bloc → défense relance comme cas spécifique
-- [ ] Tests : scénarios bloc→défense relance vs attaque→défense normale
+### ~~Phase 4 — Défense contextuelle (bloc/relance)~~ ✅ TERMINÉE (absorbée par V8.0 + V9.0)
+**Objectif** : Intégration bloc → défense relance. Réalisée de facto : `showDefenseZones()` auto-détecte le type d'attaque (relance vs standard) depuis `gameState` et affiche les zones appropriées quel que soit le contexte (après bloc, après attaque directe, etc.).
+- [x] Si clic "filet" → génère bloc + défense adaptée au contexte relance
+- [x] Transition bloc → défense relance gérée par auto-détection dans `showDefenseZones()`
+- [x] Zones relance (4 joueurs) ou standard (3 joueurs) selon `attackType` du rally
 
 ### Phase 5 — Debug global + restructuration
 **Objectif** : Rigidifier et nettoyer le code une fois toutes les fonctionnalités intégrées.
@@ -477,17 +477,18 @@ Zone semi-circulaire bleue affichée pendant la phase `defense_end` (après auto
 ### Dépendances mises à jour
 ```
 Phase 1 (zones attaque)   ── ✅
-Phase 1bis (relance)      ── ✅ ──→ Phase 4 (défense bloc/relance) ──→ Phase 5 (debug global)
+Phase 1bis (relance)      ── ✅
 Phase 3 (stats attaque)   ── ✅
 Phase 2 (override joueur) ── ✅
-Phase 6 (flèches bloc)   ──────────────────────────────────────────→ Phase 5
+Phase 4 (défense bloc)    ── ✅ (absorbée par 1 + 1bis)
+Phase 6 (flèches bloc)   ──────────────────────────────────────────→ Phase 5 (debug global)
 Phase 7 (bloc out 1-clic) ─────────────────────────────────────────→ Phase 5
 Phase 8 (stats side out)  ─────────────────────────────────────────→ Phase 5
 Phase 9 (timeline séries) ─────────────────────────────────────────→ Phase 5
 Phase 5 (debug global)   ─────────────────────────────────────────→ Phase 10 (retrait mode test)
 ```
 
-### Roadmap future (post-V9)
+### Roadmap future (post-V10)
 - Persistance long terme pour analytics multi-matchs/saisons
 - Visualisation des patterns de jeu sur diagrammes terrain
 - Statistiques joueurs sur plusieurs matchs

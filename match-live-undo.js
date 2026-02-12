@@ -220,10 +220,12 @@ function redrawRally() {
             if (action.endPos) {
                 addMarker(action.endPos, 'block-touch');
             }
-            // Trouver l'attaque précédente
+            // 2 flèches : attaque → filet + filet → atterrissage bloc
             const lastAttack = [...gameState.rally.slice(0, i)].reverse().find(a => a.type === 'attack');
             if (lastAttack && lastAttack.endPos && action.endPos) {
-                drawArrow(lastAttack.endPos, action.endPos, 'block-touch');
+                const netPos = getNetCenteredPos(lastAttack.endPos);
+                drawArrow(lastAttack.endPos, netPos, getAttackArrowType(lastAttack.attackType));
+                drawArrow(netPos, action.endPos, 'block-touch');
             }
         } else if (action.type === 'defense') {
             if (action.endPos) {

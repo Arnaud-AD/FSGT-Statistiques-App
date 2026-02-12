@@ -1065,6 +1065,41 @@ function drawArrow(from, to, actionType) {
     svg.appendChild(line);
 }
 
+// Convertit une position court en position centrée sur le filet.
+// Conserve la coordonnée X réelle mais place le Y au centre du filet.
+// Utilisé pour les flèches de bloc qui doivent partir du filet.
+function getNetCenteredPos(pos) {
+    const container = document.getElementById('courtContainer');
+    const netElement = document.getElementById('netZone');
+    const containerRect = container.getBoundingClientRect();
+    const netRect = netElement.getBoundingClientRect();
+
+    // Y du centre du filet en % du container
+    const netCenterY = ((netRect.top + netRect.height / 2 - containerRect.top) / containerRect.height) * 100;
+
+    // Convertir le X de la court-half au container
+    let netX;
+    if (pos.courtSide === 'net' || pos.courtSide === 'out') {
+        netX = pos.x;
+    } else {
+        const sourceId = pos.courtSide === 'top' ? 'courtTop' : 'courtBottom';
+        const sourceElement = document.getElementById(sourceId);
+        const sourceRect = sourceElement.getBoundingClientRect();
+        const absoluteX = (pos.x / 100) * sourceRect.width + sourceRect.left;
+        netX = ((absoluteX - containerRect.left) / containerRect.width) * 100;
+    }
+
+    return { x: netX, y: netCenterY, courtSide: 'net' };
+}
+
+// Retourne le type de flèche SVG correspondant au type d'attaque
+function getAttackArrowType(attackType) {
+    if (attackType === 'feinte') return 'attack-feinte';
+    if (attackType === 'relance') return 'attack-relance';
+    if (attackType === 'deuxieme_main') return 'attack-second';
+    return 'attack';
+}
+
 function clearMarkers() {
     document.querySelectorAll('.click-marker').forEach(m => m.remove());
 }

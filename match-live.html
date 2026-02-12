@@ -1985,10 +1985,13 @@
 
         function handleNetZoneClick(event) {
             // Capturer les coordonnées relatives au courtContainer
+            // Le X est conservé tel quel, le Y est centré sur le filet
             const container = document.getElementById('courtContainer');
             const rect = container.getBoundingClientRect();
+            const netElement = document.getElementById('netZone');
+            const netRect = netElement.getBoundingClientRect();
             const x = ((event.clientX - rect.left) / rect.width) * 100;
-            const y = ((event.clientY - rect.top) / rect.height) * 100;
+            const y = ((netRect.top + netRect.height / 2 - rect.top) / rect.height) * 100;
             const clickData = { x, y, courtSide: 'net' };
 
             if (gameState.phase === 'serve_end') {
@@ -2906,7 +2909,8 @@
             document.getElementById('outArea').classList.remove('active');
 
             if (gameState.netBlockPos) {
-                drawArrow(gameState.netBlockPos, clickData, 'block-touch');
+                const netPos = getNetCenteredPos(gameState.netBlockPos);
+                drawArrow(netPos, clickData, 'block-touch');
             }
             
             gameState.rally.push({ ...gameState.currentAction });
@@ -3110,7 +3114,8 @@
             document.getElementById('outArea').classList.remove('active');
 
             if (gameState.netBlockPos) {
-                drawArrow(gameState.netBlockPos, clickData, 'block-touch');
+                const netPos = getNetCenteredPos(gameState.netBlockPos);
+                drawArrow(netPos, clickData, 'block-touch');
             }
             
             gameState.rally.push({ ...gameState.currentAction });
@@ -3219,9 +3224,10 @@
             // Désactiver zones
             document.getElementById('outArea').classList.remove('active');
 
-            // Tracer flèche du block (depuis la position filet vers l'arrivée)
+            // Tracer flèche du block (depuis le centre du filet vers l'arrivée)
             if (gameState.netBlockPos) {
-                drawArrow(gameState.netBlockPos, clickData, 'block-touch');
+                const netPos = getNetCenteredPos(gameState.netBlockPos);
+                drawArrow(netPos, clickData, 'block-touch');
             }
             
             gameState.rally.push({ ...gameState.currentAction });
@@ -4121,11 +4127,13 @@
             const lastBlock = [...gameState.rally].reverse().find(a => a.type === 'block');
             if (lastBlock) {
                 lastBlock.endPos = clickData;
-                // startPos = position de l'attaque au filet
+                // 2 flèches : attaque → filet + filet → atterrissage bloc out
                 const lastAttack = [...gameState.rally].reverse().find(a => a.type === 'attack');
                 if (lastAttack && lastAttack.endPos) {
-                    lastBlock.startPos = lastAttack.endPos;
-                    drawArrow(lastAttack.endPos, clickData, 'block-touch');
+                    const netPos = getNetCenteredPos(lastAttack.endPos);
+                    lastBlock.startPos = netPos;
+                    drawArrow(lastAttack.endPos, netPos, getAttackArrowType(lastAttack.attackType));
+                    drawArrow(netPos, clickData, 'block-touch');
                 }
             }
             addMarker(clickData, 'block-touch');
@@ -4155,10 +4163,12 @@
             gameState.currentAction.endPos = clickData;
             addMarker(clickData, 'block-touch');
 
-            // Tracer flèche du block depuis l'arrivée de l'attaque jusqu'à l'arrivée du block
+            // Tracer 2 flèches : attaque → filet (couleur attaque) + filet → atterrissage (block-touch)
             const lastAttack = [...gameState.rally].reverse().find(a => a.type === 'attack');
             if (lastAttack && lastAttack.endPos) {
-                drawArrow(lastAttack.endPos, clickData, 'block-touch');
+                const netPos = getNetCenteredPos(lastAttack.endPos);
+                drawArrow(lastAttack.endPos, netPos, getAttackArrowType(lastAttack.attackType));
+                drawArrow(netPos, clickData, 'block-touch');
             }
 
             gameState.rally.push({ ...gameState.currentAction });
