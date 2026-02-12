@@ -116,6 +116,7 @@
                             <div class="defense-zone" data-zone="line"></div>
                             <div class="defense-zone" data-zone="diagonal"></div>
                             <div class="defense-zone" data-zone="short"></div>
+                            <div class="defense-zone" data-zone="extra"></div>
                         </div>
                         <!-- Zones de qualité de réception -->
                         <div class="reception-quality-zones" id="qualityZonesTop">
@@ -152,6 +153,7 @@
                             <div class="defense-zone" data-zone="line"></div>
                             <div class="defense-zone" data-zone="diagonal"></div>
                             <div class="defense-zone" data-zone="short"></div>
+                            <div class="defense-zone" data-zone="extra"></div>
                         </div>
                         <!-- Zones de qualité de réception -->
                         <div class="reception-quality-zones" id="qualityZonesBottom">
@@ -5210,8 +5212,32 @@
                     }
 
                     case 'attack': {
-                        stats.attack.tot++;
+                        const isRelance = action.attackType === 'relance';
                         const oppositeTeam = team === 'home' ? 'away' : 'home';
+
+                        if (isRelance) {
+                            // ===== RELANCE : seul Att+ compte pour l'attaquant =====
+                            // L'attaquant est "excusé" sauf s'il marque le point
+                            if (action.result === 'point' || action.result === 'bloc_out') {
+                                // Kill ou bloc out → Tot + A+ (bonus pour avoir marqué en relance)
+                                stats.attack.tot++;
+                                stats.attack.attplus++;
+                            } else if (action.result === 'defended') {
+                                if (!hasPassAfter(rally, i, oppositeTeam)) {
+                                    // Défense forcée sans organisation adverse → Tot + A+
+                                    stats.attack.tot++;
+                                    stats.attack.attplus++;
+                                }
+                                // Sinon (défendu + organisé) → rien pour l'attaquant
+                            }
+                            // FA en relance → rien (pas Tot, pas FA)
+                            // BP en relance → rien pour l'attaquant (le B+ bloqueur est géré dans case 'block')
+                            // Att- en relance → rien
+                            break;
+                        }
+
+                        // ===== CAS STANDARD (smash/feinte/etc.) =====
+                        stats.attack.tot++;
 
                         if (action.attackType === 'faute' || action.result === 'fault_net' || action.result === 'out') {
                             // FA : faute d'attaque (filet, out, faute technique)

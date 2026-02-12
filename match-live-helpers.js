@@ -223,8 +223,52 @@ function showDefenseZones(defendingTeam, attackerRole) {
     const zones = document.getElementById(zonesId);
 
     // Nettoyer les classes de cas précédents
-    zones.classList.remove('attack-r4', 'attack-pointu', 'attack-centre-left', 'attack-centre-right');
+    zones.classList.remove('attack-r4', 'attack-pointu', 'attack-centre-left', 'attack-centre-right', 'attack-relance');
 
+    // Auto-détecter le type d'attaque depuis gameState
+    // IMPORTANT : en phase attack_type, le joueur n'a pas encore choisi → toujours zones standard
+    let attackType = null;
+    const isAttackTypePhase = typeof gameState !== 'undefined' && gameState && gameState.phase === 'attack_type';
+    if (!isAttackTypePhase) {
+        if (typeof gameState !== 'undefined' && gameState && gameState.currentAction && gameState.currentAction.attackType) {
+            attackType = gameState.currentAction.attackType;
+        }
+        // Fallback: chercher la dernière attaque dans le rally en cours
+        if (!attackType && typeof gameState !== 'undefined' && gameState && gameState.rally) {
+            const lastAttack = [...gameState.rally].reverse().find(a => a.type === 'attack');
+            if (lastAttack) attackType = lastAttack.attackType;
+        }
+    }
+
+    // ===== CAS RELANCE : 4 zones FIXES (indépendantes du rôle de l'attaquant) =====
+    if (attackType === 'relance') {
+        zones.classList.add('attack-relance');
+        // Mapping fixe : short=R4, line=Pointu, diagonal=Centre, extra=Passeur
+        const zoneMapping = {
+            short:    { player: getPlayerByRole(defendingTeam, 'R4'),      role: 'R4',      color: ROLE_COLORS['R4']      || '#3b82f6' },
+            line:     { player: getPlayerByRole(defendingTeam, 'Pointu'),  role: 'Pointu',  color: ROLE_COLORS['Pointu']  || '#22c55e' },
+            diagonal: { player: getPlayerByRole(defendingTeam, 'Centre'),  role: 'Centre',  color: ROLE_COLORS['Centre']  || '#ef4444' },
+            extra:    { player: getPlayerByRole(defendingTeam, 'Passeur'), role: 'Passeur', color: ROLE_COLORS['Passeur'] || '#8b5cf6' }
+        };
+
+        // Appliquer les couleurs et labels aux 4 zones
+        const zoneElements = zones.querySelectorAll('.defense-zone');
+        zoneElements.forEach(el => {
+            const zoneType = el.dataset.zone;
+            const m = zoneMapping[zoneType];
+            if (m) {
+                el.style.background = m.color + 'cc';
+                el.innerHTML = `<span class="zone-label">${m.role}<br>${m.player}</span>`;
+                el.dataset.player = m.player;
+                el.dataset.role = m.role;
+            }
+        });
+
+        zones.classList.add('active');
+        return;
+    }
+
+    // ===== CAS STANDARD : 3 zones dépendantes du rôle de l'attaquant =====
     // Passeur attaque comme le Pointu (même position)
     const effectiveRole = attackerRole === 'Passeur' ? 'Pointu' : attackerRole;
 
@@ -365,7 +409,14 @@ function showDefenseZones(defendingTeam, attackerRole) {
 function hideDefenseZones() {
     ['defenseZonesTop', 'defenseZonesBottom'].forEach(id => {
         const el = document.getElementById(id);
-        el.classList.remove('active', 'attack-r4', 'attack-pointu', 'attack-centre-left', 'attack-centre-right');
+        el.classList.remove('active', 'attack-r4', 'attack-pointu', 'attack-centre-left', 'attack-centre-right', 'attack-relance');
+        // Nettoyer le style inline et contenu de toutes les zones (y compris extra)
+        el.querySelectorAll('.defense-zone').forEach(zone => {
+            zone.style.background = '';
+            zone.innerHTML = '';
+            zone.dataset.player = '';
+            zone.dataset.role = '';
+        });
     });
     document.getElementById('defenseDirectAttackSection').classList.add('hidden');
 }
@@ -430,13 +481,39 @@ function findNearestDefenseZonePlayer(event) {
     //   Top + R4 :        short=DROITE(filet), line=GAUCHE,       diagonal=DROITE(fond)
     //   Top + Pointu :    short=GAUCHE(filet), line=DROITE,       diagonal=GAUCHE(fond)
     //   Top + Centre :    short=CENTRE(filet), line=DROITE(fond), diagonal=GAUCHE(fond) [symétrique miroir]
+    const isRelanceAttack = activeContainer.classList.contains('attack-relance');
     const isPointuAttack = activeContainer.classList.contains('attack-pointu');
     const isCentreLeftAttack = activeContainer.classList.contains('attack-centre-left');
     const isCentreRightAttack = activeContainer.classList.contains('attack-centre-right');
     const isCentreAttack = isCentreLeftAttack || isCentreRightAttack;
     let targetZone;
 
-    if (isCentreAttack) {
+    if (isRelanceAttack) {
+        // Relance : 4 zones fixes en quadrants
+        // Bottom : short(R4)=haut-gauche, extra(Passeur)=coin haut-droite,
+        //          line(Pointu)=droite, diagonal(Centre)=bas
+        // Top : miroir X+Y
+        if (isBottom) {
+            if (outSector === 'left') {
+                targetZone = yPct < 50 ? 'short' : 'diagonal';
+            } else if (outSector === 'right') {
+                targetZone = yPct < 50 ? 'line' : 'diagonal';
+            } else {
+                // behind (bas)
+                targetZone = xPct < 50 ? 'diagonal' : 'diagonal';
+            }
+        } else {
+            // Top court (miroir)
+            if (outSector === 'left') {
+                targetZone = yPct > 50 ? 'line' : 'diagonal';
+            } else if (outSector === 'right') {
+                targetZone = yPct > 50 ? 'short' : 'diagonal';
+            } else {
+                // behind (haut)
+                targetZone = 'diagonal';
+            }
+        }
+    } else if (isCentreAttack) {
         // centre-left : line=droite écran (bottom), diagonal=gauche écran (bottom)
         // centre-right : line=gauche écran (bottom), diagonal=droite écran (bottom) — inversé
         if (isCentreLeftAttack) {
@@ -1578,6 +1655,10 @@ function undoLastAction() {
             gameState.defenseAutoSelected = false;
             gameState.defenseAutoPlayer = null;
             gameState.phase = 'attack_type';
+            // Reset le type d'attaque car on retourne au choix (smash par défaut)
+            if (gameState.currentAction) {
+                gameState.currentAction.attackType = 'smash';
+            }
             showSection('attackTypeSelection');
             // Ré-afficher les zones de défense (elles sont visibles pendant attack_type)
             {

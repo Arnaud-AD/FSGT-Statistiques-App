@@ -2084,6 +2084,52 @@
         }
         #defenseZonesTop.attack-centre-right .defense-zone[data-zone="diagonal"] .zone-label { left: 25%; top: 28%; }
 
+        /* ===== Cas: Attaque RELANCE — Bottom court (filet en haut) ===== */
+        /* Zones FIXES — 4 zones, point central de convergence à (55%, 42%) */
+        /* R4 (bleu) : zone haut-gauche */
+        #defenseZonesBottom.attack-relance .defense-zone[data-zone="short"] {
+            clip-path: polygon(0% 0%, 60% 0%, 55% 42%, 0% 55%);
+        }
+        #defenseZonesBottom.attack-relance .defense-zone[data-zone="short"] .zone-label { left: 18%; top: 20%; }
+        /* Pointu (vert) : grande zone bas-droite */
+        #defenseZonesBottom.attack-relance .defense-zone[data-zone="line"] {
+            clip-path: polygon(100% 30%, 100% 100%, 75% 100%, 55% 42%);
+        }
+        #defenseZonesBottom.attack-relance .defense-zone[data-zone="line"] .zone-label { left: 82%; top: 65%; }
+        /* Centre (rouge) : grande zone bas-gauche */
+        #defenseZonesBottom.attack-relance .defense-zone[data-zone="diagonal"] {
+            clip-path: polygon(0% 55%, 55% 42%, 75% 100%, 0% 100%);
+        }
+        #defenseZonesBottom.attack-relance .defense-zone[data-zone="diagonal"] .zone-label { left: 28%; top: 75%; }
+        /* Passeur (violet) : zone haut-droite (au filet) */
+        #defenseZonesBottom.attack-relance .defense-zone[data-zone="extra"] {
+            clip-path: polygon(60% 0%, 100% 0%, 100% 30%, 55% 42%);
+        }
+        #defenseZonesBottom.attack-relance .defense-zone[data-zone="extra"] .zone-label { left: 78%; top: 12%; }
+
+        /* ===== Cas: Attaque RELANCE — Top court (filet en bas, miroir X+Y) ===== */
+        /* Point central miroir : (45%, 58%) */
+        /* R4 (bleu) : zone bas-droite */
+        #defenseZonesTop.attack-relance .defense-zone[data-zone="short"] {
+            clip-path: polygon(100% 100%, 40% 100%, 45% 58%, 100% 45%);
+        }
+        #defenseZonesTop.attack-relance .defense-zone[data-zone="short"] .zone-label { left: 80%; top: 80%; }
+        /* Pointu (vert) : grande zone haut-gauche */
+        #defenseZonesTop.attack-relance .defense-zone[data-zone="line"] {
+            clip-path: polygon(0% 70%, 0% 0%, 25% 0%, 45% 58%);
+        }
+        #defenseZonesTop.attack-relance .defense-zone[data-zone="line"] .zone-label { left: 12%; top: 35%; }
+        /* Centre (rouge) : grande zone haut-droite */
+        #defenseZonesTop.attack-relance .defense-zone[data-zone="diagonal"] {
+            clip-path: polygon(100% 45%, 45% 58%, 25% 0%, 100% 0%);
+        }
+        #defenseZonesTop.attack-relance .defense-zone[data-zone="diagonal"] .zone-label { left: 70%; top: 25%; }
+        /* Passeur (violet) : zone bas-gauche */
+        #defenseZonesTop.attack-relance .defense-zone[data-zone="extra"] {
+            clip-path: polygon(40% 100%, 0% 100%, 0% 70%, 45% 58%);
+        }
+        #defenseZonesTop.attack-relance .defense-zone[data-zone="extra"] .zone-label { left: 18%; top: 82%; }
+
         .reception-quality-zones {
             position: absolute;
             top: 0;
