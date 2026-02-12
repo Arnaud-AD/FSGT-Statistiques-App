@@ -709,6 +709,110 @@
             background: #0047b3;
         }
 
+        /* Timeline des séries de points */
+        .timeline-section {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .timeline-section-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .timeline-set {
+            margin-bottom: 14px;
+        }
+
+        .timeline-set:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .timeline-set-label {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .timeline-set-score {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .tl-score-home { color: var(--accent-blue); }
+        .tl-score-away { color: var(--loss-color); }
+        .tl-score-lost { color: var(--text-secondary); }
+        .tl-sep { color: var(--text-secondary); margin: 0 2px; }
+
+        .timeline-chart {
+            display: flex;
+            align-items: stretch;
+            gap: 4px;
+            position: relative;
+            overflow-x: auto;
+            padding: 2px 0;
+        }
+
+        .timeline-chart::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 2px;
+            background: #333;
+            transform: translateY(-1px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .timeline-run {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            z-index: 1;
+        }
+
+        .timeline-row {
+            display: flex;
+            gap: 1px;
+        }
+
+        .tl-block {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Google Sans', sans-serif;
+            font-weight: 600;
+            color: white;
+            border-radius: 2px;
+            z-index: 1;
+        }
+
+        .tl-block.home {
+            background: var(--accent-blue);
+        }
+
+        .tl-block.away {
+            background: var(--loss-color);
+        }
+
+        .tl-block.empty {
+            background: transparent;
+        }
+
         /* Footer */
         .footer {
             margin-top: auto;
@@ -773,6 +877,12 @@
 
                     <div class="detail-opponent" id="detailOpponent">vs Adversaire</div>
                     <div class="detail-meta" id="detailMeta"></div>
+                </div>
+
+                <!-- Timeline des séries de points -->
+                <div class="timeline-section" id="timelineSection" style="display: none;">
+                    <div class="timeline-section-title">Séries de points</div>
+                    <div id="timelineContainer"></div>
                 </div>
 
                 <div class="detail-section stats-section">
@@ -944,6 +1054,9 @@
 
             // Tabs pour stats
             renderDetailSetTabs(match);
+
+            // Timeline des séries de points
+            renderTimeline(match);
 
             // Stats joueurs
             renderDetailStats(match, 'all');
@@ -1299,6 +1412,111 @@
             // Générer les stats pour l'équipe adverse
             const awayTotals = aggregateStats(setsToUse, 'away');
             containerAway.innerHTML = generateStatsHTML(awayTotals);
+        }
+
+        // ==================== TIMELINE ====================
+
+        function buildTimelineData(set) {
+            const points = set.points || [];
+            if (points.length === 0) return [];
+
+            const initialHome = set.initialHomeScore || 0;
+            const initialAway = set.initialAwayScore || 0;
+            const runs = [];
+            let currentRun = null;
+
+            for (let i = 0; i < points.length; i++) {
+                const pt = points[i];
+                const prevHome = i > 0 ? points[i - 1].homeScore : initialHome;
+                const scorer = pt.homeScore > prevHome ? 'home' : 'away';
+                const teamScore = scorer === 'home' ? pt.homeScore : pt.awayScore;
+
+                if (currentRun && currentRun.team === scorer) {
+                    currentRun.points.push({ teamScore });
+                } else {
+                    currentRun = { team: scorer, points: [{ teamScore }] };
+                    runs.push(currentRun);
+                }
+            }
+            return runs;
+        }
+
+        function computeBlockSize(totalPoints, runsCount) {
+            const availableWidth = 556;
+            const gapWidth = Math.max(0, runsCount - 1) * 4;
+            const internalGaps = totalPoints - runsCount;
+            const blockWidth = Math.floor((availableWidth - gapWidth - internalGaps) / totalPoints);
+            return Math.max(8, Math.min(20, blockWidth));
+        }
+
+        function renderTimeline(match) {
+            const container = document.getElementById('timelineContainer');
+            const section = document.getElementById('timelineSection');
+
+            if (!match.sets) { section.style.display = 'none'; return; }
+
+            const completedSets = match.sets.filter(s => s.completed);
+            if (completedSets.length === 0) { section.style.display = 'none'; return; }
+
+            // Vérifier qu'au moins un set a des points
+            const hasPoints = completedSets.some(s => s.points && s.points.length > 0);
+            if (!hasPoints) { section.style.display = 'none'; return; }
+
+            section.style.display = 'block';
+            let html = '';
+
+            completedSets.forEach(function(set, i) {
+                const runs = buildTimelineData(set);
+                if (runs.length === 0) return;
+
+                const totalPoints = runs.reduce(function(sum, r) { return sum + r.points.length; }, 0);
+                const blockSize = computeBlockSize(totalPoints, runs.length);
+                const fontSize = blockSize >= 14 ? 9 : (blockSize >= 10 ? 7 : 0);
+                const blockHeight = 20;
+
+                const homeScore = set.finalHomeScore || set.homeScore || 0;
+                const awayScore = set.finalAwayScore || set.awayScore || 0;
+                const homeWon = homeScore > awayScore;
+                const label = i === 4 ? 'Tie-break' : 'Set ' + (i + 1);
+
+                html += '<div class="timeline-set">';
+                html += '<div class="timeline-header">';
+                html += '<span class="timeline-set-label">' + label + '</span>';
+                html += '<span class="timeline-set-score">';
+                html += '<span class="' + (homeWon ? 'tl-score-home' : 'tl-score-lost') + '">' + homeScore + '</span>';
+                html += '<span class="tl-sep">-</span>';
+                html += '<span class="' + (homeWon ? 'tl-score-lost' : 'tl-score-away') + '">' + awayScore + '</span>';
+                html += '</span></div>';
+
+                html += '<div class="timeline-chart">';
+                runs.forEach(function(run) {
+                    html += '<div class="timeline-run">';
+                    // Top row (home)
+                    html += '<div class="timeline-row">';
+                    run.points.forEach(function(pt) {
+                        if (run.team === 'home') {
+                            html += '<div class="tl-block home" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;font-size:' + fontSize + 'px;">' + (fontSize > 0 ? pt.teamScore : '') + '</div>';
+                        } else {
+                            html += '<div class="tl-block empty" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;"></div>';
+                        }
+                    });
+                    html += '</div>';
+                    // Bottom row (away)
+                    html += '<div class="timeline-row">';
+                    run.points.forEach(function(pt) {
+                        if (run.team === 'away') {
+                            html += '<div class="tl-block away" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;font-size:' + fontSize + 'px;">' + (fontSize > 0 ? pt.teamScore : '') + '</div>';
+                        } else {
+                            html += '<div class="tl-block empty" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;"></div>';
+                        }
+                    });
+                    html += '</div>';
+                    html += '</div>';
+                });
+                html += '</div></div>';
+            });
+
+            container.innerHTML = html;
         }
 
         // ==================== UTILS ====================

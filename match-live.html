@@ -388,6 +388,12 @@
             </div>
         </div>
 
+        <!-- Mini-timeline du set en cours -->
+        <div class="mini-timeline-section" id="miniTimelineSection">
+            <div class="mini-timeline-title">Séries de points</div>
+            <div class="mini-timeline-chart" id="miniTimelineChart"></div>
+        </div>
+
         <!-- Modal de changement -->
         <div class="sub-modal-overlay" id="subModalOverlay" onclick="closeSubModal(event)">
             <div class="sub-modal" onclick="event.stopPropagation()">
@@ -5095,6 +5101,76 @@
             }
 
             renderStatsTables();
+            renderMiniTimeline();
+        }
+
+        // ==================== MINI-TIMELINE ====================
+
+        function buildTimelineData(set) {
+            const points = set.points || [];
+            if (points.length === 0) return [];
+
+            const initialHome = set.initialHomeScore || 0;
+            const runs = [];
+            let currentRun = null;
+
+            for (let i = 0; i < points.length; i++) {
+                const pt = points[i];
+                const prevHome = i > 0 ? points[i - 1].homeScore : initialHome;
+                const scorer = pt.homeScore > prevHome ? 'home' : 'away';
+                const teamScore = scorer === 'home' ? pt.homeScore : pt.awayScore;
+
+                if (currentRun && currentRun.team === scorer) {
+                    currentRun.points.push({ teamScore: teamScore });
+                } else {
+                    currentRun = { team: scorer, points: [{ teamScore: teamScore }] };
+                    runs.push(currentRun);
+                }
+            }
+            return runs;
+        }
+
+        function renderMiniTimeline() {
+            const container = document.getElementById('miniTimelineChart');
+            if (!container || !currentSet || !currentSet.points || currentSet.points.length === 0) {
+                if (container) container.innerHTML = '';
+                return;
+            }
+
+            const runs = buildTimelineData(currentSet);
+            if (runs.length === 0) { container.innerHTML = ''; return; }
+
+            const totalPoints = runs.reduce(function(sum, r) { return sum + r.points.length; }, 0);
+            const availableWidth = 576;
+            const gapWidth = Math.max(0, runs.length - 1) * 3;
+            const internalGaps = totalPoints - runs.length;
+            const blockSize = Math.max(6, Math.min(16, Math.floor((availableWidth - gapWidth - internalGaps) / totalPoints)));
+            const fontSize = blockSize >= 12 ? 7 : (blockSize >= 9 ? 6 : 0);
+            const blockHeight = 14;
+
+            let html = '';
+            runs.forEach(function(run) {
+                html += '<div class="mini-tl-run">';
+                html += '<div class="mini-tl-row">';
+                run.points.forEach(function(pt) {
+                    if (run.team === 'home') {
+                        html += '<div class="mini-tl-block home" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;font-size:' + fontSize + 'px;">' + (fontSize > 0 ? pt.teamScore : '') + '</div>';
+                    } else {
+                        html += '<div class="mini-tl-block empty" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;"></div>';
+                    }
+                });
+                html += '</div><div class="mini-tl-row">';
+                run.points.forEach(function(pt) {
+                    if (run.team === 'away') {
+                        html += '<div class="mini-tl-block away" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;font-size:' + fontSize + 'px;">' + (fontSize > 0 ? pt.teamScore : '') + '</div>';
+                    } else {
+                        html += '<div class="mini-tl-block empty" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;"></div>';
+                    }
+                });
+                html += '</div></div>';
+            });
+
+            container.innerHTML = html;
         }
 
         // Helper : obtenir les stats d'un joueur (avec init auto)

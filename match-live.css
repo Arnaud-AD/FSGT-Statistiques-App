@@ -1392,6 +1392,76 @@
             cursor: not-allowed;
         }
 
+        /* Mini-timeline des séries de points */
+        .mini-timeline-section {
+            padding: 12px 10px 40px;
+        }
+
+        .mini-timeline-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .mini-timeline-chart {
+            display: flex;
+            align-items: stretch;
+            gap: 3px;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .mini-timeline-chart:empty {
+            display: none;
+        }
+
+        .mini-timeline-chart::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 2px;
+            background: #333;
+            transform: translateY(-1px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .mini-tl-run {
+            display: flex;
+            flex-direction: column;
+            z-index: 1;
+        }
+
+        .mini-tl-row {
+            display: flex;
+            gap: 1px;
+        }
+
+        .mini-tl-block {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Google Sans', sans-serif;
+            font-weight: 600;
+            color: white;
+            border-radius: 2px;
+        }
+
+        .mini-tl-block.home {
+            background: var(--home-color, #0056D2);
+        }
+
+        .mini-tl-block.away {
+            background: var(--away-color, #ea4335);
+        }
+
+        .mini-tl-block.empty {
+            background: transparent;
+        }
+
         /* Tableau de statistiques du set */
         .stats-section {
             margin-top: 300px;
