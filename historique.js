@@ -1411,6 +1411,11 @@ const SetsPlayedView = {
 
 // ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', function() {
+    // [DEV TEST] Créer le match test si nécessaire — À RETIRER
+    if (typeof DevTestMode !== 'undefined' && DevTestMode.ENABLED) {
+        DevTestMode.ensureTestMatch();
+    }
+
     // Init tabs
     TabNav.init();
 

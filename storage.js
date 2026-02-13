@@ -506,5 +506,232 @@ const DevTestMode = {
         if (!this.ENABLED) return null;
         console.log('[DEV TEST] Auto-configuration du set (caméra, service, YouTube)');
         return this.SET_CONFIG;
+    },
+
+    // ==================== MATCH TEST HISTORIQUE — À RETIRER ====================
+
+    /**
+     * [DEV TEST] Crée un match test complet pour tester historique.html — À RETIRER
+     * Match "Equipe Test vs Jen et ses Saints" avec 4 sets et stats aléatoires.
+     * Scores : S1 20-25, S2 12-25, S3 25-23, S4 25-22 → Résultat 3-1 victoire Jen.
+     * Génère des séries de points (rallies) cohérentes avec les scores.
+     */
+    ensureTestMatch() {
+        if (!this.ENABLED) return false;
+
+        // Vérifier si le match test existe déjà
+        var matches = Storage.getAllMatches();
+        var exists = matches.some(function(m) { return m.opponent === 'Equipe Test'; });
+        if (exists) return false;
+
+        var matchId = 'test-match-' + Date.now();
+        var homePlayers = ['Alexandre', 'Arnaud', 'Jennifer', 'Antoine'];
+        var awayPlayers = ['TestPasseur', 'TestR4', 'TestCentre', 'TestPointu'];
+
+        // Scores des 4 sets (home = Jen et ses Saints, away = Equipe Test)
+        // User: S1 20-25, S2 12-25, S3 25-23, S4 25-22 → Résultat 2-2
+        var setScores = [
+            { home: 20, away: 25 },  // S1 : Jen perd
+            { home: 12, away: 25 },  // S2 : Jen perd
+            { home: 25, away: 23 },  // S3 : Jen gagne
+            { home: 25, away: 22 }   // S4 : Jen gagne
+        ];
+
+        var sets = [];
+
+        for (var si = 0; si < setScores.length; si++) {
+            var sc = setScores[si];
+            var points = this._generatePoints(sc.home, sc.away);
+            var stats = this._generateSetStats(homePlayers, awayPlayers, sc.home, sc.away);
+
+            sets.push({
+                number: si + 1,
+                homeLineup: { 1: 'Alexandre', 2: 'Arnaud', 3: 'Jennifer', 4: 'Antoine' },
+                awayLineup: { 1: 'TestR4', 2: 'TestCentre', 3: 'TestPointu', 4: 'TestPasseur' },
+                cameraSide: 'away',
+                initialServingTeam: si % 2 === 0 ? 'home' : 'away',
+                homeScore: sc.home,
+                awayScore: sc.away,
+                finalHomeScore: sc.home,
+                finalAwayScore: sc.away,
+                completed: true,
+                winner: sc.home > sc.away ? 'home' : 'away',
+                points: points,
+                stats: stats
+            });
+        }
+
+        var setsWon = sets.filter(function(s) { return s.winner === 'home'; }).length;
+        var setsLost = sets.filter(function(s) { return s.winner === 'away'; }).length;
+        var result = setsWon > setsLost ? 'win' : (setsLost > setsWon ? 'loss' : 'draw');
+
+        var match = {
+            id: matchId,
+            type: 'championship',
+            opponent: 'Equipe Test',
+            players: homePlayers.map(function(p) { return { prenom: p }; }),
+            adversePlayers: awayPlayers,
+            status: 'completed',
+            sets: sets,
+            result: result,
+            setsWon: setsWon,
+            setsLost: setsLost,
+            timestamp: Date.now() - 86400000 // Hier
+        };
+
+        Storage.saveMatch(match);
+        console.log('[DEV TEST] Match test créé : Jen ' + setsWon + '-' + setsLost + ' Equipe Test');
+        return true;
+    },
+
+    /**
+     * [DEV TEST] Génère des points (rallies) cohérents avec le score final — À RETIRER
+     * Simule une alternance réaliste de séries de points.
+     */
+    _generatePoints(homeTotal, awayTotal) {
+        var points = [];
+        var homeScore = 0;
+        var awayScore = 0;
+        var servingTeam = 'home';
+        var homeServers = ['Alexandre', 'Arnaud', 'Jennifer', 'Antoine'];
+        var awayServers = ['TestPasseur', 'TestR4', 'TestCentre', 'TestPointu'];
+        var homeServerIdx = 0;
+        var awayServerIdx = 0;
+
+        while (homeScore < homeTotal || awayScore < awayTotal) {
+            var homeNeeds = homeTotal - homeScore;
+            var awayNeeds = awayTotal - awayScore;
+            var scorer;
+
+            if (homeNeeds <= 0) {
+                scorer = 'away';
+            } else if (awayNeeds <= 0) {
+                scorer = 'home';
+            } else {
+                // Probabilité basée sur les points restants + bruit pour séries réalistes
+                var homeProb = homeNeeds / (homeNeeds + awayNeeds);
+                homeProb += (Math.random() - 0.5) * 0.3;
+                homeProb = Math.max(0.1, Math.min(0.9, homeProb));
+                scorer = Math.random() < homeProb ? 'home' : 'away';
+            }
+
+            // Le serveur actuel
+            var server = servingTeam === 'home'
+                ? homeServers[homeServerIdx % homeServers.length]
+                : awayServers[awayServerIdx % awayServers.length];
+
+            if (scorer === 'home') homeScore++;
+            else awayScore++;
+
+            points.push({
+                rally: [],
+                homeScore: homeScore,
+                awayScore: awayScore,
+                servingTeam: servingTeam,
+                server: server,
+                timestamp: Date.now() - Math.floor(Math.random() * 3600000)
+            });
+
+            // Le service change quand l'équipe en réception marque (side out)
+            if (scorer !== servingTeam) {
+                servingTeam = scorer;
+                if (scorer === 'home') homeServerIdx++;
+                else awayServerIdx++;
+            }
+        }
+
+        return points;
+    },
+
+    /**
+     * [DEV TEST] Génère des stats réalistes pour un set — À RETIRER
+     * Distribue aléatoirement des stats proportionnelles aux scores.
+     */
+    _generateSetStats(homePlayers, awayPlayers, homeScore, awayScore) {
+        var stats = { home: {}, away: {} };
+
+        function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        function distributeAmong(total, n) {
+            var arr = [];
+            var remaining = total;
+            for (var i = 0; i < n - 1; i++) {
+                var max = Math.min(remaining, Math.ceil(total / n) + 2);
+                var val = Math.min(remaining, randInt(0, max));
+                arr.push(val);
+                remaining -= val;
+            }
+            arr.push(remaining);
+            return arr;
+        }
+
+        function generatePlayerStats(totalPoints, isWinner) {
+            var ps = {
+                service:   { tot: 0, ace: 0, splus: 0, fser: 0, recSumAdv: 0, recCountAdv: 0 },
+                reception: { tot: 0, r4: 0, r3: 0, r2: 0, r1: 0, frec: 0 },
+                attack:    { tot: 0, attplus: 0, attminus: 0, bp: 0, fatt: 0 },
+                defense:   { tot: 0, defplus: 0, defminus: 0, fdef: 0 },
+                block:     { tot: 0, blcplus: 0, blcminus: 0, fblc: 0 }
+            };
+
+            // Service
+            ps.service.tot = randInt(2, 8);
+            ps.service.ace = randInt(0, Math.min(2, ps.service.tot));
+            ps.service.splus = randInt(0, Math.min(2, ps.service.tot - ps.service.ace));
+            ps.service.fser = randInt(0, Math.min(2, ps.service.tot - ps.service.ace - ps.service.splus));
+            var recAdv = ps.service.tot - ps.service.ace - ps.service.fser;
+            ps.service.recCountAdv = recAdv;
+            ps.service.recSumAdv = recAdv * randInt(1, 4);
+
+            // Réception
+            ps.reception.tot = randInt(2, 8);
+            var recRemaining = ps.reception.tot;
+            ps.reception.r4 = randInt(0, Math.min(3, recRemaining));
+            recRemaining -= ps.reception.r4;
+            ps.reception.r3 = randInt(0, Math.min(3, recRemaining));
+            recRemaining -= ps.reception.r3;
+            ps.reception.r2 = randInt(0, Math.min(2, recRemaining));
+            recRemaining -= ps.reception.r2;
+            ps.reception.r1 = randInt(0, Math.min(2, recRemaining));
+            recRemaining -= ps.reception.r1;
+            ps.reception.frec = recRemaining;
+
+            // Attaque
+            ps.attack.tot = randInt(3, 10);
+            ps.attack.attplus = randInt(1, Math.min(5, ps.attack.tot));
+            var attRemaining = ps.attack.tot - ps.attack.attplus;
+            ps.attack.attminus = randInt(0, Math.min(3, attRemaining));
+            attRemaining -= ps.attack.attminus;
+            ps.attack.bp = randInt(0, Math.min(2, attRemaining));
+            attRemaining -= ps.attack.bp;
+            ps.attack.fatt = attRemaining;
+
+            // Défense
+            ps.defense.tot = randInt(1, 6);
+            ps.defense.defplus = randInt(0, Math.min(3, ps.defense.tot));
+            var defRemaining = ps.defense.tot - ps.defense.defplus;
+            ps.defense.defminus = randInt(0, defRemaining);
+            ps.defense.fdef = defRemaining - ps.defense.defminus;
+
+            // Bloc
+            ps.block.tot = randInt(0, 4);
+            ps.block.blcplus = randInt(0, Math.min(2, ps.block.tot));
+            var blcRemaining = ps.block.tot - ps.block.blcplus;
+            ps.block.blcminus = randInt(0, blcRemaining);
+            ps.block.fblc = blcRemaining - ps.block.blcminus;
+
+            return ps;
+        }
+
+        // Générer stats pour chaque joueur home
+        homePlayers.forEach(function(name) {
+            stats.home[name] = generatePlayerStats(homeScore, homeScore > awayScore);
+        });
+
+        // Générer stats pour chaque joueur away
+        awayPlayers.forEach(function(name) {
+            stats.away[name] = generatePlayerStats(awayScore, awayScore > homeScore);
+        });
+
+        return stats;
     }
 };

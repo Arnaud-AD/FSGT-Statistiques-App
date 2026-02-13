@@ -228,14 +228,26 @@ Objet `DevTestMode` dans `storage.js` qui auto-remplit les joueurs et compositio
 - **Service** : Jen et ses Saints au service
 - **YouTube** : `https://www.youtube.com/watch?v=_5YHPt3W6nY&list=PLNR0tSMfwXlVSgtzXMopLcYBGQBR2qZa8`
 
+### Match test historique (Equipe Test)
+> **TEMPORAIRE** — Données de test pour valider historique.html. À retirer avec le reste du mode test.
+
+- **Adversaire** : Equipe Test (joueurs : TestPasseur, TestR4, TestCentre, TestPointu)
+- **Joueurs Jen** : Alexandre, Arnaud, Jennifer, Antoine
+- **Scores** : S1 20-25, S2 12-25, S3 25-23, S4 25-22 → Résultat 2-2
+- **Stats** : Aléatoires mais réalistes (service, réception, attaque, défense, bloc)
+- **Points** : Séries simulées cohérentes avec les scores (servingTeam correct pour Side Out/Break Out)
+- **Méthodes** : `ensureTestMatch()`, `_generatePoints()`, `_generateSetStats()`
+- **Appel** : `historique.js` dans `DOMContentLoaded` → `DevTestMode.ensureTestMatch()`
+
 ### Fichiers concernés
 Chaque intégration est marquée par le commentaire `[DEV TEST] ... — À RETIRER` :
-- `storage.js` : Définition de `DevTestMode` (objet complet avec `BLOCKER_CONFIG`, `SET_CONFIG`, méthodes)
+- `storage.js` : Définition de `DevTestMode` (objet complet avec `BLOCKER_CONFIG`, `SET_CONFIG`, `ensureTestMatch()`, méthodes)
 - `equipe.html` : Appel `DevTestMode.ensureHomePlayers()`
 - `match-config.html` : Appel `DevTestMode.ensureHomePlayers()`
 - `match-adverse.html` : Appel `DevTestMode.ensureAwayPlayers()`
 - `match-set-composition.html` : Fonction `devTestAutoPlace()` + appel `DevTestMode.getAutoLineup()` + `DevTestMode.getBlockerConfig()`
 - `match-set-config.html` : Appel `DevTestMode.getSetConfig()` (caméra, service, YouTube)
+- `historique.js` : Appel `DevTestMode.ensureTestMatch()` dans l'init
 
 ### Pour désactiver / retirer
 - **Désactiver** : `DevTestMode.ENABLED = false` dans `storage.js`
