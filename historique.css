@@ -540,51 +540,11 @@ body {
 .sideout-table .home-val { color: var(--accent-blue); }
 .sideout-table .away-val { color: var(--loss-color); }
 
-/* ==================== SET FILTER TABS ==================== */
-.detail-set-tabs {
+/* ==================== SEGMENTED TABS (shared) ==================== */
+.segmented-tabs {
     display: flex;
-    gap: 0;
-    margin: 0 0 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    overflow: hidden;
-    background: var(--bg-header);
-}
-
-.detail-set-tab {
-    flex: 1;
-    padding: 8px 4px;
-    font-family: 'Google Sans', sans-serif;
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: center;
-    white-space: nowrap;
-    min-width: 44px;
-}
-
-.detail-set-tab.active {
-    background: var(--accent-blue);
-    color: white;
-}
-
-.detail-set-tab:not(.active):hover {
-    background: var(--border-color);
-}
-
-/* ==================== STATS: CATEGORY TABS (mobile) ==================== */
-.stats-section {
-    padding: 0;
-}
-
-.stats-category-tabs {
-    display: flex;
-    gap: 4px;
-    padding: 4px;
+    gap: 3px;
+    padding: 3px;
     background: var(--bg-container);
     border-radius: 10px;
     overflow-x: auto;
@@ -592,11 +552,11 @@ body {
     scrollbar-width: none;
 }
 
-.stats-category-tabs::-webkit-scrollbar {
+.segmented-tabs::-webkit-scrollbar {
     display: none;
 }
 
-.cat-tab {
+.seg-tab {
     flex: 1;
     min-width: 0;
     padding: 8px 6px;
@@ -611,6 +571,30 @@ body {
     transition: all 0.2s;
     text-align: center;
     white-space: nowrap;
+}
+
+.seg-tab:not(.active):hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* ==================== SET FILTER TABS ==================== */
+.detail-set-tabs {
+    margin: 0 0 8px;
+}
+
+.detail-set-tab.active {
+    background: var(--accent-blue);
+    color: white;
+    font-weight: 700;
+}
+
+/* ==================== STATS: CATEGORY TABS (mobile) ==================== */
+.stats-section {
+    padding: 0;
+}
+
+.stats-category-tabs {
+    margin: 0 0 4px;
 }
 
 .cat-tab.active { color: white; font-weight: 700; }

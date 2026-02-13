@@ -803,9 +803,9 @@ const MatchStatsView = {
         var completedSets = match.sets.filter(function(s) { return s.completed; });
         var self = this;
 
-        var html = '<button class="detail-set-tab active" data-set="all">Global</button>';
+        var html = '<button class="seg-tab detail-set-tab active" data-set="all">Global</button>';
         completedSets.forEach(function(s, i) {
-            html += '<button class="detail-set-tab" data-set="' + i + '">S' + (i + 1) + '</button>';
+            html += '<button class="seg-tab detail-set-tab" data-set="' + i + '">S' + (i + 1) + '</button>';
         });
         container.innerHTML = html;
 
@@ -840,7 +840,7 @@ const MatchStatsView = {
 
         container.innerHTML = cats.map(function(cat) {
             var isActive = self.currentCategory === cat;
-            return '<button class="cat-tab ' + (isActive ? 'active' : '') + '" data-cat="' + cat + '">' + labels[cat] + '</button>';
+            return '<button class="seg-tab cat-tab ' + (isActive ? 'active' : '') + '" data-cat="' + cat + '">' + labels[cat] + '</button>';
         }).join('');
 
         container.onclick = function(e) {
@@ -1152,11 +1152,11 @@ const YearStatsView = {
 
         // Mobile : onglets categorie + premier onglet service
         var html = '<div class="stats-section">';
-        html += '<div class="stats-category-tabs" id="yearCategoryTabs">';
+        html += '<div class="segmented-tabs stats-category-tabs" id="yearCategoryTabs">';
         var cats = ['service', 'reception', 'attack', 'defense', 'block'];
         var labels = { service: 'Serv', reception: 'Rec', attack: 'Att', defense: 'Def', block: 'Blc' };
         cats.forEach(function(cat) {
-            html += '<button class="cat-tab ' + (cat === 'service' ? 'active' : '') + '" data-cat="' + cat + '">' + labels[cat] + '</button>';
+            html += '<button class="seg-tab cat-tab ' + (cat === 'service' ? 'active' : '') + '" data-cat="' + cat + '">' + labels[cat] + '</button>';
         });
         html += '</div>';
 
