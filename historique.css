@@ -432,8 +432,10 @@ body {
 
 /* ==================== TIMELINE ==================== */
 .timeline-section {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border-color);
+    padding: 0;
+    margin-top: 12px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 12px;
 }
 
 .timeline-section-title {
@@ -528,8 +530,10 @@ body {
 
 /* ==================== SIDE OUT / BREAK OUT ==================== */
 .sideout-section {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border-color);
+    padding: 0;
+    margin-top: 12px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 12px;
 }
 
 .sideout-section-title {

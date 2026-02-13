@@ -463,7 +463,7 @@ const SharedComponents = {
         return Math.max(6, Math.min(20, blockWidth));
     },
 
-    renderTimeline(match, containerId) {
+    renderTimeline(match, containerId, setFilter) {
         var container = document.getElementById(containerId);
         var section = container ? container.parentElement : null;
 
@@ -478,13 +478,28 @@ const SharedComponents = {
             return;
         }
 
+        // Filtrer selon le set selectionne
+        var setsToShow;
+        if (setFilter !== undefined && setFilter !== 'all') {
+            setsToShow = [completedSets[setFilter]].filter(Boolean);
+        } else {
+            setsToShow = completedSets;
+        }
+
+        if (setsToShow.length === 0 || !setsToShow.some(function(s) { return s.points && s.points.length > 0; })) {
+            if (section) section.style.display = 'none';
+            return;
+        }
+
         if (section) section.style.display = 'block';
 
         // Calculer la largeur disponible
         var containerWidth = container.clientWidth || 340;
 
         var html = '';
-        completedSets.forEach(function(set, i) {
+        setsToShow.forEach(function(set, i) {
+            // Retrouver l'index reel du set pour le label
+            var realIndex = (setFilter !== undefined && setFilter !== 'all') ? setFilter : completedSets.indexOf(set);
             var runs = SharedComponents.buildTimelineData(set);
             if (runs.length === 0) return;
 
@@ -496,7 +511,7 @@ const SharedComponents = {
             var homeScore = set.finalHomeScore || set.homeScore || 0;
             var awayScore = set.finalAwayScore || set.awayScore || 0;
             var homeWon = homeScore > awayScore;
-            var label = i === 4 ? 'Tie-break' : 'Set ' + (i + 1);
+            var label = realIndex === 4 ? 'Tie-break' : 'Set ' + (realIndex + 1);
 
             html += '<div class="timeline-set">';
             html += '<div class="timeline-header">';
@@ -686,7 +701,7 @@ const MatchStatsView = {
 
         this.renderDetailHeader(match);
         this.renderDetailSetTabs(match);
-        SharedComponents.renderTimeline(match, 'timelineContainer');
+        SharedComponents.renderTimeline(match, 'timelineContainer', 'all');
         SharedComponents.renderSideOutBlock(match, 'all', 'sideoutContainer');
         this.renderCategoryTabs();
         this.renderStats(match, 'all');
@@ -805,6 +820,7 @@ const MatchStatsView = {
 
         this.renderStats(this.currentMatch, filter);
         SharedComponents.renderSideOutBlock(this.currentMatch, filter, 'sideoutContainer');
+        SharedComponents.renderTimeline(this.currentMatch, 'timelineContainer', filter);
     },
 
     renderCategoryTabs() {
