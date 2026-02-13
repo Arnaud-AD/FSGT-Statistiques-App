@@ -455,6 +455,14 @@ const SharedComponents = {
         return runs;
     },
 
+    computeBlockSize(totalPoints, runsCount, containerWidth) {
+        var availableWidth = containerWidth || 340;
+        var gapWidth = Math.max(0, runsCount - 1) * 4;
+        var internalGaps = totalPoints - runsCount;
+        var blockWidth = Math.floor((availableWidth - gapWidth - internalGaps) / totalPoints);
+        return Math.max(6, Math.min(20, blockWidth));
+    },
+
     renderTimeline(match, containerId, setFilter) {
         var container = document.getElementById(containerId);
         var section = container ? container.parentElement : null;
@@ -485,24 +493,25 @@ const SharedComponents = {
 
         if (section) section.style.display = 'block';
 
+        // Calculer la largeur disponible
         var containerWidth = container.clientWidth || 340;
 
         var html = '';
         setsToShow.forEach(function(set, i) {
+            // Retrouver l'index reel du set pour le label
             var realIndex = (setFilter !== undefined && setFilter !== 'all') ? setFilter : completedSets.indexOf(set);
             var runs = SharedComponents.buildTimelineData(set);
             if (runs.length === 0) return;
 
             var totalPoints = runs.reduce(function(sum, r) { return sum + r.points.length; }, 0);
+            var blockSize = SharedComponents.computeBlockSize(totalPoints, runs.length, containerWidth);
+            var fontSize = blockSize >= 14 ? 9 : (blockSize >= 10 ? 7 : 0);
+            var blockHeight = 20;
+
             var homeScore = set.finalHomeScore || set.homeScore || 0;
             var awayScore = set.finalAwayScore || set.awayScore || 0;
             var homeWon = homeScore > awayScore;
             var label = realIndex === 4 ? 'Tie-break' : 'Set ' + (realIndex + 1);
-
-            // Calculer largeur proportionnelle par série
-            var gapTotal = (runs.length - 1) * 2; // 2px gap entre séries
-            var availableWidth = containerWidth - gapTotal;
-            var unitWidth = availableWidth / totalPoints;
 
             html += '<div class="timeline-set">';
             html += '<div class="timeline-header">';
@@ -515,17 +524,27 @@ const SharedComponents = {
 
             html += '<div class="timeline-chart">';
             runs.forEach(function(run) {
-                var runWidth = Math.max(18, Math.round(run.points.length * unitWidth));
-                var count = run.points.length;
-
-                html += '<div class="tl-run">';
-                if (run.team === 'home') {
-                    html += '<div class="tl-run-block home" style="width:' + runWidth + 'px;">' + count + '</div>';
-                    html += '<div class="tl-run-spacer"></div>';
-                } else {
-                    html += '<div class="tl-run-spacer"></div>';
-                    html += '<div class="tl-run-block away" style="width:' + runWidth + 'px;">' + count + '</div>';
-                }
+                html += '<div class="timeline-run">';
+                // Top row (home)
+                html += '<div class="timeline-row">';
+                run.points.forEach(function(pt) {
+                    if (run.team === 'home') {
+                        html += '<div class="tl-block home" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;font-size:' + fontSize + 'px;">' + (fontSize > 0 ? pt.teamScore : '') + '</div>';
+                    } else {
+                        html += '<div class="tl-block empty" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;"></div>';
+                    }
+                });
+                html += '</div>';
+                // Bottom row (away)
+                html += '<div class="timeline-row">';
+                run.points.forEach(function(pt) {
+                    if (run.team === 'away') {
+                        html += '<div class="tl-block away" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;font-size:' + fontSize + 'px;">' + (fontSize > 0 ? pt.teamScore : '') + '</div>';
+                    } else {
+                        html += '<div class="tl-block empty" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;"></div>';
+                    }
+                });
+                html += '</div>';
                 html += '</div>';
             });
             html += '</div></div>';
@@ -1356,23 +1375,30 @@ const SetsPlayedView = {
                     var runs = SharedComponents.buildTimelineData(s.set || { points: s.points, initialHomeScore: 0 });
                     if (runs.length > 0) {
                         var totalPoints = runs.reduce(function(sum, r) { return sum + r.points.length; }, 0);
-                        var gapTotal = (runs.length - 1) * 2;
-                        var availableWidth = containerWidth - gapTotal;
-                        var unitWidth = availableWidth / totalPoints;
+                        var blockSize = SharedComponents.computeBlockSize(totalPoints, runs.length, containerWidth);
+                        var fontSize = blockSize >= 14 ? 8 : 0;
+                        var blockHeight = 14;
 
                         var html = '<div class="timeline-chart" style="gap:2px;">';
                         runs.forEach(function(run) {
-                            var runWidth = Math.max(14, Math.round(run.points.length * unitWidth));
-                            var count = run.points.length;
-                            html += '<div class="tl-run">';
-                            if (run.team === 'home') {
-                                html += '<div class="tl-run-block home" style="width:' + runWidth + 'px;height:16px;min-width:14px;font-size:8px;">' + count + '</div>';
-                                html += '<div class="tl-run-spacer" style="height:16px;"></div>';
-                            } else {
-                                html += '<div class="tl-run-spacer" style="height:16px;"></div>';
-                                html += '<div class="tl-run-block away" style="width:' + runWidth + 'px;height:16px;min-width:14px;font-size:8px;">' + count + '</div>';
-                            }
-                            html += '</div>';
+                            html += '<div class="timeline-run">';
+                            html += '<div class="timeline-row">';
+                            run.points.forEach(function(pt) {
+                                if (run.team === 'home') {
+                                    html += '<div class="tl-block home" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;font-size:' + fontSize + 'px;">' + (fontSize > 0 ? pt.teamScore : '') + '</div>';
+                                } else {
+                                    html += '<div class="tl-block empty" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;"></div>';
+                                }
+                            });
+                            html += '</div><div class="timeline-row">';
+                            run.points.forEach(function(pt) {
+                                if (run.team === 'away') {
+                                    html += '<div class="tl-block away" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;font-size:' + fontSize + 'px;">' + (fontSize > 0 ? pt.teamScore : '') + '</div>';
+                                } else {
+                                    html += '<div class="tl-block empty" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;"></div>';
+                                }
+                            });
+                            html += '</div></div>';
                         });
                         html += '</div>';
                         timelineEl.innerHTML = html;

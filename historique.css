@@ -447,7 +447,7 @@ body {
 }
 
 .timeline-set {
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }
 
 .timeline-set:last-child {
@@ -458,7 +458,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .timeline-set-label {
@@ -481,13 +481,13 @@ body {
 
 .timeline-chart {
     display: flex;
-    align-items: center;
-    gap: 2px;
+    align-items: stretch;
+    gap: 4px;
     position: relative;
-    padding: 0;
+    overflow-x: auto;
+    padding: 2px 0;
 }
 
-/* Ligne centrale (filet) */
 .timeline-chart::after {
     content: '';
     position: absolute;
@@ -495,40 +495,38 @@ body {
     right: 0;
     top: 50%;
     height: 2px;
-    background: var(--text-secondary);
+    background: #333;
     transform: translateY(-1px);
     pointer-events: none;
     z-index: 0;
 }
 
-.tl-run {
+.timeline-run {
     display: flex;
     flex-direction: column;
-    align-items: stretch;
+    gap: 0;
     z-index: 1;
-    flex-shrink: 0;
 }
 
-.tl-run-block {
+.timeline-row {
+    display: flex;
+    gap: 1px;
+}
+
+.tl-block {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 22px;
-    min-width: 18px;
-    padding: 0 2px;
     font-family: 'Google Sans', sans-serif;
-    font-size: 10px;
-    font-weight: 700;
+    font-weight: 600;
     color: white;
-    border-radius: 3px;
-    box-sizing: border-box;
+    border-radius: 2px;
+    z-index: 1;
 }
 
-.tl-run-block.home { background: var(--accent-blue); }
-.tl-run-block.away { background: var(--loss-color); }
-.tl-run-spacer {
-    height: 22px;
-}
+.tl-block.home { background: var(--accent-blue); }
+.tl-block.away { background: var(--loss-color); }
+.tl-block.empty { background: transparent; }
 
 /* ==================== SIDE OUT / BREAK OUT ==================== */
 .sideout-section {
