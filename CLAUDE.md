@@ -1,8 +1,8 @@
-# FSGT-Statistiques-App — V14.0 (dernière version à jour)
+# FSGT-Statistiques-App — V14.1 (dernière version à jour)
 
 Application web de statistiques volleyball 4v4 pour l'équipe "Jen et ses Saints" en FSGT.
 
-> **Version** : V14.0 — Fix stats attaque filet→block : result manquant sur l'action attack (13 février 2026).
+> **Version** : V14.1 — Suppression auto-select défenseur après block (13 février 2026).
 
 ## Contexte
 

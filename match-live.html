@@ -3141,47 +3141,20 @@
             const lastAttackForZones = [...gameState.rally].reverse().find(a => a.type === 'attack');
             const attackerRoleForZones = lastAttackForZones ? lastAttackForZones.role : null;
 
-            // Cas out avec défenseur auto-sélectionné : le out est du côté du bloqueur
-            // Le défenseur fait partie de l'équipe du bloqueur → traiter comme "block revient chez le bloqueur"
-            if (clickData.courtSide === 'out' && gameState.defenseAutoSelected && gameState.defenseAutoPlayer) {
+            // Après un block, jamais d'auto-sélection du défenseur :
+            // la balle est déviée de manière imprévisible, on ne sait pas qui va récupérer
+            gameState.defenseAutoSelected = false;
+            gameState.defenseAutoPlayer = null;
+
+            if (clickData.courtSide === blockingCourtSide) {
+                // Block revient chez le bloqueur → défense pour eux
                 gameState.attackingTeam = blockingTeam;
-                const autoPlayer = gameState.defenseAutoPlayer;
-                gameState.defenseAutoSelected = false;
-                gameState.defenseAutoPlayer = null;
-                gameState.phase = 'defense';
-                updatePhase();
-                selectDefender(autoPlayer);
-            } else if (clickData.courtSide === attackingCourtSide || clickData.courtSide === 'out') {
-                // Block va chez l'attaquant (ou out sans auto-sélection) → défense pour eux
-                if (gameState.defenseAutoSelected && gameState.defenseAutoPlayer) {
-                    const autoPlayer = gameState.defenseAutoPlayer;
-                    gameState.defenseAutoSelected = false;
-                    gameState.defenseAutoPlayer = null;
-                    gameState.phase = 'defense';
-                    updatePhase();
-                    selectDefender(autoPlayer);
-                } else {
-                    gameState.phase = 'defense';
-                    document.getElementById('outArea').classList.add('active');
-                    renderDefenseSelection(attackingTeam, attackerRoleForZones);
-                }
-            } else if (clickData.courtSide === blockingCourtSide) {
-                // Block revient chez le bloqueur ←' défense pour eux
-                gameState.attackingTeam = blockingTeam;
-                // Vérifier si un défenseur a été auto-sélectionné via zone de défense
-                if (gameState.defenseAutoSelected && gameState.defenseAutoPlayer) {
-                    const autoPlayer = gameState.defenseAutoPlayer;
-                    gameState.defenseAutoSelected = false;
-                    gameState.defenseAutoPlayer = null;
-                    gameState.phase = 'defense';
-                    updatePhase();
-                    selectDefender(autoPlayer);
-                } else {
-                    gameState.phase = 'defense';
-                    document.getElementById('outArea').classList.add('active');
-                    renderDefenseSelection(blockingTeam, attackerRoleForZones);
-                }
             }
+            // Sinon (attackingCourtSide ou out) → défense pour l'attaquant (pas de changement)
+
+            gameState.phase = 'defense';
+            document.getElementById('outArea').classList.add('active');
+            renderDefenseSelection(gameState.attackingTeam, attackerRoleForZones);
         }
 
         function selectNetBlocker(playerName) {
