@@ -1196,12 +1196,14 @@ body {
 
 /* Export feedback inside menu */
 .export-feedback {
-    display: block;
+    position: absolute;
+    right: 14px;
+    top: 11px;
     font-size: 11px;
     color: var(--win-color);
-    font-weight: 500;
-    padding: 0 14px 8px;
+    font-weight: 600;
     opacity: 0;
+    pointer-events: none;
     transition: opacity 0.3s;
 }
 
