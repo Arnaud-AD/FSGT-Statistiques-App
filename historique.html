@@ -24,10 +24,11 @@
         </header>
 
         <!-- Onglets principaux -->
-        <nav class="tabs-container">
-            <button class="tab-btn active" data-tab="matchStats">Stats Matchs</button>
-            <button class="tab-btn" data-tab="yearStats">Stats Année</button>
-            <button class="tab-btn" data-tab="setsStats">Sets joués</button>
+        <nav class="segmented-tabs main-tabs">
+            <button class="seg-tab tab-btn active" data-tab="matchStats">Stats Matchs</button>
+            <button class="seg-tab tab-btn" data-tab="yearStats">Stats Année</button>
+            <button class="seg-tab tab-btn" data-tab="setsStats">Sets joués</button>
+            <button class="seg-tab tab-btn" data-tab="visualStats">Stats visuelles</button>
         </nav>
 
         <!-- ==================== TAB 1 : Stats Matchs ==================== -->
@@ -149,13 +150,26 @@
             <!-- Contenu genere dynamiquement par SetsPlayedView.render() -->
         </main>
 
+        <!-- ==================== TAB 4 : Stats visuelles ==================== -->
+        <main class="tab-content" id="content-visualStats">
+            <div class="empty-state">
+                <div class="empty-state-icon visual">
+                    <svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/>
+                    </svg>
+                </div>
+                <h3 class="empty-state-title">Stats visuelles</h3>
+                <p class="empty-state-desc">Visualisations graphiques des statistiques de jeu. Disponible prochainement.</p>
+            </div>
+        </main>
+
         <!-- Footer -->
         <footer class="footer">
             FSGT 4×4 • Saison 2025-2026
         </footer>
     </div>
 
-    <script src="storage.js?v=13.51"></script>
-    <script src="historique.js?v=13.51"></script>
+    <script src="storage.js?v=14.0"></script>
+    <script src="historique.js?v=14.0"></script>
 </body>
 </html>

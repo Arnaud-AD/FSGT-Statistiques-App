@@ -1,8 +1,8 @@
-# FSGT-Statistiques-App — V11.1 (dernière version à jour)
+# FSGT-Statistiques-App — V14.0 (dernière version à jour)
 
 Application web de statistiques volleyball 4v4 pour l'équipe "Jen et ses Saints" en FSGT.
 
-> **Version** : V11.1 — Refonte bloc out + bouton Point en défense (12 février 2026).
+> **Version** : V14.0 — Fix stats attaque filet→block : result manquant sur l'action attack (13 février 2026).
 
 ## Contexte
 
@@ -465,7 +465,7 @@ Zone semi-circulaire bleue affichée pendant la phase `defense_end` (après auto
 ### Phase 11 — Refonte totale de la vue Historique
 **Objectif** : Refonte complète de `historique.html` — redesign visuel, implémentation des onglets Stats Année et Sets joués (actuellement vides), intégration des stats Side Out / Break Point (Phase 8), et améliorations UX globales.
 
-> **État actuel** : L'onglet "Stats Matchs" fonctionne (liste matchs, détail avec header/score/timeline/stats joueurs). Les onglets "Stats Année" et "Sets joués" sont des empty states sans contenu. Le code est entièrement inline dans un seul fichier (~1550 lignes HTML+CSS+JS). La Phase 8 (Side Out/Break) prévoyait déjà un affichage dans historique.html.
+> **État actuel (V13.52)** : Les 3 onglets sont implémentés et fonctionnels. Le code est séparé en 3 fichiers (`historique.html` coquille ~160 lignes, `historique.css` ~1260 lignes, `historique.js` ~1490 lignes). UI uniformisée avec composant `segmented-tabs` partagé. Side Out/Break Out intégré. Menu actions via bouton rouage ⚙️.
 
 > **Responsive — EXCEPTION historique.html** : Contrairement au reste de l'app (optimisée Chrome desktop 600px), la vue historique doit être optimisée pour **2 types d'appareils** :
 >
@@ -481,42 +481,44 @@ Zone semi-circulaire bleue affichée pendant la phase `defense_end` (après auto
 >
 > **Note** : Cette contrainte responsive ne s'applique qu'à `historique.html` (et ses fichiers `historique.css` / `historique.js`). Les autres pages restent optimisées pour Chrome desktop 600px uniquement.
 
-**Volet 1 — Restructuration et redesign UI**
-- [ ] Extraire le CSS dans un fichier séparé `historique.css` (cohérent avec `match-live.css`)
-- [ ] Extraire le JS dans un fichier séparé `historique.js`
-- [ ] Redesign visuel du header et de la navigation par onglets
-- [ ] Améliorer le design des cartes match (sélecteur de match)
-- [ ] Redesign de la vue détail match (header, scores, sets)
-- [ ] Améliorer le rendu des tableaux de stats joueurs (lisibilité, responsive scroll)
-- [ ] Améliorer le rendu de la timeline des séries de points
+**Volet 1 — Restructuration et redesign UI** ✅ (V13.52)
+- [x] Extraire le CSS dans un fichier séparé `historique.css` (cohérent avec `match-live.css`)
+- [x] Extraire le JS dans un fichier séparé `historique.js`
+- [x] Redesign visuel du header et de la navigation par onglets
+- [x] Améliorer le design des cartes match (sélecteur de match)
+- [x] Redesign de la vue détail match (header, scores, sets)
+- [x] Améliorer le rendu des tableaux de stats joueurs (lisibilité, responsive scroll)
+- [x] Améliorer le rendu de la timeline des séries de points
+- [x] Composant `segmented-tabs` unifié pour tous les groupes d'onglets (V13.51-13.52)
+- [x] Bouton rouage ⚙️ avec dropdown menu (Exporter stats / Supprimer match) (V13.4)
 
-**Volet 2 — Onglet Stats Année (statistiques cumulées saison)**
-- [ ] Agréger les stats de tous les matchs complétés de la saison
-- [ ] Afficher le bilan global : matchs joués, V/D, sets gagnés/perdus, points marqués/encaissés
-- [ ] Tableau stats joueurs cumulées (service, réception, attaque, défense, bloc) sur toute la saison
-- [ ] Classement joueurs par catégorie (meilleur attaquant, meilleur réceptionneur, etc.)
-- [ ] Filtres : par type de match (Championnat / Ginette), par période
+**Volet 2 — Onglet Stats Année (statistiques cumulées saison)** ✅ (V13.0)
+- [x] Agréger les stats de tous les matchs complétés de la saison
+- [x] Afficher le bilan global : matchs joués, V/D, sets gagnés/perdus, points marqués/encaissés
+- [x] Tableau stats joueurs cumulées (service, réception, attaque, défense, bloc) sur toute la saison
+- [x] Classement joueurs par catégorie (meilleur attaquant, meilleur réceptionneur, etc.)
+- [x] Filtres : par type de match (Championnat / Ginette), par période
 
-**Volet 3 — Onglet Sets joués (analyse détaillée des sets)**
-- [ ] Liste de tous les sets joués (tous matchs confondus), triés chronologiquement
-- [ ] Pour chaque set : score final, adversaire, timeline des séries, durée estimée
-- [ ] Filtres : sets gagnés/perdus, par adversaire, par score serré (≤3 pts d'écart) vs dominé
-- [ ] Stats agrégées par type de set (sets gagnés vs perdus, sets serrés vs dominés)
+**Volet 3 — Onglet Sets joués (analyse détaillée des sets)** ✅ (V13.0)
+- [x] Liste de tous les sets joués (tous matchs confondus), triés chronologiquement
+- [x] Pour chaque set : score final, adversaire, timeline des séries, durée estimée
+- [x] Filtres : sets gagnés/perdus, par adversaire, par score serré (≤3 pts d'écart) vs dominé
+- [x] Stats agrégées par type de set (sets gagnés vs perdus, sets serrés vs dominés)
 
-**Volet 4 — Intégration Side Out / Break Out (absorbe Phase 8)**
-- [ ] Fonction `classifyPoint(point, prevPoint)` : retourne `'sideout'` ou `'breakout'`
-- [ ] Fonction `calculateSideOutStats(points)` : Side Out % et Break Out % par équipe
+**Volet 4 — Intégration Side Out / Break Out (absorbe Phase 8)** ✅ (V13.0)
+- [x] Fonction `classifyPoint(point, prevPoint)` : retourne `'sideout'` ou `'breakout'`
+- [x] Fonction `calculateSideOutStats(points)` : Side Out % et Break Out % par équipe
 - [ ] Stats filtrées par contexte : Att% en side out, Rec Moy en side out, Pression service
-- [ ] Bloc résumé "Side Out / Break Out" dans la vue détail match (SO% et BO% par équipe, par set et global)
+- [x] Bloc résumé "Side Out / Break Out" dans la vue détail match (SO% et BO% par équipe, par set et global)
 - [ ] Métriques croisées dans l'onglet Stats Année : tableau récapitulatif par match + total saison
 - [ ] Tests : set simulé → vérifier les % side out / break out vs comptage manuel
 
-**Volet 5 — Améliorations UX**
-- [ ] Navigation fluide entre onglets (pas de rechargement)
-- [ ] Persistance de l'onglet actif (retour sur la même vue après navigation)
-- [ ] Bouton d'export des stats (copier dans le presse-papier en format texte lisible)
-- [ ] Lien direct vers la vidéo YouTube du match (si configurée dans match-set-config)
-- [ ] Responsive : optimiser pour mobile (≤768px, cible 375–430px) ET MacBook Air 13" (≥1024px, cible 1470px) — cf. note responsive ci-dessus
+**Volet 5 — Améliorations UX** ✅ (V13.52)
+- [x] Navigation fluide entre onglets (pas de rechargement)
+- [x] Persistance de l'onglet actif (retour sur la même vue après navigation)
+- [x] Bouton d'export des stats (copier dans le presse-papier en format texte lisible)
+- [x] Lien direct vers la vidéo YouTube du match (si configurée dans match-set-config)
+- [x] Responsive : optimiser pour mobile (≤768px, cible 375–430px) ET MacBook Air 13" (≥1024px, cible 1470px) — cf. note responsive ci-dessus
 
 ### Dépendances mises à jour
 ```
@@ -527,9 +529,9 @@ Phase 2 (override joueur) ── ✅
 Phase 4 (défense bloc)    ── ✅ (absorbée par 1 + 1bis)
 Phase 6 (flèches bloc)    ── ✅
 Phase 7 (bloc out 1-clic) ── ✅
-Phase 8 (stats side out)  ─────────────────────────────────────────→ Phase 11 (absorbée)
+Phase 8 (stats side out)  ── ✅ (absorbée par Phase 11)
 Phase 9 (timeline séries) ── ✅
-Phase 11 (refonte histo)  ── indépendante (peut être faite en parallèle de Phase 5)
+Phase 11 (refonte histo)  ── ✅ (V13.52 — 5 volets terminés)
 Phase 5 (debug global)   ─────────────────────────────────────────→ Phase 10 (retrait mode test)
 ```
 

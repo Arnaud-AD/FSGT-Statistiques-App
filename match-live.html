@@ -3044,8 +3044,14 @@
                     eligiblePlayers: getLineupPlayers(blockingTeamBO), mode: 'select'
                 });
             } else if (choice === 'block') {
-                // Attaque dans le filet ←' l'équipe adverse block
+                // Attaque dans le filet ← l'équipe adverse block
                 const blockingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+
+                // Marquer l'attaque comme "defended" (le block dévie la balle → défense)
+                const lastAttackAction = gameState.rally[gameState.rally.length - 1];
+                if (lastAttackAction && lastAttackAction.type === 'attack') {
+                    lastAttackAction.result = 'defended';
+                }
 
                 // Auto-sélection du bloqueur si clic sur zone split
                 if (gameState.autoSelectedBlocker) {

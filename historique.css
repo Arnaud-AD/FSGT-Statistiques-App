@@ -106,39 +106,14 @@ body {
 }
 
 /* ==================== TABS (main) ==================== */
-.tabs-container {
-    display: flex;
-    gap: 0;
+.main-tabs {
     margin-bottom: 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    overflow: hidden;
-    background: var(--bg-header);
-}
-
-.tab-btn {
-    flex: 1;
-    padding: 10px 8px;
-    font-family: 'Google Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
-    white-space: nowrap;
 }
 
 .tab-btn.active {
     background: var(--accent-blue);
     color: white;
-}
-
-.tab-btn:not(.active):hover {
-    background: var(--border-color);
-    color: var(--text-primary);
+    font-weight: 700;
 }
 
 /* Tab content */
@@ -668,7 +643,9 @@ body {
 
 .stats-table .positive { color: var(--win-color); font-weight: 600; }
 .stats-table .negative { color: var(--loss-color); font-weight: 600; }
+.stats-table .warning { color: #e65100; font-weight: 600; }
 .stats-table .neutral { color: var(--text-secondary); }
+.stats-table .stat-pct { font-size: 10px; color: var(--text-secondary); font-weight: 400; }
 
 /* Player cell with role dot */
 .player-cell {
@@ -810,7 +787,9 @@ body {
 
 .detail-stats-table .positive { color: var(--win-color); font-weight: 600; }
 .detail-stats-table .negative { color: var(--loss-color); font-weight: 600; }
+.detail-stats-table .warning { color: #e65100; font-weight: 600; }
 .detail-stats-table .neutral { color: var(--text-secondary); }
+.detail-stats-table .stat-pct { font-size: 8px; color: var(--text-secondary); font-weight: 400; }
 
 /* ==================== YEAR STATS ==================== */
 .year-summary-card {
@@ -847,32 +826,13 @@ body {
 }
 
 .year-filters {
-    display: flex;
-    gap: 0;
     margin-bottom: 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    overflow: hidden;
-    background: var(--bg-header);
-}
-
-.year-filter-btn {
-    flex: 1;
-    padding: 8px 8px;
-    font-family: 'Google Sans', sans-serif;
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: center;
 }
 
 .year-filter-btn.active {
     background: var(--accent-blue);
     color: white;
+    font-weight: 700;
 }
 
 /* Rankings cards */

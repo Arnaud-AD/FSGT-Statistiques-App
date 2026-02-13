@@ -243,15 +243,15 @@ const StatsAggregator = {
 // ==================== SHARED COMPONENTS ====================
 const SharedComponents = {
 
-    // Definition des colonnes par categorie
-    CATEGORIES: {
+    // Definition des colonnes par categorie — variante MATCH (Tab 1 : Ace et S+ separes, FA et BP separes)
+    CATEGORIES_MATCH: {
         service: {
             label: 'Service', key: 'service',
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
-                { key: 'ace', label: 'Ace', cls: 'positive' },
+                { key: 'ace', label: 'Ace', cls: 'positive', pct: true },
                 { key: 'splus', label: 'S+', cls: 'positive' },
-                { key: 'fser', label: 'FS', cls: 'negative' },
+                { key: 'fser', label: 'FS', cls: 'negative', pct: true },
                 { key: '_moy', label: 'Moy', cls: '_srvMoy' }
             ]
         },
@@ -259,30 +259,80 @@ const SharedComponents = {
             label: 'Reception', key: 'reception',
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
-                { key: 'r4', label: 'R4', cls: 'positive' },
-                { key: 'r3', label: 'R3', cls: 'positive' },
-                { key: 'r2', label: 'R2', cls: 'neutral' },
-                { key: 'r1', label: 'R1', cls: 'negative' },
-                { key: 'frec', label: 'FR', cls: 'negative' }
+                { key: 'r4', label: 'R4', cls: 'positive', pct: true },
+                { key: 'r3', label: 'R3', cls: '' },
+                { key: 'r2', label: 'R2', cls: '' },
+                { key: 'r1', label: 'R1', cls: 'warning' },
+                { key: 'frec', label: 'FR', cls: 'negative', pct: true }
             ]
         },
         attack: {
             label: 'Attaque', key: 'attack',
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
-                { key: 'attplus', label: 'A+', cls: 'positive' },
+                { key: 'attplus', label: 'A+', cls: 'positive', pct: true },
                 { key: 'attminus', label: 'A-', cls: 'neutral' },
-                { key: 'bp', label: 'BP', cls: 'negative' },
-                { key: 'fatt', label: 'FA', cls: 'negative' }
+                { key: '_faBp', label: 'FA(BP)', cls: 'negative', pct: true, computed: 'faBp' }
             ]
         },
         defense: {
             label: 'Defense', key: 'defense',
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
-                { key: 'defplus', label: 'D+', cls: 'positive' },
+                { key: 'defplus', label: 'D+', cls: 'positive', pct: true },
                 { key: 'defminus', label: 'D-', cls: 'neutral' },
-                { key: 'fdef', label: 'FD', cls: 'negative' }
+                { key: 'fdef', label: 'FD', cls: 'negative', pct: true }
+            ]
+        },
+        block: {
+            label: 'Bloc', key: 'block',
+            columns: [
+                { key: 'tot', label: 'Tot', cls: '' },
+                { key: 'blcplus', label: 'B+', cls: 'positive' },
+                { key: 'blcminus', label: 'B-', cls: 'neutral' },
+                { key: 'fblc', label: 'FB', cls: 'negative' }
+            ]
+        }
+    },
+
+    // Definition des colonnes — variante AGGREGATED (Tab 2 & 3 : Ace fusionne avec S+)
+    CATEGORIES_AGGREGATED: {
+        service: {
+            label: 'Service', key: 'service',
+            columns: [
+                { key: 'tot', label: 'Tot', cls: '' },
+                { key: '_acePlus', label: 'Ace', cls: 'positive', pct: true, computed: 'acePlus' },
+                { key: 'fser', label: 'FS', cls: 'negative', pct: true },
+                { key: '_moy', label: 'Moy', cls: '_srvMoy' }
+            ]
+        },
+        reception: {
+            label: 'Reception', key: 'reception',
+            columns: [
+                { key: 'tot', label: 'Tot', cls: '' },
+                { key: 'r4', label: 'R4', cls: 'positive', pct: true },
+                { key: 'r3', label: 'R3', cls: '' },
+                { key: 'r2', label: 'R2', cls: '' },
+                { key: 'r1', label: 'R1', cls: 'warning' },
+                { key: 'frec', label: 'FR', cls: 'negative', pct: true }
+            ]
+        },
+        attack: {
+            label: 'Attaque', key: 'attack',
+            columns: [
+                { key: 'tot', label: 'Tot', cls: '' },
+                { key: 'attplus', label: 'A+', cls: 'positive', pct: true },
+                { key: 'attminus', label: 'A-', cls: 'neutral' },
+                { key: '_faBp', label: 'FA(BP)', cls: 'negative', pct: true, computed: 'faBp' }
+            ]
+        },
+        defense: {
+            label: 'Defense', key: 'defense',
+            columns: [
+                { key: 'tot', label: 'Tot', cls: '' },
+                { key: 'defplus', label: 'D+', cls: 'positive', pct: true },
+                { key: 'defminus', label: 'D-', cls: 'neutral' },
+                { key: 'fdef', label: 'FD', cls: 'negative', pct: true }
             ]
         },
         block: {
@@ -297,10 +347,19 @@ const SharedComponents = {
     },
 
     /**
-     * Genere le HTML du tableau stats mobile pour une categorie et une equipe.
+     * Retourne la definition de categories a utiliser selon le contexte.
      */
-    renderCategoryTable(playerTotals, category, teamLabel, teamClass) {
-        const catDef = SharedComponents.CATEGORIES[category];
+    getCategories(variant) {
+        return variant === 'aggregated' ? this.CATEGORIES_AGGREGATED : this.CATEGORIES_MATCH;
+    },
+
+    /**
+     * Genere le HTML du tableau stats mobile pour une categorie et une equipe.
+     * @param {string} variant - 'match' ou 'aggregated'
+     */
+    renderCategoryTable(playerTotals, category, teamLabel, teamClass, variant) {
+        const cats = this.getCategories(variant);
+        const catDef = cats[category];
         if (!catDef) return '';
 
         const players = Object.keys(playerTotals);
@@ -344,6 +403,7 @@ const SharedComponents = {
 
     /**
      * Genere une cellule de stat.
+     * Supporte: colonnes normales, colonnes avec %, colonnes calculees (acePlus, faBp).
      */
     renderCell(playerStats, category, col) {
         // Cas special : moyenne service
@@ -352,19 +412,56 @@ const SharedComponents = {
             return '<td class="' + cls + '">' + StatsAggregator.srvMoyDisplay(playerStats) + '</td>';
         }
 
-        const val = playerStats[category] ? (playerStats[category][col.key] || 0) : 0;
-        const display = val > 0 ? val : '-';
-        const cls = val > 0 ? col.cls : '';
-        return '<td class="' + cls + '">' + display + '</td>';
+        var catData = playerStats[category] || {};
+        var val, display, extraInfo = '';
+
+        // Colonnes calculees
+        if (col.computed === 'acePlus') {
+            // Ace fusionne = ace + splus
+            var srvData = playerStats.service || {};
+            val = (srvData.ace || 0) + (srvData.splus || 0);
+        } else if (col.computed === 'faBp') {
+            // FA(BP) fusionne = fatt + bp, affiche bp entre parentheses
+            var atkData = playerStats.attack || {};
+            var fa = atkData.fatt || 0;
+            var bp = atkData.bp || 0;
+            val = fa + bp;
+            if (bp > 0) extraInfo = '(' + bp + ')';
+        } else {
+            val = catData[col.key] || 0;
+        }
+
+        // Pourcentage
+        var pctStr = '';
+        if (col.pct && val > 0) {
+            var tot = catData.tot || 0;
+            // Pour acePlus, le tot est dans service
+            if (col.computed === 'acePlus') tot = (playerStats.service || {}).tot || 0;
+            // Pour faBp, le tot est dans attack
+            if (col.computed === 'faBp') tot = (playerStats.attack || {}).tot || 0;
+            if (tot > 0) {
+                pctStr = ' <span class="stat-pct">' + Math.round(val / tot * 100) + '%</span>';
+            }
+        }
+
+        display = val > 0 ? val : '-';
+        var cls = val > 0 ? col.cls : '';
+
+        if (val > 0 && extraInfo) {
+            return '<td class="' + cls + '">' + display + extraInfo + pctStr + '</td>';
+        }
+        return '<td class="' + cls + '">' + display + pctStr + '</td>';
     },
 
     /**
      * Genere le HTML complet desktop (multi-cartes horizontales) pour une equipe.
+     * @param {string} variant - 'match' ou 'aggregated'
      */
-    renderDesktopStatsTable(playerTotals, teamLabel, teamClass) {
+    renderDesktopStatsTable(playerTotals, teamLabel, teamClass, variant) {
         const players = Object.keys(playerTotals);
         if (players.length === 0) return '';
 
+        const cats = this.getCategories(variant);
         const totals = StatsAggregator.computeTotals(playerTotals);
         let html = '';
 
@@ -384,7 +481,7 @@ const SharedComponents = {
         // Cartes par categorie
         var catKeys = ['service', 'reception', 'attack', 'defense', 'block'];
         catKeys.forEach(function(catKey) {
-            var catDef = SharedComponents.CATEGORIES[catKey];
+            var catDef = cats[catKey];
             html += '<div class="stat-table-card">';
             html += '<div class="stat-table-header ' + catKey + '">' + catDef.label + '</div>';
             html += '<table class="detail-stats-table"><thead><tr>';
@@ -608,7 +705,7 @@ const TabNav = {
         this.currentTab = tab;
         sessionStorage.setItem('historique_tab', tab);
 
-        document.querySelectorAll('.tabs-container .tab-btn').forEach(function(btn) {
+        document.querySelectorAll('.main-tabs .tab-btn').forEach(function(btn) {
             btn.classList.toggle('active', btn.dataset.tab === tab);
         });
 
@@ -621,6 +718,7 @@ const TabNav = {
             case 'matchStats': MatchStatsView.render(); break;
             case 'yearStats': YearStatsView.render(); break;
             case 'setsStats': SetsPlayedView.render(); break;
+            case 'visualStats': break; // placeholder
         }
     }
 };
@@ -881,15 +979,15 @@ const MatchStatsView = {
         if (mobileContainer) {
             var cat = this.currentCategory;
             mobileContainer.innerHTML =
-                SharedComponents.renderCategoryTable(homeTotals, cat, 'Jen et ses Saints', 'home') +
-                SharedComponents.renderCategoryTable(awayTotals, cat, opponent, 'away');
+                SharedComponents.renderCategoryTable(homeTotals, cat, 'Jen et ses Saints', 'home', 'match') +
+                SharedComponents.renderCategoryTable(awayTotals, cat, opponent, 'away', 'match');
         }
 
         // Vue desktop : tableau complet
         if (desktopContainer) {
             desktopContainer.innerHTML =
-                SharedComponents.renderDesktopStatsTable(homeTotals, 'Jen et ses Saints', 'home') +
-                SharedComponents.renderDesktopStatsTable(awayTotals, opponent, 'away');
+                SharedComponents.renderDesktopStatsTable(homeTotals, 'Jen et ses Saints', 'home', 'match') +
+                SharedComponents.renderDesktopStatsTable(awayTotals, opponent, 'away', 'match');
         }
     },
 
@@ -948,7 +1046,7 @@ const MatchStatsView = {
 
         var cats = ['service', 'reception', 'attack', 'defense', 'block'];
         cats.forEach(function(catKey) {
-            var catDef = SharedComponents.CATEGORIES[catKey];
+            var catDef = SharedComponents.CATEGORIES_MATCH[catKey];
             text += catDef.label.toUpperCase() + '\n';
             // Header
             text += 'Joueur'.padEnd(14);
@@ -1050,9 +1148,9 @@ const YearStatsView = {
             { key: 'ginette', label: 'Ginette' }
         ];
         var self = this;
-        var html = '<div class="year-filters">';
+        var html = '<div class="segmented-tabs year-filters">';
         filters.forEach(function(f) {
-            html += '<button class="year-filter-btn ' + (self.currentFilter === f.key ? 'active' : '') + '" data-filter="' + f.key + '">' + f.label + '</button>';
+            html += '<button class="seg-tab year-filter-btn ' + (self.currentFilter === f.key ? 'active' : '') + '" data-filter="' + f.key + '">' + f.label + '</button>';
         });
         html += '</div>';
         return html;
@@ -1161,12 +1259,12 @@ const YearStatsView = {
         html += '</div>';
 
         html += '<div class="stats-mobile" id="yearStatsMobile">';
-        html += SharedComponents.renderCategoryTable(homeTotals, 'service', 'Jen et ses Saints', 'home');
+        html += SharedComponents.renderCategoryTable(homeTotals, 'service', 'Jen et ses Saints', 'home', 'aggregated');
         html += '</div>';
 
         // Desktop
         html += '<div class="stats-desktop" id="yearStatsDesktop">';
-        html += SharedComponents.renderDesktopStatsTable(homeTotals, 'Jen et ses Saints', 'home');
+        html += SharedComponents.renderDesktopStatsTable(homeTotals, 'Jen et ses Saints', 'home', 'aggregated');
         html += '</div>';
 
         html += '</div>';
@@ -1207,7 +1305,7 @@ const YearStatsView = {
 
                 var mobileContainer = document.getElementById('yearStatsMobile');
                 if (mobileContainer) {
-                    mobileContainer.innerHTML = SharedComponents.renderCategoryTable(homeTotals, cat, 'Jen et ses Saints', 'home');
+                    mobileContainer.innerHTML = SharedComponents.renderCategoryTable(homeTotals, cat, 'Jen et ses Saints', 'home', 'aggregated');
                 }
             };
         }
@@ -1443,7 +1541,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Event listeners pour les tabs principaux
-    document.querySelectorAll('.tabs-container .tab-btn').forEach(function(btn) {
+    document.querySelectorAll('.main-tabs .tab-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
             TabNav.switchTo(btn.dataset.tab);
         });
