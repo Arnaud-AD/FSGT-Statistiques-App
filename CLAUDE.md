@@ -1,8 +1,8 @@
-# FSGT-Statistiques-App — V11 (dernière version à jour)
+# FSGT-Statistiques-App — V11.1 (dernière version à jour)
 
 Application web de statistiques volleyball 4v4 pour l'équipe "Jen et ses Saints" en FSGT.
 
-> **Version** : V11 — Flèches après bloc (12 février 2026).
+> **Version** : V11.1 — Refonte bloc out + bouton Point en défense (12 février 2026).
 
 ## Contexte
 
@@ -29,7 +29,9 @@ Application web de statistiques volleyball 4v4 pour l'équipe "Jen et ses Saints
 ├── match-set-composition.html # Configuration lineup et visualisation terrain
 ├── match-set-config.html      # Configuration set (caméra, service)
 ├── match-live.html            # Interface principale de scoring en direct (161K)
-├── historique.html            # Historique et statistiques des matchs
+├── historique.html            # Historique et statistiques des matchs (coquille HTML)
+├── historique.css             # Styles pour la vue historique (mobile-first responsive)
+├── historique.js              # Logique JS pour la vue historique (modules)
 ├── equipe.html                # Gestion du roster de l'équipe
 │
 ├── storage.js                 # Couche de persistance localStorage
@@ -329,14 +331,15 @@ Chaque intégration est marquée par le commentaire `[DEV TEST] ... — À RETIR
 }
 ```
 
-### Bouton Bloc Out
+### Bouton Bloc Out (V11.1)
 
-Le bouton "💥 Bloc out" apparaît dans 3 vues :
-1. **Vue résultat attaque** (`resultSelection`) — après une attaque qui atterrit sur le terrain adverse
-2. **Vue attaque filet** (`attackNetChoice`) — quand l'attaque touche le filet/bloc
-3. **Vue défense** (`defenseFaultSection`) — pendant la phase `defense_end`, bloc déjà enregistré
+Le bouton "Bloc out" apparaît uniquement dans la **vue attaque filet** (`attackNetChoice`) — quand l'attaque touche le filet/bloc et ressort. Les autres points d'entrée (vue résultat attaque, vue défense) ont été supprimés en V11.1 pour cohérence.
 
 Phases associées : `bloc_out_player` (sélection du bloqueur) → `bloc_out_trajectory` (clic pour coordonnées ou "Passer").
+
+### Bouton Point en Défense (V11.1)
+
+Bouton "Point" ajouté en vue défense (`defenseFaultSection`) pour les attaques qui traversent le block et touchent le sol directement (pas de défense possible). Permet d'attribuer le point sans passer par une faute de défense.
 
 ### Zone de qualité de défense (D+)
 
@@ -412,60 +415,33 @@ Zone semi-circulaire bleue affichée pendant la phase `defense_end` (après auto
 - [x] Appliquer à tous les cas : bloc out, block kill, bloc dévié
 - [x] Tests : vérifier visuellement la cohérence des flèches post-bloc
 
-### Phase 7 — Bloc out : trajectoire en un clic
+### ~~Phase 7 — Bloc out : trajectoire en un clic~~ ✅ TERMINÉE (V11.1)
 **Objectif** : Quand on clique sur le terrain adverse après un bloc, le clic indique déjà où la balle atterrit. Le système ne doit pas redemander la trajectoire.
-- [ ] Si clic terrain adverse après bloc → utiliser ce clic comme trajectoire finale directement
-- [ ] Supprimer l'étape redondante "Cliquez où va la balle" quand la position est déjà connue
-- [ ] Tests : bloc out via clic terrain → point attribué sans étape supplémentaire
+- [x] Si clic terrain adverse après bloc → utiliser ce clic comme trajectoire finale directement
+- [x] Supprimer l'étape redondante "Cliquez où va la balle" quand la position est déjà connue
+- [x] Tests : bloc out via clic terrain → point attribué sans étape supplémentaire
 
-### Phase 8 — Stats Side Out / Break Point
-**Objectif** : Identifier et afficher les statistiques de side out (point marqué par l'équipe en réception) vs break point (point marqué par l'équipe au service) pour les deux équipes. Permettre une analyse croisée pour comprendre les dynamiques tactiques du match.
+### ~~Phase 8 — Stats Side Out / Break Out~~ → absorbée par Phase 11 (Volet 4)
+**Objectif** : Identifier et afficher les statistiques de side out (point marqué par l'équipe en réception) vs break out (point marqué par l'équipe au service) pour les deux équipes. Permettre une analyse croisée pour comprendre les dynamiques tactiques du match.
+
+> **Terminologie** : Side Out = % points marqués en réception. Break Out = % points marqués au service.
 
 > **Données déjà disponibles** : Chaque `point` contient `servingTeam` et les scores `homeScore`/`awayScore`. Le side out se déduit en comparant `servingTeam` avec l'équipe qui marque (delta de score). Aucune modification du modèle de données nécessaire — c'est du calcul dérivé.
 
-**Métriques de base** (par équipe, par set et total match) :
-| Stat | Signification |
-|------|---------------|
-| Side Out % | Points marqués en réception / Total points joués en réception |
-| Break % | Points marqués au service / Total points joués au service |
+> **Note** : L'implémentation de cette phase est intégrée dans la Phase 11, Volet 4. Voir Phase 11 pour les détails.
 
-**Métriques croisées** (analyse tactique) :
-| Stat | Signification | Utilité tactique |
-|------|---------------|------------------|
-| Side Out % vs Pression service (Moy) | Side Out % adverse corrélé à la qualité de notre service | Si la pression au service n'impacte pas le side out adverse → mieux vaut cibler bloc/def que risquer davantage au service |
-| Side Out % vs Att% (en side out) | Side Out % corrélé au % d'attaque en situation de side out | Si l'équipe tient le side grâce à l'attaque malgré une réception défectueuse → cibler le bloc/def adverse plutôt qu'augmenter le risque au service |
-| Side Out % vs Rec Moy (en side out) | Side Out % corrélé à la moyenne de réception | Si bonne réception mais side out faible → problème de construction ou d'attaque |
-
-> **Note implémentation** : Les stats individuelles (att%, rec moy) sont déjà calculées par joueur dans `updateStatsFromRally()`. Pour les métriques side out, il faut filtrer ces mêmes stats en les segmentant par contexte (side out vs break). Approche : lors du parcours des `points[]`, déterminer le contexte de chaque point, puis agréger les stats des rallies correspondants.
-
-- [ ] Fonction `classifyPoint(point, prevPoint)` : retourne `'sideout'` ou `'break'` en comparant `servingTeam` avec l'équipe qui a marqué (delta score)
-- [ ] Fonction `calculateSideOutStats(points)` : parcourir les `points[]`, calculer Side Out % et Break % par équipe
-- [ ] Calculer les stats filtrées par contexte : Att% en side out, Rec Moy en side out, Pression service (= 4 - Moy réception adverse forcée par notre service)
-- [ ] Afficher un bloc résumé "Side Out / Break" dans les stats live (match-live.html) : SO% et Break% par équipe
-- [ ] Afficher les métriques croisées dans historique.html : tableau récapitulatif par set + total match
-- [ ] Tests : set simulé → vérifier les % side out / break vs comptage manuel
-- [ ] Tests : vérifier cohérence des stats croisées (att% side out ≤ att% global quand la réception est mauvaise)
-
-### Phase 9 — Timeline de séries de points (visualisation)
+### ~~Phase 9 — Timeline de séries de points (visualisation)~~ ✅ TERMINÉE (V11.1)
 **Objectif** : Afficher une timeline graphique des séries de points consécutifs par équipe, set par set. Chaque bloc numéroté représente un point, coloré selon l'équipe qui l'a marqué. Les séries longues sont immédiatement visibles. Inspiré du format "Run Chart" volleyball.
 
 > **Données déjà disponibles** : Les `points[]` de chaque set contiennent `homeScore`/`awayScore` séquentiellement. Les séries se déduisent en comparant les deltas de score consécutifs. Aucune modification du modèle de données nécessaire.
 
-**Affichage par set** :
-- En-tête : score final du set + durée
-- Ligne du haut : points marqués par l'équipe domicile (blocs colorés `--home-color`, numérotés)
-- Ligne du bas : points marqués par l'équipe adverse (blocs colorés `--away-color`, numérotés)
-- Disposition chronologique (= ordre des rallies dans `points[]`)
-- Séries consécutives groupées visuellement, séparées des séries adverses par un espace
-- Numéro du point (score de l'équipe à ce moment) affiché dans chaque bloc
-
-- [ ] Composant `renderTimeline(set, container)` : génère la timeline HTML/CSS pour un set
-- [ ] Algorithme de détection des séries : parcourir `points[]`, grouper les points consécutifs de la même équipe
-- [ ] Style CSS : blocs colorés, disposition deux lignes, numérotation, responsive pour sets courts (25-10) et serrés (26-24)
-- [ ] Intégrer dans historique.html : section "Timeline" avec un rendu par set
-- [ ] Optionnel : mini-timeline dans match-live.html pour suivi en temps réel
-- [ ] Tests : vérifier l'alignement visuel sur différentes longueurs de set
-- [ ] Tests : vérifier la cohérence numérotation vs score final
+- [x] Composant `renderTimeline(set, container)` : génère la timeline HTML/CSS pour un set
+- [x] Algorithme de détection des séries : parcourir `points[]`, grouper les points consécutifs de la même équipe
+- [x] Style CSS : blocs colorés, disposition deux lignes, numérotation, responsive pour sets courts (25-10) et serrés (26-24)
+- [x] Intégrer dans historique.html : section "Timeline" avec un rendu par set
+- [x] Optionnel : mini-timeline dans match-live.html pour suivi en temps réel
+- [x] Tests : vérifier l'alignement visuel sur différentes longueurs de set
+- [x] Tests : vérifier la cohérence numérotation vs score final
 
 ### Phase 10 — Retrait du mode test (DevTestMode)
 **Objectif** : Une fois l'application terminée et toutes les fonctionnalités validées, supprimer entièrement le mode test.
@@ -473,6 +449,62 @@ Zone semi-circulaire bleue affichée pendant la phase `defense_end` (après auto
 - [ ] Supprimer tous les blocs `[DEV TEST] ... — À RETIRER` dans les 5 fichiers HTML (equipe.html, match-config.html, match-adverse.html, match-set-composition.html, match-set-config.html)
 - [ ] Vérifier qu'aucune référence à `DevTestMode` ne subsiste dans le code
 - [ ] Tester que l'application fonctionne normalement sans le mode test
+
+### Phase 11 — Refonte totale de la vue Historique
+**Objectif** : Refonte complète de `historique.html` — redesign visuel, implémentation des onglets Stats Année et Sets joués (actuellement vides), intégration des stats Side Out / Break Point (Phase 8), et améliorations UX globales.
+
+> **État actuel** : L'onglet "Stats Matchs" fonctionne (liste matchs, détail avec header/score/timeline/stats joueurs). Les onglets "Stats Année" et "Sets joués" sont des empty states sans contenu. Le code est entièrement inline dans un seul fichier (~1550 lignes HTML+CSS+JS). La Phase 8 (Side Out/Break) prévoyait déjà un affichage dans historique.html.
+
+> **Responsive — EXCEPTION historique.html** : Contrairement au reste de l'app (optimisée Chrome desktop 600px), la vue historique doit être optimisée pour **2 types d'appareils** :
+>
+> | Appareil | Viewport CSS | Breakpoint | Usage |
+> |----------|-------------|------------|-------|
+> | **Mobile (smartphone)** | 375×667 à 430×932 | `≤ 768px` | Consultation post-match sur le terrain |
+> | **MacBook Air 13"** | 1470×956 (défaut M3/M4) | `≥ 1024px` | Analyse détaillée à la maison |
+>
+> **Breakpoints cibles** :
+> - `≤ 480px` : Mobile portrait (iPhone SE, petits Android) — layout 1 colonne, tableaux scrollables
+> - `481px – 768px` : Mobile paysage / petites tablettes — layout adapté
+> - `≥ 1024px` : Laptop / MacBook Air — layout élargi, tableaux complets côte à côte, pas de scroll horizontal
+>
+> **Note** : Cette contrainte responsive ne s'applique qu'à `historique.html` (et ses fichiers `historique.css` / `historique.js`). Les autres pages restent optimisées pour Chrome desktop 600px uniquement.
+
+**Volet 1 — Restructuration et redesign UI**
+- [ ] Extraire le CSS dans un fichier séparé `historique.css` (cohérent avec `match-live.css`)
+- [ ] Extraire le JS dans un fichier séparé `historique.js`
+- [ ] Redesign visuel du header et de la navigation par onglets
+- [ ] Améliorer le design des cartes match (sélecteur de match)
+- [ ] Redesign de la vue détail match (header, scores, sets)
+- [ ] Améliorer le rendu des tableaux de stats joueurs (lisibilité, responsive scroll)
+- [ ] Améliorer le rendu de la timeline des séries de points
+
+**Volet 2 — Onglet Stats Année (statistiques cumulées saison)**
+- [ ] Agréger les stats de tous les matchs complétés de la saison
+- [ ] Afficher le bilan global : matchs joués, V/D, sets gagnés/perdus, points marqués/encaissés
+- [ ] Tableau stats joueurs cumulées (service, réception, attaque, défense, bloc) sur toute la saison
+- [ ] Classement joueurs par catégorie (meilleur attaquant, meilleur réceptionneur, etc.)
+- [ ] Filtres : par type de match (Championnat / Ginette), par période
+
+**Volet 3 — Onglet Sets joués (analyse détaillée des sets)**
+- [ ] Liste de tous les sets joués (tous matchs confondus), triés chronologiquement
+- [ ] Pour chaque set : score final, adversaire, timeline des séries, durée estimée
+- [ ] Filtres : sets gagnés/perdus, par adversaire, par score serré (≤3 pts d'écart) vs dominé
+- [ ] Stats agrégées par type de set (sets gagnés vs perdus, sets serrés vs dominés)
+
+**Volet 4 — Intégration Side Out / Break Out (absorbe Phase 8)**
+- [ ] Fonction `classifyPoint(point, prevPoint)` : retourne `'sideout'` ou `'breakout'`
+- [ ] Fonction `calculateSideOutStats(points)` : Side Out % et Break Out % par équipe
+- [ ] Stats filtrées par contexte : Att% en side out, Rec Moy en side out, Pression service
+- [ ] Bloc résumé "Side Out / Break Out" dans la vue détail match (SO% et BO% par équipe, par set et global)
+- [ ] Métriques croisées dans l'onglet Stats Année : tableau récapitulatif par match + total saison
+- [ ] Tests : set simulé → vérifier les % side out / break out vs comptage manuel
+
+**Volet 5 — Améliorations UX**
+- [ ] Navigation fluide entre onglets (pas de rechargement)
+- [ ] Persistance de l'onglet actif (retour sur la même vue après navigation)
+- [ ] Bouton d'export des stats (copier dans le presse-papier en format texte lisible)
+- [ ] Lien direct vers la vidéo YouTube du match (si configurée dans match-set-config)
+- [ ] Responsive : optimiser pour mobile (≤768px, cible 375–430px) ET MacBook Air 13" (≥1024px, cible 1470px) — cf. note responsive ci-dessus
 
 ### Dépendances mises à jour
 ```
@@ -482,9 +514,10 @@ Phase 3 (stats attaque)   ── ✅
 Phase 2 (override joueur) ── ✅
 Phase 4 (défense bloc)    ── ✅ (absorbée par 1 + 1bis)
 Phase 6 (flèches bloc)    ── ✅
-Phase 7 (bloc out 1-clic) ─────────────────────────────────────────→ Phase 5
-Phase 8 (stats side out)  ─────────────────────────────────────────→ Phase 5
-Phase 9 (timeline séries) ─────────────────────────────────────────→ Phase 5
+Phase 7 (bloc out 1-clic) ── ✅
+Phase 8 (stats side out)  ─────────────────────────────────────────→ Phase 11 (absorbée)
+Phase 9 (timeline séries) ── ✅
+Phase 11 (refonte histo)  ── indépendante (peut être faite en parallèle de Phase 5)
 Phase 5 (debug global)   ─────────────────────────────────────────→ Phase 10 (retrait mode test)
 ```
 
