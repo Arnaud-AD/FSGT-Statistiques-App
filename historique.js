@@ -660,7 +660,8 @@ const MatchStatsView = {
         var self = this;
 
         // Générer les options du select
-        var optionsHtml = '<option value="" disabled>Sélectionner un match…</option>';
+        var hasSelection = self.selectedMatchIndex !== null;
+        var optionsHtml = '<option value="" disabled' + (!hasSelection ? ' selected' : '') + '>Sélectionner un match…</option>';
         sorted.forEach(function(match, index) {
             var resultEmoji = match.result === 'win' ? '🟢' : (match.result === 'loss' ? '🔴' : '🟡');
             var setsDisplay = (match.setsWon !== undefined && match.setsLost !== undefined)
