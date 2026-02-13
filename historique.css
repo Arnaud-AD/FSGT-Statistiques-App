@@ -1111,49 +1111,96 @@ body {
     background: #0047b3;
 }
 
-/* ==================== DETAIL ACTIONS ==================== */
-.detail-actions {
-    padding: 12px 16px;
-    display: flex;
-    gap: 8px;
-    border-top: 1px solid var(--border-color);
+/* ==================== GEAR BUTTON (actions menu) ==================== */
+.detail-gear-wrapper {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
 }
 
-.detail-action-btn {
-    flex: 1;
-    padding: 10px;
+.detail-gear-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
     border: none;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: background 0.2s, color 0.2s;
+}
+
+.detail-gear-btn:hover {
+    background: var(--border-color);
+    color: var(--text-primary);
+}
+
+.detail-gear-btn.active {
+    background: var(--border-color);
+    color: var(--text-primary);
+}
+
+/* Dropdown menu */
+.detail-gear-menu {
+    display: none;
+    position: absolute;
+    top: 38px;
+    left: 0;
+    min-width: 200px;
+    background: white;
     border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    z-index: 20;
+}
+
+.detail-gear-menu.open {
+    display: block;
+}
+
+.gear-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 11px 14px;
+    border: none;
+    background: none;
     font-family: 'Google Sans', sans-serif;
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: background 0.15s;
+    text-align: left;
 }
 
-.detail-action-btn.delete-btn {
-    background: #fce8e6;
-    color: var(--loss-color);
-}
-
-.detail-action-btn.delete-btn:hover {
-    background: #f8d7da;
-}
-
-.detail-action-btn.export-btn {
-    background: #e8f0fe;
+.gear-menu-item.export {
     color: var(--accent-blue);
 }
 
-.detail-action-btn.export-btn:hover {
-    background: #d2e3fc;
+.gear-menu-item.export:hover {
+    background: #e8f0fe;
 }
 
-/* Export feedback */
+.gear-menu-item.delete {
+    color: var(--loss-color);
+}
+
+.gear-menu-item.delete:hover {
+    background: #fce8e6;
+}
+
+/* Export feedback inside menu */
 .export-feedback {
+    display: block;
     font-size: 11px;
     color: var(--win-color);
     font-weight: 500;
+    padding: 0 14px 8px;
     opacity: 0;
     transition: opacity 0.3s;
 }

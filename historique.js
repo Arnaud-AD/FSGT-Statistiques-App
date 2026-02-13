@@ -892,6 +892,13 @@ const MatchStatsView = {
         }
     },
 
+    _closeGearMenu() {
+        var gearMenu = document.getElementById('detailGearMenu');
+        var gearBtn = document.getElementById('detailGearBtn');
+        if (gearMenu) gearMenu.classList.remove('open');
+        if (gearBtn) gearBtn.classList.remove('active');
+    },
+
     setupDeleteButton(match) {
         var btn = document.getElementById('detailDeleteBtn');
         if (!btn) return;
@@ -899,6 +906,7 @@ const MatchStatsView = {
         var opponent = match.opponent || 'Adversaire';
 
         btn.onclick = function() {
+            self._closeGearMenu();
             if (confirm('Supprimer ce match ?\n' + opponent + ' (' + (match.setsWon || 0) + '-' + (match.setsLost || 0) + ')')) {
                 HistoriqueData.deleteMatch(match.id);
                 self.selectedMatchIndex = null;
@@ -917,6 +925,7 @@ const MatchStatsView = {
 
         btn.onclick = function() {
             self.exportStats(match);
+            self._closeGearMenu();
         };
     },
 
@@ -979,6 +988,7 @@ const MatchStatsView = {
         this.currentMatch = null;
         var matchSelect = document.getElementById('matchSelect');
         if (matchSelect) matchSelect.value = '';
+        this._closeGearMenu();
     }
 };
 
@@ -1443,6 +1453,25 @@ document.addEventListener('DOMContentLoaded', function() {
     if (closeBtn) {
         closeBtn.addEventListener('click', function() {
             MatchStatsView.closeDetail();
+        });
+    }
+
+    // Bouton gear (menu actions)
+    var gearBtn = document.getElementById('detailGearBtn');
+    var gearMenu = document.getElementById('detailGearMenu');
+    if (gearBtn && gearMenu) {
+        gearBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var isOpen = gearMenu.classList.toggle('open');
+            gearBtn.classList.toggle('active', isOpen);
+        });
+
+        // Fermer le menu au clic extérieur
+        document.addEventListener('click', function(e) {
+            if (!gearMenu.contains(e.target) && e.target !== gearBtn) {
+                gearMenu.classList.remove('open');
+                gearBtn.classList.remove('active');
+            }
         });
     }
 
