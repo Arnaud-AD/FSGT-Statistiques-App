@@ -683,8 +683,8 @@ const MatchStatsView = {
             }
         };
 
-        // Auto-sélectionner le premier match
-        if (this.selectedMatchIndex === null && sorted.length > 0) {
+        // Auto-sélectionner le premier match seulement au tout premier rendu
+        if (this.selectedMatchIndex === null && sorted.length > 0 && !this._rendered) {
             matchSelect.value = '0';
             this.selectMatch(0);
         }
@@ -911,9 +911,9 @@ const MatchStatsView = {
                 HistoriqueData.deleteMatch(match.id);
                 self.selectedMatchIndex = null;
                 self.currentMatch = null;
-                self._rendered = false;
-                self.render();
                 document.getElementById('matchDetailContainer').classList.remove('active');
+                // Re-render la liste sans auto-sélection
+                self.renderMatchGrid();
             }
         };
     },
