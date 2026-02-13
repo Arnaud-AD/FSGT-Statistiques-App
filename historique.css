@@ -583,9 +583,10 @@ body {
 
 .stats-category-tabs {
     display: flex;
-    gap: 0;
-    border-bottom: 2px solid var(--border-color);
-    background: var(--bg-primary);
+    gap: 4px;
+    padding: 4px;
+    background: var(--bg-container);
+    border-radius: 10px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
@@ -598,28 +599,27 @@ body {
 .cat-tab {
     flex: 1;
     min-width: 0;
-    padding: 10px 8px;
+    padding: 8px 6px;
     font-family: 'Google Sans', sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--text-secondary);
     background: transparent;
     border: none;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -2px;
+    border-radius: 7px;
     cursor: pointer;
     transition: all 0.2s;
     text-align: center;
     white-space: nowrap;
 }
 
-.cat-tab.active { font-weight: 700; }
+.cat-tab.active { color: white; font-weight: 700; }
 
-.cat-tab[data-cat="service"].active { border-bottom-color: var(--cat-service); color: var(--cat-service); }
-.cat-tab[data-cat="reception"].active { border-bottom-color: var(--cat-reception); color: var(--cat-reception); }
-.cat-tab[data-cat="attack"].active { border-bottom-color: var(--cat-attack); color: var(--cat-attack); }
-.cat-tab[data-cat="defense"].active { border-bottom-color: var(--cat-defense); color: var(--cat-defense); }
-.cat-tab[data-cat="block"].active { border-bottom-color: var(--cat-block); color: var(--cat-block); }
+.cat-tab[data-cat="service"].active { background: var(--cat-service); }
+.cat-tab[data-cat="reception"].active { background: var(--cat-reception); }
+.cat-tab[data-cat="attack"].active { background: var(--cat-attack); }
+.cat-tab[data-cat="defense"].active { background: var(--cat-defense); }
+.cat-tab[data-cat="block"].active { background: var(--cat-block); }
 
 /* ==================== STATS: TABLE (mobile) ==================== */
 .stats-team-block {

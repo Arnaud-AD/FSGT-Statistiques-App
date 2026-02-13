@@ -836,7 +836,7 @@ const MatchStatsView = {
 
         var self = this;
         var cats = ['service', 'reception', 'attack', 'defense', 'block'];
-        var labels = { service: 'Ser', reception: 'Rec', attack: 'Att', defense: 'Def', block: 'Blc' };
+        var labels = { service: 'Serv', reception: 'Rec', attack: 'Att', defense: 'Def', block: 'Blc' };
 
         container.innerHTML = cats.map(function(cat) {
             var isActive = self.currentCategory === cat;
@@ -1154,7 +1154,7 @@ const YearStatsView = {
         var html = '<div class="stats-section">';
         html += '<div class="stats-category-tabs" id="yearCategoryTabs">';
         var cats = ['service', 'reception', 'attack', 'defense', 'block'];
-        var labels = { service: 'Ser', reception: 'Rec', attack: 'Att', defense: 'Def', block: 'Blc' };
+        var labels = { service: 'Serv', reception: 'Rec', attack: 'Att', defense: 'Def', block: 'Blc' };
         cats.forEach(function(cat) {
             html += '<button class="cat-tab ' + (cat === 'service' ? 'active' : '') + '" data-cat="' + cat + '">' + labels[cat] + '</button>';
         });
