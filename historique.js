@@ -642,7 +642,7 @@ const MatchStatsView = {
     renderMatchGrid() {
         var matchHistory = HistoriqueData.getCompletedMatches();
         var matchesContainer = document.getElementById('matchesContainer');
-        var matchesGrid = document.getElementById('matchesGrid');
+        var matchSelect = document.getElementById('matchSelect');
         var emptyState = document.getElementById('emptyStateMatchStats');
         var detailContainer = document.getElementById('matchDetailContainer');
 
@@ -659,28 +659,35 @@ const MatchStatsView = {
         var sorted = matchHistory.slice().sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
         var self = this;
 
-        matchesGrid.innerHTML = sorted.map(function(match, index) {
-            var resultClass = match.result || 'draw';
+        // Générer les options du select
+        var optionsHtml = '<option value="" disabled>Sélectionner un match…</option>';
+        sorted.forEach(function(match, index) {
+            var resultEmoji = match.result === 'win' ? '🟢' : (match.result === 'loss' ? '🔴' : '🟡');
             var setsDisplay = (match.setsWon !== undefined && match.setsLost !== undefined)
                 ? match.setsWon + '-' + match.setsLost : '';
-            var isActive = self.selectedMatchIndex === index;
             var dateStr = match.timestamp ? Utils.formatDate(match.timestamp) : '';
+            var opponent = match.opponent || 'Adversaire';
+            var selected = self.selectedMatchIndex === index ? ' selected' : '';
 
-            return '<button class="match-btn ' + (isActive ? 'active' : '') + '" data-index="' + index + '">' +
-                '<span class="match-btn-indicator ' + resultClass + '"></span>' +
-                '<span class="match-btn-name">' + Utils.escapeHtml(match.opponent || 'Adversaire') + '</span>' +
-                '<span class="match-btn-score">' + setsDisplay + '</span>' +
-                '<span class="match-btn-date">' + dateStr + '</span>' +
-                '</button>';
-        }).join('');
+            optionsHtml += '<option value="' + index + '"' + selected + '>' +
+                resultEmoji + ' ' + opponent + '  ' + setsDisplay + '  ' + dateStr +
+                '</option>';
+        });
+        matchSelect.innerHTML = optionsHtml;
 
-        // Event delegation
-        matchesGrid.onclick = function(e) {
-            var btn = e.target.closest('.match-btn');
-            if (btn) {
-                self.selectMatch(parseInt(btn.dataset.index));
+        // Event listener
+        matchSelect.onchange = function() {
+            var index = parseInt(matchSelect.value);
+            if (!isNaN(index)) {
+                self.selectMatch(index);
             }
         };
+
+        // Auto-sélectionner le premier match
+        if (this.selectedMatchIndex === null && sorted.length > 0) {
+            matchSelect.value = '0';
+            this.selectMatch(0);
+        }
     },
 
     selectMatch(index) {
@@ -694,10 +701,9 @@ const MatchStatsView = {
         this.currentSetFilter = 'all';
         this.currentCategory = 'service';
 
-        // Mise a jour des boutons actifs
-        document.querySelectorAll('.match-btn').forEach(function(btn, i) {
-            btn.classList.toggle('active', i === index);
-        });
+        // Mise a jour du select
+        var matchSelect = document.getElementById('matchSelect');
+        if (matchSelect) matchSelect.value = '' + index;
 
         this.renderDetailHeader(match);
         this.renderDetailSetTabs(match);
@@ -971,7 +977,8 @@ const MatchStatsView = {
         document.getElementById('matchDetailContainer').classList.remove('active');
         this.selectedMatchIndex = null;
         this.currentMatch = null;
-        document.querySelectorAll('.match-btn').forEach(function(btn) { btn.classList.remove('active'); });
+        var matchSelect = document.getElementById('matchSelect');
+        if (matchSelect) matchSelect.value = '';
     }
 };
 

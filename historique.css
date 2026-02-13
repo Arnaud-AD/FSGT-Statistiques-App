@@ -154,81 +154,39 @@ body {
 
 /* ==================== MATCH SELECTOR ==================== */
 .matches-container {
-    background: var(--bg-container);
-    border-radius: 10px;
-    padding: 10px;
+    padding: 0 16px;
     margin-bottom: 12px;
 }
 
-/* Mobile : liste verticale */
-.matches-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.match-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.match-select {
+    width: 100%;
     padding: 12px 14px;
-    background: white;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
     font-family: 'Google Sans', sans-serif;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     color: var(--text-primary);
-    width: 100%;
-    text-align: left;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23666'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.match-btn:hover {
+.match-select:hover {
     border-color: var(--accent-blue);
     box-shadow: 0 2px 6px rgba(0, 86, 210, 0.15);
 }
 
-.match-btn.active {
-    background: var(--accent-blue);
-    color: white;
+.match-select:focus {
+    outline: none;
     border-color: var(--accent-blue);
-}
-
-.match-btn-indicator {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.match-btn-indicator.win { background: var(--win-color); }
-.match-btn-indicator.loss { background: var(--loss-color); }
-.match-btn-indicator.draw { background: var(--draw-color); }
-
-.match-btn.active .match-btn-indicator {
-    background: white;
-}
-
-.match-btn-name {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.match-btn-score {
-    font-size: 12px;
-    opacity: 0.7;
-    flex-shrink: 0;
-}
-
-.match-btn-date {
-    font-size: 11px;
-    opacity: 0.5;
-    flex-shrink: 0;
+    box-shadow: 0 0 0 3px rgba(0, 86, 210, 0.12);
 }
 
 /* ==================== MATCH DETAIL ==================== */
@@ -1219,22 +1177,6 @@ body {
         max-width: 700px;
         margin: 0 auto;
         padding: 16px 24px;
-    }
-
-    /* Match selector : grille horizontale */
-    .matches-grid {
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .match-btn {
-        width: auto;
-        flex: 0 0 auto;
-    }
-
-    .match-btn-date {
-        display: none; /* Plus compact en grille */
     }
 
     .tab-btn {
