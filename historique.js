@@ -42,16 +42,26 @@ const HistoriqueData = {
      * @returns {Promise<boolean>} true si des données Firebase ont été chargées
      */
     async loadFromFirebase() {
-        if (typeof FirebaseSync === 'undefined' || !FirebaseSync.isConfigured()) return false;
+        if (typeof FirebaseSync === 'undefined') {
+            console.log('[Historique] FirebaseSync non défini');
+            return false;
+        }
+        if (!FirebaseSync.isConfigured()) {
+            console.log('[Historique] Firebase pas configuré');
+            return false;
+        }
 
         try {
             const local = Storage.getAllMatches().filter(m => m.status === 'completed');
+            console.log('[Historique] Matchs locaux completed:', local.length, local.map(m => m.opponent));
             const remote = await FirebaseSync.getCompletedMatches();
+            console.log('[Historique] Matchs remote completed:', remote.length, remote.map(m => m.opponent));
             this._cache = FirebaseSync.mergeMatches(local, remote);
+            console.log('[Historique] Après merge:', this._cache.length, this._cache.map(m => m.opponent));
             this._firebaseLoaded = true;
             return remote.length > 0;
         } catch (err) {
-            console.warn('[Historique] Firebase indisponible, données locales uniquement :', err.message);
+            console.error('[Historique] Firebase ERREUR:', err);
             return false;
         }
     },
