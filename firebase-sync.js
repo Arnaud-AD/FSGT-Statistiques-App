@@ -143,6 +143,150 @@ const FirebaseSync = {
 
         console.log(`[FirebaseSync] Migration : ${migrated}/${localMatches.length} matchs uploadés`);
         return migrated;
+    },
+
+    // ==================== ROSTER SYNC ====================
+
+    /**
+     * Sauvegarder le roster dans Firestore
+     * @param {Array} players - Liste des noms de joueurs
+     */
+    async saveRoster(players) {
+        if (!this.isConfigured() || !auth.currentUser) return;
+        await db.collection('config').doc('roster').set({
+            players: players,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    },
+
+    /**
+     * Charger le roster depuis Firestore
+     * @returns {Promise<Array|null>} Liste des joueurs ou null
+     */
+    async getRoster() {
+        if (!this.isConfigured()) return null;
+        const doc = await db.collection('config').doc('roster').get();
+        if (doc.exists) {
+            return doc.data().players || [];
+        }
+        return null;
+    },
+
+    // ==================== MATCH IN PROGRESS SYNC ====================
+
+    /**
+     * Sauvegarder un match (tous statuts) vers Firestore
+     * @param {Object} match
+     */
+    async saveMatchAny(match) {
+        if (!this.isConfigured() || !auth.currentUser) return;
+        const matchData = {
+            ...match,
+            syncedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            syncedBy: auth.currentUser.uid
+        };
+        await db.collection(this.COLLECTION).doc(match.id).set(matchData);
+    },
+
+    /**
+     * Charger tous les matchs depuis Firestore (tous statuts)
+     * @returns {Promise<Array>}
+     */
+    async getAllMatches() {
+        if (!this.isConfigured()) return [];
+        const snapshot = await db.collection(this.COLLECTION).get();
+        return snapshot.docs.map(doc => {
+            const data = doc.data();
+            if (data.syncedAt && data.syncedAt.toMillis) {
+                data.syncedAt = data.syncedAt.toMillis();
+            }
+            return data;
+        });
+    },
+
+    // ==================== STATE SYNC ====================
+
+    /**
+     * Sauvegarder le current match ID dans Firestore
+     * @param {string|null} matchId
+     */
+    async saveCurrentMatchId(matchId) {
+        if (!this.isConfigured() || !auth.currentUser) return;
+        await db.collection('config').doc('state').set({
+            currentMatchId: matchId,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    },
+
+    /**
+     * Charger le current match ID depuis Firestore
+     * @returns {Promise<string|null>}
+     */
+    async getCurrentMatchId() {
+        if (!this.isConfigured()) return null;
+        const doc = await db.collection('config').doc('state').get();
+        if (doc.exists) {
+            return doc.data().currentMatchId || null;
+        }
+        return null;
+    },
+
+    // ==================== FULL SYNC ====================
+
+    /**
+     * Sync complète : pousse toutes les données localStorage vers Firebase
+     * Appelé après connexion pour garantir que Firebase a les données à jour
+     */
+    async pushAll() {
+        if (!this.isConfigured() || !auth.currentUser) return;
+
+        // Roster
+        const players = Storage.getPlayers();
+        if (players.length > 0) {
+            await this.saveRoster(players);
+        }
+
+        // Tous les matchs
+        const matches = Storage.getAllMatches();
+        for (const match of matches) {
+            await this.saveMatchAny(match);
+        }
+
+        // Current match ID
+        const currentId = Storage.getCurrentMatchId();
+        await this.saveCurrentMatchId(currentId);
+
+        console.log('[FirebaseSync] Push complet : roster, matchs, state');
+    },
+
+    /**
+     * Sync complète : charge toutes les données Firebase → localStorage
+     * Appelé au chargement pour récupérer les données partagées
+     */
+    async pullAll() {
+        if (!this.isConfigured()) return;
+
+        // Roster
+        const roster = await this.getRoster();
+        if (roster && roster.length > 0) {
+            localStorage.setItem(Storage.KEYS.PLAYERS, JSON.stringify(roster));
+        }
+
+        // Tous les matchs : merge Firebase + local
+        const remoteMatches = await this.getAllMatches();
+        if (remoteMatches.length > 0) {
+            const localMatches = Storage.getAllMatches();
+            const merged = this.mergeMatches(localMatches, remoteMatches);
+            localStorage.setItem(Storage.KEYS.MATCHES, JSON.stringify(merged));
+        }
+
+        // Current match ID
+        const remoteId = await this.getCurrentMatchId();
+        if (remoteId) {
+            localStorage.setItem(Storage.KEYS.CURRENT_ID, remoteId);
+        }
+
+        console.log('[FirebaseSync] Pull complet : roster, matchs, state');
     }
 };
 

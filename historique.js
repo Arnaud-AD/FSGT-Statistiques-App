@@ -1587,14 +1587,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         TabNav.switchTo(TabNav.currentTab);
     }
 
-    // Migration one-shot des matchs locaux vers Firebase (première connexion)
+    // Migration one-shot : push toutes les données locales vers Firebase (première connexion)
     if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured()) {
         auth.onAuthStateChanged(async function(user) {
             if (user && !localStorage.getItem('firebase_migrated')) {
-                const migrated = await FirebaseSync.migrateLocalMatches();
-                if (migrated > 0) {
-                    localStorage.setItem('firebase_migrated', 'true');
-                }
+                await FirebaseSync.pushAll();
+                localStorage.setItem('firebase_migrated', 'true');
             }
         });
     }

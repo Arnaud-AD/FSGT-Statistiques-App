@@ -453,10 +453,17 @@
                 FirebaseAuthUI.init();
             }
 
-            // Utilisateur connecté → mode admin automatique
+            // Utilisateur connecté → mode admin + pull Firebase
             if (typeof auth !== 'undefined') {
-                auth.onAuthStateChanged(user => {
-                    if (user) enableAdminMode();
+                auth.onAuthStateChanged(async user => {
+                    if (user) {
+                        enableAdminMode();
+                        // Pull toutes les données Firebase → localStorage
+                        if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured()) {
+                            await FirebaseSync.pullAll();
+                            checkInProgressMatch(); // Rafraîchir le bandeau avec les données Firebase
+                        }
+                    }
                 });
             }
 

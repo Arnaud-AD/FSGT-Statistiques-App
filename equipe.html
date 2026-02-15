@@ -497,6 +497,13 @@
         </div>
     </div>
 
+    <!-- Firebase SDK (compat CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="firebase-sync.js"></script>
+
     <script src="storage.js"></script>
     <script>
         // Données des joueurs (stockées en localStorage)
@@ -613,6 +620,7 @@
             }
 
             localStorage.setItem('volleyball_players', JSON.stringify(players));
+            syncRoster();
             renderTable();
             closeModal();
         }
@@ -627,7 +635,15 @@
             if (confirm(`Êtes-vous sûr de vouloir supprimer ${players[index].prenom} de l'équipe ?`)) {
                 players.splice(index, 1);
                 localStorage.setItem('volleyball_players', JSON.stringify(players));
+                syncRoster();
                 renderTable();
+            }
+        }
+
+        // Sync roster vers Firebase (non-bloquant)
+        function syncRoster() {
+            if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured() && typeof auth !== 'undefined' && auth.currentUser) {
+                FirebaseSync.saveRoster(players).catch(() => {});
             }
         }
 

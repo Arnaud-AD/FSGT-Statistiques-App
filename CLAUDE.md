@@ -1,8 +1,8 @@
-# FSGT-Statistiques-App — V16.3 (dernière version à jour)
+# FSGT-Statistiques-App — V17.0 (dernière version à jour)
 
 Application web de statistiques volleyball 4v4 pour l'équipe "Jen et ses Saints" en FSGT.
 
-> **Version** : V16.3 — Mode admin auto si connecté + redesign auth (15 février 2026).
+> **Version** : V17.0 — Full Firebase sync (toutes données localStorage → Firestore) (15 février 2026).
 
 ## Contexte
 
@@ -139,20 +139,34 @@ Storage.KEYS = {
 // 'firebase_migrated' — flag de migration one-shot (true après premier upload)
 ```
 
-## Architecture Firebase (V15.0)
+## Architecture Firebase (V17.0)
 
 ### Principe
-- **localStorage** : source de vérité pendant le match (offline-first, synchrone)
-- **Firestore** : source de vérité pour les matchs finalisés (partage équipe, multi-navigateur)
-- **`Storage`** (storage.js) : inchangé, reste 100% synchrone et localStorage
-- **`FirebaseSync`** (firebase-sync.js) : layer async au-dessus, appelé aux points d'entrée/sortie
+- **localStorage** : source de vérité synchrone (offline-first, lecture/écriture immédiate)
+- **Firestore** : miroir cloud de toutes les données (partage équipe, multi-navigateur)
+- **`Storage`** (storage.js) : couche synchrone localStorage, avec hooks Firebase non-bloquants
+- **`FirebaseSync`** (firebase-sync.js) : layer async, sync bidirectionnelle
+
+### Données synchronisées
+| Donnée | localStorage | Firestore | Direction |
+|--------|-------------|-----------|-----------|
+| Matchs (tous statuts) | `volleyball_matches` | collection `matches` | Bidirectionnelle |
+| Roster joueurs | `volleyball_players` | `config/roster` | Bidirectionnelle |
+| Current match ID | `volleyball_current_match_id` | `config/state` | Bidirectionnelle |
 
 ### Flow de données
 ```
-Pendant le match :  match-live.html → Storage.saveCurrentMatch() → localStorage
-À la finalisation :  Storage.finalizeMatch() → localStorage  +  FirebaseSync.uploadMatch() → Firestore
-Au chargement historique :  HistoriqueData.loadFromFirebase() → merge(localStorage, Firestore) → cache
+Écriture : Storage.saveMatch() → localStorage + FirebaseSync.saveMatchAny() (non-bloquant)
+Lecture : index.html DOMContentLoaded → FirebaseSync.pullAll() → localStorage mis à jour
+Migration : première connexion → FirebaseSync.pushAll() → toutes les données locales → Firestore
 ```
+
+### Hooks dans Storage (non-bloquants)
+- `saveMatch()` → `FirebaseSync.saveMatchAny()`
+- `deleteMatch()` → `FirebaseSync.deleteMatch()`
+- `setCurrentMatchId()` → `FirebaseSync.saveCurrentMatchId()`
+- `clearCurrentMatchId()` → `FirebaseSync.saveCurrentMatchId(null)`
+- `equipe.html` → `FirebaseSync.saveRoster()` (hook dédié)
 
 ### Sécurité Firestore
 - **Lecture** : publique (toute l'équipe peut consulter)
@@ -161,7 +175,7 @@ Au chargement historique :  HistoriqueData.loadFromFirebase() → merge(localSto
 - La sécurité repose sur les **Security Rules** côté serveur
 
 ### Objets exposés
-- `FirebaseSync` : uploadMatch(), getCompletedMatches(), deleteMatch(), mergeMatches(), migrateLocalMatches()
+- `FirebaseSync` : saveMatchAny(), getAllMatches(), deleteMatch(), mergeMatches(), saveRoster(), getRoster(), saveCurrentMatchId(), getCurrentMatchId(), pushAll(), pullAll(), uploadMatch(), getCompletedMatches(), migrateLocalMatches()
 - `FirebaseAuthUI` : init(), signIn(), signOut()
 - `db` : instance Firestore (global)
 - `auth` : instance Firebase Auth (global)
