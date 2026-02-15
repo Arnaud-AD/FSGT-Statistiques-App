@@ -428,8 +428,17 @@
 
     <script src="storage.js"></script>
     <script>
-        // Mode admin : ?admin dans l'URL révèle les options cachées
-        const isAdmin = new URLSearchParams(window.location.search).has('admin');
+        // Mode admin : ?admin dans l'URL OU utilisateur connecté
+        let isAdmin = new URLSearchParams(window.location.search).has('admin');
+
+        function enableAdminMode() {
+            if (isAdmin) return; // Déjà actif
+            isAdmin = true;
+            document.querySelectorAll('.admin-only').forEach(el => {
+                el.style.display = '';
+            });
+            checkInProgressMatch();
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             // Afficher les éléments admin si ?admin
@@ -443,6 +452,14 @@
             if (typeof FirebaseAuthUI !== 'undefined') {
                 FirebaseAuthUI.init();
             }
+
+            // Utilisateur connecté → mode admin automatique
+            if (typeof auth !== 'undefined') {
+                auth.onAuthStateChanged(user => {
+                    if (user) enableAdminMode();
+                });
+            }
+
             checkInProgressMatch();
         });
 
