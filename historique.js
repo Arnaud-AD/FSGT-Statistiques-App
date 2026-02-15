@@ -1593,7 +1593,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Charger les données Firebase en arrière-plan puis rafraîchir
     const hasFirebaseData = await HistoriqueData.loadFromFirebase();
     if (hasFirebaseData) {
-        // Rafraîchir la vue active avec les données mergées
+        // Forcer le re-rendu des vues avec les données mergées
+        MatchStatsView._rendered = false;
+        YearStatsView._rendered = false;
+        SetsPlayedView._rendered = false;
         TabNav.switchTo(TabNav.currentTab);
     }
 
@@ -1601,8 +1604,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured()) {
         auth.onAuthStateChanged(async function(user) {
             if (user && !localStorage.getItem('firebase_migrated')) {
-                await FirebaseSync.pushAll();
-                localStorage.setItem('firebase_migrated', 'true');
+                try {
+                    await FirebaseSync.pushAll();
+                    localStorage.setItem('firebase_migrated', 'true');
+                } catch (err) {
+                    console.warn('[Historique] Migration Firebase échouée :', err.message);
+                }
             }
         });
     }
