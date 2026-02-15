@@ -21,6 +21,7 @@
                 <h1 class="header-title">Historique & Stats</h1>
                 <p class="header-subtitle">Jen et ses Saints</p>
             </div>
+            <div id="firebase-auth-container"></div>
         </header>
 
         <!-- Onglets principaux -->
@@ -169,7 +170,14 @@
         </footer>
     </div>
 
-    <script src="storage.js?v=14.0"></script>
-    <script src="historique.js?v=14.0"></script>
+    <!-- Firebase SDK (compat CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="firebase-sync.js"></script>
+
+    <script src="storage.js?v=15.0"></script>
+    <script src="historique.js?v=15.0"></script>
 </body>
 </html>

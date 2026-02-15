@@ -4,4 +4,18 @@ CLAUDE.md
 /env/
 /env/*
 .env
+.env.*
+
+# IDE
+.idea/
+.DS_Store
+
+# Firebase (service account keys — JAMAIS commiter)
+*-service-account*.json
+firebase-admin-sdk*.json
+firebase-debug.log
+
+# Fichiers locaux
+plan.md
+start.command
 

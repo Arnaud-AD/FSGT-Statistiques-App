@@ -637,6 +637,13 @@
         </div>
     </div>
 
+    <!-- Firebase SDK (compat CDN) — pour upload du match à la finalisation -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="firebase-sync.js"></script>
+
     <script src="storage.js"></script>
     <script src="match-live-helpers.js"></script>
     <script src="match-live-undo.js"></script>
@@ -4705,6 +4712,13 @@
             // Finaliser le match (change le statut en 'completed', calcule le résultat)
             Storage.finalizeMatch(currentMatch, 'normal');
 
+            // Upload vers Firebase en arrière-plan (non-bloquant)
+            if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured()) {
+                FirebaseSync.uploadMatch(currentMatch).catch(function(err) {
+                    console.warn('[Firebase] Upload échoué (sera rattrapé au chargement historique) :', err.message);
+                });
+            }
+
             // Fermer la modal
             document.getElementById('endMatchOverlay').style.display = 'none';
 
@@ -4842,6 +4856,13 @@
 
             // Finaliser le match avec raison 'time'
             Storage.finalizeMatch(currentMatch, 'time');
+
+            // Upload vers Firebase en arrière-plan (non-bloquant)
+            if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured()) {
+                FirebaseSync.uploadMatch(currentMatch).catch(function(err) {
+                    console.warn('[Firebase] Upload échoué (sera rattrapé au chargement historique) :', err.message);
+                });
+            }
 
             // Fermer la modal
             document.getElementById('timeEndOverlay').style.display = 'none';

@@ -1,8 +1,8 @@
-# FSGT-Statistiques-App — V14.1 (dernière version à jour)
+# FSGT-Statistiques-App — V16.0 (dernière version à jour)
 
 Application web de statistiques volleyball 4v4 pour l'équipe "Jen et ses Saints" en FSGT.
 
-> **Version** : V14.1 — Suppression auto-select défenseur après block (13 février 2026).
+> **Version** : V16.0 — Mode admin sur index + masquage options (15 février 2026).
 
 ## Contexte
 
@@ -14,7 +14,9 @@ Application web de statistiques volleyball 4v4 pour l'équipe "Jen et ses Saints
 ## Stack technique
 
 - **Frontend** : HTML5, CSS3, JavaScript vanilla (aucun framework)
-- **Stockage** : localStorage (100% offline, pas de backend)
+- **Stockage local** : localStorage (offline-first pour le scoring live)
+- **Base de données** : Firebase Firestore (matchs finalisés, partage équipe)
+- **Authentification** : Firebase Auth (Google Sign-In, écriture réservée au propriétaire)
 - **Graphiques** : SVG + Canvas pour la visualisation du terrain
 - **Fonts** : Google Sans, Roboto
 
@@ -22,7 +24,7 @@ Application web de statistiques volleyball 4v4 pour l'équipe "Jen et ses Saints
 
 ```
 /
-├── index.html                 # Menu principal avec bannière match en cours
+├── index.html                 # Menu principal (mode admin via ?admin)
 ├── nouveau-match.html         # Sélection type de match (Championnat/Ginette)
 ├── match-config.html          # Sélection joueurs équipe domicile
 ├── match-adverse.html         # Sélection joueurs équipe adverse
@@ -34,7 +36,9 @@ Application web de statistiques volleyball 4v4 pour l'équipe "Jen et ses Saints
 ├── historique.js              # Logique JS pour la vue historique (modules)
 ├── equipe.html                # Gestion du roster de l'équipe
 │
-├── storage.js                 # Couche de persistance localStorage
+├── storage.js                 # Couche de persistance localStorage (inchangé)
+├── firebase-config.js         # Configuration et initialisation Firebase
+├── firebase-sync.js           # Sync Firestore + Auth UI (FirebaseSync, FirebaseAuthUI)
 ├── match-live-helpers.js      # Helpers domaine volleyball et gestion positions
 ├── match-live-undo.js         # Fonctionnalité undo/redo et gestion rallies
 ├── match-live.css             # Styles pour l'interface live
@@ -131,7 +135,36 @@ Storage.KEYS = {
     CURRENT_ID: 'volleyball_current_match_id', // ID du match actif
     PLAYERS: 'volleyball_players'            // Roster de l'équipe
 }
+// Clé ajoutée par Firebase :
+// 'firebase_migrated' — flag de migration one-shot (true après premier upload)
 ```
+
+## Architecture Firebase (V15.0)
+
+### Principe
+- **localStorage** : source de vérité pendant le match (offline-first, synchrone)
+- **Firestore** : source de vérité pour les matchs finalisés (partage équipe, multi-navigateur)
+- **`Storage`** (storage.js) : inchangé, reste 100% synchrone et localStorage
+- **`FirebaseSync`** (firebase-sync.js) : layer async au-dessus, appelé aux points d'entrée/sortie
+
+### Flow de données
+```
+Pendant le match :  match-live.html → Storage.saveCurrentMatch() → localStorage
+À la finalisation :  Storage.finalizeMatch() → localStorage  +  FirebaseSync.uploadMatch() → Firestore
+Au chargement historique :  HistoriqueData.loadFromFirebase() → merge(localStorage, Firestore) → cache
+```
+
+### Sécurité Firestore
+- **Lecture** : publique (toute l'équipe peut consulter)
+- **Écriture** : réservée aux utilisateurs authentifiés (Google Sign-In)
+- Les clés Firebase dans `firebase-config.js` sont publiques par design (identifient le projet, pas l'accès)
+- La sécurité repose sur les **Security Rules** côté serveur
+
+### Objets exposés
+- `FirebaseSync` : uploadMatch(), getCompletedMatches(), deleteMatch(), mergeMatches(), migrateLocalMatches()
+- `FirebaseAuthUI` : init(), signIn(), signOut()
+- `db` : instance Firestore (global)
+- `auth` : instance Firebase Auth (global)
 
 ## Couleurs des rôles
 
@@ -190,6 +223,24 @@ open -a "Google Chrome" "http://localhost:8000" --args --window-size=600,900
 - **Pas de framework** : JavaScript vanilla, manipulation DOM directe
 - **Stats** : Toujours recalculer depuis les données brutes (points[])
 
+## Sécurité — Commits & Déploiement
+
+> **OBLIGATOIRE** avant tout `git commit`, `git push`, ou déploiement.
+
+### Audit de sécurité pré-commit
+1. **Aucun secret dans le code** : vérifier qu'aucun mot de passe, clé privée, token, ou credential ne figure dans les fichiers commités
+2. **Fichiers sensibles exclus** : vérifier que `.gitignore` exclut les fichiers qui ne sont pas nécessaires au fonctionnement public (`.env`, clés privées, configs locales, données personnelles)
+3. **Clés Firebase** : les clés de config Firebase (`apiKey`, `projectId`, etc.) sont publiques par design — OK à commiter. Mais les **service account keys** et **admin SDK keys** ne doivent JAMAIS être commitées
+4. **localStorage** : ne jamais logger ou exposer le contenu brut du localStorage dans la console en production
+5. **Données utilisateur** : aucune donnée personnelle (emails, noms réels hors prénoms joueurs) ne doit être exposée dans le code source
+
+### Checklist avant push
+- [ ] `git diff --staged` : relire chaque ligne modifiée
+- [ ] Rechercher : `password`, `secret`, `token`, `credential`, `apiKey` (hors config Firebase publique)
+- [ ] Vérifier `.gitignore` : fichiers sensibles exclus
+- [ ] Aucun `console.log` avec des données sensibles
+- [ ] Les Security Rules Firebase sont correctement configurées (pas de write public)
+
 ## Fonctionnalités clés
 
 ### Auto-sélection
@@ -207,6 +258,15 @@ open -a "Google Chrome" "http://localhost:8000" --args --window-size=600,900
 - Flèches SVG pour trajectoires (service, attaque)
 - Marqueurs Canvas pour positions
 - Zones cliquables avec feedback visuel
+
+## Mode admin (index.html)
+
+L'index a deux modes d'affichage contrôlés par le paramètre URL `?admin` :
+
+- **Mode normal** (`index.html`) : seul le bouton "Stats matchs passés" est visible. L'app est en lecture seule pour les coéquipiers.
+- **Mode admin** (`index.html?admin`) : les 3 boutons sont visibles (Équipe manager, Stats matchs passés, Nouveau match) + le bandeau match en cours. Réservé au statisticien.
+
+Les éléments admin ont la classe CSS `admin-only` et `style="display:none"` par défaut. Le JS détecte `?admin` dans l'URL et les affiche.
 
 ## Mode Test / Développement (DevTestMode)
 

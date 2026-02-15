@@ -283,6 +283,41 @@
         .footer span {
             color: var(--accent-orange);
         }
+
+        /* Firebase Auth */
+        .firebase-auth-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .firebase-auth-email {
+            font-size: 11px;
+            color: var(--text-secondary);
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .firebase-auth-btn {
+            padding: 5px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-header, #f8f9fa);
+            color: var(--text-primary);
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .firebase-auth-btn:hover {
+            background: var(--border-color);
+        }
+        .firebase-auth-btn.firebase-auth-signout {
+            font-size: 10px;
+            color: var(--text-secondary);
+            padding: 4px 8px;
+        }
     </style>
 </head>
 <body>
@@ -294,14 +329,15 @@
                 <h1 class="header-title">Jen et ses Saints</h1>
                 <p class="header-subtitle">Stats Volleyball FSGT 4×4</p>
             </div>
+            <div id="firebase-auth-container" style="margin-left: auto;"></div>
         </header>
 
-        <!-- Bandeau match en cours -->
-        <div class="resume-section-header" id="resumeSectionHeader" style="display:none;">
+        <!-- Bandeau match en cours (admin only) -->
+        <div class="resume-section-header admin-only" id="resumeSectionHeader" style="display:none;">
             <span class="resume-section-icon">⚡</span>
             <span class="resume-section-label">En cours</span>
         </div>
-        <div id="resumeBanner" class="resume-banner">
+        <div id="resumeBanner" class="resume-banner admin-only">
             <div class="resume-content">
                 <div class="resume-opponent" id="resumeOpponent"></div>
                 <div class="resume-location" id="resumeLocation"></div>
@@ -317,7 +353,7 @@
 
         <!-- Menu principal -->
         <nav class="menu-section">
-            <a href="equipe.html" class="menu-btn">
+            <a href="equipe.html" class="menu-btn admin-only" style="display:none;">
                 <div class="menu-btn-icon team">
                     <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
                         <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
@@ -343,7 +379,7 @@
                 <span class="menu-btn-arrow">›</span>
             </a>
 
-            <a href="nouveau-match.html" class="menu-btn">
+            <a href="nouveau-match.html" class="menu-btn admin-only" style="display:none;">
                 <div class="menu-btn-icon match">
                     <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
                         <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -363,13 +399,37 @@
         </footer>
     </div>
 
+    <!-- Firebase SDK (compat CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="firebase-sync.js"></script>
+
     <script src="storage.js"></script>
     <script>
+        // Mode admin : ?admin dans l'URL révèle les options cachées
+        const isAdmin = new URLSearchParams(window.location.search).has('admin');
+
         document.addEventListener('DOMContentLoaded', () => {
+            // Afficher les éléments admin si ?admin
+            if (isAdmin) {
+                document.querySelectorAll('.admin-only').forEach(el => {
+                    el.style.display = '';
+                });
+            }
+
+            // Init Firebase Auth UI
+            if (typeof FirebaseAuthUI !== 'undefined') {
+                FirebaseAuthUI.init();
+            }
             checkInProgressMatch();
         });
 
         function checkInProgressMatch() {
+            // Le bandeau match en cours n'est visible qu'en mode admin
+            if (!isAdmin) return;
+
             const currentId = Storage.getCurrentMatchId();
             const banner = document.getElementById('resumeBanner');
             const sectionHeader = document.getElementById('resumeSectionHeader');

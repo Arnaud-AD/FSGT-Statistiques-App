@@ -22,7 +22,13 @@ const Utils = {
 // ==================== DATA LAYER ====================
 const HistoriqueData = {
     _cache: null,
+    _firebaseLoaded: false,
 
+    /**
+     * Retourne les matchs complétés (synchrone, utilise le cache).
+     * Au premier appel avant le chargement Firebase, retourne les données locales.
+     * Après loadFromFirebase(), retourne les données mergées local+Firebase.
+     */
     getCompletedMatches() {
         if (!this._cache) {
             this._cache = Storage.getAllMatches().filter(m => m.status === 'completed');
@@ -30,12 +36,41 @@ const HistoriqueData = {
         return this._cache;
     },
 
-    invalidateCache() {
-        this._cache = null;
+    /**
+     * Charge les matchs depuis Firebase et les merge avec les locaux.
+     * Pré-remplit le cache — les appels synchrones suivants utiliseront les données mergées.
+     * @returns {Promise<boolean>} true si des données Firebase ont été chargées
+     */
+    async loadFromFirebase() {
+        if (typeof FirebaseSync === 'undefined' || !FirebaseSync.isConfigured()) return false;
+
+        try {
+            const local = Storage.getAllMatches().filter(m => m.status === 'completed');
+            const remote = await FirebaseSync.getCompletedMatches();
+            this._cache = FirebaseSync.mergeMatches(local, remote);
+            this._firebaseLoaded = true;
+            return remote.length > 0;
+        } catch (err) {
+            console.warn('[Historique] Firebase indisponible, données locales uniquement :', err.message);
+            return false;
+        }
     },
 
-    deleteMatch(id) {
+    invalidateCache() {
+        this._cache = null;
+        this._firebaseLoaded = false;
+    },
+
+    async deleteMatch(id) {
         Storage.deleteMatch(id);
+        // Supprimer aussi de Firebase si disponible
+        if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured()) {
+            try {
+                await FirebaseSync.deleteMatch(id);
+            } catch (err) {
+                console.warn('[Historique] Suppression Firebase échouée :', err.message);
+            }
+        }
         this.invalidateCache();
     }
 };
@@ -1004,10 +1039,10 @@ const MatchStatsView = {
         var self = this;
         var opponent = match.opponent || 'Adversaire';
 
-        btn.onclick = function() {
+        btn.onclick = async function() {
             self._closeGearMenu();
             if (confirm('Supprimer ce match ?\n' + opponent + ' (' + (match.setsWon || 0) + '-' + (match.setsLost || 0) + ')')) {
-                HistoriqueData.deleteMatch(match.id);
+                await HistoriqueData.deleteMatch(match.id);
                 self.selectedMatchIndex = null;
                 self.currentMatch = null;
                 document.getElementById('matchDetailContainer').classList.remove('active');
@@ -1526,18 +1561,42 @@ const SetsPlayedView = {
 };
 
 // ==================== INIT ====================
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     // [DEV TEST] Créer le match test si nécessaire — À RETIRER
     if (typeof DevTestMode !== 'undefined' && DevTestMode.ENABLED) {
         DevTestMode.ensureTestMatch();
     }
 
+    // Init Firebase Auth UI
+    if (typeof FirebaseAuthUI !== 'undefined') {
+        FirebaseAuthUI.init();
+    }
+
     // Init tabs
     TabNav.init();
 
-    // Rendu initial de l'onglet actif
+    // Rendu initial avec données locales (rapide)
     if (TabNav.currentTab === 'matchStats') {
         MatchStatsView.render();
+    }
+
+    // Charger les données Firebase en arrière-plan puis rafraîchir
+    const hasFirebaseData = await HistoriqueData.loadFromFirebase();
+    if (hasFirebaseData) {
+        // Rafraîchir la vue active avec les données mergées
+        TabNav.switchTo(TabNav.currentTab);
+    }
+
+    // Migration one-shot des matchs locaux vers Firebase (première connexion)
+    if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured()) {
+        auth.onAuthStateChanged(async function(user) {
+            if (user && !localStorage.getItem('firebase_migrated')) {
+                const migrated = await FirebaseSync.migrateLocalMatches();
+                if (migrated > 0) {
+                    localStorage.setItem('firebase_migrated', 'true');
+                }
+            }
+        });
     }
 
     // Event listeners pour les tabs principaux
