@@ -60,7 +60,6 @@ const FirebaseSync = {
 
         const snapshot = await db.collection(this.COLLECTION)
             .where('status', '==', 'completed')
-            .orderBy('timestamp', 'desc')
             .get();
 
         return snapshot.docs.map(doc => {
