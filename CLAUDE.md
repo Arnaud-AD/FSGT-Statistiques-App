@@ -1,8 +1,8 @@
-# FSGT-Statistiques-App — V16.0 (dernière version à jour)
+# FSGT-Statistiques-App — V16.3 (dernière version à jour)
 
 Application web de statistiques volleyball 4v4 pour l'équipe "Jen et ses Saints" en FSGT.
 
-> **Version** : V16.0 — Mode admin sur index + masquage options (15 février 2026).
+> **Version** : V16.3 — Mode admin auto si connecté + redesign auth (15 février 2026).
 
 ## Contexte
 
@@ -261,12 +261,21 @@ open -a "Google Chrome" "http://localhost:8000" --args --window-size=600,900
 
 ## Mode admin (index.html)
 
-L'index a deux modes d'affichage contrôlés par le paramètre URL `?admin` :
+L'index a deux modes d'affichage :
 
 - **Mode normal** (`index.html`) : seul le bouton "Stats matchs passés" est visible. L'app est en lecture seule pour les coéquipiers.
-- **Mode admin** (`index.html?admin`) : les 3 boutons sont visibles (Équipe manager, Stats matchs passés, Nouveau match) + le bandeau match en cours. Réservé au statisticien.
+- **Mode admin** : les 3 boutons sont visibles (Équipe manager, Stats matchs passés, Nouveau match) + le bandeau match en cours. Réservé au statisticien.
 
-Les éléments admin ont la classe CSS `admin-only` et `style="display:none"` par défaut. Le JS détecte `?admin` dans l'URL et les affiche.
+Le mode admin s'active de deux façons :
+1. **`?admin` dans l'URL** : pour la première connexion
+2. **Utilisateur connecté** (Firebase Auth) : détection automatique via `auth.onAuthStateChanged()` → `enableAdminMode()`
+
+Les éléments admin ont la classe CSS `admin-only` et `style="display:none"` par défaut.
+
+### Bouton Firebase Auth (V16.2)
+- **Déconnecté** : pill arrondi avec icône Google 4 couleurs + "Connexion"
+- **Connecté** : pill avec avatar miniature + "Déconnexion"
+- Styles dans `index.html` (inline) et `historique.css`, rendu dans `FirebaseAuthUI._render()`
 
 ## Mode Test / Développement (DevTestMode)
 
