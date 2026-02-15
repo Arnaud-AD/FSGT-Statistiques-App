@@ -192,10 +192,17 @@ const FirebaseAuthUI = {
         if (user) {
             const photoURL = user.photoURL || '';
             const initial = (user.displayName || user.email || '?')[0].toUpperCase();
-            const avatar = photoURL
-                ? `<img src="${photoURL}" alt="" class="firebase-auth-avatar" id="firebase-signout-btn" title="Déconnexion (${user.email})" referrerpolicy="no-referrer">`
-                : `<div class="firebase-auth-avatar" id="firebase-signout-btn" title="Déconnexion (${user.email})" style="display:flex;align-items:center;justify-content:center;background:#e8eaed;font-size:13px;font-weight:500;color:#5f6368;">${initial}</div>`;
-            container.innerHTML = `<div class="firebase-auth-bar">${avatar}</div>`;
+            const avatarImg = photoURL
+                ? `<img src="${photoURL}" alt="" class="firebase-auth-avatar" referrerpolicy="no-referrer">`
+                : `<div class="firebase-auth-avatar" style="display:flex;align-items:center;justify-content:center;background:#e8eaed;font-size:13px;font-weight:500;color:#5f6368;">${initial}</div>`;
+            container.innerHTML = `
+                <div class="firebase-auth-bar">
+                    <button class="firebase-auth-btn firebase-auth-signout" id="firebase-signout-btn">
+                        ${avatarImg}
+                        Déconnexion
+                    </button>
+                </div>
+            `;
             document.getElementById('firebase-signout-btn')
                 .addEventListener('click', () => this.signOut());
         } else {

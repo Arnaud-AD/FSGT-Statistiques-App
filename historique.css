@@ -161,9 +161,15 @@ body {
 .firebase-auth-btn.firebase-auth-signout {
     font-size: 11px;
     color: var(--text-secondary);
-    padding: 4px 10px;
-    border-radius: 16px;
+    padding: 3px 10px 3px 3px;
+    border-radius: 20px;
     box-shadow: none;
+}
+
+.firebase-auth-btn.firebase-auth-signout .firebase-auth-avatar {
+    width: 22px;
+    height: 22px;
+    border: none;
 }
 
 /* ==================== TABS (main) ==================== */
