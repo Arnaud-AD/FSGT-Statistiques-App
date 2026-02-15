@@ -56,24 +56,11 @@ const FirebaseSync = {
      * @returns {Promise<Array>} Liste des matchs
      */
     async getCompletedMatches() {
-        if (!this.isConfigured()) {
-            console.log('[FirebaseSync] getCompletedMatches: pas configuré');
-            return [];
-        }
-
-        // Debug : lire TOUS les documents pour vérifier ce qui existe
-        const allSnapshot = await db.collection(this.COLLECTION).get();
-        console.log('[FirebaseSync] Tous les docs dans matches:', allSnapshot.docs.map(doc => ({
-            id: doc.id,
-            status: doc.data().status,
-            opponent: doc.data().opponent
-        })));
+        if (!this.isConfigured()) return [];
 
         const snapshot = await db.collection(this.COLLECTION)
             .where('status', '==', 'completed')
             .get();
-
-        console.log('[FirebaseSync] Matchs completed trouvés:', snapshot.docs.length);
 
         return snapshot.docs.map(doc => {
             const data = doc.data();
