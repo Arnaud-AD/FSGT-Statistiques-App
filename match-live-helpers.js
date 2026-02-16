@@ -101,6 +101,8 @@ function hidePositionZones() {
 //   - null/undefined = cas standard phase pass (Passeur rôle fait la passe)
 //   - nom du joueur = cas passe manuelle (ce joueur est remplacé dans sa zone par le Passeur rôle)
 function showAttackZones(team, excludePlayer, visualOnly) {
+    // Toujours nettoyer les deux côtés avant d'activer un seul côté
+    hideAttackZones();
     const courtSide = getCourtSideForTeam(team);
     const zonesId = courtSide === 'top' ? 'attackZonesTop' : 'attackZonesBottom';
     const zones = document.getElementById(zonesId);
@@ -854,13 +856,13 @@ function updateOverrideVisuals() {
 }
 
 // Helper défense unifié : remplace le pattern if/else renderDefenseZonesOnly/renderPlayerSelection
-function renderDefenseSelection(team, attackerRole) {
+function renderDefenseSelection(team, attackerRole, showDirectAttack = false) {
     if (attackerRole) {
         showDefenseZones(team, attackerRole);
         renderOverrideTags({
             team,
             phaseLabel: 'Défense',
-            autoPlayer: null, // La zone fournira l'auto-select
+            autoPlayer: null,
             autoRole: null,
             eligiblePlayers: getLineupPlayers(team),
             mode: 'override'
@@ -875,8 +877,13 @@ function renderDefenseSelection(team, attackerRole) {
             mode: 'select'
         });
     }
-    // Toujours afficher le bouton Attaque directe en défense
-    document.getElementById('defenseDirectAttackSection').classList.remove('hidden');
+    // Bouton Attaque directe visible seulement après un bloc
+    const section = document.getElementById('defenseDirectAttackSection');
+    if (showDirectAttack) {
+        section.classList.remove('hidden');
+    } else {
+        section.classList.add('hidden');
+    }
 }
 
 function handlePlayerSelection(playerName) {
@@ -918,8 +925,7 @@ function hideAllSections() {
     document.getElementById('serverContinue').classList.add('hidden');
     document.getElementById('playerSelection').classList.add('hidden');
     document.getElementById('secondTouchOptions').classList.add('hidden');
-    document.getElementById('passFaultSection').classList.add('hidden');
-    document.getElementById('passFaultResultSection').classList.add('hidden');
+    document.getElementById('passDirectReturnChoice').classList.add('hidden');
     deactivateNetZone();
     document.getElementById('attackTypeSelection').classList.add('hidden');
     document.getElementById('resultSelection').classList.add('hidden');
@@ -930,6 +936,7 @@ function hideAllSections() {
     document.getElementById('attackNetChoice').classList.add('hidden');
     document.getElementById('receptionFaultTrajectory').classList.add('hidden');
     document.getElementById('defenseDirectAttackSection').classList.add('hidden');
+    document.getElementById('defenseDirectReturnChoice').classList.add('hidden');
     document.getElementById('defenseFaultSection').classList.add('hidden');
     document.getElementById('defenseFaultTrajectory').classList.add('hidden');
     document.getElementById('blocOutTrajectory').classList.add('hidden');
@@ -1353,8 +1360,7 @@ function undoLastAction() {
             gameState.phase = 'pass_end';
             updatePhase();
             hideAllSections();
-            highlightCourt(gameState.attackingTeam);
-            document.getElementById('passFaultSection').classList.remove('hidden');
+            highlightCourt(null);
             document.getElementById('outArea').classList.add('active');
             activateNetZone(true);
             const passNetUndoCourtSide = getCourtSideForTeam(gameState.attackingTeam);
@@ -1457,7 +1463,21 @@ function undoLastAction() {
                 }
                 hideAllSections();
                 document.getElementById('defenseFaultSection').classList.remove('hidden');
-                highlightCourt(null);
+                // Afficher les tags override avec le défenseur (comme dans selectDefender)
+                if (defenseFromRally) {
+                    renderOverrideTags({
+                        team: gameState.attackingTeam,
+                        phaseLabel: 'Défense',
+                        autoPlayer: defenseFromRally.player,
+                        autoRole: defenseFromRally.role,
+                        eligiblePlayers: getLineupPlayers(gameState.attackingTeam),
+                        mode: 'override'
+                    });
+                }
+                // Afficher la zone de qualité D+ (comme dans selectDefender)
+                showDefenseQualityZones();
+                // Highlight terrain défenseur (adverse grisé mais cliquable pour retour direct)
+                highlightCourt(gameState.attackingTeam);
                 document.getElementById('outArea').classList.add('active');
                 const defUndoCourtSide = getCourtSideForTeam(gameState.attackingTeam);
                 document.getElementById('outLabelTop').style.display = defUndoCourtSide === 'top' ? 'block' : 'none';
@@ -1495,64 +1515,30 @@ function undoLastAction() {
             redrawRally();
             break;
 
-        case 'pass_fault_end':
-            // Retirer le subType fault
-            gameState.currentAction.subType = undefined;
-            // Aussi retirer de l'action dans le rally si elle y est déjà
-            const rallyPassAction = gameState.rally[gameState.rally.length - 1];
-            if (rallyPassAction && rallyPassAction.type === 'pass') {
-                rallyPassAction.subType = undefined;
-            }
-            if (gameState.passFaultFromAttackPlayer) {
-                // Retour à attack_player (la passe auto est déjà dans le rally)
-                gameState.passFaultFromAttackPlayer = false;
-                gameState.phase = 'attack_player';
-                updatePhase();
-                hideAllSections();
-                renderAttackPlayerSelection();
-                document.getElementById('passFaultSection').classList.remove('hidden');
-            } else if (gameState.passAutoSelected) {
-                // Retour à la phase pass combinée
-                gameState.passAutoSelected = false;
-                gameState.phase = 'pass';
+        case 'pass_direct_return_choice':
+            // Retour à pass_end (avant le clic sur terrain adverse)
+            {
+                // Retirer la passe du rally (elle a été pushée avant le popup)
+                const passFromRallyUndo = gameState.rally.pop();
+                if (passFromRallyUndo) {
+                    gameState.currentAction = { ...passFromRallyUndo };
+                    gameState.currentAction.isDirectReturn = false;
+                    gameState.currentAction.directReturnEndPos = null;
+                    gameState.currentAction.endPos = null;
+                }
+                gameState.passDirectReturnClickData = null;
+                gameState.phase = 'pass_end';
                 updatePhase();
                 hideAllSections();
                 highlightCourt(null);
                 document.getElementById('outArea').classList.add('active');
+                activateNetZone(true);
                 document.getElementById('outLabelTop').style.display = 'block';
                 document.getElementById('outLabelBottom').style.display = 'block';
-                renderPassPlayerSelection();
-            } else {
-                // Retour à pass_end (le passeur est déjà sélectionné manuellement)
-                gameState.phase = 'pass_end';
-                updatePhase();
-                hideAllSections();
-                document.getElementById('passFaultSection').classList.remove('hidden');
-                document.getElementById('outArea').classList.add('active');
-                activateNetZone(true);
-                highlightCourt(gameState.attackingTeam);
-                const passFaultUndoCourtSide = getCourtSideForTeam(gameState.attackingTeam);
-                document.getElementById('outLabelTop').style.display = passFaultUndoCourtSide === 'top' ? 'block' : 'none';
-                document.getElementById('outLabelBottom').style.display = passFaultUndoCourtSide === 'bottom' ? 'block' : 'none';
-                // Afficher les zones d'attaque visuelles
                 if (gameState.currentAction && gameState.currentAction.player) {
                     showAttackZones(gameState.attackingTeam, gameState.currentAction.player, true);
                 }
             }
-            redrawRally();
-            break;
-
-        case 'pass_fault_result':
-            // Retour à pass_fault_end — retirer le marker et l'action du rally
-            gameState.rally.pop();
-            gameState.currentAction.endPos = undefined;
-            gameState.phase = 'pass_fault_end';
-            updatePhase();
-            hideAllSections();
-            document.getElementById('outArea').classList.add('active');
-            document.getElementById('outLabelTop').style.display = 'block';
-            document.getElementById('outLabelBottom').style.display = 'block';
-            highlightCourt(null);
             redrawRally();
             break;
 
@@ -1570,15 +1556,63 @@ function undoLastAction() {
                 hideAllSections();
                 document.getElementById('receptionNetChoice').classList.remove('hidden');
                 redrawRally();
+            // Vérifier si on vient d'une attaque directe depuis un retour direct réception
+            } else if (gameState.receptionDirectAttackSource) {
+                // Retour au popup receptionOpponentChoice : retirer la réception du rally
+                gameState.receptionDirectAttackSource = false;
+                gameState.defenseDirectAttack = false;
+                const recFromRally = gameState.rally.pop();
+                if (recFromRally) {
+                    gameState.currentAction = { ...recFromRally };
+                    gameState.currentAction.isDirectReturn = false;
+                    gameState.currentAction.directReturnEndPos = null;
+                }
+                // Restaurer l'équipe attaquante = l'équipe qui réceptionnait
+                gameState.attackingTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
+                gameState.phase = 'reception_opponent_choice';
+                updatePhase();
+                hideAllSections();
+                document.getElementById('receptionOpponentChoice').classList.remove('hidden');
+                redrawRally();
+            // Vérifier si on vient d'une attaque directe depuis un retour direct de passe
+            } else if (gameState.passDirectReturnAttackSource) {
+                gameState.passDirectReturnAttackSource = false;
+                gameState.defenseDirectAttack = false;
+                const passFromRallyUndo2 = gameState.rally.pop();
+                if (passFromRallyUndo2) {
+                    gameState.currentAction = { ...passFromRallyUndo2 };
+                }
+                gameState.attackingTeam = passFromRallyUndo2 ? passFromRallyUndo2.team : gameState.attackingTeam;
+                gameState.phase = 'pass_direct_return_choice';
+                updatePhase();
+                hideAllSections();
+                document.getElementById('passDirectReturnChoice').classList.remove('hidden');
+                redrawRally();
+            // Vérifier si on vient d'une attaque directe depuis un retour direct de défense
+            } else if (gameState.defenseDirectReturnAttackSource) {
+                // Retour au popup defenseDirectReturnChoice : retirer la défense du rally
+                gameState.defenseDirectReturnAttackSource = false;
+                gameState.defenseDirectAttack = false;
+                const defFromRally = gameState.rally.pop();
+                if (defFromRally) {
+                    gameState.currentAction = { ...defFromRally };
+                    gameState.currentAction.isDirectReturn = false;
+                    gameState.currentAction.directReturnEndPos = null;
+                }
+                gameState.attackingTeam = defFromRally ? defFromRally.team : gameState.attackingTeam;
+                gameState.phase = 'defense_direct_return_choice';
+                updatePhase();
+                hideAllSections();
+                document.getElementById('defenseDirectReturnChoice').classList.remove('hidden');
+                redrawRally();
             // Vérifier si on vient d'une attaque directe depuis la défense
             } else if (gameState.defenseDirectAttack || (gameState.currentAction && gameState.currentAction.isDefenseDirectAttack)) {
                 // Retour à la sélection du défenseur
                 gameState.defenseDirectAttack = false;
                 gameState.phase = 'defense';
                 hideAllSections();
-                // Ré-afficher les zones de défense si on connaît le rôle de l'attaquant
-                const lastAttackForDirectUndo = [...gameState.rally].reverse().find(a => a.type === 'attack');
-                renderDefenseSelection(gameState.attackingTeam, lastAttackForDirectUndo ? lastAttackForDirectUndo.role : null);
+                // Retour après attaque directe (post-bloc) : PAS de zones auto-select
+                renderDefenseSelection(gameState.attackingTeam, null, true);
                 redrawRally();
             } else if (gameState.passAutoSelected) {
                 // Passe auto-sélectionnée (clic terrain en phase pass) : retour à pass
@@ -1607,14 +1641,12 @@ function undoLastAction() {
                     };
                 }
                 hideAllSections();
-                highlightCourt(gameState.attackingTeam);
-                document.getElementById('passFaultSection').classList.remove('hidden');
+                highlightCourt(null);
                 // Activer la zone out pour les passes
                 document.getElementById('outArea').classList.add('active');
                 activateNetZone(true);
-                const attackingCourtSide = getCourtSideForTeam(gameState.attackingTeam);
-                document.getElementById('outLabelTop').style.display = attackingCourtSide === 'top' ? 'block' : 'none';
-                document.getElementById('outLabelBottom').style.display = attackingCourtSide === 'bottom' ? 'block' : 'none';
+                document.getElementById('outLabelTop').style.display = 'block';
+                document.getElementById('outLabelBottom').style.display = 'block';
                 // Afficher les zones d'attaque visuelles
                 if (passFromRally && passFromRally.player) {
                     showAttackZones(gameState.attackingTeam, passFromRally.player, true);
@@ -1668,13 +1700,11 @@ function undoLastAction() {
                 gameState.phase = 'pass_end';
                 updatePhase();
                 hideAllSections();
-                highlightCourt(gameState.attackingTeam);
-                document.getElementById('passFaultSection').classList.remove('hidden');
+                highlightCourt(null);
                 document.getElementById('outArea').classList.add('active');
                 activateNetZone(true);
-                const attackingCourtSide = getCourtSideForTeam(gameState.attackingTeam);
-                document.getElementById('outLabelTop').style.display = attackingCourtSide === 'top' ? 'block' : 'none';
-                document.getElementById('outLabelBottom').style.display = attackingCourtSide === 'bottom' ? 'block' : 'none';
+                document.getElementById('outLabelTop').style.display = 'block';
+                document.getElementById('outLabelBottom').style.display = 'block';
                 // Afficher les zones d'attaque visuelles (comme dans selectPasser)
                 if (passInRally && passInRally.player) {
                     showAttackZones(gameState.attackingTeam, passInRally.player, true);
@@ -1699,6 +1729,19 @@ function undoLastAction() {
                 gameState.currentAction.attackType = 'smash';
             }
             showSection('attackTypeSelection');
+            // Ré-afficher les override tags avec l'attaquant
+            {
+                const attackPlayer = gameState.currentAction ? gameState.currentAction.player : null;
+                const attackRole = gameState.currentAction ? gameState.currentAction.role : null;
+                renderOverrideTags({
+                    team: gameState.attackingTeam,
+                    phaseLabel: 'Attaque',
+                    autoPlayer: attackPlayer,
+                    autoRole: attackRole,
+                    eligiblePlayers: getLineupPlayers(gameState.attackingTeam),
+                    mode: 'override'
+                });
+            }
             // Ré-afficher les zones de défense (elles sont visibles pendant attack_type)
             {
                 const defTeamAtkEnd = gameState.attackingTeam === 'home' ? 'away' : 'home';
@@ -1752,36 +1795,55 @@ function undoLastAction() {
             const lastActionForDefense = gameState.rally[gameState.rally.length - 1];
             
             if (lastActionForDefense && lastActionForDefense.type === 'reception' && lastActionForDefense.isDirectReturn) {
-                // C'était après un retour direct de réception, retourner à direct_return_end
-                gameState.phase = 'direct_return_end';
+                // C'était après un retour direct de réception → retourner au popup de choix
                 const directReturnFromRally = gameState.rally.pop();
+                // Sauvegarder les positions du retour direct avant de les effacer
+                const recEndPos = directReturnFromRally ? directReturnFromRally.endPos : null;
+                const directReturnEndPos = directReturnFromRally ? directReturnFromRally.directReturnEndPos : null;
                 if (directReturnFromRally) {
                     gameState.currentAction = { ...directReturnFromRally };
-                    // Enlever le directReturnEndPos car on va le re-cliquer
-                    delete gameState.currentAction.directReturnEndPos;
+                    gameState.currentAction.isDirectReturn = false;
+                    gameState.currentAction.directReturnEndPos = null;
                 }
-                // Remettre l'équipe qui attaque à celle qui a fait le retour direct
                 gameState.attackingTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
+                gameState.phase = 'reception_opponent_choice';
+                updatePhase();
                 hideAllSections();
-                highlightCourt(gameState.servingTeam);
+                document.getElementById('receptionOpponentChoice').classList.remove('hidden');
+                // redrawRally dessine le service (flèche + markers). On ajoute ensuite
+                // la flèche du retour direct qui n'est plus dans le rally.
+                // Note : reception.endPos === service.endPos (set par handleOpponentChoice),
+                // donc on dessine une seule flèche service.endPos → directReturnEndPos.
+                redrawRally();
+                if (directReturnEndPos) {
+                    const serviceAction = gameState.rally.find(a => a.type === 'service');
+                    if (serviceAction && serviceAction.endPos) {
+                        addMarker(directReturnEndPos, 'reception');
+                        drawArrow(serviceAction.endPos, directReturnEndPos, 'reception');
+                    }
+                }
+            } else if (lastActionForDefense && lastActionForDefense.type === 'pass' && lastActionForDefense.isDirectReturn) {
+                // C'était après un retour direct de passe → retourner au popup de choix
+                const directReturnPass = gameState.rally.pop();
+                gameState.attackingTeam = directReturnPass.team;
+                gameState.currentAction = { ...directReturnPass };
+                gameState.phase = 'pass_direct_return_choice';
+                updatePhase();
+                hideAllSections();
+                document.getElementById('passDirectReturnChoice').classList.remove('hidden');
                 redrawRally();
             } else if (lastActionForDefense && lastActionForDefense.type === 'defense' && lastActionForDefense.isDirectReturn) {
-                // C'était après un retour direct de défense, retourner à defense_end de l'action précédente
+                // C'était après un retour direct de défense → retourner au popup de choix
                 const directReturnDefense = gameState.rally.pop();
-                // Remettre l'équipe qui attaque à celle qui a fait le retour direct
                 gameState.attackingTeam = directReturnDefense.team;
-                gameState.currentAction = { 
-                    type: 'defense',
-                    player: directReturnDefense.player,
-                    team: directReturnDefense.team
-                };
-                gameState.phase = 'defense_end';
+                gameState.currentAction = { ...directReturnDefense };
+                gameState.currentAction.isDirectReturn = false;
+                gameState.currentAction.directReturnEndPos = null;
+                gameState.currentAction.isDirectReturnWinner = false;
+                gameState.phase = 'defense_direct_return_choice';
+                updatePhase();
                 hideAllSections();
-                highlightCourt(null);
-                document.getElementById('outArea').classList.add('active');
-                const defendingCourtSide = getCourtSideForTeam(gameState.attackingTeam);
-                document.getElementById('outLabelTop').style.display = defendingCourtSide === 'top' ? 'block' : 'none';
-                document.getElementById('outLabelBottom').style.display = defendingCourtSide === 'bottom' ? 'block' : 'none';
+                document.getElementById('defenseDirectReturnChoice').classList.remove('hidden');
                 redrawRally();
             } else if (lastActionForDefense && lastActionForDefense.type === 'block') {
                 // C'était après un block
@@ -1866,10 +1928,31 @@ function undoLastAction() {
             gameState.defenseAutoSelected = false;
             gameState.defenseAutoPlayer = null;
             gameState.phase = 'defense';
-            // Ré-afficher les zones de défense pour auto-sélection
+            hideAllSections();
+            hideDefenseQualityZones();
+            // Désactiver la zone out et les labels OUT (restés de defense_end)
+            document.getElementById('outArea').classList.remove('active');
+            document.getElementById('outLabelTop').style.display = 'none';
+            document.getElementById('outLabelBottom').style.display = 'none';
+            // Ré-afficher le terrain du défenseur
+            highlightCourt(gameState.attackingTeam);
             {
                 const lastAttackForZones = [...gameState.rally].reverse().find(a => a.type === 'attack');
-                renderDefenseSelection(gameState.attackingTeam, lastAttackForZones ? lastAttackForZones.role : null);
+                const defTeam = gameState.attackingTeam;
+                // Détecter si un bloc précède cette défense (pour afficher le bouton Attaque directe)
+                let hasBlockBefore = false;
+                for (let i = gameState.rally.length - 1; i >= 0; i--) {
+                    const a = gameState.rally[i];
+                    if (a.type === 'block' && a.team === defTeam) { hasBlockBefore = true; break; }
+                    if ((a.type === 'pass' || a.type === 'attack') && a.team === defTeam) break;
+                }
+                // Détecter si la défense vient d'un retour direct (balle imprévisible → pas de zones)
+                const lastRallyAction = gameState.rally[gameState.rally.length - 1];
+                const isAfterDirectReturn = lastRallyAction && lastRallyAction.isDirectReturn;
+                // Si après un bloc ou un retour direct : PAS de zones auto-select, sinon zones normales
+                const noAutoZones = hasBlockBefore || isAfterDirectReturn;
+                const attackerRoleForUndo = noAutoZones ? null : (lastAttackForZones ? lastAttackForZones.role : null);
+                renderDefenseSelection(gameState.attackingTeam, attackerRoleForUndo, hasBlockBefore);
             }
             redrawRally();
             break;
@@ -1881,11 +1964,59 @@ function undoLastAction() {
             gameState.currentAction.faultTrajectory = null;
             hideAllSections();
             document.getElementById('defenseFaultSection').classList.remove('hidden');
-            highlightCourt(null);
+            // Afficher les tags override avec le défenseur
+            if (gameState.currentAction && gameState.currentAction.player) {
+                renderOverrideTags({
+                    team: gameState.attackingTeam,
+                    phaseLabel: 'Défense',
+                    autoPlayer: gameState.currentAction.player,
+                    autoRole: gameState.currentAction.role,
+                    eligiblePlayers: getLineupPlayers(gameState.attackingTeam),
+                    mode: 'override'
+                });
+            }
+            showDefenseQualityZones();
+            // Highlight terrain défenseur (adverse grisé mais cliquable pour retour direct)
+            highlightCourt(gameState.attackingTeam);
             document.getElementById('outArea').classList.add('active');
             const defendingCourtSideUndo = getCourtSideForTeam(gameState.attackingTeam);
             document.getElementById('outLabelTop').style.display = defendingCourtSideUndo === 'top' ? 'block' : 'none';
             document.getElementById('outLabelBottom').style.display = defendingCourtSideUndo === 'bottom' ? 'block' : 'none';
+            redrawRally();
+            break;
+
+        case 'defense_direct_return_choice':
+            // Retour à defense_end (avant le clic sur terrain adverse)
+            gameState.currentAction.isDirectReturn = false;
+            gameState.currentAction.directReturnEndPos = null;
+            gameState.currentAction.isDirectReturnWinner = false;
+            gameState.defenseDirectReturnClickData = null;
+            gameState.phase = 'defense_end';
+            hideDefenseZones();
+            hideAttackZones();
+            hideAllSections();
+            document.getElementById('defenseFaultSection').classList.remove('hidden');
+            // Afficher les tags override avec le défenseur (comme dans selectDefender)
+            if (gameState.currentAction && gameState.currentAction.player) {
+                renderOverrideTags({
+                    team: gameState.attackingTeam,
+                    phaseLabel: 'Défense',
+                    autoPlayer: gameState.currentAction.player,
+                    autoRole: gameState.currentAction.role,
+                    eligiblePlayers: getLineupPlayers(gameState.attackingTeam),
+                    mode: 'override'
+                });
+            }
+            // Afficher la zone de qualité D+
+            showDefenseQualityZones();
+            // Highlight terrain défenseur (adverse grisé mais cliquable pour retour direct)
+            highlightCourt(gameState.attackingTeam);
+            document.getElementById('outArea').classList.add('active');
+            {
+                const defReturnUndoCourtSide = getCourtSideForTeam(gameState.attackingTeam);
+                document.getElementById('outLabelTop').style.display = defReturnUndoCourtSide === 'top' ? 'block' : 'none';
+                document.getElementById('outLabelBottom').style.display = defReturnUndoCourtSide === 'bottom' ? 'block' : 'none';
+            }
             redrawRally();
             break;
     }
@@ -1937,6 +2068,11 @@ function cancelPoint() {
     gameState.receptionAutoSelected = false;
     gameState.netDirectAttack = false;
     gameState.defenseDirectAttack = false;
+    gameState.receptionDirectAttackSource = false;
+    gameState.defenseDirectReturnAttackSource = false;
+    gameState.defenseDirectReturnClickData = null;
+    gameState.passDirectReturnAttackSource = false;
+    gameState.passDirectReturnClickData = null;
     gameState.defenseAutoSelected = false;
     gameState.defenseAutoPlayer = null;
     gameState.defenseFaultShortcut = false;

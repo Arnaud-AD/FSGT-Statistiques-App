@@ -647,13 +647,30 @@
             }
         }
 
-        // [DEV TEST] Auto-création des joueurs de test si roster vide — À RETIRER
-        if (typeof DevTestMode !== 'undefined' && DevTestMode.ensureHomePlayers()) {
-            players = Storage.getPlayers();
+        // Init : charger roster Firebase (prioritaire) puis fallback DevTestMode
+        async function initRoster() {
+            // Tenter de charger le roster depuis Firebase
+            if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured()) {
+                try {
+                    const firebaseRoster = await FirebaseSync.getRoster();
+                    if (firebaseRoster && firebaseRoster.length > 0) {
+                        localStorage.setItem(Storage.KEYS.PLAYERS, JSON.stringify(firebaseRoster));
+                        players = firebaseRoster;
+                    }
+                } catch (err) {
+                    console.warn('[Équipe] Firebase indisponible, roster local uniquement');
+                }
+            }
+
+            // [DEV TEST] Auto-création des joueurs de test si roster vide — À RETIRER
+            if (typeof DevTestMode !== 'undefined' && DevTestMode.ensureHomePlayers()) {
+                players = Storage.getPlayers();
+            }
+
+            renderTable();
         }
 
-        // Init
-        renderTable();
+        initRoster();
     </script>
 </body>
 </html>

@@ -165,28 +165,28 @@ function redrawRally() {
         if (serviceAction.endPos) {
             addMarker(serviceAction.endPos, 'service');
         }
+        // Flèche de service dessinée indépendamment de la réception
+        if (serviceAction.startPos && serviceAction.endPos) {
+            drawArrow(serviceAction.startPos, serviceAction.endPos, 'service');
+        }
     }
 
     // Redessiner les autres actions
     for (let i = 0; i < gameState.rally.length; i++) {
         const action = gameState.rally[i];
-        
+
         if (action.type === 'reception') {
             if (action.endPos) {
                 addMarker(action.endPos, 'reception');
             }
-            // Dessiner flèche service
-            if (serviceAction && serviceAction.startPos && serviceAction.endPos) {
-                drawArrow(serviceAction.startPos, serviceAction.endPos, 'service');
-                // Dessiner la flèche de réception
-                if (action.endPos) {
-                    drawArrow(serviceAction.endPos, action.endPos, 'reception');
-                }
-                // Si retour direct avec position d'arrivée, dessiner la flèche du retour
-                if (action.isDirectReturn && action.directReturnEndPos) {
-                    addMarker(action.directReturnEndPos, 'reception');
-                    drawArrow(action.endPos, action.directReturnEndPos, 'reception');
-                }
+            // Dessiner la flèche de réception (service → réception)
+            if (serviceAction && serviceAction.endPos && action.endPos) {
+                drawArrow(serviceAction.endPos, action.endPos, 'reception');
+            }
+            // Si retour direct avec position d'arrivée, dessiner la flèche du retour
+            if (action.isDirectReturn && action.directReturnEndPos) {
+                addMarker(action.directReturnEndPos, 'reception');
+                drawArrow(action.endPos, action.directReturnEndPos, 'reception');
             }
         } else if (action.type === 'pass') {
             if (action.endPos) {
