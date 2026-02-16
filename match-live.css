@@ -1541,8 +1541,8 @@
         /* Colonne joueur sticky à gauche */
         .stats-players-col {
             flex-shrink: 0;
-            width: 65px;
-            min-width: 65px;
+            width: 58px;
+            min-width: 58px;
             border-right: 2px solid #dadce0;
             background: white;
             position: sticky;
@@ -1599,7 +1599,7 @@
         }
 
         .stat-table-header {
-            padding: 4px 4px;
+            padding: 4px 2px;
             font-family: 'Google Sans', sans-serif;
             font-size: 8px;
             font-weight: 600;
@@ -1625,6 +1625,11 @@
             color: #e65100;
         }
 
+        .stat-table-header.relance {
+            background: #fff8e1;
+            color: #f57f17;
+        }
+
         .stat-table-header.defense {
             background: #f3e5f5;
             color: #7b1fa2;
@@ -1646,7 +1651,7 @@
             font-family: 'Google Sans', sans-serif;
             font-weight: 600;
             color: #5f6368;
-            padding: 3px 2px;
+            padding: 3px 1px;
             text-align: center;
             font-size: 8px;
             white-space: nowrap;
@@ -1655,11 +1660,11 @@
         }
 
         .detail-stats-table tbody td {
-            padding: 4px 2px;
+            padding: 4px 1px;
             text-align: center;
             border-bottom: 1px solid #f1f3f4;
             font-size: 10px;
-            min-width: 20px;
+            min-width: 17px;
         }
 
         .detail-stats-table tbody tr:last-child td {

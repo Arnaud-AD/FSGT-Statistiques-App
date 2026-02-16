@@ -473,7 +473,7 @@ Zone semi-circulaire bleue affichée pendant la phase `defense_end` (après auto
 
 > **Stratégie** : Workflow d'abord (scoring live solide), puis enrichissement historique, puis stats avancées, puis finalisation.
 
-### Phases terminées (V8.0 → V18.1)
+### Phases terminées (V8.0 → V18.2)
 
 | Phase | Description | Version |
 |-------|-------------|---------|
@@ -493,10 +493,11 @@ Zone semi-circulaire bleue affichée pendant la phase `defense_end` (après auto
 | V17.x | Full Firebase sync (localStorage → Firestore) | V17.3 ✅ |
 | V18.0 | Audit & fix retours directs (réception, passe, défense) + comptabilisation stats | V18.0 ✅ |
 | V18.1 | Réécriture complète du système undo (WorkflowEngine) + bug fixes (flèches, bloc) | V18.1 ✅ |
+| V18.2 | Points de mixité modifiables en cours de set + blocs gris timeline | V18.2 ✅ |
 
 ---
 
-### Phase 18 — Workflow : Corrections & Robustesse *(en cours)*
+### ~~Phase 18 — Workflow : Corrections & Robustesse~~ ✅ TERMINÉE
 
 ~~**V18.0 — Audit & fix retours directs**~~ ✅
 - [x] Auditer tous les cas de retour direct (réception, passe, défense) et leur comptabilisation stats
@@ -507,9 +508,9 @@ Zone semi-circulaire bleue affichée pendant la phase `defense_end` (après auto
 - [x] Réécriture complète du système undo (WorkflowEngine)
 - [x] Bug fixes flèches, bloc, undo sur tous scénarios
 
-**V18.2 — Points de mixité en cours de set**
-- [ ] Ajouter bouton dans match-live pour ajouter/modifier les points de mixité pendant le set
-- [ ] Gestion séries de points : points mixité gris toujours au début pour l'équipe concernée dans la timeline
+~~**V18.2 — Points de mixité en cours de set**~~ ✅
+- [x] Ajouter bouton dans match-live pour ajouter/modifier les points de mixité pendant le set
+- [x] Gestion séries de points : points mixité gris toujours au début pour l'équipe concernée dans la timeline
 
 ### Phase 19 — Workflow : Stats relance & Qualité de passe
 *Enrichissement du modèle de données*

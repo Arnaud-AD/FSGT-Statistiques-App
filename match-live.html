@@ -931,7 +931,7 @@
 
         // Statistiques du set (format unifié avec historique)
         let setStats = {
-            home: {}, // { playerName: { service: {tot, ace, fser}, reception: {tot, rplus, rminus, frec}, attack: {tot, attplus, attminus, bp, fatt}, defense: {tot, defplus, defminus, fdef}, block: {tot, blcplus, blcminus, fblc} } }
+            home: {}, // { playerName: { service: {...}, reception: {...}, attack: {...}, relance: {tot, relplus, relminus, frel}, defense: {...}, block: {...} } }
             away: {}
         };
 
@@ -940,6 +940,7 @@
                 service:   { tot: 0, ace: 0, splus: 0, fser: 0, recSumAdv: 0, recCountAdv: 0 },
                 reception: { tot: 0, r4: 0, r3: 0, r2: 0, r1: 0, frec: 0 },
                 attack:    { tot: 0, attplus: 0, attminus: 0, bp: 0, fatt: 0 },
+                relance:   { tot: 0, relplus: 0, relminus: 0, frel: 0 },
                 defense:   { tot: 0, defplus: 0, defminus: 0, fdef: 0 },
                 block:     { tot: 0, blcplus: 0, blcminus: 0, fblc: 0 }
             };
@@ -990,6 +991,7 @@
                 service:   { tot: 0, ace: 0, splus: 0, fser: 0, recSumAdv: 0, recCountAdv: 0 },
                 reception: { tot: 0, r4: 0, r3: 0, r2: 0, r1: 0, frec: 0 },
                 attack:    { tot: 0, attplus: 0, attminus: 0, bp: 0, fatt: 0 },
+                relance:   { tot: 0, relplus: 0, relminus: 0, frel: 0 },
                 defense:   { tot: 0, defplus: 0, defminus: 0, fdef: 0 },
                 block:     { tot: 0, blcplus: 0, blcminus: 0, fblc: 0 }
             };
@@ -1013,6 +1015,10 @@
                 totals.attack.attminus += p.attack.attminus;
                 totals.attack.bp += p.attack.bp;
                 totals.attack.fatt += p.attack.fatt;
+                totals.relance.tot += p.relance.tot;
+                totals.relance.relplus += p.relance.relplus;
+                totals.relance.relminus += p.relance.relminus;
+                totals.relance.frel += p.relance.frel;
                 totals.defense.tot += p.defense.tot;
                 totals.defense.defplus += p.defense.defplus;
                 totals.defense.defminus += p.defense.defminus;
@@ -1123,6 +1129,28 @@
                 cell(totals.attack.attminus, 'neutral') +
                 cell(totals.attack.bp, 'negative') +
                 cell(totals.attack.fatt, 'negative') +
+            '</tr></tbody></table></div>';
+
+            // ===== RELANCE =====
+            html += '<div class="stat-table-card">' +
+                '<div class="stat-table-header relance">Relance</div>' +
+                '<table class="detail-stats-table"><thead><tr>' +
+                '<th>Tot</th><th>R+</th><th>R-</th><th>FR</th>' +
+                '</tr></thead><tbody>';
+            players.forEach(name => {
+                const p = stats[name];
+                html += '<tr>' +
+                    '<td>' + (p.relance.tot || '-') + '</td>' +
+                    cell(p.relance.relplus, 'positive') +
+                    cell(p.relance.relminus, 'neutral') +
+                    cell(p.relance.frel, 'negative') +
+                '</tr>';
+            });
+            html += '<tr class="total-row">' +
+                '<td>' + (totals.relance.tot || '-') + '</td>' +
+                cell(totals.relance.relplus, 'positive') +
+                cell(totals.relance.relminus, 'neutral') +
+                cell(totals.relance.frel, 'negative') +
             '</tr></tbody></table></div>';
 
             // ===== DÉFENSE =====
@@ -5483,23 +5511,27 @@
                         const oppositeTeam = team === 'home' ? 'away' : 'home';
 
                         if (isRelance) {
-                            // ===== RELANCE : seul Att+ compte pour l'attaquant =====
-                            // L'attaquant est "excusé" sauf s'il marque le point
+                            // ===== RELANCE : catégorie stats séparée =====
+                            stats.relance.tot++;
+
                             if (action.result === 'point' || action.result === 'bloc_out') {
-                                // Kill ou bloc out → Tot + A+ (bonus pour avoir marqué en relance)
-                                stats.attack.tot++;
-                                stats.attack.attplus++;
+                                // Kill ou bloc out → R+
+                                stats.relance.relplus++;
                             } else if (action.result === 'defended') {
                                 if (!hasPassAfter(rally, i, oppositeTeam)) {
-                                    // Défense forcée sans organisation adverse → Tot + A+
-                                    stats.attack.tot++;
-                                    stats.attack.attplus++;
+                                    // Défense forcée sans organisation adverse → R+
+                                    stats.relance.relplus++;
+                                } else {
+                                    // Défendu + organisé → R-
+                                    stats.relance.relminus++;
                                 }
-                                // Sinon (défendu + organisé) → rien pour l'attaquant
+                            } else if (action.result === 'fault_net' || action.result === 'out') {
+                                // Faute de relance (filet ou out)
+                                stats.relance.frel++;
+                            } else if (action.result === 'blocked') {
+                                // Bloc pris en relance → R-
+                                stats.relance.relminus++;
                             }
-                            // FA en relance → rien (pas Tot, pas FA)
-                            // BP en relance → rien pour l'attaquant (le B+ bloqueur est géré dans case 'block')
-                            // Att- en relance → rien
                             break;
                         }
 

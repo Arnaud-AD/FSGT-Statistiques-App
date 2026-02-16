@@ -179,6 +179,7 @@ const StatsAggregator = {
             service: { tot: 0, ace: 0, splus: 0, fser: 0, recSumAdv: 0, recCountAdv: 0 },
             reception: { tot: 0, r4: 0, r3: 0, r2: 0, r1: 0, frec: 0 },
             attack: { tot: 0, attplus: 0, attminus: 0, bp: 0, fatt: 0 },
+            relance: { tot: 0, relplus: 0, relminus: 0, frel: 0 },
             defense: { tot: 0, defplus: 0, defminus: 0, fdef: 0 },
             block: { tot: 0, blcplus: 0, blcminus: 0, fblc: 0 }
         };
@@ -221,6 +222,12 @@ const StatsAggregator = {
                 t.attack.bp += (data.attack?.bp || 0);
                 t.attack.fatt += (data.attack?.fatt || 0);
 
+                // Relance
+                t.relance.tot += (data.relance?.tot || 0);
+                t.relance.relplus += (data.relance?.relplus || 0);
+                t.relance.relminus += (data.relance?.relminus || 0);
+                t.relance.frel += (data.relance?.frel || 0);
+
                 // Defense
                 t.defense.tot += (data.defense?.tot || 0);
                 t.defense.defplus += (data.defense?.defplus || 0);
@@ -243,7 +250,7 @@ const StatsAggregator = {
     computeTotals(playerTotals) {
         const totals = StatsAggregator.initPlayerStats();
         for (const p of Object.values(playerTotals)) {
-            for (const cat of ['service', 'reception', 'attack', 'defense', 'block']) {
+            for (const cat of ['service', 'reception', 'attack', 'relance', 'defense', 'block']) {
                 for (const key of Object.keys(totals[cat])) {
                     totals[cat][key] += (p[cat][key] || 0);
                 }
@@ -310,6 +317,15 @@ const SharedComponents = {
                 { key: '_faBp', label: 'FA(BP)', cls: 'negative', pct: true, computed: 'faBp' }
             ]
         },
+        relance: {
+            label: 'Relance', key: 'relance',
+            columns: [
+                { key: 'tot', label: 'Tot', cls: '' },
+                { key: 'relplus', label: 'R+', cls: 'positive', pct: true },
+                { key: 'relminus', label: 'R-', cls: 'neutral' },
+                { key: 'frel', label: 'FR', cls: 'negative', pct: true }
+            ]
+        },
         defense: {
             label: 'Defense', key: 'defense',
             columns: [
@@ -359,6 +375,15 @@ const SharedComponents = {
                 { key: 'attplus', label: 'A+', cls: 'positive', pct: true },
                 { key: 'attminus', label: 'A-', cls: 'neutral' },
                 { key: '_faBp', label: 'FA(BP)', cls: 'negative', pct: true, computed: 'faBp' }
+            ]
+        },
+        relance: {
+            label: 'Relance', key: 'relance',
+            columns: [
+                { key: 'tot', label: 'Tot', cls: '' },
+                { key: 'relplus', label: 'R+', cls: 'positive', pct: true },
+                { key: 'relminus', label: 'R-', cls: 'neutral' },
+                { key: 'frel', label: 'FR', cls: 'negative', pct: true }
             ]
         },
         defense: {
@@ -514,7 +539,7 @@ const SharedComponents = {
         html += '</div>';
 
         // Cartes par categorie
-        var catKeys = ['service', 'reception', 'attack', 'defense', 'block'];
+        var catKeys = ['service', 'reception', 'attack', 'relance', 'defense', 'block'];
         catKeys.forEach(function(catKey) {
             var catDef = cats[catKey];
             html += '<div class="stat-table-card">';
@@ -1003,8 +1028,8 @@ const MatchStatsView = {
         if (!container) return;
 
         var self = this;
-        var cats = ['service', 'reception', 'attack', 'defense', 'block'];
-        var labels = { service: 'Serv', reception: 'Rec', attack: 'Att', defense: 'Def', block: 'Blc' };
+        var cats = ['service', 'reception', 'attack', 'relance', 'defense', 'block'];
+        var labels = { service: 'Serv', reception: 'Rec', attack: 'Att', relance: 'Rel', defense: 'Def', block: 'Blc' };
 
         container.innerHTML = cats.map(function(cat) {
             var isActive = self.currentCategory === cat;
@@ -1114,7 +1139,7 @@ const MatchStatsView = {
         }
         text += '\n';
 
-        var cats = ['service', 'reception', 'attack', 'defense', 'block'];
+        var cats = ['service', 'reception', 'attack', 'relance', 'defense', 'block'];
         cats.forEach(function(catKey) {
             var catDef = SharedComponents.CATEGORIES_MATCH[catKey];
             text += catDef.label.toUpperCase() + '\n';
@@ -1321,8 +1346,8 @@ const YearStatsView = {
         // Mobile : onglets categorie + premier onglet service
         var html = '<div class="stats-section">';
         html += '<div class="segmented-tabs stats-category-tabs" id="yearCategoryTabs">';
-        var cats = ['service', 'reception', 'attack', 'defense', 'block'];
-        var labels = { service: 'Serv', reception: 'Rec', attack: 'Att', defense: 'Def', block: 'Blc' };
+        var cats = ['service', 'reception', 'attack', 'relance', 'defense', 'block'];
+        var labels = { service: 'Serv', reception: 'Rec', attack: 'Att', relance: 'Rel', defense: 'Def', block: 'Blc' };
         cats.forEach(function(cat) {
             html += '<button class="seg-tab cat-tab ' + (cat === 'service' ? 'active' : '') + '" data-cat="' + cat + '">' + labels[cat] + '</button>';
         });
