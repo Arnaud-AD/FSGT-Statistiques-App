@@ -633,10 +633,16 @@ const SharedComponents = {
             // Retrouver l'index reel du set pour le label
             var realIndex = (setFilter !== undefined && setFilter !== 'all') ? setFilter : completedSets.indexOf(set);
             var runs = SharedComponents.buildTimelineData(set);
-            if (runs.length === 0) return;
+            var mixHome = set.mixiteHome || 0;
+            var mixAway = set.mixiteAway || 0;
+            var hasMix = mixHome > 0 || mixAway > 0;
+            if (runs.length === 0 && !hasMix) return;
 
             var totalPoints = runs.reduce(function(sum, r) { return sum + r.points.length; }, 0);
-            var blockSize = SharedComponents.computeBlockSize(totalPoints, runs.length, containerWidth);
+            var totalMixBlocks = mixHome + mixAway;
+            var totalAll = totalPoints + totalMixBlocks;
+            var mixRuns = (mixHome > 0 ? 1 : 0) + (mixAway > 0 ? 1 : 0);
+            var blockSize = SharedComponents.computeBlockSize(totalAll, runs.length + mixRuns, containerWidth);
             var fontSize = blockSize >= 14 ? 9 : (blockSize >= 10 ? 7 : 0);
             var blockHeight = 20;
 
@@ -655,6 +661,35 @@ const SharedComponents = {
             html += '</span></div>';
 
             html += '<div class="timeline-chart">';
+
+            // Blocs mixité gris au début
+            if (mixHome > 0) {
+                html += '<div class="timeline-run">';
+                html += '<div class="timeline-row">';
+                for (var m = 1; m <= mixHome; m++) {
+                    html += '<div class="tl-block mixite" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;font-size:' + fontSize + 'px;">' + (fontSize > 0 ? m : '') + '</div>';
+                }
+                html += '</div>';
+                html += '<div class="timeline-row">';
+                for (var m = 0; m < mixHome; m++) {
+                    html += '<div class="tl-block empty" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;"></div>';
+                }
+                html += '</div></div>';
+            }
+            if (mixAway > 0) {
+                html += '<div class="timeline-run">';
+                html += '<div class="timeline-row">';
+                for (var m = 0; m < mixAway; m++) {
+                    html += '<div class="tl-block empty" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;"></div>';
+                }
+                html += '</div>';
+                html += '<div class="timeline-row">';
+                for (var m = 1; m <= mixAway; m++) {
+                    html += '<div class="tl-block mixite" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;font-size:' + fontSize + 'px;">' + (fontSize > 0 ? m : '') + '</div>';
+                }
+                html += '</div></div>';
+            }
+
             runs.forEach(function(run) {
                 html += '<div class="timeline-run">';
                 // Top row (home)

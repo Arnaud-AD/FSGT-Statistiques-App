@@ -526,6 +526,7 @@ body {
 
 .tl-block.home { background: var(--accent-blue); }
 .tl-block.away { background: var(--loss-color); }
+.tl-block.mixite { background: #9ca3af; }
 .tl-block.empty { background: transparent; }
 
 /* ==================== SIDE OUT / BREAK OUT ==================== */

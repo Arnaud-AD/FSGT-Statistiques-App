@@ -363,6 +363,12 @@ function renderSubModal() {
         <div class="sub-blocker-btn ${team} ${currentPrimary === opt.value ? 'active' : ''}"
              onclick="setSubPrimaryBlocker('${opt.value}')">${opt.label}</div>
     `).join('');
+
+    // Mixité — pré-remplir avec les valeurs actuelles
+    document.getElementById('subMixiteHome').value = currentSet.mixiteHome || 0;
+    document.getElementById('subMixiteAway').value = currentSet.mixiteAway || 0;
+    document.getElementById('subMixiteAwayLabel').textContent =
+        (currentMatch.opponent || 'Adv').substring(0, 10);
 }
 
 function subSlotClick(role) {
@@ -468,6 +474,52 @@ function setSubPrimaryBlocker(value) {
     }
     saveCurrentSet();
     renderSubModal();
+}
+
+function setMixite() {
+    const newMixHome = parseInt(document.getElementById('subMixiteHome').value) || 0;
+    const newMixAway = parseInt(document.getElementById('subMixiteAway').value) || 0;
+
+    const oldMixHome = currentSet.mixiteHome || 0;
+    const oldMixAway = currentSet.mixiteAway || 0;
+
+    const diffHome = newMixHome - oldMixHome;
+    const diffAway = newMixAway - oldMixAway;
+
+    if (diffHome === 0 && diffAway === 0) return;
+
+    // Mettre à jour les champs mixité sur le set
+    currentSet.mixiteHome = newMixHome;
+    currentSet.mixiteAway = newMixAway;
+
+    // Mettre à jour le score initial (bonus) et le score courant sur le set
+    currentSet.initialHomeScore = (currentSet.initialHomeScore || 0) + diffHome;
+    currentSet.initialAwayScore = (currentSet.initialAwayScore || 0) + diffAway;
+    currentSet.homeScore = (currentSet.homeScore || 0) + diffHome;
+    currentSet.awayScore = (currentSet.awayScore || 0) + diffAway;
+
+    // Mettre à jour gameState
+    gameState.homeScore += diffHome;
+    gameState.awayScore += diffAway;
+
+    // Décaler tous les scores stockés dans les points du set
+    if (currentSet.points) {
+        currentSet.points.forEach(function(pt) {
+            pt.homeScore += diffHome;
+            pt.awayScore += diffAway;
+        });
+    }
+
+    // Mettre à jour l'affichage
+    updateScore();
+    renderMiniTimeline();
+    saveCurrentSet();
+
+    // Vérifier si le nouveau score déclenche une fin de set
+    checkSetEnd();
+    if (gameState.setEnded) {
+        closeSubModal();
+    }
 }
 
 function handleBack() {

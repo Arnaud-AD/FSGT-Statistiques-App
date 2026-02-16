@@ -1353,6 +1353,46 @@
             color: white;
         }
 
+        .sub-mixite-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .sub-mixite-team {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-primary);
+            min-width: 30px;
+        }
+
+        .sub-mixite-input {
+            width: 44px;
+            padding: 4px 6px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'Google Sans', sans-serif;
+        }
+
+        .sub-mixite-input:focus {
+            border-color: #9ca3af;
+            outline: none;
+        }
+
+        .sub-mixite-pts {
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        .sub-mixite-sep {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin: 0 2px;
+        }
+
         .sub-modal-hint {
             font-size: 10px;
             color: var(--text-secondary);
@@ -1456,6 +1496,10 @@
 
         .mini-tl-block.away {
             background: var(--away-color, #ea4335);
+        }
+
+        .mini-tl-block.mixite {
+            background: #9ca3af;
         }
 
         .mini-tl-block.empty {

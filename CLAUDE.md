@@ -347,6 +347,7 @@ Chaque intégration est marquée par le commentaire `[DEV TEST] ... — À RETIR
 | Service    | Tot, Ace, S+, FS, Moy            |
 | Réception  | Tot, R4, R3, R2, R1, FR          |
 | Attaque    | Tot, A+, A-, BP, FA              |
+| Relance    | Tot, R+, R-, FR *(V19.0 — à implémenter)* |
 | Défense    | Tot, D+, D-, FD                  |
 | Bloc       | Tot, B+, B-, FB                  |
 
@@ -385,6 +386,23 @@ Chaque intégration est marquée par le commentaire `[DEV TEST] ... — À RETIR
 
 > **Critère A+ vs A-** : S'il y a une passe (`pass`) de l'équipe adverse après l'attaque dans le rally → A- (jeu organisé). Sinon → A+ (l'attaque a forcé le point ou l'erreur).
 
+### Relance *(V19.0 — à implémenter)*
+
+> **Distinction attaque vs relance** : La relance (`attackType === 'relance'`) est une catégorie de stats **séparée** de l'attaque. Ce n'est pas une attaque — c'est un geste de survie quand le joueur reçoit une balle impossible à attaquer (mauvaise passe ou mauvaise défense en amont). La responsabilité de la situation incombe à la passe/défense précédente, pas à l'attaquant.
+
+> **Contexte dans le workflow** : La relance est déclenchée dans le workflow quand le joueur choisit `attackType === 'relance'` au lieu de `'normal'`/`'feinte'`/`'deuxieme_main'`. Le workflow est identique à une attaque (choix de zone, trajectoire, résultat) mais la comptabilisation stats est différente.
+
+| Stat | Signification | Condition |
+|------|---------------|-----------|
+| Tot  | Total relances | Chaque action `type: 'attack'` avec `attackType === 'relance'` |
+| R+   | Relance positive | Point direct (`result === 'point'`) ou relance qui permet de continuer le jeu (l'adversaire ne marque pas directement après) |
+| R-   | Relance neutre/mauvaise | Relance défendue qui mène à une attaque adverse organisée |
+| FR   | Faute de relance | `result === 'fault_net'` ou `result === 'out'` |
+
+> **Règle actuelle (pré-V19.0)** : Les relances sont comptées en attaque (Tot+1, Att+ si point direct, FA/BP/A- ignorés). En V19.0, elles seront **retirées de la catégorie attaque** et migrées vers cette catégorie dédiée.
+>
+> **Impact sur les stats d'attaque** : Après V19.0, les actions avec `attackType === 'relance'` ne compteront plus dans `attack.tot`, `attack.attplus`, etc. Seules les attaques réelles (`normal`, `feinte`, `deuxieme_main`) resteront dans la catégorie attaque.
+
 ### Défense
 
 | Stat | Signification | Condition |
@@ -421,6 +439,7 @@ Chaque intégration est marquée par le commentaire `[DEV TEST] ... — À RETIR
     service:   { tot: 0, ace: 0, splus: 0, fser: 0, recSumAdv: 0, recCountAdv: 0 },
     reception: { tot: 0, r4: 0, r3: 0, r2: 0, r1: 0, frec: 0 },
     attack:    { tot: 0, attplus: 0, attminus: 0, bp: 0, fatt: 0 },
+    relance:   { tot: 0, relplus: 0, relminus: 0, frel: 0 },  // V19.0 — à ajouter
     defense:   { tot: 0, defplus: 0, defminus: 0, fdef: 0 },
     block:     { tot: 0, blcplus: 0, blcminus: 0, fblc: 0 }
 }
@@ -452,174 +471,160 @@ Zone semi-circulaire bleue affichée pendant la phase `defense_end` (après auto
 
 ## Planning de développement
 
-> **Stratégie** : Implémenter toutes les fonctionnalités d'abord, puis phase finale de debug global + restructuration propre du code.
+> **Stratégie** : Workflow d'abord (scoring live solide), puis enrichissement historique, puis stats avancées, puis finalisation.
 
-### ~~Phase 1 — Zones d'attaque détaillées + auto-select défenseur contextuel~~ ✅ TERMINÉE (V8.0)
-**Objectif** : Zones d'attaque granulaires (incluant centre) avec auto-select défenseur basé sur la section du terrain (et non plus sur le joueur).
-- [x] Ajouter zone d'attaque au centre (en plus des ailes existantes)
-- [x] Redécouper le terrain adverse en sections de défense
-- [x] Auto-select défenseur basé sur la zone d'impact terrain
-- [x] Tests : chaque zone → bon défenseur auto-sélectionné
+### Phases terminées (V8.0 → V18.1)
 
-### ~~Phase 1bis — Système relance : zones de défense 4 joueurs + stats conditionnelles~~ ✅ TERMINÉE (V9.0)
-**Objectif** : Zones de défense spécifiques pour les attaques en relance, avec 4 joueurs en défense et stats conditionnelles.
-- [x] 4 zones de défense fixes pour attaques relance (R4, Pointu, Centre, Passeur) avec point de convergence (55%, 42%)
-- [x] Auto-détection du type d'attaque dans `showDefenseZones()` sans modifier les call sites
-- [x] Phase `attack_type` : toujours afficher les zones smash standard (pas de relance prématurée)
-- [x] Nettoyage complet des zones dans `hideDefenseZones()` (style inline + contenu + dataset)
-- [x] Stats relance : seul Att+ compte (Tot+1, Att+), FA/BP/Att- ignorés pour l'attaquant
-- [x] 4ème zone HTML (`data-zone="extra"`) invisible par défaut, active uniquement en relance
-- [x] Support miroir top/bottom court pour les 8 clip-paths relance
+| Phase | Description | Version |
+|-------|-------------|---------|
+| Phase 1 | Zones d'attaque détaillées + auto-select défenseur contextuel | V8.0 ✅ |
+| Phase 1bis | Système relance : zones de défense 4 joueurs + stats conditionnelles | V9.0 ✅ |
+| Phase 2 | Override joueur sur toutes les phases (4 tags toujours visibles) | V10.0 ✅ |
+| Phase 3 | Stats attaque différenciées (relance : seul Att+ compte) | V9.0 ✅ |
+| Phase 4 | Défense contextuelle (bloc/relance) — absorbée par 1 + 1bis | V9.0 ✅ |
+| Phase 6 | Flèches après bloc (Y = centre filet, X = position réelle) | V11.0 ✅ |
+| Phase 7 | Bloc out trajectoire en un clic | V11.1 ✅ |
+| Phase 8 | Stats Side Out / Break Out — absorbée par Phase 11 | V13.0 ✅ |
+| Phase 9 | Timeline de séries de points | V11.1 ✅ |
+| Phase 11 | Refonte totale historique (5 volets) | V13.52 ✅ |
+| V14.0 | Fix stats attaque filet→block (`result = 'defended'`) | V14.0 ✅ |
+| V14.1 | Suppression auto-select défenseur après block | V14.1 ✅ |
+| V16.x | Mode admin + Firebase Auth UI | V16.4 ✅ |
+| V17.x | Full Firebase sync (localStorage → Firestore) | V17.3 ✅ |
+| V18.0 | Audit & fix retours directs (réception, passe, défense) + comptabilisation stats | V18.0 ✅ |
+| V18.1 | Réécriture complète du système undo (WorkflowEngine) + bug fixes (flèches, bloc) | V18.1 ✅ |
 
-### ~~Phase 2 — Override joueur sur toutes les phases~~ ✅ TERMINÉE (V10.0)
-**Objectif** : À chaque étape du workflow (réception, passe, attaque, défense, bloc — sauf service), 4 tags joueurs sont toujours visibles dans l'ordre fixe Passeur → R4 → Centre → Pointu. Le joueur auto-sélectionné est en surbrillance (fond couleur du rôle). Clic sur un autre tag = override. Clic sur le tag auto = retour au mode auto.
+---
 
-**Principe fondamental** : Ne jamais exclure de joueur des tags. Les 4 joueurs sont toujours affichés.
+### Phase 18 — Workflow : Corrections & Robustesse *(en cours)*
 
-- [x] Tags joueurs visibles à chaque étape du workflow (sauf service) : réception, réception_end, passe, passe_end, attaque_player, attaque_type, attaque_end, résultat, défense, défense_end, bloc au filet, bloc out
-- [x] Ordre fixe des tags : Passeur → R4 → Centre → Pointu (tri par rôle dans `renderOverrideTags()`)
-- [x] Suppression de toute logique d'exclusion (`excludePlayers` ignoré, `lastToucher` non exclu)
-- [x] `getEffectivePlayer()` unifié (sans side-effect) utilisé dans tous les handlers
-- [x] Correction bug `updateOverrideVisuals()` : utilise `overrideTagsTeam` au lieu de `attackingTeam`
-- [x] Reset automatique de `overridePlayer` dans `renderOverrideTags()` à chaque changement de phase
-- [x] Bandeau mis à jour avec le joueur effectif (override ou auto) à chaque étape
+~~**V18.0 — Audit & fix retours directs**~~ ✅
+- [x] Auditer tous les cas de retour direct (réception, passe, défense) et leur comptabilisation stats
+- [x] Corriger les cas manquants/incohérents
+- [x] Vérifier les retours directs gagnants ET perdants depuis chaque phase
 
-### ~~Phase 3 — Stats attaque différenciées (relance vs smash/feinte)~~ ✅ TERMINÉE (V9.0)
-**Objectif** : Séparer les statistiques selon le type d'attaque pour une analyse plus fine.
-- [x] Différencier relance vs smash/feinte dans le modèle de données
-- [x] Stats relance conditionnelles : seul Att+ compte (Tot+1, Att+), FA/BP/Att- ignorés
-- [x] Tests : vérifier que les stats se catégorisent correctement
+~~**V18.1 — Fix undo complet**~~ ✅
+- [x] Réécriture complète du système undo (WorkflowEngine)
+- [x] Bug fixes flèches, bloc, undo sur tous scénarios
 
-### ~~Phase 4 — Défense contextuelle (bloc/relance)~~ ✅ TERMINÉE (absorbée par V8.0 + V9.0)
-**Objectif** : Intégration bloc → défense relance. Réalisée de facto : `showDefenseZones()` auto-détecte le type d'attaque (relance vs standard) depuis `gameState` et affiche les zones appropriées quel que soit le contexte (après bloc, après attaque directe, etc.).
-- [x] Si clic "filet" → génère bloc + défense adaptée au contexte relance
-- [x] Transition bloc → défense relance gérée par auto-détection dans `showDefenseZones()`
-- [x] Zones relance (4 joueurs) ou standard (3 joueurs) selon `attackType` du rally
+**V18.2 — Points de mixité en cours de set**
+- [ ] Ajouter bouton dans match-live pour ajouter/modifier les points de mixité pendant le set
+- [ ] Gestion séries de points : points mixité gris toujours au début pour l'équipe concernée dans la timeline
 
-### Phase 5 — Debug global + restructuration
-**Objectif** : Rigidifier et nettoyer le code une fois toutes les fonctionnalités intégrées.
-- [ ] Test complet workflow happy path (service → point marqué)
-- [ ] Test complet workflow return (échange avec contre-attaque)
-- [ ] Test complet undo/redo sur tous les scénarios
-- [ ] Restructuration et nettoyage du code
-- [ ] Vérification cohérence state machine avec tous les nouveaux cas
+### Phase 19 — Workflow : Stats relance & Qualité de passe
+*Enrichissement du modèle de données*
 
-### ~~Phase 6 — Flèches après bloc (amélioration visuelle)~~ ✅ TERMINÉE (V11.0)
-**Objectif** : Quand un bloc est déclenché (bloc out, block kill, bloc dévié), le point de départ de la flèche doit être centré sur le filet en hauteur, mais positionné correctement en largeur (position réelle du bloc).
-- [x] Modifier le point de départ de la flèche post-bloc : Y = centre filet, X = position réelle
-- [x] Appliquer à tous les cas : bloc out, block kill, bloc dévié
-- [x] Tests : vérifier visuellement la cohérence des flèches post-bloc
+**V19.0 — Nouvelle catégorie stats : Relance**
+- [ ] Créer une catégorie de stats à part entière "Relance" (séparée de l'attaque — la relance n'est pas une attaque, c'est un geste de survie dû à une mauvaise passe/défense en amont)
+- [ ] Colonnes : Tot, R+ (relance qui permet de continuer le jeu / point direct), R- (relance neutre/mauvaise), FR (faute de relance)
+- [ ] Intégration dans le calcul de stats (`recalculateAllStats`) et l'affichage (match-live + historique)
+- [ ] Retirer les relances des stats d'attaque (actuellement : Tot+1 et Att+ si point direct → à migrer vers la catégorie Relance)
 
-### ~~Phase 7 — Bloc out : trajectoire en un clic~~ ✅ TERMINÉE (V11.1)
-**Objectif** : Quand on clique sur le terrain adverse après un bloc, le clic indique déjà où la balle atterrit. Le système ne doit pas redemander la trajectoire.
-- [x] Si clic terrain adverse après bloc → utiliser ce clic comme trajectoire finale directement
-- [x] Supprimer l'étape redondante "Cliquez où va la balle" quand la position est déjà connue
-- [x] Tests : bloc out via clic terrain → point attribué sans étape supplémentaire
+**V19.1 — Système de qualité de passe**
+- [ ] 3 grilles prédéfinies selon le contexte : **confort** (après R4/R3), **contraint** (après R2/R1), **transition** (après défense/relance ou passeur non principal)
+- [ ] Chaque grille a ses propres zones ~50cm×50cm avec seuils "optimale / acceptable / mauvaise"
+- [ ] Passeur en poste → grille confort ou contraint selon réception. Autres joueurs → toujours grille transition
+- [ ] Enregistrement qualité de passe dans le modèle de données (action `pass` : `passQuality`, `passContext`)
+- [ ] Distinction passeur principal / passeur de transition dans les stats
 
-### ~~Phase 8 — Stats Side Out / Break Out~~ → absorbée par Phase 11 (Volet 4)
-**Objectif** : Identifier et afficher les statistiques de side out (point marqué par l'équipe en réception) vs break out (point marqué par l'équipe au service) pour les deux équipes. Permettre une analyse croisée pour comprendre les dynamiques tactiques du match.
+**V19.2 — Badges flash feedback visuel**
+- [ ] Badges temporaires après chaque action : résultat (R4→R0, D+, D-, A+, BP, FA...)
+- [ ] Badges optionnels en haut pour ajuster la qualité (override vers qualité inférieure si jugé)
+- [ ] Design discret, animation courte (apparition/disparition rapide)
 
-> **Terminologie** : Side Out = % points marqués en réception. Break Out = % points marqués au service.
+### Phase 20 — Historique : Refonte structure & design
 
-> **Données déjà disponibles** : Chaque `point` contient `servingTeam` et les scores `homeScore`/`awayScore`. Le side out se déduit en comparant `servingTeam` avec l'équipe qui marque (delta de score). Aucune modification du modèle de données nécessaire — c'est du calcul dérivé.
+> **Responsive** : La vue historique est optimisée pour **mobile** (375–430px portrait) ET **MacBook Air 13"** (1470px). Breakpoints : ≤480px (mobile portrait), 481–768px (mobile paysage), ≥1024px (laptop).
 
-> **Note** : L'implémentation de cette phase est intégrée dans la Phase 11, Volet 4. Voir Phase 11 pour les détails.
+**V20.0 — Restructuration onglets**
+- [ ] Renommer "Stats Matchs" → "Stats ALL" (stats détaillées par joueur, actuellement dans Global)
+- [ ] Nouvel onglet "Global" : stats globales du match (side out/break out, séries, meilleurs joueurs, graphiques par poste)
+- [ ] Onglet stats passe dédié dans Stats ALL et dans chaque Set (passeur principal / passeur transition)
 
-### ~~Phase 9 — Timeline de séries de points (visualisation)~~ ✅ TERMINÉE (V11.1)
-**Objectif** : Afficher une timeline graphique des séries de points consécutifs par équipe, set par set. Chaque bloc numéroté représente un point, coloré selon l'équipe qui l'a marqué. Les séries longues sont immédiatement visibles. Inspiré du format "Run Chart" volleyball.
+**V20.1 — Améliorations visuelles match**
+- [ ] Bouton YouTube redesigné style YouTube (carré rouge, bouton play blanc/texte gris)
+- [ ] Scores sets et match colorés : vert (victoire Neuilly) / rouge (défaite Neuilly) / noir (adversaire)
+- [ ] Détection poste par joueur par set → pastilles de rôle dans la vue historique (multi-pastilles si multi-postes dans différents sets)
+- [ ] Side Out / Break Out : ajouter ligne moyenne par set dans les onglets Set X (pour comparaison). Ligne absente de Stats ALL car moyenne = ALL
 
-> **Données déjà disponibles** : Les `points[]` de chaque set contiennent `homeScore`/`awayScore` séquentiellement. Les séries se déduisent en comparant les deltas de score consécutifs. Aucune modification du modèle de données nécessaire.
+**V20.2 — Stats globales enrichies (onglet Global)**
+- [ ] Meilleur marqueur, meilleur bloqueur, meilleur réceptionneur (règles à définir + visuels)
+- [ ] Graphiques par poste : Att/Recep/Bloc pour ailiers, Passe/Serv/Def pour passeur, Recep/Def pour centre
+- [ ] Statistiques comparatives joueur vs moyenne année
+- [ ] Graphique momentum lié aux séries de points (chaud/froid, courbe d'élan)
 
-- [x] Composant `renderTimeline(set, container)` : génère la timeline HTML/CSS pour un set
-- [x] Algorithme de détection des séries : parcourir `points[]`, grouper les points consécutifs de la même équipe
-- [x] Style CSS : blocs colorés, disposition deux lignes, numérotation, responsive pour sets courts (25-10) et serrés (26-24)
-- [x] Intégrer dans historique.html : section "Timeline" avec un rendu par set
-- [x] Optionnel : mini-timeline dans match-live.html pour suivi en temps réel
-- [x] Tests : vérifier l'alignement visuel sur différentes longueurs de set
-- [x] Tests : vérifier la cohérence numérotation vs score final
+**V20.3 — Refonte design tableaux desktop + responsive**
+- [ ] Refonte complète des tableaux stats (desktop — design propre)
+- [ ] Mobile portrait : double onglet Serv/Recep OU Passe/Attaque OU Def/Bloc
+- [ ] Mobile paysage : layout adapté
 
-### Phase 10 — Retrait du mode test (DevTestMode)
-**Objectif** : Une fois l'application terminée et toutes les fonctionnalités validées, supprimer entièrement le mode test.
-- [ ] Supprimer l'objet `DevTestMode` dans `storage.js`
-- [ ] Supprimer tous les blocs `[DEV TEST] ... — À RETIRER` dans les 5 fichiers HTML (equipe.html, match-config.html, match-adverse.html, match-set-composition.html, match-set-config.html)
-- [ ] Vérifier qu'aucune référence à `DevTestMode` ne subsiste dans le code
-- [ ] Tester que l'application fonctionne normalement sans le mode test
+### Phase 21 — Historique : Visualisation terrain (flèches)
 
-### Phase 11 — Refonte totale de la vue Historique
-**Objectif** : Refonte complète de `historique.html` — redesign visuel, implémentation des onglets Stats Année et Sets joués (actuellement vides), intégration des stats Side Out / Break Point (Phase 8), et améliorations UX globales.
+**V21.0 — Vue terrain avec flèches filtrables**
+- [ ] Rendu terrain SVG avec toutes les trajectoires enregistrées (service, réception, attaque, passe, défense)
+- [ ] Couleurs par résultat : vert (gagnant), rouge (perdant), orange (neutre)
+- [ ] Filtres combinables multi-sélection : joueur(s), set(s)/match, catégorie(s), résultat(s)
+- [ ] Intégration dans historique.html (onglet ou section dédiée)
 
-> **État actuel (V13.52)** : Les 3 onglets sont implémentés et fonctionnels. Le code est séparé en 3 fichiers (`historique.html` coquille ~160 lignes, `historique.css` ~1260 lignes, `historique.js` ~1490 lignes). UI uniformisée avec composant `segmented-tabs` partagé. Side Out/Break Out intégré. Menu actions via bouton rouage ⚙️.
+**V21.1 — Heatmap passe**
+- [ ] Heatmap terrain avec zones colorées selon qualité de passe (données de V19.1)
+- [ ] Filtres : passeur principal vs transition, par set, par qualité de réception en amont
+- [ ] Tendances : petit côté vs grand côté selon lieu/qualité de réception
 
-> **Responsive — EXCEPTION historique.html** : Contrairement au reste de l'app (optimisée Chrome desktop 600px), la vue historique doit être optimisée pour **2 types d'appareils** :
->
-> | Appareil | Viewport CSS | Breakpoint | Usage |
-> |----------|-------------|------------|-------|
-> | **Mobile (smartphone)** | 375×667 à 430×932 | `≤ 768px` | Consultation post-match sur le terrain |
-> | **MacBook Air 13"** | 1470×956 (défaut M3/M4) | `≥ 1024px` | Analyse détaillée à la maison |
->
-> **Breakpoints cibles** :
-> - `≤ 480px` : Mobile portrait (iPhone SE, petits Android) — layout 1 colonne, tableaux scrollables
-> - `481px – 768px` : Mobile paysage / petites tablettes — layout adapté
-> - `≥ 1024px` : Laptop / MacBook Air — layout élargi, tableaux complets côte à côte, pas de scroll horizontal
->
-> **Note** : Cette contrainte responsive ne s'applique qu'à `historique.html` (et ses fichiers `historique.css` / `historique.js`). Les autres pages restent optimisées pour Chrome desktop 600px uniquement.
+### Phase 22 — Stats avancées
 
-**Volet 1 — Restructuration et redesign UI** ✅ (V13.52)
-- [x] Extraire le CSS dans un fichier séparé `historique.css` (cohérent avec `match-live.css`)
-- [x] Extraire le JS dans un fichier séparé `historique.js`
-- [x] Redesign visuel du header et de la navigation par onglets
-- [x] Améliorer le design des cartes match (sélecteur de match)
-- [x] Redesign de la vue détail match (header, scores, sets)
-- [x] Améliorer le rendu des tableaux de stats joueurs (lisibilité, responsive scroll)
-- [x] Améliorer le rendu de la timeline des séries de points
-- [x] Composant `segmented-tabs` unifié pour tous les groupes d'onglets (V13.51-13.52)
-- [x] Bouton rouage ⚙️ avec dropdown menu (Exporter stats / Supprimer match) (V13.4)
+**V22.0 — Notes joueurs /100 par poste**
+- [ ] Barème ailier : pondération Attaque / Réception / Bloc
+- [ ] Barème passeur : pondération Passe / Service / Défense
+- [ ] Barème centre : pondération Réception / Défense
+- [ ] Affichage dans historique (par match et cumulé année)
 
-**Volet 2 — Onglet Stats Année (statistiques cumulées saison)** ✅ (V13.0)
-- [x] Agréger les stats de tous les matchs complétés de la saison
-- [x] Afficher le bilan global : matchs joués, V/D, sets gagnés/perdus, points marqués/encaissés
-- [x] Tableau stats joueurs cumulées (service, réception, attaque, défense, bloc) sur toute la saison
-- [x] Classement joueurs par catégorie (meilleur attaquant, meilleur réceptionneur, etc.)
-- [x] Filtres : par type de match (Championnat / Ginette), par période
-
-**Volet 3 — Onglet Sets joués (analyse détaillée des sets)** ✅ (V13.0)
-- [x] Liste de tous les sets joués (tous matchs confondus), triés chronologiquement
-- [x] Pour chaque set : score final, adversaire, timeline des séries, durée estimée
-- [x] Filtres : sets gagnés/perdus, par adversaire, par score serré (≤3 pts d'écart) vs dominé
-- [x] Stats agrégées par type de set (sets gagnés vs perdus, sets serrés vs dominés)
-
-**Volet 4 — Intégration Side Out / Break Out (absorbe Phase 8)** ✅ (V13.0)
-- [x] Fonction `classifyPoint(point, prevPoint)` : retourne `'sideout'` ou `'breakout'`
-- [x] Fonction `calculateSideOutStats(points)` : Side Out % et Break Out % par équipe
+**V22.1 — Stats Side Out / Break Out enrichies**
 - [ ] Stats filtrées par contexte : Att% en side out, Rec Moy en side out, Pression service
-- [x] Bloc résumé "Side Out / Break Out" dans la vue détail match (SO% et BO% par équipe, par set et global)
-- [ ] Métriques croisées dans l'onglet Stats Année : tableau récapitulatif par match + total saison
+- [ ] Métriques croisées Stats Année : tableau récapitulatif SO%/BO% par match + total saison
 - [ ] Tests : set simulé → vérifier les % side out / break out vs comptage manuel
 
-**Volet 5 — Améliorations UX** ✅ (V13.52)
-- [x] Navigation fluide entre onglets (pas de rechargement)
-- [x] Persistance de l'onglet actif (retour sur la même vue après navigation)
-- [x] Bouton d'export des stats (copier dans le presse-papier en format texte lisible)
-- [x] Lien direct vers la vidéo YouTube du match (si configurée dans match-set-config)
-- [x] Responsive : optimiser pour mobile (≤768px, cible 375–430px) ET MacBook Air 13" (≥1024px, cible 1470px) — cf. note responsive ci-dessus
+**V22.2 — Stats texte export**
+- [ ] Export texte par match : Set 1,2,3,4,5 + stats totales par joueur
+- [ ] Sets joués / points +/- par set
+- [ ] Note /100 par joueur dans l'export
 
-### Dépendances mises à jour
-```
-Phase 1 (zones attaque)   ── ✅
-Phase 1bis (relance)      ── ✅
-Phase 3 (stats attaque)   ── ✅
-Phase 2 (override joueur) ── ✅
-Phase 4 (défense bloc)    ── ✅ (absorbée par 1 + 1bis)
-Phase 6 (flèches bloc)    ── ✅
-Phase 7 (bloc out 1-clic) ── ✅
-Phase 8 (stats side out)  ── ✅ (absorbée par Phase 11)
-Phase 9 (timeline séries) ── ✅
-Phase 11 (refonte histo)  ── ✅ (V13.52 — 5 volets terminés)
-Phase 5 (debug global)   ─────────────────────────────────────────→ Phase 10 (retrait mode test)
-```
+**V22.3 — Graphique momentum Stats Année**
+- [ ] Graphique momentum agrégé dans l'onglet Stats Année (tendances sur la saison)
 
-### Roadmap future (post-V11)
-- Persistance long terme pour analytics multi-matchs/saisons
-- Visualisation des patterns de jeu sur diagrammes terrain
-- Statistiques joueurs sur plusieurs matchs
-- Amélioration du déploiement GitHub Pages
+**V22.4 — Stats mentalité / distribution passeur**
+- [ ] Détecter les séquences : attaquant échoue (A-, BP, defended) → passe suivante du même passeur → même attaquant ou switch
+- [ ] Taux de re-confiance par passeur (% redistribution au même attaquant après échec)
+- [ ] Taux de switch : vers qui le passeur redirige après un échec
+- [ ] Corrélation : est-ce que le re-feed donne un meilleur ou pire résultat ?
+- [ ] Affichage dans les stats passe (historique)
+
+### Phase 23 — Ginette 4v6
+*À détailler quand les phases précédentes seront terminées*
+- [ ] Adaptation workflow pour matchs 4 contre 6 (zones de défense, positions)
+- [ ] Stats spécifiques Ginette
+
+### Phase 24 — Finalisation
+
+**V24.0 — Uniformisation thème**
+- [ ] Thème visuel cohérent sur toutes les pages (palette couleurs, typographie, composants)
+
+**V24.1 — Retrait DevTestMode (ex-Phase 10)**
+- [ ] Supprimer `DevTestMode` dans `storage.js`
+- [ ] Supprimer tous les blocs `[DEV TEST]` dans les fichiers HTML
+- [ ] Vérifier qu'aucune référence ne subsiste
+
+**V24.2 — Debug global (ex-Phase 5)**
+- [ ] Test complet tous workflows (happy path, contre-attaque, undo, retours directs)
+- [ ] Vérification cohérence state machine avec tous les nouveaux cas
+- [ ] Nettoyage final du code
+
+### Dépendances
+```
+Phase 18 (workflow fixes)  ──→ Phase 19 (relance + passe) ──→ Phase 21.1 (heatmap passe)
+                                                            ↗
+Phase 20 (historique)      ──→ Phase 21.0 (flèches terrain)
+                           ──→ Phase 22 (stats avancées)
+Phase 23 (Ginette)         ── indépendante, à détailler
+Phase 24 (finalisation)    ── après toutes les autres phases
+```

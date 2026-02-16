@@ -458,6 +458,20 @@
                     </div>
                 </div>
 
+                <!-- Mixité -->
+                <div class="sub-bench-section" id="subMixiteSection">
+                    <div class="sub-bench-label">⚖️ Points de mixité :</div>
+                    <div class="sub-mixite-row">
+                        <span class="sub-mixite-team">Jen</span>
+                        <input type="number" class="sub-mixite-input" id="subMixiteHome" value="0" min="0" max="10" oninput="setMixite()">
+                        <span class="sub-mixite-pts">pts</span>
+                        <span class="sub-mixite-sep">—</span>
+                        <span class="sub-mixite-team" id="subMixiteAwayLabel">Adv</span>
+                        <input type="number" class="sub-mixite-input" id="subMixiteAway" value="0" min="0" max="10" oninput="setMixite()">
+                        <span class="sub-mixite-pts">pts</span>
+                    </div>
+                </div>
+
                 <div class="sub-modal-actions">
                     <button class="sub-modal-btn cancel" onclick="closeSubModal()">Fermer</button>
                 </div>
@@ -5262,23 +5276,58 @@
 
         function renderMiniTimeline() {
             const container = document.getElementById('miniTimelineChart');
-            if (!container || !currentSet || !currentSet.points || currentSet.points.length === 0) {
-                if (container) container.innerHTML = '';
-                return;
-            }
+            if (!container || !currentSet) { if (container) container.innerHTML = ''; return; }
 
-            const runs = buildTimelineData(currentSet);
-            if (runs.length === 0) { container.innerHTML = ''; return; }
+            const mixHome = currentSet.mixiteHome || 0;
+            const mixAway = currentSet.mixiteAway || 0;
+            const hasMix = mixHome > 0 || mixAway > 0;
+            const hasPoints = currentSet.points && currentSet.points.length > 0;
+
+            if (!hasMix && !hasPoints) { container.innerHTML = ''; return; }
+
+            const runs = hasPoints ? buildTimelineData(currentSet) : [];
+            if (!hasMix && runs.length === 0) { container.innerHTML = ''; return; }
 
             const totalPoints = runs.reduce(function(sum, r) { return sum + r.points.length; }, 0);
+            const totalMixBlocks = mixHome + mixAway;
+            const totalAll = totalPoints + totalMixBlocks;
+            const mixRuns = (mixHome > 0 ? 1 : 0) + (mixAway > 0 ? 1 : 0);
             const availableWidth = 576;
-            const gapWidth = Math.max(0, runs.length - 1) * 3;
-            const internalGaps = totalPoints - runs.length;
-            const blockSize = Math.max(6, Math.min(16, Math.floor((availableWidth - gapWidth - internalGaps) / totalPoints)));
+            const totalRuns = runs.length + mixRuns;
+            const gapWidth = Math.max(0, totalRuns - 1) * 3;
+            const internalGaps = totalAll - totalRuns;
+            const blockSize = Math.max(6, Math.min(16, Math.floor((availableWidth - gapWidth - internalGaps) / totalAll)));
             const fontSize = blockSize >= 12 ? 7 : (blockSize >= 9 ? 6 : 0);
             const blockHeight = 14;
 
             let html = '';
+
+            // Blocs mixité gris au début
+            if (mixHome > 0) {
+                html += '<div class="mini-tl-run">';
+                html += '<div class="mini-tl-row">';
+                for (var m = 1; m <= mixHome; m++) {
+                    html += '<div class="mini-tl-block mixite" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;font-size:' + fontSize + 'px;">' + (fontSize > 0 ? m : '') + '</div>';
+                }
+                html += '</div><div class="mini-tl-row">';
+                for (var m = 0; m < mixHome; m++) {
+                    html += '<div class="mini-tl-block empty" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;"></div>';
+                }
+                html += '</div></div>';
+            }
+            if (mixAway > 0) {
+                html += '<div class="mini-tl-run">';
+                html += '<div class="mini-tl-row">';
+                for (var m = 0; m < mixAway; m++) {
+                    html += '<div class="mini-tl-block empty" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;"></div>';
+                }
+                html += '</div><div class="mini-tl-row">';
+                for (var m = 1; m <= mixAway; m++) {
+                    html += '<div class="mini-tl-block mixite" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;font-size:' + fontSize + 'px;">' + (fontSize > 0 ? m : '') + '</div>';
+                }
+                html += '</div></div>';
+            }
+
             runs.forEach(function(run) {
                 html += '<div class="mini-tl-run">';
                 html += '<div class="mini-tl-row">';
