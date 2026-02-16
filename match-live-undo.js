@@ -121,31 +121,12 @@ function confirmUndoLastPoint() {
     // Fermer la modal
     closeUndoPointModal();
     
-    // Reset pour nouveau point
-    gameState.rally = [];
-    gameState.currentAction = {};
-    gameState.passAutoSelected = false;
-    gameState.attackAutoSelected = false;
-    gameState.receptionAutoSelected = false;
-    gameState.netDirectAttack = false;
-    gameState.defenseDirectAttack = false;
-    gameState.defenseAutoSelected = false;
-    gameState.defenseAutoPlayer = null;
-    gameState.defenseFaultShortcut = false;
-    delete gameState.blocOutPending;
-    delete gameState.blocOutAttackingTeam;
-    clearMarkers();
-    clearArrows();
-    hideServiceZones();
-    hideReceptionQualityZones();
-    hideDefenseQualityZones();
-    hideAttackZones();
-    hideDefenseZones();
-    highlightCourt(null);
+    // Reset pour nouveau point via WorkflowEngine
+    WorkflowEngine._resetRallyState();
+    WorkflowEngine.clearStack();
 
-    gameState.phase = 'server_selection';
-    updatePhase();
-    renderServerSelection();
+    // Démarrer un nouveau point
+    WorkflowEngine.transition('server_selection');
 }
 
 function redrawRally() {
@@ -228,6 +209,10 @@ function redrawRally() {
                 drawArrow(netPos, action.endPos, 'block-touch');
             }
         } else if (action.type === 'defense') {
+            // Marqueur au point de départ de la défense (zone auto-select) si disponible
+            if (action.startPos && action.startPos !== action.endPos) {
+                addMarker(action.startPos, 'defense');
+            }
             if (action.endPos) {
                 addMarker(action.endPos, 'defense');
             }
@@ -237,16 +222,28 @@ function redrawRally() {
                 if (action.endPos) {
                     drawArrow(action.endPos, action.directReturnEndPos, 'defense');
                 }
+            } else if (action.startPos && action.endPos) {
+                // Flèche intermédiaire : attaque → zone de défense
+                const prevAction = gameState.rally[i - 1];
+                if (prevAction && prevAction.endPos && action.incomingArrowType) {
+                    drawArrow(prevAction.endPos, action.startPos, action.incomingArrowType);
+                } else if (prevAction && prevAction.endPos) {
+                    // Fallback si pas de incomingArrowType
+                    const arrowType = prevAction.type === 'attack'
+                        ? getAttackArrowType(prevAction.attackType)
+                        : 'defense';
+                    drawArrow(prevAction.endPos, action.startPos, arrowType);
+                }
+                // Flèche depuis la position de défense (startPos = zone auto-select)
+                drawArrow(action.startPos, action.endPos, 'defense');
             } else {
-                // Trouver l'action précédente (block, attack, ou retour direct)
+                // Fallback : flèche depuis l'action précédente
                 const prevAction = gameState.rally[i - 1];
                 if (prevAction && prevAction.type === 'reception' && prevAction.isDirectReturn && prevAction.directReturnEndPos) {
-                    // Cas du retour direct de réception : flèche depuis directReturnEndPos
                     if (action.endPos) {
                         drawArrow(prevAction.directReturnEndPos, action.endPos, 'defense');
                     }
                 } else if (prevAction && prevAction.type === 'defense' && prevAction.isDirectReturn && prevAction.directReturnEndPos) {
-                    // Cas du retour direct de défense précédente : flèche depuis directReturnEndPos
                     if (action.endPos) {
                         drawArrow(prevAction.directReturnEndPos, action.endPos, 'defense');
                     }
@@ -387,7 +384,9 @@ function subSlotClick(role) {
         subState.selectedBench = null;
         saveCurrentSet();
         renderStatsTables();
-        renderServerSelection();
+        if (WorkflowEngine && WorkflowEngine.phases[gameState.phase] && WorkflowEngine.phases[gameState.phase].reenter) {
+            WorkflowEngine.phases[gameState.phase].reenter();
+        }
         renderSubModal();
         
     } else if (subState.selectedSlot !== null) {
@@ -432,7 +431,9 @@ function subBenchClick(playerName) {
         subState.selectedSlot = null;
         saveCurrentSet();
         renderStatsTables();
-        renderServerSelection();
+        if (WorkflowEngine && WorkflowEngine.phases[gameState.phase] && WorkflowEngine.phases[gameState.phase].reenter) {
+            WorkflowEngine.phases[gameState.phase].reenter();
+        }
         renderSubModal();
         
     } else if (subState.selectedBench === playerName) {

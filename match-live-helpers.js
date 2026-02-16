@@ -802,8 +802,8 @@ function renderOverrideTags(config) {
 
     // Boutons Ace et Faute réception en phase réception
     if (showAceButton) {
-        html += `<button class="action-tag ace" onclick="handleAceFromReception()">🎯 Ace</button>`;
-        html += `<button class="action-tag faute" onclick="handleReceptionFaultFromTags()">❌ Faute réception</button>`;
+        html += `<button class="action-tag ace" onclick="WorkflowEngine.handleButton('ace')">🎯 Ace</button>`;
+        html += `<button class="action-tag faute" onclick="WorkflowEngine.handleButton('receptionFault')">❌ Faute réception</button>`;
     }
 
     container.innerHTML = html;
@@ -886,33 +886,9 @@ function renderDefenseSelection(team, attackerRole, showDirectAttack = false) {
     }
 }
 
+// V18.0 : Délègue au WorkflowEngine au lieu du switch/case
 function handlePlayerSelection(playerName) {
-    switch (gameState.phase) {
-        case 'reception':
-            selectReceptioner(playerName);
-            break;
-        case 'pass':
-            selectPasser(playerName);
-            break;
-        case 'attack_player':
-            selectAttacker(playerName);
-            break;
-        case 'defense':
-            selectDefender(playerName);
-            break;
-        case 'reception_net_block_player':
-            selectNetBlocker(playerName);
-            break;
-        case 'pass_net_block_player':
-            selectPassNetBlocker(playerName);
-            break;
-        case 'attack_net_block_player':
-            selectAttackNetBlocker(playerName);
-            break;
-        case 'bloc_out_player':
-            selectBlocOutPlayer(playerName);
-            break;
-    }
+    WorkflowEngine.handleButton('selectPlayer', playerName);
 }
 
 function showSection(sectionId) {
@@ -936,6 +912,7 @@ function hideAllSections() {
     document.getElementById('attackNetChoice').classList.add('hidden');
     document.getElementById('receptionFaultTrajectory').classList.add('hidden');
     document.getElementById('defenseDirectAttackSection').classList.add('hidden');
+    document.getElementById('blockKillBtn').classList.add('hidden');
     document.getElementById('defenseDirectReturnChoice').classList.add('hidden');
     document.getElementById('defenseFaultSection').classList.add('hidden');
     document.getElementById('defenseFaultTrajectory').classList.add('hidden');

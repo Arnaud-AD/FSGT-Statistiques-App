@@ -232,8 +232,8 @@
                 <div id="secondTouchOptions" class="hidden">
                     <div class="tags-title">Ou action en 2ème touche</div>
                     <div class="tags-grid">
-                        <button class="action-tag second-touch" onclick="handleSecondTouch('deuxieme_main')">✋ Deuxième main</button>
-                        <button class="action-tag second-touch" onclick="handleSecondTouch('attaque_directe')">⚡ Attaque directe</button>
+                        <button class="action-tag second-touch" onclick="WorkflowEngine.handleButton('secondTouch', 'deuxieme_main')">✋ Deuxième main</button>
+                        <button class="action-tag second-touch" onclick="WorkflowEngine.handleButton('secondTouch', 'attaque_directe')">⚡ Attaque directe</button>
                     </div>
                 </div>
 
@@ -241,9 +241,9 @@
                 <div id="passDirectReturnChoice" class="hidden">
                     <div class="tags-title">Passe chez l'adversaire — Que se passe-t-il ?</div>
                     <div class="tags-grid">
-                        <button class="action-tag direct-return" onclick="handlePassDirectReturnChoice('defense')">🛡️ Défendu</button>
-                        <button class="action-tag direct-return" onclick="handlePassDirectReturnChoice('direct_attack')">⚡ Attaque directe</button>
-                        <button class="action-tag direct-return-winner" onclick="handlePassDirectReturnChoice('winner')">✅ Point direct</button>
+                        <button class="action-tag direct-return" onclick="WorkflowEngine.handleButton('defense')">🛡️ Défendu</button>
+                        <button class="action-tag direct-return" onclick="WorkflowEngine.handleButton('direct_attack')">⚡ Attaque directe</button>
+                        <button class="action-tag direct-return-winner" onclick="WorkflowEngine.handleButton('winner')">✅ Point direct</button>
                     </div>
                 </div>
 
@@ -251,8 +251,8 @@
                 <div id="attackTypeSelection" class="hidden">
                     <div class="tags-title">Type d'attaque</div>
                     <div class="tags-grid">
-                        <button class="action-tag feinte" onclick="selectAttackType('feinte')">🎯 Feinte</button>
-                        <button class="action-tag relance" onclick="selectAttackType('relance')">↩️ Relance</button>
+                        <button class="action-tag feinte" onclick="WorkflowEngine.handleButton('selectAttackType', 'feinte')">🎯 Feinte</button>
+                        <button class="action-tag relance" onclick="WorkflowEngine.handleButton('selectAttackType', 'relance')">↩️ Relance</button>
                     </div>
                 </div>
 
@@ -260,16 +260,16 @@
                 <div id="resultSelection" class="hidden">
                     <div class="tags-title">Résultat de l'attaque</div>
                     <div class="tags-grid">
-                        <button class="action-tag point" onclick="selectResult('point')">✔ Point</button>
-                        <button class="action-tag faute" onclick="selectResult('defense_fault')">❌ Défense faute</button>
+                        <button class="action-tag point" onclick="WorkflowEngine.handleButton('point')">✔ Point</button>
+                        <button class="action-tag faute" onclick="WorkflowEngine.handleButton('defenseFault')">❌ Défense faute</button>
                     </div>
                 </div>
 
                 <!-- Faute de réception + Ace -->
                 <div id="receptionFaultSection" class="hidden">
                     <div class="tags-grid">
-                        <button class="action-tag ace" onclick="handleAceFromReception()">🎯 Ace</button>
-                        <button class="action-tag faute" onclick="handleReceptionFault()">❌ Faute réception</button>
+                        <button class="action-tag ace" onclick="WorkflowEngine.handleButton('ace')">🎯 Ace</button>
+                        <button class="action-tag faute" onclick="WorkflowEngine.handleButton('receptionFault')">❌ Faute réception</button>
                     </div>
                     <div class="quality-legend">
                         <span class="legend-item"><span class="legend-dot perfect"></span>Excellente 4/4</span>
@@ -283,9 +283,9 @@
                 <div id="receptionOpponentChoice" class="hidden">
                     <div class="tags-title">Retour direct — Que se passe-t-il ?</div>
                     <div class="tags-grid">
-                        <button class="action-tag direct-return" onclick="handleOpponentChoice('defense')">🛡️ Défendu</button>
-                        <button class="action-tag direct-return" onclick="handleOpponentChoice('direct_attack')">⚡ Attaque directe</button>
-                        <button class="action-tag direct-return-winner" onclick="handleOpponentChoice('winner')">✅ Retour gagnant</button>
+                        <button class="action-tag direct-return" onclick="WorkflowEngine.handleButton('defense')">🛡️ Défendu</button>
+                        <button class="action-tag direct-return" onclick="WorkflowEngine.handleButton('direct_attack')">⚡ Attaque directe</button>
+                        <button class="action-tag direct-return-winner" onclick="WorkflowEngine.handleButton('winner')">✅ Retour gagnant</button>
                     </div>
                 </div>
 
@@ -293,7 +293,7 @@
                 <div id="receptionNetChoice" class="hidden">
                     <div class="tags-title">Réception filet — Attaque directe ou cliquez le terrain = block</div>
                     <div class="tags-grid">
-                        <button class="action-tag direct-return-winner" onclick="handleReceptionNetChoice('attaque_directe')">⚡ Attaque directe</button>
+                        <button class="action-tag direct-return-winner" onclick="WorkflowEngine.handleButton('direct_attack')">⚡ Attaque directe</button>
                     </div>
                 </div>
 
@@ -301,7 +301,7 @@
                 <div id="passNetChoice" class="hidden">
                     <div class="tags-title">Passe filet — Attaque directe ou cliquez le terrain = block</div>
                     <div class="tags-grid">
-                        <button class="action-tag direct-return-winner" onclick="handlePassNetChoice('attaque_directe')">⚡ Attaque directe</button>
+                        <button class="action-tag direct-return-winner" onclick="WorkflowEngine.handleButton('direct_attack')">⚡ Attaque directe</button>
                     </div>
                 </div>
 
@@ -309,15 +309,16 @@
                 <div id="attackNetChoice" class="hidden">
                     <div class="tags-title">Attaque dans le filet — Faute ou cliquez le terrain = block</div>
                     <div class="tags-grid">
-                        <button class="action-tag faute" onclick="handleAttackNetChoice('faute')">❌ Faute (filet)</button>
-                        <button class="action-tag bloc-out" onclick="handleAttackNetChoice('bloc_out')">💥 Bloc out</button>
+                        <button class="action-tag faute" onclick="WorkflowEngine.handleButton('faute')">❌ Faute (filet)</button>
+                        <button class="action-tag bloc-out" onclick="WorkflowEngine.handleButton('bloc_out')">💥 Bloc out</button>
                     </div>
                 </div>
 
-                <!-- Attaque directe depuis défense (visible quand zones de défense actives) -->
+                <!-- Actions spéciales depuis défense (visible après block ou en contexte adapté) -->
                 <div id="defenseDirectAttackSection" class="hidden">
                     <div class="tags-grid">
-                        <button class="action-tag direct-return" onclick="handleDefenseDirectAttack()">⚡ Attaque directe</button>
+                        <button class="action-tag direct-return" onclick="WorkflowEngine.handleButton('directAttack')">⚡ Attaque directe</button>
+                        <button id="blockKillBtn" class="action-tag point hidden" onclick="WorkflowEngine.handleButton('blockKill')">💀 Bloc Kill</button>
                     </div>
                 </div>
 
@@ -326,16 +327,16 @@
                 <div id="defenseDirectReturnChoice" class="hidden">
                     <div class="tags-title">Retour direct défense — Que se passe-t-il ?</div>
                     <div class="tags-grid">
-                        <button class="action-tag direct-return" onclick="handleDefenseDirectReturnChoice('defense')">🛡️ Défendu</button>
-                        <button class="action-tag direct-return" onclick="handleDefenseDirectReturnChoice('direct_attack')">⚡ Attaque directe</button>
-                        <button class="action-tag direct-return-winner" onclick="handleDefenseDirectReturnChoice('winner')">✅ Retour gagnant</button>
+                        <button class="action-tag direct-return" onclick="WorkflowEngine.handleButton('defense')">🛡️ Défendu</button>
+                        <button class="action-tag direct-return" onclick="WorkflowEngine.handleButton('direct_attack')">⚡ Attaque directe</button>
+                        <button class="action-tag direct-return-winner" onclick="WorkflowEngine.handleButton('winner')">✅ Retour gagnant</button>
                     </div>
                 </div>
                 <!-- Défense faute / Point block (visible pendant defense_end) -->
                 <div id="defenseFaultSection" class="hidden">
                     <div class="tags-grid">
-                        <button class="action-tag point" onclick="handleDefensePoint()">✔ Point</button>
-                        <button class="action-tag faute" onclick="handleDefenseFault()">❌ Défense faute</button>
+                        <button class="action-tag point" onclick="WorkflowEngine.handleButton('defensePoint')">✔ Point</button>
+                        <button class="action-tag faute" onclick="WorkflowEngine.handleButton('defenseFault')">❌ Défense faute</button>
                     </div>
                 </div>
 
@@ -343,7 +344,7 @@
                 <div id="blocOutTrajectory" class="hidden">
                     <div class="tags-title">Cliquez où va la balle (trajectoire du bloc out)</div>
                     <div class="tags-grid">
-                        <button class="action-tag" onclick="skipBlocOutTrajectory()">⏩ Passer</button>
+                        <button class="action-tag" onclick="WorkflowEngine.handleButton('skip')">⏩ Passer</button>
                     </div>
                 </div>
 
@@ -351,7 +352,7 @@
                 <div id="defenseFaultTrajectory" class="hidden">
                     <div class="tags-title">Cliquez où va la balle (trajectoire de la faute)</div>
                     <div class="tags-grid">
-                        <button class="action-tag" onclick="skipDefenseFaultTrajectory()">⏩ Passer</button>
+                        <button class="action-tag" onclick="WorkflowEngine.handleButton('skip')">⏩ Passer</button>
                     </div>
                 </div>
 
@@ -359,7 +360,7 @@
                 <div id="receptionFaultTrajectory" class="hidden">
                     <div class="tags-title">Cliquez où va la balle (trajectoire de la faute)</div>
                     <div class="tags-grid">
-                        <button class="action-tag" onclick="skipReceptionFaultTrajectory()">⏩ Passer</button>
+                        <button class="action-tag" onclick="WorkflowEngine.handleButton('skip')">⏩ Passer</button>
                     </div>
                 </div>
 
@@ -652,6 +653,7 @@
     <script src="storage.js"></script>
     <script src="match-live-helpers.js"></script>
     <script src="match-live-undo.js"></script>
+    <script src="match-live-workflow.js?v=18.0"></script>
 
     <!-- YouTube iframe API (chargé dynamiquement) -->
     <script>
@@ -909,7 +911,8 @@
             receptionOpponentClickData: null, // données du clic terrain adverse pendant reception_end
             overridePlayer: null, // joueur manuellement overridé via tag (Phase 2)
             autoSelectedPlayer: null, // joueur auto-sélectionné par zone/logique (Phase 2)
-            overrideTagsTeam: null // équipe des tags override affichés (Phase 2)
+            overrideTagsTeam: null, // équipe des tags override affichés (Phase 2)
+            context: null // Objet contexte structuré (V18.0 — initialisé par WorkflowEngine)
         };
 
         // Statistiques du set (format unifié avec historique)
@@ -1158,6 +1161,37 @@
         // Configuration caméra (qui est en bas)
         let cameraSide = 'home'; // 'home' = Jen en bas, 'away' = adversaire en bas
 
+        // ==================== V18.0 BRIDGE FUNCTIONS ====================
+        // Undo = WorkflowEngine.popState()
+        function undoLastAction() {
+            WorkflowEngine.popState();
+        }
+
+        // Cancel point : en début de point → undo dernier point validé, sinon → annuler le rally en cours
+        function cancelPoint() {
+            if (gameState.phase === 'server_selection' ||
+                (gameState.phase === 'serve_start' && gameState.currentServer && gameState.rally.length === 0)) {
+                if (currentSet.points && currentSet.points.length > 0) {
+                    showUndoPointModal();
+                } else {
+                    alert('Aucun point à annuler.');
+                }
+                return;
+            }
+            // En cours de rally → annuler le rally complet
+            if (!confirm('Annuler ce point et recommencer ?')) return;
+            WorkflowEngine._resetRallyState();
+            WorkflowEngine.clearStack();
+            gameState.currentServer = null;
+            WorkflowEngine.transition('server_selection');
+        }
+
+        // Bridge pour les anciennes fonctions appelées par les handlers HTML
+        // Ces fonctions ne sont plus directement utilisées mais certains onclick les référencent encore
+        function handleAceFromReception() { WorkflowEngine.handleButton('ace'); }
+        function handleReceptionFault() { WorkflowEngine.handleButton('receptionFault'); }
+        function handleReceptionFaultFromTags() { WorkflowEngine.handleButton('receptionFault'); }
+
         // ==================== INITIALISATION ====================
         function init() {
             if (!currentMatch) {
@@ -1203,8 +1237,8 @@
             updateLabels();
             updateScore();
             updatePhase();
-            renderServerSelection();
-            setupCourtListeners();
+            // V18.0 : WorkflowEngine remplace renderServerSelection() + setupCourtListeners()
+            WorkflowEngine.start();
             
             // Initialiser les statistiques du set
             initSetStats();
@@ -1305,7 +1339,9 @@
                 'defense': '<span class="highlight">Défense</span> — Sélectionnez le défenseur',
                 'defense_end': '<span class="highlight">Défense</span> — _DEFENDER_ Cliquez où arrive la défense',
                 'defense_fault_trajectory': '<span class="highlight">Faute défense</span> — Cliquez où va la balle',
-                'ace_reception': '<span class="highlight">Ace !</span> — Qui a raté la réception ?'
+                'ace_reception': '<span class="highlight">Ace !</span> — Qui a raté la réception ?',
+                'net_block_player': '<span class="highlight">Block au filet</span> — Qui block ?',
+                'net_block_end': '<span class="highlight">Block au filet</span> — Cliquez où arrive le block'
             };
             let phaseText = phases[gameState.phase] || '';
 
@@ -2200,8 +2236,8 @@
             }
         }
 
-        function handleAceFromReception() {
-            // Ace signalé depuis la phase reception (tags joueurs visibles, pas encore de réceptionneur sélectionné)
+        function _OLD_handleAceFromReception() {
+            // [DEAD CODE V18.0] Remplacé par WorkflowEngine — Ace signalé depuis la phase reception
             // ou depuis la phase reception_end (réceptionneur déjà sélectionné)
             const team = gameState.attackingTeam;
 
@@ -2355,8 +2391,8 @@
             document.getElementById('outLabelBottom').style.display = receivingCourtSide === 'bottom' ? 'block' : 'none';
         }
 
-        function handleReceptionFaultFromTags() {
-            // Faute réception depuis les tags (phase reception, pas encore de réceptionneur)
+        function _OLD_handleReceptionFaultFromTags() {
+            // [DEAD CODE V18.0] Remplacé par WorkflowEngine — Faute réception depuis les tags
             // Utiliser le joueur sélectionné via override/auto s'il y en a un
             const selectedPlayer = getEffectivePlayer();
             if (selectedPlayer) {
@@ -2587,8 +2623,8 @@
             }
         }
 
-        function handleReceptionFault() {
-            // Faute de réception = on entre en mode trajectoire pour savoir où va la balle
+        function _OLD_handleReceptionFault() {
+            // [DEAD CODE V18.0] Remplacé par WorkflowEngine — Faute de réception
             gameState.currentAction.quality = { score: 0, label: 'Faute' };
             
             // Masquer les zones de qualité et désactiver le filet
