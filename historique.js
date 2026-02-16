@@ -1129,7 +1129,16 @@ const MatchStatsView = {
         var opponent = match.opponent || 'Adversaire';
         var completedSets = match.sets.filter(function(s) { return s.completed; });
         var setsToUse = (this.currentSetFilter === 'all') ? completedSets : [completedSets[this.currentSetFilter]].filter(Boolean);
-        var homeTotals = StatsAggregator.aggregateStats(setsToUse, 'home');
+        var homeTotalsRaw = StatsAggregator.aggregateStats(setsToUse, 'home');
+        // Filtrer les joueurs sans aucune stat (ex: joueurs adverses dans les données home)
+        var homeTotals = {};
+        Object.entries(homeTotalsRaw).forEach(function(entry) {
+            var p = entry[1];
+            var hasAny = ['service', 'reception', 'attack', 'relance', 'defense', 'block'].some(function(cat) {
+                return p[cat] && Object.values(p[cat]).some(function(v) { return v > 0; });
+            });
+            if (hasAny) homeTotals[entry[0]] = p;
+        });
         var totals = StatsAggregator.computeTotals(homeTotals);
 
         var text = 'Stats Match vs ' + opponent + '\n';
@@ -1146,7 +1155,8 @@ const MatchStatsView = {
             // Header
             text += 'Joueur'.padEnd(14);
             catDef.columns.forEach(function(col) {
-                text += col.label.padStart(5);
+                var w = (col.computed === 'faBp') ? 7 : 5;
+                text += col.label.padStart(w);
             });
             text += '\n';
             // Joueurs
@@ -1157,6 +1167,13 @@ const MatchStatsView = {
                 catDef.columns.forEach(function(col) {
                     if (col.key === '_moy') {
                         text += StatsAggregator.srvMoyDisplay(p).padStart(5);
+                    } else if (col.computed === 'faBp') {
+                        var atkData = p.attack || {};
+                        var fa = atkData.fatt || 0;
+                        var bp = atkData.bp || 0;
+                        var combined = fa + bp;
+                        var cell = combined > 0 ? String(combined) + (bp > 0 ? '(' + bp + ')' : '') : '-';
+                        text += cell.padStart(7);
                     } else {
                         var val = p[catKey] ? (p[catKey][col.key] || 0) : 0;
                         text += (val > 0 ? String(val) : '-').padStart(5);
