@@ -13,6 +13,166 @@ const ROLE_COLORS = {
     'Pointu': '#22c55e'
 };
 
+// ==================== PASS QUALITY GRIDS (V19.1) ====================
+// 9 grilles : 3 zones d'attaque (R4, Centre, Pointu) x 3 contextes (confort, contraint, transition)
+// R4 : 8 lignes x 22 colonnes (18 terrain + 4 debordement gauche, ~2m hors touche)
+// Centre : 8 lignes x 18 colonnes (terrain uniquement)
+// Pointu : 8 lignes x 22 colonnes (18 terrain + 4 debordement droite, ~2m hors touche)
+// Couvrant les ~4 premiers metres derriere le filet (~44% du demi-terrain)
+// Valeurs : 4=Optimale (P4), 3=Bonne (P3), 2=Jouable (P2), 1=Mauvaise (P1)
+// Defaut : tout P2 (Jouable) — a calibrer via pass-grids.html puis coller ici
+const PASS_GRIDS = {
+    'R4': {
+        'confort': [
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
+        ],
+        'contraint': [
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
+        ],
+        'transition': [
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
+        ]
+    },
+    'Centre': {
+        'confort': [
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
+        ],
+        'contraint': [
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
+        ],
+        'transition': [
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
+        ]
+    },
+    'Pointu': {
+        'confort': [
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
+        ],
+        'contraint': [
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
+        ],
+        'transition': [
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]
+        ]
+    }
+};
+
+const PASS_QUALITY_LABELS = {
+    4: 'Optimale',
+    3: 'Bonne',
+    2: 'Jouable',
+    1: 'Mauvaise'
+};
+
+const PASS_GRID_ROWS = 8;
+const PASS_GRID_COLS_BASE = 18;   // Colonnes terrain (9m / 50cm)
+const PASS_GRID_COLS_EXTRA = 4;   // Colonnes hors-terrain (2m / 50cm)
+const PASS_GRID_DEPTH = 44;       // % du demi-terrain couvert par la grille (≈4m sur 9m)
+const PASS_GRID_OVERFLOW = 22.22; // % hors-terrain pour R4 (gauche) et Pointu (droite) = 2m/9m * 100
+
+// Nombre de colonnes par zone
+function getPassGridCols(zone) {
+    return (zone === 'R4' || zone === 'Pointu') ? PASS_GRID_COLS_BASE + PASS_GRID_COLS_EXTRA : PASS_GRID_COLS_BASE;
+}
+
+/**
+ * Charge les grilles de passe calibrees depuis localStorage et mute PASS_GRIDS en place.
+ * Appelee au demarrage de match-live.html pour utiliser les grilles du calibrateur.
+ * Migration integree : grilles 18 cols → 22 cols pour R4/Pointu.
+ */
+function loadPassGridsFromStorage() {
+    const raw = localStorage.getItem('volleyball_pass_grids');
+    if (!raw) return;
+    try {
+        const saved = JSON.parse(raw);
+        ['R4', 'Centre', 'Pointu'].forEach(zone => {
+            if (!saved[zone]) return;
+            const expectedCols = getPassGridCols(zone);
+            ['confort', 'contraint', 'transition'].forEach(ctx => {
+                if (!saved[zone][ctx] || !PASS_GRIDS[zone] || !PASS_GRIDS[zone][ctx]) return;
+                let grid = saved[zone][ctx];
+                // Migration colonnes si necessaire (anciennes grilles 18 cols → 22 cols)
+                if (grid[0] && grid[0].length < expectedCols) {
+                    const diff = expectedCols - grid[0].length;
+                    grid = grid.map(row => {
+                        const extra = new Array(diff).fill(1);
+                        return zone === 'R4' ? [...extra, ...row] : [...row, ...extra];
+                    });
+                }
+                // Muter PASS_GRIDS en place (const objet → proprietes mutables)
+                for (let r = 0; r < PASS_GRID_ROWS && r < grid.length; r++) {
+                    PASS_GRIDS[zone][ctx][r] = grid[r];
+                }
+            });
+        });
+    } catch (e) {
+        console.warn('[V19.1] Erreur chargement grilles passe:', e);
+    }
+}
+
 function getPlayerByRole(team, role) {
     const lineup = team === 'home' ? currentSet.homeLineup : currentSet.awayLineup;
     const roles = POSITION_ROLES[team];
@@ -585,6 +745,140 @@ function getCourtSideForTeam(team) {
     } else {
         return team === 'home' ? 'top' : 'bottom';
     }
+}
+
+// ==================== PASS QUALITY EVALUATION (V19.1) ====================
+
+/**
+ * Determine la zone d'attaque visee par une passe (endPos).
+ * Tiers du terrain : gauche = R4 (bottom) ou Pointu (top), centre = Centre, droite = inverse.
+ * @param {Object} endPos - {x, y, courtSide}
+ * @param {string} team - 'home' ou 'away'
+ * @returns {string} 'R4' | 'Centre' | 'Pointu'
+ */
+function getPassZone(endPos, team) {
+    const courtSide = getCourtSideForTeam(team);
+    const x = endPos.x;
+
+    if (courtSide === 'bottom') {
+        // Bottom : gauche = R4, centre = Centre, droite = Pointu
+        if (x < 33.33) return 'R4';
+        if (x > 66.67) return 'Pointu';
+        return 'Centre';
+    } else {
+        // Top : miroir — gauche = Pointu, centre = Centre, droite = R4
+        if (x < 33.33) return 'Pointu';
+        if (x > 66.67) return 'R4';
+        return 'Centre';
+    }
+}
+
+/**
+ * Determine le contexte de la passe depuis l'historique du rally.
+ * - Passeur en poste apres R4/R3 → confort
+ * - Passeur en poste apres R2/R1 → contraint
+ * - Non-passeur OU apres defense → transition
+ * @param {Array} rally - Actions du rally en cours (SANS la passe courante)
+ * @param {string} passerRole - Role du passeur ('Passeur', 'R4', etc.)
+ * @returns {string} 'confort' | 'contraint' | 'transition'
+ */
+function getPassContext(rally, passerRole) {
+    // Si le passeur n'est pas au poste Passeur → transition
+    if (passerRole !== 'Passeur') return 'transition';
+
+    // Chercher la derniere reception ou defense dans le rally
+    for (let i = rally.length - 1; i >= 0; i--) {
+        const action = rally[i];
+        if (action.type === 'reception') {
+            if (action.quality) {
+                const score = action.quality.score;
+                if (score >= 3) return 'confort';     // Excellente (4) ou Positive (3)
+                return 'contraint';                     // Jouable (2), Negative (1) ou Faute (0)
+            }
+            return 'contraint'; // Pas d'info qualite → contraint par defaut
+        }
+        if (action.type === 'defense') {
+            return 'transition'; // Apres defense → toujours transition
+        }
+    }
+    return 'transition'; // Fallback
+}
+
+/**
+ * Evalue la qualite d'une passe via lookup dans PASS_GRIDS.
+ * @param {Object} endPos - {x, y, courtSide}
+ * @param {string} zone - 'R4' | 'Centre' | 'Pointu'
+ * @param {string} context - 'confort' | 'contraint' | 'transition'
+ * @param {string} team - 'home' ou 'away'
+ * @returns {Object} { quality: string, score: number, zone: string, context: string }
+ */
+function evaluatePassQuality(endPos, zone, context, team) {
+    const courtSide = getCourtSideForTeam(team);
+
+    // Normaliser Y en distance depuis le filet (0% = au filet, 100% = fond de terrain)
+    let distFromNet;
+    if (courtSide === 'bottom') {
+        distFromNet = endPos.y; // Bottom : y=0 est le filet
+    } else {
+        distFromNet = 100 - endPos.y; // Top : y=100 est le filet
+    }
+
+    // Au-dela de la zone de detail (44%) → toujours P1
+    if (distFromNet > PASS_GRID_DEPTH) {
+        return { quality: 'mauvaise', score: 1, zone, context };
+    }
+
+    // Nombre de colonnes pour cette zone
+    const totalCols = getPassGridCols(zone);
+
+    // Mapper X vers la colonne
+    // endPos.x est en % du court-half complet (0-100% = 9m de largeur terrain)
+    // Chaque grille (R4/Centre/Pointu) couvre les 9m COMPLETS du terrain (18 cols = 50cm chacune)
+    // R4 et Pointu ont 4 colonnes extra (2m) hors-terrain d'un cote → 22 cols au total = 11m
+    let col;
+
+    if (zone === 'R4' || zone === 'Pointu') {
+        // Grille etendue : 22 colonnes = 11m
+        // 18 cols couvrent 0-100% du terrain (9m), 4 cols couvrent 2m hors-terrain d'un cote
+        // PASS_GRID_OVERFLOW = 2m/9m * 100 = 22.22% du terrain
+        // Largeur totale de la grille en % du terrain : 100 + 22.22 = 122.22%
+        const totalWidth = 100 + PASS_GRID_OVERFLOW; // 122.22%
+        let xShifted;
+
+        // R4 (bottom) deborde a GAUCHE / R4 (top) deborde a DROITE
+        // Pointu (bottom) deborde a DROITE / Pointu (top) deborde a GAUCHE
+        const overflowLeft = (zone === 'R4' && courtSide === 'bottom') || (zone === 'Pointu' && courtSide === 'top');
+        if (overflowLeft) {
+            // Grille va de x = -22.22% a x = 100% → decaler pour que -22.22 devienne 0
+            xShifted = endPos.x + PASS_GRID_OVERFLOW;
+        } else {
+            // Grille va de x = 0% a x = 122.22% → pas de decalage
+            xShifted = endPos.x;
+        }
+        col = Math.min(totalCols - 1, Math.max(0, Math.floor(xShifted / totalWidth * totalCols)));
+    } else {
+        // Centre : 18 colonnes couvrant 0-100% du terrain (9m)
+        col = Math.min(totalCols - 1, Math.max(0, Math.floor(endPos.x / 100 * totalCols)));
+    }
+
+    // Miroir top court : les grilles sont calibrees depuis la perspective bottom (col 0 = gauche)
+    // En top court, gauche/droite sont inverses → lire les colonnes a l'envers
+    if (courtSide === 'top') {
+        col = totalCols - 1 - col;
+    }
+
+    const row = Math.min(PASS_GRID_ROWS - 1, Math.max(0, Math.floor(distFromNet / PASS_GRID_DEPTH * PASS_GRID_ROWS)));
+
+    // Lookup dans la grille
+    const grid = PASS_GRIDS[zone] && PASS_GRIDS[zone][context];
+    if (!grid || !grid[row]) {
+        return { quality: 'jouable', score: 2, zone, context }; // Fallback si grille manquante
+    }
+
+    const score = grid[row][col] || 1;
+    const labels = { 4: 'optimale', 3: 'bonne', 2: 'jouable', 1: 'mauvaise' };
+
+    return { quality: labels[score] || 'jouable', score, zone, context };
 }
 
 // Retourne le bloqueur assigné à une zone du filet (left ou right)

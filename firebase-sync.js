@@ -203,6 +203,33 @@ const FirebaseSync = {
         });
     },
 
+    // ==================== PASS GRIDS SYNC ====================
+
+    /**
+     * Sauvegarder les grilles de qualité de passe dans Firestore
+     * @param {Object} grids - Les 9 grilles (3 zones x 3 contextes)
+     */
+    async savePassGrids(grids) {
+        if (!this.isConfigured() || !auth.currentUser) return;
+        await db.collection('config').doc('passGrids').set({
+            grids: grids,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    },
+
+    /**
+     * Charger les grilles de qualité de passe depuis Firestore
+     * @returns {Promise<Object|null>} Les grilles ou null
+     */
+    async getPassGrids() {
+        if (!this.isConfigured()) return null;
+        const doc = await db.collection('config').doc('passGrids').get();
+        if (doc.exists) {
+            return doc.data().grids || null;
+        }
+        return null;
+    },
+
     // ==================== STATE SYNC ====================
 
     /**
@@ -255,7 +282,13 @@ const FirebaseSync = {
         const currentId = Storage.getCurrentMatchId();
         await this.saveCurrentMatchId(currentId);
 
-        console.log('[FirebaseSync] Push complet : roster, matchs, state');
+        // Pass grids
+        const passGrids = localStorage.getItem('volleyball_pass_grids');
+        if (passGrids) {
+            await this.savePassGrids(JSON.parse(passGrids));
+        }
+
+        console.log('[FirebaseSync] Push complet : roster, matchs, state, passGrids');
     },
 
     /**
@@ -285,7 +318,13 @@ const FirebaseSync = {
             localStorage.setItem(Storage.KEYS.CURRENT_ID, remoteId);
         }
 
-        console.log('[FirebaseSync] Pull complet : roster, matchs, state');
+        // Pass grids
+        const passGrids = await this.getPassGrids();
+        if (passGrids) {
+            localStorage.setItem('volleyball_pass_grids', JSON.stringify(passGrids));
+        }
+
+        console.log('[FirebaseSync] Pull complet : roster, matchs, state, passGrids');
     }
 };
 

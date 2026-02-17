@@ -128,6 +128,8 @@
                         <div class="defense-quality-zones" id="defQualityZonesTop">
                             <div class="defense-quality-zone positive"></div>
                         </div>
+                        <!-- Zone debug qualité de passe (V19.1d) -->
+                        <div class="pass-quality-grid" id="passGridTop"></div>
                     </div>
                     <div class="net" id="netZone">
                         <div class="net-click-zone" id="netClickZone">
@@ -165,6 +167,8 @@
                         <div class="defense-quality-zones" id="defQualityZonesBottom">
                             <div class="defense-quality-zone positive"></div>
                         </div>
+                        <!-- Zone debug qualité de passe (V19.1d) -->
+                        <div class="pass-quality-grid" id="passGridBottom"></div>
                     </div>
                     <div class="team-label" id="bottomTeamLabel">Jen et ses Saints</div>
                     
@@ -939,6 +943,7 @@
             return {
                 service:   { tot: 0, ace: 0, splus: 0, fser: 0, recSumAdv: 0, recCountAdv: 0 },
                 reception: { tot: 0, r4: 0, r3: 0, r2: 0, r1: 0, frec: 0 },
+                pass:      { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0 },
                 attack:    { tot: 0, attplus: 0, attminus: 0, bp: 0, fatt: 0 },
                 relance:   { tot: 0, relplus: 0, relminus: 0, frel: 0 },
                 defense:   { tot: 0, defplus: 0, defminus: 0, fdef: 0 },
@@ -990,6 +995,7 @@
             const totals = {
                 service:   { tot: 0, ace: 0, splus: 0, fser: 0, recSumAdv: 0, recCountAdv: 0 },
                 reception: { tot: 0, r4: 0, r3: 0, r2: 0, r1: 0, frec: 0 },
+                pass:      { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0 },
                 attack:    { tot: 0, attplus: 0, attminus: 0, bp: 0, fatt: 0 },
                 relance:   { tot: 0, relplus: 0, relminus: 0, frel: 0 },
                 defense:   { tot: 0, defplus: 0, defminus: 0, fdef: 0 },
@@ -1010,6 +1016,12 @@
                 totals.reception.r2 += p.reception.r2;
                 totals.reception.r1 += p.reception.r1;
                 totals.reception.frec += p.reception.frec;
+                totals.pass.tot += p.pass.tot;
+                totals.pass.p4 += p.pass.p4;
+                totals.pass.p3 += p.pass.p3;
+                totals.pass.p2 += p.pass.p2;
+                totals.pass.p1 += p.pass.p1;
+                totals.pass.fp += p.pass.fp;
                 totals.attack.tot += p.attack.tot;
                 totals.attack.attplus += p.attack.attplus;
                 totals.attack.attminus += p.attack.attminus;
@@ -1107,6 +1119,32 @@
                 cell(totals.reception.frec, 'negative') +
             '</tr></tbody></table></div>';
 
+            // ===== PASSE =====
+            html += '<div class="stat-table-card">' +
+                '<div class="stat-table-header passe">Passe</div>' +
+                '<table class="detail-stats-table"><thead><tr>' +
+                '<th>Tot</th><th>P4</th><th>P3</th><th>P2</th><th>P1</th><th>FP</th>' +
+                '</tr></thead><tbody>';
+            players.forEach(name => {
+                const p = stats[name];
+                html += '<tr>' +
+                    '<td>' + (p.pass.tot || '-') + '</td>' +
+                    cell(p.pass.p4, 'positive') +
+                    cell(p.pass.p3, 'positive') +
+                    cell(p.pass.p2, 'neutral') +
+                    cell(p.pass.p1, 'negative') +
+                    cell(p.pass.fp, 'negative') +
+                '</tr>';
+            });
+            html += '<tr class="total-row">' +
+                '<td>' + (totals.pass.tot || '-') + '</td>' +
+                cell(totals.pass.p4, 'positive') +
+                cell(totals.pass.p3, 'positive') +
+                cell(totals.pass.p2, 'neutral') +
+                cell(totals.pass.p1, 'negative') +
+                cell(totals.pass.fp, 'negative') +
+            '</tr></tbody></table></div>';
+
             // ===== ATTAQUE =====
             html += '<div class="stat-table-card">' +
                 '<div class="stat-table-header attack">Attaque</div>' +
@@ -1135,7 +1173,7 @@
             html += '<div class="stat-table-card">' +
                 '<div class="stat-table-header relance">Relance</div>' +
                 '<table class="detail-stats-table"><thead><tr>' +
-                '<th>Tot</th><th>R+</th><th>R-</th><th>FR</th>' +
+                '<th>Tot</th><th>R+</th><th>R-</th><th>FRel</th>' +
                 '</tr></thead><tbody>';
             players.forEach(name => {
                 const p = stats[name];
@@ -1236,6 +1274,9 @@
 
         // ==================== INITIALISATION ====================
         function init() {
+            // V19.1 : charger les grilles de passe calibrées depuis localStorage
+            if (typeof loadPassGridsFromStorage === 'function') loadPassGridsFromStorage();
+
             if (!currentMatch) {
                 window.location.href = 'nouveau-match.html';
                 return;
@@ -2664,6 +2705,172 @@
                 return 'negative'; // D-
             }
         }
+
+        // ==================== DEBUG : GRILLE QUALITE PASSE (V19.1d) ====================
+        // Affiche l'overlay colore sur le terrain pendant la phase passe (DevTestMode uniquement)
+        let passGridDebugActive = false;
+
+        function togglePassQualityGrid() {
+            if (passGridDebugActive) {
+                hidePassQualityGrid();
+            } else {
+                showPassQualityGrid(gameState.attackingTeam);
+            }
+        }
+
+        function showPassQualityGrid(team) {
+            if (typeof DevTestMode === 'undefined' || !DevTestMode.ENABLED) return;
+            if (!team) return;
+
+            const courtSide = getCourtSideForTeam(team);
+            const gridId = courtSide === 'top' ? 'passGridTop' : 'passGridBottom';
+            const gridEl = document.getElementById(gridId);
+            if (!gridEl) return;
+
+            // Determiner le contexte depuis le rally en cours
+            const passeur = getPlayerByRole(team, 'Passeur');
+            const effectivePlayer = getEffectivePlayer && getEffectivePlayer();
+            const passer = effectivePlayer || passeur;
+            const passerRole = passer ? (getPlayerRole(team, passer) || 'transition') : 'transition';
+            const context = getPassContext(gameState.rally || [], passerRole);
+
+            const colors = {
+                4: '#22c55e',  // Vert — Optimale
+                3: '#a3e635',  // Vert-jaune — Bonne
+                2: '#f97316',  // Orange — Jouable
+                1: '#ef4444'   // Rouge — Mauvaise
+            };
+
+            let html = '';
+            const cellHeight = PASS_GRID_DEPTH / PASS_GRID_ROWS;
+
+            // Chaque grille (R4/Centre/Pointu) couvre les 9m COMPLETS du terrain (18 cols de 50cm)
+            // R4 et Pointu ont 4 cols extra (2m) hors-terrain → 22 cols = 11m
+            // L'overlay composite montre le TIERS pertinent de chaque grille + le debordement hors-terrain
+            //
+            // Pour le tiers R4 (bottom=gauche, top=droite) : on affiche les colonnes de la grille R4
+            //   qui correspondent a x ∈ [0%, 33.33%] du terrain, + les cols hors-terrain
+            // Pour le tiers Centre : colonnes de la grille Centre pour x ∈ [33.33%, 66.67%]
+            // Pour le tiers Pointu : colonnes de la grille Pointu pour x ∈ [66.67%, 100%] + hors-terrain
+
+            const zones = courtSide === 'bottom'
+                ? [{ zone: 'R4', xStart: 0, xEnd: 33.33 }, { zone: 'Centre', xStart: 33.33, xEnd: 66.67 }, { zone: 'Pointu', xStart: 66.67, xEnd: 100 }]
+                : [{ zone: 'Pointu', xStart: 0, xEnd: 33.33 }, { zone: 'Centre', xStart: 33.33, xEnd: 66.67 }, { zone: 'R4', xStart: 66.67, xEnd: 100 }];
+
+            zones.forEach(function(zoneInfo) {
+                const zoneGrid = PASS_GRIDS[zoneInfo.zone] && PASS_GRIDS[zoneInfo.zone][context];
+                if (!zoneGrid) return;
+
+                const totalCols = getPassGridCols(zoneInfo.zone);
+                const isExtended = (zoneInfo.zone === 'R4' || zoneInfo.zone === 'Pointu');
+
+                // Largeur d'une colonne en % du terrain = largeur grille / nb cols
+                // Grille couvre 100% (18 cols) ou 122.22% (22 cols) du terrain
+                const totalGridWidth = 100 + (isExtended ? PASS_GRID_OVERFLOW : 0); // 122.22 ou 100
+                const colWidthPct = totalGridWidth / totalCols; // % du terrain par colonne
+
+                // Debut X de la grille complete en % du terrain
+                // R4 bottom / Pointu top : debordement a GAUCHE → grille commence a -22.22%
+                // Pointu bottom / R4 top : debordement a DROITE → grille commence a 0%
+                const overflowLeft = isExtended && (
+                    (zoneInfo.zone === 'R4' && courtSide === 'bottom') ||
+                    (zoneInfo.zone === 'Pointu' && courtSide === 'top')
+                );
+                const gridXStart = overflowLeft ? -PASS_GRID_OVERFLOW : 0;
+
+                // Determiner quelles colonnes tombent dans le tiers [xStart, xEnd] + hors-terrain
+                for (let ci = 0; ci < totalCols; ci++) {
+                    const cellLeft = gridXStart + ci * colWidthPct;
+                    const cellRight = cellLeft + colWidthPct;
+
+                    // La colonne est-elle dans le tiers visible ou dans le debordement hors-terrain ?
+                    const inThird = (cellRight > zoneInfo.xStart && cellLeft < zoneInfo.xEnd);
+                    const isOffCourt = (cellLeft < 0 || cellRight > 100);
+
+                    if (!inThird && !isOffCourt) continue; // Hors du tiers et pas hors-terrain → skip
+
+                    // Miroir top court : les grilles sont calibrees en perspective bottom
+                    // col 0 = gauche → en top court gauche/droite inverses → lire colonnes a l'envers
+                    // row 0 = filet → en top court le filet est en bas → lire rows a l'envers
+                    const gridCol = (courtSide === 'top') ? (totalCols - 1 - ci) : ci;
+
+                    for (let row = 0; row < PASS_GRID_ROWS; row++) {
+                        const gridRow = (courtSide === 'top') ? (PASS_GRID_ROWS - 1 - row) : row;
+                        const score = zoneGrid[gridRow] ? (zoneGrid[gridRow][gridCol] || 1) : 1;
+                        const color = colors[score];
+
+                        const left = cellLeft.toFixed(2) + '%';
+                        const width = colWidthPct.toFixed(2) + '%';
+                        let top;
+                        if (courtSide === 'bottom') {
+                            top = (row * cellHeight).toFixed(2) + '%';
+                        } else {
+                            top = (100 - PASS_GRID_DEPTH + row * cellHeight).toFixed(2) + '%';
+                        }
+                        const height = cellHeight.toFixed(2) + '%';
+
+                        // Hachures diagonales pour les zones hors-terrain
+                        const offCourtStyle = isOffCourt
+                            ? 'background-image:repeating-linear-gradient(45deg,transparent,transparent 2px,rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px);'
+                            : '';
+
+                        html += '<div style="position:absolute;left:' + left + ';top:' + top +
+                            ';width:' + width + ';height:' + height +
+                            ';background-color:' + color + ';' + offCourtStyle +
+                            'border:1px solid rgba(255,255,255,0.3);' +
+                            'font-size:8px;font-weight:bold;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.85);">' +
+                            score + '</div>';
+                    }
+                }
+            });
+
+            gridEl.innerHTML = html;
+            gridEl.classList.add('active');
+            passGridDebugActive = true;
+
+            // Élever .court au-dessus de svg.arrow-svg pour que l'overlay soit visible
+            const courtEl = document.querySelector('.court');
+            if (courtEl) courtEl.classList.add('pass-grid-debug-active');
+        }
+
+        function hidePassQualityGrid() {
+            const top = document.getElementById('passGridTop');
+            const bottom = document.getElementById('passGridBottom');
+            if (top) { top.classList.remove('active'); top.innerHTML = ''; }
+            if (bottom) { bottom.classList.remove('active'); bottom.innerHTML = ''; }
+            passGridDebugActive = false;
+
+            // Remettre .court à son z-index normal
+            const courtEl = document.querySelector('.court');
+            if (courtEl) courtEl.classList.remove('pass-grid-debug-active');
+        }
+
+        // Touche G pour toggle l'overlay grille passe
+        // Active en phase pass/pass_end, masque automatiquement sinon
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'g' || e.key === 'G') {
+                if (gameState.phase === 'pass' || gameState.phase === 'pass_end') {
+                    togglePassQualityGrid();
+                } else if (passGridDebugActive) {
+                    // Auto-masquer si on appuie G hors phase pass
+                    hidePassQualityGrid();
+                }
+            }
+        });
+
+        // Masquer l'overlay automatiquement quand la phase change (clic terrain, bouton, etc.)
+        // On observe les changements via un poll léger sur requestAnimationFrame
+        (function autoHidePassGrid() {
+            let lastPhase = '';
+            function checkPhase() {
+                if (passGridDebugActive && gameState.phase !== 'pass' && gameState.phase !== 'pass_end') {
+                    hidePassQualityGrid();
+                }
+                lastPhase = gameState.phase;
+                requestAnimationFrame(checkPhase);
+            }
+            requestAnimationFrame(checkPhase);
+        })();
 
         function _OLD_handleReceptionFault() {
             // [DEAD CODE V18.0] Remplacé par WorkflowEngine — Faute de réception
@@ -5412,23 +5619,48 @@
             return null;
         }
 
-        // Chercher la prochaine action "pass" de l'équipe adverse après un index donné
-        function hasPassAfter(rally, afterIndex, oppositeTeam) {
+        // Analyser ce qui se passe après une attaque defended
+        // Retourne : 'continued' (A-), 'blocked' (BP), 'ended' (A+)
+        function analyzeAfterDefended(rally, afterIndex, oppositeTeam) {
+            const attackingTeam = oppositeTeam === 'home' ? 'away' : 'home';
             for (let i = afterIndex + 1; i < rally.length; i++) {
-                if (rally[i].type === 'pass' && rally[i].team === oppositeTeam) return true;
+                const a = rally[i];
+                if (a.team === oppositeTeam) {
+                    // Defense fault = l'adversaire rate sa défense → l'attaque a forcé le point
+                    if (a.type === 'defense' && a.result === 'fault') continue;
+                    // Block = la balle revient chez l'attaquant
+                    if (a.type === 'block') {
+                        // Chercher si l'équipe attaquante récupère réellement après le block
+                        for (let j = i + 1; j < rally.length; j++) {
+                            if (rally[j].team === attackingTeam) {
+                                if (rally[j].type === 'defense' && rally[j].result === 'fault') {
+                                    return 'blocked'; // Defense fault après block = BP
+                                }
+                                return 'continued'; // L'équipe récupère le block → A-
+                            }
+                        }
+                        return 'blocked'; // Personne ne récupère → BP
+                    }
+                    // Toute autre action adverse (pass, attack, defense réussie, retour direct) = jeu continue
+                    return 'continued';
+                }
             }
-            return false;
+            return 'ended';
         }
 
         // Vérifie si un retour direct (réception ou défense) est "exploité" par l'adversaire
         // = l'adversaire marque directement après sans que l'équipe ait reconstruit (pas de passe/attaque de l'équipe entre-temps)
+        // ET sans que l'adversaire ait organisé son jeu (passe adverse = le DR a été absorbé, la suite n'est plus liée)
         function isDirectReturnExploited(rally, index, team) {
+            const oppositeTeam = team === 'home' ? 'away' : 'home';
             for (let j = index + 1; j < rally.length; j++) {
                 const a = rally[j];
                 // Si l'équipe du retour direct fait une passe ou attaque → elle a reconstruit → non exploité
                 if (a.team === team && (a.type === 'pass' || a.type === 'attack')) return false;
+                // Si l'adversaire fait une passe → il a organisé son jeu → le DR a été absorbé → non exploité
+                // (une attaque directe SANS passe = exploitation du DR, donc on ne stoppe pas sur attack)
+                if (a.team === oppositeTeam && a.type === 'pass') return false;
                 // Si l'adversaire marque directement (attaque gagnante, faute défense de l'équipe)
-                const oppositeTeam = team === 'home' ? 'away' : 'home';
                 if (a.team === oppositeTeam && a.type === 'attack' && (a.result === 'point' || a.result === 'bloc_out')) return true;
                 if (a.team === team && a.type === 'defense' && a.result === 'fault') return true;
             }
@@ -5506,32 +5738,53 @@
                         break;
                     }
 
+                    case 'pass': {
+                        // V19.1 : calcul qualite de passe a la volee depuis endPos + grilles
+                        // Skip les retours directs et les passes filet (pas de qualite evaluable)
+                        if (action.isDirectReturn) {
+                            // Retour direct : compter comme FP si c'est une faute (adversaire marque)
+                            if (!action.isDirectReturnWinner) {
+                                const passExploited = isDirectReturnExploited(rally, i, action.team);
+                                if (passExploited) {
+                                    stats.pass.tot++;
+                                    stats.pass.fp++;
+                                }
+                            }
+                            break;
+                        }
+                        if (!action.endPos || action.endPos.courtSide === 'out' || action.endPos.courtSide === 'net') {
+                            // Passe out ou filet → FP
+                            stats.pass.tot++;
+                            stats.pass.fp++;
+                            break;
+                        }
+
+                        // Determiner le role du passeur
+                        const passerRole = action.role || 'transition';
+                        // Determiner zone et contexte
+                        const passZone = getPassZone(action.endPos, team);
+                        const passContext = getPassContext(rally.slice(0, i), passerRole);
+                        // Evaluer la qualite
+                        const passEval = evaluatePassQuality(action.endPos, passZone, passContext, team);
+
+                        stats.pass.tot++;
+                        switch (passEval.score) {
+                            case 4: stats.pass.p4++; break;
+                            case 3: stats.pass.p3++; break;
+                            case 2: stats.pass.p2++; break;
+                            case 1: stats.pass.p1++; break;
+                        }
+                        break;
+                    }
+
                     case 'attack': {
                         const isRelance = action.attackType === 'relance';
                         const oppositeTeam = team === 'home' ? 'away' : 'home';
 
                         if (isRelance) {
-                            // ===== RELANCE : catégorie stats séparée =====
-                            stats.relance.tot++;
-
-                            if (action.result === 'point' || action.result === 'bloc_out') {
-                                // Kill ou bloc out → R+
-                                stats.relance.relplus++;
-                            } else if (action.result === 'defended') {
-                                if (!hasPassAfter(rally, i, oppositeTeam)) {
-                                    // Défense forcée sans organisation adverse → R+
-                                    stats.relance.relplus++;
-                                } else {
-                                    // Défendu + organisé → R-
-                                    stats.relance.relminus++;
-                                }
-                            } else if (action.result === 'fault_net' || action.result === 'out') {
-                                // Faute de relance (filet ou out)
-                                stats.relance.frel++;
-                            } else if (action.result === 'blocked') {
-                                // Bloc pris en relance → R-
-                                stats.relance.relminus++;
-                            }
+                            // ===== RELANCE : pas de stats côté attaquant =====
+                            // La relance n'est pas une vraie attaque — les stats sont comptées
+                            // côté DÉFENSEUR (dans le case 'defense' quand l'attaque précédente est une relance)
                             break;
                         }
 
@@ -5551,54 +5804,104 @@
                             // BP : bloc pris (la balle revient chez l'attaquant)
                             stats.attack.bp++;
                         } else if (action.result === 'defended') {
-                            // Vérifier s'il y a une passe adverse après (= jeu organisé = A-)
-                            // Ou pas de passe = A+ (défense faute, retour direct gagnant adverse, etc.)
-                            if (hasPassAfter(rally, i, oppositeTeam)) {
-                                // L'adversaire a organisé son jeu → A- (neutre)
-                                stats.attack.attminus++;
+                            const outcome = analyzeAfterDefended(rally, i, oppositeTeam);
+                            if (outcome === 'continued') {
+                                stats.attack.attminus++; // Le jeu continue → A-
+                            } else if (outcome === 'blocked') {
+                                stats.attack.bp++; // Bloc pris → BP
                             } else {
-                                // Pas de passe adverse = l'attaque a quand même forcé l'erreur → A+
-                                // Cas : défense faute, retour direct raté, etc.
-                                stats.attack.attplus++;
+                                stats.attack.attplus++; // L'attaque a forcé le point → A+
                             }
                         }
                         break;
                     }
 
                     case 'defense': {
-                        stats.defense.tot++;
-                        // Retour direct de défense exploité → FD
-                        const defExploited = action.isDirectReturn && !action.isDirectReturnWinner
-                            && isDirectReturnExploited(rally, i, action.team);
-                        if (defExploited) {
-                            stats.defense.fdef++;
-                        } else if (action.isDirectReturn) {
-                            // Retour direct gagnant ou non exploité → D-
-                            stats.defense.defminus++;
-                        } else if (action.result === 'fault') {
-                            // Vérifier si un bloc précède cette défense dans le même échange
-                            let hasBlockBefore = false;
-                            for (let j = i - 1; j >= 0; j--) {
-                                if (rally[j].type === 'block' && rally[j].team === team) {
-                                    hasBlockBefore = true;
-                                    break;
-                                }
-                                if (rally[j].type === 'pass' && rally[j].team === team) break;
-                                if (rally[j].type === 'attack' && rally[j].team === team) break;
+                        // Chercher si l'attaque adverse précédente est une relance
+                        const oppositeTeamDef = team === 'home' ? 'away' : 'home';
+                        let isDefAfterRelance = false;
+                        for (let j = i - 1; j >= 0; j--) {
+                            if (rally[j].type === 'attack' && rally[j].team === oppositeTeamDef) {
+                                isDefAfterRelance = rally[j].attackType === 'relance';
+                                break;
                             }
-                            if (hasBlockBefore) {
-                                stats.defense.defminus++;
+                            // Si on trouve un block ou une defense de notre équipe avant l'attaque → pas directement après relance
+                            if (rally[j].type === 'block' || (rally[j].type === 'defense' && rally[j].team === team)) break;
+                        }
+
+                        if (isDefAfterRelance) {
+                            // ===== RELANCE : stats comptées côté défenseur =====
+                            // Même logique que D+/D-/FD mais dans les compteurs relance
+                            stats.relance.tot++;
+
+                            // Retour direct de relance exploité → FR
+                            const relExploited = action.isDirectReturn && !action.isDirectReturnWinner
+                                && isDirectReturnExploited(rally, i, action.team);
+                            if (relExploited) {
+                                stats.relance.frel++;
+                            } else if (action.isDirectReturn) {
+                                // Retour direct non exploité → R-
+                                stats.relance.relminus++;
+                            } else if (action.result === 'fault') {
+                                // Vérifier si un bloc précède
+                                let hasBlockBeforeRel = false;
+                                for (let j = i - 1; j >= 0; j--) {
+                                    if (rally[j].type === 'block' && rally[j].team === team) {
+                                        hasBlockBeforeRel = true;
+                                        break;
+                                    }
+                                    if (rally[j].type === 'pass' && rally[j].team === team) break;
+                                    if (rally[j].type === 'attack' && rally[j].team === team) break;
+                                }
+                                if (hasBlockBeforeRel) {
+                                    stats.relance.relminus++; // Bloc avant → R- (pas FR)
+                                } else {
+                                    stats.relance.frel++; // Pas de bloc → FR
+                                }
                             } else {
-                                stats.defense.fdef++;
+                                // Relance défendue : utiliser defenseQuality
+                                if (action.defenseQuality === 'positive') {
+                                    stats.relance.relplus++; // Zone bleue claire → R+
+                                } else {
+                                    stats.relance.relminus++; // Hors zone → R-
+                                }
                             }
                         } else {
-                            // Défense réussie : utiliser defenseQuality si disponible
-                            if (action.defenseQuality === 'positive') {
-                                stats.defense.defplus++;
-                            } else if (action.defenseQuality === 'negative') {
+                            // ===== DEFENSE NORMALE =====
+                            stats.defense.tot++;
+                            // Retour direct de défense exploité → FD
+                            const defExploited = action.isDirectReturn && !action.isDirectReturnWinner
+                                && isDirectReturnExploited(rally, i, action.team);
+                            if (defExploited) {
+                                stats.defense.fdef++;
+                            } else if (action.isDirectReturn) {
+                                // Retour direct gagnant ou non exploité → D-
                                 stats.defense.defminus++;
+                            } else if (action.result === 'fault') {
+                                // Vérifier si un bloc précède cette défense dans le même échange
+                                let hasBlockBefore = false;
+                                for (let j = i - 1; j >= 0; j--) {
+                                    if (rally[j].type === 'block' && rally[j].team === team) {
+                                        hasBlockBefore = true;
+                                        break;
+                                    }
+                                    if (rally[j].type === 'pass' && rally[j].team === team) break;
+                                    if (rally[j].type === 'attack' && rally[j].team === team) break;
+                                }
+                                if (hasBlockBefore) {
+                                    stats.defense.defminus++;
+                                } else {
+                                    stats.defense.fdef++;
+                                }
                             } else {
-                                stats.defense.defplus++;
+                                // Défense réussie : utiliser defenseQuality si disponible
+                                if (action.defenseQuality === 'positive') {
+                                    stats.defense.defplus++;
+                                } else if (action.defenseQuality === 'negative') {
+                                    stats.defense.defminus++;
+                                } else {
+                                    stats.defense.defplus++;
+                                }
                             }
                         }
                         break;

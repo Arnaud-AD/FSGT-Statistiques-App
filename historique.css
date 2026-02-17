@@ -19,6 +19,8 @@
     --cat-service: #1565c0;
     --cat-reception-bg: #e8f5e9;
     --cat-reception: #2e7d32;
+    --cat-passe-bg: #ede9fe;
+    --cat-passe: #7c3aed;
     --cat-attack-bg: #fff3e0;
     --cat-attack: #e65100;
     --cat-relance-bg: #fff8e1;
@@ -646,6 +648,7 @@ body {
 
 .cat-tab[data-cat="service"].active { background: var(--cat-service); }
 .cat-tab[data-cat="reception"].active { background: var(--cat-reception); }
+.cat-tab[data-cat="passe"].active { background: var(--cat-passe); }
 .cat-tab[data-cat="attack"].active { background: var(--cat-attack); }
 .cat-tab[data-cat="relance"].active { background: var(--cat-relance); }
 .cat-tab[data-cat="defense"].active { background: var(--cat-defense); }
@@ -815,6 +818,7 @@ body {
 
 .stat-table-header.service { background: var(--cat-service-bg); color: var(--cat-service); }
 .stat-table-header.reception { background: var(--cat-reception-bg); color: var(--cat-reception); }
+.stat-table-header.passe { background: var(--cat-passe-bg); color: var(--cat-passe); }
 .stat-table-header.attack { background: var(--cat-attack-bg); color: var(--cat-attack); }
 .stat-table-header.relance { background: var(--cat-relance-bg); color: var(--cat-relance); }
 .stat-table-header.defense { background: var(--cat-defense-bg); color: var(--cat-defense); }

@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zones de passe - Jen et ses Saints</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-header: #f8f9fa;
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --border-color: #e8eaed;
+            --accent-violet: #8b5cf6;
+            --accent-violet-light: #ede9fe;
+            --q4-color: #22c55e;
+            --q3-color: #a3e635;
+            --q2-color: #f97316;
+            --q1-color: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Roboto', 'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .app-container {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: var(--bg-header);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+        .back-btn:hover { background: var(--border-color); }
+
+        .header-content { flex: 1; }
+
+        .header-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        .header-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* Sélecteurs zone + contexte */
+        .selectors {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .selector-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .selector-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            min-width: 65px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .selector-buttons {
+            display: flex;
+            gap: 6px;
+            flex: 1;
+        }
+
+        .selector-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            cursor: pointer;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.15s;
+        }
+        .selector-btn:hover {
+            border-color: var(--accent-violet);
+            color: var(--accent-violet);
+        }
+        .selector-btn.active {
+            background: var(--accent-violet);
+            border-color: var(--accent-violet);
+            color: white;
+        }
+
+        /* Palette de qualité */
+        .palette-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .palette-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            min-width: 65px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .palette-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .quality-btn {
+            width: 48px;
+            height: 48px;
+            border: 3px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.15s;
+            position: relative;
+        }
+        .quality-btn:hover { transform: scale(1.05); }
+        .quality-btn.active {
+            border-color: var(--text-primary);
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        }
+
+        .quality-btn[data-quality="4"] { background: var(--q4-color); }
+        .quality-btn[data-quality="3"] { background: var(--q3-color); color: #365314; }
+        .quality-btn[data-quality="2"] { background: var(--q2-color); }
+        .quality-btn[data-quality="1"] { background: var(--q1-color); }
+
+        /* Indicateur grille courante */
+        .grid-info {
+            text-align: center;
+            padding: 8px 16px;
+            background: var(--accent-violet-light);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--accent-violet);
+        }
+
+        /* Court container */
+        .court-container {
+            position: relative;
+            border: 2px solid var(--text-primary);
+            border-radius: 4px;
+            margin-bottom: 16px;
+            background: #f0fdf4;
+        }
+
+        /* Zone de détail (4m derrière le filet) — colonnes dynamiques via JS */
+        .grid-detail-zone {
+            position: relative;
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(18, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            aspect-ratio: 18 / 8;
+            border-bottom: 3px solid #333;
+        }
+        /* La zone arrière (P1) s'adapte aussi */
+
+        .grid-cell {
+            border: 1px solid rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: opacity 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.7);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .grid-cell:hover { opacity: 0.8; }
+        .grid-cell[data-val="4"] { background: var(--q4-color); }
+        .grid-cell[data-val="3"] { background: var(--q3-color); }
+        .grid-cell[data-val="2"] { background: var(--q2-color); }
+        .grid-cell[data-val="1"] { background: var(--q1-color); }
+
+        /* Cellules hors-terrain (débordement latéral) */
+        .grid-cell.off-court {
+            background-image: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 3px,
+                rgba(0,0,0,0.08) 3px,
+                rgba(0,0,0,0.08) 6px
+            );
+        }
+        .grid-cell.off-court[data-val="4"] { background-color: var(--q4-color); }
+        .grid-cell.off-court[data-val="3"] { background-color: var(--q3-color); }
+        .grid-cell.off-court[data-val="2"] { background-color: var(--q2-color); }
+        .grid-cell.off-court[data-val="1"] { background-color: var(--q1-color); }
+
+        /* Zone arrière fixe P1 */
+        .grid-back-zone {
+            width: 100%;
+            aspect-ratio: 18 / 10.18;
+            background: var(--q1-color);
+            opacity: 0.35;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 500;
+            color: white;
+        }
+
+        /* Filet label */
+        .net-label {
+            text-align: center;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            padding: 2px 0;
+            background: #333;
+            color: white;
+            letter-spacing: 2px;
+        }
+
+        /* Repères de terrain */
+        .court-markers {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 4px;
+            margin-top: 4px;
+            margin-bottom: 12px;
+        }
+        .court-marker {
+            font-size: 10px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Boutons d'action */
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.15s;
+        }
+        .action-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .action-btn:active { transform: scale(0.98); }
+
+        .export-btn {
+            background: var(--accent-violet);
+            color: white;
+        }
+        .reset-btn {
+            background: var(--bg-header);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Zone export JSON */
+        .export-output {
+            display: none;
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            max-height: 300px;
+            overflow: auto;
+            white-space: pre;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 4px 10px;
+            background: rgba(255,255,255,0.15);
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        .copy-btn:hover { background: rgba(255,255,255,0.25); }
+
+        /* Stats rapides */
+        .grid-stats {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .grid-stat {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: white;
+        }
+        .grid-stat.q4 { background: var(--q4-color); }
+        .grid-stat.q3 { background: var(--q3-color); color: #365314; }
+        .grid-stat.q2 { background: var(--q2-color); }
+        .grid-stat.q1 { background: var(--q1-color); }
+
+        /* Footer */
+        .footer {
+            margin-top: auto;
+            padding-top: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <a href="index.html?admin" class="back-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+            </a>
+            <div class="header-content">
+                <h1 class="header-title">Zones de passe</h1>
+                <p class="header-subtitle">Calibrer les grilles de qualite</p>
+            </div>
+        </header>
+
+        <!-- Selecteurs Zone + Contexte -->
+        <div class="selectors">
+            <div class="selector-row">
+                <span class="selector-label">Zone</span>
+                <div class="selector-buttons" id="zoneSelector">
+                    <button class="selector-btn active" data-zone="R4">R4</button>
+                    <button class="selector-btn" data-zone="Centre">Centre</button>
+                    <button class="selector-btn" data-zone="Pointu">Pointu</button>
+                </div>
+            </div>
+            <div class="selector-row">
+                <span class="selector-label">Contexte</span>
+                <div class="selector-buttons" id="contextSelector">
+                    <button class="selector-btn active" data-context="confort">Confort</button>
+                    <button class="selector-btn" data-context="contraint">Contraint</button>
+                    <button class="selector-btn" data-context="transition">Transition</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Palette qualite -->
+        <div class="palette-section">
+            <span class="palette-label">Pinceau</span>
+            <div class="palette-buttons">
+                <button class="quality-btn active" data-quality="4">4</button>
+                <button class="quality-btn" data-quality="3">3</button>
+                <button class="quality-btn" data-quality="2">2</button>
+                <button class="quality-btn" data-quality="1">1</button>
+            </div>
+        </div>
+
+        <!-- Info grille courante -->
+        <div class="grid-info" id="gridInfo">R4 — Confort</div>
+
+        <!-- Stats rapides -->
+        <div class="grid-stats" id="gridStats"></div>
+
+        <!-- Court -->
+        <div class="court-container">
+            <div class="net-label">FILET</div>
+            <div class="grid-detail-zone" id="gridDetailZone"></div>
+            <div class="grid-back-zone">Toujours P1 (arriere terrain)</div>
+        </div>
+
+        <!-- Reperes -->
+        <div class="court-markers" id="courtMarkers">
+            <span class="court-marker">0m</span>
+            <span class="court-marker">4.5m</span>
+            <span class="court-marker">9m</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+            <button class="action-btn export-btn" onclick="exportGrids()">Exporter JSON</button>
+            <button class="action-btn reset-btn" onclick="resetCurrentGrid()">Reset grille</button>
+        </div>
+
+        <!-- Export output -->
+        <div class="export-output" id="exportOutput">
+            <button class="copy-btn" onclick="copyExport()">Copier</button>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            Zones de passe — 9 grilles (3 zones x 3 contextes)<br>
+            18-22 colonnes x 8 lignes (~50cm x 50cm)<br>
+            R4/Pointu : +2m hors terrain
+        </footer>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="firebase-sync.js"></script>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        const ZONES = ['R4', 'Centre', 'Pointu'];
+        const CONTEXTS = ['confort', 'contraint', 'transition'];
+        const GRID_ROWS = 8;
+        const GRID_COLS_BASE = 18;     // Colonnes terrain (9m / 50cm)
+        const GRID_COLS_EXTRA = 4;     // Colonnes hors-terrain (2m / 50cm)
+        const PASS_GRIDS_KEY = 'volleyball_pass_grids';
+
+        // R4 : 4 colonnes extra à gauche (débordement côté touche gauche)
+        // Pointu : 4 colonnes extra à droite (débordement côté touche droite)
+        // Centre : pas de débordement
+        function getGridCols(zone) {
+            return (zone === 'R4' || zone === 'Pointu') ? GRID_COLS_BASE + GRID_COLS_EXTRA : GRID_COLS_BASE;
+        }
+
+        const QUALITY_COLORS = {
+            4: '#22c55e',
+            3: '#a3e635',
+            2: '#f97316',
+            1: '#ef4444'
+        };
+
+        // ==================== STATE ====================
+        let currentZone = 'R4';
+        let currentContext = 'confort';
+        let activeQuality = 4;
+        let grids = {};
+
+        // ==================== INIT ====================
+        function init() {
+            loadGrids();
+            setupSelectors();
+            setupPalette();
+            renderGrid();
+        }
+
+        function loadGrids() {
+            const saved = localStorage.getItem(PASS_GRIDS_KEY);
+            if (saved) {
+                try {
+                    grids = JSON.parse(saved);
+                } catch (e) {
+                    grids = createDefaultGrids();
+                }
+            } else {
+                grids = createDefaultGrids();
+            }
+
+            // S'assurer que toutes les grilles existent et ont le bon nombre de colonnes
+            ZONES.forEach(zone => {
+                if (!grids[zone]) grids[zone] = {};
+                const expectedCols = getGridCols(zone);
+                CONTEXTS.forEach(ctx => {
+                    if (!grids[zone][ctx]) {
+                        grids[zone][ctx] = createEmptyGrid(zone);
+                    } else {
+                        // Migration : ajuster le nombre de colonnes si nécessaire
+                        grids[zone][ctx] = migrateGridCols(grids[zone][ctx], expectedCols, zone);
+                    }
+                });
+            });
+        }
+
+        function createDefaultGrids() {
+            const g = {};
+            ZONES.forEach(zone => {
+                g[zone] = {};
+                CONTEXTS.forEach(ctx => {
+                    g[zone][ctx] = createEmptyGrid(zone);
+                });
+            });
+            return g;
+        }
+
+        function createEmptyGrid(zone) {
+            const cols = zone ? getGridCols(zone) : GRID_COLS_BASE;
+            const grid = [];
+            for (let r = 0; r < GRID_ROWS; r++) {
+                grid.push(new Array(cols).fill(1));
+            }
+            return grid;
+        }
+
+        /**
+         * Migre une grille si le nombre de colonnes a changé.
+         * R4 : colonnes extra ajoutées à GAUCHE (début du tableau)
+         * Pointu : colonnes extra ajoutées à DROITE (fin du tableau)
+         */
+        function migrateGridCols(grid, expectedCols, zone) {
+            if (!grid || !grid[0]) return createEmptyGrid(zone);
+            const currentCols = grid[0].length;
+            if (currentCols === expectedCols) return grid;
+
+            const diff = expectedCols - currentCols;
+            if (diff <= 0) return grid; // Pas de réduction
+
+            return grid.map(row => {
+                const extra = new Array(diff).fill(1);
+                if (zone === 'R4') {
+                    // R4 : débordement à gauche → colonnes extra au début
+                    return [...extra, ...row];
+                } else {
+                    // Pointu : débordement à droite → colonnes extra à la fin
+                    return [...row, ...extra];
+                }
+            });
+        }
+
+        function saveGrids() {
+            localStorage.setItem(PASS_GRIDS_KEY, JSON.stringify(grids));
+            // Sync Firebase (non-bloquant) — même pattern que equipe.html syncRoster
+            if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured() && typeof auth !== 'undefined' && auth.currentUser) {
+                FirebaseSync.savePassGrids(grids).catch(() => {});
+            }
+        }
+
+        // ==================== SELECTORS ====================
+        function setupSelectors() {
+            // Zone
+            document.querySelectorAll('#zoneSelector .selector-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#zoneSelector .selector-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentZone = btn.dataset.zone;
+                    renderGrid();
+                });
+            });
+
+            // Contexte
+            document.querySelectorAll('#contextSelector .selector-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#contextSelector .selector-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentContext = btn.dataset.context;
+                    renderGrid();
+                });
+            });
+        }
+
+        function setupPalette() {
+            document.querySelectorAll('.quality-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.quality-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeQuality = parseInt(btn.dataset.quality);
+                });
+            });
+        }
+
+        // ==================== GRID RENDERING ====================
+        function renderGrid() {
+            const cols = getGridCols(currentZone);
+            const grid = grids[currentZone][currentContext];
+            const container = document.getElementById('gridDetailZone');
+
+            // Mettre à jour le grid-template dynamiquement
+            container.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+            container.style.aspectRatio = cols + ' / ' + GRID_ROWS;
+
+            // Mettre a jour l'info
+            const contextLabels = { confort: 'Confort', contraint: 'Contraint', transition: 'Transition' };
+            const extraInfo = (currentZone === 'R4' || currentZone === 'Pointu') ? ' (+ 2m hors terrain)' : '';
+            document.getElementById('gridInfo').textContent = currentZone + ' \u2014 ' + contextLabels[currentContext] + extraInfo;
+
+            // Generer les cellules
+            let html = '';
+            const extraCols = (currentZone === 'R4' || currentZone === 'Pointu') ? GRID_COLS_EXTRA : 0;
+            const courtStart = (currentZone === 'R4') ? GRID_COLS_EXTRA : 0;
+            const courtEnd = courtStart + GRID_COLS_BASE;
+
+            for (let row = 0; row < GRID_ROWS; row++) {
+                for (let col = 0; col < cols; col++) {
+                    const val = grid[row][col];
+                    const isOffCourt = (col < courtStart || col >= courtEnd);
+                    const offClass = isOffCourt ? ' off-court' : '';
+                    html += '<div class="grid-cell' + offClass + '" data-val="' + val + '" data-row="' + row + '" data-col="' + col + '">' +
+                        val + '</div>';
+                }
+            }
+            container.innerHTML = html;
+
+            // Marqueurs : lignes de touche
+            updateCourtMarkers();
+
+            // Ajouter les event listeners
+            container.querySelectorAll('.grid-cell').forEach(cell => {
+                cell.addEventListener('click', handleCellClick);
+            });
+
+            updateStats();
+        }
+
+        function updateCourtMarkers() {
+            const markers = document.getElementById('courtMarkers');
+            if (!markers) return;
+            if (currentZone === 'R4') {
+                markers.innerHTML = '<span class="court-marker">-2m</span><span class="court-marker">0m</span><span class="court-marker">4.5m</span><span class="court-marker">9m</span>';
+            } else if (currentZone === 'Pointu') {
+                markers.innerHTML = '<span class="court-marker">0m</span><span class="court-marker">4.5m</span><span class="court-marker">9m</span><span class="court-marker">11m</span>';
+            } else {
+                markers.innerHTML = '<span class="court-marker">0m</span><span class="court-marker">4.5m</span><span class="court-marker">9m</span>';
+            }
+        }
+
+        function handleCellClick(e) {
+            const cell = e.currentTarget;
+            const row = parseInt(cell.dataset.row);
+            const col = parseInt(cell.dataset.col);
+
+            // Peindre la case avec la qualite active
+            grids[currentZone][currentContext][row][col] = activeQuality;
+            cell.dataset.val = activeQuality;
+            cell.textContent = activeQuality;
+
+            saveGrids();
+            updateStats();
+        }
+
+        function updateStats() {
+            const cols = getGridCols(currentZone);
+            const grid = grids[currentZone][currentContext];
+            const counts = { 4: 0, 3: 0, 2: 0, 1: 0 };
+            for (let r = 0; r < GRID_ROWS; r++) {
+                for (let c = 0; c < cols; c++) {
+                    counts[grid[r][c]]++;
+                }
+            }
+            const total = GRID_ROWS * cols;
+
+            const statsEl = document.getElementById('gridStats');
+            statsEl.innerHTML =
+                '<span class="grid-stat q4">P4: ' + counts[4] + ' (' + Math.round(counts[4]/total*100) + '%)</span>' +
+                '<span class="grid-stat q3">P3: ' + counts[3] + ' (' + Math.round(counts[3]/total*100) + '%)</span>' +
+                '<span class="grid-stat q2">P2: ' + counts[2] + ' (' + Math.round(counts[2]/total*100) + '%)</span>' +
+                '<span class="grid-stat q1">P1: ' + counts[1] + ' (' + Math.round(counts[1]/total*100) + '%)</span>';
+        }
+
+        // ==================== ACTIONS ====================
+        function resetCurrentGrid() {
+            if (!confirm('Remettre la grille ' + currentZone + ' / ' + currentContext + ' a P1 ?')) return;
+            grids[currentZone][currentContext] = createEmptyGrid(currentZone);
+            saveGrids();
+            renderGrid();
+        }
+
+        function exportGrids() {
+            // Generer le JS pour match-live-helpers.js
+            // Inclure aussi les dimensions par zone pour référence
+            let output = '// R4: ' + getGridCols('R4') + ' cols (4 extra gauche), Centre: ' + getGridCols('Centre') + ' cols, Pointu: ' + getGridCols('Pointu') + ' cols (4 extra droite)\n';
+            output += 'const PASS_GRIDS = {\n';
+
+            ZONES.forEach((zone, zi) => {
+                output += "    '" + zone + "': {\n";
+                CONTEXTS.forEach((ctx, ci) => {
+                    const grid = grids[zone][ctx];
+                    output += "        '" + ctx + "': [\n";
+                    grid.forEach((row, ri) => {
+                        output += '            [' + row.join(',') + ']';
+                        if (ri < GRID_ROWS - 1) output += ',';
+                        output += '\n';
+                    });
+                    output += '        ]';
+                    if (ci < CONTEXTS.length - 1) output += ',';
+                    output += '\n';
+                });
+                output += '    }';
+                if (zi < ZONES.length - 1) output += ',';
+                output += '\n';
+            });
+
+            output += '};\n';
+
+            const exportEl = document.getElementById('exportOutput');
+            // Inserer le texte avant le bouton copier
+            const copyBtn = exportEl.querySelector('.copy-btn');
+            // Nettoyer le contenu texte existant
+            exportEl.childNodes.forEach(node => {
+                if (node.nodeType === Node.TEXT_NODE) node.remove();
+            });
+            exportEl.insertBefore(document.createTextNode(output), copyBtn);
+            exportEl.style.display = 'block';
+        }
+
+        function copyExport() {
+            const exportEl = document.getElementById('exportOutput');
+            // Extraire le texte sans le bouton
+            let text = '';
+            exportEl.childNodes.forEach(node => {
+                if (node.nodeType === Node.TEXT_NODE) text += node.textContent;
+            });
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = exportEl.querySelector('.copy-btn');
+                btn.textContent = 'Copie !';
+                setTimeout(() => { btn.textContent = 'Copier'; }, 1500);
+            });
+        }
+
+        // ==================== LAUNCH ====================
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

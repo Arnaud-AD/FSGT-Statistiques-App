@@ -347,7 +347,7 @@ Chaque intégration est marquée par le commentaire `[DEV TEST] ... — À RETIR
 | Service    | Tot, Ace, S+, FS, Moy            |
 | Réception  | Tot, R4, R3, R2, R1, FR          |
 | Attaque    | Tot, A+, A-, BP, FA              |
-| Relance    | Tot, R+, R-, FR *(V19.0 — à implémenter)* |
+| Relance    | Tot, R+, R-, FR *(V19.0)* |
 | Défense    | Tot, D+, D-, FD                  |
 | Bloc       | Tot, B+, B-, FB                  |
 
@@ -386,7 +386,7 @@ Chaque intégration est marquée par le commentaire `[DEV TEST] ... — À RETIR
 
 > **Critère A+ vs A-** : S'il y a une passe (`pass`) de l'équipe adverse après l'attaque dans le rally → A- (jeu organisé). Sinon → A+ (l'attaque a forcé le point ou l'erreur).
 
-### Relance *(V19.0 — à implémenter)*
+### Relance *(V19.0)*
 
 > **Distinction attaque vs relance** : La relance (`attackType === 'relance'`) est une catégorie de stats **séparée** de l'attaque. Ce n'est pas une attaque — c'est un geste de survie quand le joueur reçoit une balle impossible à attaquer (mauvaise passe ou mauvaise défense en amont). La responsabilité de la situation incombe à la passe/défense précédente, pas à l'attaquant.
 
@@ -439,7 +439,7 @@ Chaque intégration est marquée par le commentaire `[DEV TEST] ... — À RETIR
     service:   { tot: 0, ace: 0, splus: 0, fser: 0, recSumAdv: 0, recCountAdv: 0 },
     reception: { tot: 0, r4: 0, r3: 0, r2: 0, r1: 0, frec: 0 },
     attack:    { tot: 0, attplus: 0, attminus: 0, bp: 0, fatt: 0 },
-    relance:   { tot: 0, relplus: 0, relminus: 0, frel: 0 },  // V19.0 — à ajouter
+    relance:   { tot: 0, relplus: 0, relminus: 0, frel: 0 },  // V19.0
     defense:   { tot: 0, defplus: 0, defminus: 0, fdef: 0 },
     block:     { tot: 0, blcplus: 0, blcminus: 0, fblc: 0 }
 }
@@ -473,7 +473,7 @@ Zone semi-circulaire bleue affichée pendant la phase `defense_end` (après auto
 
 > **Stratégie** : Workflow d'abord (scoring live solide), puis enrichissement historique, puis stats avancées, puis finalisation.
 
-### Phases terminées (V8.0 → V18.2)
+### Phases terminées (V8.0 → V19.0)
 
 | Phase | Description | Version |
 |-------|-------------|---------|
@@ -494,6 +494,7 @@ Zone semi-circulaire bleue affichée pendant la phase `defense_end` (après auto
 | V18.0 | Audit & fix retours directs (réception, passe, défense) + comptabilisation stats | V18.0 ✅ |
 | V18.1 | Réécriture complète du système undo (WorkflowEngine) + bug fixes (flèches, bloc) | V18.1 ✅ |
 | V18.2 | Points de mixité modifiables en cours de set + blocs gris timeline | V18.2 ✅ |
+| V19.0 | Nouvelle catégorie stats Relance (séparée de l'attaque) — Tot, R+, R-, FR | V19.0 ✅ |
 
 ---
 
@@ -515,11 +516,12 @@ Zone semi-circulaire bleue affichée pendant la phase `defense_end` (après auto
 ### Phase 19 — Workflow : Stats relance & Qualité de passe
 *Enrichissement du modèle de données*
 
-**V19.0 — Nouvelle catégorie stats : Relance**
-- [ ] Créer une catégorie de stats à part entière "Relance" (séparée de l'attaque — la relance n'est pas une attaque, c'est un geste de survie dû à une mauvaise passe/défense en amont)
-- [ ] Colonnes : Tot, R+ (relance qui permet de continuer le jeu / point direct), R- (relance neutre/mauvaise), FR (faute de relance)
-- [ ] Intégration dans le calcul de stats (`recalculateAllStats`) et l'affichage (match-live + historique)
-- [ ] Retirer les relances des stats d'attaque (actuellement : Tot+1 et Att+ si point direct → à migrer vers la catégorie Relance)
+~~**V19.0 — Nouvelle catégorie stats : Relance**~~ ✅
+- [x] Créer une catégorie de stats à part entière "Relance" (séparée de l'attaque — la relance n'est pas une attaque, c'est un geste de survie dû à une mauvaise passe/défense en amont)
+- [x] Colonnes : Tot, R+ (relance qui permet de continuer le jeu / point direct), R- (relance neutre/mauvaise), FR (faute de relance)
+- [x] Intégration dans le calcul de stats (`recalculateAllStats`) et l'affichage (match-live + historique)
+- [x] Retirer les relances des stats d'attaque (actuellement : Tot+1 et Att+ si point direct → à migrer vers la catégorie Relance)
+- [x] V19.0(+1) : Fix export stats FA(BP) + header aligné + filtrage joueurs fantômes adverses
 
 **V19.1 — Système de qualité de passe**
 - [ ] 3 grilles prédéfinies selon le contexte : **confort** (après R4/R3), **contraint** (après R2/R1), **transition** (après défense/relance ou passeur non principal)
