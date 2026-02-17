@@ -3785,6 +3785,43 @@
             return player;
         }
 
+        // Convertit un clic outArea (coordonnées courtContainer %) en coordonnées court-half
+        // Retourne { x, y, courtSide } si le clic tombe dans la bande Y d'un court-half, null sinon
+        function convertOutToCourtHalf(containerClickData) {
+            const container = document.getElementById('courtContainer');
+            const courtTop = document.getElementById('courtTop');
+            const courtBottom = document.getElementById('courtBottom');
+            const containerRect = container.getBoundingClientRect();
+            const topRect = courtTop.getBoundingClientRect();
+            const bottomRect = courtBottom.getBoundingClientRect();
+
+            // Position du clic en pixels absolus dans le container
+            const clickPxX = containerClickData.x / 100 * containerRect.width;
+            const clickPxY = containerClickData.y / 100 * containerRect.height;
+
+            // Positions relatives des court-halves dans le container
+            const topRelY = topRect.top - containerRect.top;
+            const topH = topRect.height;
+            const bottomRelY = bottomRect.top - containerRect.top;
+            const bottomH = bottomRect.height;
+
+            // X relatif au court (centré dans le container)
+            const court = document.getElementById('court');
+            const courtRect = court.getBoundingClientRect();
+            const courtRelX = courtRect.left - containerRect.left;
+            const xInCourt = (clickPxX - courtRelX) / courtRect.width * 100;
+
+            if (clickPxY >= topRelY && clickPxY <= topRelY + topH) {
+                const yInHalf = (clickPxY - topRelY) / topH * 100;
+                return { x: xInCourt, y: yInHalf, courtSide: 'top' };
+            } else if (clickPxY >= bottomRelY && clickPxY <= bottomRelY + bottomH) {
+                const yInHalf = (clickPxY - bottomRelY) / bottomH * 100;
+                return { x: xInCourt, y: yInHalf, courtSide: 'bottom' };
+            }
+
+            return null; // Vraiment hors zone (au-dessus ou en-dessous des deux terrains)
+        }
+
         // Clic terrain pendant phase pass = auto-sélection du passeur + enregistrement position
         // + auto-sélection de l'attaquant selon le côté gauche/droite
         function handlePassCourtClick(clickData) {
@@ -3839,27 +3876,71 @@
                 return;
             }
 
-            // Passe out → point adversaire
+            // Passe out → convertir en coordonnées court-half si possible
             if (clickData.courtSide === 'out') {
-                gameState.passAutoSelected = true;
-                gameState.currentAction = {
-                    type: 'pass',
-                    player: selectedPasser,
-                    team: team,
-                    role: selectedRole,
-                    endPos: clickData
-                };
-                const lastActionForStart = gameState.rally[gameState.rally.length - 1];
-                if (lastActionForStart && lastActionForStart.endPos) {
-                    gameState.currentAction.startPos = lastActionForStart.endPos;
-                } else if (lastActionForStart && lastActionForStart.isDirectReturn && lastActionForStart.directReturnEndPos) {
-                    gameState.currentAction.startPos = lastActionForStart.directReturnEndPos;
+                const converted = convertOutToCourtHalf(clickData);
+
+                if (converted && converted.courtSide === passingCourtSide) {
+                    // Clic out mais côté propre terrain → traiter comme passe normale
+                    // La grille de qualité gère les zones hors-terrain via les extensions R4/Pointu
+                    clickData = converted;
+                    // NE PAS return — continuer dans le flow normal ci-dessous
+                } else if (converted && converted.courtSide === oppositeCourtSide) {
+                    // Clic out côté adverse → retour direct
+                    gameState.passAutoSelected = true;
+                    gameState.currentAction = {
+                        type: 'pass',
+                        player: selectedPasser,
+                        team: team,
+                        role: selectedRole,
+                        endPos: converted,
+                        isDirectReturn: true,
+                        directReturnEndPos: converted
+                    };
+                    const lastActionForStart = gameState.rally[gameState.rally.length - 1];
+                    if (lastActionForStart && lastActionForStart.endPos) {
+                        gameState.currentAction.startPos = lastActionForStart.endPos;
+                    } else if (lastActionForStart && lastActionForStart.isDirectReturn && lastActionForStart.directReturnEndPos) {
+                        gameState.currentAction.startPos = lastActionForStart.directReturnEndPos;
+                    }
+                    addMarker(converted, 'pass');
+                    const lastAction = gameState.rally[gameState.rally.length - 1];
+                    if (lastAction && lastAction.endPos) {
+                        drawArrow(lastAction.endPos, converted, 'pass');
+                    } else if (lastAction && lastAction.isDirectReturn && lastAction.directReturnEndPos) {
+                        drawArrow(lastAction.directReturnEndPos, converted, 'pass');
+                    }
+                    document.getElementById('outArea').classList.remove('active');
+                    gameState.passDirectReturnClickData = converted;
+                    gameState.rally.push({ ...gameState.currentAction });
+                    hideAttackZones();
+                    gameState.phase = 'pass_direct_return_choice';
+                    updatePhase();
+                    hideAllSections();
+                    document.getElementById('passDirectReturnChoice').classList.remove('hidden');
+                    return;
+                } else {
+                    // Vraiment hors zone → FP comme avant
+                    gameState.passAutoSelected = true;
+                    gameState.currentAction = {
+                        type: 'pass',
+                        player: selectedPasser,
+                        team: team,
+                        role: selectedRole,
+                        endPos: clickData
+                    };
+                    const lastActionForStart = gameState.rally[gameState.rally.length - 1];
+                    if (lastActionForStart && lastActionForStart.endPos) {
+                        gameState.currentAction.startPos = lastActionForStart.endPos;
+                    } else if (lastActionForStart && lastActionForStart.isDirectReturn && lastActionForStart.directReturnEndPos) {
+                        gameState.currentAction.startPos = lastActionForStart.directReturnEndPos;
+                    }
+                    gameState.rally.push({ ...gameState.currentAction });
+                    const otherTeam = team === 'home' ? 'away' : 'home';
+                    awardPoint(otherTeam);
+                    endRally();
+                    return;
                 }
-                gameState.rally.push({ ...gameState.currentAction });
-                const otherTeam = team === 'home' ? 'away' : 'home';
-                awardPoint(otherTeam);
-                endRally();
-                return;
             }
 
             // Passe normale sur son propre terrain
