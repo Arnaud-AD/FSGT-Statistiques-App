@@ -526,26 +526,50 @@
             setupPalette();
             renderGrid();
 
-            // V19.23 : Si localStorage vide, tenter de charger depuis Firebase (async)
-            if (!localStorage.getItem(PASS_GRIDS_KEY)) {
-                loadGridsFromFirebase();
-            }
+            // V19.23 : Toujours tenter de charger depuis Firebase au demarrage
+            // Firebase fait autorite si les grilles locales sont vides/default
+            loadGridsFromFirebase();
         }
 
         /**
-         * Charge les grilles depuis Firebase si disponible, puis re-render.
-         * Appelé quand localStorage est vide (après clear cache).
+         * Verifie si les grilles contiennent au moins une valeur calibree (non-P1).
+         * Les grilles par defaut sont remplies de 1 (P1) — on ne veut pas ecraser Firebase avec ca.
+         */
+        function hasCalibrationData(gridsObj) {
+            for (const zone of ZONES) {
+                if (!gridsObj[zone]) continue;
+                for (const ctx of CONTEXTS) {
+                    const grid = gridsObj[zone][ctx];
+                    if (!grid) continue;
+                    for (let r = 0; r < grid.length; r++) {
+                        for (let c = 0; c < grid[r].length; c++) {
+                            if (grid[r][c] !== 1) return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Charge les grilles depuis Firebase si disponible.
+         * Si les grilles locales sont vides/default et Firebase a des donnees calibrees,
+         * les grilles Firebase remplacent les locales.
          */
         async function loadGridsFromFirebase() {
             if (typeof FirebaseSync === 'undefined' || !FirebaseSync.isConfigured()) return;
             try {
                 const remoteGrids = await FirebaseSync.getPassGrids();
-                if (remoteGrids) {
-                    localStorage.setItem(PASS_GRIDS_KEY, JSON.stringify(remoteGrids));
-                    grids = remoteGrids;
-                    normalizeGrids();
-                    renderGrid();
-                    console.log('[V19.23] Grilles de passe chargées depuis Firebase');
+                if (remoteGrids && hasCalibrationData(remoteGrids)) {
+                    // Firebase a des donnees calibrees
+                    if (!hasCalibrationData(grids)) {
+                        // Local est vide/default → Firebase fait autorite
+                        localStorage.setItem(PASS_GRIDS_KEY, JSON.stringify(remoteGrids));
+                        grids = remoteGrids;
+                        normalizeGrids();
+                        renderGrid();
+                        console.log('[V19.23] Grilles de passe restaurées depuis Firebase');
+                    }
                 }
             } catch (e) {
                 console.warn('[V19.23] Erreur chargement grilles Firebase:', e);
@@ -631,8 +655,11 @@
 
         function saveGrids() {
             localStorage.setItem(PASS_GRIDS_KEY, JSON.stringify(grids));
-            // Sync Firebase (non-bloquant) — même pattern que equipe.html syncRoster
-            if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured() && typeof auth !== 'undefined' && auth.currentUser) {
+            // Sync Firebase (non-bloquant) — seulement si les grilles ont des donnees calibrees
+            // pour ne jamais ecraser Firebase avec des grilles vides/default
+            if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured()
+                && typeof auth !== 'undefined' && auth.currentUser
+                && hasCalibrationData(grids)) {
                 FirebaseSync.savePassGrids(grids).catch(() => {});
             }
         }

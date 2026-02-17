@@ -1366,13 +1366,39 @@
             // V19.1 : charger les grilles de passe calibrées depuis localStorage
             if (typeof loadPassGridsFromStorage === 'function') loadPassGridsFromStorage();
 
-            // V19.23 : Si localStorage vide, tenter de charger depuis Firebase (async, non-bloquant)
-            if (!localStorage.getItem('volleyball_pass_grids') && typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured()) {
+            // V19.23 : Toujours tenter de charger les grilles depuis Firebase (async, non-bloquant)
+            // Firebase fait autorite si les grilles locales sont vides/default (tout P1)
+            if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured()) {
                 FirebaseSync.getPassGrids().then(remoteGrids => {
-                    if (remoteGrids) {
+                    if (!remoteGrids) return;
+                    // Verifier que Firebase a des donnees calibrees (au moins une cellule non-P1)
+                    const hasRemoteData = Object.values(remoteGrids).some(zone =>
+                        zone && Object.values(zone).some(ctx =>
+                            Array.isArray(ctx) && ctx.some(row =>
+                                Array.isArray(row) && row.some(v => v !== 1)
+                            )
+                        )
+                    );
+                    if (!hasRemoteData) return;
+                    // Verifier que le local n'a PAS de donnees calibrees
+                    const localRaw = localStorage.getItem('volleyball_pass_grids');
+                    let hasLocalData = false;
+                    if (localRaw) {
+                        try {
+                            const local = JSON.parse(localRaw);
+                            hasLocalData = Object.values(local).some(zone =>
+                                zone && Object.values(zone).some(ctx =>
+                                    Array.isArray(ctx) && ctx.some(row =>
+                                        Array.isArray(row) && row.some(v => v !== 1)
+                                    )
+                                )
+                            );
+                        } catch(e) {}
+                    }
+                    if (!hasLocalData) {
                         localStorage.setItem('volleyball_pass_grids', JSON.stringify(remoteGrids));
                         if (typeof loadPassGridsFromStorage === 'function') loadPassGridsFromStorage();
-                        console.log('[V19.23] Grilles de passe chargées depuis Firebase');
+                        console.log('[V19.23] Grilles de passe restaurées depuis Firebase');
                     }
                 }).catch(() => {});
             }

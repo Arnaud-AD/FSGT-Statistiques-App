@@ -282,10 +282,21 @@ const FirebaseSync = {
         const currentId = Storage.getCurrentMatchId();
         await this.saveCurrentMatchId(currentId);
 
-        // Pass grids
+        // Pass grids — ne jamais ecraser Firebase avec des grilles vides/default
         const passGrids = localStorage.getItem('volleyball_pass_grids');
         if (passGrids) {
-            await this.savePassGrids(JSON.parse(passGrids));
+            const parsed = JSON.parse(passGrids);
+            // Verifier qu'au moins une cellule n'est pas P1 (valeur 1)
+            const hasData = Object.values(parsed).some(zone =>
+                zone && Object.values(zone).some(ctx =>
+                    Array.isArray(ctx) && ctx.some(row =>
+                        Array.isArray(row) && row.some(v => v !== 1)
+                    )
+                )
+            );
+            if (hasData) {
+                await this.savePassGrids(parsed);
+            }
         }
 
         console.log('[FirebaseSync] Push complet : roster, matchs, state, passGrids');
