@@ -1366,6 +1366,17 @@
             // V19.1 : charger les grilles de passe calibrées depuis localStorage
             if (typeof loadPassGridsFromStorage === 'function') loadPassGridsFromStorage();
 
+            // V19.23 : Si localStorage vide, tenter de charger depuis Firebase (async, non-bloquant)
+            if (!localStorage.getItem('volleyball_pass_grids') && typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured()) {
+                FirebaseSync.getPassGrids().then(remoteGrids => {
+                    if (remoteGrids) {
+                        localStorage.setItem('volleyball_pass_grids', JSON.stringify(remoteGrids));
+                        if (typeof loadPassGridsFromStorage === 'function') loadPassGridsFromStorage();
+                        console.log('[V19.23] Grilles de passe chargées depuis Firebase');
+                    }
+                }).catch(() => {});
+            }
+
             if (!currentMatch) {
                 window.location.href = 'nouveau-match.html';
                 return;

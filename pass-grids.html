@@ -499,6 +499,31 @@
             setupSelectors();
             setupPalette();
             renderGrid();
+
+            // V19.23 : Si localStorage vide, tenter de charger depuis Firebase (async)
+            if (!localStorage.getItem(PASS_GRIDS_KEY)) {
+                loadGridsFromFirebase();
+            }
+        }
+
+        /**
+         * Charge les grilles depuis Firebase si disponible, puis re-render.
+         * Appelé quand localStorage est vide (après clear cache).
+         */
+        async function loadGridsFromFirebase() {
+            if (typeof FirebaseSync === 'undefined' || !FirebaseSync.isConfigured()) return;
+            try {
+                const remoteGrids = await FirebaseSync.getPassGrids();
+                if (remoteGrids) {
+                    localStorage.setItem(PASS_GRIDS_KEY, JSON.stringify(remoteGrids));
+                    grids = remoteGrids;
+                    normalizeGrids();
+                    renderGrid();
+                    console.log('[V19.23] Grilles de passe chargées depuis Firebase');
+                }
+            } catch (e) {
+                console.warn('[V19.23] Erreur chargement grilles Firebase:', e);
+            }
         }
 
         function loadGrids() {
@@ -512,8 +537,13 @@
             } else {
                 grids = createDefaultGrids();
             }
+            normalizeGrids();
+        }
 
-            // S'assurer que toutes les grilles existent et ont le bon nombre de colonnes
+        /**
+         * S'assurer que toutes les grilles existent et ont le bon nombre de colonnes.
+         */
+        function normalizeGrids() {
             ZONES.forEach(zone => {
                 if (!grids[zone]) grids[zone] = {};
                 const expectedCols = getGridCols(zone);
