@@ -206,7 +206,33 @@
             grid-template-columns: repeat(18, 1fr);
             grid-template-rows: repeat(8, 1fr);
             aspect-ratio: 18 / 8;
-            border-bottom: 3px solid #333;
+        }
+
+        /* V19.23 : Lignes de repère terrain (3m, touche) — overlays absolus */
+        .court-line {
+            position: absolute;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .court-line-3m {
+            left: 0; right: 0;
+            top: 75%; /* 3m sur 4m = 6/8 lignes */
+            height: 0;
+            border-top: 2px solid rgba(255,255,255,0.7);
+        }
+        .court-line-3m::after {
+            content: '3m';
+            position: absolute;
+            right: 4px;
+            top: 2px;
+            font-size: 9px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.7);
+        }
+        .court-line-side {
+            top: 0; bottom: 0;
+            width: 0;
+            border-left: 2px solid rgba(255,255,255,0.7);
         }
         /* La zone arrière (P1) s'adapte aussi */
 
@@ -674,6 +700,17 @@
                         val + '</div>';
                 }
             }
+            // V19.23 : Lignes de repère (3m + touche latérale)
+            html += '<div class="court-line court-line-3m"></div>';
+            if (currentZone === 'R4') {
+                // R4 : extra cols à gauche → ligne de touche gauche
+                const pct = (GRID_COLS_EXTRA / cols * 100).toFixed(2);
+                html += '<div class="court-line court-line-side" style="left:' + pct + '%"></div>';
+            } else if (currentZone === 'Pointu') {
+                // Pointu : extra cols à droite → ligne de touche droite
+                const pct = (GRID_COLS_BASE / cols * 100).toFixed(2);
+                html += '<div class="court-line court-line-side" style="left:' + pct + '%"></div>';
+            }
             container.innerHTML = html;
 
             // Marqueurs : lignes de touche
@@ -690,12 +727,13 @@
         function updateCourtMarkers() {
             const markers = document.getElementById('courtMarkers');
             if (!markers) return;
+            // Marqueurs : bord gauche, milieu terrain, bord droit (+ hors-terrain si applicable)
             if (currentZone === 'R4') {
-                markers.innerHTML = '<span class="court-marker">-2m</span><span class="court-marker">0m</span><span class="court-marker">4.5m</span><span class="court-marker">9m</span>';
+                markers.innerHTML = '<span class="court-marker">-2m</span><span class="court-marker">0m (touche)</span><span class="court-marker">9m</span>';
             } else if (currentZone === 'Pointu') {
-                markers.innerHTML = '<span class="court-marker">0m</span><span class="court-marker">4.5m</span><span class="court-marker">9m</span><span class="court-marker">11m</span>';
+                markers.innerHTML = '<span class="court-marker">0m</span><span class="court-marker">9m (touche)</span><span class="court-marker">11m</span>';
             } else {
-                markers.innerHTML = '<span class="court-marker">0m</span><span class="court-marker">4.5m</span><span class="court-marker">9m</span>';
+                markers.innerHTML = '<span class="court-marker">0m</span><span class="court-marker">9m</span>';
             }
         }
 
