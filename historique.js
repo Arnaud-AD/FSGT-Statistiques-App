@@ -482,9 +482,11 @@ const SharedComponents = {
         });
 
         // Ligne total
+        // V19.1 fix : la cle UI 'passe' correspond a la cle data 'pass'
+        var totDataKey = (category === 'passe') ? 'pass' : category;
         html += '<tr class="total-row"><td>Total</td>';
         catDef.columns.forEach(function(col) {
-            html += SharedComponents.renderCell({ [category]: totals[category], service: totals.service }, category, col);
+            html += SharedComponents.renderCell({ [totDataKey]: totals[totDataKey], service: totals.service }, category, col);
         });
         html += '</tr>';
 
@@ -503,7 +505,9 @@ const SharedComponents = {
             return '<td class="' + cls + '">' + StatsAggregator.srvMoyDisplay(playerStats) + '</td>';
         }
 
-        var catData = playerStats[category] || {};
+        // V19.1 fix : la cle UI 'passe' correspond a la cle data 'pass'
+        var dataKey = (category === 'passe') ? 'pass' : category;
+        var catData = playerStats[dataKey] || {};
         var val, display, extraInfo = '';
 
         // Colonnes calculees
@@ -591,9 +595,11 @@ const SharedComponents = {
             });
 
             // Total
+            // V19.1 fix : la cle UI 'passe' correspond a la cle data 'pass'
+            var totDataK = (catKey === 'passe') ? 'pass' : catKey;
             html += '<tr class="total-row">';
             catDef.columns.forEach(function(col) {
-                html += SharedComponents.renderCell({ [catKey]: totals[catKey], service: totals.service }, catKey, col);
+                html += SharedComponents.renderCell({ [totDataK]: totals[totDataK], service: totals.service }, catKey, col);
             });
             html += '</tr>';
 
@@ -1182,6 +1188,8 @@ const MatchStatsView = {
         var cats = ['service', 'reception', 'passe', 'attack', 'relance', 'defense', 'block'];
         cats.forEach(function(catKey) {
             var catDef = SharedComponents.CATEGORIES_MATCH[catKey];
+            // V19.1 fix : la cle UI 'passe' correspond a la cle data 'pass'
+            var exportDataKey = (catKey === 'passe') ? 'pass' : catKey;
             text += catDef.label.toUpperCase() + '\n';
             // Header
             text += 'Joueur'.padEnd(14);
@@ -1206,7 +1214,7 @@ const MatchStatsView = {
                         var cell = combined > 0 ? String(combined) + (bp > 0 ? '(' + bp + ')' : '') : '-';
                         text += cell.padStart(7);
                     } else {
-                        var val = p[catKey] ? (p[catKey][col.key] || 0) : 0;
+                        var val = p[exportDataKey] ? (p[exportDataKey][col.key] || 0) : 0;
                         text += (val > 0 ? String(val) : '-').padStart(5);
                     }
                 });
