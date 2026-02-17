@@ -174,11 +174,19 @@ const SideOutAnalysis = {
 // ==================== STATS AGGREGATION ====================
 const StatsAggregator = {
 
+    _passCtx() { return { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0 }; },
+
     initPlayerStats() {
         return {
             service: { tot: 0, ace: 0, splus: 0, fser: 0, recSumAdv: 0, recCountAdv: 0 },
             reception: { tot: 0, r4: 0, r3: 0, r2: 0, r1: 0, frec: 0 },
-            pass: { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0 },
+            pass: {
+                tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0,
+                passeur: { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0,
+                    confort: this._passCtx(), contraint: this._passCtx(), transition: this._passCtx() },
+                autre: { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0,
+                    contraint: this._passCtx(), transition: this._passCtx() }
+            },
             attack: { tot: 0, attplus: 0, attminus: 0, bp: 0, fatt: 0 },
             relance: { tot: 0, relplus: 0, relminus: 0, frel: 0 },
             defense: { tot: 0, defplus: 0, defminus: 0, fdef: 0 },
@@ -216,13 +224,26 @@ const StatsAggregator = {
                 t.reception.r1 += (data.reception?.r1 || 0);
                 t.reception.frec += (data.reception?.faute || data.reception?.frec || 0);
 
-                // Passe
+                // Passe (plat)
                 t.pass.tot += (data.pass?.tot || 0);
                 t.pass.p4 += (data.pass?.p4 || 0);
                 t.pass.p3 += (data.pass?.p3 || 0);
                 t.pass.p2 += (data.pass?.p2 || 0);
                 t.pass.p1 += (data.pass?.p1 || 0);
                 t.pass.fp += (data.pass?.fp || 0);
+
+                // Passe ventilation V19.2 (passeur/autre + contextes)
+                var pKeys = ['tot', 'p4', 'p3', 'p2', 'p1', 'fp'];
+                ['passeur', 'autre'].forEach(function(pType) {
+                    var src = data.pass?.[pType];
+                    if (!src) return;
+                    pKeys.forEach(function(k) { t.pass[pType][k] += (src[k] || 0); });
+                    var ctxs = pType === 'passeur' ? ['confort', 'contraint', 'transition'] : ['contraint', 'transition'];
+                    ctxs.forEach(function(ctx) {
+                        if (!src[ctx]) return;
+                        pKeys.forEach(function(k) { t.pass[pType][ctx][k] += (src[ctx]?.[k] || 0); });
+                    });
+                });
 
                 // Attaque
                 t.attack.tot += (data.attack?.tot || 0);
@@ -258,12 +279,24 @@ const StatsAggregator = {
      */
     computeTotals(playerTotals) {
         const totals = StatsAggregator.initPlayerStats();
+        const pKeys = ['tot', 'p4', 'p3', 'p2', 'p1', 'fp'];
         for (const p of Object.values(playerTotals)) {
-            for (const cat of ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block']) {
+            for (const cat of ['service', 'reception', 'attack', 'relance', 'defense', 'block']) {
                 for (const key of Object.keys(totals[cat])) {
-                    totals[cat][key] += (p[cat][key] || 0);
+                    totals[cat][key] += (p[cat]?.[key] || 0);
                 }
             }
+            // Passe : champs plats + ventilation
+            pKeys.forEach(function(k) { totals.pass[k] += (p.pass?.[k] || 0); });
+            ['passeur', 'autre'].forEach(function(pType) {
+                if (!p.pass?.[pType]) return;
+                pKeys.forEach(function(k) { totals.pass[pType][k] += (p.pass[pType][k] || 0); });
+                var ctxs = pType === 'passeur' ? ['confort', 'contraint', 'transition'] : ['contraint', 'transition'];
+                ctxs.forEach(function(ctx) {
+                    if (!p.pass[pType][ctx]) return;
+                    pKeys.forEach(function(k) { totals.pass[pType][ctx][k] += (p.pass[pType][ctx]?.[k] || 0); });
+                });
+            });
         }
         return totals;
     },
@@ -605,6 +638,100 @@ const SharedComponents = {
 
             html += '</tbody></table></div>';
         });
+
+        html += '</div>';
+        return html;
+    },
+
+    /**
+     * Rendu detail passe avec ventilation Passeur/Autre + contextes.
+     * Utilise en mobile (onglet Passe) et dans l'export texte.
+     * @param {Object} playerTotals - {name: {pass: {passeur: {confort:...}, autre:...}}}
+     * @param {string} teamLabel
+     * @param {string} teamClass - 'home' ou 'away'
+     */
+    renderPassDetailView(playerTotals, teamLabel, teamClass) {
+        var totals = StatsAggregator.computeTotals(playerTotals);
+        var passData = totals.pass || {};
+        if (!passData.tot && !passData.fp) return '';
+
+        var cols = [
+            { key: 'tot', label: 'Tot', cls: '' },
+            { key: 'p4', label: 'P4', cls: 'positive' },
+            { key: 'p3', label: 'P3', cls: '' },
+            { key: 'p2', label: 'P2', cls: '' },
+            { key: 'p1', label: 'P1', cls: 'warning' },
+            { key: 'fp', label: 'FP', cls: 'negative' }
+        ];
+
+        function cell(bucket, key, cls) {
+            var v = bucket[key] || 0;
+            var pct = '';
+            if (v > 0 && (key === 'p4' || key === 'fp') && bucket.tot > 0) {
+                pct = ' <span class="stat-pct">' + Math.round(v / bucket.tot * 100) + '%</span>';
+            }
+            return '<td class="' + (v > 0 ? cls : '') + '">' + (v > 0 ? v : '-') + pct + '</td>';
+        }
+
+        function typeRow(label, bucket, cssClass) {
+            var html = '<tr class="' + cssClass + '"><td>' + label + '</td>';
+            cols.forEach(function(c) { html += cell(bucket, c.key, c.cls); });
+            html += '</tr>';
+            return html;
+        }
+
+        function ctxRow(label, bucket) {
+            var html = '<tr class="pass-ctx-row"><td>\u2514 ' + label + '</td>';
+            cols.forEach(function(c) { html += cell(bucket, c.key, c.cls); });
+            html += '</tr>';
+            return html;
+        }
+
+        var html = '<div class="stats-team-block">';
+        html += '<div class="stats-team-title ' + teamClass + '">' + Utils.escapeHtml(teamLabel) + '</div>';
+
+        // -- Tableau par joueur (standard) --
+        var players = Object.keys(playerTotals);
+        html += '<table class="stats-table"><thead><tr><th>Joueur</th>';
+        cols.forEach(function(c) { html += '<th>' + c.label + '</th>'; });
+        html += '</tr></thead><tbody>';
+
+        players.forEach(function(name) {
+            var p = playerTotals[name].pass || {};
+            html += '<tr><td><div class="player-cell">';
+            html += '<span class="role-dot" style="background:' + SharedComponents.getRoleColor(name) + '"></span>';
+            html += Utils.escapeHtml(name);
+            html += '</div></td>';
+            cols.forEach(function(c) { html += cell(p, c.key, c.cls); });
+            html += '</tr>';
+        });
+
+        // Total
+        html += '<tr class="total-row"><td>Total</td>';
+        cols.forEach(function(c) { html += cell(passData, c.key, c.cls); });
+        html += '</tr>';
+        html += '</tbody></table>';
+
+        // -- Tableau ventilation equipe --
+        var psr = passData.passeur || {};
+        var aut = passData.autre || {};
+        if (psr.tot || aut.tot || psr.fp || aut.fp) {
+            html += '<div class="pass-ventilation-title">Ventilation equipe</div>';
+            html += '<table class="stats-table pass-ventilation-table"><thead><tr><th></th>';
+            cols.forEach(function(c) { html += '<th>' + c.label + '</th>'; });
+            html += '</tr></thead><tbody>';
+
+            html += typeRow('Passeur', psr, 'pass-type-row');
+            if (psr.confort) html += ctxRow('Confort', psr.confort);
+            if (psr.contraint) html += ctxRow('Contraint', psr.contraint);
+            if (psr.transition) html += ctxRow('Transition', psr.transition);
+
+            html += typeRow('Autres', aut, 'pass-type-row');
+            if (aut.contraint) html += ctxRow('Contraint', aut.contraint);
+            if (aut.transition) html += ctxRow('Transition', aut.transition);
+
+            html += '</tbody></table>';
+        }
 
         html += '</div>';
         return html;
@@ -1110,9 +1237,16 @@ const MatchStatsView = {
         // Vue mobile : categorie selectionnee
         if (mobileContainer) {
             var cat = this.currentCategory;
-            mobileContainer.innerHTML =
-                SharedComponents.renderCategoryTable(homeTotals, cat, 'Jen et ses Saints', 'home', 'match') +
-                SharedComponents.renderCategoryTable(awayTotals, cat, opponent, 'away', 'match');
+            if (cat === 'passe') {
+                // V19.2 : onglet Passe dedie avec ventilation
+                mobileContainer.innerHTML =
+                    SharedComponents.renderPassDetailView(homeTotals, 'Jen et ses Saints', 'home') +
+                    SharedComponents.renderPassDetailView(awayTotals, opponent, 'away');
+            } else {
+                mobileContainer.innerHTML =
+                    SharedComponents.renderCategoryTable(homeTotals, cat, 'Jen et ses Saints', 'home', 'match') +
+                    SharedComponents.renderCategoryTable(awayTotals, cat, opponent, 'away', 'match');
+            }
         }
 
         // Vue desktop : tableau complet
@@ -1220,6 +1354,31 @@ const MatchStatsView = {
                 });
                 text += '\n';
             });
+            // V19.2 : ventilation passe equipe apres les lignes joueurs
+            if (catKey === 'passe') {
+                var passKeys = ['tot', 'p4', 'p3', 'p2', 'p1', 'fp'];
+                function exportPassLine(label, bucket) {
+                    if (!bucket || !bucket.tot) return '';
+                    var line = label.padEnd(14);
+                    passKeys.forEach(function(k) {
+                        var v = bucket[k] || 0;
+                        line += (v > 0 ? String(v) : '-').padStart(5);
+                    });
+                    return line + '\n';
+                }
+                var pt = totals.pass || {};
+                if (pt.passeur && (pt.passeur.tot || pt.passeur.fp)) {
+                    text += exportPassLine('Passeur', pt.passeur);
+                    if (pt.passeur.confort) text += exportPassLine('  Confort', pt.passeur.confort);
+                    if (pt.passeur.contraint) text += exportPassLine('  Contraint', pt.passeur.contraint);
+                    if (pt.passeur.transition) text += exportPassLine('  Transition', pt.passeur.transition);
+                }
+                if (pt.autre && (pt.autre.tot || pt.autre.fp)) {
+                    text += exportPassLine('Autres', pt.autre);
+                    if (pt.autre.contraint) text += exportPassLine('  Contraint', pt.autre.contraint);
+                    if (pt.autre.transition) text += exportPassLine('  Transition', pt.autre.transition);
+                }
+            }
             text += '\n';
         });
 
@@ -1456,7 +1615,11 @@ const YearStatsView = {
 
                 var mobileContainer = document.getElementById('yearStatsMobile');
                 if (mobileContainer) {
-                    mobileContainer.innerHTML = SharedComponents.renderCategoryTable(homeTotals, cat, 'Jen et ses Saints', 'home', 'aggregated');
+                    if (cat === 'passe') {
+                        mobileContainer.innerHTML = SharedComponents.renderPassDetailView(homeTotals, 'Jen et ses Saints', 'home');
+                    } else {
+                        mobileContainer.innerHTML = SharedComponents.renderCategoryTable(homeTotals, cat, 'Jen et ses Saints', 'home', 'aggregated');
+                    }
                 }
             };
         }

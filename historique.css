@@ -867,6 +867,33 @@ body {
 .detail-stats-table .neutral { color: var(--text-secondary); }
 .detail-stats-table .stat-pct { font-size: 8px; color: var(--text-secondary); font-weight: 400; }
 
+/* ==================== V19.2 PASS VENTILATION ==================== */
+.pass-ventilation-title {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--cat-passe);
+    margin: 12px 0 4px 0;
+    padding-left: 2px;
+}
+.pass-ventilation-table { margin-bottom: 4px; }
+.pass-type-row td {
+    font-weight: 600;
+    background: var(--bg-container);
+    border-top: 1px solid var(--border-color);
+}
+.pass-type-row td:first-child { text-align: left; padding-left: 4px; }
+.pass-ctx-row td {
+    font-size: 11px;
+    color: var(--text-secondary);
+    padding: 6px 6px;
+}
+.pass-ctx-row td:first-child {
+    text-align: left;
+    padding-left: 12px;
+    font-style: italic;
+}
+
 /* ==================== YEAR STATS ==================== */
 .year-summary-card {
     background: var(--bg-container);

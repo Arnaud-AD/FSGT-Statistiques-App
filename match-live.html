@@ -398,6 +398,9 @@
             </div>
         </div>
 
+        <!-- Tableau passe détaillée (V19.2) -->
+        <div id="passDetailContainer"></div>
+
         <!-- Mini-timeline du set en cours -->
         <div class="mini-timeline-section" id="miniTimelineSection">
             <div class="mini-timeline-title">Séries de points</div>
@@ -939,11 +942,19 @@
             away: {}
         };
 
+        function _passCtx() { return { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0 }; }
+
         function initPlayerStats() {
             return {
                 service:   { tot: 0, ace: 0, splus: 0, fser: 0, recSumAdv: 0, recCountAdv: 0 },
                 reception: { tot: 0, r4: 0, r3: 0, r2: 0, r1: 0, frec: 0 },
-                pass:      { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0 },
+                pass: {
+                    tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0,
+                    passeur: { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0,
+                        confort: _passCtx(), contraint: _passCtx(), transition: _passCtx() },
+                    autre: { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0,
+                        contraint: _passCtx(), transition: _passCtx() }
+                },
                 attack:    { tot: 0, attplus: 0, attminus: 0, bp: 0, fatt: 0 },
                 relance:   { tot: 0, relplus: 0, relminus: 0, frel: 0 },
                 defense:   { tot: 0, defplus: 0, defminus: 0, fdef: 0 },
@@ -974,6 +985,7 @@
         function renderStatsTables() {
             renderStatsTable('home', 'homeStatsContainer');
             renderStatsTable('away', 'awayStatsContainer');
+            renderPassDetailTable();
         }
 
         function renderStatsTable(team, containerId) {
@@ -1235,6 +1247,83 @@
                 cell(totals.block.fblc, 'negative') +
             '</tr></tbody></table></div>';
 
+            container.innerHTML = html;
+        }
+
+        // V19.2 : Tableau passe detaillee (ventilation Passeur/Autre + contexte)
+        function renderPassDetailTable() {
+            const container = document.getElementById('passDetailContainer');
+            if (!container) return;
+
+            // Agreger les stats pass de tous les joueurs home
+            const homeStats = setStats.home;
+            const players = Object.keys(homeStats);
+            if (players.length === 0) { container.innerHTML = ''; return; }
+
+            // Agreger passeur et autre sur tous les joueurs
+            const agg = {
+                passeur: { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0,
+                    confort: { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0 },
+                    contraint: { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0 },
+                    transition: { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0 } },
+                autre: { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0,
+                    contraint: { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0 },
+                    transition: { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0 } }
+            };
+            const keys = ['tot', 'p4', 'p3', 'p2', 'p1', 'fp'];
+            players.forEach(function(name) {
+                const p = homeStats[name].pass;
+                if (!p) return;
+                ['passeur', 'autre'].forEach(function(pType) {
+                    if (!p[pType]) return;
+                    keys.forEach(function(k) { agg[pType][k] += (p[pType][k] || 0); });
+                    var ctxs = pType === 'passeur' ? ['confort', 'contraint', 'transition'] : ['contraint', 'transition'];
+                    ctxs.forEach(function(ctx) {
+                        if (!p[pType][ctx]) return;
+                        keys.forEach(function(k) { agg[pType][ctx][k] += (p[pType][ctx][k] || 0); });
+                    });
+                });
+            });
+
+            var totalPasses = (agg.passeur.tot || 0) + (agg.autre.tot || 0);
+            if (totalPasses === 0) { container.innerHTML = ''; return; }
+
+            function cell(val, cls) {
+                return '<td class="' + (val > 0 ? cls : '') + '">' + (val || '-') + '</td>';
+            }
+            function passRow(label, data, cls) {
+                return '<tr class="' + cls + '">' +
+                    '<td>' + label + '</td>' +
+                    '<td>' + (data.tot || '-') + '</td>' +
+                    cell(data.p4, 'positive') +
+                    cell(data.p3, 'positive') +
+                    cell(data.p2, 'neutral') +
+                    cell(data.p1, 'negative') +
+                    cell(data.fp, 'negative') +
+                '</tr>';
+            }
+
+            var html = '<div class="stat-table-card pass-detail-card">' +
+                '<div class="stat-table-header passe">Passe d\u00e9taill\u00e9e</div>' +
+                '<table class="detail-stats-table"><thead><tr>' +
+                '<th></th><th>Tot</th><th>P4</th><th>P3</th><th>P2</th><th>P1</th><th>FP</th>' +
+                '</tr></thead><tbody>';
+
+            // Passeur
+            if (agg.passeur.tot > 0) {
+                html += passRow('Passeur', agg.passeur, 'pass-type-row');
+                if (agg.passeur.confort.tot > 0) html += passRow('\u2514 Confort', agg.passeur.confort, 'pass-ctx-row');
+                if (agg.passeur.contraint.tot > 0) html += passRow('\u2514 Contraint', agg.passeur.contraint, 'pass-ctx-row');
+                if (agg.passeur.transition.tot > 0) html += passRow('\u2514 Transition', agg.passeur.transition, 'pass-ctx-row');
+            }
+            // Autres
+            if (agg.autre.tot > 0) {
+                html += passRow('Autres', agg.autre, 'pass-type-row');
+                if (agg.autre.contraint.tot > 0) html += passRow('\u2514 Contraint', agg.autre.contraint, 'pass-ctx-row');
+                if (agg.autre.transition.tot > 0) html += passRow('\u2514 Transition', agg.autre.transition, 'pass-ctx-row');
+            }
+
+            html += '</tbody></table></div>';
             container.innerHTML = html;
         }
 
@@ -2732,7 +2821,8 @@
             const effectivePlayer = getEffectivePlayer && getEffectivePlayer();
             const passer = effectivePlayer || passeur;
             const passerRole = passer ? (getPlayerRole(team, passer) || 'transition') : 'transition';
-            const context = getPassContext(gameState.rally || [], passerRole);
+            const contextObj = getPassContext(gameState.rally || [], passerRole);
+            const context = contextObj.context;
 
             const colors = {
                 4: '#22c55e',  // Vert — Optimale
@@ -5739,41 +5829,48 @@
                     }
 
                     case 'pass': {
-                        // V19.1 : calcul qualite de passe a la volee depuis endPos + grilles
-                        // Skip les retours directs et les passes filet (pas de qualite evaluable)
+                        // V19.2 : qualite de passe + ventilation par contexte
+                        const passerRoleP = action.role || 'transition';
+                        const passCtxObj = getPassContext(rally.slice(0, i), passerRoleP);
+                        const pType = passCtxObj.playerType === 'Passeur' ? 'passeur' : 'autre';
+                        const pCtx = passCtxObj.context;
+
+                        // Helper : incrementer tot + score dans un bucket
+                        function _incPass(bucket, scoreKey) {
+                            bucket.tot++;
+                            if (scoreKey === 'fp') bucket.fp++;
+                            else if (bucket[scoreKey] !== undefined) bucket[scoreKey]++;
+                        }
+
+                        // Retour direct : compter comme FP si exploite
                         if (action.isDirectReturn) {
-                            // Retour direct : compter comme FP si c'est une faute (adversaire marque)
                             if (!action.isDirectReturnWinner) {
                                 const passExploited = isDirectReturnExploited(rally, i, action.team);
                                 if (passExploited) {
-                                    stats.pass.tot++;
-                                    stats.pass.fp++;
+                                    _incPass(stats.pass, 'fp');
+                                    _incPass(stats.pass[pType], 'fp');
+                                    if (stats.pass[pType][pCtx]) _incPass(stats.pass[pType][pCtx], 'fp');
                                 }
                             }
                             break;
                         }
+                        // Passe out ou filet → FP
                         if (!action.endPos || action.endPos.courtSide === 'out' || action.endPos.courtSide === 'net') {
-                            // Passe out ou filet → FP
-                            stats.pass.tot++;
-                            stats.pass.fp++;
+                            _incPass(stats.pass, 'fp');
+                            _incPass(stats.pass[pType], 'fp');
+                            if (stats.pass[pType][pCtx]) _incPass(stats.pass[pType][pCtx], 'fp');
                             break;
                         }
 
-                        // Determiner le role du passeur
-                        const passerRole = action.role || 'transition';
-                        // Determiner zone et contexte
+                        // Determiner zone et evaluer la qualite
                         const passZone = getPassZone(action.endPos, team);
-                        const passContext = getPassContext(rally.slice(0, i), passerRole);
-                        // Evaluer la qualite
+                        const passContext = passCtxObj.context;
                         const passEval = evaluatePassQuality(action.endPos, passZone, passContext, team);
+                        const scoreKey = passEval.score === 4 ? 'p4' : passEval.score === 3 ? 'p3' : passEval.score === 2 ? 'p2' : 'p1';
 
-                        stats.pass.tot++;
-                        switch (passEval.score) {
-                            case 4: stats.pass.p4++; break;
-                            case 3: stats.pass.p3++; break;
-                            case 2: stats.pass.p2++; break;
-                            case 1: stats.pass.p1++; break;
-                        }
+                        _incPass(stats.pass, scoreKey);
+                        _incPass(stats.pass[pType], scoreKey);
+                        if (stats.pass[pType][pCtx]) _incPass(stats.pass[pType][pCtx], scoreKey);
                         break;
                     }
 

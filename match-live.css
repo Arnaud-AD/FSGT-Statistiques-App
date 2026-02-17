@@ -1696,6 +1696,39 @@
             color: #5f6368;
         }
 
+        /* V19.2 : Tableau passe detaillee */
+        .pass-detail-card {
+            margin: 8px 12px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .pass-detail-card .stat-table-header {
+            padding: 4px 8px;
+            font-size: 10px;
+        }
+        .pass-detail-card table {
+            width: 100%;
+        }
+        .pass-type-row td {
+            font-weight: 600;
+            background: #f8f9fa;
+            border-top: 1px solid #dadce0;
+        }
+        .pass-type-row td:first-child {
+            text-align: left;
+            padding-left: 6px;
+        }
+        .pass-ctx-row td {
+            font-size: 9px;
+            color: #888;
+        }
+        .pass-ctx-row td:first-child {
+            text-align: left;
+            padding-left: 14px;
+            font-style: italic;
+        }
+
         /* SVG Arrow */
         svg.arrow-svg {
             position: absolute;

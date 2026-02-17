@@ -774,34 +774,52 @@ function getPassZone(endPos, team) {
 }
 
 /**
- * Determine le contexte de la passe depuis l'historique du rally.
- * - Passeur en poste apres R4/R3 → confort
- * - Passeur en poste apres R2/R1 → contraint
- * - Non-passeur OU apres defense → transition
+ * V19.2 : Determine le contexte de la passe depuis l'historique du rally.
+ * Retourne un objet {playerType, context} pour la ventilation stats.
+ *
+ * Passeur (role === 'Passeur'):
+ *   R4 → confort | R3 → contraint | R2/R1 → contraint
+ *   D+/R+ → contraint | D-/R- → transition
+ *
+ * Autre (non-passeur):
+ *   R4/R3 → transition | R2/R1 → contraint
+ *   D+/R+ → contraint | D-/R- → transition
+ *
  * @param {Array} rally - Actions du rally en cours (SANS la passe courante)
  * @param {string} passerRole - Role du passeur ('Passeur', 'R4', etc.)
- * @returns {string} 'confort' | 'contraint' | 'transition'
+ * @returns {{ playerType: 'Passeur'|'Autre', context: 'confort'|'contraint'|'transition' }}
  */
 function getPassContext(rally, passerRole) {
-    // Si le passeur n'est pas au poste Passeur → transition
-    if (passerRole !== 'Passeur') return 'transition';
+    const isPasseur = (passerRole === 'Passeur');
+    const playerType = isPasseur ? 'Passeur' : 'Autre';
+    const fallback = { playerType, context: 'transition' };
 
     // Chercher la derniere reception ou defense dans le rally
     for (let i = rally.length - 1; i >= 0; i--) {
         const action = rally[i];
+
         if (action.type === 'reception') {
-            if (action.quality) {
-                const score = action.quality.score;
-                if (score >= 3) return 'confort';     // Excellente (4) ou Positive (3)
-                return 'contraint';                     // Jouable (2), Negative (1) ou Faute (0)
+            const score = action.quality ? action.quality.score : 2;
+            if (isPasseur) {
+                // Passeur: R4=confort, R3/R2/R1=contraint
+                if (score === 4) return { playerType, context: 'confort' };
+                return { playerType, context: 'contraint' };
+            } else {
+                // Autre: R4/R3=transition, R2/R1=contraint
+                if (score >= 3) return { playerType, context: 'transition' };
+                return { playerType, context: 'contraint' };
             }
-            return 'contraint'; // Pas d'info qualite → contraint par defaut
         }
+
         if (action.type === 'defense') {
-            return 'transition'; // Apres defense → toujours transition
+            // D+/R+ (positive) → contraint, D-/R- (negative) → transition
+            const defQ = action.defenseQuality || 'negative';
+            if (defQ === 'positive') return { playerType, context: 'contraint' };
+            return { playerType, context: 'transition' };
         }
     }
-    return 'transition'; // Fallback
+
+    return fallback;
 }
 
 /**

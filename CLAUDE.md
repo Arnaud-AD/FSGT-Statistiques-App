@@ -346,6 +346,7 @@ Chaque intégration est marquée par le commentaire `[DEV TEST] ... — À RETIR
 |------------|-----------------------------------|
 | Service    | Tot, Ace, S+, FS, Moy            |
 | Réception  | Tot, R4, R3, R2, R1, FR          |
+| Passe      | Tot, P4, P3, P2, P1, FP *(V19.1)* + ventilation Passeur/Autre × contexte *(V19.2)* |
 | Attaque    | Tot, A+, A-, BP, FA              |
 | Relance    | Tot, R+, R-, FR *(V19.0)* |
 | Défense    | Tot, D+, D-, FD                  |
@@ -373,6 +374,93 @@ Chaque intégration est marquée par le commentaire `[DEV TEST] ... — À RETIR
 | FR   | Faute de réception | `'Faute'` | 0 |
 
 > **Retour gagnant** : Si `action.isDirectReturnWinner === true` sur une réception → compte aussi comme `Att+ (attack.attplus)` et `attack.tot++`.
+
+### Passe *(V19.1 + V19.2)*
+
+> La passe est une stat centrale au volleyball. V19.1 a ajouté l'évaluation de qualité via des grilles calibrées. V19.2 ajoute la ventilation par type de passeur et contexte de jeu.
+
+#### Colonnes stats
+
+| Stat | Signification | Condition |
+|------|---------------|-----------|
+| Tot  | Total passes | Chaque action `type: 'pass'` (hors retour direct gagnant) |
+| P4   | Passe excellente | Grille calibrée → score 4 |
+| P3   | Passe positive | Grille calibrée → score 3 |
+| P2   | Passe jouable | Grille calibrée → score 2 |
+| P1   | Passe négative | Grille calibrée → score 1 |
+| FP   | Faute de passe | Passe dans le filet/out, ou retour direct exploité par l'adversaire |
+
+#### Évaluation de qualité (V19.1)
+
+- **9 grilles calibrées** (3 zones × 3 contextes) créées dans `pass-grids.html`
+- **Zone** : `getPassZone(endPos, team)` → tiers gauche (R4) / centre / droite (Pointu), avec miroir top/bottom
+- **Contexte** : `getPassContext(rally, passerRole)` → confort / contraint / transition
+- **Scoring** : `evaluatePassQuality(endPos, zone, context, team)` → lookup grille → P4/P3/P2/P1
+- **Stockage** : `localStorage.volleyball_pass_grids` + Firebase `config/passGrids`
+- **Debug overlay** : touche G en match-live → grille composite colorée sur le terrain
+
+#### Modèle de contexte (V19.2)
+
+**Niveau 1 — Type de passeur :**
+- **Passeur** : joueur au poste `role === 'Passeur'`
+- **Autre** : tout autre joueur (R4, Centre, Pointu)
+
+**Niveau 2 — Contexte de jeu :**
+
+| Situation | Passeur | Autre |
+|-----------|---------|-------|
+| Après réception R4 (score 4) | **confort** | transition |
+| Après réception R3 (score 3) | contraint | transition |
+| Après réception R2/R1 (score ≤ 2) | contraint | contraint |
+| Après défense positive (D+ ou R+) | contraint | contraint |
+| Après défense négative (D- ou R-) | transition | transition |
+| Fallback | transition | transition |
+
+> **Logique** : Le passeur en confort = excellente réception (R4), il a tous les choix. Un non-passeur n'est **jamais** en confort car faire une passe est toujours un geste contraint ou de transition pour lui.
+
+> **Grilles de calibration** : On garde 3 grilles (confort / contraint / transition). Un non-passeur n'est jamais évalué avec la grille "confort" (très discriminante, exigeante sur la précision).
+
+#### Implémentation `getPassContext()` (match-live-helpers.js)
+
+```javascript
+// Retourne { playerType: 'Passeur'|'Autre', context: 'confort'|'contraint'|'transition' }
+function getPassContext(rally, passerRole) {
+    const isPasseur = (passerRole === 'Passeur');
+    const playerType = isPasseur ? 'Passeur' : 'Autre';
+    // Cherche la dernière réception ou défense dans le rally
+    // Réception : R4 → Passeur:confort / Autre:transition
+    //             R3 → Passeur:contraint / Autre:transition
+    //             R2/R1 → tous:contraint
+    // Défense :   positive → tous:contraint
+    //             negative → tous:transition
+    // Fallback → transition
+}
+```
+
+#### Structure de données ventilée
+
+```javascript
+pass: {
+    tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0,        // Champs plats (total global)
+    passeur: {
+        tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0,     // Total passeur
+        confort:    { tot, p4, p3, p2, p1, fp },
+        contraint:  { tot, p4, p3, p2, p1, fp },
+        transition: { tot, p4, p3, p2, p1, fp }
+    },
+    autre: {
+        tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0,     // Total non-passeur
+        contraint:  { tot, p4, p3, p2, p1, fp },
+        transition: { tot, p4, p3, p2, p1, fp }
+    }
+}
+```
+
+#### Affichage
+
+- **Match-live** : tableau "Passe détaillée" entre les stats et la mini-timeline (`renderPassDetailTable()`)
+- **Historique mobile** : onglet "Pas" dédié avec tableau joueurs + ventilation équipe (`renderPassDetailView()`)
+- **Historique export texte** : section PASSE avec sous-lignes Passeur/Autres + contextes
 
 ### Attaque
 
@@ -438,8 +526,15 @@ Chaque intégration est marquée par le commentaire `[DEV TEST] ... — À RETIR
 {
     service:   { tot: 0, ace: 0, splus: 0, fser: 0, recSumAdv: 0, recCountAdv: 0 },
     reception: { tot: 0, r4: 0, r3: 0, r2: 0, r1: 0, frec: 0 },
+    pass: {                                                        // V19.1 + V19.2
+        tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0,
+        passeur: { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0,
+            confort: {...}, contraint: {...}, transition: {...} },
+        autre: { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0,
+            contraint: {...}, transition: {...} }
+    },
     attack:    { tot: 0, attplus: 0, attminus: 0, bp: 0, fatt: 0 },
-    relance:   { tot: 0, relplus: 0, relminus: 0, frel: 0 },  // V19.0
+    relance:   { tot: 0, relplus: 0, relminus: 0, frel: 0 },     // V19.0
     defense:   { tot: 0, defplus: 0, defminus: 0, fdef: 0 },
     block:     { tot: 0, blcplus: 0, blcminus: 0, fblc: 0 }
 }
@@ -495,6 +590,8 @@ Zone semi-circulaire bleue affichée pendant la phase `defense_end` (après auto
 | V18.1 | Réécriture complète du système undo (WorkflowEngine) + bug fixes (flèches, bloc) | V18.1 ✅ |
 | V18.2 | Points de mixité modifiables en cours de set + blocs gris timeline | V18.2 ✅ |
 | V19.0 | Nouvelle catégorie stats Relance (séparée de l'attaque) — Tot, R+, R-, FR | V19.0 ✅ |
+| V19.1 | Système qualité de passe (9 grilles calibrées, scoring, overlay debug, historique) | V19.1 ✅ |
+| V19.2 | Stats passe par contexte — ventilation Passeur/Autre × confort/contraint/transition | V19.2 ✅ |
 
 ---
 
@@ -523,14 +620,25 @@ Zone semi-circulaire bleue affichée pendant la phase `defense_end` (après auto
 - [x] Retirer les relances des stats d'attaque (actuellement : Tot+1 et Att+ si point direct → à migrer vers la catégorie Relance)
 - [x] V19.0(+1) : Fix export stats FA(BP) + header aligné + filtrage joueurs fantômes adverses
 
-**V19.1 — Système de qualité de passe**
-- [ ] 3 grilles prédéfinies selon le contexte : **confort** (après R4/R3), **contraint** (après R2/R1), **transition** (après défense/relance ou passeur non principal)
-- [ ] Chaque grille a ses propres zones ~50cm×50cm avec seuils "optimale / acceptable / mauvaise"
-- [ ] Passeur en poste → grille confort ou contraint selon réception. Autres joueurs → toujours grille transition
-- [ ] Enregistrement qualité de passe dans le modèle de données (action `pass` : `passQuality`, `passContext`)
-- [ ] Distinction passeur principal / passeur de transition dans les stats
+~~**V19.1 — Système de qualité de passe**~~ ✅
+- [x] 9 grilles calibrables (3 zones × 3 contextes) dans `pass-grids.html` avec pinceaux P4/P3/P2/P1
+- [x] Extension hors-terrain +2m pour R4 (gauche) et Pointu (droite) → 22 colonnes vs 18 pour Centre
+- [x] `evaluatePassQuality()` dans `match-live-helpers.js` : lookup grille selon zone (getPassZone) + contexte (getPassContext)
+- [x] Debug overlay (touche G) : grille composite colorée sur le terrain, miroir top/bottom, 100% opaque over toutes les zones
+- [x] Chargement dynamique des grilles calibrées depuis localStorage au démarrage de match-live
+- [x] Sync Firebase des grilles (savePassGrids/getPassGrids dans pushAll/pullAll)
+- [x] Stats passe dans historique : Tot/P4/P3/P2/P1/FP (tableau mobile, desktop, export texte)
+- [x] V19.1(+1) : Fix affichage stats passe dans historique (clé UI 'passe' vs clé data 'pass')
 
-**V19.2 — Badges flash feedback visuel**
+~~**V19.2 — Stats passe par contexte (Passeur vs Autre)**~~ ✅
+- [x] `getPassContext()` retourne `{playerType, context}` au lieu de `string`
+- [x] Ventilation stats : `pass.passeur.{confort,contraint,transition}` + `pass.autre.{contraint,transition}`
+- [x] Tableau "Passe détaillée" dans match-live entre stats et mini-timeline
+- [x] Onglet Passe dédié dans historique (mobile) avec ventilation équipe
+- [x] Export texte avec sous-lignes Passeur/Autres × contextes
+- [x] Documentation modèle de contexte dans CLAUDE.md
+
+**V19.3 — Badges flash feedback visuel**
 - [ ] Badges temporaires après chaque action : résultat (R4→R0, D+, D-, A+, BP, FA...)
 - [ ] Badges optionnels en haut pour ajuster la qualité (override vers qualité inférieure si jugé)
 - [ ] Design discret, animation courte (apparition/disparition rapide)
