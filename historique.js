@@ -967,7 +967,7 @@ const BilanView = {
     // Ponderations IP par poste
     IP_WEIGHTS: {
         'Passeur': { attaque: 0.05, bloc: 0.00, reception: 0.05, defense: 0.25, passe: 0.40, service: 0.25 },
-        'Centre':  { attaque: 0.00, bloc: 0.00, reception: 0.30, defense: 0.25, passe: 0.05, service: 0.40 },
+        'Centre':  { attaque: 0.00, relance: 0.20, reception: 0.30, defense: 0.20, passe: 0.05, service: 0.25 },
         'R4':      { attaque: 0.30, bloc: 0.20, reception: 0.20, defense: 0.10, passe: 0.05, service: 0.15 },
         'Pointu':  { attaque: 0.30, bloc: 0.20, reception: 0.20, defense: 0.10, passe: 0.05, service: 0.15 }
     },
@@ -983,6 +983,16 @@ const BilanView = {
     SPIDER_AXES: [
         { key: 'attaque',   label: 'Att',  angle: -90 },
         { key: 'bloc',      label: 'Blc',  angle: -30 },
+        { key: 'passe',     label: 'Pas',  angle: 30 },
+        { key: 'service',   label: 'Srv',  angle: 90 },
+        { key: 'defense',   label: 'Def',  angle: 150 },
+        { key: 'reception', label: 'Rec',  angle: 210 }
+    ],
+
+    // Axes specifiques Centre : hexagone, Relance remplace Bloc
+    SPIDER_AXES_CENTRE: [
+        { key: 'attaque',   label: 'Att',  angle: -90 },
+        { key: 'relance',   label: 'Rel',  angle: -30 },
         { key: 'passe',     label: 'Pas',  angle: 30 },
         { key: 'service',   label: 'Srv',  angle: 90 },
         { key: 'defense',   label: 'Def',  angle: 150 },
@@ -1031,114 +1041,266 @@ const BilanView = {
             var color = self.ROLE_COLORS[role] || '#5f6368';
             var axisScores = self.computeAxisScores(homeTotals[name]);
             var ip = self.computeIP(axisScores, role);
-            html += self.renderSpiderChart(name, role, axisScores, ip, color);
+            var chartAxes = (role === 'Centre') ? self.SPIDER_AXES_CENTRE : self.SPIDER_AXES;
+            html += self.renderSpiderChart(name, role, axisScores, ip, color, chartAxes);
         });
 
         html += '</div>'; // ferme bilan-grid
         html += '</div>'; // ferme bilan-section profils
 
         // Section Distinctions
-        html += this.renderDistinctions(homeTotals, playerRoles);
+        html += this.renderDistinctions(homeTotals, playerRoles, players);
 
         container.innerHTML = html;
     },
 
-    // --- Distinctions : meilleurs joueurs par categorie ---
-    renderDistinctions(homeTotals, playerRoles) {
+    // --- Helper : formater un pourcentage ---
+    _pct(num, den) {
+        if (den === 0) return '0%';
+        return Math.round(num / den * 100) + '%';
+    },
+
+    // --- Distinctions : MVP + meilleurs joueurs par categorie ---
+    renderDistinctions(homeTotals, playerRoles, filteredPlayers) {
         var self = this;
-        var players = Object.keys(homeTotals).filter(function(name) {
+        var players = filteredPlayers || Object.keys(homeTotals).filter(function(name) {
             return playerRoles[name];
         });
 
-        var awards = [
-            {
-                emoji: '🎯', label: 'Meilleur Serveur', shortLabel: 'Serveur', cssClass: 'service',
-                compute: function(name) {
-                    var s = homeTotals[name].service;
-                    if (s.tot < 3) return null; // minimum 3 services
-                    var recCount = s.recCountAdv + s.ace;
-                    var moy = recCount > 0 ? s.recSumAdv / recCount : 4;
-                    return { score: -moy, display: 'Moy ' + moy.toFixed(1), detail: s.ace + ' ace, ' + s.splus + ' S+, ' + s.fser + ' FS' };
-                }
-            },
-            {
-                emoji: '🏐', label: 'Meilleur Réceptionneur', shortLabel: 'Réceptionneur', cssClass: 'reception',
-                compute: function(name) {
-                    var r = homeTotals[name].reception;
-                    if (r.tot < 3) return null;
-                    var moy = (r.r4 * 4 + r.r3 * 3 + r.r2 * 2 + r.r1 * 1) / r.tot;
-                    return { score: moy, display: 'Moy ' + moy.toFixed(1), detail: r.tot + ' rec (' + r.r4 + ' R4, ' + r.r3 + ' R3)' };
-                }
-            },
-            {
-                emoji: '⚔️', label: 'Meilleur Attaquant', shortLabel: 'Attaquant', cssClass: 'attaque',
-                compute: function(name) {
-                    var a = homeTotals[name].attack;
-                    if (a.tot < 3) return null;
-                    var killPct = a.attplus / a.tot * 100;
-                    return { score: killPct, display: Math.round(killPct) + '% kill', detail: a.attplus + '/' + a.tot + ' (' + a.bp + ' BP, ' + a.fatt + ' FA)' };
-                }
-            },
-            {
-                emoji: '🛡️', label: 'Meilleur Défenseur', shortLabel: 'Défenseur', cssClass: 'defense',
-                compute: function(name) {
-                    var d = homeTotals[name].defense;
-                    var r = homeTotals[name].relance;
-                    var totalActions = d.tot + r.tot;
-                    if (totalActions < 2) return null;
-                    var positives = d.defplus + r.relplus;
-                    return { score: positives, display: positives + ' D+/R+', detail: d.defplus + ' D+, ' + r.relplus + ' R+ / ' + d.fdef + ' FD, ' + r.frel + ' FR' };
-                }
-            },
-            {
-                emoji: '🧱', label: 'Meilleur Bloqueur', shortLabel: 'Bloqueur', cssClass: 'bloc',
-                compute: function(name) {
-                    var b = homeTotals[name].block;
-                    if (b.tot < 1) return null;
-                    var impact = b.blcplus + b.blcminus * 0.5;
-                    return { score: impact, display: b.blcplus + ' B+, ' + b.blcminus + ' B-', detail: b.tot + ' blocs (' + b.fblc + ' FB)' };
-                }
+        // --- Calculer IP de chaque joueur pour le MVP ---
+        var playerIPs = {};
+        players.forEach(function(name) {
+            var role = playerRoles[name].primaryRole;
+            var axisScores = self.computeAxisScores(homeTotals[name]);
+            playerIPs[name] = self.computeIP(axisScores, role);
+        });
+
+        // --- Trouver le MVP (meilleur IP) ---
+        var mvpName = null;
+        var mvpIP = -1;
+        players.forEach(function(name) {
+            if (playerIPs[name] > mvpIP) {
+                mvpIP = playerIPs[name];
+                mvpName = name;
             }
-        ];
+        });
 
         var html = '<div class="bilan-section">';
         html += '<div class="bilan-section-title">Distinctions</div>';
-        html += '<div class="bilan-awards-grid">';
+        html += '<div class="bilan-distinctions">';
 
-        awards.forEach(function(award) {
-            var best = null;
-            var bestName = null;
-            players.forEach(function(name) {
-                var result = award.compute(name);
-                if (result && (!best || result.score > best.score)) {
-                    best = result;
-                    bestName = name;
-                }
-            });
-
-            html += '<div class="bilan-award-card bilan-award-' + award.cssClass + '">';
-            html += '<div class="bilan-award-card-header">';
-            html += '<span class="bilan-award-emoji">' + award.emoji + '</span>';
-            html += '<span class="bilan-award-category">' + award.shortLabel + '</span>';
+        // --- MVP ---
+        if (mvpName) {
+            var mvpRole = playerRoles[mvpName].primaryRole;
+            var mvpColor = self.ROLE_COLORS[mvpRole] || '#5f6368';
+            var mvpStats = homeTotals[mvpName];
+            html += '<div class="distinction-row distinction-mvp">';
+            html += '<div class="distinction-header">';
+            html += '<span class="distinction-emoji">👑</span>';
+            html += '<span class="distinction-label">MVP</span>';
+            html += '<span class="bilan-role-dot" style="background:' + mvpColor + '"></span>';
+            html += '<span class="distinction-name">' + Utils.escapeHtml(mvpName) + '</span>';
             html += '</div>';
-            if (bestName && best) {
-                var role = playerRoles[bestName].primaryRole;
-                var color = self.ROLE_COLORS[role] || '#5f6368';
-                html += '<div class="bilan-award-player">';
-                html += '<span class="bilan-role-dot" style="background:' + color + '"></span>';
-                html += '<span class="bilan-award-player-name">' + Utils.escapeHtml(bestName) + '</span>';
-                html += '</div>';
-                html += '<div class="bilan-award-value">' + best.display + '</div>';
-                html += '<div class="bilan-award-detail">' + best.detail + '</div>';
-            } else {
-                html += '<div class="bilan-award-player" style="color:var(--text-secondary)">—</div>';
-            }
-            html += '</div>'; // award-card
-        });
+            html += '<div class="distinction-stats">';
+            html += '<span class="distinction-stat-highlight">IP ' + mvpIP + '</span>';
+            // Stats impactantes selon le poste
+            html += '<span class="distinction-stat-detail">' + self._mvpStats(mvpStats, mvpRole) + '</span>';
+            html += '</div>';
+            html += '</div>';
+        }
 
-        html += '</div>'; // bilan-awards-grid
+        // --- Meilleur Serveur ---
+        var bestSrv = self._findBest(players, function(name) {
+            var s = homeTotals[name].service;
+            if (s.tot < 3) return null;
+            var recCount = s.recCountAdv + s.ace;
+            var moy = recCount > 0 ? s.recSumAdv / recCount : 4;
+            return { score: -moy, stats: s, moy: moy };
+        });
+        if (bestSrv) {
+            var s = bestSrv.data.stats;
+            var srvRole = playerRoles[bestSrv.name].primaryRole;
+            var srvColor = self.ROLE_COLORS[srvRole] || '#5f6368';
+            var totalSrv = s.tot;
+            html += '<div class="distinction-row">';
+            html += '<div class="distinction-header">';
+            html += '<span class="distinction-emoji">🎯</span>';
+            html += '<span class="distinction-label">Meilleur Serveur</span>';
+            html += '<span class="bilan-role-dot" style="background:' + srvColor + '"></span>';
+            html += '<span class="distinction-name">' + Utils.escapeHtml(bestSrv.name) + '</span>';
+            html += '</div>';
+            html += '<div class="distinction-stats">';
+            html += 'Tot : ' + totalSrv;
+            html += ' · Ace : ' + s.ace + ' (' + self._pct(s.ace, totalSrv) + ')';
+            html += ' · FS : ' + s.fser + ' (' + self._pct(s.fser, totalSrv) + ')';
+            html += ' · Moy Adv : ' + bestSrv.data.moy.toFixed(1);
+            html += '</div>';
+            html += '</div>';
+        }
+
+        // --- Meilleur Réceptionneur ---
+        var bestRec = self._findBest(players, function(name) {
+            var r = homeTotals[name].reception;
+            if (r.tot < 3) return null;
+            var moy = (r.r4 * 4 + r.r3 * 3 + r.r2 * 2 + r.r1 * 1) / r.tot;
+            return { score: moy, stats: r, moy: moy };
+        });
+        if (bestRec) {
+            var r = bestRec.data.stats;
+            var recRole = playerRoles[bestRec.name].primaryRole;
+            var recColor = self.ROLE_COLORS[recRole] || '#5f6368';
+            html += '<div class="distinction-row">';
+            html += '<div class="distinction-header">';
+            html += '<span class="distinction-emoji">🏐</span>';
+            html += '<span class="distinction-label">Meilleur Réceptionneur</span>';
+            html += '<span class="bilan-role-dot" style="background:' + recColor + '"></span>';
+            html += '<span class="distinction-name">' + Utils.escapeHtml(bestRec.name) + '</span>';
+            html += '</div>';
+            html += '<div class="distinction-stats">';
+            html += 'R4 : ' + r.r4 + ' (' + self._pct(r.r4, r.tot) + ')';
+            html += ' · R1(FR) : ' + (r.r1 + r.frec) + ' (' + self._pct(r.r1 + r.frec, r.tot) + ')';
+            html += ' · Moy : ' + bestRec.data.moy.toFixed(1);
+            html += '</div>';
+            html += '</div>';
+        }
+
+        // --- Meilleur Attaquant ---
+        var bestAtt = self._findBest(players, function(name) {
+            var a = homeTotals[name].attack;
+            if (a.tot < 3) return null;
+            var killPct = a.attplus / a.tot * 100;
+            return { score: killPct, stats: a };
+        });
+        if (bestAtt) {
+            var a = bestAtt.data.stats;
+            var attRole = playerRoles[bestAtt.name].primaryRole;
+            var attColor = self.ROLE_COLORS[attRole] || '#5f6368';
+            html += '<div class="distinction-row">';
+            html += '<div class="distinction-header">';
+            html += '<span class="distinction-emoji">⚔️</span>';
+            html += '<span class="distinction-label">Meilleur Attaquant</span>';
+            html += '<span class="bilan-role-dot" style="background:' + attColor + '"></span>';
+            html += '<span class="distinction-name">' + Utils.escapeHtml(bestAtt.name) + '</span>';
+            html += '</div>';
+            html += '<div class="distinction-stats">';
+            html += 'A+ : ' + a.attplus + ' (' + self._pct(a.attplus, a.tot) + ')';
+            html += ' · A- : ' + a.attminus + ' (' + self._pct(a.attminus, a.tot) + ')';
+            html += ' · FA(BP) : ' + a.fatt + '(' + a.bp + ') (' + self._pct(a.fatt + a.bp, a.tot) + ')';
+            html += '</div>';
+            html += '</div>';
+        }
+
+        // --- Meilleur Défenseur ---
+        var bestDef = self._findBest(players, function(name) {
+            var d = homeTotals[name].defense;
+            var r = homeTotals[name].relance;
+            var totalActions = d.tot + r.tot;
+            if (totalActions < 2) return null;
+            var positives = d.defplus + r.relplus;
+            return { score: positives, def: d, rel: r, totalActions: totalActions };
+        });
+        if (bestDef) {
+            var d = bestDef.data.def;
+            var rl = bestDef.data.rel;
+            var defRole = playerRoles[bestDef.name].primaryRole;
+            var defColor = self.ROLE_COLORS[defRole] || '#5f6368';
+            html += '<div class="distinction-row">';
+            html += '<div class="distinction-header">';
+            html += '<span class="distinction-emoji">🛡️</span>';
+            html += '<span class="distinction-label">Meilleur Défenseur</span>';
+            html += '<span class="bilan-role-dot" style="background:' + defColor + '"></span>';
+            html += '<span class="distinction-name">' + Utils.escapeHtml(bestDef.name) + '</span>';
+            html += '</div>';
+            html += '<div class="distinction-stats">';
+            html += 'D+ : ' + d.defplus + ' · D- : ' + d.defminus + ' · FD : ' + d.fdef;
+            html += ' · R+ : ' + rl.relplus + ' · R- : ' + rl.relminus + ' · FR : ' + rl.frel;
+            html += '</div>';
+            html += '</div>';
+        }
+
+        // --- Meilleur Bloqueur ---
+        var bestBlc = self._findBest(players, function(name) {
+            var b = homeTotals[name].block;
+            if (b.tot < 1) return null;
+            var impact = b.blcplus + b.blcminus * 0.5;
+            return { score: impact, stats: b };
+        });
+        if (bestBlc) {
+            var b = bestBlc.data.stats;
+            var blcRole = playerRoles[bestBlc.name].primaryRole;
+            var blcColor = self.ROLE_COLORS[blcRole] || '#5f6368';
+            html += '<div class="distinction-row">';
+            html += '<div class="distinction-header">';
+            html += '<span class="distinction-emoji">🧱</span>';
+            html += '<span class="distinction-label">Meilleur Bloqueur</span>';
+            html += '<span class="bilan-role-dot" style="background:' + blcColor + '"></span>';
+            html += '<span class="distinction-name">' + Utils.escapeHtml(bestBlc.name) + '</span>';
+            html += '</div>';
+            html += '<div class="distinction-stats">';
+            html += 'B+ : ' + b.blcplus + ' (' + self._pct(b.blcplus, b.tot) + ')';
+            html += ' · B- : ' + b.blcminus + ' (' + self._pct(b.blcminus, b.tot) + ')';
+            html += ' · FB : ' + b.fblc + ' (' + self._pct(b.fblc, b.tot) + ')';
+            html += '</div>';
+            html += '</div>';
+        }
+
+        html += '</div>'; // bilan-distinctions
         html += '</div>'; // bilan-section
         return html;
+    },
+
+    // --- Helper : trouver le meilleur joueur ---
+    _findBest(players, computeFn) {
+        var best = null;
+        var bestName = null;
+        players.forEach(function(name) {
+            var result = computeFn(name);
+            if (result && (!best || result.score > best.score)) {
+                best = result;
+                bestName = name;
+            }
+        });
+        return bestName ? { name: bestName, data: best } : null;
+    },
+
+    // --- Helper : stats MVP selon le poste ---
+    _mvpStats(stats, role) {
+        var self = this;
+        if (role === 'Passeur') {
+            var p = stats.pass || {};
+            var d = stats.defense;
+            var s = stats.service;
+            var parts = [];
+            if (p.tot > 0) parts.push('P4 : ' + (p.p4 || 0) + ' (' + self._pct(p.p4 || 0, p.tot) + ')');
+            if (d.tot > 0) parts.push('D+ : ' + d.defplus);
+            if (s.tot > 0) parts.push('Ace : ' + s.ace);
+            return parts.join(' · ');
+        }
+        if (role === 'Centre') {
+            var r = stats.reception;
+            var d = stats.defense;
+            var s = stats.service;
+            var parts = [];
+            if (s.tot > 0) parts.push('Ace : ' + s.ace);
+            if (r.tot > 0) {
+                var moy = (r.r4 * 4 + r.r3 * 3 + r.r2 * 2 + r.r1 * 1) / r.tot;
+                parts.push('Rec Moy : ' + moy.toFixed(1));
+            }
+            if (d.tot > 0) parts.push('D+ : ' + d.defplus);
+            return parts.join(' · ');
+        }
+        // Ailiers (R4, Pointu)
+        var a = stats.attack;
+        var b = stats.block;
+        var r = stats.reception;
+        var parts = [];
+        if (a.tot > 0) parts.push('A+ : ' + a.attplus + ' (' + self._pct(a.attplus, a.tot) + ')');
+        if (b.tot > 0) parts.push('B+ : ' + b.blcplus);
+        if (r.tot > 0) {
+            var moy = (r.r4 * 4 + r.r3 * 3 + r.r2 * 2 + r.r1 * 1) / r.tot;
+            parts.push('Rec : ' + moy.toFixed(1));
+        }
+        return parts.join(' · ');
     },
 
     // --- Determiner le role primaire de chaque joueur depuis les lineups ---
@@ -1243,6 +1405,17 @@ const BilanView = {
             scores.bloc = 0;
         }
 
+        // RELANCE : base 30 + taux R+ - fault penalty
+        var rel = s.relance;
+        if (rel && rel.tot > 0) {
+            var relPosRate = rel.relplus / rel.tot;
+            var relFaultRate = rel.frel / rel.tot;
+            var raw = 30 + relPosRate * 50 + (1 - relFaultRate) * 20;
+            scores.relance = this.clamp(floor, 100, Math.round(raw));
+        } else {
+            scores.relance = 0;
+        }
+
         // DEFENSE : base 30 + taux D+ - fault penalty
         // Bonne defense (60% D+, peu de fautes) = ~65
         var def = s.defense;
@@ -1269,9 +1442,10 @@ const BilanView = {
     },
 
     // --- Rendu SVG d'un spider chart pour un joueur ---
-    renderSpiderChart(playerName, role, axisScores, ip, roleColor) {
+    renderSpiderChart(playerName, role, axisScores, ip, roleColor, chartAxes) {
         var cx = 75, cy = 78, maxR = 58;
         var self = this;
+        var axes = chartAxes || self.SPIDER_AXES;
 
         var html = '<div class="bilan-player-card">';
 
@@ -1285,9 +1459,9 @@ const BilanView = {
         // SVG spider chart
         html += '<svg class="spider-chart" viewBox="0 0 150 160" xmlns="http://www.w3.org/2000/svg">';
 
-        // Hexagones concentriques de fond (25%, 50%, 75%, 100%)
+        // Polygones concentriques de fond (25%, 50%, 75%, 100%)
         [0.25, 0.5, 0.75, 1.0].forEach(function(scale) {
-            var points = self.SPIDER_AXES.map(function(axis) {
+            var points = axes.map(function(axis) {
                 var pt = self.polarToCartesian(cx, cy, maxR * scale, axis.angle);
                 return pt.x.toFixed(1) + ',' + pt.y.toFixed(1);
             }).join(' ');
@@ -1295,33 +1469,52 @@ const BilanView = {
         });
 
         // Lignes d'axes (centre → sommet)
-        self.SPIDER_AXES.forEach(function(axis) {
+        axes.forEach(function(axis) {
             var pt = self.polarToCartesian(cx, cy, maxR, axis.angle);
             html += '<line x1="' + cx + '" y1="' + cy + '" x2="' + pt.x.toFixed(1) + '" y2="' + pt.y.toFixed(1) + '" stroke="#e8eaed" stroke-width="0.8"/>';
         });
 
-        // Polygone de donnees
-        // - 1 seul axe a 0 : tracer a 0 (au centre sur cet axe) sans point
-        // - 2+ axes a 0 : skip les axes a 0, ligne droite entre axes actifs
-        var axes = self.SPIDER_AXES;
-        var zeroCount = axes.filter(function(a) { return (axisScores[a.key] || 0) === 0; }).length;
-        var skipZeros = zeroCount >= 2;
-
+        // Polygone de donnees — deux logiques distinctes :
+        // CENTRE : 'attaque' = zero structurel (toujours au centre)
+        //   les autres zeros : skip si 4+ actifs sur 5 restants, sinon centre
+        // AUTRES POSTES : zeros toujours traces au centre, jamais de skip
         var polyPoints = [];
         var dotPoints = [];
-        axes.forEach(function(axis) {
-            var val = axisScores[axis.key] || 0;
-            if (val > 0) {
-                var r = maxR * val / 100;
-                var pt = self.polarToCartesian(cx, cy, r, axis.angle);
-                polyPoints.push(pt);
-                dotPoints.push(pt);
-            } else if (!skipZeros) {
-                // 1 seul axe a 0 : inclure le point au centre (pas de dot)
-                polyPoints.push({ x: cx, y: cy });
-            }
-            // sinon skip (2+ axes a 0)
-        });
+
+        if (role === 'Centre') {
+            var nonStructural = axes.filter(function(a) { return a.key !== 'attaque'; });
+            var activeCount = nonStructural.filter(function(a) { return (axisScores[a.key] || 0) > 0; }).length;
+            var skipZeros = activeCount >= 4;
+
+            axes.forEach(function(axis) {
+                var val = axisScores[axis.key] || 0;
+                if (val > 0) {
+                    var r = maxR * val / 100;
+                    var pt = self.polarToCartesian(cx, cy, r, axis.angle);
+                    polyPoints.push(pt);
+                    dotPoints.push(pt);
+                } else if (axis.key === 'attaque' || !skipZeros) {
+                    // Attaque toujours au centre, autres zeros au centre si pas skip
+                    polyPoints.push({ x: cx, y: cy });
+                }
+            });
+        } else {
+            var activeCount = axes.filter(function(a) { return (axisScores[a.key] || 0) > 0; }).length;
+            var skipZeros = activeCount === 4;
+
+            axes.forEach(function(axis) {
+                var val = axisScores[axis.key] || 0;
+                if (val > 0) {
+                    var r = maxR * val / 100;
+                    var pt = self.polarToCartesian(cx, cy, r, axis.angle);
+                    polyPoints.push(pt);
+                    dotPoints.push(pt);
+                } else if (!skipZeros) {
+                    // 3 ou moins actifs : tracer au centre sans point
+                    polyPoints.push({ x: cx, y: cy });
+                }
+            });
+        }
 
         if (polyPoints.length >= 2) {
             var dataPolygon = polyPoints.map(function(pt) { return pt.x.toFixed(1) + ',' + pt.y.toFixed(1); }).join(' ');
@@ -1334,20 +1527,21 @@ const BilanView = {
         });
 
         // Labels d'axes a l'exterieur
-        self.SPIDER_AXES.forEach(function(axis) {
+        axes.forEach(function(axis) {
             var labelR = maxR + 14;
             var pt = self.polarToCartesian(cx, cy, labelR, axis.angle);
 
-            // Alignement du texte selon l'angle
+            // Alignement du texte selon l'angle (generique)
+            var cos = Math.cos(axis.angle * Math.PI / 180);
+            var sin = Math.sin(axis.angle * Math.PI / 180);
             var anchor = 'middle';
-            if (axis.angle === -30 || axis.angle === 30) anchor = 'start';
-            else if (axis.angle === 150 || axis.angle === 210) anchor = 'end';
+            if (cos > 0.3) anchor = 'start';
+            else if (cos < -0.3) anchor = 'end';
 
             // Decalage vertical selon la position
-            var dy = 0;
-            if (axis.angle === -90) dy = -2;
-            else if (axis.angle === 90) dy = 10;
-            else dy = 4;
+            var dy = 4;
+            if (sin < -0.7) dy = -2;  // haut
+            else if (sin > 0.7) dy = 10; // bas
 
             html += '<text x="' + pt.x.toFixed(1) + '" y="' + (pt.y + dy).toFixed(1) + '" ';
             html += 'text-anchor="' + anchor + '" font-size="10" font-weight="500" ';
