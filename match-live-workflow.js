@@ -1622,7 +1622,7 @@ WorkflowEngine.registerPhase('pass', {
 
             WorkflowEngine.transition('attack_end', { fromSecondTouch: true });
         }
-        // V19.3 : Faute de passe rapide (sans position terrain)
+        // V19.3 : Faute de passe → phase trajectoire (comme defense_fault_trajectory)
         if (action === 'passFault') {
             const player = getEffectivePlayer();
             if (!player) return;
@@ -1636,15 +1636,11 @@ WorkflowEngine.registerPhase('pass', {
                 type: 'pass',
                 player: player,
                 team: team,
-                role: role,
-                endPos: null
+                role: role
             };
             gameState.currentAction.startPos = _getStartPosFromLastAction();
-            gameState.rally.push({ ...gameState.currentAction });
 
-            const oppositeTeam = team === 'home' ? 'away' : 'home';
-            WorkflowEngine.awardPoint(oppositeTeam);
-            WorkflowEngine.endRally();
+            WorkflowEngine.transition('pass_fault_trajectory');
         }
         if (action === 'attackZoneClick') {
             // Clic zone d'attaque en phase pass = auto-passe + auto-attaquant
@@ -2854,6 +2850,61 @@ WorkflowEngine.registerPhase('defense_fault_trajectory', {
         gameState.rally.push({ ...gameState.currentAction });
 
         WorkflowEngine.awardPoint(scoringTeam);
+        WorkflowEngine.endRally();
+    },
+
+    reenter() {
+        this.enter();
+    }
+});
+
+
+// ==================== PHASE : pass_fault_trajectory (V19.3) ====================
+WorkflowEngine.registerPhase('pass_fault_trajectory', {
+    enter() {
+        hideAllSections();
+        document.getElementById('passFaultTrajectory').classList.remove('hidden');
+        document.getElementById('outArea').classList.add('active');
+        document.getElementById('outLabelTop').style.display = 'block';
+        document.getElementById('outLabelBottom').style.display = 'block';
+        highlightCourt(null);
+    },
+
+    handleClick(clickData) {
+        WorkflowEngine.pushState('pass_fault_traj_click');
+        gameState.currentAction.faultTrajectory = clickData;
+
+        // Flèche de trajectoire depuis la dernière action
+        if (gameState.currentAction.startPos) {
+            drawArrow(gameState.currentAction.startPos, clickData, 'pass');
+            addMarker(gameState.currentAction.startPos, 'pass');
+        }
+        addMarker(clickData, 'pass');
+
+        this._finalize();
+    },
+
+    handleOutClick(clickData) {
+        this.handleClick(clickData);
+    },
+
+    handleButton(action) {
+        if (action === 'skip') {
+            WorkflowEngine.pushState('pass_fault_skip');
+            this._finalize();
+        }
+    },
+
+    _finalize() {
+        document.getElementById('outArea').classList.remove('active');
+
+        const team = gameState.attackingTeam;
+        const oppositeTeam = team === 'home' ? 'away' : 'home';
+
+        gameState.currentAction.endPos = gameState.currentAction.faultTrajectory || null;
+        gameState.rally.push({ ...gameState.currentAction });
+
+        WorkflowEngine.awardPoint(oppositeTeam);
         WorkflowEngine.endRally();
     },
 

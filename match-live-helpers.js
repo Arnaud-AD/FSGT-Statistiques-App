@@ -1229,6 +1229,7 @@ function hideAllSections() {
     document.getElementById('defenseDirectReturnChoice').classList.add('hidden');
     document.getElementById('defenseFaultSection').classList.add('hidden');
     document.getElementById('defenseFaultTrajectory').classList.add('hidden');
+    document.getElementById('passFaultTrajectory').classList.add('hidden');
     document.getElementById('blocOutTrajectory').classList.add('hidden');
     document.getElementById('outArea').classList.remove('active');
     hideReceptionQualityZones();
