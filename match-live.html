@@ -4238,12 +4238,35 @@
             }
 
             if (clickData.courtSide === 'out') {
-                // Passe out → point adversaire
-                gameState.rally.push({ ...gameState.currentAction });
-                const otherTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
-                awardPoint(otherTeam);
-                endRally();
-                return;
+                // Rescue : convertir les coordonnées container → court-half
+                const converted = convertOutToCourtHalf(clickData);
+
+                if (converted && converted.courtSide === passingCourtSide) {
+                    // Clic out mais côté propre terrain → traiter comme passe normale
+                    clickData = converted;
+                    gameState.currentAction.endPos = clickData;
+                    // NE PAS return — continuer dans le flow normal ci-dessous
+                } else if (converted && converted.courtSide === oppositeCourtSide) {
+                    // Clic out côté adverse → retour direct
+                    clickData = converted;
+                    gameState.currentAction.endPos = clickData;
+                    gameState.currentAction.isDirectReturn = true;
+                    gameState.currentAction.directReturnEndPos = clickData;
+                    gameState.passDirectReturnClickData = clickData;
+                    gameState.rally.push({ ...gameState.currentAction });
+                    gameState.phase = 'pass_direct_return_choice';
+                    updatePhase();
+                    hideAllSections();
+                    document.getElementById('passDirectReturnChoice').classList.remove('hidden');
+                    return;
+                } else {
+                    // Vraiment hors zone → FP, point adversaire
+                    gameState.rally.push({ ...gameState.currentAction });
+                    const otherTeam = passingTeam === 'home' ? 'away' : 'home';
+                    awardPoint(otherTeam);
+                    endRally();
+                    return;
+                }
             }
 
             // Passe normale sur son propre terrain
@@ -6028,9 +6051,20 @@
                             // Service in : chercher la réception adverse pour S+ et Moy
                             const recAction = findNextAction(rally, i, 'reception');
                             if (recAction) {
-                                const recQuality = recAction.action.quality;
-                                const note = receptionQualityToNote(recQuality);
+                                const rec = recAction.action;
+                                let note = receptionQualityToNote(rec.quality);
                                 if (note !== null) {
+                                    // Retour direct gagnant = pire outcome pour le serveur → note 0 (FR)
+                                    if (rec.isDirectReturnWinner) {
+                                        note = 0;
+                                    }
+                                    // Retour direct exploité par le serveur = réception catastrophique → note 0 (FR) + S+
+                                    else if (rec.isDirectReturn && !rec.isDirectReturnWinner) {
+                                        const exploited = isDirectReturnExploited(rally, recAction.index, rec.team);
+                                        if (exploited) {
+                                            note = 0;
+                                        }
+                                    }
                                     stats.service.recSumAdv += note;
                                     stats.service.recCountAdv++;
                                     // S+ = faute de réception adverse (note 0)
