@@ -1366,21 +1366,20 @@
             // V19.1 : charger les grilles de passe calibrées depuis localStorage
             if (typeof loadPassGridsFromStorage === 'function') loadPassGridsFromStorage();
 
-            // V19.23 : Toujours tenter de charger les grilles depuis Firebase (async, non-bloquant)
-            // Firebase fait autorite si les grilles locales sont vides/default (tout P1)
+            // V19.23 : Tenter de charger les grilles depuis Firebase (async, non-bloquant)
+            // Firebase fait autorite si les grilles locales sont vides/default
+            // Seuil : v > 2 (P3/P4) = donnees reellement calibrees
             if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured()) {
                 FirebaseSync.getPassGrids().then(remoteGrids => {
                     if (!remoteGrids) return;
-                    // Verifier que Firebase a des donnees calibrees (au moins une cellule non-P1)
                     const hasRemoteData = Object.values(remoteGrids).some(zone =>
                         zone && Object.values(zone).some(ctx =>
                             Array.isArray(ctx) && ctx.some(row =>
-                                Array.isArray(row) && row.some(v => v !== 1)
+                                Array.isArray(row) && row.some(v => v > 2)
                             )
                         )
                     );
                     if (!hasRemoteData) return;
-                    // Verifier que le local n'a PAS de donnees calibrees
                     const localRaw = localStorage.getItem('volleyball_pass_grids');
                     let hasLocalData = false;
                     if (localRaw) {
@@ -1389,7 +1388,7 @@
                             hasLocalData = Object.values(local).some(zone =>
                                 zone && Object.values(zone).some(ctx =>
                                     Array.isArray(ctx) && ctx.some(row =>
-                                        Array.isArray(row) && row.some(v => v !== 1)
+                                        Array.isArray(row) && row.some(v => v > 2)
                                     )
                                 )
                             );

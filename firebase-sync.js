@@ -283,18 +283,18 @@ const FirebaseSync = {
         await this.saveCurrentMatchId(currentId);
 
         // Pass grids — ne jamais ecraser Firebase avec des grilles vides/default
-        const passGrids = localStorage.getItem('volleyball_pass_grids');
-        if (passGrids) {
-            const parsed = JSON.parse(passGrids);
-            // Verifier qu'au moins une cellule n'est pas P1 (valeur 1)
-            const hasData = Object.values(parsed).some(zone =>
+        const passGridsRaw = localStorage.getItem('volleyball_pass_grids');
+        if (passGridsRaw) {
+            const parsed = JSON.parse(passGridsRaw);
+            // Verifier qu'au moins une cellule est P3 ou P4 (vraie calibration)
+            const hasCalibration = Object.values(parsed).some(zone =>
                 zone && Object.values(zone).some(ctx =>
                     Array.isArray(ctx) && ctx.some(row =>
-                        Array.isArray(row) && row.some(v => v !== 1)
+                        Array.isArray(row) && row.some(v => v > 2)
                     )
                 )
             );
-            if (hasData) {
+            if (hasCalibration) {
                 await this.savePassGrids(parsed);
             }
         }
@@ -329,10 +329,37 @@ const FirebaseSync = {
             localStorage.setItem(Storage.KEYS.CURRENT_ID, remoteId);
         }
 
-        // Pass grids
+        // Pass grids — ne jamais ecraser des grilles calibrees locales
         const passGrids = await this.getPassGrids();
         if (passGrids) {
-            localStorage.setItem('volleyball_pass_grids', JSON.stringify(passGrids));
+            const remoteHasData = Object.values(passGrids).some(zone =>
+                zone && Object.values(zone).some(ctx =>
+                    Array.isArray(ctx) && ctx.some(row =>
+                        Array.isArray(row) && row.some(v => v > 2)
+                    )
+                )
+            );
+            const localRaw = localStorage.getItem('volleyball_pass_grids');
+            const localHasData = localRaw && (() => {
+                try {
+                    const parsed = JSON.parse(localRaw);
+                    return Object.values(parsed).some(zone =>
+                        zone && Object.values(zone).some(ctx =>
+                            Array.isArray(ctx) && ctx.some(row =>
+                                Array.isArray(row) && row.some(v => v > 2)
+                            )
+                        )
+                    );
+                } catch(e) { return false; }
+            })();
+            // Ecraser local seulement si Firebase a des donnees calibrees (P3/P4)
+            // ET que le local n'a PAS de donnees calibrees
+            if (remoteHasData && !localHasData) {
+                localStorage.setItem('volleyball_pass_grids', JSON.stringify(passGrids));
+            } else if (remoteHasData) {
+                // Les deux ont des donnees — on garde le local (source de verite offline-first)
+                console.log('[FirebaseSync] pullAll: grilles locales calibrees conservees');
+            }
         }
 
         console.log('[FirebaseSync] Pull complet : roster, matchs, state, passGrids');

@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Pass FP Fantômes — Marvels 4</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 20px; background: #1a1a2e; color: #e0e0e0; }
+        h1 { margin-bottom: 10px; color: #00d2ff; }
+        h2 { margin: 20px 0 10px; color: #ffb347; }
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; margin: 5px; }
+        .btn-primary { background: #0056D2; color: white; }
+        .btn-primary:hover { background: #0070F3; }
+        .btn-danger { background: #ea4335; color: white; }
+        .btn-danger:hover { background: #ff5a4e; }
+        .btn-success { background: #22c55e; color: white; }
+        .btn-success:hover { background: #36d972; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        #log { background: #16213e; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 13px;
+               white-space: pre-wrap; max-height: 600px; overflow-y: auto; margin-top: 10px; line-height: 1.5; }
+        .log-error { color: #ef4444; }
+        .log-success { color: #22c55e; }
+        .log-warn { color: #f59e0b; }
+        .log-info { color: #3b82f6; }
+        .log-highlight { color: #e879f9; font-weight: bold; }
+        table { border-collapse: collapse; margin: 10px 0; width: 100%; }
+        th, td { border: 1px solid #333; padding: 6px 10px; text-align: left; font-size: 13px; }
+        th { background: #16213e; color: #00d2ff; }
+        tr:nth-child(even) { background: rgba(255,255,255,0.05); }
+        .fp-row { background: rgba(234,67,53,0.2) !important; }
+        .fixed-row { background: rgba(34,197,94,0.2) !important; }
+        .section { margin: 15px 0; padding: 15px; background: #16213e; border-radius: 8px; }
+        .stats-compare { display: flex; gap: 20px; flex-wrap: wrap; }
+        .stats-box { flex: 1; min-width: 250px; padding: 10px; background: #0f3460; border-radius: 6px; }
+        .stats-box h3 { color: #00d2ff; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+    <h1>Fix Pass FP Fantômes</h1>
+    <p>Corrige les passes mal classées FP (courtSide='out') qui sont en fait dans l'aire de jeu.</p>
+
+    <div style="margin: 15px 0;">
+        <button class="btn btn-primary" id="btn-signin">🔐 Connexion Google</button>
+        <button class="btn btn-primary" id="btn-diagnose" disabled>🔍 Diagnostiquer FP fantômes</button>
+        <button class="btn btn-danger" id="btn-fix" disabled>🔧 Appliquer le fix</button>
+        <button class="btn btn-success" id="btn-audit" disabled>📊 Auditer toutes les FP</button>
+        <button class="btn btn-danger" id="btn-recalc" disabled>🔄 Recalculer stats passe</button>
+    </div>
+
+    <div class="section" id="grids-section" style="display:none;">
+        <h2 style="color:#00d2ff;margin-bottom:8px;">Grilles de passe manquantes</h2>
+        <p style="font-size:13px;margin-bottom:8px;">Les grilles calibrées ne sont pas trouvées sur cet origin. Ouvre la console (Cmd+Option+J) sur la page <b>historique.html</b> ou <b>match-live.html</b> (l'origin habituel) et tape :</p>
+        <code style="background:#0f3460;padding:4px 8px;border-radius:4px;font-size:12px;">copy(localStorage.getItem('volleyball_pass_grids'))</code>
+        <p style="font-size:13px;margin:8px 0;">Puis colle le résultat ici :</p>
+        <textarea id="grids-input" rows="3" style="width:100%;background:#0f3460;color:#e0e0e0;border:1px solid #333;border-radius:6px;padding:8px;font-family:monospace;font-size:11px;" placeholder="Coller le JSON des grilles ici..."></textarea>
+        <button class="btn btn-primary" id="btn-load-grids" style="margin-top:5px;">Charger les grilles</button>
+    </div>
+
+    <div id="log"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="match-live-helpers.js"></script>
+    <script>
+        // ===================== FIREBASE INIT =====================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAwO1RtalQXt1M9b7kAkiwZF5nU69T7EJI",
+            authDomain: "fsgt-stats.firebaseapp.com",
+            projectId: "fsgt-stats",
+            storageBucket: "fsgt-stats.firebasestorage.app",
+            messagingSenderId: "359241380045",
+            appId: "1:359241380045:web:d3d40b30796a096f2cf984"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // ===================== LOGGING =====================
+        const logEl = document.getElementById('log');
+        function log(msg, cls = '') {
+            const span = document.createElement('span');
+            span.className = cls;
+            span.textContent = msg + '\n';
+            logEl.appendChild(span);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        // ===================== LAYOUT CONSTANTS =====================
+        // Dimensions du layout match-live à 600px (target width)
+        // Ces valeurs sont déterministes (pas de media queries)
+        const CONTAINER_WIDTH = 600;
+        const CONTAINER_PADDING_H = 25;  // padding left/right
+        const CONTAINER_PADDING_V = 15;  // padding top/bottom
+        const COURT_WIDTH = 180;         // max-width du #court
+        const COURT_HALF_SIZE = 180;     // aspect-ratio 1:1 → 180x180
+        const NET_HEIGHT = 4;
+        const SERVICE_ZONE_HEIGHT = 40;  // visibility:hidden mais prend la place
+        const TEAM_LABEL_HEIGHT = 13;    // font-size 9px + padding 2px*2 + line-height
+
+        // Positions calculées
+        const CONTENT_WIDTH = CONTAINER_WIDTH - 2 * CONTAINER_PADDING_H; // 550px
+        const COURT_LEFT = CONTAINER_PADDING_H + (CONTENT_WIDTH - COURT_WIDTH) / 2; // 210px
+
+        // Structure verticale du #court (flex column):
+        // service-zone top (40) + team-label (13) + courtTop (180) + net (4) + courtBottom (180) + team-label (13) + service-zone bottom (40)
+        const COURT_TOP_Y = CONTAINER_PADDING_V + SERVICE_ZONE_HEIGHT + TEAM_LABEL_HEIGHT; // 15 + 40 + 13 = 68
+        const COURT_BOTTOM_Y = COURT_TOP_Y + COURT_HALF_SIZE + NET_HEIGHT; // 68 + 180 + 4 = 252
+        const CONTAINER_HEIGHT = CONTAINER_PADDING_V * 2 + SERVICE_ZONE_HEIGHT * 2 + TEAM_LABEL_HEIGHT * 2 + COURT_HALF_SIZE * 2 + NET_HEIGHT;
+        // = 15*2 + 40*2 + 13*2 + 180*2 + 4 = 500
+
+        // ===================== COORDINATE CONVERSION =====================
+        // Reproduit convertOutToCourtHalf() mais avec des constantes CSS au lieu du DOM
+        function convertOutToCourtHalfOffline(outX, outY) {
+            // outX, outY sont en % du courtContainer
+            const clickPxX = outX / 100 * CONTAINER_WIDTH;
+            const clickPxY = outY / 100 * CONTAINER_HEIGHT;
+
+            // X relatif au court (peut être négatif ou > 100 pour les zones de débordement)
+            const xInCourt = (clickPxX - COURT_LEFT) / COURT_WIDTH * 100;
+
+            // Tester si le clic tombe dans la bande Y du courtTop
+            if (clickPxY >= COURT_TOP_Y && clickPxY <= COURT_TOP_Y + COURT_HALF_SIZE) {
+                const yInHalf = (clickPxY - COURT_TOP_Y) / COURT_HALF_SIZE * 100;
+                return { x: xInCourt, y: yInHalf, courtSide: 'top' };
+            }
+            // Tester courtBottom
+            if (clickPxY >= COURT_BOTTOM_Y && clickPxY <= COURT_BOTTOM_Y + COURT_HALF_SIZE) {
+                const yInHalf = (clickPxY - COURT_BOTTOM_Y) / COURT_HALF_SIZE * 100;
+                return { x: xInCourt, y: yInHalf, courtSide: 'bottom' };
+            }
+
+            return null; // Vraiment hors zone
+        }
+
+        // ===================== PASS QUALITY (versions offline avec cameraSide en parametre) =====================
+        // match-live-helpers.js fournit PASS_GRIDS et getPassContext()
+        // Les fonctions ci-dessous sont des versions offline (cameraSide en param au lieu du global)
+        function getCourtSideForTeamOffline(team, cameraSide) {
+            if (cameraSide === 'home') {
+                return team === 'home' ? 'bottom' : 'top';
+            } else {
+                return team === 'home' ? 'top' : 'bottom';
+            }
+        }
+
+        function getPassZone(endPos, team, cameraSide) {
+            const courtSide = getCourtSideForTeamOffline(team, cameraSide);
+            const x = endPos.x;
+            if (courtSide === 'bottom') {
+                if (x < 33.33) return 'R4';
+                if (x > 66.67) return 'Pointu';
+                return 'Centre';
+            } else {
+                if (x < 33.33) return 'Pointu';
+                if (x > 66.67) return 'R4';
+                return 'Centre';
+            }
+        }
+
+        function evaluatePassQualityOffline(endPos, zone, context, team, cameraSide, gridsParam) {
+            const courtSide = getCourtSideForTeamOffline(team, cameraSide);
+            let distFromNet;
+            if (courtSide === 'bottom') {
+                distFromNet = endPos.y;
+            } else {
+                distFromNet = 100 - endPos.y;
+            }
+            if (distFromNet > PASS_GRID_DEPTH) {
+                return { quality: 'mauvaise', score: 1, zone, context };
+            }
+            const totalCols = getPassGridCols(zone);
+            let col;
+            if (zone === 'R4' || zone === 'Pointu') {
+                const totalWidth = 100 + PASS_GRID_OVERFLOW;
+                let xShifted;
+                const overflowLeft = (zone === 'R4' && courtSide === 'bottom') || (zone === 'Pointu' && courtSide === 'top');
+                if (overflowLeft) {
+                    xShifted = endPos.x + PASS_GRID_OVERFLOW;
+                } else {
+                    xShifted = endPos.x;
+                }
+                col = Math.min(totalCols - 1, Math.max(0, Math.floor(xShifted / totalWidth * totalCols)));
+            } else {
+                col = Math.min(totalCols - 1, Math.max(0, Math.floor(endPos.x / 100 * totalCols)));
+            }
+            if (courtSide === 'top') {
+                col = totalCols - 1 - col;
+            }
+            const row = Math.min(PASS_GRID_ROWS - 1, Math.max(0, Math.floor(distFromNet / PASS_GRID_DEPTH * PASS_GRID_ROWS)));
+            const grid = gridsParam[zone] && gridsParam[zone][context];
+            if (!grid || !grid[row]) {
+                return { quality: 'jouable', score: 2, zone, context };
+            }
+            const score = grid[row][col] || 1;
+            const labels = { 4: 'optimale', 3: 'bonne', 2: 'jouable', 1: 'mauvaise' };
+            return { quality: labels[score] || 'jouable', score, zone, context };
+        }
+
+        // ===================== GLOBALS =====================
+        let matchData = null;
+        let affectedPasses = [];
+        let passGrids = null;
+
+        // ===================== AUTH =====================
+        document.getElementById('btn-signin').onclick = async () => {
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                await auth.signInWithPopup(provider);
+            } catch (e) {
+                log('Erreur connexion : ' + e.message, 'log-error');
+            }
+        };
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                log('✅ Connecté : ' + user.email, 'log-success');
+                document.getElementById('btn-diagnose').disabled = false;
+            }
+        });
+
+        // ===================== DIAGNOSE =====================
+        document.getElementById('btn-diagnose').onclick = async () => {
+            log('\n═══════════════════════════════════════', 'log-info');
+            log('  DIAGNOSTIC — Recherche des FP fantômes', 'log-info');
+            log('═══════════════════════════════════════\n', 'log-info');
+
+            // Charger les grilles de passe
+            try {
+                const gridsDoc = await db.collection('config').doc('passGrids').get();
+                if (gridsDoc.exists) {
+                    passGrids = gridsDoc.data().grids;
+                    log('✅ Grilles de passe chargées depuis Firebase', 'log-success');
+                } else {
+                    log('⚠️ Pas de grilles de passe en Firebase — qualité non évaluable', 'log-warn');
+                }
+            } catch (e) {
+                log('⚠️ Erreur chargement grilles : ' + e.message, 'log-warn');
+            }
+
+            // Charger tous les matchs
+            const snapshot = await db.collection('matches').get();
+            const allMatches = snapshot.docs.map(doc => doc.data());
+            log('Matchs en base : ' + allMatches.length);
+            allMatches.forEach(m => {
+                const setsInfo = m.sets ? `${m.sets.length} sets` : 'pas de sets';
+                log(`  • ${m.opponent || '?'} — ${m.status || '?'} — ${setsInfo} — ID: ${m.id}`);
+            });
+
+            // Trouver le match Marvels
+            matchData = allMatches.find(m => m.opponent && m.opponent.toLowerCase().includes('marvels'));
+            if (!matchData) {
+                log('\n❌ Match Marvels introuvable !', 'log-error');
+                return;
+            }
+            log('\n✅ Match trouvé : ' + matchData.opponent + ' (ID: ' + matchData.id + ')', 'log-success');
+            log('   Sets : ' + matchData.sets.length + ' | Score : ' + matchData.setsWon + '-' + matchData.setsLost);
+
+            // Scanner chaque set
+            affectedPasses = [];
+            let totalPasses = 0;
+            let totalFP = 0;
+
+            matchData.sets.forEach((set, setIdx) => {
+                const cameraSide = set.cameraSide || 'away';
+                log(`\n── Set ${setIdx + 1} (caméra: ${cameraSide}) ──`, 'log-highlight');
+                log(`   Score: ${set.homeScore}-${set.awayScore}`);
+
+                if (!set.points) { log('   Pas de points enregistrés'); return; }
+
+                set.points.forEach((point, ptIdx) => {
+                    if (!point.rally) return;
+
+                    point.rally.forEach((action, actIdx) => {
+                        if (action.type !== 'pass') return;
+                        totalPasses++;
+
+                        if (action.isDirectReturn) return; // Les retours directs ont leur propre logique
+
+                        if (!action.endPos) {
+                            totalFP++;
+                            return;
+                        }
+
+                        if (action.endPos.courtSide === 'out') {
+                            totalFP++;
+
+                            // Tenter la conversion
+                            const converted = convertOutToCourtHalfOffline(action.endPos.x, action.endPos.y);
+                            const passingTeam = action.team;
+                            const passingCourtSide = getCourtSideForTeamOffline(passingTeam, cameraSide);
+
+                            let diagnosis = '';
+                            let canFix = false;
+                            let newEndPos = null;
+
+                            if (converted) {
+                                if (converted.courtSide === passingCourtSide) {
+                                    // C'est une passe dans l'aire de jeu de l'équipe → FP FANTÔME
+                                    diagnosis = 'FP FANTÔME → devrait être évaluée par grille';
+                                    canFix = true;
+                                    newEndPos = converted;
+                                } else {
+                                    // C'est un retour direct (terrain adverse) — cas séparé
+                                    diagnosis = 'Out vers terrain adverse — possible retour direct non détecté';
+                                }
+                            } else {
+                                diagnosis = 'Vraiment hors zone (au-dessus/en-dessous des terrains) — FP légitime';
+                            }
+
+                            // Évaluer la qualité si on peut fixer
+                            let qualityInfo = '';
+                            if (canFix && newEndPos && passGrids) {
+                                const zone = getPassZone(newEndPos, passingTeam, cameraSide);
+                                const ctxObj = getPassContext(point.rally, actIdx, action.role || 'transition');
+                                const eval_ = evaluatePassQualityOffline(newEndPos, zone, ctxObj.context, passingTeam, cameraSide, passGrids);
+                                qualityInfo = ` → Zone: ${zone}, Contexte: ${ctxObj.context}, Score: P${eval_.score}`;
+                            }
+
+                            const entry = {
+                                setIdx, ptIdx, actIdx, action,
+                                converted, canFix, newEndPos,
+                                diagnosis, qualityInfo,
+                                player: action.player,
+                                team: action.team,
+                                cameraSide
+                            };
+                            affectedPasses.push(entry);
+
+                            const cls = canFix ? 'log-warn' : 'log-info';
+                            log(`   S${setIdx+1} P${ptIdx+1} A${actIdx+1} | ${action.player} (${action.team}) | out(${action.endPos.x.toFixed(1)}, ${action.endPos.y.toFixed(1)})`, cls);
+                            if (converted) {
+                                log(`     → Converti: ${converted.courtSide}(${converted.x.toFixed(1)}, ${converted.y.toFixed(1)})`, cls);
+                            }
+                            log(`     ${diagnosis}${qualityInfo}`, cls);
+                        } else if (action.endPos.courtSide === 'net') {
+                            totalFP++;
+                        }
+                    });
+                });
+            });
+
+            // Résumé
+            log('\n═══════════════════════════════════════', 'log-info');
+            log('  RÉSUMÉ', 'log-info');
+            log('═══════════════════════════════════════', 'log-info');
+            log(`Total passes : ${totalPasses}`);
+            log(`Total FP (courtSide=out ou net) : ${totalFP}`);
+
+            const phantomFPs = affectedPasses.filter(p => p.canFix);
+            const legitimateFPs = affectedPasses.filter(p => !p.canFix);
+            log(`FP fantômes (fixables) : ${phantomFPs.length}`, phantomFPs.length > 0 ? 'log-warn' : 'log-success');
+            log(`FP légitimes / autres : ${legitimateFPs.length}`);
+
+            if (phantomFPs.length > 0) {
+                log('\n📋 Détail des FP fantômes à corriger :', 'log-highlight');
+                phantomFPs.forEach((p, i) => {
+                    log(`  ${i+1}. S${p.setIdx+1} P${p.ptIdx+1} | ${p.player} | out(${p.action.endPos.x.toFixed(1)}, ${p.action.endPos.y.toFixed(1)}) → ${p.newEndPos.courtSide}(${p.newEndPos.x.toFixed(1)}, ${p.newEndPos.y.toFixed(1)})${p.qualityInfo}`);
+                });
+                document.getElementById('btn-fix').disabled = false;
+                log('\n👆 Cliquez sur "Appliquer le fix" pour corriger ces données en base.', 'log-warn');
+            } else {
+                log('\n✅ Aucune FP fantôme détectée — rien à corriger !', 'log-success');
+            }
+        };
+
+        // ===================== FIX =====================
+        document.getElementById('btn-fix').onclick = async () => {
+            const phantomFPs = affectedPasses.filter(p => p.canFix);
+            if (phantomFPs.length === 0) {
+                log('\nAucun fix à appliquer.', 'log-info');
+                return;
+            }
+
+            log('\n═══════════════════════════════════════', 'log-warn');
+            log('  APPLICATION DU FIX', 'log-warn');
+            log('═══════════════════════════════════════\n', 'log-warn');
+
+            // Modifier les données en mémoire
+            let fixCount = 0;
+            phantomFPs.forEach(p => {
+                const action = matchData.sets[p.setIdx].points[p.ptIdx].rally[p.actIdx];
+                if (action.type === 'pass' && action.endPos && action.endPos.courtSide === 'out') {
+                    const oldEndPos = { ...action.endPos };
+                    action.endPos = {
+                        x: p.newEndPos.x,
+                        y: p.newEndPos.y,
+                        courtSide: p.newEndPos.courtSide
+                    };
+                    fixCount++;
+                    log(`✅ Fix ${fixCount}: S${p.setIdx+1} P${p.ptIdx+1} | ${action.player} | out(${oldEndPos.x.toFixed(1)},${oldEndPos.y.toFixed(1)}) → ${action.endPos.courtSide}(${action.endPos.x.toFixed(1)},${action.endPos.y.toFixed(1)})`, 'log-success');
+                }
+            });
+
+            if (fixCount === 0) {
+                log('\n⚠️ Aucune donnée modifiée.', 'log-warn');
+                return;
+            }
+
+            // Sauvegarder en Firebase
+            log(`\n💾 Sauvegarde de ${fixCount} corrections en Firebase...`);
+            try {
+                await db.collection('matches').doc(matchData.id).set({
+                    ...matchData,
+                    syncedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    syncedBy: auth.currentUser.uid
+                });
+                log('✅ Match sauvegardé avec succès !', 'log-success');
+                log('\n📝 Pour que les stats se recalculent :', 'log-info');
+                log('   1. Ouvrir historique.html', 'log-info');
+                log('   2. Les stats seront recalculées depuis les données brutes (points[])', 'log-info');
+                log('   3. Les FP fantômes seront maintenant évaluées comme P1/P2/P3/P4', 'log-info');
+
+                // Aussi mettre à jour localStorage si on est sur la même machine
+                try {
+                    const localMatches = JSON.parse(localStorage.getItem('volleyball_matches') || '[]');
+                    const localIdx = localMatches.findIndex(m => m.id === matchData.id);
+                    if (localIdx >= 0) {
+                        localMatches[localIdx] = matchData;
+                        localStorage.setItem('volleyball_matches', JSON.stringify(localMatches));
+                        log('✅ localStorage aussi mis à jour', 'log-success');
+                    }
+                } catch (e) {
+                    log('⚠️ localStorage non mis à jour (pas grave si machine différente)', 'log-warn');
+                }
+
+                document.getElementById('btn-fix').disabled = true;
+            } catch (e) {
+                log('❌ Erreur sauvegarde : ' + e.message, 'log-error');
+            }
+        };
+
+        // ===================== AUDIT ALL FP =====================
+        // Reproduit la logique de updateStatsFromRally pour lister TOUTES les FP
+        // et montrer pourquoi chacune est comptée comme FP
+        document.getElementById('btn-audit').onclick = async () => {
+            log('\n═══════════════════════════════════════', 'log-info');
+            log('  AUDIT COMPLET — Toutes les FP du match', 'log-info');
+            log('═══════════════════════════════════════\n', 'log-info');
+
+            // Charger le match depuis Firebase (données fraîches post-fix)
+            if (!matchData) {
+                const snapshot = await db.collection('matches').get();
+                const allMatches = snapshot.docs.map(doc => doc.data());
+                matchData = allMatches.find(m => m.opponent && m.opponent.toLowerCase().includes('marvels'));
+            }
+            if (!matchData) { log('❌ Match introuvable', 'log-error'); return; }
+
+            // Charger les grilles si pas fait
+            if (!passGrids) {
+                try {
+                    const gridsDoc = await db.collection('config').doc('passGrids').get();
+                    if (gridsDoc.exists) passGrids = gridsDoc.data().grids;
+                } catch(e) {}
+            }
+
+            // Reproduire isDirectReturnExploited
+            function isDirectReturnExploited(rally, index, team) {
+                const oppositeTeam = team === 'home' ? 'away' : 'home';
+                for (let j = index + 1; j < rally.length; j++) {
+                    const a = rally[j];
+                    if (a.team === team && (a.type === 'pass' || a.type === 'attack')) return false;
+                    if (a.team === oppositeTeam && a.type === 'pass') return false;
+                    if (a.team === oppositeTeam && a.type === 'attack' && (a.result === 'point' || a.result === 'bloc_out')) return true;
+                    if (a.team === team && a.type === 'defense' && a.result === 'fault') return true;
+                }
+                return false;
+            }
+
+            let fpCount = 0;
+            let totalPasses = 0;
+            const fpDetails = [];
+
+            matchData.sets.forEach((set, setIdx) => {
+                const cameraSide = set.cameraSide || 'away';
+                if (!set.points) return;
+
+                set.points.forEach((point, ptIdx) => {
+                    if (!point.rally) return;
+
+                    point.rally.forEach((action, actIdx) => {
+                        if (action.type !== 'pass') return;
+                        const team = action.team;
+                        totalPasses++;
+
+                        let isFP = false;
+                        let reason = '';
+
+                        // Cas 1 : Retour direct exploité
+                        if (action.isDirectReturn) {
+                            if (!action.isDirectReturnWinner) {
+                                const exploited = isDirectReturnExploited(point.rally, actIdx, team);
+                                if (exploited) {
+                                    isFP = true;
+                                    reason = 'Retour direct de passe exploité par l\'adversaire (attaque directe sans passe)';
+                                }
+                            }
+                            if (!isFP) return; // retour direct non-exploité = pas de FP, pas compté
+                        }
+
+                        // Cas 2 : Pas de endPos
+                        if (!isFP && !action.endPos) {
+                            isFP = true;
+                            reason = 'Pas de endPos (action incomplète)';
+                        }
+
+                        // Cas 3 : courtSide === 'out'
+                        if (!isFP && action.endPos && action.endPos.courtSide === 'out') {
+                            isFP = true;
+                            reason = `Passe out — endPos(${action.endPos.x.toFixed(1)}, ${action.endPos.y.toFixed(1)}) courtSide=out`;
+                        }
+
+                        // Cas 4 : courtSide === 'net'
+                        if (!isFP && action.endPos && action.endPos.courtSide === 'net') {
+                            isFP = true;
+                            reason = 'Passe dans le filet (courtSide=net)';
+                        }
+
+                        if (isFP) {
+                            fpCount++;
+                            const detail = {
+                                setIdx, ptIdx, actIdx,
+                                player: action.player,
+                                team: action.team,
+                                role: action.role,
+                                reason,
+                                isDirectReturn: !!action.isDirectReturn,
+                                endPos: action.endPos
+                            };
+                            fpDetails.push(detail);
+
+                            // Contexte du rally pour mieux comprendre
+                            const rallyActions = point.rally.map((a, i) => {
+                                let desc = `${a.type}`;
+                                if (a.player) desc += `(${a.player})`;
+                                if (a.result) desc += `→${a.result}`;
+                                if (a.quality) desc += `[${a.quality.label || a.quality.score}]`;
+                                if (i === actIdx) desc = `>>>${desc}<<<`;
+                                return desc;
+                            }).join(' | ');
+
+                            log(`FP #${fpCount} — S${setIdx+1} P${ptIdx+1} A${actIdx+1}`, 'log-warn');
+                            log(`  Joueur: ${action.player} (${action.team}) — Rôle: ${action.role || '?'}`, 'log-warn');
+                            log(`  Raison: ${reason}`, 'log-error');
+                            log(`  Rally: ${rallyActions}`, 'log-info');
+                            log('');
+                        }
+                    });
+                });
+            });
+
+            log('═══════════════════════════════════════', 'log-info');
+            log(`  Total passes: ${totalPasses} | Total FP: ${fpCount}`, 'log-info');
+            log('═══════════════════════════════════════', 'log-info');
+
+            // Résumé par type
+            const byReason = {};
+            fpDetails.forEach(d => {
+                const key = d.isDirectReturn ? 'Retour direct exploité' :
+                           d.reason.includes('net') ? 'Passe filet' :
+                           d.reason.includes('out') ? 'Passe out' : 'Autre';
+                byReason[key] = (byReason[key] || 0) + 1;
+            });
+            log('\nVentilation par type :', 'log-highlight');
+            Object.entries(byReason).forEach(([k, v]) => {
+                log(`  ${k}: ${v}`);
+            });
+
+            // Résumé par joueur
+            const byPlayer = {};
+            fpDetails.forEach(d => { byPlayer[d.player] = (byPlayer[d.player] || 0) + 1; });
+            log('\nVentilation par joueur :', 'log-highlight');
+            Object.entries(byPlayer).sort((a,b) => b[1]-a[1]).forEach(([k, v]) => {
+                log(`  ${k}: ${v}`);
+            });
+        };
+
+        // ===================== RECALCULATE PASS STATS =====================
+        // Recalcule les stats passe pré-calculées dans set.stats depuis les rallies corrigés
+        document.getElementById('btn-recalc').onclick = async () => {
+            log('\n═══════════════════════════════════════', 'log-warn');
+            log('  RECALCUL DES STATS PASSE', 'log-warn');
+            log('═══════════════════════════════════════\n', 'log-warn');
+
+            // Charger le match frais depuis Firebase
+            const snapshot = await db.collection('matches').get();
+            const allMatches = snapshot.docs.map(doc => doc.data());
+            matchData = allMatches.find(m => m.opponent && m.opponent.toLowerCase().includes('marvels'));
+            if (!matchData) { log('❌ Match introuvable', 'log-error'); return; }
+
+            // Charger les grilles : Firebase d'abord, puis localStorage en fallback
+            if (!passGrids) {
+                try {
+                    const gridsDoc = await db.collection('config').doc('passGrids').get();
+                    if (gridsDoc.exists && gridsDoc.data().grids) {
+                        passGrids = gridsDoc.data().grids;
+                        log('✅ Grilles chargées depuis Firebase', 'log-success');
+                    }
+                } catch(e) {}
+            }
+            if (!passGrids) {
+                try {
+                    const localGrids = localStorage.getItem('volleyball_pass_grids');
+                    if (localGrids) {
+                        passGrids = JSON.parse(localGrids);
+                        log('✅ Grilles chargées depuis localStorage (fallback)', 'log-success');
+                    }
+                } catch(e) {}
+            }
+            if (!passGrids && typeof PASS_GRIDS !== 'undefined') {
+                // Fallback : grilles calibrees hardcodees dans match-live-helpers.js
+                passGrids = JSON.parse(JSON.stringify(PASS_GRIDS));
+                log('✅ Grilles chargées depuis match-live-helpers.js (hardcoded)', 'log-success');
+            }
+            if (!passGrids) {
+                log('❌ Aucune grille trouvée nulle part — abandon', 'log-error');
+                return;
+            }
+
+            // isDirectReturnExploited local
+            function isDirectReturnExploited(rally, index, team) {
+                const oppositeTeam = team === 'home' ? 'away' : 'home';
+                for (let j = index + 1; j < rally.length; j++) {
+                    const a = rally[j];
+                    if (a.team === team && (a.type === 'pass' || a.type === 'attack')) return false;
+                    if (a.team === oppositeTeam && a.type === 'pass') return false;
+                    if (a.team === oppositeTeam && a.type === 'attack' && (a.result === 'point' || a.result === 'bloc_out')) return true;
+                    if (a.team === team && a.type === 'defense' && a.result === 'fault') return true;
+                }
+                return false;
+            }
+
+            function freshPassCtx() { return { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0 }; }
+            function freshPassStats() {
+                return {
+                    tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0,
+                    passeur: { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0,
+                        confort: freshPassCtx(), contraint: freshPassCtx(), transition: freshPassCtx() },
+                    autre: { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0,
+                        contraint: freshPassCtx(), transition: freshPassCtx() }
+                };
+            }
+
+            function _incPass(bucket, scoreKey) {
+                bucket.tot++;
+                if (scoreKey === 'fp') bucket.fp++;
+                else if (bucket[scoreKey] !== undefined) bucket[scoreKey]++;
+            }
+
+            matchData.sets.forEach((set, setIdx) => {
+                const cameraSide = set.cameraSide || 'away';
+                if (!set.stats || !set.points) return;
+
+                // Collecter tous les joueurs qui ont des stats dans ce set
+                ['home', 'away'].forEach(teamKey => {
+                    if (!set.stats[teamKey]) return;
+
+                    // Réinitialiser les stats passe de chaque joueur
+                    for (const playerName in set.stats[teamKey]) {
+                        const oldPass = set.stats[teamKey][playerName].pass;
+                        set.stats[teamKey][playerName].pass = freshPassStats();
+                    }
+                });
+
+                // Recalculer depuis les rallies
+                set.points.forEach((point, ptIdx) => {
+                    if (!point.rally) return;
+                    const rally = point.rally;
+
+                    rally.forEach((action, i) => {
+                        if (action.type !== 'pass') return;
+                        const team = action.team;
+                        const player = action.player;
+                        if (!team || !player) return;
+
+                        const teamKey = team;
+                        if (!set.stats[teamKey] || !set.stats[teamKey][player]) {
+                            // Joueur pas dans les stats (fantôme) — créer
+                            if (!set.stats[teamKey]) set.stats[teamKey] = {};
+                            if (!set.stats[teamKey][player]) {
+                                set.stats[teamKey][player] = { pass: freshPassStats() };
+                            } else if (!set.stats[teamKey][player].pass) {
+                                set.stats[teamKey][player].pass = freshPassStats();
+                            }
+                        }
+                        const stats = set.stats[teamKey][player];
+
+                        const passerRole = action.role || 'transition';
+                        // getPassContext(rally, passActionIndex, passerRole) — cherche en arrière depuis passActionIndex
+                        const passCtxObj = getPassContext(rally, i, passerRole);
+                        const pType = passCtxObj.playerType === 'Passeur' ? 'passeur' : 'autre';
+                        const pCtx = passCtxObj.context;
+
+                        // Retour direct
+                        if (action.isDirectReturn) {
+                            if (!action.isDirectReturnWinner) {
+                                const exploited = isDirectReturnExploited(rally, i, team);
+                                if (exploited) {
+                                    _incPass(stats.pass, 'fp');
+                                    _incPass(stats.pass[pType], 'fp');
+                                    if (stats.pass[pType][pCtx]) _incPass(stats.pass[pType][pCtx], 'fp');
+                                }
+                            }
+                            return;
+                        }
+
+                        // Passe out ou filet → FP
+                        if (!action.endPos || action.endPos.courtSide === 'out' || action.endPos.courtSide === 'net') {
+                            _incPass(stats.pass, 'fp');
+                            _incPass(stats.pass[pType], 'fp');
+                            if (stats.pass[pType][pCtx]) _incPass(stats.pass[pType][pCtx], 'fp');
+                            return;
+                        }
+
+                        // Évaluer la qualité
+                        const passZone = getPassZone(action.endPos, team, cameraSide);
+                        const passEval = evaluatePassQualityOffline(action.endPos, passZone, pCtx, team, cameraSide, passGrids);
+                        const scoreKey = passEval.score === 4 ? 'p4' : passEval.score === 3 ? 'p3' : passEval.score === 2 ? 'p2' : 'p1';
+
+                        _incPass(stats.pass, scoreKey);
+                        _incPass(stats.pass[pType], scoreKey);
+                        if (stats.pass[pType][pCtx]) _incPass(stats.pass[pType][pCtx], scoreKey);
+                    });
+                });
+
+                // Log résultat pour ce set
+                log(`Set ${setIdx + 1} — Stats passe recalculées :`, 'log-success');
+                ['home', 'away'].forEach(teamKey => {
+                    if (!set.stats[teamKey]) return;
+                    for (const [name, data] of Object.entries(set.stats[teamKey])) {
+                        const p = data.pass;
+                        if (!p || !p.tot && !p.fp) continue;
+                        log(`  ${teamKey === 'home' ? '🏠' : '🔴'} ${name}: Tot=${p.tot} P4=${p.p4} P3=${p.p3} P2=${p.p2} P1=${p.p1} FP=${p.fp}`);
+                    }
+                });
+            });
+
+            // Sauvegarder
+            log('\n💾 Sauvegarde en Firebase...', 'log-info');
+            try {
+                await db.collection('matches').doc(matchData.id).set({
+                    ...matchData,
+                    syncedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    syncedBy: auth.currentUser.uid
+                });
+                log('✅ Stats passe recalculées et sauvegardées !', 'log-success');
+
+                // Aussi localStorage
+                try {
+                    const localMatches = JSON.parse(localStorage.getItem('volleyball_matches') || '[]');
+                    const localIdx = localMatches.findIndex(m => m.id === matchData.id);
+                    if (localIdx >= 0) {
+                        localMatches[localIdx] = matchData;
+                        localStorage.setItem('volleyball_matches', JSON.stringify(localMatches));
+                        log('✅ localStorage mis à jour', 'log-success');
+                    }
+                } catch (e) {
+                    log('⚠️ localStorage non mis à jour', 'log-warn');
+                }
+
+                log('\n📝 Rafraîchis l\'historique pour voir les stats corrigées.', 'log-info');
+            } catch (e) {
+                log('❌ Erreur sauvegarde : ' + e.message, 'log-error');
+            }
+        };
+
+        // ===================== LOAD GRIDS FROM PASTE =====================
+        document.getElementById('btn-load-grids').onclick = () => {
+            const raw = document.getElementById('grids-input').value.trim();
+            if (!raw) { log('⚠️ Champ vide — colle le JSON des grilles', 'log-warn'); return; }
+            try {
+                const parsed = JSON.parse(raw);
+                if (!parsed.R4 || !parsed.Centre || !parsed.Pointu) {
+                    log('❌ Format invalide — doit contenir R4, Centre, Pointu', 'log-error');
+                    return;
+                }
+                passGrids = parsed;
+                log('✅ Grilles calibrées chargées depuis le champ texte !', 'log-success');
+                // Vérifier qu'il y a de la variété (pas tout P2)
+                const hasVariety = Object.values(parsed).some(zone =>
+                    zone && Object.values(zone).some(ctx =>
+                        ctx && ctx.some(row => row && row.some(v => v !== 2))
+                    )
+                );
+                if (hasVariety) {
+                    log('   Grilles calibrées détectées (valeurs variées P1-P4)', 'log-success');
+                } else {
+                    log('   ⚠️ Grilles par défaut (tout P2) — pas calibrées ?', 'log-warn');
+                }
+                document.getElementById('grids-section').style.display = 'none';
+                log('\n👆 Reclique sur "Recalculer stats passe" maintenant.', 'log-info');
+            } catch (e) {
+                log('❌ JSON invalide : ' + e.message, 'log-error');
+            }
+        };
+
+        // Enable audit button when auth is ready (read is public anyway)
+        auth.onAuthStateChanged(user => {
+            document.getElementById('btn-audit').disabled = false;
+            if (user) document.getElementById('btn-recalc').disabled = false;
+        });
+        // Also enable immediately since reads are public
+        document.getElementById('btn-audit').disabled = false;
+    </script>
+</body>
+</html>

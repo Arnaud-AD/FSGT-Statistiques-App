@@ -487,6 +487,7 @@
         </footer>
     </div>
 
+    <script src="match-live-helpers.js"></script>
     <script src="firebase-config.js"></script>
     <script src="firebase-sync.js"></script>
 
@@ -536,6 +537,8 @@
          * Les grilles par defaut sont remplies de 1 (P1) — on ne veut pas ecraser Firebase avec ca.
          */
         function hasCalibrationData(gridsObj) {
+            // Seuil : au moins une cellule P3 ou P4 (v > 2) = vraie calibration
+            // Les valeurs 1 (P1) et 2 (P2) sont des defaults, pas de la calibration
             for (const zone of ZONES) {
                 if (!gridsObj[zone]) continue;
                 for (const ctx of CONTEXTS) {
@@ -543,7 +546,7 @@
                     if (!grid) continue;
                     for (let r = 0; r < grid.length; r++) {
                         for (let c = 0; c < grid[r].length; c++) {
-                            if (grid[r][c] !== 1) return true;
+                            if (grid[r][c] > 2) return true;
                         }
                     }
                 }
@@ -584,6 +587,12 @@
                 } catch (e) {
                     grids = createDefaultGrids();
                 }
+            } else if (typeof PASS_GRIDS !== 'undefined' && hasCalibrationData(PASS_GRIDS)) {
+                // Fallback : grilles calibrees hardcodees dans match-live-helpers.js
+                grids = JSON.parse(JSON.stringify(PASS_GRIDS)); // deep copy
+                // Sauvegarder dans localStorage pour les prochaines sessions
+                localStorage.setItem(PASS_GRIDS_KEY, JSON.stringify(grids));
+                console.log('[pass-grids] Grilles restaurees depuis match-live-helpers.js (hardcoded)');
             } else {
                 grids = createDefaultGrids();
             }
