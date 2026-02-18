@@ -1592,7 +1592,7 @@ WorkflowEngine.registerPhase('pass', {
             WorkflowEngine.transition('pass_end', { passer: playerName });
         }
         if (action === 'secondTouch') {
-            const type = args[0]; // 'deuxieme_main' or 'attaque_directe'
+            const type = args[0]; // 'deuxieme_main', 'attaque_directe', or 'relance'
             const player = getEffectivePlayer();
             if (!player) return;
 
@@ -1609,7 +1609,42 @@ WorkflowEngine.registerPhase('pass', {
                 role: role
             };
 
+            // V19.3 : si la dernière action du rally est une défense, la transformer en passe
+            // (le défenseur a fait office de passeur en envoyant directement)
+            const lastRallyAction = gameState.rally[gameState.rally.length - 1];
+            if (lastRallyAction && lastRallyAction.type === 'defense') {
+                lastRallyAction.type = 'pass';
+                delete lastRallyAction.defenseQuality;
+                delete lastRallyAction.isDirectReturn;
+                delete lastRallyAction.isDirectReturnWinner;
+                delete lastRallyAction.directReturnEndPos;
+            }
+
             WorkflowEngine.transition('attack_end', { fromSecondTouch: true });
+        }
+        // V19.3 : Faute de passe rapide (sans position terrain)
+        if (action === 'passFault') {
+            const player = getEffectivePlayer();
+            if (!player) return;
+
+            WorkflowEngine.pushState('pass_fault');
+
+            const team = gameState.attackingTeam;
+            const role = getPlayerRole(team, player);
+
+            gameState.currentAction = {
+                type: 'pass',
+                player: player,
+                team: team,
+                role: role,
+                endPos: null
+            };
+            gameState.currentAction.startPos = _getStartPosFromLastAction();
+            gameState.rally.push({ ...gameState.currentAction });
+
+            const oppositeTeam = team === 'home' ? 'away' : 'home';
+            WorkflowEngine.awardPoint(oppositeTeam);
+            WorkflowEngine.endRally();
         }
         if (action === 'attackZoneClick') {
             // Clic zone d'attaque en phase pass = auto-passe + auto-attaquant
