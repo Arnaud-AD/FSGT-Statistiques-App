@@ -76,6 +76,42 @@
 
         <!-- Main Content -->
         <main class="main-content">
+            <!-- Overlay pré-match : caméra + service (affiché avant le 1er point) -->
+            <div class="pre-match-overlay" id="preMatchOverlay">
+                <div class="pre-match-card">
+                    <div class="pre-match-section">
+                        <div class="pre-match-label">
+                            <svg fill="currentColor" viewBox="0 0 24 24" width="18" height="18">
+                                <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                            </svg>
+                            Équipe côté caméra (terrain du bas)
+                        </div>
+                        <div class="pre-match-toggle" id="preMatchCameraToggle">
+                            <button class="pre-match-option selected" data-value="home" onclick="preMatchSelect('camera', 'home')">Jen et ses Saints</button>
+                            <button class="pre-match-option" data-value="away" onclick="preMatchSelect('camera', 'away')" id="preMatchCameraAway">Adversaire</button>
+                        </div>
+                    </div>
+                    <div class="pre-match-section">
+                        <div class="pre-match-label">
+                            <svg fill="currentColor" viewBox="0 0 24 24" width="18" height="18">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                            Qui sert ?
+                        </div>
+                        <div class="pre-match-toggle" id="preMatchServingToggle">
+                            <button class="pre-match-option" data-value="home" onclick="preMatchSelect('serving', 'home')">Jen et ses Saints</button>
+                            <button class="pre-match-option selected" data-value="away" onclick="preMatchSelect('serving', 'away')" id="preMatchServingAway">Adversaire</button>
+                        </div>
+                    </div>
+                    <button class="pre-match-start-btn" onclick="confirmPreMatch()">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                        Démarrer le Set
+                    </button>
+                </div>
+            </div>
+
             <!-- Phase Indicator -->
             <div class="phase-indicator" id="phaseIndicator">
                 <span class="highlight">Service</span> — Sélectionnez le serveur
@@ -1426,10 +1462,6 @@
                 return;
             }
 
-            // Configuration
-            cameraSide = currentSet.cameraSide || 'home';
-            gameState.servingTeam = currentSet.servingTeam || 'away';
-
             // Defaults bloqueur (backward compat)
             if (!currentSet.homeBlockerRight) currentSet.homeBlockerRight = 'Pointu';
             if (!currentSet.awayBlockerRight) currentSet.awayBlockerRight = 'Pointu';
@@ -1451,13 +1483,39 @@
                 currentSet.initialAwayScore = gameState.awayScore;
             }
 
-            // Mettre à jour l'affichage
+            // Set frais (aucun point), filmé, ET pas encore confirmé → afficher overlay pré-match
+            const isFilmedSet = currentSet.isFilmed !== false; // par défaut filmé
+            const isFreshSet = isFilmedSet && (!currentSet.points || currentSet.points.length === 0) && !currentSet.preMatchConfirmed;
+            if (isFreshSet) {
+                showPreMatchOverlay();
+                // On ne démarre PAS le workflow — on attend confirmPreMatch()
+            } else {
+                // Configuration déjà définie (reprise ou confirmée)
+                cameraSide = currentSet.cameraSide || 'home';
+                gameState.servingTeam = currentSet.servingTeam || 'away';
+                startMatch();
+            }
+
+            // Mettre à jour l'affichage de base (score header, labels)
             updateLabels();
             updateScore();
+
+            // Mettre à jour les titres des tableaux de stats
+            const opponent = currentMatch.opponent || 'Adversaire';
+            document.getElementById('homeTeamStatsTitle').textContent = 'Jen et ses Saints';
+            document.getElementById('awayTeamStatsTitle').textContent = opponent;
+
+            // Initialiser le lecteur YouTube si URL disponible
+            loadYouTubeForCurrentSet();
+            updateYoutubeButtonState();
+        }
+
+        // Démarrer le match (après confirmation pré-match ou en reprise)
+        function startMatch() {
             updatePhase();
             // V18.0 : WorkflowEngine remplace renderServerSelection() + setupCourtListeners()
             WorkflowEngine.start();
-            
+
             // Initialiser les statistiques du set
             initSetStats();
 
@@ -1466,7 +1524,6 @@
                 const lastPt = currentSet.points[currentSet.points.length - 1];
                 gameState.homeScore = lastPt.homeScore;
                 gameState.awayScore = lastPt.awayScore;
-                // Déterminer qui sert au prochain point
                 const prevHome = currentSet.points.length >= 2
                     ? currentSet.points[currentSet.points.length - 2].homeScore
                     : (currentSet.initialHomeScore || 0);
@@ -1479,16 +1536,70 @@
                 updateScore();
                 recalculateAllStats();
             }
-            
-            // Mettre à jour les titres des tableaux de stats
-            const opponent = currentMatch.opponent || 'Adversaire';
-            document.getElementById('homeTeamStatsTitle').textContent = 'Jen et ses Saints';
-            document.getElementById('awayTeamStatsTitle').textContent = opponent;
-
-            // Initialiser le lecteur YouTube si URL disponible
-            loadYouTubeForCurrentSet();
-            updateYoutubeButtonState();
         }
+
+        // ==================== PRE-MATCH OVERLAY ====================
+        function showPreMatchOverlay() {
+            const overlay = document.getElementById('preMatchOverlay');
+            const opponent = currentMatch.opponent || 'Adversaire';
+
+            // Labels adversaire
+            document.getElementById('preMatchCameraAway').textContent = opponent;
+            document.getElementById('preMatchServingAway').textContent = opponent;
+
+            // Pré-sélection : valeurs du set (auto-flip entre sets) ou défauts
+            const defaultCamera = currentSet.cameraSide || 'home';
+            const defaultServing = currentSet.servingTeam || 'away';
+            preMatchSelect('camera', defaultCamera);
+            preMatchSelect('serving', defaultServing);
+
+            overlay.classList.add('active');
+
+            // Masquer les éléments du workflow (phase indicator, tags)
+            document.getElementById('phaseIndicator').style.display = 'none';
+            document.getElementById('tagsContainer').style.display = 'none';
+        }
+
+        function preMatchSelect(type, value) {
+            const toggleId = type === 'camera' ? 'preMatchCameraToggle' : 'preMatchServingToggle';
+            const toggle = document.getElementById(toggleId);
+            toggle.querySelectorAll('.pre-match-option').forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.value === value);
+            });
+        }
+
+        function confirmPreMatch() {
+            const cameraToggle = document.getElementById('preMatchCameraToggle');
+            const servingToggle = document.getElementById('preMatchServingToggle');
+
+            const selectedCamera = cameraToggle.querySelector('.pre-match-option.selected')?.dataset.value || 'home';
+            const selectedServing = servingToggle.querySelector('.pre-match-option.selected')?.dataset.value || 'away';
+
+            // Appliquer au set et au gameState
+            currentSet.cameraSide = selectedCamera;
+            currentSet.servingTeam = selectedServing;
+            currentSet.preMatchConfirmed = true;
+            cameraSide = selectedCamera;
+            gameState.servingTeam = selectedServing;
+
+            // Sauvegarder
+            Storage.saveCurrentMatch(currentMatch);
+
+            // Masquer l'overlay, réafficher le workflow
+            document.getElementById('preMatchOverlay').classList.remove('active');
+            document.getElementById('phaseIndicator').style.display = '';
+            document.getElementById('tagsContainer').style.display = '';
+
+            // Mettre à jour les labels du terrain (caméra détermine qui est en haut/bas)
+            updateLabels();
+            updateScore();
+
+            // Démarrer le workflow
+            startMatch();
+        }
+
+        // ==================== INITIALISATION (suite) ====================
+        // (vide — la logique de reprise est dans startMatch via le bloc existant dans init)
 
         // ==================== AFFICHAGE ====================
         function updateLabels() {
@@ -2842,7 +2953,7 @@
         }
 
         // ==================== DEBUG : GRILLE QUALITE PASSE (V19.1d) ====================
-        // Affiche l'overlay colore sur le terrain pendant la phase passe (DevTestMode uniquement)
+        // Affiche l'overlay colore sur le terrain (touche G)
         let passGridDebugActive = false;
 
         function togglePassQualityGrid() {
@@ -2854,7 +2965,6 @@
         }
 
         function showPassQualityGrid(team) {
-            if (typeof DevTestMode === 'undefined' || !DevTestMode.ENABLED) return;
             if (!team) return;
 
             const courtSide = getCourtSideForTeam(team);

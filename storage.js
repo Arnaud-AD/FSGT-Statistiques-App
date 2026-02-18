@@ -398,7 +398,7 @@ Storage.init();
 // =======================================================================
 const DevTestMode = {
     // Mettre à true pour activer l'auto-remplissage sur chaque page
-    ENABLED: true,
+    ENABLED: false,
 
     // Joueurs de test pour Jen et ses Saints
     HOME_PLAYERS: [

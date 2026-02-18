@@ -618,46 +618,6 @@
 
         <!-- Options si filmé -->
         <div class="config-options" id="configOptions">
-            <!-- Équipe côté caméra -->
-            <div class="option-card">
-                <div class="option-label">
-                    <svg fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
-                    </svg>
-                    Équipe côté caméra (terrain du bas)
-                </div>
-                <div class="radio-group">
-                    <div class="radio-option">
-                        <input type="radio" name="cameraSide" id="cameraHome" value="home" checked>
-                        <label for="cameraHome">Jen et ses Saints</label>
-                    </div>
-                    <div class="radio-option">
-                        <input type="radio" name="cameraSide" id="cameraAway" value="away">
-                        <label for="cameraAway" id="cameraAwayLabel">Adversaire</label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Équipe au service -->
-            <div class="option-card">
-                <div class="option-label">
-                    <svg fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                    </svg>
-                    Équipe au service
-                </div>
-                <div class="radio-group">
-                    <div class="radio-option">
-                        <input type="radio" name="serving" id="servingHome" value="home" checked>
-                        <label for="servingHome">Jen et ses Saints</label>
-                    </div>
-                    <div class="radio-option">
-                        <input type="radio" name="serving" id="servingAway" value="away">
-                        <label for="servingAway" id="servingAwayLabel">Adversaire</label>
-                    </div>
-                </div>
-            </div>
-
             <!-- Lien vidéo YouTube -->
             <div class="option-card">
                 <div class="option-label">
@@ -759,8 +719,6 @@
             // Mettre à jour les labels avec le nom de l'adversaire
             document.getElementById('matchInfo').textContent = `vs ${currentMatch.opponent}`;
             document.getElementById('setBadge').textContent = `SET ${currentSetNumber}`;
-            document.getElementById('cameraAwayLabel').textContent = currentMatch.opponent;
-            document.getElementById('servingAwayLabel').textContent = currentMatch.opponent;
             document.getElementById('mixiteAwayTeam').textContent = currentMatch.opponent;
             document.getElementById('finalScoreAwayLabel').textContent = currentMatch.opponent;
 
@@ -768,16 +726,6 @@
             const setIndex = currentSetNumber - 1;
             const currentSet = currentMatch.sets?.[setIndex];
             if (currentSet) {
-                // Caméra côté
-                if (currentSet.cameraSide) {
-                    const cameraRadio = document.getElementById(currentSet.cameraSide === 'home' ? 'cameraHome' : 'cameraAway');
-                    if (cameraRadio) cameraRadio.checked = true;
-                }
-                // Équipe au service
-                if (currentSet.servingTeam) {
-                    const servingRadio = document.getElementById(currentSet.servingTeam === 'home' ? 'servingHome' : 'servingAway');
-                    if (servingRadio) servingRadio.checked = true;
-                }
                 // URL YouTube
                 if (currentSet.youtubeUrl) {
                     document.getElementById('youtubeUrl').value = currentSet.youtubeUrl;
@@ -829,8 +777,6 @@
         // Valider la configuration
         function validateConfig() {
             const isFilmed = document.getElementById('filmedToggle').checked;
-            const cameraSide = document.querySelector('input[name="cameraSide"]:checked').value;
-            const servingTeam = document.querySelector('input[name="serving"]:checked').value;
             const mixiteHome = parseInt(document.getElementById('mixiteHome').value) || 0;
             const mixiteAway = parseInt(document.getElementById('mixiteAway').value) || 0;
             const absenceReason = document.getElementById('absenceReason').value;
@@ -841,12 +787,11 @@
             const setIndex = currentSetNumber - 1;
             if (currentMatch.sets && currentMatch.sets[setIndex]) {
                 currentMatch.sets[setIndex].isFilmed = isFilmed;
-                
+
                 if (isFilmed) {
                     const youtubeUrl = document.getElementById('youtubeUrl').value.trim();
                     currentMatch.sets[setIndex].youtubeUrl = youtubeUrl || '';
-                    currentMatch.sets[setIndex].cameraSide = cameraSide;
-                    currentMatch.sets[setIndex].servingTeam = servingTeam;
+                    // cameraSide et servingTeam sont maintenant définis dans match-live (overlay pré-match)
                     currentMatch.sets[setIndex].homeScore = mixiteHome;
                     currentMatch.sets[setIndex].awayScore = mixiteAway;
                     currentMatch.sets[setIndex].mixiteHome = mixiteHome;
@@ -888,22 +833,6 @@
         // Init
         init();
 
-        // [DEV TEST] Auto-configuration du set (caméra, service, YouTube) — À RETIRER
-        if (typeof DevTestMode !== 'undefined') {
-            const setConfig = DevTestMode.getSetConfig();
-            if (setConfig) {
-                // Caméra côté adverse (away)
-                const cameraRadio = document.getElementById(setConfig.cameraSide === 'home' ? 'cameraHome' : 'cameraAway');
-                if (cameraRadio) cameraRadio.checked = true;
-                // Équipe au service
-                const servingRadio = document.getElementById(setConfig.servingTeam === 'home' ? 'servingHome' : 'servingAway');
-                if (servingRadio) servingRadio.checked = true;
-                // URL YouTube
-                if (setConfig.youtubeUrl) {
-                    document.getElementById('youtubeUrl').value = setConfig.youtubeUrl;
-                }
-            }
-        }
     </script>
 </body>
 </html>

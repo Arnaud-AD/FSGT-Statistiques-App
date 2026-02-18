@@ -954,8 +954,9 @@ const BilanView = {
 
     // Mapping position → role (duplique match-live-helpers.js, pas d'import en vanilla)
     POSITION_ROLES_HOME: { 1: 'Passeur', 2: 'R4', 3: 'Centre', 4: 'Pointu' },
+    POSITION_ROLES_AWAY: { 4: 'Passeur', 1: 'R4', 2: 'Centre', 3: 'Pointu' },
 
-    ROLE_ORDER: ['Passeur', 'R4', 'Centre', 'Pointu'],
+    ROLE_ORDER: ['Passeur', 'R4', 'Pointu', 'Centre'],
 
     ROLE_COLORS: {
         'Passeur': '#8b5cf6',
@@ -964,12 +965,22 @@ const BilanView = {
         'Pointu': '#22c55e'
     },
 
+    // Couleurs adverses : meme famille, teinte decalee (contraste fort)
+    // Rollback : remplacer par _lightenColor(roleColor, 0.35) dans renderSpiderChart
+    // V precedente : Passeur #a78bfa, R4 #60a5fa, Centre #f87171, Pointu #4ade80
+    ROLE_COLORS_AWAY: {
+        'Passeur': '#9A5CF6',   // violet decale
+        'R4': '#3B41F6',        // bleu-indigo
+        'Centre': '#F23333',    // rouge vif
+        'Pointu': '#22C532'     // vert decale
+    },
+
     // Ponderations IP par poste
     IP_WEIGHTS: {
         'Passeur': { attaque: 0.05, bloc: 0.00, reception: 0.05, defense: 0.25, passe: 0.40, service: 0.25 },
         'Centre':  { attaque: 0.00, relance: 0.20, reception: 0.30, defense: 0.20, passe: 0.05, service: 0.25 },
-        'R4':      { attaque: 0.30, bloc: 0.20, reception: 0.20, defense: 0.10, passe: 0.05, service: 0.15 },
-        'Pointu':  { attaque: 0.30, bloc: 0.20, reception: 0.20, defense: 0.10, passe: 0.05, service: 0.15 }
+        'R4':      { attaque: 0.30, bloc: 0.20, reception: 0.20, defense: 0.10, relance: 0.05, service: 0.15 },
+        'Pointu':  { attaque: 0.30, bloc: 0.20, reception: 0.20, defense: 0.10, relance: 0.05, service: 0.15 }
     },
 
     // 6 axes du spider chart (sens horaire depuis le haut)
@@ -980,10 +991,35 @@ const BilanView = {
     // Defense (150°)     Passe (30°)
     //        \              /
     //         Service (90°)
+    // Axes ailiers : Relance remplace Passe (plus pertinent pour R4/Pointu)
+    //         Attaque (-90°)
+    //        /              \
+    // Reception (210°)    Bloc (-30°)
+    //       |                |
+    // Defense (150°)     Relance (30°)
+    //        \              /
+    //         Service (90°)
     SPIDER_AXES: [
         { key: 'attaque',   label: 'Att',  angle: -90 },
         { key: 'bloc',      label: 'Blc',  angle: -30 },
-        { key: 'passe',     label: 'Pas',  angle: 30 },
+        { key: 'relance',   label: 'Rel',  angle: 30 },
+        { key: 'service',   label: 'Srv',  angle: 90 },
+        { key: 'defense',   label: 'Def',  angle: 150 },
+        { key: 'reception', label: 'Rec',  angle: 210 }
+    ],
+
+    // Axes specifiques Passeur : Passe en haut, Attaque en bas-droite (interversion)
+    //         Passe (-90°)
+    //        /              \
+    // Reception (210°)    Bloc (-30°)
+    //       |                |
+    // Defense (150°)     Attaque (30°)
+    //        \              /
+    //         Service (90°)
+    SPIDER_AXES_PASSEUR: [
+        { key: 'passe',     label: 'Pas',  angle: -90 },
+        { key: 'bloc',      label: 'Blc',  angle: -30 },
+        { key: 'attaque',   label: 'Att',  angle: 30 },
         { key: 'service',   label: 'Srv',  angle: 90 },
         { key: 'defense',   label: 'Def',  angle: 150 },
         { key: 'reception', label: 'Rec',  angle: 210 }
@@ -1012,44 +1048,118 @@ const BilanView = {
             return;
         }
 
-        var playerRoles = this.getPlayerRoles(match);
+        var homeRoles = this.getPlayerRoles(match, 'home');
+        var awayRoles = this.getPlayerRoles(match, 'away');
         var homeTotals = StatsAggregator.aggregateStats(completedSets, 'home');
+        var awayTotals = StatsAggregator.aggregateStats(completedSets, 'away');
 
-        // Filtrer les joueurs avec au moins une stat (exclure les fantomes DevTestMode)
+        // Filtrer les joueurs avec au moins une stat
         var self = this;
-        var players = Object.keys(homeTotals)
-            .filter(function(name) {
-                if (!playerRoles[name]) return false;
-                // Verifier qu'il y a au moins une action
-                var p = homeTotals[name];
-                return ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'].some(function(cat) {
-                    return p[cat] && p[cat].tot > 0;
-                });
-            })
-            .sort(function(a, b) {
-                var roleA = self.ROLE_ORDER.indexOf(playerRoles[a].primaryRole);
-                var roleB = self.ROLE_ORDER.indexOf(playerRoles[b].primaryRole);
-                return roleA - roleB;
-            });
+        var statCategories = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'];
 
+        function filterPlayers(totals, roles) {
+            return Object.keys(totals)
+                .filter(function(name) {
+                    if (!roles[name]) return false;
+                    var p = totals[name];
+                    return statCategories.some(function(cat) {
+                        return p[cat] && p[cat].tot > 0;
+                    });
+                });
+        }
+
+        var homePlayers = filterPlayers(homeTotals, homeRoles);
+        var awayPlayers = filterPlayers(awayTotals, awayRoles);
+
+        // Grouper par role
+        function groupByRole(players, roles) {
+            var groups = {};
+            players.forEach(function(name) {
+                var role = roles[name].primaryRole;
+                if (!groups[role]) groups[role] = [];
+                groups[role].push(name);
+            });
+            return groups;
+        }
+
+        var homeByRole = groupByRole(homePlayers, homeRoles);
+        var awayByRole = groupByRole(awayPlayers, awayRoles);
+
+        // --- Head to head : Jen (gauche) vs Adverse (droite) ---
         var html = '<div class="bilan-section">';
-        html += '<div class="bilan-section-title">Profils joueurs</div>';
+        html += '<div class="bilan-h2h-header">';
+        html += '<span class="bilan-h2h-team">Jen et ses Saints</span>';
+        html += '<span class="bilan-h2h-vs">vs</span>';
+        html += '<span class="bilan-h2h-team">' + Utils.escapeHtml(match.opponent || 'Adverse') + '</span>';
+        html += '<button class="bilan-compare-toggle" onclick="BilanView.toggleCompare(this)" title="Superposer l\'adversaire">';
+        html += '<span class="bilan-compare-icon">👁</span> Comparer</button>';
+        html += '</div>';
+
         html += '<div class="bilan-grid">';
 
-        players.forEach(function(name) {
-            var role = playerRoles[name].primaryRole;
+        self.ROLE_ORDER.forEach(function(role) {
+            var homeGroup = homeByRole[role] || [];
+            var awayGroup = awayByRole[role] || [];
+            if (homeGroup.length === 0 && awayGroup.length === 0) return;
+
             var color = self.ROLE_COLORS[role] || '#5f6368';
-            var axisScores = self.computeAxisScores(homeTotals[name]);
-            var ip = self.computeIP(axisScores, role);
-            var chartAxes = (role === 'Centre') ? self.SPIDER_AXES_CENTRE : self.SPIDER_AXES;
-            html += self.renderSpiderChart(name, role, axisScores, ip, color, chartAxes);
+
+            // Pre-calculer scores + IP + axes pour chaque joueur
+            function computePlayerData(names, totals, side) {
+                return names.map(function(name) {
+                    var stats = totals[name];
+                    var effectiveRole = role;
+                    var axes = (role === 'Centre') ? self.SPIDER_AXES_CENTRE
+                             : (role === 'Passeur') ? self.SPIDER_AXES_PASSEUR
+                             : self.SPIDER_AXES;
+                    // Detection centre offensif (away uniquement)
+                    if (side === 'away' && role === 'Centre') {
+                        var hasAttack = stats.attack && stats.attack.tot >= 2;
+                        var hasBlock = stats.block && stats.block.tot >= 1;
+                        if (hasAttack || hasBlock) {
+                            axes = self.SPIDER_AXES;
+                            effectiveRole = 'R4';
+                        }
+                    }
+                    var scores = self.computeAxisScores(stats);
+                    var ip = self.computeIP(scores, effectiveRole);
+                    return { name: name, scores: scores, ip: ip, axes: axes, effectiveRole: effectiveRole };
+                }).sort(function(a, b) { return b.ip - a.ip; }); // Tri par IP decroissant
+            }
+
+            var homeData = computePlayerData(homeGroup, homeTotals, 'home');
+            var awayData = computePlayerData(awayGroup, awayTotals, 'away');
+
+            // Overlay = toujours le meilleur du cote oppose
+            var bestAwayOverlay = awayData.length > 0 ? { scores: awayData[0].scores, role: awayData[0].effectiveRole } : null;
+            var bestHomeOverlay = homeData.length > 0 ? { scores: homeData[0].scores, role: homeData[0].effectiveRole } : null;
+
+            var maxLen = Math.max(homeData.length, awayData.length);
+
+            for (var i = 0; i < maxLen; i++) {
+                // Joueur Jen (gauche) + overlay meilleur adverse
+                if (homeData[i]) {
+                    var h = homeData[i];
+                    html += self.renderSpiderChart(h.name, role, h.scores, h.ip, color, h.axes, false, bestAwayOverlay);
+                } else {
+                    html += '<div class="bilan-player-card bilan-player-empty"></div>';
+                }
+
+                // Joueur Adverse (droite) + overlay meilleur home
+                if (awayData[i]) {
+                    var a = awayData[i];
+                    html += self.renderSpiderChart(a.name, a.effectiveRole, a.scores, a.ip, color, a.axes, true, bestHomeOverlay);
+                } else {
+                    html += '<div class="bilan-player-card bilan-player-empty"></div>';
+                }
+            }
         });
 
         html += '</div>'; // ferme bilan-grid
-        html += '</div>'; // ferme bilan-section profils
+        html += '</div>'; // ferme bilan-section
 
-        // Section Distinctions
-        html += this.renderDistinctions(homeTotals, playerRoles, players);
+        // Section Distinctions (home uniquement)
+        html += this.renderDistinctions(homeTotals, homeRoles, homePlayers);
 
         container.innerHTML = html;
     },
@@ -1304,17 +1414,21 @@ const BilanView = {
     },
 
     // --- Determiner le role primaire de chaque joueur depuis les lineups ---
-    getPlayerRoles(match) {
+    getPlayerRoles(match, team) {
         var roleCounts = {};
         var self = this;
+        var side = team || 'home';
+        var lineupKey = (side === 'away') ? 'awayLineup' : 'homeLineup';
+        var positionRoles = (side === 'away') ? self.POSITION_ROLES_AWAY : self.POSITION_ROLES_HOME;
         var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
 
         completedSets.forEach(function(set) {
-            if (!set.homeLineup) return;
-            Object.keys(set.homeLineup).forEach(function(pos) {
-                var playerName = set.homeLineup[pos];
+            var lineup = set[lineupKey];
+            if (!lineup) return;
+            Object.keys(lineup).forEach(function(pos) {
+                var playerName = lineup[pos];
                 if (!playerName) return;
-                var role = self.POSITION_ROLES_HOME[pos];
+                var role = positionRoles[pos];
                 if (!role) return;
                 if (!roleCounts[playerName]) roleCounts[playerName] = {};
                 roleCounts[playerName][role] = (roleCounts[playerName][role] || 0) + 1;
@@ -1442,10 +1556,14 @@ const BilanView = {
     },
 
     // --- Rendu SVG d'un spider chart pour un joueur ---
-    renderSpiderChart(playerName, role, axisScores, ip, roleColor, chartAxes) {
-        var cx = 75, cy = 78, maxR = 58;
+    // overlayData: { scores, role } — polygone adverse en overlay (toggle comparer)
+    renderSpiderChart(playerName, role, axisScores, ip, roleColor, chartAxes, isAway, overlayData) {
+        var cx = 75, cy = 78, maxR = 67;
         var self = this;
         var axes = chartAxes || self.SPIDER_AXES;
+
+        // Meme couleur home/away (couleurs originales ROLE_COLORS)
+        var chartColor = roleColor;
 
         var html = '<div class="bilan-player-card">';
 
@@ -1482,21 +1600,30 @@ const BilanView = {
         var dotPoints = [];
 
         if (role === 'Centre') {
-            var nonStructural = axes.filter(function(a) { return a.key !== 'attaque'; });
-            var activeCount = nonStructural.filter(function(a) { return (axisScores[a.key] || 0) > 0; }).length;
-            var skipZeros = activeCount >= 4;
+            // Centre : attaque = zero structurel (TOUJOURS au centre, jamais skip)
+            // Autres axes : meme logique que les autres postes (skip si 4 actifs sur 5 non-structurels)
+            var nonStructuralActive = axes.filter(function(a) {
+                return a.key !== 'attaque' && (axisScores[a.key] || 0) > 0;
+            }).length;
+            var skipNonStructuralZeros = nonStructuralActive === 4; // 4 sur 5 = losange
 
             axes.forEach(function(axis) {
                 var val = axisScores[axis.key] || 0;
+                // Forcer attaque a 0 pour Centre (zero structurel)
+                if (axis.key === 'attaque') val = 0;
                 if (val > 0) {
                     var r = maxR * val / 100;
                     var pt = self.polarToCartesian(cx, cy, r, axis.angle);
                     polyPoints.push(pt);
                     dotPoints.push(pt);
-                } else if (axis.key === 'attaque' || !skipZeros) {
-                    // Attaque toujours au centre, autres zeros au centre si pas skip
+                } else if (axis.key === 'attaque') {
+                    // Att structurel : TOUJOURS tracer au centre (jamais skip)
+                    polyPoints.push({ x: cx, y: cy });
+                } else if (!skipNonStructuralZeros) {
+                    // Autre axe a 0, pas assez d'actifs : tracer au centre
                     polyPoints.push({ x: cx, y: cy });
                 }
+                // sinon : skip (losange)
             });
         } else {
             var activeCount = axes.filter(function(a) { return (axisScores[a.key] || 0) > 0; }).length;
@@ -1518,17 +1645,61 @@ const BilanView = {
 
         if (polyPoints.length >= 2) {
             var dataPolygon = polyPoints.map(function(pt) { return pt.x.toFixed(1) + ',' + pt.y.toFixed(1); }).join(' ');
-            html += '<polygon points="' + dataPolygon + '" fill="' + roleColor + '" fill-opacity="0.2" stroke="' + roleColor + '" stroke-width="2"/>';
+            html += '<polygon points="' + dataPolygon + '" fill="' + chartColor + '" fill-opacity="0.2" stroke="' + chartColor + '" stroke-width="1.5"/>';
         }
 
         // Points (cercles) uniquement sur les axes avec valeur
         dotPoints.forEach(function(pt) {
-            html += '<circle cx="' + pt.x.toFixed(1) + '" cy="' + pt.y.toFixed(1) + '" r="3" fill="' + roleColor + '"/>';
+            html += '<circle cx="' + pt.x.toFixed(1) + '" cy="' + pt.y.toFixed(1) + '" r="2.5" fill="' + chartColor + '"/>';
         });
+
+        // --- Overlay adversaire (visible seulement quand toggle "comparer" actif) ---
+        if (overlayData && overlayData.scores) {
+            var ovScores = overlayData.scores;
+            var ovRole = overlayData.role || role;
+            var ovColor = '#9aa0a6'; // gris neutre pour l'overlay
+            var ovPoints = [];
+
+            if (ovRole === 'Centre') {
+                var ovNonStructural = axes.filter(function(a) {
+                    return a.key !== 'attaque' && (ovScores[a.key] || 0) > 0;
+                }).length;
+                var ovSkip = ovNonStructural === 4;
+                axes.forEach(function(axis) {
+                    var val = ovScores[axis.key] || 0;
+                    if (axis.key === 'attaque') val = 0;
+                    if (val > 0) {
+                        var r = maxR * val / 100;
+                        ovPoints.push(self.polarToCartesian(cx, cy, r, axis.angle));
+                    } else if (axis.key === 'attaque') {
+                        ovPoints.push({ x: cx, y: cy });
+                    } else if (!ovSkip) {
+                        ovPoints.push({ x: cx, y: cy });
+                    }
+                });
+            } else {
+                var ovActive = axes.filter(function(a) { return (ovScores[a.key] || 0) > 0; }).length;
+                var ovSkipZ = ovActive === 4;
+                axes.forEach(function(axis) {
+                    var val = ovScores[axis.key] || 0;
+                    if (val > 0) {
+                        var r = maxR * val / 100;
+                        ovPoints.push(self.polarToCartesian(cx, cy, r, axis.angle));
+                    } else if (!ovSkipZ) {
+                        ovPoints.push({ x: cx, y: cy });
+                    }
+                });
+            }
+
+            if (ovPoints.length >= 2) {
+                var ovPoly = ovPoints.map(function(pt) { return pt.x.toFixed(1) + ',' + pt.y.toFixed(1); }).join(' ');
+                html += '<polygon class="spider-overlay" points="' + ovPoly + '" fill="' + ovColor + '" fill-opacity="0.08" stroke="' + ovColor + '" stroke-width="1.2" stroke-dasharray="4,3"/>';
+            }
+        }
 
         // Labels d'axes a l'exterieur
         axes.forEach(function(axis) {
-            var labelR = maxR + 14;
+            var labelR = 72; // fixe, independant de maxR
             var pt = self.polarToCartesian(cx, cy, labelR, axis.angle);
 
             // Alignement du texte selon l'angle (generique)
@@ -1565,6 +1736,24 @@ const BilanView = {
 
     clamp(min, max, val) {
         return Math.max(min, Math.min(max, val));
+    },
+
+    // --- Eclaircir une couleur hex de amount (0-1) ---
+    _lightenColor(hex, amount) {
+        var r = parseInt(hex.slice(1, 3), 16);
+        var g = parseInt(hex.slice(3, 5), 16);
+        var b = parseInt(hex.slice(5, 7), 16);
+        r = Math.round(r + (255 - r) * amount);
+        g = Math.round(g + (255 - g) * amount);
+        b = Math.round(b + (255 - b) * amount);
+        return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    },
+
+    // --- Toggle comparaison : affiche/masque les overlays adverses ---
+    toggleCompare(btn) {
+        var grid = btn.closest('.bilan-section').querySelector('.bilan-grid');
+        var active = grid.classList.toggle('bilan-compare-active');
+        btn.classList.toggle('active', active);
     }
 };
 
@@ -2509,11 +2698,6 @@ const SetsPlayedView = {
 
 // ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', async function() {
-    // [DEV TEST] Créer le match test si nécessaire — À RETIRER
-    if (typeof DevTestMode !== 'undefined' && DevTestMode.ENABLED) {
-        DevTestMode.ensureTestMatch();
-    }
-
     // Init Firebase Auth UI
     if (typeof FirebaseAuthUI !== 'undefined') {
         FirebaseAuthUI.init();

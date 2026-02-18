@@ -3123,3 +3123,103 @@
 .end-match-actions .end-set-btn {
     flex: 1;
 }
+
+/* ==================== PRE-MATCH OVERLAY ==================== */
+.pre-match-overlay {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.97);
+    z-index: 50;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.pre-match-overlay.active {
+    display: flex;
+}
+
+.main-content {
+    position: relative;
+}
+
+.pre-match-card {
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.pre-match-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pre-match-label {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pre-match-toggle {
+    display: flex;
+    gap: 8px;
+}
+
+.pre-match-option {
+    flex: 1;
+    padding: 12px 10px;
+    background: var(--bg-header);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'Google Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-primary);
+}
+
+.pre-match-option:hover {
+    background: #e8f0fe;
+}
+
+.pre-match-option.selected {
+    border-color: var(--accent-blue);
+    background: #e8f0fe;
+    color: var(--accent-blue);
+}
+
+.pre-match-start-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px;
+    background: var(--win-color);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+}
+
+.pre-match-start-btn:hover {
+    background: #2d9147;
+}

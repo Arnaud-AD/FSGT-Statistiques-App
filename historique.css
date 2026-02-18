@@ -1277,6 +1277,81 @@ body {
     margin-bottom: 8px;
 }
 
+/* --- Head to head header --- */
+.bilan-h2h-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 8px 0 12px;
+}
+
+.bilan-h2h-team {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    flex: 1;
+    text-align: center;
+}
+
+.bilan-h2h-vs {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+/* Bouton toggle comparer */
+.bilan-compare-toggle {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: #5f6368;
+    background: #f1f3f4;
+    border: none;
+    border-radius: 16px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+.bilan-compare-toggle:hover {
+    background: #e8eaed;
+}
+.bilan-compare-toggle.active {
+    background: #1a73e8;
+    color: #fff;
+}
+.bilan-compare-icon {
+    font-size: 12px;
+}
+
+/* Overlay adversaire : cache par defaut, visible quand toggle actif */
+.spider-overlay {
+    display: none;
+}
+.bilan-compare-active .spider-overlay {
+    display: inline;
+}
+
+.bilan-h2h-role-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 10px 0 6px;
+}
+
+.bilan-player-empty {
+    min-height: 60px;
+    opacity: 0;
+}
+
 .bilan-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
