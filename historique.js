@@ -1193,10 +1193,10 @@ const BilanView = {
         self.FAMILY_ORDER.forEach(function(fam) {
             var bestA = null;
             allAway.forEach(function(d) { if (d.family === fam && (!bestA || d.ip > bestA.ip)) bestA = d; });
-            if (bestA) bestAwayByFamily[fam] = { scores: bestA.scores, role: bestA.effectiveRole };
+            if (bestA) bestAwayByFamily[fam] = { scores: bestA.scores, role: bestA.effectiveRole, name: bestA.name };
             var bestH = null;
             allHome.forEach(function(d) { if (d.family === fam && (!bestH || d.ip > bestH.ip)) bestH = d; });
-            if (bestH) bestHomeByFamily[fam] = { scores: bestH.scores, role: bestH.effectiveRole };
+            if (bestH) bestHomeByFamily[fam] = { scores: bestH.scores, role: bestH.effectiveRole, name: bestH.name };
         });
 
         // Rendu paires home/away alignees par slot
@@ -1999,6 +1999,12 @@ const BilanView = {
         });
 
         html += '</svg>';
+
+        // Label du joueur compare (visible uniquement quand toggle comparer actif)
+        if (overlayData && overlayData.name) {
+            html += '<div class="spider-overlay bilan-compare-label">vs ' + Utils.escapeHtml(overlayData.name) + '</div>';
+        }
+
         html += '</div>';
         return html;
     },
