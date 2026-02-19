@@ -1010,7 +1010,7 @@
                     localStorage.setItem('volleyball_matches', JSON.stringify(localMatches));
                     log('\n✅ Match sauvegardé en localStorage (existant mis à jour)');
                 } else {
-                    log('\n⚠️ Match non trouvé en localStorage (source: Firebase)');
+                    log('\n⚠️ Match non trouvé en localStorage (source: Firebase uniquement)');
                 }
             } else {
                 matches[matchIdx] = match;
@@ -1018,9 +1018,10 @@
                 log('\n✅ Match sauvegardé en localStorage');
             }
 
-            // Vérification immédiate
-            const check = JSON.parse(localStorage.getItem('volleyball_matches')).find(m => m.id === selectedMatchId);
-            if (check.sets[1]) {
+            // Vérification immédiate (seulement si en localStorage)
+            const localRaw = localStorage.getItem('volleyball_matches');
+            const check = localRaw ? JSON.parse(localRaw).find(m => m.id === selectedMatchId) : null;
+            if (check && check.sets[1]) {
                 const homeStats = check.sets[1].stats.home;
                 for (const [name, ps] of Object.entries(homeStats)) {
                     if (ps.pass.tot > 0) {
