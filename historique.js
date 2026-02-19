@@ -990,7 +990,7 @@ const BilanView = {
 
     // Ponderations IP par poste
     IP_WEIGHTS: {
-        'Passeur': { attaque: 0.05, bloc: 0.00, reception: 0.05, defense: 0.25, passe: 0.40, service: 0.25 },
+        'Passeur': { attaque: 0.05, bloc: 0.00, relance: 0.05, defense: 0.25, passe: 0.40, service: 0.25 },
         'Centre':  { attaque: 0.00, relance: 0.20, reception: 0.30, defense: 0.20, passe: 0.05, service: 0.25 },
         'R4':      { attaque: 0.30, bloc: 0.20, reception: 0.20, defense: 0.10, relance: 0.05, service: 0.15 },
         'Pointu':  { attaque: 0.30, bloc: 0.20, reception: 0.20, defense: 0.10, relance: 0.05, service: 0.15 }
@@ -1021,10 +1021,10 @@ const BilanView = {
         { key: 'reception', label: 'Rec',  angle: 210 }
     ],
 
-    // Axes specifiques Passeur : Passe en haut, Attaque en bas-droite (interversion)
+    // Axes specifiques Passeur : Passe en haut, Relance remplace Reception
     //         Passe (-90°)
     //        /              \
-    // Reception (210°)    Bloc (-30°)
+    // Relance (210°)      Bloc (-30°)
     //       |                |
     // Defense (150°)     Attaque (30°)
     //        \              /
@@ -1035,7 +1035,7 @@ const BilanView = {
         { key: 'attaque',   label: 'Att',  angle: 30 },
         { key: 'service',   label: 'Srv',  angle: 90 },
         { key: 'defense',   label: 'Def',  angle: 150 },
-        { key: 'reception', label: 'Rec',  angle: 210 }
+        { key: 'relance',   label: 'Rel',  angle: 210 }
     ],
 
     // Axes specifiques Centre : hexagone, Relance remplace Bloc
@@ -1089,15 +1089,19 @@ const BilanView = {
 
         html += '<div class="bilan-grid">';
 
-        // --- Boucle par famille de postes ---
+        // --- Collecter toutes les donnees par famille, puis aplatir ---
+        // Ordre de rendu : Passeur → R4 (IP) → Pointu (IP) → Centre
+        // Slots de tri pour les ailiers : primaryRole distingue R4 de Pointu
+        var SLOT_ORDER = ['Passeur', 'R4', 'Pointu', 'Centre'];
+        var allHome = []; // { slot, data, family }
+        var allAway = [];
+
         self.FAMILY_ORDER.forEach(function(family) {
-            // Axes et role IP par famille
             var familyAxes = (family === 'Passeur') ? self.SPIDER_AXES_PASSEUR
                            : (family === 'Centre') ? self.SPIDER_AXES_CENTRE
                            : self.SPIDER_AXES;
             var familyIpRole = (family === 'Ailier') ? 'R4' : family;
 
-            // Collecter joueurs home/away dans cette famille
             function collectPlayers(familiesData) {
                 var names = [];
                 Object.keys(familiesData).forEach(function(name) {
@@ -1106,18 +1110,12 @@ const BilanView = {
                 return names;
             }
 
-            var homeInFamily = collectPlayers(homeFamilies);
-            var awayInFamily = collectPlayers(awayFamilies);
-            if (homeInFamily.length === 0 && awayInFamily.length === 0) return;
-
-            // Calculer scores/IP pour chaque joueur (stats filtrees par sets de cette famille)
             function computeFamilyData(names, familiesData, teamKey, side) {
                 return names.map(function(name) {
                     var famData = familiesData[name].families[family];
                     var setIndices = famData.setIndices;
                     var roles = famData.roles;
 
-                    // Stats filtrees aux sets de cette famille
                     var playerTotals = StatsAggregator.aggregateStatsBySetIndices(completedSets, teamKey, setIndices);
                     var stats = playerTotals[name] || StatsAggregator.initPlayerStats();
 
@@ -1125,7 +1123,6 @@ const BilanView = {
                     var axes = familyAxes;
                     var ipRole = familyIpRole;
 
-                    // Centre offensif adverse : bascule vers axes ailier
                     if (side === 'away' && family === 'Centre') {
                         var hasAttack = stats.attack && stats.attack.tot >= 2;
                         var hasBlock = stats.block && stats.block.tot >= 1;
@@ -1136,11 +1133,9 @@ const BilanView = {
                         }
                     }
 
-                    // Couleurs pastilles : une par role dans cette famille
                     var roleColors = Object.keys(roles).map(function(r) {
                         return self.ROLE_COLORS[r];
                     });
-                    // Couleur principale = role le plus joue
                     var primaryRoleInFamily = Object.keys(roles).sort(function(a, b) {
                         return roles[b] - roles[a];
                     })[0];
@@ -1149,54 +1144,79 @@ const BilanView = {
                     var scores = self.computeAxisScores(stats);
                     var ip = self.computeIP(scores, ipRole);
 
+                    // Slot de tri : pour les ailiers, utiliser le role principal (R4 ou Pointu)
+                    var slot = family;
+                    if (family === 'Ailier') slot = primaryRoleInFamily;
+
                     return {
                         name: name, scores: scores, ip: ip, axes: axes,
                         effectiveRole: effectiveRole, primaryColor: primaryColor,
-                        roleColors: roleColors
+                        roleColors: roleColors, family: family, slot: slot
                     };
-                }).sort(function(a, b) { return b.ip - a.ip; });
+                });
             }
+
+            var homeInFamily = collectPlayers(homeFamilies);
+            var awayInFamily = collectPlayers(awayFamilies);
 
             var homeData = computeFamilyData(homeInFamily, homeFamilies, 'home', 'home');
             var awayData = computeFamilyData(awayInFamily, awayFamilies, 'away', 'away');
 
-            // Filtrer joueurs sans aucune stat dans les sets filtres
-            homeData = homeData.filter(function(d) {
+            // Filtrer joueurs sans stats
+            function hasStats(d) {
                 return d.scores.service > 0 || d.scores.reception > 0 || d.scores.passe > 0
                     || d.scores.attaque > 0 || d.scores.bloc > 0 || d.scores.relance > 0 || d.scores.defense > 0;
+            }
+            homeData.filter(hasStats).forEach(function(d) { allHome.push(d); });
+            awayData.filter(hasStats).forEach(function(d) { allAway.push(d); });
+        });
+
+        // Grouper par slot et trier par IP desc au sein de chaque slot
+        function groupBySlot(arr) {
+            var groups = {};
+            SLOT_ORDER.forEach(function(s) { groups[s] = []; });
+            arr.forEach(function(d) {
+                if (!groups[d.slot]) groups[d.slot] = [];
+                groups[d.slot].push(d);
             });
-            awayData = awayData.filter(function(d) {
-                return d.scores.service > 0 || d.scores.reception > 0 || d.scores.passe > 0
-                    || d.scores.attaque > 0 || d.scores.bloc > 0 || d.scores.relance > 0 || d.scores.defense > 0;
+            SLOT_ORDER.forEach(function(s) {
+                groups[s].sort(function(a, b) { return b.ip - a.ip; });
             });
+            return groups;
+        }
+        var homeBySlot = groupBySlot(allHome);
+        var awayBySlot = groupBySlot(allAway);
 
-            if (homeData.length === 0 && awayData.length === 0) return;
+        // Overlay par famille : meilleur adverse dans la meme famille
+        var bestAwayByFamily = {};
+        var bestHomeByFamily = {};
+        self.FAMILY_ORDER.forEach(function(fam) {
+            var bestA = null;
+            allAway.forEach(function(d) { if (d.family === fam && (!bestA || d.ip > bestA.ip)) bestA = d; });
+            if (bestA) bestAwayByFamily[fam] = { scores: bestA.scores, role: bestA.effectiveRole };
+            var bestH = null;
+            allHome.forEach(function(d) { if (d.family === fam && (!bestH || d.ip > bestH.ip)) bestH = d; });
+            if (bestH) bestHomeByFamily[fam] = { scores: bestH.scores, role: bestH.effectiveRole };
+        });
 
-            // Titre de section famille
-            var familyLabel = self.FAMILY_LABELS[family];
-            var familyColor = (family === 'Passeur') ? self.ROLE_COLORS['Passeur']
-                            : (family === 'Centre') ? self.ROLE_COLORS['Centre']
-                            : '#5f6368';
-            html += '<div class="bilan-family-title" style="border-left-color:' + familyColor + '">';
-            html += familyLabel;
-            html += '</div>';
+        // Rendu paires home/away alignees par slot
+        SLOT_ORDER.forEach(function(slot) {
+            var homeSlot = homeBySlot[slot] || [];
+            var awaySlot = awayBySlot[slot] || [];
+            var maxLen = Math.max(homeSlot.length, awaySlot.length);
+            if (maxLen === 0) return;
 
-            // Overlay = meilleur du cote oppose dans cette famille
-            var bestAwayOverlay = awayData.length > 0 ? { scores: awayData[0].scores, role: awayData[0].effectiveRole } : null;
-            var bestHomeOverlay = homeData.length > 0 ? { scores: homeData[0].scores, role: homeData[0].effectiveRole } : null;
-
-            var maxLen = Math.max(homeData.length, awayData.length);
             for (var i = 0; i < maxLen; i++) {
-                if (homeData[i]) {
-                    var h = homeData[i];
-                    html += self.renderSpiderChart(h.name, h.effectiveRole, h.scores, h.ip, h.primaryColor, h.axes, false, bestAwayOverlay, h.roleColors);
+                if (homeSlot[i]) {
+                    var h = homeSlot[i];
+                    html += self.renderSpiderChart(h.name, h.effectiveRole, h.scores, h.ip, h.primaryColor, h.axes, false, bestAwayByFamily[h.family], h.roleColors);
                 } else {
                     html += '<div class="bilan-player-card bilan-player-empty"></div>';
                 }
 
-                if (awayData[i]) {
-                    var a = awayData[i];
-                    html += self.renderSpiderChart(a.name, a.effectiveRole, a.scores, a.ip, a.primaryColor, a.axes, true, bestHomeOverlay, a.roleColors);
+                if (awaySlot[i]) {
+                    var a = awaySlot[i];
+                    html += self.renderSpiderChart(a.name, a.effectiveRole, a.scores, a.ip, a.primaryColor, a.axes, true, bestHomeByFamily[a.family], a.roleColors);
                 } else {
                     html += '<div class="bilan-player-card bilan-player-empty"></div>';
                 }
@@ -2688,13 +2708,16 @@ const YearStatsView = {
 
         html += '<div class="bilan-grid-year">';
 
+        // Collecter tous les joueurs, trier Passeur → R4 → Pointu → Centre par IP
+        var SLOT_ORDER_YEAR = ['Passeur', 'R4', 'Pointu', 'Centre'];
+        var allPlayerData = [];
+
         BilanView.FAMILY_ORDER.forEach(function(family) {
             var familyAxes = (family === 'Passeur') ? BilanView.SPIDER_AXES_PASSEUR
                            : (family === 'Centre') ? BilanView.SPIDER_AXES_CENTRE
                            : BilanView.SPIDER_AXES;
             var familyIpRole = (family === 'Ailier') ? 'R4' : family;
 
-            // Collecter joueurs de cette famille
             var playersInFamily = [];
             Object.keys(playerFamiliesYear).forEach(function(name) {
                 if (playerFamiliesYear[name].primaryFamily === family) {
@@ -2703,14 +2726,18 @@ const YearStatsView = {
             });
             if (playersInFamily.length === 0) return;
 
-            // Calculer stats, scores, IP pour chaque joueur
-            var playerData = playersInFamily.map(function(name) {
+            // Overlay par famille
+            var medianRanking = BilanView.computeMedianIPForFamily(matches, playerFamiliesYear, family);
+            var eligible = medianRanking.filter(function(r) { return r.matchCount >= 1; });
+            var bestName = eligible.length > 0 ? eligible[0].name : null;
+            var secondBestName = eligible.length > 1 ? eligible[1].name : null;
+
+            playersInFamily.forEach(function(name) {
                 var famData = playerFamiliesYear[name].families[family];
                 var stats = BilanView.aggregateStatsForFamilyYear(matches, name, famData);
                 var scores = BilanView.computeAxisScores(stats);
                 var ip = BilanView.computeIP(scores, familyIpRole);
 
-                // Pastilles multi-role dans la famille
                 var roleColors = Object.keys(famData.roles).map(function(r) {
                     return BilanView.ROLE_COLORS[r];
                 });
@@ -2719,57 +2746,73 @@ const YearStatsView = {
                 })[0];
                 var primaryColor = BilanView.ROLE_COLORS[primaryRoleInFamily];
 
-                return {
+                var slot = family;
+                if (family === 'Ailier') slot = primaryRoleInFamily;
+
+                var hasAnyStats = scores.service > 0 || scores.reception > 0 || scores.passe > 0
+                    || scores.attaque > 0 || scores.bloc > 0 || scores.relance > 0 || scores.defense > 0;
+                if (!hasAnyStats) return;
+
+                allPlayerData.push({
                     name: name, scores: scores, ip: ip, stats: stats,
                     primaryColor: primaryColor, roleColors: roleColors,
-                    effectiveRole: familyIpRole
-                };
-            }).sort(function(a, b) { return b.ip - a.ip; });
-
-            // Filtrer joueurs sans stats
-            playerData = playerData.filter(function(d) {
-                return d.scores.service > 0 || d.scores.reception > 0 || d.scores.passe > 0
-                    || d.scores.attaque > 0 || d.scores.bloc > 0 || d.scores.relance > 0 || d.scores.defense > 0;
+                    effectiveRole: familyIpRole, family: family, slot: slot,
+                    axes: familyAxes, bestName: bestName, secondBestName: secondBestName
+                });
             });
-            if (playerData.length === 0) return;
+        });
 
-            // Overlay : meilleur au poste par IP median (min 3 matchs)
-            var medianRanking = BilanView.computeMedianIPForFamily(matches, playerFamiliesYear, family);
-            var eligible = medianRanking.filter(function(r) { return r.matchCount >= 1; });
-            var bestName = eligible.length > 0 ? eligible[0].name : null;
-            var secondBestName = eligible.length > 1 ? eligible[1].name : null;
+        // Trier par slot puis IP desc
+        allPlayerData.sort(function(a, b) {
+            var ai = SLOT_ORDER_YEAR.indexOf(a.slot);
+            var bi = SLOT_ORDER_YEAR.indexOf(b.slot);
+            if (ai === -1) ai = 99;
+            if (bi === -1) bi = 99;
+            if (ai !== bi) return ai - bi;
+            return b.ip - a.ip;
+        });
 
-            // Pre-calculer les scores agregés du best et secondBest pour l'overlay
-            var bestOverlay = null;
-            var secondBestOverlay = null;
-            if (bestName) {
-                var bd = playerData.find(function(d) { return d.name === bestName; });
-                if (bd) bestOverlay = { scores: bd.scores, role: bd.effectiveRole };
-            }
-            if (secondBestName) {
-                var sd = playerData.find(function(d) { return d.name === secondBestName; });
-                if (sd) secondBestOverlay = { scores: sd.scores, role: sd.effectiveRole };
-            }
+        // Pre-calculer overlays par famille (best + secondBest)
+        var familyOverlays = {};
+        BilanView.FAMILY_ORDER.forEach(function(fam) {
+            var inFam = allPlayerData.filter(function(d) { return d.family === fam; });
+            inFam.sort(function(a, b) { return b.ip - a.ip; });
+            familyOverlays[fam] = {
+                best: inFam.length > 0 ? { name: inFam[0].name, scores: inFam[0].scores, role: inFam[0].effectiveRole } : null,
+                second: inFam.length > 1 ? { name: inFam[1].name, scores: inFam[1].scores, role: inFam[1].effectiveRole } : null
+            };
+        });
 
-            // Titre famille
-            var familyLabel = BilanView.FAMILY_LABELS[family];
-            var familyColor = (family === 'Passeur') ? BilanView.ROLE_COLORS['Passeur']
-                            : (family === 'Centre') ? BilanView.ROLE_COLORS['Centre']
-                            : '#5f6368';
-            html += '<div class="bilan-family-title" style="border-left-color:' + familyColor + '">';
-            html += familyLabel;
-            html += '</div>';
+        // Grouper par slot pour aligner sur la grille 2 colonnes
+        var dataBySlot = {};
+        SLOT_ORDER_YEAR.forEach(function(s) { dataBySlot[s] = []; });
+        allPlayerData.forEach(function(d) {
+            if (!dataBySlot[d.slot]) dataBySlot[d.slot] = [];
+            dataBySlot[d.slot].push(d);
+        });
 
-            // Cartes spider
-            playerData.forEach(function(d) {
+        // Rendu cartes par slot, case vide si nombre impair
+        SLOT_ORDER_YEAR.forEach(function(slot) {
+            var slotData = dataBySlot[slot] || [];
+            if (slotData.length === 0) return;
+
+            slotData.forEach(function(d) {
+                var fo = familyOverlays[d.family];
                 var overlay = null;
-                if (d.name === bestName) {
-                    overlay = secondBestOverlay;
-                } else {
-                    overlay = bestOverlay;
+                if (fo) {
+                    if (fo.best && d.name === fo.best.name) {
+                        overlay = fo.second;
+                    } else {
+                        overlay = fo.best;
+                    }
                 }
-                html += BilanView.renderSpiderChart(d.name, d.effectiveRole, d.scores, d.ip, d.primaryColor, familyAxes, false, overlay, d.roleColors);
+                html += BilanView.renderSpiderChart(d.name, d.effectiveRole, d.scores, d.ip, d.primaryColor, d.axes, false, overlay, d.roleColors);
             });
+
+            // Case vide si nombre impair pour completer la ligne de la grille
+            if (slotData.length % 2 !== 0) {
+                html += '<div class="bilan-player-card bilan-player-empty"></div>';
+            }
         });
 
         html += '</div>'; // bilan-grid-year
