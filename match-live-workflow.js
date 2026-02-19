@@ -287,7 +287,8 @@ const WorkflowEngine = {
             receptionAutoSelected: false,
             defenseAttackerRole: null,
             showDirectAttack: false,
-            receptionOpponentClickData: null
+            receptionOpponentClickData: null,
+            passRelance: false
         };
     },
 
@@ -1505,6 +1506,11 @@ WorkflowEngine.registerPhase('pass', {
             role: selectedRole,
             endPos: clickData
         };
+        // V20.0b : propager le flag relance passe
+        if (gameState.context.passRelance) {
+            gameState.currentAction.passType = 'relance';
+            gameState.context.passRelance = false;
+        }
         gameState.currentAction.startPos = _getStartPosFromLastAction();
 
         addMarker(clickData, 'pass');
@@ -1593,6 +1599,17 @@ WorkflowEngine.registerPhase('pass', {
         }
         if (action === 'secondTouch') {
             const type = args[0]; // 'deuxieme_main', 'attaque_directe', or 'relance'
+
+            // V20.0b : Relance passe — le passeur fait un geste de survie dans son terrain
+            // On reste en phase pass avec un flag, le clic terrain créera une pass avec passType: 'relance'
+            if (type === 'relance') {
+                WorkflowEngine.pushState('pass_relance');
+                gameState.context.passRelance = true;
+                // Cacher les options 2ème touche (le joueur va cliquer le terrain)
+                document.getElementById('secondTouchOptions').classList.add('hidden');
+                return;
+            }
+
             const player = getEffectivePlayer();
             if (!player) return;
 
@@ -1715,6 +1732,11 @@ WorkflowEngine.registerPhase('pass_end', {
 
         const team = gameState.attackingTeam;
         gameState.currentAction.endPos = clickData;
+        // V20.0b : propager le flag relance passe
+        if (gameState.context.passRelance) {
+            gameState.currentAction.passType = 'relance';
+            gameState.context.passRelance = false;
+        }
         gameState.currentAction.startPos = _getStartPosFromLastAction();
         addMarker(clickData, 'pass');
         _drawArrowFromPrev(clickData, 'pass');

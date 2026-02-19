@@ -6100,6 +6100,48 @@
                     }
 
                     case 'pass': {
+                        // V20.0b : Relance passe — geste de survie, pas comptabilise en stats passe
+                        // Mais rétrograde la réception/défense précédente et compte une relance R-
+                        if (action.passType === 'relance') {
+                            // Chercher la dernière réception ou défense de la même équipe en amont
+                            for (let j = i - 1; j >= 0; j--) {
+                                const prev = rally[j];
+                                if (prev.team !== action.team) continue;
+                                const prevPlayer = prev.player;
+                                if (!prevPlayer) continue;
+                                const prevStats = setStats[team][prevPlayer];
+                                if (!prevStats) break;
+
+                                if (prev.type === 'reception' && prev.quality) {
+                                    // Annuler le score précédent et forcer R1
+                                    switch (prev.quality.label) {
+                                        case 'Excellente': prevStats.reception.r4--; break;
+                                        case 'Positive':   prevStats.reception.r3--; break;
+                                        case 'Jouable':    prevStats.reception.r2--; break;
+                                        case 'Négative':   /* déjà R1 */ break;
+                                        case 'Faute':      prevStats.reception.frec--; break;
+                                    }
+                                    if (prev.quality.label !== 'Négative') {
+                                        prevStats.reception.r1++;
+                                    }
+                                    break;
+                                }
+                                if (prev.type === 'defense') {
+                                    // Annuler le score précédent et forcer D-
+                                    if (prev.defenseQuality === 'positive') {
+                                        prevStats.defense.defplus--;
+                                        prevStats.defense.defminus++;
+                                    }
+                                    // Si déjà D- ou FD, on ne change rien
+                                    break;
+                                }
+                            }
+                            // Compter une relance R- pour le passeur
+                            stats.relance.tot++;
+                            stats.relance.relminus++;
+                            break;
+                        }
+
                         // V19.2 : qualite de passe + ventilation par contexte
                         const passerRoleP = action.role || 'transition';
                         const passCtxObj = getPassContext(rally.slice(0, i), passerRoleP);
@@ -6125,16 +6167,24 @@
                             }
                             break;
                         }
-                        // Passe out ou filet → FP
-                        if (!action.endPos || action.endPos.courtSide === 'out' || action.endPos.courtSide === 'net') {
+                        // Passe sans endPos ou filet → FP
+                        if (!action.endPos || action.endPos.courtSide === 'net') {
                             _incPass(stats.pass, 'fp');
                             _incPass(stats.pass[pType], 'fp');
                             if (stats.pass[pType][pCtx]) _incPass(stats.pass[pType][pCtx], 'fp');
                             break;
                         }
 
+                        // V20.0b : passe courtSide='out' = clic latéral mais dans zone de jeu
+                        // → convertir vers le court-side de l'équipe pour évaluer normalement
+                        let passEndPos = action.endPos;
+                        if (passEndPos.courtSide === 'out') {
+                            const passCourtSide = getCourtSideForTeam(team);
+                            passEndPos = { x: passEndPos.x, y: passEndPos.y, courtSide: passCourtSide };
+                        }
+
                         // Determiner zone et evaluer la qualite
-                        const passZone = getPassZone(action.endPos, team);
+                        const passZone = getPassZone(passEndPos, team);
                         const passContext = passCtxObj.context;
                         const passEval = evaluatePassQuality(action.endPos, passZone, passContext, team);
                         const scoreKey = passEval.score === 4 ? 'p4' : passEval.score === 3 ? 'p3' : passEval.score === 2 ? 'p2' : 'p1';

@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Fix Stats V2 — Recalcul complet</title>
+    <style>
+        body { font-family: 'Google Sans', Roboto, sans-serif; max-width: 900px; margin: 20px auto; padding: 0 15px; background: #1a1a2e; color: #e0e0e0; }
+        h1 { color: #4fc3f7; }
+        h2 { color: #81d4fa; margin-top: 30px; }
+        h3 { color: #aed581; }
+        .match-card { background: #16213e; border-radius: 8px; padding: 15px; margin: 10px 0; }
+        .match-card.selected { border: 2px solid #4fc3f7; }
+        button { background: #0056D2; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; margin: 5px; }
+        button:hover { background: #0070f3; }
+        button.danger { background: #ea4335; }
+        button.danger:hover { background: #ff5252; }
+        button:disabled { background: #555; cursor: not-allowed; }
+        pre { background: #0d1117; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 12px; line-height: 1.5; }
+        table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 13px; }
+        th, td { border: 1px solid #333; padding: 4px 8px; text-align: center; }
+        th { background: #1e3a5f; }
+        .diff-good { color: #4caf50; }
+        .diff-bad { color: #f44336; }
+        .diff-same { color: #888; }
+        #log { background: #0d1117; padding: 12px; border-radius: 6px; max-height: 400px; overflow-y: auto; font-size: 12px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Fix Stats V2 — Recalcul complet des stats</h1>
+    <p>Ce script recalcule les stats d'un match en utilisant <strong>exactement</strong> le même code que match-live.html, avec les vraies PASS_GRIDS hardcodées.</p>
+
+    <h2>1. Sélection du match</h2>
+    <div id="matchList"></div>
+
+    <h2>2. Diagnostic & Correction</h2>
+    <button id="btnDiag" onclick="runDiagnostic()" disabled>🔍 Diagnostic (avant/après)</button>
+    <button id="btnAuth" onclick="doAuth()">🔑 Connexion Google</button>
+    <button id="btnFix" onclick="applyFixAndSync()" disabled class="danger">⚡ Corriger + Sync Firebase</button>
+    <p id="authStatus" style="color: #f44336;">⚠️ Connecte-toi Google AVANT de corriger</p>
+
+    <div id="log"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        let selectedMatchId = null;
+        const logEl = document.getElementById('log');
+
+        function log(msg) {
+            logEl.textContent += msg + '\n';
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        // ==================== PASS GRIDS (HARDCODED — identique à match-live-helpers.js) ====================
+        const PASS_GRIDS = {
+            'R4': {
+                'confort': [
+                    [1,1,1,2,4,4,4,3,2,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,3,4,4,4,3,2,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,3,3,3,3,3,2,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ],
+                'contraint': [
+                    [1,1,1,3,4,4,4,4,3,2,2,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,2,3,4,4,4,4,3,2,2,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,2,3,4,4,4,4,3,2,2,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,2,3,3,3,3,3,3,2,2,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ],
+                'transition': [
+                    [1,1,2,3,4,4,4,4,4,3,2,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,2,3,4,4,4,4,4,3,2,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,2,3,4,4,4,4,4,3,2,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,2,3,3,3,3,3,3,3,2,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,2,2,2,2,3,3,3,3,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ]
+            },
+            'Centre': {
+                'confort': [
+                    [1,1,1,1,1,2,3,4,4,4,4,3,2,1,1,1,1,1],
+                    [1,1,1,1,1,2,3,3,3,3,3,3,2,1,1,1,1,1],
+                    [1,1,1,1,1,2,2,2,2,2,2,2,2,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,2,2,2,2,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ],
+                'contraint': [
+                    [1,1,1,1,1,3,4,4,4,4,4,4,3,1,1,1,1,1],
+                    [1,1,1,1,1,3,3,4,4,4,4,3,3,1,1,1,1,1],
+                    [1,1,1,1,1,2,3,3,3,3,3,3,2,1,1,1,1,1],
+                    [1,1,1,1,1,1,2,2,2,2,2,2,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,2,2,2,2,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ],
+                'transition': [
+                    [1,1,1,1,1,3,4,4,4,4,4,4,3,1,1,1,1,1],
+                    [1,1,1,1,1,3,3,4,4,4,4,3,3,1,1,1,1,1],
+                    [1,1,1,1,1,2,3,4,4,4,4,3,2,1,1,1,1,1],
+                    [1,1,1,1,1,2,3,3,3,3,3,3,2,1,1,1,1,1],
+                    [1,1,1,1,1,1,2,2,2,2,2,2,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,2,2,2,2,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ]
+            },
+            'Pointu': {
+                'confort': [
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,3,4,4,4,4,2,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,3,4,4,4,4,3,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,3,3,2,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ],
+                'contraint': [
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,3,4,4,4,4,3,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,3,4,4,4,4,3,2,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,3,4,4,4,4,3,2,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,3,3,3,3,3,3,2,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ],
+                'transition': [
+                    [1,1,1,1,1,1,1,1,1,1,1,2,3,4,4,4,4,4,3,2,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,2,3,4,4,4,4,4,3,2,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,2,3,4,4,4,4,4,3,2,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,2,3,3,3,3,3,3,3,2,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,2,2,3,3,3,3,3,2,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                ]
+            }
+        };
+
+        // Charger et merger les grilles de passe depuis localStorage (comme loadPassGridsFromStorage)
+        function loadPassGridsFromStorage() {
+            const raw = localStorage.getItem('volleyball_pass_grids');
+            if (!raw) {
+                log('[GRIDS] Pas de grilles dans localStorage, utilisation des grilles hardcodées');
+                return;
+            }
+            try {
+                const saved = JSON.parse(raw);
+                let merged = 0;
+                ['R4', 'Centre', 'Pointu'].forEach(zone => {
+                    if (!saved[zone]) return;
+                    const expectedCols = (zone === 'R4' || zone === 'Pointu') ? 22 : 18;
+                    ['confort', 'contraint', 'transition'].forEach(ctx => {
+                        if (!saved[zone][ctx] || !PASS_GRIDS[zone] || !PASS_GRIDS[zone][ctx]) return;
+                        let grid = saved[zone][ctx];
+                        // Migration colonnes si nécessaire (anciennes grilles 18 cols → 22 cols)
+                        if (grid[0] && grid[0].length < expectedCols) {
+                            const diff = expectedCols - grid[0].length;
+                            grid = grid.map(row => {
+                                const extra = new Array(diff).fill(1);
+                                return zone === 'R4' ? [...extra, ...row] : [...row, ...extra];
+                            });
+                        }
+                        // Muter PASS_GRIDS en place
+                        for (let r = 0; r < 8 && r < grid.length; r++) {
+                            PASS_GRIDS[zone][ctx][r] = grid[r];
+                        }
+                        merged++;
+                    });
+                });
+                log(`[GRIDS] ${merged} grilles chargées depuis localStorage`);
+            } catch (e) {
+                log(`[GRIDS] Erreur chargement: ${e.message}`);
+            }
+        }
+
+        const PASS_GRID_ROWS = 8;
+        const PASS_GRID_DEPTH = 44;
+        const PASS_GRID_OVERFLOW = 22.22;
+
+        const POSITION_ROLES = {
+            home: { 1: 'Passeur', 2: 'R4', 3: 'Centre', 4: 'Pointu' },
+            away: { 4: 'Passeur', 1: 'R4', 2: 'Centre', 3: 'Pointu' }
+        };
+
+        // ==================== FONCTIONS IDENTIQUES À match-live-helpers.js ====================
+
+        function getCourtSideForTeam(team, cameraSide) {
+            if (cameraSide === 'home') {
+                return team === 'home' ? 'bottom' : 'top';
+            } else {
+                return team === 'home' ? 'top' : 'bottom';
+            }
+        }
+
+        function getPassGridCols(zone) {
+            return (zone === 'R4' || zone === 'Pointu') ? 22 : 18;
+        }
+
+        function getPassZone(endPos, team, cameraSide) {
+            const courtSide = getCourtSideForTeam(team, cameraSide);
+            const x = endPos.x;
+            if (courtSide === 'bottom') {
+                if (x < 33.33) return 'R4';
+                if (x > 66.67) return 'Pointu';
+                return 'Centre';
+            } else {
+                if (x < 33.33) return 'Pointu';
+                if (x > 66.67) return 'R4';
+                return 'Centre';
+            }
+        }
+
+        function getPassContext(rally, passerRole) {
+            const isPasseur = (passerRole === 'Passeur');
+            const playerType = isPasseur ? 'Passeur' : 'Autre';
+            const fallback = { playerType, context: 'transition' };
+            for (let i = rally.length - 1; i >= 0; i--) {
+                const action = rally[i];
+                if (action.type === 'reception') {
+                    const score = action.quality ? action.quality.score : 2;
+                    if (isPasseur) {
+                        if (score === 4) return { playerType, context: 'confort' };
+                        return { playerType, context: 'contraint' };
+                    } else {
+                        if (score >= 3) return { playerType, context: 'transition' };
+                        return { playerType, context: 'contraint' };
+                    }
+                }
+                if (action.type === 'defense') {
+                    const defQ = action.defenseQuality || 'negative';
+                    if (defQ === 'positive') return { playerType, context: 'contraint' };
+                    return { playerType, context: 'transition' };
+                }
+            }
+            return fallback;
+        }
+
+        function evaluatePassQuality(endPos, zone, context, team, cameraSide) {
+            const courtSide = getCourtSideForTeam(team, cameraSide);
+            let distFromNet;
+            if (courtSide === 'bottom') {
+                distFromNet = endPos.y;
+            } else {
+                distFromNet = 100 - endPos.y;
+            }
+            if (distFromNet > PASS_GRID_DEPTH) {
+                return { quality: 'mauvaise', score: 1, zone, context };
+            }
+            const totalCols = getPassGridCols(zone);
+            let col;
+            if (zone === 'R4' || zone === 'Pointu') {
+                const totalWidth = 100 + PASS_GRID_OVERFLOW;
+                let xShifted;
+                const overflowLeft = (zone === 'R4' && courtSide === 'bottom') || (zone === 'Pointu' && courtSide === 'top');
+                if (overflowLeft) {
+                    xShifted = endPos.x + PASS_GRID_OVERFLOW;
+                } else {
+                    xShifted = endPos.x;
+                }
+                col = Math.min(totalCols - 1, Math.max(0, Math.floor(xShifted / totalWidth * totalCols)));
+            } else {
+                col = Math.min(totalCols - 1, Math.max(0, Math.floor(endPos.x / 100 * totalCols)));
+            }
+            // Miroir top court
+            if (courtSide === 'top') {
+                col = totalCols - 1 - col;
+            }
+            const row = Math.min(PASS_GRID_ROWS - 1, Math.max(0, Math.floor(distFromNet / PASS_GRID_DEPTH * PASS_GRID_ROWS)));
+            const grid = PASS_GRIDS[zone] && PASS_GRIDS[zone][context];
+            if (!grid || !grid[row]) {
+                log(`  ⚠️ FALLBACK P2 — grille manquante: ${zone}/${context}/row${row}`);
+                return { quality: 'jouable', score: 2, zone, context };
+            }
+            const score = grid[row][col] || 1;
+            return { quality: ['', 'mauvaise', 'jouable', 'bonne', 'optimale'][score], score, zone, context };
+        }
+
+        // ==================== FONCTIONS IDENTIQUES À match-live.html ====================
+
+        function receptionQualityToNote(quality) {
+            if (!quality || !quality.label) return null;
+            switch (quality.label) {
+                case 'Excellente': return 4;
+                case 'Positive':   return 3;
+                case 'Jouable':    return 2;
+                case 'Négative':   return 1;
+                case 'Faute':      return 0;
+                default:
+                    return (typeof quality.score === 'number') ? quality.score : null;
+            }
+        }
+
+        function findNextAction(rally, afterIndex, type) {
+            for (let i = afterIndex + 1; i < rally.length; i++) {
+                if (rally[i].type === type) return { action: rally[i], index: i };
+            }
+            return null;
+        }
+
+        function analyzeAfterDefended(rally, afterIndex, oppositeTeam) {
+            const attackingTeam = oppositeTeam === 'home' ? 'away' : 'home';
+            for (let i = afterIndex + 1; i < rally.length; i++) {
+                const a = rally[i];
+                if (a.team === oppositeTeam) {
+                    if (a.type === 'defense' && a.result === 'fault') continue;
+                    if (a.type === 'block') {
+                        for (let j = i + 1; j < rally.length; j++) {
+                            if (rally[j].team === attackingTeam) {
+                                if (rally[j].type === 'defense' && rally[j].result === 'fault') {
+                                    return 'blocked';
+                                }
+                                return 'continued';
+                            }
+                        }
+                        return 'blocked';
+                    }
+                    return 'continued';
+                }
+            }
+            return 'ended';
+        }
+
+        function isDirectReturnExploited(rally, index, team) {
+            const oppositeTeam = team === 'home' ? 'away' : 'home';
+            for (let j = index + 1; j < rally.length; j++) {
+                const a = rally[j];
+                if (a.team === team && (a.type === 'pass' || a.type === 'attack')) return false;
+                if (a.team === oppositeTeam && a.type === 'pass') return false;
+                if (a.team === oppositeTeam && a.type === 'attack' && (a.result === 'point' || a.result === 'bloc_out')) return true;
+                if (a.team === team && a.type === 'defense' && a.result === 'fault') return true;
+            }
+            return false;
+        }
+
+        function _passCtx() { return { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0 }; }
+
+        function initPlayerStats() {
+            return {
+                service:   { tot: 0, ace: 0, splus: 0, fser: 0, recSumAdv: 0, recCountAdv: 0 },
+                reception: { tot: 0, r4: 0, r3: 0, r2: 0, r1: 0, frec: 0 },
+                pass: {
+                    tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0,
+                    passeur: { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0,
+                        confort: _passCtx(), contraint: _passCtx(), transition: _passCtx() },
+                    autre: { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0,
+                        contraint: _passCtx(), transition: _passCtx() }
+                },
+                attack:    { tot: 0, attplus: 0, attminus: 0, bp: 0, fatt: 0 },
+                relance:   { tot: 0, relplus: 0, relminus: 0, frel: 0 },
+                defense:   { tot: 0, defplus: 0, defminus: 0, fdef: 0 },
+                block:     { tot: 0, blcplus: 0, blcminus: 0, fblc: 0 }
+            };
+        }
+
+        function getPlayerRole(team, playerName, set) {
+            const lineup = team === 'home' ? set.homeLineup : set.awayLineup;
+            const roles = POSITION_ROLES[team];
+            for (const [pos, name] of Object.entries(lineup)) {
+                if (name === playerName) return roles[pos] || null;
+            }
+            return null;
+        }
+
+        // ==================== updateStatsFromRally — COPIE EXACTE de match-live.html ====================
+
+        function updateStatsFromRally(rally, setStats, getPlayerStatsFn, cameraSide) {
+            if (!rally || rally.length === 0) return;
+
+            for (let i = 0; i < rally.length; i++) {
+                const action = rally[i];
+                const team = action.team;
+                const player = action.player;
+
+                if (!team || !player) continue;
+
+                const stats = getPlayerStatsFn(team, player);
+                if (!stats) continue;
+
+                switch (action.type) {
+                    case 'service': {
+                        stats.service.tot++;
+                        if (action.result === 'ace') {
+                            stats.service.ace++;
+                            const recActionAce = findNextAction(rally, i, 'reception');
+                            if (recActionAce) {
+                                const noteAce = receptionQualityToNote(recActionAce.action.quality);
+                                if (noteAce !== null) {
+                                    stats.service.recSumAdv += noteAce;
+                                    stats.service.recCountAdv++;
+                                }
+                            }
+                        } else if (action.result === 'fault' || action.result === 'fault_out' || action.result === 'fault_net') {
+                            stats.service.fser++;
+                        } else {
+                            const recAction = findNextAction(rally, i, 'reception');
+                            if (recAction) {
+                                const rec = recAction.action;
+                                let note = receptionQualityToNote(rec.quality);
+                                if (note !== null) {
+                                    if (rec.isDirectReturnWinner) {
+                                        note = 0;
+                                    } else if (rec.isDirectReturn && !rec.isDirectReturnWinner) {
+                                        const exploited = isDirectReturnExploited(rally, recAction.index, rec.team);
+                                        if (exploited) {
+                                            note = 0;
+                                        }
+                                    }
+                                    stats.service.recSumAdv += note;
+                                    stats.service.recCountAdv++;
+                                    if (note === 0) {
+                                        stats.service.splus++;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+
+                    case 'reception': {
+                        stats.reception.tot++;
+                        const recExploited = action.isDirectReturn && !action.isDirectReturnWinner
+                            && isDirectReturnExploited(rally, i, action.team);
+                        if (recExploited) {
+                            stats.reception.frec++;
+                        } else if (action.quality) {
+                            switch (action.quality.label) {
+                                case 'Excellente': stats.reception.r4++; break;
+                                case 'Positive':   stats.reception.r3++; break;
+                                case 'Jouable':    stats.reception.r2++; break;
+                                case 'Négative':   stats.reception.r1++; break;
+                                case 'Faute':      stats.reception.frec++; break;
+                                default:
+                                    if (action.quality.score === 0) stats.reception.frec++;
+                                    break;
+                            }
+                        }
+                        break;
+                    }
+
+                    case 'pass': {
+                        // V20.0b : Relance passe — geste de survie, pas comptabilisé en stats passe
+                        // Mais rétrograde la réception/défense précédente et compte une relance R-
+                        if (action.passType === 'relance') {
+                            for (let j = i - 1; j >= 0; j--) {
+                                const prev = rally[j];
+                                if (prev.team !== action.team) continue;
+                                const prevPlayer = prev.player;
+                                if (!prevPlayer) continue;
+                                const prevStats = setStats[team][prevPlayer];
+                                if (!prevStats) break;
+
+                                if (prev.type === 'reception' && prev.quality) {
+                                    switch (prev.quality.label) {
+                                        case 'Excellente': prevStats.reception.r4--; break;
+                                        case 'Positive':   prevStats.reception.r3--; break;
+                                        case 'Jouable':    prevStats.reception.r2--; break;
+                                        case 'Négative':   break;
+                                        case 'Faute':      prevStats.reception.frec--; break;
+                                    }
+                                    if (prev.quality.label !== 'Négative') {
+                                        prevStats.reception.r1++;
+                                    }
+                                    break;
+                                }
+                                if (prev.type === 'defense') {
+                                    if (prev.defenseQuality === 'positive') {
+                                        prevStats.defense.defplus--;
+                                        prevStats.defense.defminus++;
+                                    }
+                                    break;
+                                }
+                            }
+                            stats.relance.tot++;
+                            stats.relance.relminus++;
+                            break;
+                        }
+
+                        const passerRoleP = action.role || 'transition';
+                        const passCtxObj = getPassContext(rally.slice(0, i), passerRoleP);
+                        const pType = passCtxObj.playerType === 'Passeur' ? 'passeur' : 'autre';
+                        const pCtx = passCtxObj.context;
+
+                        function _incPass(bucket, scoreKey) {
+                            bucket.tot++;
+                            if (scoreKey === 'fp') bucket.fp++;
+                            else if (bucket[scoreKey] !== undefined) bucket[scoreKey]++;
+                        }
+
+                        // Retour direct
+                        if (action.isDirectReturn) {
+                            if (!action.isDirectReturnWinner) {
+                                const passExploited = isDirectReturnExploited(rally, i, action.team);
+                                if (passExploited) {
+                                    _incPass(stats.pass, 'fp');
+                                    _incPass(stats.pass[pType], 'fp');
+                                    if (stats.pass[pType][pCtx]) _incPass(stats.pass[pType][pCtx], 'fp');
+                                }
+                            }
+                            break;
+                        }
+                        // Passe filet → FP (courtSide 'out' n'est PAS une FP, c'est un clic latéral)
+                        if (!action.endPos || action.endPos.courtSide === 'net') {
+                            _incPass(stats.pass, 'fp');
+                            _incPass(stats.pass[pType], 'fp');
+                            if (stats.pass[pType][pCtx]) _incPass(stats.pass[pType][pCtx], 'fp');
+                            break;
+                        }
+
+                        // V20.0b : passe courtSide='out' = clic latéral mais dans zone de jeu
+                        // → convertir vers le court-side de l'équipe pour évaluer normalement
+                        let passEndPos = action.endPos;
+                        if (passEndPos.courtSide === 'out') {
+                            const passCourtSide = getCourtSideForTeam(team, cameraSide);
+                            passEndPos = { x: passEndPos.x, y: passEndPos.y, courtSide: passCourtSide };
+                        }
+
+                        // Déterminer zone et évaluer qualité
+                        const passZone = getPassZone(passEndPos, team, cameraSide);
+                        const passContext = passCtxObj.context;
+                        const passEval = evaluatePassQuality(passEndPos, passZone, passContext, team, cameraSide);
+                        const scoreKey = passEval.score === 4 ? 'p4' : passEval.score === 3 ? 'p3' : passEval.score === 2 ? 'p2' : 'p1';
+
+                        _incPass(stats.pass, scoreKey);
+                        _incPass(stats.pass[pType], scoreKey);
+                        if (stats.pass[pType][pCtx]) _incPass(stats.pass[pType][pCtx], scoreKey);
+                        break;
+                    }
+
+                    case 'attack': {
+                        const isRelance = action.attackType === 'relance';
+                        const oppositeTeam = team === 'home' ? 'away' : 'home';
+
+                        if (isRelance) {
+                            break; // Stats relance comptées côté défenseur
+                        }
+
+                        stats.attack.tot++;
+
+                        if (action.attackType === 'faute' || action.result === 'fault_net' || action.result === 'out') {
+                            stats.attack.fatt++;
+                        } else if (action.result === 'point') {
+                            stats.attack.attplus++;
+                        } else if (action.result === 'bloc_out') {
+                            stats.attack.attplus++;
+                        } else if (action.result === 'blocked') {
+                            stats.attack.bp++;
+                        } else if (action.result === 'defended') {
+                            const outcome = analyzeAfterDefended(rally, i, oppositeTeam);
+                            if (outcome === 'continued') {
+                                stats.attack.attminus++;
+                            } else if (outcome === 'blocked') {
+                                stats.attack.bp++;
+                            } else {
+                                stats.attack.attplus++;
+                            }
+                        }
+                        break;
+                    }
+
+                    case 'defense': {
+                        const oppositeTeamDef = team === 'home' ? 'away' : 'home';
+                        let isDefAfterRelance = false;
+                        for (let j = i - 1; j >= 0; j--) {
+                            if (rally[j].type === 'attack' && rally[j].team === oppositeTeamDef) {
+                                isDefAfterRelance = rally[j].attackType === 'relance';
+                                break;
+                            }
+                            if (rally[j].type === 'block' || (rally[j].type === 'defense' && rally[j].team === team)) break;
+                        }
+
+                        if (isDefAfterRelance) {
+                            stats.relance.tot++;
+                            const relExploited = action.isDirectReturn && !action.isDirectReturnWinner
+                                && isDirectReturnExploited(rally, i, action.team);
+                            if (relExploited) {
+                                stats.relance.frel++;
+                            } else if (action.isDirectReturn) {
+                                stats.relance.relminus++;
+                            } else if (action.result === 'fault') {
+                                let hasBlockBeforeRel = false;
+                                for (let j = i - 1; j >= 0; j--) {
+                                    if (rally[j].type === 'block' && rally[j].team === team) {
+                                        hasBlockBeforeRel = true;
+                                        break;
+                                    }
+                                    if (rally[j].type === 'pass' && rally[j].team === team) break;
+                                    if (rally[j].type === 'attack' && rally[j].team === team) break;
+                                }
+                                if (hasBlockBeforeRel) {
+                                    stats.relance.relminus++;
+                                } else {
+                                    stats.relance.frel++;
+                                }
+                            } else {
+                                if (action.defenseQuality === 'positive') {
+                                    stats.relance.relplus++;
+                                } else {
+                                    stats.relance.relminus++;
+                                }
+                            }
+                        } else {
+                            stats.defense.tot++;
+                            const defExploited = action.isDirectReturn && !action.isDirectReturnWinner
+                                && isDirectReturnExploited(rally, i, action.team);
+                            if (defExploited) {
+                                stats.defense.fdef++;
+                            } else if (action.isDirectReturn) {
+                                stats.defense.defminus++;
+                            } else if (action.result === 'fault') {
+                                let hasBlockBefore = false;
+                                for (let j = i - 1; j >= 0; j--) {
+                                    if (rally[j].type === 'block' && rally[j].team === team) {
+                                        hasBlockBefore = true;
+                                        break;
+                                    }
+                                    if (rally[j].type === 'pass' && rally[j].team === team) break;
+                                    if (rally[j].type === 'attack' && rally[j].team === team) break;
+                                }
+                                if (hasBlockBefore) {
+                                    stats.defense.defminus++;
+                                } else {
+                                    stats.defense.fdef++;
+                                }
+                            } else {
+                                if (action.defenseQuality === 'positive') {
+                                    stats.defense.defplus++;
+                                } else if (action.defenseQuality === 'negative') {
+                                    stats.defense.defminus++;
+                                } else {
+                                    stats.defense.defplus++;
+                                }
+                            }
+                        }
+                        break;
+                    }
+
+                    case 'block': {
+                        stats.block.tot++;
+                        if (action.result === 'bloc_out') {
+                            stats.block.fblc++;
+                        } else if (action.result === 'kill' || action.result === 'point') {
+                            stats.block.blcplus++;
+                        } else {
+                            let blockOutcome = 'unknown';
+                            for (let j = i + 1; j < rally.length; j++) {
+                                if (rally[j].type === 'defense') {
+                                    if (rally[j].result === 'fault') {
+                                        if (rally[j].team === team) {
+                                            blockOutcome = 'own_defense_fault';
+                                        } else {
+                                            blockOutcome = 'opponent_defense_fault';
+                                        }
+                                    } else {
+                                        blockOutcome = 'play_continues';
+                                    }
+                                    break;
+                                }
+                                if (rally[j].type === 'pass' || rally[j].type === 'attack') {
+                                    blockOutcome = 'play_continues';
+                                    break;
+                                }
+                            }
+                            if (blockOutcome === 'play_continues') {
+                                stats.block.blcminus++;
+                            } else if (blockOutcome === 'own_defense_fault') {
+                                stats.block.fblc++;
+                            } else if (blockOutcome === 'opponent_defense_fault') {
+                                stats.block.blcplus++;
+                            } else {
+                                stats.block.blcplus++;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        // ==================== RECALCUL COMPLET D'UN SET ====================
+
+        function recalculateSetStats(set, cameraSide) {
+            const newStats = { home: {}, away: {} };
+
+            // Init stats pour tous les joueurs des lineups
+            if (set.homeLineup) {
+                Object.values(set.homeLineup).forEach(name => {
+                    if (name) newStats.home[name] = initPlayerStats();
+                });
+            }
+            if (set.awayLineup) {
+                Object.values(set.awayLineup).forEach(name => {
+                    if (name) newStats.away[name] = initPlayerStats();
+                });
+            }
+
+            function getPlayerStatsFn(team, player) {
+                if (!team || !player) return null;
+                if (!newStats[team][player]) {
+                    newStats[team][player] = initPlayerStats();
+                }
+                return newStats[team][player];
+            }
+
+            if (set.points) {
+                for (const point of set.points) {
+                    updateStatsFromRally(point.rally, newStats, getPlayerStatsFn, cameraSide);
+                }
+            }
+
+            return newStats;
+        }
+
+        // ==================== FIX courtSide 'out' (Bug #2) ====================
+
+        function fixCourtSideOut(set, cameraSide) {
+            let fixes = 0;
+            if (!set.points) return fixes;
+
+            for (let p = 0; p < set.points.length; p++) {
+                const rally = set.points[p].rally;
+                if (!rally) continue;
+                for (let a = 0; a < rally.length; a++) {
+                    const action = rally[a];
+                    if (action.type === 'pass' && action.endPos && action.endPos.courtSide === 'out') {
+                        // Tenter de convertir comme convertOutToCourtHalf
+                        const ep = action.endPos;
+                        const passingTeam = action.team;
+                        const passingCourtSide = getCourtSideForTeam(passingTeam, cameraSide);
+
+                        // Y dans les limites du terrain?
+                        let inTop = (ep.y >= 0 && ep.y <= 100);
+                        let inBottom = (ep.y >= 0 && ep.y <= 100);
+                        // X dans les limites du terrain? (0-100% + marge)
+                        let inX = (ep.x >= -5 && ep.x <= 105);
+
+                        if (inX) {
+                            // C'est dans une moitié de terrain
+                            // Déterminer laquelle selon les coordonnées container
+                            // Si le y original est dans la moitié haute → top court
+                            // Si le y original est dans la moitié basse → bottom court
+                            // Problème : on a perdu les coordonnées container dans endPos
+                            // Mais on sait que si c'est un passe de l'équipe home et cameraSide = away,
+                            // home est en top, donc le passe devrait être en top court
+                            const expectedCourtSide = passingCourtSide;
+                            log(`  Set ${set.number} Pt ${p+1} Action ${a}: passe courtSide='out' → '${expectedCourtSide}' (x:${ep.x.toFixed(1)}%, y:${ep.y.toFixed(1)}%)`);
+                            action.endPos.courtSide = expectedCourtSide;
+                            fixes++;
+                        }
+                    }
+                }
+            }
+            return fixes;
+        }
+
+        // ==================== AFFICHAGE ====================
+
+        function formatPassStats(ps) {
+            return `Tot:${ps.tot} P4:${ps.p4} P3:${ps.p3} P2:${ps.p2} P1:${ps.p1} FP:${ps.fp}`;
+        }
+
+        function formatAllStats(playerStats, playerName) {
+            const s = playerStats;
+            let out = `  ${playerName}:\n`;
+            out += `    Serv: Tot:${s.service.tot} Ace:${s.service.ace} S+:${s.service.splus} FS:${s.service.fser}`;
+            if (s.service.recCountAdv > 0) {
+                out += ` Moy:${(s.service.recSumAdv / s.service.recCountAdv).toFixed(2)}`;
+            }
+            out += '\n';
+            out += `    Rec:  Tot:${s.reception.tot} R4:${s.reception.r4} R3:${s.reception.r3} R2:${s.reception.r2} R1:${s.reception.r1} FR:${s.reception.frec}\n`;
+            out += `    Pass: ${formatPassStats(s.pass)}\n`;
+            out += `    Att:  Tot:${s.attack.tot} A+:${s.attack.attplus} A-:${s.attack.attminus} BP:${s.attack.bp} FA:${s.attack.fatt}\n`;
+            out += `    Rel:  Tot:${s.relance.tot} R+:${s.relance.relplus} R-:${s.relance.relminus} FR:${s.relance.frel}\n`;
+            out += `    Def:  Tot:${s.defense.tot} D+:${s.defense.defplus} D-:${s.defense.defminus} FD:${s.defense.fdef}\n`;
+            out += `    Bloc: Tot:${s.block.tot} B+:${s.block.blcplus} B-:${s.block.blcminus} FB:${s.block.fblc}\n`;
+            return out;
+        }
+
+        // ==================== MATCH LISTING ====================
+
+        function loadMatches() {
+            const raw = localStorage.getItem('volleyball_matches');
+            if (!raw) return [];
+            try { return JSON.parse(raw); } catch(e) { return []; }
+        }
+
+        function renderMatchList() {
+            const matches = loadMatches();
+            const el = document.getElementById('matchList');
+            if (matches.length === 0) {
+                el.innerHTML = '<p>Aucun match en localStorage.</p>';
+                return;
+            }
+            el.innerHTML = matches.map(m => {
+                const setsInfo = (m.sets || []).map((s, i) => `S${i+1}: ${s.homeScore || 0}-${s.awayScore || 0}`).join(', ');
+                return `<div class="match-card" id="mc-${m.id}" onclick="selectMatch('${m.id}')">
+                    <strong>${m.opponent || 'Match inconnu'}</strong> — ${m.status || '?'} — ${setsInfo}
+                    <br><small>ID: ${m.id}</small>
+                </div>`;
+            }).join('');
+        }
+
+        function selectMatch(id) {
+            selectedMatchId = id;
+            document.querySelectorAll('.match-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('mc-' + id).classList.add('selected');
+            document.getElementById('btnDiag').disabled = false;
+            document.getElementById('btnFix').disabled = false;
+            log(`\n✅ Match sélectionné: ${id}`);
+        }
+
+        // ==================== DIAGNOSTIC ====================
+
+        function runDiagnostic() {
+            logEl.textContent = '';
+            const matches = loadMatches();
+            const match = matches.find(m => m.id === selectedMatchId);
+            if (!match) { log('❌ Match non trouvé'); return; }
+
+            log(`=== DIAGNOSTIC: ${match.opponent} ===`);
+            log(`Sets: ${match.sets.length}`);
+
+            // Charger les grilles depuis localStorage (comme l'app le fait)
+            loadPassGridsFromStorage();
+
+            for (let si = 0; si < match.sets.length; si++) {
+                const set = match.sets[si];
+                const cameraSide = set.cameraSide || 'away';
+                log(`\n--- Set ${si + 1} (cameraSide: ${cameraSide}) ---`);
+                log(`Score: ${set.homeScore}-${set.awayScore}, Points: ${(set.points || []).length}`);
+
+                // Compter les passes 'out' non corrigées
+                let outPasses = 0;
+                if (set.points) {
+                    for (const pt of set.points) {
+                        for (const act of (pt.rally || [])) {
+                            if (act.type === 'pass' && act.endPos && act.endPos.courtSide === 'out') {
+                                outPasses++;
+                            }
+                        }
+                    }
+                }
+                if (outPasses > 0) log(`  ⚠️ ${outPasses} passes avec courtSide='out' à corriger`);
+
+                // Stats actuelles (stockées dans le match)
+                log('\n  📊 STATS ACTUELLES (stockées):');
+                if (set.stats) {
+                    for (const team of ['home', 'away']) {
+                        log(`  [${team.toUpperCase()}]`);
+                        const teamStats = set.stats[team] || {};
+                        for (const [name, ps] of Object.entries(teamStats)) {
+                            log(formatAllStats(ps, name));
+                        }
+                    }
+                }
+
+                // Recalcul
+                log('\n  🔄 STATS RECALCULÉES:');
+                const newStats = recalculateSetStats(set, cameraSide);
+                for (const team of ['home', 'away']) {
+                    log(`  [${team.toUpperCase()}]`);
+                    for (const [name, ps] of Object.entries(newStats[team])) {
+                        log(formatAllStats(ps, name));
+                    }
+                }
+
+                // Comparer les passes
+                log('\n  📐 COMPARAISON PASSES:');
+                for (const team of ['home', 'away']) {
+                    for (const [name, newPs] of Object.entries(newStats[team])) {
+                        const oldPs = set.stats && set.stats[team] && set.stats[team][name];
+                        const newP = newPs.pass;
+                        const oldP = oldPs ? oldPs.pass : null;
+                        if (newP.tot > 0 || (oldP && oldP.tot > 0)) {
+                            const oldStr = oldP ? formatPassStats(oldP) : '(aucune)';
+                            const newStr = formatPassStats(newP);
+                            const changed = oldStr !== newStr;
+                            log(`  ${changed ? '⚠️' : '✅'} ${name} [${team}]: ${oldStr} → ${newStr}`);
+                        }
+                    }
+                }
+            }
+
+            log('\n=== FIN DIAGNOSTIC ===');
+        }
+
+        // ==================== AUTH GOOGLE ====================
+
+        let isAuthenticated = false;
+
+        async function doAuth() {
+            try {
+                log('🔑 Connexion Google...');
+                const provider = new firebase.auth.GoogleAuthProvider();
+                await auth.signInWithPopup(provider);
+                isAuthenticated = true;
+                document.getElementById('authStatus').textContent = '✅ Connecté — prêt à corriger';
+                document.getElementById('authStatus').style.color = '#4caf50';
+                log('✅ Connecté !');
+            } catch (e) {
+                log(`❌ Erreur auth: ${e.message}`);
+            }
+        }
+
+        // Vérifier si déjà connecté au chargement
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                isAuthenticated = true;
+                document.getElementById('authStatus').textContent = '✅ Connecté (' + user.email + ') — prêt à corriger';
+                document.getElementById('authStatus').style.color = '#4caf50';
+            }
+        });
+
+        // ==================== APPLIQUER + SYNC ATOMIQUE ====================
+
+        async function applyFixAndSync() {
+            if (!isAuthenticated) {
+                log('❌ Connecte-toi Google d\'abord !');
+                return;
+            }
+
+            logEl.textContent = '';
+            const matches = loadMatches();
+            const matchIdx = matches.findIndex(m => m.id === selectedMatchId);
+            if (matchIdx === -1) { log('❌ Match non trouvé'); return; }
+
+            const match = matches[matchIdx];
+            log(`=== CORRECTION: ${match.opponent} ===`);
+
+            loadPassGridsFromStorage();
+
+            for (let si = 0; si < match.sets.length; si++) {
+                const set = match.sets[si];
+                const cameraSide = set.cameraSide || 'away';
+                log(`\n--- Set ${si + 1} ---`);
+
+                // Étape 1: Fix courtSide 'out'
+                const outFixes = fixCourtSideOut(set, cameraSide);
+                if (outFixes > 0) log(`  ✅ ${outFixes} passes courtSide corrigées`);
+
+                // Étape 2: Recalcul stats
+                const newStats = recalculateSetStats(set, cameraSide);
+
+                // Afficher résultat passe
+                log('  Passes recalculées:');
+                for (const team of ['home', 'away']) {
+                    for (const [name, ps] of Object.entries(newStats[team])) {
+                        if (ps.pass.tot > 0) {
+                            log(`    ${name} [${team}]: ${formatPassStats(ps.pass)}`);
+                        }
+                    }
+                }
+
+                // Appliquer
+                set.stats = newStats;
+                log(`  ✅ Stats du set ${si + 1} remplacées`);
+            }
+
+            // Sauvegarder en localStorage
+            matches[matchIdx] = match;
+            localStorage.setItem('volleyball_matches', JSON.stringify(matches));
+            log('\n✅ Match sauvegardé en localStorage');
+
+            // Vérification immédiate
+            const check = JSON.parse(localStorage.getItem('volleyball_matches')).find(m => m.id === selectedMatchId);
+            if (check.sets[1]) {
+                const homeStats = check.sets[1].stats.home;
+                for (const [name, ps] of Object.entries(homeStats)) {
+                    if (ps.pass.tot > 0) {
+                        log(`\n🔍 VÉRIF localStorage Set 2 ${name}: P4=${ps.pass.p4} P3=${ps.pass.p3} P2=${ps.pass.p2} P1=${ps.pass.p1}`);
+                    }
+                }
+            }
+
+            // Sync Firebase IMMÉDIATEMENT (même page, même session auth)
+            log('\n☁️ Synchronisation Firebase...');
+            try {
+                await db.collection('matches').doc(match.id).set(match);
+                log('✅ Match synchronisé avec Firebase !');
+
+                // Vérification Firebase
+                const fbDoc = await db.collection('matches').doc(match.id).get();
+                const fbMatch = fbDoc.data();
+                if (fbMatch.sets[1]) {
+                    const fbHome = fbMatch.sets[1].stats.home;
+                    for (const [name, ps] of Object.entries(fbHome)) {
+                        if (ps.pass.tot > 0) {
+                            log(`\n🔍 VÉRIF Firebase Set 2 ${name}: P4=${ps.pass.p4} P3=${ps.pass.p3} P2=${ps.pass.p2} P1=${ps.pass.p1}`);
+                        }
+                    }
+                }
+
+                log('\n=== ✅ CORRECTION COMPLÈTE (localStorage + Firebase) ===');
+                log('Tu peux maintenant ouvrir historique.html en toute sécurité.');
+            } catch (e) {
+                log(`\n❌ Erreur Firebase: ${e.message}`);
+                log('Les données sont correctes en localStorage mais PAS en Firebase.');
+            }
+        }
+
+        // ==================== INIT ====================
+        renderMatchList();
+        log('Sélectionnez un match pour commencer.');
+    </script>
+</body>
+</html>
