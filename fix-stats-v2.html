@@ -30,6 +30,7 @@
     <p>Ce script recalcule les stats d'un match en utilisant <strong>exactement</strong> le même code que match-live.html, avec les vraies PASS_GRIDS hardcodées.</p>
 
     <h2>1. Sélection du match</h2>
+    <p><button onclick="loadFromFirebase()">☁️ Charger depuis Firebase</button> <small>(si le match n'est pas dans localStorage)</small></p>
     <div id="matchList"></div>
 
     <h2>2. Diagnostic & Correction</h2>
@@ -796,20 +797,44 @@
 
         // ==================== MATCH LISTING ====================
 
+        let matchSource = 'localStorage'; // 'localStorage' ou 'firebase'
+        let firebaseMatches = null; // cache des matchs Firebase
+
         function loadMatches() {
+            if (matchSource === 'firebase' && firebaseMatches) {
+                return firebaseMatches;
+            }
             const raw = localStorage.getItem('volleyball_matches');
             if (!raw) return [];
             try { return JSON.parse(raw); } catch(e) { return []; }
         }
 
+        async function loadFromFirebase() {
+            log('☁️ Chargement des matchs depuis Firebase...');
+            try {
+                const snapshot = await db.collection('matches').get();
+                firebaseMatches = [];
+                snapshot.forEach(doc => {
+                    firebaseMatches.push(doc.data());
+                });
+                matchSource = 'firebase';
+                log(`✅ ${firebaseMatches.length} matchs chargés depuis Firebase`);
+                renderMatchList();
+            } catch (e) {
+                log(`❌ Erreur Firebase: ${e.message}`);
+            }
+        }
+
         function renderMatchList() {
             const matches = loadMatches();
             const el = document.getElementById('matchList');
+            const sourceLabel = matchSource === 'firebase' ? '☁️ Firebase' : '💾 localStorage';
             if (matches.length === 0) {
-                el.innerHTML = '<p>Aucun match en localStorage.</p>';
+                el.innerHTML = `<p>Aucun match en ${sourceLabel}.</p>`;
                 return;
             }
-            el.innerHTML = matches.map(m => {
+            el.innerHTML = `<p style="color:#81d4fa;font-size:12px;">Source: ${sourceLabel} — ${matches.length} match(s)</p>` +
+            matches.map(m => {
                 const setsInfo = (m.sets || []).map((s, i) => `S${i+1}: ${s.homeScore || 0}-${s.awayScore || 0}`).join(', ');
                 return `<div class="match-card" id="mc-${m.id}" onclick="selectMatch('${m.id}')">
                     <strong>${m.opponent || 'Match inconnu'}</strong> — ${m.status || '?'} — ${setsInfo}
@@ -974,10 +999,24 @@
                 log(`  ✅ Stats du set ${si + 1} remplacées`);
             }
 
-            // Sauvegarder en localStorage
-            matches[matchIdx] = match;
-            localStorage.setItem('volleyball_matches', JSON.stringify(matches));
-            log('\n✅ Match sauvegardé en localStorage');
+            // Sauvegarder en localStorage (et mettre à jour le cache Firebase si nécessaire)
+            if (matchSource === 'firebase') {
+                firebaseMatches[matchIdx] = match;
+                // Aussi sauvegarder en localStorage pour cohérence
+                const localMatches = JSON.parse(localStorage.getItem('volleyball_matches') || '[]');
+                const localIdx = localMatches.findIndex(m => m.id === selectedMatchId);
+                if (localIdx !== -1) {
+                    localMatches[localIdx] = match;
+                    localStorage.setItem('volleyball_matches', JSON.stringify(localMatches));
+                    log('\n✅ Match sauvegardé en localStorage (existant mis à jour)');
+                } else {
+                    log('\n⚠️ Match non trouvé en localStorage (source: Firebase)');
+                }
+            } else {
+                matches[matchIdx] = match;
+                localStorage.setItem('volleyball_matches', JSON.stringify(matches));
+                log('\n✅ Match sauvegardé en localStorage');
+            }
 
             // Vérification immédiate
             const check = JSON.parse(localStorage.getItem('volleyball_matches')).find(m => m.id === selectedMatchId);
