@@ -275,6 +275,14 @@ const StatsAggregator = {
     },
 
     /**
+     * Comme aggregateStats, mais filtre les sets par indices.
+     */
+    aggregateStatsBySetIndices(setsData, teamKey, setIndices) {
+        var filtered = setIndices.map(function(i) { return setsData[i]; }).filter(Boolean);
+        return this.aggregateStats(filtered, teamKey);
+    },
+
+    /**
      * Calcule les totaux equipe a partir des totaux joueurs.
      */
     computeTotals(playerTotals) {
@@ -958,6 +966,11 @@ const BilanView = {
 
     ROLE_ORDER: ['Passeur', 'R4', 'Pointu', 'Centre'],
 
+    // Familles de postes : regroupement pour spider charts multi-postes
+    ROLE_TO_FAMILY: { 'Passeur': 'Passeur', 'R4': 'Ailier', 'Pointu': 'Ailier', 'Centre': 'Centre' },
+    FAMILY_ORDER: ['Passeur', 'Ailier', 'Centre'],
+    FAMILY_LABELS: { 'Passeur': 'Passeur', 'Ailier': 'Ailiers', 'Centre': 'Centre' },
+
     ROLE_COLORS: {
         'Passeur': '#8b5cf6',
         'R4': '#3b82f6',
@@ -1048,42 +1061,21 @@ const BilanView = {
             return;
         }
 
-        var homeRoles = this.getPlayerRoles(match, 'home');
-        var awayRoles = this.getPlayerRoles(match, 'away');
-        var homeTotals = StatsAggregator.aggregateStats(completedSets, 'home');
-        var awayTotals = StatsAggregator.aggregateStats(completedSets, 'away');
-
-        // Filtrer les joueurs avec au moins une stat
         var self = this;
+
+        // Familles par joueur (avec indices des sets et roles specifiques)
+        var homeFamilies = this.getPlayerFamilies(match, 'home');
+        var awayFamilies = this.getPlayerFamilies(match, 'away');
+
+        // Stats agregees completes (pour Distinctions)
+        var homeTotals = StatsAggregator.aggregateStats(completedSets, 'home');
+        var homeRoles = this.getPlayerRoles(match, 'home');
         var statCategories = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'];
-
-        function filterPlayers(totals, roles) {
-            return Object.keys(totals)
-                .filter(function(name) {
-                    if (!roles[name]) return false;
-                    var p = totals[name];
-                    return statCategories.some(function(cat) {
-                        return p[cat] && p[cat].tot > 0;
-                    });
-                });
-        }
-
-        var homePlayers = filterPlayers(homeTotals, homeRoles);
-        var awayPlayers = filterPlayers(awayTotals, awayRoles);
-
-        // Grouper par role
-        function groupByRole(players, roles) {
-            var groups = {};
-            players.forEach(function(name) {
-                var role = roles[name].primaryRole;
-                if (!groups[role]) groups[role] = [];
-                groups[role].push(name);
-            });
-            return groups;
-        }
-
-        var homeByRole = groupByRole(homePlayers, homeRoles);
-        var awayByRole = groupByRole(awayPlayers, awayRoles);
+        var homePlayers = Object.keys(homeTotals).filter(function(name) {
+            if (!homeRoles[name]) return false;
+            var p = homeTotals[name];
+            return statCategories.some(function(cat) { return p[cat] && p[cat].tot > 0; });
+        });
 
         // --- Head to head : Jen (gauche) vs Adverse (droite) ---
         var html = '<div class="bilan-section">';
@@ -1097,58 +1089,114 @@ const BilanView = {
 
         html += '<div class="bilan-grid">';
 
-        self.ROLE_ORDER.forEach(function(role) {
-            var homeGroup = homeByRole[role] || [];
-            var awayGroup = awayByRole[role] || [];
-            if (homeGroup.length === 0 && awayGroup.length === 0) return;
+        // --- Boucle par famille de postes ---
+        self.FAMILY_ORDER.forEach(function(family) {
+            // Axes et role IP par famille
+            var familyAxes = (family === 'Passeur') ? self.SPIDER_AXES_PASSEUR
+                           : (family === 'Centre') ? self.SPIDER_AXES_CENTRE
+                           : self.SPIDER_AXES;
+            var familyIpRole = (family === 'Ailier') ? 'R4' : family;
 
-            var color = self.ROLE_COLORS[role] || '#5f6368';
+            // Collecter joueurs home/away dans cette famille
+            function collectPlayers(familiesData) {
+                var names = [];
+                Object.keys(familiesData).forEach(function(name) {
+                    if (familiesData[name].families[family]) names.push(name);
+                });
+                return names;
+            }
 
-            // Pre-calculer scores + IP + axes pour chaque joueur
-            function computePlayerData(names, totals, side) {
+            var homeInFamily = collectPlayers(homeFamilies);
+            var awayInFamily = collectPlayers(awayFamilies);
+            if (homeInFamily.length === 0 && awayInFamily.length === 0) return;
+
+            // Calculer scores/IP pour chaque joueur (stats filtrees par sets de cette famille)
+            function computeFamilyData(names, familiesData, teamKey, side) {
                 return names.map(function(name) {
-                    var stats = totals[name];
-                    var effectiveRole = role;
-                    var axes = (role === 'Centre') ? self.SPIDER_AXES_CENTRE
-                             : (role === 'Passeur') ? self.SPIDER_AXES_PASSEUR
-                             : self.SPIDER_AXES;
-                    // Detection centre offensif (away uniquement)
-                    if (side === 'away' && role === 'Centre') {
+                    var famData = familiesData[name].families[family];
+                    var setIndices = famData.setIndices;
+                    var roles = famData.roles;
+
+                    // Stats filtrees aux sets de cette famille
+                    var playerTotals = StatsAggregator.aggregateStatsBySetIndices(completedSets, teamKey, setIndices);
+                    var stats = playerTotals[name] || StatsAggregator.initPlayerStats();
+
+                    var effectiveRole = family;
+                    var axes = familyAxes;
+                    var ipRole = familyIpRole;
+
+                    // Centre offensif adverse : bascule vers axes ailier
+                    if (side === 'away' && family === 'Centre') {
                         var hasAttack = stats.attack && stats.attack.tot >= 2;
                         var hasBlock = stats.block && stats.block.tot >= 1;
                         if (hasAttack || hasBlock) {
                             axes = self.SPIDER_AXES;
+                            ipRole = 'R4';
                             effectiveRole = 'R4';
                         }
                     }
+
+                    // Couleurs pastilles : une par role dans cette famille
+                    var roleColors = Object.keys(roles).map(function(r) {
+                        return self.ROLE_COLORS[r];
+                    });
+                    // Couleur principale = role le plus joue
+                    var primaryRoleInFamily = Object.keys(roles).sort(function(a, b) {
+                        return roles[b] - roles[a];
+                    })[0];
+                    var primaryColor = self.ROLE_COLORS[primaryRoleInFamily];
+
                     var scores = self.computeAxisScores(stats);
-                    var ip = self.computeIP(scores, effectiveRole);
-                    return { name: name, scores: scores, ip: ip, axes: axes, effectiveRole: effectiveRole };
-                }).sort(function(a, b) { return b.ip - a.ip; }); // Tri par IP decroissant
+                    var ip = self.computeIP(scores, ipRole);
+
+                    return {
+                        name: name, scores: scores, ip: ip, axes: axes,
+                        effectiveRole: effectiveRole, primaryColor: primaryColor,
+                        roleColors: roleColors
+                    };
+                }).sort(function(a, b) { return b.ip - a.ip; });
             }
 
-            var homeData = computePlayerData(homeGroup, homeTotals, 'home');
-            var awayData = computePlayerData(awayGroup, awayTotals, 'away');
+            var homeData = computeFamilyData(homeInFamily, homeFamilies, 'home', 'home');
+            var awayData = computeFamilyData(awayInFamily, awayFamilies, 'away', 'away');
 
-            // Overlay = toujours le meilleur du cote oppose
+            // Filtrer joueurs sans aucune stat dans les sets filtres
+            homeData = homeData.filter(function(d) {
+                return d.scores.service > 0 || d.scores.reception > 0 || d.scores.passe > 0
+                    || d.scores.attaque > 0 || d.scores.bloc > 0 || d.scores.relance > 0 || d.scores.defense > 0;
+            });
+            awayData = awayData.filter(function(d) {
+                return d.scores.service > 0 || d.scores.reception > 0 || d.scores.passe > 0
+                    || d.scores.attaque > 0 || d.scores.bloc > 0 || d.scores.relance > 0 || d.scores.defense > 0;
+            });
+
+            if (homeData.length === 0 && awayData.length === 0) return;
+
+            // Titre de section famille
+            var familyLabel = self.FAMILY_LABELS[family];
+            var familyColor = (family === 'Passeur') ? self.ROLE_COLORS['Passeur']
+                            : (family === 'Centre') ? self.ROLE_COLORS['Centre']
+                            : '#5f6368';
+            html += '<div class="bilan-family-title" style="border-left-color:' + familyColor + '">';
+            html += familyLabel;
+            html += '</div>';
+
+            // Overlay = meilleur du cote oppose dans cette famille
             var bestAwayOverlay = awayData.length > 0 ? { scores: awayData[0].scores, role: awayData[0].effectiveRole } : null;
             var bestHomeOverlay = homeData.length > 0 ? { scores: homeData[0].scores, role: homeData[0].effectiveRole } : null;
 
             var maxLen = Math.max(homeData.length, awayData.length);
-
             for (var i = 0; i < maxLen; i++) {
-                // Joueur Jen (gauche) + overlay meilleur adverse
                 if (homeData[i]) {
                     var h = homeData[i];
-                    html += self.renderSpiderChart(h.name, role, h.scores, h.ip, color, h.axes, false, bestAwayOverlay);
+                    html += self.renderSpiderChart(h.name, h.effectiveRole, h.scores, h.ip, h.primaryColor, h.axes, false, bestAwayOverlay, h.roleColors);
                 } else {
                     html += '<div class="bilan-player-card bilan-player-empty"></div>';
                 }
 
-                // Joueur Adverse (droite) + overlay meilleur home
                 if (awayData[i]) {
                     var a = awayData[i];
-                    html += self.renderSpiderChart(a.name, a.effectiveRole, a.scores, a.ip, color, a.axes, true, bestHomeOverlay);
+                    html += self.renderSpiderChart(a.name, a.effectiveRole, a.scores, a.ip, a.primaryColor, a.axes, true, bestHomeOverlay, a.roleColors);
                 } else {
                     html += '<div class="bilan-player-card bilan-player-empty"></div>';
                 }
@@ -1158,7 +1206,7 @@ const BilanView = {
         html += '</div>'; // ferme bilan-grid
         html += '</div>'; // ferme bilan-section
 
-        // Section Distinctions (home uniquement)
+        // Section Distinctions (home uniquement, stats agregees completes)
         html += this.renderDistinctions(homeTotals, homeRoles, homePlayers);
 
         container.innerHTML = html;
@@ -1444,6 +1492,207 @@ const BilanView = {
         return result;
     },
 
+    // Retourne par joueur : familles jouees, indices des sets, roles specifiques
+    // Ex: { "Alex": { families: { "Ailier": { setIndices: [0,1], roles: { R4:1, Pointu:1 } } } } }
+    getPlayerFamilies(match, team) {
+        var self = this;
+        var side = team || 'home';
+        var lineupKey = (side === 'away') ? 'awayLineup' : 'homeLineup';
+        var positionRoles = (side === 'away') ? self.POSITION_ROLES_AWAY : self.POSITION_ROLES_HOME;
+        var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+        var result = {};
+
+        completedSets.forEach(function(set, setIndex) {
+            var lineup = set[lineupKey];
+            if (!lineup) return;
+            Object.keys(lineup).forEach(function(pos) {
+                var playerName = lineup[pos];
+                if (!playerName) return;
+                var role = positionRoles[pos];
+                if (!role) return;
+                var family = self.ROLE_TO_FAMILY[role];
+                if (!family) return;
+
+                if (!result[playerName]) result[playerName] = { families: {} };
+                if (!result[playerName].families[family]) {
+                    result[playerName].families[family] = { setIndices: [], roles: {} };
+                }
+                var fam = result[playerName].families[family];
+                if (fam.setIndices.indexOf(setIndex) === -1) {
+                    fam.setIndices.push(setIndex);
+                }
+                fam.roles[role] = (fam.roles[role] || 0) + 1;
+            });
+        });
+
+        return result;
+    },
+
+    // --- Helpers pour Stats Annee ---
+
+    _median(arr) {
+        if (!arr || arr.length === 0) return 0;
+        var sorted = arr.slice().sort(function(a, b) { return a - b; });
+        var mid = Math.floor(sorted.length / 2);
+        return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+    },
+
+    _mergePlayerStats(target, source) {
+        var cats = ['service', 'reception', 'attack', 'relance', 'defense', 'block'];
+        cats.forEach(function(cat) {
+            if (!source[cat]) return;
+            Object.keys(target[cat]).forEach(function(k) {
+                if (typeof target[cat][k] === 'number') {
+                    target[cat][k] += (source[cat][k] || 0);
+                }
+            });
+        });
+        // Passe (plat)
+        if (source.pass) {
+            var pKeys = ['tot', 'p4', 'p3', 'p2', 'p1', 'fp'];
+            pKeys.forEach(function(k) { target.pass[k] += (source.pass[k] || 0); });
+            ['passeur', 'autre'].forEach(function(pType) {
+                if (!source.pass[pType]) return;
+                pKeys.forEach(function(k) { target.pass[pType][k] += (source.pass[pType][k] || 0); });
+                var ctxs = pType === 'passeur' ? ['confort', 'contraint', 'transition'] : ['contraint', 'transition'];
+                ctxs.forEach(function(ctx) {
+                    if (!source.pass[pType][ctx]) return;
+                    pKeys.forEach(function(k) { target.pass[pType][ctx][k] += (source.pass[pType][ctx][k] || 0); });
+                });
+            });
+        }
+    },
+
+    getPlayerRolesYear(matches) {
+        var self = this;
+        var mergedCounts = {};
+        matches.forEach(function(match) {
+            var roles = self.getPlayerRoles(match, 'home');
+            Object.keys(roles).forEach(function(name) {
+                if (!mergedCounts[name]) mergedCounts[name] = {};
+                Object.keys(roles[name].roles).forEach(function(role) {
+                    mergedCounts[name][role] = (mergedCounts[name][role] || 0) + roles[name].roles[role];
+                });
+            });
+        });
+        var result = {};
+        Object.keys(mergedCounts).forEach(function(name) {
+            var roles = mergedCounts[name];
+            var primary = Object.keys(roles).sort(function(a, b) { return roles[b] - roles[a]; })[0];
+            result[name] = { primaryRole: primary, roles: roles };
+        });
+        return result;
+    },
+
+    getPlayerFamiliesYear(matches) {
+        var self = this;
+        var result = {};
+        matches.forEach(function(match, matchIndex) {
+            var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+            completedSets.forEach(function(set, setIndex) {
+                var lineup = set.homeLineup;
+                if (!lineup) return;
+                Object.keys(lineup).forEach(function(pos) {
+                    var playerName = lineup[pos];
+                    if (!playerName) return;
+                    var role = self.POSITION_ROLES_HOME[pos];
+                    if (!role) return;
+                    var family = self.ROLE_TO_FAMILY[role];
+                    if (!family) return;
+
+                    if (!result[playerName]) result[playerName] = { primaryFamily: null, families: {} };
+                    if (!result[playerName].families[family]) {
+                        result[playerName].families[family] = { matchSets: [], roles: {}, totalSets: 0 };
+                    }
+                    var fam = result[playerName].families[family];
+                    fam.roles[role] = (fam.roles[role] || 0) + 1;
+                    fam.totalSets++;
+
+                    // Ajouter le setIndex au matchSets correspondant
+                    var ms = fam.matchSets.find(function(m) { return m.matchIndex === matchIndex; });
+                    if (!ms) {
+                        ms = { matchIndex: matchIndex, setIndices: [] };
+                        fam.matchSets.push(ms);
+                    }
+                    if (ms.setIndices.indexOf(setIndex) === -1) {
+                        ms.setIndices.push(setIndex);
+                    }
+                });
+            });
+        });
+
+        // Determiner primaryFamily par joueur
+        var familyOrder = self.FAMILY_ORDER;
+        Object.keys(result).forEach(function(name) {
+            var families = result[name].families;
+            var best = null;
+            var bestCount = -1;
+            Object.keys(families).forEach(function(fam) {
+                var count = families[fam].totalSets;
+                if (count > bestCount || (count === bestCount && familyOrder.indexOf(fam) < familyOrder.indexOf(best))) {
+                    best = fam;
+                    bestCount = count;
+                }
+            });
+            result[name].primaryFamily = best;
+        });
+
+        return result;
+    },
+
+    aggregateStatsForFamilyYear(matches, playerName, familyData) {
+        var self = this;
+        var merged = StatsAggregator.initPlayerStats();
+        familyData.matchSets.forEach(function(ms) {
+            var match = matches[ms.matchIndex];
+            if (!match) return;
+            var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+            var playerTotals = StatsAggregator.aggregateStatsBySetIndices(completedSets, 'home', ms.setIndices);
+            var stats = playerTotals[playerName];
+            if (stats) {
+                self._mergePlayerStats(merged, stats);
+            }
+        });
+        return merged;
+    },
+
+    computeMedianIPForFamily(matches, playerFamiliesYear, family) {
+        var self = this;
+        var familyIpRole = (family === 'Ailier') ? 'R4' : family;
+        var results = [];
+
+        Object.keys(playerFamiliesYear).forEach(function(name) {
+            var pData = playerFamiliesYear[name];
+            if (pData.primaryFamily !== family) return;
+            var famData = pData.families[family];
+            if (!famData) return;
+
+            var perMatchIPs = [];
+            famData.matchSets.forEach(function(ms) {
+                var match = matches[ms.matchIndex];
+                if (!match) return;
+                var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+                var playerTotals = StatsAggregator.aggregateStatsBySetIndices(completedSets, 'home', ms.setIndices);
+                var stats = playerTotals[name];
+                if (!stats) return;
+                var scores = self.computeAxisScores(stats);
+                var ip = self.computeIP(scores, familyIpRole);
+                perMatchIPs.push(ip);
+            });
+
+            if (perMatchIPs.length > 0) {
+                results.push({
+                    name: name,
+                    medianIP: self._median(perMatchIPs),
+                    matchCount: perMatchIPs.length
+                });
+            }
+        });
+
+        results.sort(function(a, b) { return b.medianIP - a.medianIP; });
+        return results;
+    },
+
     // Score plancher par axe : evite les polygones ecrases pour les postes
     // qui n'interviennent pas sur certains axes (ex: passeur sans attaque/bloc)
     // Plancher = 10 pour les axes secondaires, 0 pour tot=0 si le joueur n'a
@@ -1557,7 +1806,7 @@ const BilanView = {
 
     // --- Rendu SVG d'un spider chart pour un joueur ---
     // overlayData: { scores, role } — polygone adverse en overlay (toggle comparer)
-    renderSpiderChart(playerName, role, axisScores, ip, roleColor, chartAxes, isAway, overlayData) {
+    renderSpiderChart(playerName, role, axisScores, ip, roleColor, chartAxes, isAway, overlayData, multiRoleColors) {
         var cx = 75, cy = 78, maxR = 67;
         var self = this;
         var axes = chartAxes || self.SPIDER_AXES;
@@ -1567,9 +1816,18 @@ const BilanView = {
 
         var html = '<div class="bilan-player-card">';
 
-        // Header : role dot + nom + IP
+        // Header : role dot(s) + nom + IP — multi-pastilles si plusieurs roles dans la famille
         html += '<div class="bilan-player-header">';
-        html += '<span class="bilan-role-dot" style="background:' + roleColor + '"></span>';
+        var dotColors = multiRoleColors && multiRoleColors.length > 1 ? multiRoleColors : [roleColor];
+        if (dotColors.length > 1) {
+            html += '<span class="bilan-role-dots">';
+            dotColors.forEach(function(c) {
+                html += '<span class="bilan-role-dot bilan-role-dot-stacked" style="background:' + c + '"></span>';
+            });
+            html += '</span>';
+        } else {
+            html += '<span class="bilan-role-dot" style="background:' + dotColors[0] + '"></span>';
+        }
         html += '<span class="bilan-player-name">' + Utils.escapeHtml(playerName) + '</span>';
         html += '<span class="bilan-ip" style="color:' + roleColor + '">IP ' + ip + '</span>';
         html += '</div>';
@@ -1752,6 +2010,14 @@ const BilanView = {
     // --- Toggle comparaison : affiche/masque les overlays adverses ---
     toggleCompare(btn) {
         var grid = btn.closest('.bilan-section').querySelector('.bilan-grid');
+        var active = grid.classList.toggle('bilan-compare-active');
+        btn.classList.toggle('active', active);
+    },
+
+    // --- Toggle comparaison Stats Annee : meilleur coequipier au poste ---
+    toggleCompareYear(btn) {
+        var grid = btn.closest('.bilan-section').querySelector('.bilan-grid-year');
+        if (!grid) return;
         var active = grid.classList.toggle('bilan-compare-active');
         btn.classList.toggle('active', active);
     }
@@ -2282,8 +2548,11 @@ const YearStatsView = {
         // Bilan saison
         html += this.renderSummary(filtered);
 
-        // Classement joueurs
-        html += this.renderRankings(filtered);
+        // Spider charts par famille
+        html += this.renderSpiderCharts(filtered);
+
+        // Distinctions saison
+        html += this.renderYearDistinctions(filtered);
 
         // Stats joueurs cumulees (meme composant que Tab 1)
         html += this.renderPlayerStats(filtered);
@@ -2404,6 +2673,127 @@ const YearStatsView = {
         });
         html += '</div>';
         return html;
+    },
+
+    renderSpiderCharts(matches) {
+        var playerFamiliesYear = BilanView.getPlayerFamiliesYear(matches);
+        if (Object.keys(playerFamiliesYear).length === 0) return '';
+
+        var html = '<div class="bilan-section">';
+        html += '<div class="bilan-h2h-header">';
+        html += '<span class="bilan-h2h-team">Jen et ses Saints</span>';
+        html += '<button class="bilan-compare-toggle" onclick="BilanView.toggleCompareYear(this)" title="Comparer au meilleur au poste">';
+        html += '<span class="bilan-compare-icon">\uD83D\uDC41</span> Comparer</button>';
+        html += '</div>';
+
+        html += '<div class="bilan-grid-year">';
+
+        BilanView.FAMILY_ORDER.forEach(function(family) {
+            var familyAxes = (family === 'Passeur') ? BilanView.SPIDER_AXES_PASSEUR
+                           : (family === 'Centre') ? BilanView.SPIDER_AXES_CENTRE
+                           : BilanView.SPIDER_AXES;
+            var familyIpRole = (family === 'Ailier') ? 'R4' : family;
+
+            // Collecter joueurs de cette famille
+            var playersInFamily = [];
+            Object.keys(playerFamiliesYear).forEach(function(name) {
+                if (playerFamiliesYear[name].primaryFamily === family) {
+                    playersInFamily.push(name);
+                }
+            });
+            if (playersInFamily.length === 0) return;
+
+            // Calculer stats, scores, IP pour chaque joueur
+            var playerData = playersInFamily.map(function(name) {
+                var famData = playerFamiliesYear[name].families[family];
+                var stats = BilanView.aggregateStatsForFamilyYear(matches, name, famData);
+                var scores = BilanView.computeAxisScores(stats);
+                var ip = BilanView.computeIP(scores, familyIpRole);
+
+                // Pastilles multi-role dans la famille
+                var roleColors = Object.keys(famData.roles).map(function(r) {
+                    return BilanView.ROLE_COLORS[r];
+                });
+                var primaryRoleInFamily = Object.keys(famData.roles).sort(function(a, b) {
+                    return famData.roles[b] - famData.roles[a];
+                })[0];
+                var primaryColor = BilanView.ROLE_COLORS[primaryRoleInFamily];
+
+                return {
+                    name: name, scores: scores, ip: ip, stats: stats,
+                    primaryColor: primaryColor, roleColors: roleColors,
+                    effectiveRole: familyIpRole
+                };
+            }).sort(function(a, b) { return b.ip - a.ip; });
+
+            // Filtrer joueurs sans stats
+            playerData = playerData.filter(function(d) {
+                return d.scores.service > 0 || d.scores.reception > 0 || d.scores.passe > 0
+                    || d.scores.attaque > 0 || d.scores.bloc > 0 || d.scores.relance > 0 || d.scores.defense > 0;
+            });
+            if (playerData.length === 0) return;
+
+            // Overlay : meilleur au poste par IP median (min 3 matchs)
+            var medianRanking = BilanView.computeMedianIPForFamily(matches, playerFamiliesYear, family);
+            var eligible = medianRanking.filter(function(r) { return r.matchCount >= 1; });
+            var bestName = eligible.length > 0 ? eligible[0].name : null;
+            var secondBestName = eligible.length > 1 ? eligible[1].name : null;
+
+            // Pre-calculer les scores agregés du best et secondBest pour l'overlay
+            var bestOverlay = null;
+            var secondBestOverlay = null;
+            if (bestName) {
+                var bd = playerData.find(function(d) { return d.name === bestName; });
+                if (bd) bestOverlay = { scores: bd.scores, role: bd.effectiveRole };
+            }
+            if (secondBestName) {
+                var sd = playerData.find(function(d) { return d.name === secondBestName; });
+                if (sd) secondBestOverlay = { scores: sd.scores, role: sd.effectiveRole };
+            }
+
+            // Titre famille
+            var familyLabel = BilanView.FAMILY_LABELS[family];
+            var familyColor = (family === 'Passeur') ? BilanView.ROLE_COLORS['Passeur']
+                            : (family === 'Centre') ? BilanView.ROLE_COLORS['Centre']
+                            : '#5f6368';
+            html += '<div class="bilan-family-title" style="border-left-color:' + familyColor + '">';
+            html += familyLabel;
+            html += '</div>';
+
+            // Cartes spider
+            playerData.forEach(function(d) {
+                var overlay = null;
+                if (d.name === bestName) {
+                    overlay = secondBestOverlay;
+                } else {
+                    overlay = bestOverlay;
+                }
+                html += BilanView.renderSpiderChart(d.name, d.effectiveRole, d.scores, d.ip, d.primaryColor, familyAxes, false, overlay, d.roleColors);
+            });
+        });
+
+        html += '</div>'; // bilan-grid-year
+        html += '</div>'; // bilan-section
+        return html;
+    },
+
+    renderYearDistinctions(matches) {
+        var allSets = [];
+        matches.forEach(function(m) {
+            (m.sets || []).filter(function(s) { return s.completed; }).forEach(function(s) { allSets.push(s); });
+        });
+        var homeTotals = StatsAggregator.aggregateStats(allSets, 'home');
+        if (Object.keys(homeTotals).length === 0) return '';
+
+        var mergedRoles = BilanView.getPlayerRolesYear(matches);
+        var statCategories = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'];
+        var players = Object.keys(homeTotals).filter(function(name) {
+            if (!mergedRoles[name]) return false;
+            var p = homeTotals[name];
+            return statCategories.some(function(cat) { return p[cat] && p[cat].tot > 0; });
+        });
+
+        return BilanView.renderDistinctions(homeTotals, mergedRoles, players);
     },
 
     renderPlayerStats(matches) {

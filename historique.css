@@ -1352,9 +1352,33 @@ body {
     opacity: 0;
 }
 
+/* Titre de section famille (span toute la grille) */
+.bilan-family-title {
+    grid-column: 1 / -1;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    padding: 6px 8px 2px;
+    border-left: 3px solid #5f6368;
+    margin-top: 4px;
+}
+.bilan-family-title:first-child {
+    margin-top: 0;
+}
+
 .bilan-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    background: #f1f3f4;
+    border-radius: 14px;
+    padding: 8px;
+}
+
+.bilan-grid-year {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
     background: #f1f3f4;
     border-radius: 14px;
@@ -1380,6 +1404,18 @@ body {
     height: 8px;
     border-radius: 50%;
     flex-shrink: 0;
+}
+
+/* Pastilles empilees verticalement (multi-role meme famille) */
+.bilan-role-dots {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-shrink: 0;
+}
+.bilan-role-dot-stacked {
+    width: 6px;
+    height: 6px;
 }
 
 .bilan-player-name {
@@ -1499,7 +1535,8 @@ body {
     }
 
     /* Bilan : espacement tablette */
-    .bilan-grid {
+    .bilan-grid,
+    .bilan-grid-year {
         gap: 12px;
     }
 
@@ -1548,6 +1585,12 @@ body {
     /* Bilan : 4 colonnes sur desktop */
     .bilan-grid {
         grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+    }
+
+    /* Stats Annee : 3 colonnes (pas de H2H) */
+    .bilan-grid-year {
+        grid-template-columns: repeat(3, 1fr);
         gap: 16px;
     }
 
