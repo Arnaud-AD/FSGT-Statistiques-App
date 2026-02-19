@@ -815,7 +815,8 @@
                 const snapshot = await db.collection('matches').get();
                 firebaseMatches = [];
                 snapshot.forEach(doc => {
-                    firebaseMatches.push(doc.data());
+                    // JSON round-trip pour purger les types Firestore (Timestamp, etc.)
+                    firebaseMatches.push(JSON.parse(JSON.stringify(doc.data())));
                 });
                 matchSource = 'firebase';
                 log(`✅ ${firebaseMatches.length} matchs chargés depuis Firebase`);
@@ -963,6 +964,7 @@
             }
 
             logEl.textContent = '';
+          try {
             const matches = loadMatches();
             const matchIdx = matches.findIndex(m => m.id === selectedMatchId);
             if (matchIdx === -1) { log('❌ Match non trouvé'); return; }
@@ -1051,9 +1053,13 @@
                 log('\n=== ✅ CORRECTION COMPLÈTE (localStorage + Firebase) ===');
                 log('Tu peux maintenant ouvrir historique.html en toute sécurité.');
             } catch (e) {
-                log(`\n❌ Erreur Firebase: ${e.message}`);
+                log(`\n❌ Erreur Firebase sync: ${e.message}`);
                 log('Les données sont correctes en localStorage mais PAS en Firebase.');
             }
+          } catch (globalErr) {
+            log(`\n❌ ERREUR GLOBALE: ${globalErr.message}`);
+            log(globalErr.stack);
+          }
         }
 
         // ==================== INIT ====================
