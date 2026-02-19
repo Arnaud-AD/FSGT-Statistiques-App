@@ -2002,7 +2002,7 @@ const BilanView = {
 
         // Label du joueur compare (visible uniquement quand toggle comparer actif)
         if (overlayData && overlayData.name) {
-            html += '<div class="spider-overlay bilan-compare-label">vs ' + Utils.escapeHtml(overlayData.name) + '</div>';
+            html += '<div class="spider-overlay bilan-compare-label">' + Utils.escapeHtml(overlayData.name) + '</div>';
         }
 
         html += '</div>';
