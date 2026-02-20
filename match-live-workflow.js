@@ -1469,17 +1469,28 @@ WorkflowEngine.registerPhase('pass', {
         document.getElementById('outLabelBottom').style.display = 'block';
         activateNetZone(true);
 
-        // Auto-select Passeur
+        // Auto-select : Pointu si le Passeur est le dernier toucheur, sinon Passeur
         const passeur = getPlayerByRole(team, 'Passeur');
+        const lastToucher = getLastTouchPlayer(team);
+        let autoPlayer, autoRole;
+        if (passeur && passeur === lastToucher) {
+            const pointu = getPlayerByRole(team, 'Pointu');
+            autoPlayer = pointu || null;
+            autoRole = pointu ? 'Pointu' : null;
+        } else {
+            autoPlayer = passeur || null;
+            autoRole = passeur ? 'Passeur' : null;
+        }
+
         showAttackZones(team);
 
         renderOverrideTags({
             team,
             phaseLabel: 'Passe',
-            autoPlayer: passeur || null,
-            autoRole: passeur ? 'Passeur' : null,
+            autoPlayer,
+            autoRole,
             eligiblePlayers: getLineupPlayers(team),
-            mode: passeur ? 'override' : 'select'
+            mode: autoPlayer ? 'override' : 'select'
         });
 
         // Options 2ème touche
