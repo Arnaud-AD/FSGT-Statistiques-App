@@ -4025,6 +4025,40 @@
                     clickData = converted;
                     // NE PAS return — continuer dans le flow normal ci-dessous
                 } else if (converted && converted.courtSide === oppositeCourtSide) {
+                    // V20.18 : Relance passe out côté adverse → faute immédiate (comme attaque out)
+                    if (gameState.context.passRelance) {
+                        gameState.passAutoSelected = true;
+                        gameState.currentAction = {
+                            type: 'pass',
+                            player: selectedPasser,
+                            team: team,
+                            role: selectedRole,
+                            endPos: converted,
+                            passType: 'relance',
+                            result: 'out'
+                        };
+                        const lastActionForStart = gameState.rally[gameState.rally.length - 1];
+                        if (lastActionForStart && lastActionForStart.endPos) {
+                            gameState.currentAction.startPos = lastActionForStart.endPos;
+                        } else if (lastActionForStart && lastActionForStart.isDirectReturn && lastActionForStart.directReturnEndPos) {
+                            gameState.currentAction.startPos = lastActionForStart.directReturnEndPos;
+                        }
+                        addMarker(converted, 'pass');
+                        const lastAction = gameState.rally[gameState.rally.length - 1];
+                        if (lastAction && lastAction.endPos) {
+                            drawArrow(lastAction.endPos, converted, 'pass');
+                        } else if (lastAction && lastAction.isDirectReturn && lastAction.directReturnEndPos) {
+                            drawArrow(lastAction.directReturnEndPos, converted, 'pass');
+                        }
+                        gameState.context.passRelance = false;
+                        gameState.rally.push({ ...gameState.currentAction });
+                        document.getElementById('outArea').classList.remove('active');
+                        hideAttackZones();
+                        const otherTeam = team === 'home' ? 'away' : 'home';
+                        awardPoint(otherTeam);
+                        endRally();
+                        return;
+                    }
                     // Clic out côté adverse → retour direct
                     gameState.passAutoSelected = true;
                     gameState.currentAction = {
@@ -4068,6 +4102,12 @@
                         role: selectedRole,
                         endPos: clickData
                     };
+                    // V20.18 : propager le flag relance si actif
+                    if (gameState.context.passRelance) {
+                        gameState.currentAction.passType = 'relance';
+                        gameState.currentAction.result = 'out';
+                        gameState.context.passRelance = false;
+                    }
                     const lastActionForStart = gameState.rally[gameState.rally.length - 1];
                     if (lastActionForStart && lastActionForStart.endPos) {
                         gameState.currentAction.startPos = lastActionForStart.endPos;
@@ -4095,6 +4135,11 @@
                 role: selectedRole,
                 endPos: clickData
             };
+            // V20.18 : propager le flag relance passe
+            if (gameState.context.passRelance) {
+                gameState.currentAction.passType = 'relance';
+                gameState.context.passRelance = false;
+            }
 
             // startPos = arrivee de la reception/defense precedente
             const lastActionForPassStart = gameState.rally[gameState.rally.length - 1];
@@ -4267,6 +4312,18 @@
                     gameState.currentAction.endPos = clickData;
                     // NE PAS return — continuer dans le flow normal ci-dessous
                 } else if (converted && converted.courtSide === oppositeCourtSide) {
+                    // V20.18 : Relance passe out côté adverse → faute immédiate (comme attaque out)
+                    if (gameState.context.passRelance) {
+                        gameState.currentAction.endPos = converted;
+                        gameState.currentAction.passType = 'relance';
+                        gameState.currentAction.result = 'out';
+                        gameState.context.passRelance = false;
+                        gameState.rally.push({ ...gameState.currentAction });
+                        const otherTeam = passingTeam === 'home' ? 'away' : 'home';
+                        awardPoint(otherTeam);
+                        endRally();
+                        return;
+                    }
                     // Clic out côté adverse → retour direct
                     clickData = converted;
                     gameState.currentAction.endPos = clickData;
@@ -4281,6 +4338,12 @@
                     return;
                 } else {
                     // Vraiment hors zone → FP, point adversaire
+                    // V20.18 : propager le flag relance si actif
+                    if (gameState.context.passRelance) {
+                        gameState.currentAction.passType = 'relance';
+                        gameState.currentAction.result = 'out';
+                        gameState.context.passRelance = false;
+                    }
                     gameState.rally.push({ ...gameState.currentAction });
                     const otherTeam = passingTeam === 'home' ? 'away' : 'home';
                     awardPoint(otherTeam);
@@ -6151,6 +6214,10 @@
                         // V20.0b : Relance passe — geste de survie, pas comptabilise en stats passe
                         // Mais rétrograde la réception/défense précédente et compte une relance R-
                         if (action.passType === 'relance') {
+                            // V20.18 : relance out = pas de stats (faute brute, point perdu)
+                            if (action.result === 'out') {
+                                break;
+                            }
                             // Chercher la dernière réception ou défense de la même équipe en amont
                             for (let j = i - 1; j >= 0; j--) {
                                 const prev = rally[j];
