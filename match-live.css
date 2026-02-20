@@ -2113,72 +2113,72 @@
         }
 
         /* ===== Cas: Attaque R4 adverse — Bottom court (filet en haut) ===== */
-        /* R4 (petite diago + filet) : triangle haut-gauche le long du filet */
+        /* R4 (short) : quadrilatère haut-gauche le long du filet — pivot (63,35) */
         #defenseZonesBottom.attack-r4 .defense-zone[data-zone="short"] {
-            clip-path: polygon(0% 0%, 55% 0%, 40% 55%, 0% 35%);
+            clip-path: polygon(63% 35%, 0% 55%, 0% 0%, 65% 0%);
         }
-        #defenseZonesBottom.attack-r4 .defense-zone[data-zone="short"] .zone-label { left: 20%; top: 20%; }
-        /* Passeur (ligne) : coin bas-gauche, fond de court */
+        #defenseZonesBottom.attack-r4 .defense-zone[data-zone="short"] .zone-label { left: 25%; top: 20%; }
+        /* Centre (ligne) : quadrilatère bas-gauche — pivot (63,35) */
         #defenseZonesBottom.attack-r4 .defense-zone[data-zone="line"] {
-            clip-path: polygon(0% 35%, 40% 55%, 30% 100%, 0% 100%);
+            clip-path: polygon(60% 100%, 0% 100%, 0% 55%, 63% 35%);
         }
-        #defenseZonesBottom.attack-r4 .defense-zone[data-zone="line"] .zone-label { left: 15%; top: 70%; }
-        /* Centre (grande diagonale) : grande zone droite */
+        #defenseZonesBottom.attack-r4 .defense-zone[data-zone="line"] .zone-label { left: 25%; top: 75%; }
+        /* Passeur (diagonale) : bande droite — pivot (63,35) */
         #defenseZonesBottom.attack-r4 .defense-zone[data-zone="diagonal"] {
-            clip-path: polygon(55% 0%, 100% 0%, 100% 100%, 30% 100%, 40% 55%);
+            clip-path: polygon(100% 100%, 60% 100%, 63% 35%, 65% 0%, 100% 0%);
         }
-        #defenseZonesBottom.attack-r4 .defense-zone[data-zone="diagonal"] .zone-label { left: 70%; top: 50%; }
+        #defenseZonesBottom.attack-r4 .defense-zone[data-zone="diagonal"] .zone-label { left: 85%; top: 50%; }
 
         /* ===== Cas: Attaque R4 adverse — Top court (filet en bas, miroir X+Y) ===== */
-        /* R4 (petite diago + filet) : bas-droite le long du filet */
+        /* R4 (short) : quadrilatère bas-droite le long du filet — pivot (37,65) */
         #defenseZonesTop.attack-r4 .defense-zone[data-zone="short"] {
-            clip-path: polygon(100% 100%, 45% 100%, 60% 45%, 100% 65%);
+            clip-path: polygon(37% 65%, 100% 45%, 100% 100%, 35% 100%);
         }
-        #defenseZonesTop.attack-r4 .defense-zone[data-zone="short"] .zone-label { left: 80%; top: 80%; }
-        /* Passeur/Pointu (ligne) : grande zone gauche (fond + côté attaquant) */
+        #defenseZonesTop.attack-r4 .defense-zone[data-zone="short"] .zone-label { left: 75%; top: 80%; }
+        /* Passeur (ligne) : bande gauche — pivot (37,65) */
         #defenseZonesTop.attack-r4 .defense-zone[data-zone="line"] {
-            clip-path: polygon(45% 100%, 0% 100%, 0% 0%, 70% 0%, 60% 45%);
+            clip-path: polygon(0% 0%, 40% 0%, 37% 65%, 35% 100%, 0% 100%);
         }
-        #defenseZonesTop.attack-r4 .defense-zone[data-zone="line"] .zone-label { left: 30%; top: 50%; }
-        /* Centre (grande diagonale) : haut-droite, entre ligne et petite diago */
+        #defenseZonesTop.attack-r4 .defense-zone[data-zone="line"] .zone-label { left: 15%; top: 50%; }
+        /* Centre (diagonale) : quadrilatère haut-droite — pivot (37,65) */
         #defenseZonesTop.attack-r4 .defense-zone[data-zone="diagonal"] {
-            clip-path: polygon(100% 65%, 60% 45%, 70% 0%, 100% 0%);
+            clip-path: polygon(40% 0%, 100% 0%, 100% 45%, 37% 65%);
         }
-        #defenseZonesTop.attack-r4 .defense-zone[data-zone="diagonal"] .zone-label { left: 85%; top: 30%; }
+        #defenseZonesTop.attack-r4 .defense-zone[data-zone="diagonal"] .zone-label { left: 75%; top: 25%; }
 
-        /* ===== Cas: Attaque Pointu adverse — Bottom court (filet en haut, miroir X du R4) ===== */
-        /* Passeur/Pointu (petite diago + filet) : triangle haut-droite le long du filet */
+        /* ===== Cas: Attaque Pointu adverse — Bottom court (filet en haut, miroir X du R4 Bottom) ===== */
+        /* Short : quadrilatère haut-droite le long du filet — pivot (37,35) */
         #defenseZonesBottom.attack-pointu .defense-zone[data-zone="short"] {
-            clip-path: polygon(100% 0%, 45% 0%, 60% 55%, 100% 35%);
+            clip-path: polygon(35% 0%, 100% 0%, 100% 55%, 37% 35%);
         }
-        #defenseZonesBottom.attack-pointu .defense-zone[data-zone="short"] .zone-label { left: 80%; top: 20%; }
-        /* Centre (ligne) : coin bas-droite, fond de court */
+        #defenseZonesBottom.attack-pointu .defense-zone[data-zone="short"] .zone-label { left: 75%; top: 20%; }
+        /* Non-bloqueur (ligne) : quadrilatère bas-droite — pivot (37,35) */
         #defenseZonesBottom.attack-pointu .defense-zone[data-zone="line"] {
-            clip-path: polygon(100% 35%, 60% 55%, 70% 100%, 100% 100%);
+            clip-path: polygon(37% 35%, 100% 55%, 100% 100%, 35% 100%);
         }
-        #defenseZonesBottom.attack-pointu .defense-zone[data-zone="line"] .zone-label { left: 85%; top: 70%; }
-        /* Passeur/Pointu (grande diagonale) : grande zone gauche */
+        #defenseZonesBottom.attack-pointu .defense-zone[data-zone="line"] .zone-label { left: 75%; top: 75%; }
+        /* Centre (diagonale) : bande gauche — pivot (37,35) */
         #defenseZonesBottom.attack-pointu .defense-zone[data-zone="diagonal"] {
-            clip-path: polygon(45% 0%, 0% 0%, 0% 100%, 70% 100%, 60% 55%);
+            clip-path: polygon(0% 0%, 35% 0%, 37% 35%, 35% 100%, 0% 100%);
         }
-        #defenseZonesBottom.attack-pointu .defense-zone[data-zone="diagonal"] .zone-label { left: 30%; top: 50%; }
+        #defenseZonesBottom.attack-pointu .defense-zone[data-zone="diagonal"] .zone-label { left: 15%; top: 50%; }
 
-        /* ===== Cas: Attaque Pointu adverse — Top court (filet en bas, miroir X+Y) ===== */
-        /* Passeur/Pointu (petite diago + filet) : bas-gauche le long du filet */
+        /* ===== Cas: Attaque Pointu adverse — Top court (filet en bas, miroir X du R4 Top) ===== */
+        /* Short : quadrilatère bas-gauche le long du filet — pivot (63,65) */
         #defenseZonesTop.attack-pointu .defense-zone[data-zone="short"] {
-            clip-path: polygon(0% 100%, 55% 100%, 40% 45%, 0% 65%);
+            clip-path: polygon(63% 65%, 0% 45%, 0% 100%, 65% 100%);
         }
-        #defenseZonesTop.attack-pointu .defense-zone[data-zone="short"] .zone-label { left: 20%; top: 80%; }
-        /* Centre (ligne) : grande zone droite (fond + côté attaquant) */
+        #defenseZonesTop.attack-pointu .defense-zone[data-zone="short"] .zone-label { left: 25%; top: 80%; }
+        /* Centre (ligne) : bande droite — pivot (63,65) */
         #defenseZonesTop.attack-pointu .defense-zone[data-zone="line"] {
-            clip-path: polygon(55% 100%, 100% 100%, 100% 0%, 30% 0%, 40% 45%);
+            clip-path: polygon(100% 0%, 60% 0%, 63% 65%, 65% 100%, 100% 100%);
         }
-        #defenseZonesTop.attack-pointu .defense-zone[data-zone="line"] .zone-label { left: 70%; top: 50%; }
-        /* Passeur/Pointu (grande diagonale) : haut-gauche */
+        #defenseZonesTop.attack-pointu .defense-zone[data-zone="line"] .zone-label { left: 85%; top: 50%; }
+        /* Non-bloqueur (diagonale) : quadrilatère haut-gauche — pivot (63,65) */
         #defenseZonesTop.attack-pointu .defense-zone[data-zone="diagonal"] {
-            clip-path: polygon(0% 65%, 40% 45%, 30% 0%, 0% 0%);
+            clip-path: polygon(60% 0%, 0% 0%, 0% 45%, 63% 65%);
         }
-        #defenseZonesTop.attack-pointu .defense-zone[data-zone="diagonal"] .zone-label { left: 15%; top: 30%; }
+        #defenseZonesTop.attack-pointu .defense-zone[data-zone="diagonal"] .zone-label { left: 25%; top: 25%; }
 
         /* ===== Cas: Attaque Centre — Bottom court (filet en haut) ===== */
         /* Short (quadrilatère haut-gauche, côté ligne descend jusqu'à 50%) */
