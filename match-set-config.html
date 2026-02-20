@@ -726,9 +726,13 @@
             const setIndex = currentSetNumber - 1;
             const currentSet = currentMatch.sets?.[setIndex];
             if (currentSet) {
-                // URL YouTube
-                if (currentSet.youtubeUrl) {
-                    document.getElementById('youtubeUrl').value = currentSet.youtubeUrl;
+                // URL YouTube — fallback vers le set précédent si vide
+                let ytUrl = currentSet.youtubeUrl;
+                if (!ytUrl && setIndex > 0) {
+                    ytUrl = currentMatch.sets[setIndex - 1]?.youtubeUrl;
+                }
+                if (ytUrl) {
+                    document.getElementById('youtubeUrl').value = ytUrl;
                 }
             }
 
