@@ -62,15 +62,33 @@ const HistoriqueData = {
     },
 
     async deleteMatch(id) {
-        Storage.deleteMatch(id);
-        // Supprimer aussi de Firebase si disponible
+        // Vérifier l'authentification avant toute suppression
+        if (typeof auth === 'undefined' || !auth.currentUser) {
+            throw new Error('Connexion requise pour supprimer un match.');
+        }
+
+        var firebaseOk = false;
+
+        // Supprimer de Firebase EN PREMIER (si échec réseau, on ne supprime pas du local)
         if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured()) {
             try {
                 await FirebaseSync.deleteMatch(id);
+                firebaseOk = true;
             } catch (err) {
                 console.warn('[Historique] Suppression Firebase échouée :', err.message);
             }
         }
+
+        // Supprimer du localStorage
+        Storage.deleteMatch(id);
+
+        // Si Firebase a échoué, stocker un tombstone pour empêcher la restauration au prochain merge
+        if (!firebaseOk) {
+            var tombstones = JSON.parse(localStorage.getItem('volleyball_deleted_matches') || '[]');
+            if (tombstones.indexOf(id) === -1) tombstones.push(id);
+            localStorage.setItem('volleyball_deleted_matches', JSON.stringify(tombstones));
+        }
+
         this.invalidateCache();
     }
 };
@@ -2616,7 +2634,16 @@ const MatchStatsView = {
         var self = this;
         var opponent = match.opponent || 'Adversaire';
 
+        // Cacher le bouton si pas authentifié (seul l'admin peut supprimer)
+        var isAdmin = typeof auth !== 'undefined' && auth.currentUser;
+        btn.style.display = isAdmin ? '' : 'none';
+
         btn.onclick = async function() {
+            // Double-check auth au moment du clic
+            if (typeof auth === 'undefined' || !auth.currentUser) {
+                alert('Connexion requise pour supprimer un match.');
+                return;
+            }
             self._closeGearMenu();
             if (confirm('Supprimer ce match ?\n' + opponent + ' (' + (match.setsWon || 0) + '-' + (match.setsLost || 0) + ')')) {
                 await HistoriqueData.deleteMatch(match.id);

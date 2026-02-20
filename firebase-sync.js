@@ -88,6 +88,14 @@ const FirebaseSync = {
 
         await db.collection(this.COLLECTION).doc(matchId).delete();
         console.log('[FirebaseSync] Match supprimé de Firestore :', matchId);
+
+        // Nettoyer le tombstone local si présent (suppression Firebase réussie)
+        var tombstones = JSON.parse(localStorage.getItem('volleyball_deleted_matches') || '[]');
+        var idx = tombstones.indexOf(matchId);
+        if (idx !== -1) {
+            tombstones.splice(idx, 1);
+            localStorage.setItem('volleyball_deleted_matches', JSON.stringify(tombstones));
+        }
     },
 
     /**
@@ -100,11 +108,19 @@ const FirebaseSync = {
     mergeMatches(localMatches, firebaseMatches) {
         const merged = new Map();
 
+        // Exclure les matchs supprimés localement (tombstones)
+        const tombstones = JSON.parse(localStorage.getItem('volleyball_deleted_matches') || '[]');
+
         // Ajouter les matchs locaux
         localMatches.forEach(m => merged.set(m.id, m));
 
         // Les matchs Firebase écrasent les locaux (source de vérité partagée)
-        firebaseMatches.forEach(m => merged.set(m.id, m));
+        // Sauf ceux marqués comme supprimés localement
+        firebaseMatches.forEach(m => {
+            if (tombstones.indexOf(m.id) === -1) {
+                merged.set(m.id, m);
+            }
+        });
 
         // Trier par date décroissante
         return Array.from(merged.values())
