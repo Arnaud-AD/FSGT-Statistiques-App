@@ -267,7 +267,7 @@ const StatsAggregator = {
             },
             attack: { tot: 0, attplus: 0, attminus: 0, bp: 0, fatt: 0 },
             relance: { tot: 0, relplus: 0, relminus: 0, frel: 0 },
-            defense: { tot: 0, defplus: 0, defminus: 0, fdef: 0 },
+            defense: { tot: 0, defplus: 0, defneutral: 0, defminus: 0, fdef: 0 },
             block: { tot: 0, blcplus: 0, blcminus: 0, fblc: 0 }
         };
     },
@@ -336,11 +336,20 @@ const StatsAggregator = {
                 t.relance.relminus += (data.relance?.relminus || 0);
                 t.relance.frel += (data.relance?.frel || 0);
 
-                // Defense
+                // Defense (V20.15 : D+/D/D-/FD — rétrocompat ancien format)
                 t.defense.tot += (data.defense?.tot || 0);
                 t.defense.defplus += (data.defense?.defplus || 0);
-                t.defense.defminus += (data.defense?.defminus || 0);
-                t.defense.fdef += (data.defense?.fdef || 0);
+                if (data.defense?.defneutral !== undefined) {
+                    // Nouveau format V20.15+ : champs avec nouvelles significations
+                    t.defense.defneutral += (data.defense.defneutral || 0);
+                    t.defense.defminus += (data.defense.defminus || 0);
+                    t.defense.fdef += (data.defense.fdef || 0);
+                } else {
+                    // Ancien format : defminus = "D neutre", fdef = "D- faute touchée"
+                    t.defense.defneutral += (data.defense?.defminus || 0);
+                    t.defense.defminus += (data.defense?.fdef || 0);
+                    // fdef reste à 0 (non-touchée n'existait pas)
+                }
 
                 // Bloc
                 t.block.tot += (data.block?.tot || 0);
@@ -470,7 +479,8 @@ const SharedComponents = {
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
                 { key: 'defplus', label: 'D+', cls: 'positive', pct: true },
-                { key: 'defminus', label: 'D-', cls: 'neutral' },
+                { key: 'defneutral', label: 'D', cls: 'neutral' },
+                { key: 'defminus', label: 'D-', cls: 'negative', pct: true },
                 { key: 'fdef', label: 'FD', cls: 'negative', pct: true }
             ]
         },
@@ -541,7 +551,8 @@ const SharedComponents = {
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
                 { key: 'defplus', label: 'D+', cls: 'positive', pct: true },
-                { key: 'defminus', label: 'D-', cls: 'neutral' },
+                { key: 'defneutral', label: 'D', cls: 'neutral' },
+                { key: 'defminus', label: 'D-', cls: 'negative', pct: true },
                 { key: 'fdef', label: 'FD', cls: 'negative', pct: true }
             ]
         },
@@ -1543,7 +1554,7 @@ const BilanView = {
             html += '<span class="distinction-name">' + Utils.escapeHtml(bestDef.name) + '</span>';
             html += '</div>';
             html += '<div class="distinction-stats">';
-            html += 'D+ : ' + d.defplus + ' · D- : ' + d.defminus + ' · FD : ' + d.fdef;
+            html += 'D+ : ' + d.defplus + ' · D : ' + (d.defneutral || 0) + ' · D- : ' + d.defminus + ' · FD : ' + d.fdef;
             html += ' · R+ : ' + rl.relplus + ' · R- : ' + rl.relminus + ' · FR : ' + rl.frel;
             html += '</div>';
             html += '</div>';
@@ -1955,13 +1966,15 @@ const BilanView = {
             scores.relance = 0;
         }
 
-        // DEFENSE : base 30 + taux D+ - fault penalty
+        // DEFENSE (V20.15) : D+ vaut +50, D vaut +10, D- pénalise -10, FD pénalise -20
         // Bonne defense (60% D+, peu de fautes) = ~65
         var def = s.defense;
         if (def.tot > 0) {
             var posRate = def.defplus / def.tot;
-            var faultRateDef = def.fdef / def.tot;
-            var raw = 30 + posRate * 50 + (1 - faultRateDef) * 20;
+            var neutralRate = (def.defneutral || 0) / def.tot;
+            var faultRate = def.defminus / def.tot;
+            var untouchedRate = def.fdef / def.tot;
+            var raw = 30 + posRate * 50 + neutralRate * 10 - faultRate * 10 - untouchedRate * 20;
             scores.defense = this.clamp(floor, 100, Math.round(raw));
         } else {
             scores.defense = 0;

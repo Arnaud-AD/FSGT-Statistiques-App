@@ -371,16 +371,10 @@ function hideAttackZones() {
     });
 }
 
-// Affiche les 3 zones de défense selon le rôle de l'attaquant adverse
-// defendingTeam : équipe qui défend
-// attackerRole : rôle de l'attaquant adverse ('R4', 'Pointu', 'Centre', 'Passeur')
-function showDefenseZones(defendingTeam, attackerRole) {
+// Calcule le mapping zone→joueur sans toucher au DOM (V20.15)
+// Retourne : { mapping: {...}, cssClass: string, isRelance: bool } ou null
+function getDefenseZoneMapping(defendingTeam, attackerRole) {
     const courtSide = getCourtSideForTeam(defendingTeam);
-    const zonesId = courtSide === 'top' ? 'defenseZonesTop' : 'defenseZonesBottom';
-    const zones = document.getElementById(zonesId);
-
-    // Nettoyer les classes de cas précédents
-    zones.classList.remove('attack-r4', 'attack-pointu', 'attack-centre-left', 'attack-centre-right', 'attack-relance');
 
     // Auto-détecter le type d'attaque depuis gameState
     // IMPORTANT : en phase attack_type, le joueur n'a pas encore choisi → toujours zones standard
@@ -399,54 +393,32 @@ function showDefenseZones(defendingTeam, attackerRole) {
 
     // ===== CAS RELANCE : 4 zones FIXES (indépendantes du rôle de l'attaquant) =====
     if (attackType === 'relance') {
-        zones.classList.add('attack-relance');
-        // Mapping fixe : short=R4, line=Pointu, diagonal=Centre, extra=Passeur
-        const zoneMapping = {
-            short:    { player: getPlayerByRole(defendingTeam, 'R4'),      role: 'R4',      color: ROLE_COLORS['R4']      || '#3b82f6' },
-            line:     { player: getPlayerByRole(defendingTeam, 'Pointu'),  role: 'Pointu',  color: ROLE_COLORS['Pointu']  || '#22c55e' },
-            diagonal: { player: getPlayerByRole(defendingTeam, 'Centre'),  role: 'Centre',  color: ROLE_COLORS['Centre']  || '#ef4444' },
-            extra:    { player: getPlayerByRole(defendingTeam, 'Passeur'), role: 'Passeur', color: ROLE_COLORS['Passeur'] || '#8b5cf6' }
+        return {
+            mapping: {
+                short:    { player: getPlayerByRole(defendingTeam, 'R4'),      role: 'R4',      color: ROLE_COLORS['R4']      || '#3b82f6' },
+                line:     { player: getPlayerByRole(defendingTeam, 'Pointu'),  role: 'Pointu',  color: ROLE_COLORS['Pointu']  || '#22c55e' },
+                diagonal: { player: getPlayerByRole(defendingTeam, 'Centre'),  role: 'Centre',  color: ROLE_COLORS['Centre']  || '#ef4444' },
+                extra:    { player: getPlayerByRole(defendingTeam, 'Passeur'), role: 'Passeur', color: ROLE_COLORS['Passeur'] || '#8b5cf6' }
+            },
+            cssClass: 'attack-relance',
+            isRelance: true
         };
-
-        // Appliquer les couleurs et labels aux 4 zones
-        const zoneElements = zones.querySelectorAll('.defense-zone');
-        zoneElements.forEach(el => {
-            const zoneType = el.dataset.zone;
-            const m = zoneMapping[zoneType];
-            if (m) {
-                el.style.background = m.color + 'cc';
-                el.innerHTML = `<span class="zone-label">${m.role}<br>${m.player}</span>`;
-                el.dataset.player = m.player;
-                el.dataset.role = m.role;
-            }
-        });
-
-        zones.classList.add('active');
-        return;
     }
 
     // ===== CAS STANDARD : 3 zones dépendantes du rôle de l'attaquant =====
     // Passeur attaque comme le Pointu (même position)
     const effectiveRole = attackerRole === 'Passeur' ? 'Pointu' : attackerRole;
 
-    // Déterminer qui bloque et qui défend où
     let zoneMapping; // { line: {player, role, color}, diagonal: {player, role, color}, short: {player, role, color} }
+    let cssClass = '';
 
     if (effectiveRole === 'R4') {
-        zones.classList.add('attack-r4');
+        cssClass = 'attack-r4';
         // R4 adverse attaque → le blockerRight bloque TOUJOURS face au R4
-        // (Pointu ou Passeur selon config, positionné au filet côté R4)
         const blockerRightRole = defendingTeam === 'home'
             ? (currentSet.homeBlockerRight || 'Pointu')
             : (currentSet.awayBlockerRight || 'Pointu');
-        const blockerRole = blockerRightRole;
-        // Les 3 défenseurs = tous sauf le blockerRight
-        // L'autre entre Passeur/Pointu (non-bloqueur)
         const otherSide = (blockerRightRole === 'Pointu') ? 'Passeur' : 'Pointu';
-        // short = R4 (au filet petite diag, côté bloc)
-        // Centre = fond court côté bloc (derrière le bloc)
-        // non-bloqueur (Passeur/Pointu) = grande zone diagonale opposée
-        //
         // ATTENTION : les noms CSS "line"/"diagonal" correspondent à des zones DIFFÉRENTES
         // selon le court (miroir X+Y) :
         //   Bottom court : "line" = fond côté bloc (petit), "diagonal" = grande zone opposée
@@ -454,11 +426,9 @@ function showDefenseZones(defendingTeam, attackerRole) {
         const shortRole = 'R4';
         let lineRole, diagRole;
         if (courtSide === 'bottom') {
-            // Bottom : line=fond côté bloc=Centre, diagonal=grande zone opposée=non-bloqueur
             lineRole = 'Centre';
             diagRole = otherSide;
         } else {
-            // Top : line=grande zone=non-bloqueur, diagonal=fond côté bloc=Centre
             lineRole = otherSide;
             diagRole = 'Centre';
         }
@@ -470,33 +440,18 @@ function showDefenseZones(defendingTeam, attackerRole) {
         };
 
     } else if (effectiveRole === 'Pointu') {
-        zones.classList.add('attack-pointu');
+        cssClass = 'attack-pointu';
         // Pointu adverse attaque → le R4 bloque TOUJOURS face au Pointu
-        // (il est positionné au filet côté Pointu, c'est le bloqueur naturel)
-        const blockerRole = 'R4';
-        // Les 3 défenseurs = Passeur, Pointu, Centre (tous sauf R4)
-        // Déterminer qui va en short (petite diag au filet) vs line (fond court)
         const blockerRightRole = defendingTeam === 'home'
             ? (currentSet.homeBlockerRight || 'Pointu')
             : (currentSet.awayBlockerRight || 'Pointu');
-        // blockerRight = celui qui bloque habituellement côté R4 (pas ici, R4 bloque)
-        // Il est donc dispo en défense : il va en short (petite diag au filet, côté bloc)
-        // L'autre entre Passeur/Pointu (non-bloqueur) va en fond court côté bloc
-        // Le Centre couvre la grande zone opposée
-        //
-        // ATTENTION : les noms CSS "line"/"diagonal" correspondent à des zones DIFFÉRENTES
-        // selon le court (miroir X+Y), donc le mapping JS doit s'adapter :
-        //   Top court :    "line" = grande zone droite (opposée), "diagonal" = fond côté bloc
-        //   Bottom court : "line" = fond côté bloc,               "diagonal" = grande zone gauche (opposée)
         const shortRole = blockerRightRole;
         const nonBlockerRole = (blockerRightRole === 'Pointu') ? 'Passeur' : 'Pointu';
         let lineRole, diagRole;
         if (courtSide === 'top') {
-            // Top : line=grande zone opposée=Centre, diagonal=fond côté bloc=non-bloqueur
             lineRole = 'Centre';
             diagRole = nonBlockerRole;
         } else {
-            // Bottom : line=fond côté bloc=non-bloqueur, diagonal=grande zone opposée=Centre
             lineRole = nonBlockerRole;
             diagRole = 'Centre';
         }
@@ -508,9 +463,6 @@ function showDefenseZones(defendingTeam, attackerRole) {
         };
     } else if (effectiveRole === 'Centre') {
         // Centre adverse attaque depuis le milieu du filet
-        // Qui bloque dépend du primaryBlocker :
-        //   primaryBlocker === 'right' → le blockerRight (Pointu/Passeur) bloque
-        //   primaryBlocker === 'R4'    → le R4 bloque (il couvre le centre du filet)
         const primaryBlocker = defendingTeam === 'home'
             ? (currentSet.homePrimaryBlocker || 'right')
             : (currentSet.awayPrimaryBlocker || 'right');
@@ -519,23 +471,18 @@ function showDefenseZones(defendingTeam, attackerRole) {
             : (currentSet.awayBlockerRight || 'Pointu');
         const otherSide = (blockerRightRole === 'Pointu') ? 'Passeur' : 'Pointu';
 
-        // Short du côté du bloqueur (le défenseur court est à côté du bloc) :
-        //   blockerRight bloque → short côté gauche écran bottom (attack-centre-left)
-        //   R4 bloque           → short côté droit écran bottom (attack-centre-right)
         const isShortLeft = (primaryBlocker !== 'R4');
-        zones.classList.add(isShortLeft ? 'attack-centre-left' : 'attack-centre-right');
+        cssClass = isShortLeft ? 'attack-centre-left' : 'attack-centre-right';
 
         let shortRole, lineRole, diagRole;
         if (primaryBlocker === 'R4') {
-            // R4 bloque → blockerRight (Pointu) en short à droite, Centre à gauche, otherSide à droite profond
             shortRole = blockerRightRole;
-            lineRole = 'Centre';     // gauche écran (bottom) = grande zone
-            diagRole = otherSide;    // droite écran (bottom) = zone profonde hors short
+            lineRole = 'Centre';
+            diagRole = otherSide;
         } else {
-            // blockerRight bloque → R4 en short à gauche, otherSide à droite, Centre à gauche profond
             shortRole = 'R4';
-            lineRole = otherSide;    // droite écran (bottom)
-            diagRole = 'Centre';     // gauche écran profond (bottom)
+            lineRole = otherSide;
+            diagRole = 'Centre';
         }
 
         zoneMapping = {
@@ -545,13 +492,32 @@ function showDefenseZones(defendingTeam, attackerRole) {
         };
     }
 
-    if (!zoneMapping) return;
+    if (!zoneMapping) return null;
+    return { mapping: zoneMapping, cssClass: cssClass, isRelance: false };
+}
+
+// Affiche les zones de défense selon le rôle de l'attaquant adverse (utilise getDefenseZoneMapping)
+// defendingTeam : équipe qui défend
+// attackerRole : rôle de l'attaquant adverse ('R4', 'Pointu', 'Centre', 'Passeur')
+function showDefenseZones(defendingTeam, attackerRole) {
+    const courtSide = getCourtSideForTeam(defendingTeam);
+    const zonesId = courtSide === 'top' ? 'defenseZonesTop' : 'defenseZonesBottom';
+    const zones = document.getElementById(zonesId);
+
+    // Nettoyer les classes de cas précédents
+    zones.classList.remove('attack-r4', 'attack-pointu', 'attack-centre-left', 'attack-centre-right', 'attack-relance');
+
+    const result = getDefenseZoneMapping(defendingTeam, attackerRole);
+    if (!result) return;
+
+    // Appliquer la classe CSS
+    if (result.cssClass) zones.classList.add(result.cssClass);
 
     // Appliquer les couleurs et labels aux zones
     const zoneElements = zones.querySelectorAll('.defense-zone');
     zoneElements.forEach(el => {
-        const zoneType = el.dataset.zone; // 'line', 'diagonal', 'short'
-        const m = zoneMapping[zoneType];
+        const zoneType = el.dataset.zone;
+        const m = result.mapping[zoneType];
         if (m) {
             el.style.background = m.color + 'cc';
             el.innerHTML = `<span class="zone-label">${m.role}<br>${m.player}</span>`;
@@ -1170,6 +1136,10 @@ function updateOverrideVisuals() {
 
 // Helper défense unifié : remplace le pattern if/else renderDefenseZonesOnly/renderPlayerSelection
 function renderDefenseSelection(team, attackerRole, showDirectAttack = false) {
+    // V20.15 : stocker le rôle de l'attaquant pour le contexte défense
+    if (gameState.context) {
+        gameState.context.defenseAttackerRole = attackerRole || null;
+    }
     if (attackerRole) {
         showDefenseZones(team, attackerRole);
         renderOverrideTags({

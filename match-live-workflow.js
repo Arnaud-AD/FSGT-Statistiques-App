@@ -2813,15 +2813,35 @@ WorkflowEngine.registerPhase('defense_end', {
         if (action === 'defensePoint') {
             WorkflowEngine.pushState('defense_point_btn');
             hideDefenseQualityZones();
+            document.getElementById('outArea').classList.remove('active');
 
-            // L'attaque a traversé et touché le sol — point pour l'attaquant
-            const attackingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+            // V20.15 : enregistrer FD pour le joueur sélectionné (tag auto-select ou override)
+            const effectivePlayer = getEffectivePlayer() || gameState.currentAction.player;
+            const effectiveRole = effectivePlayer && effectivePlayer !== gameState.currentAction.player
+                ? getPlayerRole(gameState.attackingTeam, effectivePlayer)
+                : gameState.currentAction.role;
 
+            // Forcer la dernière attaque en point
             const lastAttack = [...gameState.rally].reverse().find(a => a.type === 'attack');
             if (lastAttack) lastAttack.result = 'point';
 
+            // Enregistrer la défense non-touchée (FD) si un joueur est sélectionné
+            if (effectivePlayer) {
+                gameState.currentAction = {
+                    type: 'defense',
+                    player: effectivePlayer,
+                    team: gameState.attackingTeam,
+                    role: effectiveRole,
+                    untouched: true,
+                    result: 'fault'
+                };
+                gameState.rally.push({ ...gameState.currentAction });
+            }
+
+            // Point pour l'équipe attaquante (adversaire du défenseur)
+            const scoringTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
             gameState.currentAction = {};
-            WorkflowEngine.awardPoint(attackingTeam);
+            WorkflowEngine.awardPoint(scoringTeam);
             WorkflowEngine.endRally();
         }
     },
@@ -3102,6 +3122,25 @@ WorkflowEngine.registerPhase('result', {
         document.getElementById('outArea').classList.remove('active');
 
         if (result === 'point') {
+            // V20.15 : enregistrer FD pour le défenseur sélectionné (tag auto-select ou override)
+            const defendingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+            const autoDefender = gameState.context.autoDefender;
+            const effectivePlayer = getEffectivePlayer() || (autoDefender ? autoDefender.player : null);
+
+            if (effectivePlayer) {
+                const effectiveRole = autoDefender && effectivePlayer === autoDefender.player
+                    ? autoDefender.role
+                    : getPlayerRole(defendingTeam, effectivePlayer);
+                gameState.rally.push({
+                    type: 'defense',
+                    player: effectivePlayer,
+                    team: defendingTeam,
+                    role: effectiveRole,
+                    untouched: true,
+                    result: 'fault'
+                });
+            }
+
             gameState.context.autoDefender = null;
             WorkflowEngine.awardPoint(gameState.attackingTeam);
             WorkflowEngine.endRally();

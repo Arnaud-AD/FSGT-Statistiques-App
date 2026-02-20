@@ -1003,7 +1003,7 @@
                 },
                 attack:    { tot: 0, attplus: 0, attminus: 0, bp: 0, fatt: 0 },
                 relance:   { tot: 0, relplus: 0, relminus: 0, frel: 0 },
-                defense:   { tot: 0, defplus: 0, defminus: 0, fdef: 0 },
+                defense:   { tot: 0, defplus: 0, defneutral: 0, defminus: 0, fdef: 0 },
                 block:     { tot: 0, blcplus: 0, blcminus: 0, fblc: 0 }
             };
         }
@@ -1056,7 +1056,7 @@
                 pass:      { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0 },
                 attack:    { tot: 0, attplus: 0, attminus: 0, bp: 0, fatt: 0 },
                 relance:   { tot: 0, relplus: 0, relminus: 0, frel: 0 },
-                defense:   { tot: 0, defplus: 0, defminus: 0, fdef: 0 },
+                defense:   { tot: 0, defplus: 0, defneutral: 0, defminus: 0, fdef: 0 },
                 block:     { tot: 0, blcplus: 0, blcminus: 0, fblc: 0 }
             };
 
@@ -1091,6 +1091,7 @@
                 totals.relance.frel += p.relance.frel;
                 totals.defense.tot += p.defense.tot;
                 totals.defense.defplus += p.defense.defplus;
+                totals.defense.defneutral += p.defense.defneutral;
                 totals.defense.defminus += p.defense.defminus;
                 totals.defense.fdef += p.defense.fdef;
                 totals.block.tot += p.block.tot;
@@ -1249,25 +1250,27 @@
                 cell(totals.relance.frel, 'negative') +
             '</tr></tbody></table></div>';
 
-            // ===== DÉFENSE =====
+            // ===== DÉFENSE (V20.15 : D+/D/D-/FD) =====
             html += '<div class="stat-table-card">' +
                 '<div class="stat-table-header defense">Défense</div>' +
                 '<table class="detail-stats-table"><thead><tr>' +
-                '<th>Tot</th><th>D+</th><th>D-</th><th>FD</th>' +
+                '<th>Tot</th><th>D+</th><th>D</th><th>D-</th><th>FD</th>' +
                 '</tr></thead><tbody>';
             players.forEach(name => {
                 const p = stats[name];
                 html += '<tr>' +
                     '<td>' + (p.defense.tot || '-') + '</td>' +
                     cell(p.defense.defplus, 'positive') +
-                    cell(p.defense.defminus, 'neutral') +
+                    cell(p.defense.defneutral, 'neutral') +
+                    cell(p.defense.defminus, 'negative') +
                     cell(p.defense.fdef, 'negative') +
                 '</tr>';
             });
             html += '<tr class="total-row">' +
                 '<td>' + (totals.defense.tot || '-') + '</td>' +
                 cell(totals.defense.defplus, 'positive') +
-                cell(totals.defense.defminus, 'neutral') +
+                cell(totals.defense.defneutral, 'neutral') +
+                cell(totals.defense.defminus, 'negative') +
                 cell(totals.defense.fdef, 'negative') +
             '</tr></tbody></table></div>';
 
@@ -4656,7 +4659,22 @@
             }
 
             if (result === 'point') {
-                // Point pour l'équipe qui attaque
+                // V20.15 : enregistrer FD pour le défenseur sélectionné
+                const defendingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+                const fdPlayer = getEffectivePlayer() || gameState.defenseAutoPlayer;
+
+                if (fdPlayer) {
+                    const fdRole = getPlayerRole(defendingTeam, fdPlayer);
+                    gameState.rally.push({
+                        type: 'defense',
+                        player: fdPlayer,
+                        team: defendingTeam,
+                        role: fdRole,
+                        untouched: true,
+                        result: 'fault'
+                    });
+                }
+
                 gameState.defenseAutoSelected = false;
                 gameState.defenseAutoPlayer = null;
                 awardPoint(gameState.attackingTeam);
@@ -5059,7 +5077,7 @@
             hideDefenseQualityZones();
             hideAllSections();
 
-            const attackingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
+            const scoringTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
 
             // Marquer l'attaque comme point
             const lastAttack = [...gameState.rally].reverse().find(a => a.type === 'attack');
@@ -5067,10 +5085,22 @@
                 lastAttack.result = 'point';
             }
 
-            // Annuler l'action de défense en cours
-            gameState.currentAction = {};
+            // V20.15 : enregistrer FD si un défenseur est sélectionné
+            const effectivePlayer = getEffectivePlayer() || gameState.currentAction.player;
+            if (effectivePlayer) {
+                const effectiveRole = getPlayerRole(gameState.attackingTeam, effectivePlayer);
+                gameState.rally.push({
+                    type: 'defense',
+                    player: effectivePlayer,
+                    team: gameState.attackingTeam,
+                    role: effectiveRole,
+                    untouched: true,
+                    result: 'fault'
+                });
+            }
 
-            awardPoint(attackingTeam);
+            gameState.currentAction = {};
+            awardPoint(scoringTeam);
             endRally();
         }
 
@@ -6144,12 +6174,12 @@
                                     break;
                                 }
                                 if (prev.type === 'defense') {
-                                    // Annuler le score précédent et forcer D-
+                                    // Annuler le score précédent et forcer D (V20.15)
                                     if (prev.defenseQuality === 'positive') {
                                         prevStats.defense.defplus--;
-                                        prevStats.defense.defminus++;
+                                        prevStats.defense.defneutral++;
                                     }
-                                    // Si déjà D- ou FD, on ne change rien
+                                    // Si déjà D/D-/FD, on ne change rien
                                     break;
                                 }
                             }
@@ -6302,40 +6332,46 @@
                                 }
                             }
                         } else {
-                            // ===== DEFENSE NORMALE =====
+                            // ===== DEFENSE NORMALE (V20.15 : D+/D/D-/FD) =====
                             stats.defense.tot++;
-                            // Retour direct de défense exploité → FD
-                            const defExploited = action.isDirectReturn && !action.isDirectReturnWinner
-                                && isDirectReturnExploited(rally, i, action.team);
-                            if (defExploited) {
+
+                            if (action.untouched) {
+                                // Balle non-touchée dans la zone → FD
                                 stats.defense.fdef++;
-                            } else if (action.isDirectReturn) {
-                                // Retour direct gagnant ou non exploité → D-
-                                stats.defense.defminus++;
-                            } else if (action.result === 'fault') {
-                                // Vérifier si un bloc précède cette défense dans le même échange
-                                let hasBlockBefore = false;
-                                for (let j = i - 1; j >= 0; j--) {
-                                    if (rally[j].type === 'block' && rally[j].team === team) {
-                                        hasBlockBefore = true;
-                                        break;
-                                    }
-                                    if (rally[j].type === 'pass' && rally[j].team === team) break;
-                                    if (rally[j].type === 'attack' && rally[j].team === team) break;
-                                }
-                                if (hasBlockBefore) {
-                                    stats.defense.defminus++;
-                                } else {
-                                    stats.defense.fdef++;
-                                }
                             } else {
-                                // Défense réussie : utiliser defenseQuality si disponible
-                                if (action.defenseQuality === 'positive') {
-                                    stats.defense.defplus++;
-                                } else if (action.defenseQuality === 'negative') {
+                                // Retour direct de défense exploité → D- (touchée mais perdue)
+                                const defExploited = action.isDirectReturn && !action.isDirectReturnWinner
+                                    && isDirectReturnExploited(rally, i, action.team);
+                                if (defExploited) {
                                     stats.defense.defminus++;
+                                } else if (action.isDirectReturn) {
+                                    // Retour direct gagnant ou non exploité → D (touchée, pas optimale)
+                                    stats.defense.defneutral++;
+                                } else if (action.result === 'fault') {
+                                    // Vérifier si un bloc précède cette défense dans le même échange
+                                    let hasBlockBefore = false;
+                                    for (let j = i - 1; j >= 0; j--) {
+                                        if (rally[j].type === 'block' && rally[j].team === team) {
+                                            hasBlockBefore = true;
+                                            break;
+                                        }
+                                        if (rally[j].type === 'pass' && rally[j].team === team) break;
+                                        if (rally[j].type === 'attack' && rally[j].team === team) break;
+                                    }
+                                    if (hasBlockBefore) {
+                                        stats.defense.defneutral++; // Responsabilité partagée bloc → D
+                                    } else {
+                                        stats.defense.defminus++; // Seul responsable → D-
+                                    }
                                 } else {
-                                    stats.defense.defplus++;
+                                    // Défense réussie : utiliser defenseQuality si disponible
+                                    if (action.defenseQuality === 'positive') {
+                                        stats.defense.defplus++;
+                                    } else if (action.defenseQuality === 'negative') {
+                                        stats.defense.defneutral++; // Touchée mais pas optimale → D
+                                    } else {
+                                        stats.defense.defplus++; // Fallback → D+
+                                    }
                                 }
                             }
                         }
