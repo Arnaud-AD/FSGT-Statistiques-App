@@ -1164,6 +1164,8 @@
                 // Set déjà créé par confirmEndSet — mettre à jour la composition
                 currentMatch.sets[currentSetIndex].homeLineup = { ...homePositions };
                 currentMatch.sets[currentSetIndex].awayLineup = { ...awayPositions };
+                currentMatch.sets[currentSetIndex].initialHomeLineup = { ...homePositions };
+                currentMatch.sets[currentSetIndex].initialAwayLineup = { ...awayPositions };
                 currentMatch.sets[currentSetIndex].homeBlockerRight = homeBlockerRight;
                 currentMatch.sets[currentSetIndex].awayBlockerRight = awayBlockerRight;
                 currentMatch.sets[currentSetIndex].homePrimaryBlocker = homePrimaryBlocker;
@@ -1177,6 +1179,8 @@
                     setNumber: currentSetNumber,
                     homeLineup: { ...homePositions },
                     awayLineup: { ...awayPositions },
+                    initialHomeLineup: { ...homePositions },
+                    initialAwayLineup: { ...awayPositions },
                     homeBlockerRight: homeBlockerRight,
                     awayBlockerRight: awayBlockerRight,
                     homePrimaryBlocker: homePrimaryBlocker,

@@ -379,8 +379,21 @@ function subSlotClick(role) {
     if (subState.selectedBench) {
         // Bench player selected → substitute into this slot
         const benchPlayer = subState.selectedBench;
-        
+        const oldPlayer = lineup[pos];
+
         lineup[pos] = benchPlayer;
+
+        // Log substitution for playing time tracking
+        if (!currentSet.substitutions) currentSet.substitutions = [];
+        currentSet.substitutions.push({
+            pointIndex: (currentSet.points || []).length,
+            team: team,
+            playerOut: oldPlayer,
+            playerIn: benchPlayer,
+            position: parseInt(pos),
+            homeScore: currentSet.homeScore || 0,
+            awayScore: currentSet.awayScore || 0
+        });
         
         const statsTeam = team === 'home' ? setStats.home : setStats.away;
         if (!statsTeam[benchPlayer]) {

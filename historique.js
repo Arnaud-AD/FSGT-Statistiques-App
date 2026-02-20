@@ -3204,68 +3204,24 @@ const YearStatsView = {
     }
 };
 
-// ==================== TAB 3: SETS PLAYED VIEW ====================
+// ==================== TAB 3: TEMPS DE JEU ====================
 const SetsPlayedView = {
-    filters: { outcome: 'all', type: 'all' },
     _rendered: false,
 
     render() {
         var container = document.getElementById('content-setsStats');
         if (!container) return;
 
-        var allSets = this.loadAllSets();
-        if (allSets.length === 0) {
+        var matches = HistoriqueData.getCompletedMatches();
+        if (matches.length === 0) {
             this.renderEmpty(container);
             return;
         }
 
-        var filtered = this.filterSets(allSets);
-
-        var html = '';
-        html += this.renderSummary(allSets);
-        html += this.renderFilterPills();
-        html += this.renderSetList(filtered);
-
-        container.innerHTML = html;
-        this.bindEvents(container, allSets);
+        var playerRoles = BilanView.getPlayerRolesYear(matches);
+        var data = this.computePlayingTime(matches, playerRoles);
+        container.innerHTML = this.renderTable(data, matches);
         this._rendered = true;
-    },
-
-    loadAllSets() {
-        var matches = HistoriqueData.getCompletedMatches();
-        var sets = [];
-        matches.forEach(function(match) {
-            (match.sets || []).filter(function(s) { return s.completed; }).forEach(function(set) {
-                var homeScore = set.finalHomeScore || 0;
-                var awayScore = set.finalAwayScore || 0;
-                sets.push({
-                    matchId: match.id,
-                    opponent: match.opponent || 'Adversaire',
-                    matchType: match.type,
-                    matchDate: match.timestamp || match.completedAt,
-                    setNumber: set.number,
-                    homeScore: homeScore,
-                    awayScore: awayScore,
-                    winner: set.winner || (homeScore > awayScore ? 'home' : 'away'),
-                    points: set.points || [],
-                    margin: Math.abs(homeScore - awayScore),
-                    isClose: Math.abs(homeScore - awayScore) <= 3,
-                    stats: set.stats,
-                    set: set
-                });
-            });
-        });
-        return sets.sort(function(a, b) { return (b.matchDate || 0) - (a.matchDate || 0); });
-    },
-
-    filterSets(sets) {
-        var f = this.filters;
-        var result = sets;
-        if (f.outcome === 'won') result = result.filter(function(s) { return s.winner === 'home'; });
-        if (f.outcome === 'lost') result = result.filter(function(s) { return s.winner === 'away'; });
-        if (f.type === 'close') result = result.filter(function(s) { return s.isClose; });
-        if (f.type === 'dominated') result = result.filter(function(s) { return !s.isClose; });
-        return result;
     },
 
     renderEmpty(container) {
@@ -3273,147 +3229,207 @@ const SetsPlayedView = {
             '<div class="empty-state-icon visual">' +
             '<svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>' +
             '</div>' +
-            '<h3 class="empty-state-title">Sets joues</h3>' +
-            '<p class="empty-state-desc">L\'analyse detaillee de tous vos sets sera disponible ici.</p>' +
+            '<h3 class="empty-state-title">Temps de jeu</h3>' +
+            '<p class="empty-state-desc">Les statistiques de temps de jeu seront disponibles apres vos premiers matchs.</p>' +
             '</div>';
     },
 
-    renderSummary(sets) {
-        var won = sets.filter(function(s) { return s.winner === 'home'; }).length;
-        var lost = sets.filter(function(s) { return s.winner === 'away'; }).length;
-        var closeSets = sets.filter(function(s) { return s.isClose; });
-        var closeWon = closeSets.filter(function(s) { return s.winner === 'home'; }).length;
+    /**
+     * Calcule le temps de jeu par joueur.
+     * Pour chaque set :
+     * - Si substitutions[] existe → prorata précis basé sur les points joués
+     * - Sinon → fallback : chaque joueur avec des stats compte pour 1 set complet
+     *
+     * Retourne un tableau trié par setsPlayed décroissant.
+     */
+    computePlayingTime(matches, playerRoles) {
+        var players = {}; // { name: { setsPlayed, matchesPresent: Set, matchesStarting: Set, details } }
 
-        var html = '<div class="sets-summary-card">';
-        html += '<strong>' + sets.length + ' sets</strong> &nbsp; ';
-        html += '<span style="color:var(--win-color);font-weight:600">' + won + 'V</span>';
-        html += ' \u00b7 <span style="color:var(--loss-color);font-weight:600">' + lost + 'D</span>';
-        html += ' &nbsp; Win: <strong>' + (sets.length > 0 ? Math.round(won / sets.length * 100) : 0) + '%</strong>';
-        if (closeSets.length > 0) {
-            html += '<br>Serres: ' + closeSets.length + ' (' + closeWon + 'V \u00b7 ' + (closeSets.length - closeWon) + 'D)';
-        }
-        html += '</div>';
-        return html;
-    },
+        matches.forEach(function(match) {
+            var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+            if (completedSets.length === 0) return;
 
-    renderFilterPills() {
-        var self = this;
-        var html = '<div class="sets-filters">';
+            completedSets.forEach(function(set, setIdx) {
+                var totalPoints = (set.points || []).length;
+                if (totalPoints === 0) totalPoints = 1; // eviter division par 0
+                var subs = set.substitutions || [];
+                var homeSubs = subs.filter(function(s) { return s.team === 'home'; });
 
-        // Outcome filters
-        var outcomes = [
-            { key: 'all', label: 'Tous' },
-            { key: 'won', label: 'Gagnes' },
-            { key: 'lost', label: 'Perdus' }
-        ];
-        outcomes.forEach(function(f) {
-            html += '<button class="sets-filter-pill ' + (self.filters.outcome === f.key ? 'active' : '') + '" data-group="outcome" data-value="' + f.key + '">' + f.label + '</button>';
-        });
+                // Determiner le lineup initial du set
+                var initialLineup = set.initialHomeLineup || set.homeLineup || {};
+                var initialPlayers = Object.values(initialLineup).filter(function(p) { return p !== null; });
 
-        // Type filters
-        var types = [
-            { key: 'all', label: 'Tous types' },
-            { key: 'close', label: 'Serres' },
-            { key: 'dominated', label: 'Domines' }
-        ];
-        types.forEach(function(f) {
-            html += '<button class="sets-filter-pill ' + (self.filters.type === f.key ? 'active' : '') + '" data-group="type" data-value="' + f.key + '">' + f.label + '</button>';
-        });
+                if (homeSubs.length > 0) {
+                    // ---- Calcul precis avec substitutions ----
+                    // Reconstruire la timeline : qui etait sur le terrain a chaque intervalle
+                    // Trier les subs par pointIndex
+                    var sortedSubs = homeSubs.slice().sort(function(a, b) { return a.pointIndex - b.pointIndex; });
 
-        html += '</div>';
-        return html;
-    },
+                    // Construire les intervalles : [0, sub1.pointIndex), [sub1.pointIndex, sub2.pointIndex), ..., [lastSub.pointIndex, totalPoints)
+                    var currentOnCourt = initialPlayers.slice();
+                    var intervals = [];
+                    var prevIndex = 0;
 
-    renderSetList(sets) {
-        if (sets.length === 0) {
-            return '<div style="text-align:center;color:var(--text-secondary);padding:24px;">Aucun set correspondant aux filtres.</div>';
-        }
+                    sortedSubs.forEach(function(sub) {
+                        if (sub.pointIndex > prevIndex) {
+                            intervals.push({ start: prevIndex, end: sub.pointIndex, players: currentOnCourt.slice() });
+                        }
+                        // Appliquer la substitution
+                        var idx = currentOnCourt.indexOf(sub.playerOut);
+                        if (idx >= 0) {
+                            currentOnCourt[idx] = sub.playerIn;
+                        } else {
+                            currentOnCourt.push(sub.playerIn);
+                        }
+                        prevIndex = sub.pointIndex;
+                    });
 
-        var html = '<div class="sets-list">';
-        sets.forEach(function(s, i) {
-            var isWin = s.winner === 'home';
-            var scoreColor = isWin ? 'color:var(--accent-blue)' : 'color:var(--loss-color)';
-            var dateStr = s.matchDate ? Utils.formatDate(s.matchDate) : '';
+                    // Dernier intervalle
+                    if (prevIndex < totalPoints) {
+                        intervals.push({ start: prevIndex, end: totalPoints, players: currentOnCourt.slice() });
+                    }
 
-            html += '<div class="set-card" data-set-index="' + i + '">';
-            html += '<div class="set-card-header">';
-            html += '<span class="set-card-result ' + (isWin ? 'win' : 'loss') + '"></span>';
-            html += '<div class="set-card-info">';
-            html += '<div class="set-card-title">Set ' + (s.setNumber || '?') + ' vs ' + Utils.escapeHtml(s.opponent) + '</div>';
-            html += '<div class="set-card-meta">' + dateStr + '</div>';
-            html += '</div>';
-            html += '<span class="set-card-score" style="' + scoreColor + '">' + s.homeScore + '-' + s.awayScore + '</span>';
-            if (s.isClose) {
-                html += '<span class="set-card-badge">serre</span>';
-            }
-            html += '</div>'; // set-card-header
+                    // Accumuler le prorata par joueur
+                    intervals.forEach(function(interval) {
+                        var pointsInInterval = interval.end - interval.start;
+                        var ratio = pointsInInterval / totalPoints;
+                        interval.players.forEach(function(name) {
+                            if (!players[name]) players[name] = { setsPlayed: 0, matchIds: {}, startingMatchIds: {} };
+                            players[name].setsPlayed += ratio;
+                            players[name].matchIds[match.id] = true;
+                        });
+                    });
+                } else {
+                    // ---- Fallback : pas de substitutions ----
+                    // Tous les joueurs qui apparaissent dans les stats du set = 1 set complet
+                    var statsHome = (set.stats && set.stats.home) ? set.stats.home : {};
+                    var playersInSet = Object.keys(statsHome).filter(function(name) {
+                        var s = statsHome[name];
+                        // Verifier qu'il a au moins 1 action
+                        return s && (
+                            (s.service && s.service.tot > 0) ||
+                            (s.reception && s.reception.tot > 0) ||
+                            (s.pass && s.pass.tot > 0) ||
+                            (s.attack && s.attack.tot > 0) ||
+                            (s.relance && s.relance.tot > 0) ||
+                            (s.defense && s.defense.tot > 0) ||
+                            (s.block && s.block.tot > 0)
+                        );
+                    });
 
-            // Mini timeline
-            if (s.points.length > 0) {
-                html += '<div class="set-card-timeline" id="setTimeline' + i + '"></div>';
-            }
+                    // Si aucun joueur dans les stats, utiliser le lineup
+                    if (playersInSet.length === 0) {
+                        playersInSet = initialPlayers.slice();
+                    }
 
-            html += '</div>'; // set-card
-        });
-        html += '</div>';
-        return html;
-    },
+                    playersInSet.forEach(function(name) {
+                        if (!players[name]) players[name] = { setsPlayed: 0, matchIds: {}, startingMatchIds: {} };
+                        players[name].setsPlayed += 1;
+                        players[name].matchIds[match.id] = true;
+                    });
+                }
 
-    bindEvents(container, allSets) {
-        var self = this;
-
-        // Filtres
-        container.querySelectorAll('.sets-filter-pill').forEach(function(pill) {
-            pill.addEventListener('click', function() {
-                var group = pill.dataset.group;
-                var value = pill.dataset.value;
-                self.filters[group] = value;
-                self._rendered = false;
-                self.render();
+                // Titulaire = dans le lineup initial du Set 1 (setIdx === 0)
+                if (setIdx === 0) {
+                    initialPlayers.forEach(function(name) {
+                        if (!players[name]) players[name] = { setsPlayed: 0, matchIds: {}, startingMatchIds: {} };
+                        players[name].startingMatchIds[match.id] = true;
+                    });
+                }
             });
         });
 
-        // Rendre les mini-timelines apres insertion dans le DOM
-        var filtered = this.filterSets(allSets);
-        filtered.forEach(function(s, i) {
-            if (s.points.length > 0) {
-                var timelineEl = document.getElementById('setTimeline' + i);
-                if (timelineEl) {
-                    var containerWidth = timelineEl.clientWidth || 300;
-                    var runs = SharedComponents.buildTimelineData(s.set || { points: s.points, initialHomeScore: 0 });
-                    if (runs.length > 0) {
-                        var totalPoints = runs.reduce(function(sum, r) { return sum + r.points.length; }, 0);
-                        var blockSize = SharedComponents.computeBlockSize(totalPoints, runs.length, containerWidth);
-                        var fontSize = blockSize >= 14 ? 8 : 0;
-                        var blockHeight = 14;
-
-                        var html = '<div class="timeline-chart" style="gap:2px;">';
-                        runs.forEach(function(run) {
-                            html += '<div class="timeline-run">';
-                            html += '<div class="timeline-row">';
-                            run.points.forEach(function(pt) {
-                                if (run.team === 'home') {
-                                    html += '<div class="tl-block home" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;font-size:' + fontSize + 'px;">' + (fontSize > 0 ? pt.teamScore : '') + '</div>';
-                                } else {
-                                    html += '<div class="tl-block empty" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;"></div>';
-                                }
-                            });
-                            html += '</div><div class="timeline-row">';
-                            run.points.forEach(function(pt) {
-                                if (run.team === 'away') {
-                                    html += '<div class="tl-block away" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;font-size:' + fontSize + 'px;">' + (fontSize > 0 ? pt.teamScore : '') + '</div>';
-                                } else {
-                                    html += '<div class="tl-block empty" style="width:' + blockSize + 'px;height:' + blockHeight + 'px;"></div>';
-                                }
-                            });
-                            html += '</div></div>';
-                        });
-                        html += '</div>';
-                        timelineEl.innerHTML = html;
-                    }
-                }
-            }
+        // Convertir en tableau avec role principal
+        var roleOrder = { 'Passeur': 0, 'R4': 1, 'Pointu': 2, 'Centre': 3 };
+        var result = Object.keys(players).map(function(name) {
+            var p = players[name];
+            var matchesPresent = Object.keys(p.matchIds).length;
+            var matchesStarting = Object.keys(p.startingMatchIds).length;
+            var role = (playerRoles && playerRoles[name]) ? playerRoles[name].primaryRole : null;
+            return {
+                name: name,
+                role: role || 'Autre',
+                setsPlayed: p.setsPlayed,
+                matchesPresent: matchesPresent,
+                matchesStarting: matchesStarting,
+                setsPerMatch: matchesPresent > 0 ? p.setsPlayed / matchesPresent : 0
+            };
         });
+
+        // Trier par role (ordre poste) puis par setsPlayed decroissant
+        result.sort(function(a, b) {
+            var ra = roleOrder[a.role] !== undefined ? roleOrder[a.role] : 99;
+            var rb = roleOrder[b.role] !== undefined ? roleOrder[b.role] : 99;
+            if (ra !== rb) return ra - rb;
+            return b.setsPlayed - a.setsPlayed;
+        });
+        return result;
+    },
+
+    renderTable(data, matches) {
+        if (data.length === 0) {
+            return '<div style="text-align:center;color:var(--text-secondary);padding:24px;">Aucune donnee de temps de jeu.</div>';
+        }
+
+        // Totaux pour X/Y
+        var totalSets = 0;
+        matches.forEach(function(m) {
+            (m.sets || []).forEach(function(s) {
+                if (s.completed) totalSets++;
+            });
+        });
+        var totalMatches = matches.length;
+        var maxSets = data[0].setsPlayed; // pour la barre de progression
+
+        var roleColors = BilanView.ROLE_COLORS;
+        var currentRole = null;
+
+        var html = '<div class="pt-table-container">';
+        html += '<table class="pt-table">';
+        html += '<thead><tr>';
+        html += '<th class="pt-th-name">Joueur</th>';
+        html += '<th class="pt-th-num">%</th>';
+        html += '<th class="pt-th-num">Sets</th>';
+        html += '<th class="pt-th-num">Matchs</th>';
+        html += '<th class="pt-th-num">S/M</th>';
+        html += '<th class="pt-th-num">Titu.</th>';
+        html += '</tr></thead>';
+        html += '<tbody>';
+
+        data.forEach(function(p) {
+            // En-tete de categorie quand le role change
+            if (p.role !== currentRole) {
+                currentRole = p.role;
+                var roleColor = roleColors[currentRole] || '#5f6368';
+                html += '<tr class="pt-role-header"><td colspan="6">';
+                html += '<span class="pt-role-header-bar" style="background:' + roleColor + '"></span>';
+                html += currentRole;
+                html += '</td></tr>';
+            }
+
+            var setsDisplay = (p.setsPlayed % 1 === 0) ? p.setsPlayed.toFixed(0) : p.setsPlayed.toFixed(1);
+            var spmDisplay = p.setsPerMatch.toFixed(2);
+            var pctValue = totalSets > 0 ? (p.setsPlayed / totalSets * 100) : 0;
+            var pctDisplay = Math.round(pctValue);
+            var barWidth = maxSets > 0 ? (p.setsPlayed / maxSets * 100) : 0;
+            var dotColor = roleColors[p.role] || '#5f6368';
+
+            html += '<tr>';
+            html += '<td class="pt-td-name">';
+            html += '<div class="pt-player-name"><span class="role-dot" style="background:' + dotColor + '"></span>' + Utils.escapeHtml(p.name) + '</div>';
+            html += '<div class="pt-bar-container"><div class="pt-bar" style="width:' + barWidth.toFixed(1) + '%;background:' + dotColor + '"></div></div>';
+            html += '</td>';
+            html += '<td class="pt-td-num pt-pct">' + pctDisplay + '%</td>';
+            html += '<td class="pt-td-num pt-sets-val">' + setsDisplay + '</td>';
+            html += '<td class="pt-td-num">' + p.matchesPresent + '/' + totalMatches + '</td>';
+            html += '<td class="pt-td-num">' + spmDisplay + '</td>';
+            html += '<td class="pt-td-num">' + p.matchesStarting + '</td>';
+            html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+        html += '</div>';
+        return html;
     }
 };
 

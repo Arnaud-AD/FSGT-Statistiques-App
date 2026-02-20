@@ -1003,118 +1003,115 @@ body {
 }
 
 /* ==================== SETS PLAYED ==================== */
-.sets-summary-card {
-    background: var(--bg-container);
+/* ==================== TEMPS DE JEU (Tab 3) ==================== */
+.pt-table-container {
+    background: white;
+    border: 1px solid var(--border-color);
     border-radius: 10px;
-    padding: 16px;
-    margin-bottom: 12px;
-    font-size: 13px;
-}
-
-.sets-filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 12px;
-}
-
-.sets-filter-pill {
-    padding: 6px 12px;
-    border-radius: 16px;
-    font-family: 'Google Sans', sans-serif;
-    font-size: 11px;
-    font-weight: 500;
-    border: 1px solid var(--border-color);
-    background: white;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.sets-filter-pill.active {
-    background: var(--accent-blue);
-    color: white;
-    border-color: var(--accent-blue);
-}
-
-.sets-filter-pill:not(.active):hover {
-    border-color: var(--accent-blue);
-}
-
-/* Set cards */
-.set-card {
-    background: white;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    margin-bottom: 8px;
     overflow: hidden;
-    transition: all 0.2s;
+    margin-bottom: 12px;
 }
 
-.set-card-header {
+.pt-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.pt-table thead {
+    background: var(--bg-container);
+}
+
+.pt-table th {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 8px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.pt-th-name {
+    text-align: left !important;
+    padding-left: 14px !important;
+}
+
+.pt-table td {
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.pt-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.pt-td-name {
+    padding-left: 14px !important;
+}
+
+.pt-player-name {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px;
-    cursor: pointer;
-}
-
-.set-card-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.set-card-title {
+    gap: 6px;
     font-family: 'Google Sans', sans-serif;
     font-size: 13px;
     font-weight: 500;
-    margin-bottom: 2px;
+    color: var(--text-primary);
+    margin-bottom: 4px;
 }
 
-.set-card-meta {
+.pt-role-header td {
+    font-family: 'Google Sans', sans-serif;
     font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 14px 4px !important;
+    border-bottom: none !important;
+}
+
+.pt-role-header-bar {
+    display: inline-block;
+    width: 3px;
+    height: 12px;
+    border-radius: 1.5px;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+
+.pt-bar-container {
+    height: 4px;
+    background: var(--bg-container);
+    border-radius: 2px;
+    overflow: hidden;
+    width: 100%;
+    max-width: 120px;
+}
+
+.pt-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.pt-td-num {
+    text-align: center;
+    font-variant-numeric: tabular-nums;
     color: var(--text-secondary);
 }
 
-.set-card-score {
-    font-family: 'Google Sans', sans-serif;
-    font-size: 16px;
+.pt-frac {
+    font-weight: 400;
+    color: var(--text-secondary);
+}
+
+.pt-pct {
     font-weight: 700;
-    flex-shrink: 0;
-}
-
-.set-card-result {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.set-card-result.win { background: var(--win-color); }
-.set-card-result.loss { background: var(--loss-color); }
-
-.set-card-badge {
-    font-size: 9px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    background: #fff3e0;
-    color: #e65100;
-    font-weight: 500;
-    flex-shrink: 0;
-}
-
-.set-card-timeline {
-    padding: 0 12px 10px;
-}
-
-.set-card-detail {
-    display: none;
-    padding: 0 12px 12px;
-    border-top: 1px solid var(--border-color);
-}
-
-.set-card.expanded .set-card-detail {
-    display: block;
+    color: var(--text-primary) !important;
 }
 
 /* ==================== EMPTY STATE ==================== */
