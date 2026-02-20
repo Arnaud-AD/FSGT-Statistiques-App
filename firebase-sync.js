@@ -27,6 +27,17 @@ const FirebaseSync = {
     },
 
     /**
+     * Vérifie si l'utilisateur courant est l'admin (propriétaire).
+     * Nécessite admin-config.js (ADMIN_UID) chargé avant.
+     * @returns {boolean}
+     */
+    isAdmin() {
+        if (typeof ADMIN_UID === 'undefined') return false;
+        if (typeof auth === 'undefined' || !auth.currentUser) return false;
+        return auth.currentUser.uid === ADMIN_UID;
+    },
+
+    /**
      * Upload un match finalisé vers Firestore
      * @param {Object} match - Le match complet (status === 'completed')
      * @returns {Promise<void>}
@@ -35,8 +46,8 @@ const FirebaseSync = {
         if (!this.isConfigured()) return;
 
         const user = auth.currentUser;
-        if (!user) {
-            console.warn('[FirebaseSync] Non authentifié — match sauvé localement uniquement');
+        if (!user || !this.isAdmin()) {
+            console.warn('[FirebaseSync] Non admin — match sauvé localement uniquement');
             return;
         }
 
@@ -80,9 +91,8 @@ const FirebaseSync = {
     async deleteMatch(matchId) {
         if (!this.isConfigured()) return;
 
-        const user = auth.currentUser;
-        if (!user) {
-            console.warn('[FirebaseSync] Non authentifié — suppression Firestore ignorée');
+        if (!this.isAdmin()) {
+            console.warn('[FirebaseSync] Non admin — suppression Firestore ignorée');
             return;
         }
 
@@ -136,7 +146,7 @@ const FirebaseSync = {
         if (!this.isConfigured()) return 0;
 
         const user = auth.currentUser;
-        if (!user) return 0;
+        if (!user || !this.isAdmin()) return 0;
 
         const localMatches = Storage.getAllMatches()
             .filter(m => m.status === 'completed');
@@ -167,7 +177,7 @@ const FirebaseSync = {
      * @param {Array} players - Liste des noms de joueurs
      */
     async saveRoster(players) {
-        if (!this.isConfigured() || !auth.currentUser) return;
+        if (!this.isConfigured() || !this.isAdmin()) return;
         await db.collection('config').doc('roster').set({
             players: players,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -194,7 +204,7 @@ const FirebaseSync = {
      * @param {Object} match
      */
     async saveMatchAny(match) {
-        if (!this.isConfigured() || !auth.currentUser) return;
+        if (!this.isConfigured() || !this.isAdmin()) return;
         const matchData = {
             ...match,
             syncedAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -226,7 +236,7 @@ const FirebaseSync = {
      * @param {Object} grids - Les 9 grilles (3 zones x 3 contextes)
      */
     async savePassGrids(grids) {
-        if (!this.isConfigured() || !auth.currentUser) return;
+        if (!this.isConfigured() || !this.isAdmin()) return;
         await db.collection('config').doc('passGrids').set({
             grids: grids,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -253,7 +263,7 @@ const FirebaseSync = {
      * @param {string|null} matchId
      */
     async saveCurrentMatchId(matchId) {
-        if (!this.isConfigured() || !auth.currentUser) return;
+        if (!this.isConfigured() || !this.isAdmin()) return;
         await db.collection('config').doc('state').set({
             currentMatchId: matchId,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -280,7 +290,7 @@ const FirebaseSync = {
      * Appelé après connexion pour garantir que Firebase a les données à jour
      */
     async pushAll() {
-        if (!this.isConfigured() || !auth.currentUser) return;
+        if (!this.isConfigured() || !this.isAdmin()) return;
 
         // Roster
         const players = Storage.getPlayers();

@@ -115,7 +115,7 @@ const Storage = {
         }
         localStorage.setItem(this.KEYS.MATCHES, JSON.stringify(matches));
         // Sync Firebase (non-bloquant)
-        if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured() && typeof auth !== 'undefined' && auth.currentUser) {
+        if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured() && FirebaseSync.isAdmin()) {
             FirebaseSync.saveMatchAny(match).catch(() => {});
         }
     },
@@ -133,7 +133,7 @@ const Storage = {
             this.clearCurrentMatchId();
         }
         // Sync Firebase (non-bloquant)
-        if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured() && typeof auth !== 'undefined' && auth.currentUser) {
+        if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured() && FirebaseSync.isAdmin()) {
             FirebaseSync.deleteMatch(id).catch(() => {});
         }
     },
@@ -155,7 +155,7 @@ const Storage = {
     setCurrentMatchId(id) {
         localStorage.setItem(this.KEYS.CURRENT_ID, id);
         // Sync Firebase (non-bloquant)
-        if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured() && typeof auth !== 'undefined' && auth.currentUser) {
+        if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured() && FirebaseSync.isAdmin()) {
             FirebaseSync.saveCurrentMatchId(id).catch(() => {});
         }
     },
@@ -166,7 +166,7 @@ const Storage = {
     clearCurrentMatchId() {
         localStorage.removeItem(this.KEYS.CURRENT_ID);
         // Sync Firebase (non-bloquant)
-        if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured() && typeof auth !== 'undefined' && auth.currentUser) {
+        if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured() && FirebaseSync.isAdmin()) {
             FirebaseSync.saveCurrentMatchId(null).catch(() => {});
         }
     },

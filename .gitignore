@@ -15,6 +15,9 @@ CLAUDE.md
 firebase-admin-sdk*.json
 firebase-debug.log
 
+# Config admin (contient le UID propriétaire — JAMAIS commiter)
+admin-config.js
+
 # Fichiers locaux
 plan.md
 start.command

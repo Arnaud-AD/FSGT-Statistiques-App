@@ -62,9 +62,9 @@ const HistoriqueData = {
     },
 
     async deleteMatch(id) {
-        // Vérifier l'authentification avant toute suppression
-        if (typeof auth === 'undefined' || !auth.currentUser) {
-            throw new Error('Connexion requise pour supprimer un match.');
+        // Vérifier que c'est bien l'admin (propriétaire)
+        if (typeof FirebaseSync === 'undefined' || !FirebaseSync.isAdmin()) {
+            throw new Error('Seul le propriétaire peut supprimer un match.');
         }
 
         var firebaseOk = false;
@@ -2634,14 +2634,14 @@ const MatchStatsView = {
         var self = this;
         var opponent = match.opponent || 'Adversaire';
 
-        // Cacher le bouton si pas authentifié (seul l'admin peut supprimer)
-        var isAdmin = typeof auth !== 'undefined' && auth.currentUser;
-        btn.style.display = isAdmin ? '' : 'none';
+        // Cacher le bouton si pas admin (seul le propriétaire peut supprimer)
+        var adminOk = typeof FirebaseSync !== 'undefined' && FirebaseSync.isAdmin();
+        btn.style.display = adminOk ? '' : 'none';
 
         btn.onclick = async function() {
-            // Double-check auth au moment du clic
-            if (typeof auth === 'undefined' || !auth.currentUser) {
-                alert('Connexion requise pour supprimer un match.');
+            // Double-check admin au moment du clic
+            if (typeof FirebaseSync === 'undefined' || !FirebaseSync.isAdmin()) {
+                alert('Seul le propriétaire peut supprimer un match.');
                 return;
             }
             self._closeGearMenu();
