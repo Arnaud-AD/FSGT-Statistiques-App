@@ -494,7 +494,7 @@ const SharedComponents = {
         const catDef = cats[category];
         if (!catDef) return '';
 
-        const players = Object.keys(playerTotals);
+        const players = this.sortPlayers(Object.keys(playerTotals), playerTotals);
         if (players.length === 0) return '';
 
         const totals = StatsAggregator.computeTotals(playerTotals);
@@ -594,7 +594,7 @@ const SharedComponents = {
      * @param {string} variant - 'match' ou 'aggregated'
      */
     renderDesktopStatsTable(playerTotals, teamLabel, teamClass, variant) {
-        const players = Object.keys(playerTotals);
+        const players = this.sortPlayers(Object.keys(playerTotals), playerTotals);
         if (players.length === 0) return '';
 
         const cats = this.getCategories(variant);
@@ -699,7 +699,7 @@ const SharedComponents = {
         html += '<div class="stats-team-title ' + teamClass + '">' + Utils.escapeHtml(teamLabel) + '</div>';
 
         // -- Tableau par joueur (standard) --
-        var players = Object.keys(playerTotals);
+        var players = SharedComponents.sortPlayers(Object.keys(playerTotals), playerTotals);
         html += '<table class="stats-table"><thead><tr><th>Joueur</th>';
         cols.forEach(function(c) { html += '<th>' + c.label + '</th>'; });
         html += '</tr></thead><tbody>';
@@ -756,6 +756,32 @@ const SharedComponents = {
         'R4': 'var(--role-r4)',
         'Centre': 'var(--role-centre)',
         'Pointu': 'var(--role-pointu)'
+    },
+
+    ROLE_ORDER: { 'Passeur': 0, 'R4': 1, 'Pointu': 2, 'Centre': 3 },
+
+    /**
+     * Trie les joueurs par poste (Passeur → R4 → Pointu → Centre) puis par volume d'actions.
+     */
+    sortPlayers(names, playerTotals) {
+        var self = this;
+        return names.slice().sort(function(a, b) {
+            var roleA = self.playerRolesMap && self.playerRolesMap[a] ? self.playerRolesMap[a].primaryRole : null;
+            var roleB = self.playerRolesMap && self.playerRolesMap[b] ? self.playerRolesMap[b].primaryRole : null;
+            var orderA = roleA ? (self.ROLE_ORDER[roleA] !== undefined ? self.ROLE_ORDER[roleA] : 9) : 9;
+            var orderB = roleB ? (self.ROLE_ORDER[roleB] !== undefined ? self.ROLE_ORDER[roleB] : 9) : 9;
+            if (orderA !== orderB) return orderA - orderB;
+            // Meme poste : trier par volume total d'actions (decroissant)
+            var totA = 0, totB = 0;
+            var pa = playerTotals[a], pb = playerTotals[b];
+            ['service', 'reception', 'attack', 'defense', 'block', 'relance'].forEach(function(cat) {
+                totA += (pa[cat] && pa[cat].tot) || 0;
+                totB += (pb[cat] && pb[cat].tot) || 0;
+            });
+            var passA = pa.pass || pa.passe || {}; totA += passA.tot || 0;
+            var passB = pb.pass || pb.passe || {}; totB += passB.tot || 0;
+            return totB - totA;
+        });
     },
 
     /**
@@ -2266,7 +2292,7 @@ const MatchStatsView = {
 
         this.selectedMatchIndex = index;
         this.currentMatch = match;
-        this.currentSetFilter = 'all';
+        this.currentSetFilter = 'bilan';
         this.currentCategory = 'service';
 
         // Mise a jour du select
@@ -2275,10 +2301,8 @@ const MatchStatsView = {
 
         this.renderDetailHeader(match);
         this.renderDetailSetTabs(match);
-        SharedComponents.renderTimeline(match, 'timelineContainer', 'all');
-        SharedComponents.renderSideOutBlock(match, 'all', 'sideoutContainer');
         this.renderCategoryTabs();
-        this.renderStats(match, 'all');
+        this.showBilanView(match);
         this.setupDeleteButton(match);
         this.setupExportButton(match);
 
@@ -2376,8 +2400,8 @@ const MatchStatsView = {
         var completedSets = match.sets.filter(function(s) { return s.completed; });
         var self = this;
 
-        var html = '<button class="seg-tab detail-set-tab" data-set="bilan">Bilan</button>';
-        html += '<button class="seg-tab detail-set-tab active" data-set="all">Set ALL</button>';
+        var html = '<button class="seg-tab detail-set-tab active" data-set="bilan">Bilan</button>';
+        html += '<button class="seg-tab detail-set-tab" data-set="all">Set ALL</button>';
         completedSets.forEach(function(s, i) {
             html += '<button class="seg-tab detail-set-tab" data-set="' + i + '">S' + (i + 1) + '</button>';
         });
