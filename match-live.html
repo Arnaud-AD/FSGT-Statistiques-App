@@ -3811,10 +3811,18 @@
         function renderPassPlayerSelection() {
             const team = gameState.attackingTeam;
             const passeur = getPlayerByRole(team, 'Passeur');
+            const lastToucher = getLastTouchPlayer(team);
 
-            // Auto-sélection : toujours le Passeur
-            const autoPlayer = passeur || null;
-            const autoRole = passeur ? 'Passeur' : null;
+            // Auto-sélection : Pointu si le Passeur est lastToucher, sinon Passeur
+            let autoPlayer, autoRole;
+            if (passeur && passeur === lastToucher) {
+                const pointu = getPlayerByRole(team, 'Pointu');
+                autoPlayer = pointu || null;
+                autoRole = pointu ? 'Pointu' : null;
+            } else {
+                autoPlayer = passeur || null;
+                autoRole = passeur ? 'Passeur' : null;
+            }
 
             // Afficher les zones d'attaque (anticipation visuelle)
             showAttackZones(team);
@@ -3948,9 +3956,15 @@
             const passeur = getPlayerByRole(team, 'Passeur');
             if (!passeur) return;
 
-            // Déterminer le passeur : override > Passeur par défaut
+            // Déterminer le passeur : override > Pointu (si Passeur est lastToucher) > Passeur
             const effectiveOverride = getEffectivePlayer();
-            const selectedPasser = effectiveOverride || passeur;
+            let defaultPasser = passeur;
+            const lastToucher = getLastTouchPlayer(team);
+            if (passeur === lastToucher) {
+                const pointu = getPlayerByRole(team, 'Pointu');
+                if (pointu) defaultPasser = pointu;
+            }
+            const selectedPasser = effectiveOverride || defaultPasser;
             const selectedRole = getPlayerRole(team, selectedPasser);
 
             // Vérifier si la passe va dans le terrain adverse (retour direct)
