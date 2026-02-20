@@ -2754,7 +2754,8 @@
                 // La réception va dans le terrain adverse — afficher les choix
                 // Retour direct = R1 (non maîtrisé mais pas une faute — sera ajusté en FR si exploité)
                 gameState.currentAction.quality = { score: 1, label: 'Négative' };
-                
+                gameState.currentAction.endPos = clickData;
+
                 // Enregistrer le point de contact de la réception = l'arrivée du service
                 const serviceAction = gameState.rally.find(a => a.type === 'service');
                 if (serviceAction && serviceAction.endPos) {
@@ -2798,7 +2799,8 @@
                 quality = calculateReceptionQuality(clickData);
             }
             gameState.currentAction.quality = quality;
-            
+            gameState.currentAction.endPos = clickData;
+
             addMarker(clickData, 'reception');
             
             // Masquer les zones de qualité
@@ -2851,14 +2853,14 @@
             // Distance horizontale depuis le centre (en %)
             const distX = Math.abs(clickData.x - 50);
             
-            // Calcul basé sur la forme elliptique des demi-cercles
-            // Zone parfaite: width 40%, height 30% ←’ ratio x/20, y/30
-            // Zone correcte: width 70%, height 55% ←’ ratio x/35, y/55
-            // Zone moyenne: width 100%, height 80% ←’ ratio x/50, y/80
-            
-            const perfectRatio = Math.sqrt(Math.pow(distX / 20, 2) + Math.pow(distanceFromNet / 30, 2));
-            const goodRatio = Math.sqrt(Math.pow(distX / 35, 2) + Math.pow(distanceFromNet / 55, 2));
-            const averageRatio = Math.sqrt(Math.pow(distX / 50, 2) + Math.pow(distanceFromNet / 80, 2));
+            // Calcul basé sur la forme elliptique des demi-cercles (75% de l'original)
+            // Zone parfaite: width 30%, height 22.5% → ratio x/15, y/22.5
+            // Zone correcte: width 52.5%, height 41% → ratio x/26.25, y/41
+            // Zone moyenne: width 75%, height 60% → ratio x/37.5, y/60
+
+            const perfectRatio = Math.sqrt(Math.pow(distX / 15, 2) + Math.pow(distanceFromNet / 22.5, 2));
+            const goodRatio = Math.sqrt(Math.pow(distX / 26.25, 2) + Math.pow(distanceFromNet / 41, 2));
+            const averageRatio = Math.sqrt(Math.pow(distX / 37.5, 2) + Math.pow(distanceFromNet / 60, 2));
             
             if (perfectRatio <= 1) {
                 return { score: 4, label: 'Excellente' };
