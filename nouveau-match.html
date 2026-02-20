@@ -90,6 +90,8 @@
         .match-type-btn.championnat:hover { background: #f0f7ff; }
         .match-type-btn.ginette { border-color: var(--accent-gold); }
         .match-type-btn.ginette:hover { background: #fffbeb; }
+        .match-type-btn.season { border-color: var(--text-secondary); }
+        .match-type-btn.season:hover { background: #f5f5f5; }
 
         .match-type-icon {
             width: 56px; height: 56px; border-radius: 12px;
@@ -340,12 +342,17 @@
             </button>
             <div class="header-content">
                 <h1 class="header-title" id="headerTitle">Nouveau Match</h1>
-                <p class="header-subtitle" id="headerSubtitle">Choisir le type de match</p>
+                <p class="header-subtitle" id="headerSubtitle">Choisir la saison</p>
             </div>
         </header>
 
+        <!-- Vue 0: Choix de la saison -->
+        <div class="view active" id="viewSeason">
+            <div class="match-type-section" id="seasonList"></div>
+        </div>
+
         <!-- Vue 1: Choix du type -->
-        <div class="view active" id="viewType">
+        <div class="view" id="viewType">
             <div class="match-type-section">
                 <button class="match-type-btn championnat" onclick="showChampionnat()">
                     <div class="match-type-icon championnat">
@@ -480,38 +487,92 @@
 
     <script src="storage.js"></script>
     <script>
-        const championnatMatches = [
-            { opponent: "Red Hot Sucy Pépère", location: "extérieur" },
-            { opponent: "Manu Andy-sport", location: "domicile" },
-            { opponent: "Bières et le loup", location: "domicile" },
-            { opponent: "StarPAFF", location: "extérieur" },
-            { opponent: "Kiki Team", location: "extérieur" },
-            { opponent: "RSC Champigny 1", location: "domicile" },
-            { opponent: "Marvels 4", location: "domicile" },
-            { opponent: "Rhinos Féroces", location: "extérieur" },
-            { opponent: "Les Rescapés", location: "domicile" },
-            { opponent: "Red Hot Sucy Pépère", location: "domicile" },
-            { opponent: "Manu Andy-sport", location: "extérieur" },
-            { opponent: "Bières et le loup", location: "extérieur" },
-            { opponent: "StarPAFF", location: "domicile" },
-            { opponent: "Kiki Team", location: "domicile" },
-            { opponent: "RSC Champigny 1", location: "extérieur" },
-            { opponent: "Marvels 4", location: "extérieur" },
-            { opponent: "Rhinos Féroces", location: "domicile" },
-            { opponent: "Les Rescapés", location: "extérieur" }
-        ];
+        const SEASONS = {
+            '2025-2026': {
+                label: 'Saison 2025-2026',
+                matches: [
+                    { opponent: "Red Hot Sucy Pépère", location: "extérieur" },
+                    { opponent: "Manu Andy-sport", location: "domicile" },
+                    { opponent: "Bières et le loup", location: "domicile" },
+                    { opponent: "StarPAFF", location: "extérieur" },
+                    { opponent: "Kiki Team", location: "extérieur" },
+                    { opponent: "RSC Champigny 1", location: "domicile" },
+                    { opponent: "Marvels 4", location: "domicile" },
+                    { opponent: "Rhinos Féroces", location: "extérieur" },
+                    { opponent: "Les Rescapés", location: "domicile" },
+                    { opponent: "Red Hot Sucy Pépère", location: "domicile" },
+                    { opponent: "Manu Andy-sport", location: "extérieur" },
+                    { opponent: "Bières et le loup", location: "extérieur" },
+                    { opponent: "StarPAFF", location: "domicile" },
+                    { opponent: "Kiki Team", location: "domicile" },
+                    { opponent: "RSC Champigny 1", location: "extérieur" },
+                    { opponent: "Marvels 4", location: "extérieur" },
+                    { opponent: "Rhinos Féroces", location: "domicile" },
+                    { opponent: "Les Rescapés", location: "extérieur" }
+                ]
+            },
+            '2024-2025': {
+                label: 'Saison 2024-2025',
+                matches: [
+                    { opponent: "Marvels 4", location: "extérieur" },
+                    { opponent: "StarPAFF", location: "extérieur" },
+                    { opponent: "Kiki Team", location: "domicile" },
+                    { opponent: "Bières et le loup", location: "domicile" },
+                    { opponent: "Rhinos Féroces", location: "extérieur" },
+                    { opponent: "RSC Champigny 1", location: "extérieur" },
+                    { opponent: "Manu Andy-sport", location: "domicile" },
+                    { opponent: "Les Rescapés", location: "domicile" },
+                    { opponent: "Marvels 4", location: "domicile" },
+                    { opponent: "Bières et le loup", location: "extérieur" },
+                    { opponent: "Rhinos Féroces", location: "domicile" },
+                    { opponent: "RSC Champigny 1", location: "domicile" },
+                    { opponent: "Manu Andy-sport", location: "extérieur" },
+                    { opponent: "StarPAFF", location: "domicile" },
+                    { opponent: "Les Rescapés", location: "extérieur" },
+                    { opponent: "Kiki Team", location: "extérieur" }
+                ]
+            }
+        };
+        const SEASON_ORDER = ['2025-2026', '2024-2025'];
+        const DEFAULT_SEASON = '2025-2026';
+        let currentSeason = null;
 
-        let currentView = 'type';
+        let currentView = 'season';
 
         function showView(viewId) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
         }
 
+        function renderSeasonList() {
+            const container = document.getElementById('seasonList');
+            let html = '';
+            SEASON_ORDER.forEach(key => {
+                const s = SEASONS[key];
+                html += `<button class="match-type-btn season" onclick="selectSeason('${key}')">
+                    <div class="match-type-icon"><span style="font-size: 40px;">📅</span></div>
+                    <div class="match-type-content">
+                        <div class="match-type-title">${s.label}</div>
+                        <div class="match-type-desc">${s.matches.length} matchs de championnat</div>
+                    </div>
+                    <span class="match-type-arrow">›</span>
+                </button>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function selectSeason(seasonKey) {
+            currentSeason = seasonKey;
+            currentView = 'type';
+            document.getElementById('headerTitle').textContent = SEASONS[seasonKey].label;
+            document.getElementById('headerSubtitle').textContent = 'Choisir le type de match';
+            showView('viewType');
+        }
+
         function showChampionnat() {
             currentView = 'championnat';
             document.getElementById('headerTitle').textContent = 'Championnat';
-            document.getElementById('headerSubtitle').textContent = 'Gérer les matchs';
+            document.getElementById('headerSubtitle').textContent = SEASONS[currentSeason].label;
             renderMatchesList();
             showView('viewChampionnat');
         }
@@ -519,16 +580,22 @@
         function showGinette() {
             currentView = 'ginette';
             document.getElementById('headerTitle').textContent = 'Ginette';
-            document.getElementById('headerSubtitle').textContent = 'Tournoi spécial';
+            document.getElementById('headerSubtitle').textContent = SEASONS[currentSeason].label;
             showView('viewGinette');
         }
 
         function handleBack() {
-            if (currentView === 'type') {
+            if (currentView === 'season') {
                 window.location.href = 'index.html';
+            } else if (currentView === 'type') {
+                currentView = 'season';
+                currentSeason = null;
+                document.getElementById('headerTitle').textContent = 'Nouveau Match';
+                document.getElementById('headerSubtitle').textContent = 'Choisir la saison';
+                showView('viewSeason');
             } else {
                 currentView = 'type';
-                document.getElementById('headerTitle').textContent = 'Nouveau Match';
+                document.getElementById('headerTitle').textContent = SEASONS[currentSeason].label;
                 document.getElementById('headerSubtitle').textContent = 'Choisir le type de match';
                 showView('viewType');
             }
@@ -547,14 +614,17 @@
         function renderMatchesList() {
             const container = document.getElementById('matchesList');
             const allStored = Storage.getAllMatches();
+            const seasonMatches = SEASONS[currentSeason].matches;
 
             const inProgress = [];
             const toPlay = [];
             const completed = [];
 
-            championnatMatches.forEach((match, index) => {
-                const matchId = `champ_${index}`;
-                const stored = allStored.find(m => m.id === matchId);
+            seasonMatches.forEach((match, index) => {
+                const matchId = `champ_${currentSeason}_${index}`;
+                // Chercher aussi l'ancien format (legacy sans saison) pour 2025-2026
+                const legacyId = currentSeason === '2025-2026' ? `champ_${index}` : null;
+                const stored = allStored.find(m => m.id === matchId || (legacyId && m.id === legacyId));
                 if (stored) {
                     if (stored.status === 'completed') {
                         completed.push({ ...match, index, matchId, stored });
@@ -566,8 +636,8 @@
                 }
             });
 
-            // Ginette matches
-            allStored.filter(m => m.type === 'ginette').forEach(stored => {
+            // Ginette matches (filtrés par saison)
+            allStored.filter(m => m.type === 'ginette' && m.season === currentSeason).forEach(stored => {
                 const entry = { opponent: stored.opponent, location: stored.round || '', index: -1, matchId: stored.id, stored };
                 if (stored.status === 'completed') completed.push(entry);
                 else inProgress.push(entry);
@@ -660,9 +730,10 @@
 
         // ==================== ACTIONS ====================
         function selectMatch(index) {
-            const match = championnatMatches[index];
+            const match = SEASONS[currentSeason].matches[index];
             const data = {
-                id: `champ_${index}`, type: 'championnat', status: 'in_progress',
+                id: `champ_${currentSeason}_${index}`, type: 'championnat',
+                season: currentSeason, status: 'in_progress',
                 opponent: match.opponent, location: match.location,
                 matchNumber: index + 1, timestamp: Date.now()
             };
@@ -750,7 +821,8 @@
         function saveGinetteMatch(event) {
             event.preventDefault();
             const data = {
-                id: `ginette_${Date.now()}`, type: 'ginette', status: 'in_progress',
+                id: `ginette_${Date.now()}`, type: 'ginette',
+                season: currentSeason, status: 'in_progress',
                 round: document.getElementById('ginetteRound').value,
                 opponent: document.getElementById('ginetteOpponent').value.trim(),
                 level: document.getElementById('ginetteLevel').value,
@@ -762,7 +834,7 @@
         }
 
         // Init
-        renderMatchesList();
+        renderSeasonList();
     </script>
 </body>
 </html>

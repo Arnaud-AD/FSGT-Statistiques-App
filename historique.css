@@ -176,6 +176,40 @@ body {
     border: none;
 }
 
+/* ==================== SEASON SELECTOR ==================== */
+.season-selector {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.season-btn {
+    flex: 1;
+    padding: 8px 12px;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--bg-header);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.season-btn:hover {
+    border-color: var(--text-secondary);
+}
+
+.season-btn.active {
+    background: var(--text-primary);
+    color: white;
+    border-color: var(--text-primary);
+    font-weight: 700;
+}
+
 /* ==================== TABS (main) ==================== */
 .main-tabs {
     margin-bottom: 12px;

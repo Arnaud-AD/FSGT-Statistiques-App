@@ -75,6 +75,84 @@ const HistoriqueData = {
     }
 };
 
+// ==================== SEASON SELECTOR ====================
+const SeasonSelector = {
+    current: '2025-2026',
+
+    init() {
+        var saved = sessionStorage.getItem('historique_season');
+        if (saved) {
+            this.current = saved;
+            this._updateButtons();
+            this._updateTabs();
+        }
+    },
+
+    switchTo(season) {
+        this.current = season;
+        sessionStorage.setItem('historique_season', season);
+        this._updateButtons();
+
+        // Force re-render de toutes les vues
+        MatchStatsView._rendered = false;
+        MatchStatsView.selectedMatchIndex = null;
+        MatchStatsView.currentMatch = null;
+        YearStatsView._rendered = false;
+        SetsPlayedView._rendered = false;
+
+        // Adapter les onglets selon la saison
+        this._updateTabs();
+
+        // Si on est en ALL et l'onglet actif est matchStats, basculer sur yearStats
+        if (season === 'ALL' && TabNav.currentTab === 'matchStats') {
+            TabNav.switchTo('yearStats');
+        } else {
+            TabNav.switchTo(TabNav.currentTab);
+        }
+
+        // Footer dynamique
+        this._updateFooter();
+    },
+
+    getFilteredMatches() {
+        var all = HistoriqueData.getCompletedMatches();
+        if (this.current === 'ALL') return all;
+        return all.filter(function(m) {
+            // Matchs sans champ season = legacy 2025-2026
+            var matchSeason = m.season || '2025-2026';
+            return matchSeason === this.current;
+        }.bind(this));
+    },
+
+    getLabel() {
+        if (this.current === 'ALL') return 'Saisons ALL';
+        return 'Saison ' + this.current;
+    },
+
+    _updateButtons() {
+        document.querySelectorAll('.season-btn').forEach(function(btn) {
+            btn.classList.toggle('active', btn.dataset.season === this.current);
+        }.bind(this));
+    },
+
+    _updateTabs() {
+        var isAll = this.current === 'ALL';
+        // Masquer/afficher Stats Matchs
+        var matchStatsBtn = document.querySelector('.tab-btn[data-tab="matchStats"]');
+        if (matchStatsBtn) matchStatsBtn.style.display = isAll ? 'none' : '';
+        // Renommer Stats Année / Stats Années
+        var yearStatsBtn = document.querySelector('.tab-btn[data-tab="yearStats"]');
+        if (yearStatsBtn) yearStatsBtn.textContent = isAll ? 'Stats Années' : 'Stats Année';
+    },
+
+    _updateFooter() {
+        var footer = document.querySelector('.footer');
+        if (footer) {
+            footer.textContent = 'FSGT 4\u00d74 \u2022 ' + this.getLabel();
+        }
+    }
+};
+
 // ==================== SIDE OUT / BREAK OUT ANALYSIS ====================
 const SideOutAnalysis = {
 
@@ -2187,7 +2265,7 @@ const BilanView = {
 
 // ==================== TAB NAVIGATION ====================
 const TabNav = {
-    currentTab: 'matchStats',
+    currentTab: 'yearStats',
 
     init() {
         var saved = sessionStorage.getItem('historique_tab');
@@ -2233,7 +2311,7 @@ const MatchStatsView = {
     },
 
     renderMatchGrid() {
-        var matchHistory = HistoriqueData.getCompletedMatches();
+        var matchHistory = SeasonSelector.getFilteredMatches();
         var matchesContainer = document.getElementById('matchesContainer');
         var matchSelect = document.getElementById('matchSelect');
         var emptyState = document.getElementById('emptyStateMatchStats');
@@ -2285,7 +2363,7 @@ const MatchStatsView = {
     },
 
     selectMatch(index) {
-        var matchHistory = HistoriqueData.getCompletedMatches();
+        var matchHistory = SeasonSelector.getFilteredMatches();
         var sorted = matchHistory.slice().sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
         var match = sorted[index];
         if (!match) return;
@@ -2707,7 +2785,7 @@ const YearStatsView = {
     _rendered: false,
 
     render() {
-        var matches = HistoriqueData.getCompletedMatches();
+        var matches = SeasonSelector.getFilteredMatches();
         var container = document.getElementById('content-yearStats');
         if (!container) return;
 
@@ -2763,7 +2841,7 @@ const YearStatsView = {
     renderFilters() {
         var filters = [
             { key: 'all', label: 'Tous' },
-            { key: 'championship', label: 'Championnat' },
+            { key: 'championnat', label: 'Championnat' },
             { key: 'ginette', label: 'Ginette' }
         ];
         var self = this;
@@ -2783,7 +2861,7 @@ const YearStatsView = {
         var setsLost = matches.reduce(function(s, m) { return s + (m.setsLost || 0); }, 0);
 
         var html = '<div class="year-summary-card">';
-        html += '<div class="year-summary-title">Bilan Saison 2025-2026</div>';
+        html += '<div class="year-summary-title">Bilan ' + SeasonSelector.getLabel() + '</div>';
         html += '<div class="year-summary-row"><span class="year-summary-big">' + matches.length + '</span> matchs &nbsp; ';
         html += '<span style="color:var(--win-color);font-weight:600">' + wins + 'V</span>';
         html += ' \u00b7 <span style="color:var(--loss-color);font-weight:600">' + losses + 'D</span>';
@@ -3281,7 +3359,7 @@ const YearStatsView = {
                     t.classList.toggle('active', t.dataset.cat === cat);
                 });
 
-                var matches = HistoriqueData.getCompletedMatches();
+                var matches = SeasonSelector.getFilteredMatches();
                 var filtered = self.applyFilter(matches);
                 var allSets = [];
                 filtered.forEach(function(m) {
@@ -3314,7 +3392,7 @@ const SetsPlayedView = {
         var container = document.getElementById('content-setsStats');
         if (!container) return;
 
-        var matches = HistoriqueData.getCompletedMatches();
+        var matches = SeasonSelector.getFilteredMatches();
         if (matches.length === 0) {
             this.renderEmpty(container);
             return;
@@ -3542,13 +3620,13 @@ document.addEventListener('DOMContentLoaded', async function() {
         FirebaseAuthUI.init();
     }
 
-    // Init tabs
+    // Init season selector + tabs
+    SeasonSelector.init();
+    SeasonSelector._updateFooter();
     TabNav.init();
 
     // Rendu initial avec données locales (rapide)
-    if (TabNav.currentTab === 'matchStats') {
-        MatchStatsView.render();
-    }
+    TabNav.switchTo(TabNav.currentTab);
 
     // Charger les données Firebase en arrière-plan puis rafraîchir
     const hasFirebaseData = await HistoriqueData.loadFromFirebase();
@@ -3573,6 +3651,13 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
     }
+
+    // Event listeners pour le sélecteur de saison
+    document.querySelectorAll('.season-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            SeasonSelector.switchTo(btn.dataset.season);
+        });
+    });
 
     // Event listeners pour les tabs principaux
     document.querySelectorAll('.main-tabs .tab-btn').forEach(function(btn) {
@@ -3612,12 +3697,26 @@ document.addEventListener('DOMContentLoaded', async function() {
     var params = new URLSearchParams(window.location.search);
     var matchId = params.get('match');
     if (matchId) {
-        var matches = HistoriqueData.getCompletedMatches()
-            .slice().sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
-        var index = matches.findIndex(function(m) { return m.id === matchId; });
-        if (index >= 0) {
-            MatchStatsView.render();
-            MatchStatsView.selectMatch(index);
+        // Chercher dans TOUS les matchs (pas filtré par saison)
+        var allMatches = HistoriqueData.getCompletedMatches();
+        var foundMatch = allMatches.find(function(m) { return m.id === matchId; });
+        if (foundMatch) {
+            // Basculer vers la saison du match trouvé
+            if (foundMatch.season && foundMatch.season !== SeasonSelector.current) {
+                SeasonSelector.current = foundMatch.season;
+                sessionStorage.setItem('historique_season', foundMatch.season);
+                SeasonSelector._updateButtons();
+                SeasonSelector._updateFooter();
+                MatchStatsView._rendered = false;
+            }
+            // Chercher l'index dans les matchs filtrés
+            var filtered = SeasonSelector.getFilteredMatches()
+                .slice().sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
+            var index = filtered.findIndex(function(m) { return m.id === matchId; });
+            if (index >= 0) {
+                MatchStatsView.render();
+                MatchStatsView.selectMatch(index);
+            }
         }
         window.history.replaceState({}, '', window.location.pathname);
     }
