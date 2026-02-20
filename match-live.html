@@ -545,6 +545,20 @@
             </div>
         </div>
 
+        <!-- V20.183 : Modal revenir dans le point précédent -->
+        <div class="undo-point-overlay" id="resumePointOverlay" onclick="closeResumePointModal(event)">
+            <div class="undo-point-modal" onclick="event.stopPropagation()">
+                <div class="undo-point-title" style="color: #2563eb;">↩️ Revenir dans le point précédent ?</div>
+                <div class="undo-point-summary" id="resumePointSummary">
+                    <!-- Rempli dynamiquement -->
+                </div>
+                <div class="undo-point-actions">
+                    <button class="undo-point-btn keep" onclick="closeResumePointModal()">Non</button>
+                    <button class="undo-point-btn remove" style="background: #2563eb;" onclick="confirmResumeLastPoint()">Oui, revenir</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Modal fin de set -->
         <div class="end-set-overlay" id="endSetOverlay">
             <div class="end-set-modal" onclick="event.stopPropagation()">
@@ -1383,7 +1397,11 @@
         // ==================== V18.0 BRIDGE FUNCTIONS ====================
         // Undo = WorkflowEngine.popState()
         function undoLastAction() {
-            WorkflowEngine.popState();
+            if (WorkflowEngine.popState()) return;
+            // V20.183 : stack vide → proposer retour dans le point précédent
+            if (currentSet.points && currentSet.points.length > 0) {
+                showResumePointModal();
+            }
         }
 
         // Cancel point : en début de point → undo dernier point validé, sinon → annuler le rally en cours

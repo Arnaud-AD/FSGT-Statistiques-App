@@ -129,6 +129,239 @@ function confirmUndoLastPoint() {
     WorkflowEngine.transition('server_selection');
 }
 
+// ==================== V20.183 : Revenir dans le point précédent ====================
+
+function showResumePointModal() {
+    const points = currentSet.points;
+    if (!points || points.length === 0) return;
+
+    const lastPoint = points[points.length - 1];
+    const rally = lastPoint.rally;
+
+    // Score avant ce point
+    const prevPoint = points.length >= 2 ? points[points.length - 2] : null;
+    const initialHome = currentSet.initialHomeScore || 0;
+    const initialAway = currentSet.initialAwayScore || 0;
+    const scoreBeforeHome = prevPoint ? prevPoint.homeScore : initialHome;
+    const scoreBeforeAway = prevPoint ? prevPoint.awayScore : initialAway;
+
+    // Info service
+    const serviceAction = rally.find(a => a.type === 'service');
+    const serverName = serviceAction ? serviceAction.player : '?';
+    const serverTeam = serviceAction ? serviceAction.team : '?';
+    const serverTeamName = serverTeam === 'home' ? 'Jen et ses Saints' : (currentMatch.opponent || 'Adversaire');
+
+    // Dernière action (celle qui a terminé le point)
+    const lastAction = rally[rally.length - 1];
+    let lastActionDesc = '';
+    if (lastAction) {
+        const actionLabels = {
+            'service': 'Service', 'reception': 'Réception', 'pass': 'Passe',
+            'attack': 'Attaque', 'block': 'Block', 'defense': 'Défense'
+        };
+        const actionLabel = actionLabels[lastAction.type] || lastAction.type;
+
+        if (lastAction.type === 'service') {
+            if (lastAction.result === 'ace') lastActionDesc = `Ace de ${lastAction.player}`;
+            else if (lastAction.result === 'fault' || lastAction.result === 'fault_out' || lastAction.result === 'fault_net') lastActionDesc = `Faute au service de ${lastAction.player}`;
+            else lastActionDesc = `Service de ${lastAction.player}`;
+        } else if (lastAction.type === 'attack') {
+            if (lastAction.result === 'point') lastActionDesc = `Attaque gagnante de ${lastAction.player}`;
+            else if (lastAction.attackType === 'faute') lastActionDesc = `Faute d'attaque de ${lastAction.player}`;
+            else if (lastAction.result === 'out') lastActionDesc = `Attaque out de ${lastAction.player}`;
+            else if (lastAction.result === 'fault_net') lastActionDesc = `Attaque filet de ${lastAction.player}`;
+            else lastActionDesc = `${actionLabel} de ${lastAction.player}`;
+        } else if (lastAction.type === 'reception') {
+            if (lastAction.isDirectReturnWinner) lastActionDesc = `Retour gagnant de ${lastAction.player}`;
+            else if (lastAction.quality && lastAction.quality.label === 'Faute') lastActionDesc = `Faute réception de ${lastAction.player}`;
+            else lastActionDesc = `${actionLabel} de ${lastAction.player}`;
+        } else if (lastAction.type === 'defense') {
+            if (lastAction.result === 'fault') lastActionDesc = `Faute défense de ${lastAction.player}`;
+            else lastActionDesc = `${actionLabel}${lastAction.player ? ' de ' + lastAction.player : ''}`;
+        } else if (lastAction.type === 'pass') {
+            if (lastAction.result === 'out') lastActionDesc = `Passe out de ${lastAction.player}`;
+            else lastActionDesc = `${actionLabel}${lastAction.player ? ' de ' + lastAction.player : ''}`;
+        } else {
+            lastActionDesc = `${actionLabel}${lastAction.player ? ' de ' + lastAction.player : ''}`;
+        }
+    }
+
+    // Nombre d'actions dans le rally (hors la dernière)
+    const nbActions = rally.length - 1;
+
+    const summaryEl = document.getElementById('resumePointSummary');
+    summaryEl.innerHTML = `
+        <div class="undo-point-score">
+            <span class="score-before">${lastPoint.homeScore} - ${lastPoint.awayScore}</span>
+            <span class="score-arrow">→</span>
+            <span class="score-after">${scoreBeforeHome} - ${scoreBeforeAway}</span>
+        </div>
+        <div class="undo-point-detail">
+            <div><span class="label">🏐 Service :</span> ${serverName} (${serverTeamName})</div>
+            <div><span class="label">❌ Action à annuler :</span> ${lastActionDesc}</div>
+            <div style="margin-top:6px; font-size:11px; color:#9ca3af;">Le rally (${nbActions} action${nbActions > 1 ? 's' : ''}) sera restauré juste avant cette action</div>
+        </div>
+    `;
+
+    document.getElementById('resumePointOverlay').classList.add('active');
+}
+
+function closeResumePointModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('resumePointOverlay').classList.remove('active');
+}
+
+function confirmResumeLastPoint() {
+    const points = currentSet.points;
+    if (!points || points.length === 0) return;
+
+    // 1. Retirer le dernier point
+    const removedPoint = points.pop();
+    const rally = JSON.parse(JSON.stringify(removedPoint.rally));
+
+    // 2. Restaurer le score
+    const prevPoint = points.length > 0 ? points[points.length - 1] : null;
+    const initialHome = currentSet.initialHomeScore || 0;
+    const initialAway = currentSet.initialAwayScore || 0;
+    gameState.homeScore = prevPoint ? prevPoint.homeScore : initialHome;
+    gameState.awayScore = prevPoint ? prevPoint.awayScore : initialAway;
+
+    // 3. Restaurer l'équipe au service
+    const serviceAction = removedPoint.rally.find(a => a.type === 'service');
+    if (serviceAction) {
+        gameState.servingTeam = serviceAction.team;
+        gameState.currentServer = serviceAction.player;
+    }
+
+    // 4. Retirer la dernière action (celle qui a terminé le point)
+    const removedAction = rally.pop();
+
+    // 5. Restaurer le rally (sans la dernière action)
+    gameState.rally = rally;
+    gameState.currentAction = {};
+    gameState.context = WorkflowEngine._freshContext();
+    gameState.overridePlayer = null;
+    gameState.autoSelectedPlayer = null;
+    gameState.overrideTagsTeam = null;
+
+    // 6. Restaurer l'attackingTeam depuis le contexte du rally
+    // L'équipe qui attaquait = l'équipe de la dernière action retirée (sauf si c'est une défense/réception)
+    if (removedAction) {
+        if (removedAction.type === 'attack' || removedAction.type === 'pass') {
+            gameState.attackingTeam = removedAction.team;
+        } else if (removedAction.type === 'defense') {
+            // La défense est faite par l'équipe adverse de l'attaquant
+            gameState.attackingTeam = removedAction.team === 'home' ? 'away' : 'home';
+        } else if (removedAction.type === 'service') {
+            gameState.attackingTeam = removedAction.team === 'home' ? 'away' : 'home';
+        } else if (removedAction.type === 'reception') {
+            gameState.attackingTeam = removedAction.team;
+        } else if (removedAction.type === 'block') {
+            // Le block est fait par l'équipe adverse de l'attaquant
+            gameState.attackingTeam = removedAction.team === 'home' ? 'away' : 'home';
+        }
+    }
+
+    // 7. Recalculer les stats et sauvegarder
+    updateScore();
+    recalculateAllStats();
+    saveCurrentSet();
+
+    // 8. Fermer la modal
+    closeResumePointModal();
+
+    // 9. Reconstruire les visuels
+    clearMarkers();
+    clearArrows();
+    WorkflowEngine.clearStack();
+    redrawRally();
+
+    // 10. Déterminer la phase de reprise et y entrer
+    _resumeToPhase(removedAction);
+}
+
+/**
+ * Détermine la phase de reprise en fonction de l'action retirée
+ * et entre dans cette phase via WorkflowEngine.transition()
+ */
+function _resumeToPhase(removedAction) {
+    if (!removedAction) {
+        WorkflowEngine.transition('server_selection');
+        return;
+    }
+
+    // Pusher un état pour que le prochain Retour fonctionne
+    WorkflowEngine.pushState('resume_point');
+
+    switch (removedAction.type) {
+        case 'attack': {
+            // L'attaque a terminé le point (out, point, fault, bloc_out)
+            // Reprendre en attack_end : l'attaquant est déjà sélectionné, on attend le clic terrain
+            gameState.currentAction = {
+                type: 'attack',
+                player: removedAction.player,
+                team: removedAction.team,
+                role: removedAction.role,
+                attackType: removedAction.attackType
+            };
+            if (removedAction.startPos) {
+                gameState.currentAction.startPos = removedAction.startPos;
+            }
+            WorkflowEngine.transition('attack_end');
+            break;
+        }
+
+        case 'service': {
+            // Service ace ou fault → reprendre en serve_end
+            gameState.currentAction = {
+                type: 'service',
+                player: removedAction.player,
+                team: removedAction.team,
+                role: removedAction.role,
+                startPos: removedAction.startPos
+            };
+            WorkflowEngine.transition('serve_end');
+            break;
+        }
+
+        case 'reception': {
+            // Réception fault ou retour direct → reprendre en reception
+            // L'équipe qui réceptionne est l'attacking team
+            gameState.attackingTeam = removedAction.team;
+            WorkflowEngine.transition('reception');
+            break;
+        }
+
+        case 'defense': {
+            // Défense fault → reprendre en result (l'attaque est terminée, on attend le résultat défensif)
+            // L'équipe qui attaquait est l'adverse du défenseur
+            gameState.attackingTeam = removedAction.team === 'home' ? 'away' : 'home';
+            WorkflowEngine.transition('result');
+            break;
+        }
+
+        case 'pass': {
+            // Passe fault/out → reprendre en pass
+            gameState.attackingTeam = removedAction.team;
+            WorkflowEngine.transition('pass');
+            break;
+        }
+
+        case 'block': {
+            // Block qui termine le point → reprendre en attack_net_choice ou result
+            // L'équipe qui attaquait est l'adverse du bloqueur
+            gameState.attackingTeam = removedAction.team === 'home' ? 'away' : 'home';
+            WorkflowEngine.transition('result');
+            break;
+        }
+
+        default:
+            // Fallback : revenir à server_selection
+            WorkflowEngine.transition('server_selection');
+            break;
+    }
+}
+
 function redrawRally() {
     // Redessiner tous les markers et flèches du rally actuel
     clearMarkers();
