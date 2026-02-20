@@ -687,7 +687,19 @@
                             } else if (blockOutcome === 'opponent_defense_fault') {
                                 stats.block.blcplus++;
                             } else {
-                                stats.block.blcplus++;
+                                // unknown = fin du rally après le bloc sans suite claire
+                                // Vérifier qui a gagné le point
+                                const lastAttackBeforeBlock = (() => {
+                                    for (let j = i - 1; j >= 0; j--) {
+                                        if (rally[j].type === 'attack') return rally[j];
+                                    }
+                                    return null;
+                                })();
+                                if (lastAttackBeforeBlock && lastAttackBeforeBlock.result === 'point' && lastAttackBeforeBlock.team !== team) {
+                                    stats.block.blcminus++;
+                                } else {
+                                    stats.block.blcplus++;
+                                }
                             }
                         }
                         break;
@@ -1020,41 +1032,17 @@
                 log('\n✅ Match sauvegardé en localStorage');
             }
 
-            // Vérification immédiate (seulement si en localStorage)
-            const localRaw = localStorage.getItem('volleyball_matches');
-            const check = localRaw ? JSON.parse(localRaw).find(m => m.id === selectedMatchId) : null;
-            if (check && check.sets[1]) {
-                const homeStats = check.sets[1].stats.home;
-                for (const [name, ps] of Object.entries(homeStats)) {
-                    if (ps.pass.tot > 0) {
-                        log(`\n🔍 VÉRIF localStorage Set 2 ${name}: P4=${ps.pass.p4} P3=${ps.pass.p3} P2=${ps.pass.p2} P1=${ps.pass.p1}`);
-                    }
-                }
-            }
-
-            // Sync Firebase IMMÉDIATEMENT (même page, même session auth)
+            // Sync Firebase IMMÉDIATEMENT
             log('\n☁️ Synchronisation Firebase...');
             try {
-                await db.collection('matches').doc(match.id).set(match);
+                // JSON round-trip pour purger toute valeur non-sérialisable
+                const cleanMatch = JSON.parse(JSON.stringify(match));
+                await db.collection('matches').doc(cleanMatch.id).set(cleanMatch);
                 log('✅ Match synchronisé avec Firebase !');
-
-                // Vérification Firebase
-                const fbDoc = await db.collection('matches').doc(match.id).get();
-                const fbMatch = fbDoc.data();
-                if (fbMatch.sets[1]) {
-                    const fbHome = fbMatch.sets[1].stats.home;
-                    for (const [name, ps] of Object.entries(fbHome)) {
-                        if (ps.pass.tot > 0) {
-                            log(`\n🔍 VÉRIF Firebase Set 2 ${name}: P4=${ps.pass.p4} P3=${ps.pass.p3} P2=${ps.pass.p2} P1=${ps.pass.p1}`);
-                        }
-                    }
-                }
-
-                log('\n=== ✅ CORRECTION COMPLÈTE (localStorage + Firebase) ===');
-                log('Tu peux maintenant ouvrir historique.html en toute sécurité.');
+                log('\n=== ✅ CORRECTION COMPLÈTE ===');
             } catch (e) {
                 log(`\n❌ Erreur Firebase sync: ${e.message}`);
-                log('Les données sont correctes en localStorage mais PAS en Firebase.');
+                log(e.stack);
             }
           } catch (globalErr) {
             log(`\n❌ ERREUR GLOBALE: ${globalErr.message}`);

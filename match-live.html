@@ -6369,8 +6369,20 @@
                                 stats.block.blcplus++; // B+ : bloc kill (adversaire rate sa défense)
                             } else {
                                 // unknown = fin du rally après le bloc sans suite claire
-                                // Probablement le bloc a fait le point → B+
-                                stats.block.blcplus++;
+                                // Vérifier qui a gagné le point : chercher la dernière attaque avant le bloc
+                                const lastAttackBeforeBlock = (() => {
+                                    for (let j = i - 1; j >= 0; j--) {
+                                        if (rally[j].type === 'attack') return rally[j];
+                                    }
+                                    return null;
+                                })();
+                                if (lastAttackBeforeBlock && lastAttackBeforeBlock.result === 'point' && lastAttackBeforeBlock.team !== team) {
+                                    // L'attaquant adverse a fait le point malgré le bloc → B- (bloc ralenti mais pas décisif)
+                                    stats.block.blcminus++;
+                                } else {
+                                    // Le bloc a fait le point → B+
+                                    stats.block.blcplus++;
+                                }
                             }
                         }
                         break;
