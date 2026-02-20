@@ -325,10 +325,10 @@ body {
     font-weight: 700;
 }
 
-.detail-header-team-score.home-winner { color: var(--accent-blue); }
-.detail-header-team-score.home-loser { color: var(--text-primary); }
-.detail-header-team-score.away-winner { color: var(--loss-color); }
-.detail-header-team-score.away-loser { color: var(--text-primary); }
+.detail-header-team-score.score-win { color: var(--win-color); }
+.detail-header-team-score.score-loss { color: var(--loss-color); }
+.detail-header-team-score.score-draw { color: var(--draw-color); }
+.detail-header-team-score.score-opponent { color: var(--text-primary); }
 
 .detail-header-sep {
     font-size: 16px;
@@ -358,10 +358,9 @@ body {
 
 .detail-header-set-chip .set-label { color: var(--text-secondary); }
 .detail-header-set-chip .set-score { font-weight: 600; }
-.detail-header-set-chip .set-score.home-won { color: var(--accent-blue); }
-.detail-header-set-chip .set-score.home-lost { color: var(--text-primary); }
-.detail-header-set-chip .set-score.away-won { color: var(--loss-color); }
-.detail-header-set-chip .set-score.away-lost { color: var(--text-primary); }
+.detail-header-set-chip .set-score.score-win { color: var(--win-color); }
+.detail-header-set-chip .set-score.score-loss { color: var(--loss-color); }
+.detail-header-set-chip .set-score.score-opponent { color: var(--text-primary); }
 
 .detail-opponent {
     font-size: 13px;
@@ -396,24 +395,30 @@ body {
     color: #d93025;
 }
 
-/* Lien YouTube dans le header */
+/* Lien YouTube style natif dans le header */
 .detail-youtube-link {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     margin-top: 8px;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 11px;
+    padding: 5px 12px 5px 8px;
+    border-radius: 8px;
+    font-size: 12px;
     font-weight: 500;
-    color: var(--accent-blue);
-    background: #e8f0fe;
+    color: #606060;
+    background: #fff;
     text-decoration: none;
     transition: background 0.2s;
 }
 
 .detail-youtube-link:hover {
-    background: #d2e3fc;
+    background: #f2f2f2;
+}
+
+.detail-youtube-link .yt-icon {
+    width: 18px;
+    height: 13px;
+    flex-shrink: 0;
 }
 
 /* ==================== DETAIL SECTIONS ==================== */
@@ -478,9 +483,9 @@ body {
     font-weight: 600;
 }
 
-.tl-score-home { color: var(--accent-blue); }
-.tl-score-away { color: var(--loss-color); }
-.tl-score-lost { color: var(--text-secondary); }
+.tl-score-win { color: var(--win-color); }
+.tl-score-loss { color: var(--loss-color); }
+.tl-score-opponent { color: var(--text-primary); }
 .tl-sep { color: var(--text-secondary); margin: 0 2px; }
 
 .timeline-chart {
@@ -586,6 +591,8 @@ body {
 
 .sideout-table .home-val { color: var(--accent-blue); }
 .sideout-table .away-val { color: var(--loss-color); }
+.sideout-table .moy-row td { padding: 2px 8px; font-size: 11px; font-weight: 400; border-bottom: 1px solid var(--border-color); }
+.sideout-table .moy-val { color: var(--text-secondary); }
 
 /* ==================== MOMENTUM ==================== */
 .momentum-section {
@@ -760,6 +767,19 @@ body {
     height: 8px;
     border-radius: 50%;
     flex-shrink: 0;
+}
+
+/* Pastilles empilees verticalement (multi-postes dans stat tables) */
+.role-dots {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex-shrink: 0;
+}
+
+.role-dot.role-dot-stacked {
+    width: 6px;
+    height: 6px;
 }
 
 /* ==================== STATS: DESKTOP MULTI-CARD ==================== */

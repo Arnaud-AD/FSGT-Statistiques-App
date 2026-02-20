@@ -513,7 +513,7 @@ const SharedComponents = {
         players.forEach(function(name) {
             const p = playerTotals[name];
             html += '<tr><td><div class="player-cell">';
-            html += '<span class="role-dot" style="background:' + SharedComponents.getRoleColor(name) + '"></span>';
+            html += SharedComponents.renderRoleDots(name);
             html += Utils.escapeHtml(name);
             html += '</div></td>';
             catDef.columns.forEach(function(col) {
@@ -707,7 +707,7 @@ const SharedComponents = {
         players.forEach(function(name) {
             var p = playerTotals[name].pass || {};
             html += '<tr><td><div class="player-cell">';
-            html += '<span class="role-dot" style="background:' + SharedComponents.getRoleColor(name) + '"></span>';
+            html += SharedComponents.renderRoleDots(name);
             html += Utils.escapeHtml(name);
             html += '</div></td>';
             cols.forEach(function(c) { html += cell(p, c.key, c.cls); });
@@ -746,16 +746,47 @@ const SharedComponents = {
     },
 
     /**
-     * Retourne la couleur du role d'un joueur (basique, par nom).
+     * Map de roles par joueur, positionne avant chaque render.
+     * Format : { 'Didier': { primaryRole: 'R4', roles: { 'R4': 2, 'Pointu': 1 } } }
+     */
+    playerRolesMap: null,
+
+    ROLE_COLORS_CSS: {
+        'Passeur': 'var(--role-passeur)',
+        'R4': 'var(--role-r4)',
+        'Centre': 'var(--role-centre)',
+        'Pointu': 'var(--role-pointu)'
+    },
+
+    /**
+     * Retourne la couleur du role d'un joueur.
+     * Utilise playerRolesMap si disponible, sinon fallback par nom.
      */
     getRoleColor(name) {
+        if (this.playerRolesMap && this.playerRolesMap[name]) {
+            var role = this.playerRolesMap[name].primaryRole;
+            return this.ROLE_COLORS_CSS[role] || 'var(--text-secondary)';
+        }
         const lower = name.toLowerCase();
         if (lower.includes('passeur')) return 'var(--role-passeur)';
         if (lower.includes('r4')) return 'var(--role-r4)';
         if (lower.includes('centre')) return 'var(--role-centre)';
         if (lower.includes('pointu')) return 'var(--role-pointu)';
-        // Fallback
         return 'var(--text-secondary)';
+    },
+
+    /**
+     * Genere le HTML des pastilles de role pour un joueur.
+     * Multi-postes : pastilles empilees verticalement.
+     */
+    renderRoleDots(name) {
+        if (this.playerRolesMap && this.playerRolesMap[name]) {
+            var info = this.playerRolesMap[name];
+            // Toujours 1 seule pastille = role principal (le plus joue)
+            // Les anciens matchs sans initialLineup ont des roles pollues par les substitutions
+            return '<span class="role-dot" style="background:' + (this.ROLE_COLORS_CSS[info.primaryRole] || 'var(--text-secondary)') + '"></span>';
+        }
+        return '<span class="role-dot" style="background:' + this.getRoleColor(name) + '"></span>';
     },
 
     // ==================== TIMELINE ====================
@@ -852,9 +883,9 @@ const SharedComponents = {
             html += '<div class="timeline-header">';
             html += '<span class="timeline-set-label">' + label + '</span>';
             html += '<span class="timeline-set-score">';
-            html += '<span class="' + (homeWon ? 'tl-score-home' : 'tl-score-lost') + '">' + homeScore + '</span>';
+            html += '<span class="' + (homeWon ? 'tl-score-win' : 'tl-score-loss') + '">' + homeScore + '</span>';
             html += '<span class="tl-sep">-</span>';
-            html += '<span class="' + (homeWon ? 'tl-score-lost' : 'tl-score-away') + '">' + awayScore + '</span>';
+            html += '<span class="tl-score-opponent">' + awayScore + '</span>';
             html += '</span></div>';
 
             html += '<div class="timeline-chart">';
@@ -936,6 +967,12 @@ const SharedComponents = {
         var stats = SideOutAnalysis.aggregateSideOutStats(setsToUse);
         var opponent = match.opponent || 'Adversaire';
 
+        // Moyenne match (tous sets) pour comparaison quand on regarde un set specifique
+        var allStats = null;
+        if (setFilter !== 'all' && completedSets.length > 1) {
+            allStats = SideOutAnalysis.aggregateSideOutStats(completedSets);
+        }
+
         var html = '<table class="sideout-table">';
         html += '<thead><tr><th></th>';
         html += '<th>Jen</th>';
@@ -946,11 +983,23 @@ const SharedComponents = {
         html += '<td class="home-val">' + (stats.home.soPercent !== null ? stats.home.soPercent + '%' : '-') + '</td>';
         html += '<td class="away-val">' + (stats.away.soPercent !== null ? stats.away.soPercent + '%' : '-') + '</td>';
         html += '</tr>';
+        if (allStats) {
+            html += '<tr class="moy-row"><td>Moy. match</td>';
+            html += '<td class="moy-val">' + (allStats.home.soPercent !== null ? allStats.home.soPercent + '%' : '-') + '</td>';
+            html += '<td class="moy-val">' + (allStats.away.soPercent !== null ? allStats.away.soPercent + '%' : '-') + '</td>';
+            html += '</tr>';
+        }
 
         html += '<tr><td>Break Out</td>';
         html += '<td class="home-val">' + (stats.home.brkPercent !== null ? stats.home.brkPercent + '%' : '-') + '</td>';
         html += '<td class="away-val">' + (stats.away.brkPercent !== null ? stats.away.brkPercent + '%' : '-') + '</td>';
         html += '</tr>';
+        if (allStats) {
+            html += '<tr class="moy-row"><td>Moy. match</td>';
+            html += '<td class="moy-val">' + (allStats.home.brkPercent !== null ? allStats.home.brkPercent + '%' : '-') + '</td>';
+            html += '<td class="moy-val">' + (allStats.away.brkPercent !== null ? allStats.away.brkPercent + '%' : '-') + '</td>';
+            html += '</tr>';
+        }
 
         html += '</tbody></table>';
         container.innerHTML = html;
@@ -1486,12 +1535,14 @@ const BilanView = {
         var roleCounts = {};
         var self = this;
         var side = team || 'home';
+        // Utiliser initialLineup (feuille de match) plutot que lineup courant (apres substitutions)
+        var initialKey = (side === 'away') ? 'initialAwayLineup' : 'initialHomeLineup';
         var lineupKey = (side === 'away') ? 'awayLineup' : 'homeLineup';
         var positionRoles = (side === 'away') ? self.POSITION_ROLES_AWAY : self.POSITION_ROLES_HOME;
         var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
 
         completedSets.forEach(function(set) {
-            var lineup = set[lineupKey];
+            var lineup = set[initialKey] || set[lineupKey];
             if (!lineup) return;
             Object.keys(lineup).forEach(function(pos) {
                 var playerName = lineup[pos];
@@ -1517,13 +1568,14 @@ const BilanView = {
     getPlayerFamilies(match, team) {
         var self = this;
         var side = team || 'home';
+        var initialKey = (side === 'away') ? 'initialAwayLineup' : 'initialHomeLineup';
         var lineupKey = (side === 'away') ? 'awayLineup' : 'homeLineup';
         var positionRoles = (side === 'away') ? self.POSITION_ROLES_AWAY : self.POSITION_ROLES_HOME;
         var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
         var result = {};
 
         completedSets.forEach(function(set, setIndex) {
-            var lineup = set[lineupKey];
+            var lineup = set[initialKey] || set[lineupKey];
             if (!lineup) return;
             Object.keys(lineup).forEach(function(pos) {
                 var playerName = lineup[pos];
@@ -1610,7 +1662,7 @@ const BilanView = {
         matches.forEach(function(match, matchIndex) {
             var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
             completedSets.forEach(function(set, setIndex) {
-                var lineup = set.homeLineup;
+                var lineup = set.initialHomeLineup || set.homeLineup;
                 if (!lineup) return;
                 Object.keys(lineup).forEach(function(pos) {
                     var playerName = lineup[pos];
@@ -2254,11 +2306,13 @@ const MatchStatsView = {
         // Score sets
         var homeSetsEl = document.getElementById('detailHomeSets');
         var awaySetsEl = document.getElementById('detailAwaySets');
-        var homeWon = (match.setsWon || 0) > (match.setsLost || 0);
+        var isWin = match.result === 'win';
+        var isDraw = match.result === 'draw';
+        var homeScoreClass = isWin ? 'score-win' : (isDraw ? 'score-draw' : 'score-loss');
         homeSetsEl.textContent = match.setsWon || 0;
         awaySetsEl.textContent = match.setsLost || 0;
-        homeSetsEl.className = 'detail-header-team-score ' + (homeWon ? 'home-winner' : 'home-loser');
-        awaySetsEl.className = 'detail-header-team-score ' + (homeWon ? 'away-loser' : 'away-winner');
+        homeSetsEl.className = 'detail-header-team-score ' + homeScoreClass;
+        awaySetsEl.className = 'detail-header-team-score score-opponent';
         document.getElementById('detailAwayName').textContent = opponent;
 
         // Detail sets chips
@@ -2278,14 +2332,13 @@ const MatchStatsView = {
             var a = s.finalAwayScore || 0;
             var homeWon = h > a;
             var label = (i === 4) ? 'TB' : 'S' + (i + 1);
-            var homeClass = homeWon ? 'home-won' : 'home-lost';
-            var awayClass = homeWon ? 'away-lost' : 'away-won';
+            var homeClass = homeWon ? 'score-win' : 'score-loss';
 
             return '<span class="detail-header-set-chip">' +
                 '<span class="set-label">' + label + '</span>' +
                 '<span class="set-score ' + homeClass + '">' + h + '</span>' +
                 '<span class="set-label">-</span>' +
-                '<span class="set-score ' + awayClass + '">' + a + '</span>' +
+                '<span class="set-score score-opponent">' + a + '</span>' +
                 '</span>';
         }).join('');
     },
@@ -2303,7 +2356,12 @@ const MatchStatsView = {
         });
 
         if (urls.length > 0) {
-            linkContainer.innerHTML = '<a class="detail-youtube-link" href="' + Utils.escapeHtml(urls[0]) + '" target="_blank">\u25b6 Voir la video</a>';
+            linkContainer.innerHTML = '<a class="detail-youtube-link" href="' + Utils.escapeHtml(urls[0]) + '" target="_blank">' +
+                '<svg class="yt-icon" viewBox="0 0 28 20" xmlns="http://www.w3.org/2000/svg">' +
+                '<rect width="28" height="20" rx="4" fill="#FF0000"/>' +
+                '<polygon points="11,4.5 11,15.5 20,10" fill="#FFF"/>' +
+                '</svg>' +
+                '<span>Voir la vidéo</span></a>';
             linkContainer.style.display = 'block';
         } else {
             linkContainer.innerHTML = '';
@@ -2439,26 +2497,37 @@ const MatchStatsView = {
         var homeTotals = StatsAggregator.aggregateStats(setsToUse, 'home');
         var awayTotals = StatsAggregator.aggregateStats(setsToUse, 'away');
 
+        // Roles par joueur pour pastilles colorees
+        var homeRoles = BilanView.getPlayerRoles(match, 'home');
+        var awayRoles = BilanView.getPlayerRoles(match, 'away');
+
         // Vue mobile : categorie selectionnee
         if (mobileContainer) {
             var cat = this.currentCategory;
             if (cat === 'passe') {
-                // V19.2 : onglet Passe dedie avec ventilation
-                mobileContainer.innerHTML =
-                    SharedComponents.renderPassDetailView(homeTotals, 'Jen et ses Saints', 'home') +
-                    SharedComponents.renderPassDetailView(awayTotals, opponent, 'away');
+                SharedComponents.playerRolesMap = homeRoles;
+                var homeHtml = SharedComponents.renderPassDetailView(homeTotals, 'Jen et ses Saints', 'home');
+                SharedComponents.playerRolesMap = awayRoles;
+                var awayHtml = SharedComponents.renderPassDetailView(awayTotals, opponent, 'away');
+                mobileContainer.innerHTML = homeHtml + awayHtml;
             } else {
-                mobileContainer.innerHTML =
-                    SharedComponents.renderCategoryTable(homeTotals, cat, 'Jen et ses Saints', 'home', 'match') +
-                    SharedComponents.renderCategoryTable(awayTotals, cat, opponent, 'away', 'match');
+                SharedComponents.playerRolesMap = homeRoles;
+                var homeHtml = SharedComponents.renderCategoryTable(homeTotals, cat, 'Jen et ses Saints', 'home', 'match');
+                SharedComponents.playerRolesMap = awayRoles;
+                var awayHtml = SharedComponents.renderCategoryTable(awayTotals, cat, opponent, 'away', 'match');
+                mobileContainer.innerHTML = homeHtml + awayHtml;
             }
+            SharedComponents.playerRolesMap = null;
         }
 
         // Vue desktop : tableau complet
         if (desktopContainer) {
-            desktopContainer.innerHTML =
-                SharedComponents.renderDesktopStatsTable(homeTotals, 'Jen et ses Saints', 'home', 'match') +
-                SharedComponents.renderDesktopStatsTable(awayTotals, opponent, 'away', 'match');
+            SharedComponents.playerRolesMap = homeRoles;
+            var homeDesktop = SharedComponents.renderDesktopStatsTable(homeTotals, 'Jen et ses Saints', 'home', 'match');
+            SharedComponents.playerRolesMap = awayRoles;
+            var awayDesktop = SharedComponents.renderDesktopStatsTable(awayTotals, opponent, 'away', 'match');
+            SharedComponents.playerRolesMap = null;
+            desktopContainer.innerHTML = homeDesktop + awayDesktop;
         }
     },
 
@@ -2756,7 +2825,7 @@ const YearStatsView = {
         rankings.forEach(function(r) {
             html += '<div class="ranking-card">';
             html += '<div><div class="ranking-label">' + r.label + '</div>';
-            html += '<div class="ranking-player"><span class="role-dot" style="background:' + SharedComponents.getRoleColor(r.name) + '"></span>' + Utils.escapeHtml(r.name) + '</div>';
+            html += '<div class="ranking-player">' + SharedComponents.renderRoleDots(r.name) + Utils.escapeHtml(r.name) + '</div>';
             html += '</div>';
             html += '<div class="ranking-value">' + r.value + '</div>';
             html += '</div>';
@@ -3136,6 +3205,9 @@ const YearStatsView = {
         var homeTotals = StatsAggregator.aggregateStats(allSets, 'home');
         if (Object.keys(homeTotals).length === 0) return '';
 
+        // Roles annee pour pastilles colorees
+        SharedComponents.playerRolesMap = BilanView.getPlayerRolesYear(matches);
+
         // Mobile : onglets categorie + premier onglet service
         var html = '<div class="stats-section">';
         html += '<div class="segmented-tabs stats-category-tabs" id="yearCategoryTabs">';
@@ -3154,6 +3226,8 @@ const YearStatsView = {
         html += '<div class="stats-desktop" id="yearStatsDesktop">';
         html += SharedComponents.renderDesktopStatsTable(homeTotals, 'Jen et ses Saints', 'home', 'aggregated');
         html += '</div>';
+
+        SharedComponents.playerRolesMap = null;
 
         html += '</div>';
         return html;
@@ -3191,6 +3265,9 @@ const YearStatsView = {
                 });
                 var homeTotals = StatsAggregator.aggregateStats(allSets, 'home');
 
+                // Roles annee pour pastilles colorees
+                SharedComponents.playerRolesMap = BilanView.getPlayerRolesYear(filtered);
+
                 var mobileContainer = document.getElementById('yearStatsMobile');
                 if (mobileContainer) {
                     if (cat === 'passe') {
@@ -3199,6 +3276,7 @@ const YearStatsView = {
                         mobileContainer.innerHTML = SharedComponents.renderCategoryTable(homeTotals, cat, 'Jen et ses Saints', 'home', 'aggregated');
                     }
                 }
+                SharedComponents.playerRolesMap = null;
             };
         }
     }
