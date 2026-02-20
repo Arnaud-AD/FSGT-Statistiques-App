@@ -587,6 +587,33 @@ body {
 .sideout-table .home-val { color: var(--accent-blue); }
 .sideout-table .away-val { color: var(--loss-color); }
 
+/* ==================== MOMENTUM ==================== */
+.momentum-section {
+    padding: 0;
+    margin-top: 12px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 12px;
+}
+
+.momentum-section-title {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+}
+
+.momentum-subtitle {
+    font-weight: 400;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.momentum-chart {
+    width: 100%;
+    display: block;
+}
+
 /* ==================== SEGMENTED TABS (shared) ==================== */
 .segmented-tabs {
     display: flex;
@@ -1361,6 +1388,14 @@ body {
 .bilan-player-empty {
     min-height: 60px;
     opacity: 0;
+}
+
+/* Carte moyenne passeurs adverses */
+.bilan-away-avg .bilan-player-name {
+    color: #5f6368;
+}
+.bilan-away-avg .bilan-ip {
+    color: #b4a0d6 !important;
 }
 
 /* Titre de section famille (span toute la grille) */

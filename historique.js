@@ -2033,6 +2033,64 @@ const BilanView = {
         return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     },
 
+    // --- Agreger les passeurs adverses de la saison (moyenne des scores axes) ---
+    aggregateAwayPasseursYear(matches) {
+        var self = this;
+        var bestPerMatch = []; // meilleur passeur adverse de chaque match
+
+        matches.forEach(function(match) {
+            var awayFamilies = self.getPlayerFamilies(match, 'away');
+            var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+            if (completedSets.length === 0) return;
+
+            var bestScores = null;
+            var bestIp = -1;
+
+            Object.keys(awayFamilies).forEach(function(name) {
+                var fam = awayFamilies[name].families['Passeur'];
+                if (!fam) return;
+
+                var playerTotals = StatsAggregator.aggregateStatsBySetIndices(
+                    completedSets, 'away', fam.setIndices
+                );
+                var stats = playerTotals[name];
+                if (!stats) return;
+
+                var scores = self.computeAxisScores(stats);
+                var hasAny = ['service', 'reception', 'passe', 'attaque', 'bloc', 'relance', 'defense'].some(function(k) {
+                    return (scores[k] || 0) > 0;
+                });
+                if (!hasAny) return;
+
+                var ip = self.computeIP(scores, 'Passeur');
+                if (ip > bestIp) {
+                    bestIp = ip;
+                    bestScores = scores;
+                }
+            });
+
+            if (bestScores) bestPerMatch.push(bestScores);
+        });
+
+        if (bestPerMatch.length === 0) return null;
+
+        // Moyenne par axe uniquement sur les passeurs ayant des stats sur cet axe
+        var avgScores = {};
+        ['service', 'reception', 'passe', 'attaque', 'bloc', 'relance', 'defense'].forEach(function(k) {
+            var withStats = bestPerMatch.filter(function(sc) { return (sc[k] || 0) > 0; });
+            if (withStats.length === 0) { avgScores[k] = 0; return; }
+            var sum = withStats.reduce(function(s, sc) { return s + sc[k]; }, 0);
+            avgScores[k] = Math.round(sum / withStats.length);
+        });
+
+        return {
+            name: 'Passeurs Adv.',
+            scores: avgScores,
+            ip: self.computeIP(avgScores, 'Passeur'),
+            count: bestPerMatch.length
+        };
+    },
+
     // --- Toggle comparaison : affiche/masque les overlays adverses ---
     toggleCompare(btn) {
         var grid = btn.closest('.bilan-section').querySelector('.bilan-grid');
@@ -2583,6 +2641,12 @@ const YearStatsView = {
         // Stats joueurs cumulees (meme composant que Tab 1)
         html += this.renderPlayerStats(filtered);
 
+        // Side Out / Break Out agrege
+        html += this.renderYearSideOut(filtered);
+
+        // Graphique momentum agrege
+        html += this.renderYearMomentum(filtered);
+
         container.innerHTML = html;
         this.bindEvents(container);
         this._rendered = true;
@@ -2789,6 +2853,18 @@ const YearStatsView = {
             };
         });
 
+        // Moyenne passeurs adverses pour comparaison au poste Passeur
+        var awayPasseursAvg = BilanView.aggregateAwayPasseursYear(matches);
+        var passeurCount = allPlayerData.filter(function(d) { return d.family === 'Passeur'; }).length;
+
+        // Si un seul passeur Jen et des passeurs adverses, utiliser la moyenne adverse comme overlay
+        if (passeurCount === 1 && awayPasseursAvg) {
+            familyOverlays['Passeur'] = {
+                best: familyOverlays['Passeur'] ? familyOverlays['Passeur'].best : null,
+                second: { name: awayPasseursAvg.name, scores: awayPasseursAvg.scores, role: 'Passeur' }
+            };
+        }
+
         // Grouper par slot pour aligner sur la grille 2 colonnes
         var dataBySlot = {};
         SLOT_ORDER_YEAR.forEach(function(s) { dataBySlot[s] = []; });
@@ -2800,7 +2876,13 @@ const YearStatsView = {
         // Rendu cartes par slot, case vide si nombre impair
         SLOT_ORDER_YEAR.forEach(function(slot) {
             var slotData = dataBySlot[slot] || [];
-            if (slotData.length === 0) return;
+            var totalCards = slotData.length;
+
+            // Pour le slot Passeur : ajouter la carte moyenne adverse
+            var showAwayPasseurCard = (slot === 'Passeur' && awayPasseursAvg);
+            if (showAwayPasseurCard) totalCards++;
+
+            if (totalCards === 0) return;
 
             slotData.forEach(function(d) {
                 var fo = familyOverlays[d.family];
@@ -2815,8 +2897,22 @@ const YearStatsView = {
                 html += BilanView.renderSpiderChart(d.name, d.effectiveRole, d.scores, d.ip, d.primaryColor, d.axes, false, overlay, d.roleColors);
             });
 
+            // Carte moyenne passeurs adverses
+            if (showAwayPasseurCard) {
+                var homePasseurOverlay = (passeurCount === 1 && familyOverlays['Passeur'] && familyOverlays['Passeur'].best)
+                    ? familyOverlays['Passeur'].best : null;
+                var awayCard = BilanView.renderSpiderChart(
+                    awayPasseursAvg.name,
+                    'Passeur', awayPasseursAvg.scores, awayPasseursAvg.ip,
+                    '#b4a0d6', BilanView.SPIDER_AXES_PASSEUR, true,
+                    homePasseurOverlay, null
+                );
+                // Ajouter classe bilan-away-avg pour style distinct
+                html += awayCard.replace('bilan-player-card"', 'bilan-player-card bilan-away-avg"');
+            }
+
             // Case vide si nombre impair pour completer la ligne de la grille
-            if (slotData.length % 2 !== 0) {
+            if (totalCards % 2 !== 0) {
                 html += '<div class="bilan-player-card bilan-player-empty"></div>';
             }
         });
@@ -2843,6 +2939,192 @@ const YearStatsView = {
         });
 
         return BilanView.renderDistinctions(homeTotals, mergedRoles, players);
+    },
+
+    renderYearSideOut(matches) {
+        var allSets = [];
+        matches.forEach(function(m) {
+            (m.sets || []).filter(function(s) { return s.completed; }).forEach(function(s) { allSets.push(s); });
+        });
+        if (allSets.length === 0) return '';
+
+        var agg = { home: { soTotal: 0, soWon: 0, brkTotal: 0, brkWon: 0 }, away: { soTotal: 0, soWon: 0, brkTotal: 0, brkWon: 0 } };
+        allSets.forEach(function(set) {
+            var setStats = SideOutAnalysis.calculateSideOutStats(set.points || [], set.initialHomeScore || 0, set.initialAwayScore || 0);
+            ['home', 'away'].forEach(function(team) {
+                agg[team].soTotal += setStats[team].soTotal;
+                agg[team].soWon += setStats[team].soWon;
+                agg[team].brkTotal += setStats[team].brkTotal;
+                agg[team].brkWon += setStats[team].brkWon;
+            });
+        });
+
+        ['home', 'away'].forEach(function(team) {
+            agg[team].soPercent = agg[team].soTotal > 0 ? Math.round(agg[team].soWon / agg[team].soTotal * 100) : null;
+            agg[team].brkPercent = agg[team].brkTotal > 0 ? Math.round(agg[team].brkWon / agg[team].brkTotal * 100) : null;
+        });
+
+        var html = '<div class="sideout-section">';
+        html += '<div class="sideout-section-title">Side Out / Break Out</div>';
+        html += '<table class="sideout-table">';
+        html += '<thead><tr><th></th><th>Jen</th><th>Adversaires</th></tr></thead><tbody>';
+        html += '<tr><td>Side Out</td>';
+        html += '<td class="home-val">' + (agg.home.soPercent !== null ? agg.home.soPercent + '%' : '-') + '</td>';
+        html += '<td class="away-val">' + (agg.away.soPercent !== null ? agg.away.soPercent + '%' : '-') + '</td>';
+        html += '</tr>';
+        html += '<tr><td>Break Out</td>';
+        html += '<td class="home-val">' + (agg.home.brkPercent !== null ? agg.home.brkPercent + '%' : '-') + '</td>';
+        html += '<td class="away-val">' + (agg.away.brkPercent !== null ? agg.away.brkPercent + '%' : '-') + '</td>';
+        html += '</tr>';
+        html += '</tbody></table></div>';
+        return html;
+    },
+
+    renderYearMomentum(matches) {
+        // Collecter les courbes d'ecart de chaque set
+        var curves = [];
+        matches.forEach(function(m) {
+            (m.sets || []).filter(function(s) { return s.completed && s.points && s.points.length >= 20; }).forEach(function(s) {
+                var pts = s.points;
+                var ih = s.initialHomeScore || 0;
+                var ia = s.initialAwayScore || 0;
+                var curve = [0];
+                for (var i = 0; i < pts.length; i++) {
+                    curve.push((pts[i].homeScore - ih) - (pts[i].awayScore - ia));
+                }
+                curves.push(curve);
+            });
+        });
+        if (curves.length === 0) return '';
+
+        // Normaliser chaque set sur RESOLUTION positions (0% a 100%)
+        // Echantillonnage "nearest" (pas d'interpolation) pour garder les a-coups
+        var RESOLUTION = 50;
+        var rawCurve = [];
+        for (var pct = 0; pct <= RESOLUTION; pct++) {
+            var sum = 0;
+            for (var s = 0; s < curves.length; s++) {
+                var c = curves[s];
+                var idx = Math.round((pct / RESOLUTION) * (c.length - 1));
+                sum += c[idx];
+            }
+            rawCurve.push(sum / curves.length);
+        }
+
+        // EMA (Exponential Moving Average) pour lisser legerement
+        // alpha bas = plus lisse, alpha haut = plus nerveux
+        var alpha = 0.95;
+        var avgCurve = [rawCurve[0]];
+        for (var i = 1; i < rawCurve.length; i++) {
+            avgCurve.push(alpha * rawCurve[i] + (1 - alpha) * avgCurve[i - 1]);
+        }
+
+        // Echelle symetrique
+        var absMax = 0;
+        for (var i = 0; i < avgCurve.length; i++) {
+            var a = Math.abs(avgCurve[i]);
+            if (a > absMax) absMax = a;
+        }
+        if (absMax === 0) absMax = 1;
+        var scaleMax = Math.ceil(absMax * 2) / 2;
+
+        var n = avgCurve.length - 1;
+
+        // Dimensions SVG
+        var svgWidth = 340;
+        var svgHeight = 160;
+        var padLeft = 24;
+        var padRight = 4;
+        var padTop = 10;
+        var padBottom = 18;
+        var chartW = svgWidth - padLeft - padRight;
+        var chartH = svgHeight - padTop - padBottom;
+        var midY = padTop + chartH / 2;
+        var topY = padTop;
+        var botY = padTop + chartH;
+
+        // Helper : interpolation couleur bleu (froid) → rouge (chaud) selon valeur normalisee [-1, +1]
+        // -1 (adversaire domine) = bleu #0056D2, 0 = gris #888, +1 (Jen domine) = rouge #ea4335
+        function momentumColor(val, max) {
+            var t = max > 0 ? val / max : 0; // [-1, +1]
+            var r, g, b;
+            if (t >= 0) {
+                // gris → rouge
+                r = Math.round(136 + t * (234 - 136));
+                g = Math.round(136 - t * (136 - 67));
+                b = Math.round(136 - t * (136 - 53));
+            } else {
+                // gris → bleu
+                var s = -t;
+                r = Math.round(136 - s * (136 - 0));
+                g = Math.round(136 - s * (136 - 86));
+                b = Math.round(136 + s * (210 - 136));
+            }
+            return 'rgb(' + r + ',' + g + ',' + b + ')';
+        }
+
+        var html = '<div class="momentum-section">';
+        html += '<div class="momentum-section-title">Momentum <span class="momentum-subtitle">' + curves.length + ' sets</span></div>';
+
+        html += '<svg class="momentum-chart" viewBox="0 0 ' + svgWidth + ' ' + svgHeight + '">';
+
+        // Grilles legeres
+        html += '<line x1="' + padLeft + '" y1="' + topY + '" x2="' + (svgWidth - padRight) + '" y2="' + topY + '" stroke="#e8eaed" stroke-width="0.5"/>';
+        html += '<line x1="' + padLeft + '" y1="' + botY + '" x2="' + (svgWidth - padRight) + '" y2="' + botY + '" stroke="#e8eaed" stroke-width="0.5"/>';
+
+        // Labels echelle
+        var scaleLabel = scaleMax % 1 === 0 ? scaleMax.toFixed(0) : scaleMax.toFixed(1);
+        html += '<text x="' + (padLeft - 3) + '" y="' + (topY + 4) + '" text-anchor="end" font-size="8" fill="#5f6368">+' + scaleLabel + '</text>';
+        html += '<text x="' + (padLeft - 3) + '" y="' + (midY + 3) + '" text-anchor="end" font-size="8" fill="#5f6368">0</text>';
+        html += '<text x="' + (padLeft - 3) + '" y="' + (botY + 1) + '" text-anchor="end" font-size="8" fill="#5f6368">-' + scaleLabel + '</text>';
+
+        // Ligne zero
+        html += '<line x1="' + padLeft + '" y1="' + midY + '" x2="' + (svgWidth - padRight) + '" y2="' + midY + '" stroke="#333" stroke-width="1"/>';
+
+        // Separateurs tiers + labels abscisse
+        var thirds = ['Debut', 'Milieu', 'Fin'];
+        for (var t = 0; t < 3; t++) {
+            var thirdX = padLeft + ((t + 0.5) / 3) * chartW;
+            html += '<text x="' + thirdX.toFixed(1) + '" y="' + (botY + 9) + '" text-anchor="middle" font-size="7" fill="#5f6368">' + thirds[t] + '</text>';
+            if (t > 0) {
+                var sepX = padLeft + (t / 3) * chartW;
+                html += '<line x1="' + sepX.toFixed(1) + '" y1="' + topY + '" x2="' + sepX.toFixed(1) + '" y2="' + botY + '" stroke="#e8eaed" stroke-width="0.5" stroke-dasharray="3,3"/>';
+            }
+        }
+
+        // Calculer les pentes (derivee) pour la colorisation
+        var slopes = [];
+        var maxSlope = 0;
+        for (var i = 0; i < n; i++) {
+            var slope = avgCurve[i + 1] - avgCurve[i];
+            slopes.push(slope);
+            if (Math.abs(slope) > maxSlope) maxSlope = Math.abs(slope);
+        }
+        if (maxSlope === 0) maxSlope = 1;
+
+        // Courbe segment par segment : couleur selon la pente
+        // Pente positive (Jen accelere) = rouge chaud, pente negative (Adv accelere) = bleu froid
+        for (var i = 0; i < n; i++) {
+            var x1 = padLeft + (i / n) * chartW;
+            var x2 = padLeft + ((i + 1) / n) * chartW;
+            var y1 = midY - (avgCurve[i] / scaleMax) * (chartH / 2);
+            var y2 = midY - (avgCurve[i + 1] / scaleMax) * (chartH / 2);
+            html += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="' + momentumColor(slopes[i], maxSlope) + '" stroke-width="2" stroke-linecap="round"/>';
+        }
+
+        // Pastille finale coloree selon derniere pente
+        var lastX = padLeft + chartW;
+        var lastY = midY - (avgCurve[n] / scaleMax) * (chartH / 2);
+        var lastSlope = slopes.length > 0 ? slopes[slopes.length - 1] : 0;
+        html += '<circle cx="' + lastX.toFixed(1) + '" cy="' + lastY.toFixed(1) + '" r="3" fill="' + momentumColor(lastSlope, maxSlope) + '"/>';
+
+        // Labels Jen / Adversaires
+        html += '<text x="' + (svgWidth - padRight) + '" y="' + (topY + 4) + '" text-anchor="end" font-size="7" fill="#ea4335" opacity="0.6">Jen +</text>';
+        html += '<text x="' + (svgWidth - padRight) + '" y="' + (botY - 1) + '" text-anchor="end" font-size="7" fill="#0056D2" opacity="0.6">Adv +</text>';
+
+        html += '</svg>';
+        html += '</div>';
+        return html;
     },
 
     renderPlayerStats(matches) {
