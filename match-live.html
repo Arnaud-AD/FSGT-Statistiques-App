@@ -3365,12 +3365,13 @@
                 // Sauvegarder la position du bloc au filet pour les flèches
                 gameState.netBlockPos = gameState.currentAction.endPos;
 
-                // Auto-sélection du bloqueur si clic sur zone split
-                if (gameState.autoSelectedBlocker) {
-                    const blocker = gameState.autoSelectedBlocker;
-                    delete gameState.autoSelectedBlocker;
-                    delete gameState.autoSelectedBlockerRole;
-                    selectNetBlocker(blocker);
+                // V20.182 : vérifier l'override avant l'auto-blocker
+                const overrideBlockerRec = getEffectivePlayer();
+                const blockerRec = overrideBlockerRec || gameState.autoSelectedBlocker;
+                delete gameState.autoSelectedBlocker;
+                delete gameState.autoSelectedBlockerRole;
+                if (blockerRec) {
+                    selectNetBlocker(blockerRec);
                     return;
                 }
 
@@ -3403,12 +3404,13 @@
                 const blockingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
                 gameState.netBlockPos = gameState.rally[gameState.rally.length - 1].endPos; // Position filet de la passe
 
-                // Auto-sélection du bloqueur si clic sur zone split
-                if (gameState.autoSelectedBlocker) {
-                    const blocker = gameState.autoSelectedBlocker;
-                    delete gameState.autoSelectedBlocker;
-                    delete gameState.autoSelectedBlockerRole;
-                    selectPassNetBlocker(blocker);
+                // V20.182 : vérifier l'override avant l'auto-blocker
+                const overrideBlockerPass = getEffectivePlayer();
+                const blockerPass = overrideBlockerPass || gameState.autoSelectedBlocker;
+                delete gameState.autoSelectedBlocker;
+                delete gameState.autoSelectedBlockerRole;
+                if (blockerPass) {
+                    selectPassNetBlocker(blockerPass);
                     return;
                 }
 
@@ -3572,20 +3574,21 @@
                     lastAttackActionBO.result = 'bloc_out';
                 }
 
-                // Auto-sélection du bloqueur si disponible
-                if (gameState.autoSelectedBlocker) {
-                    const blocker = gameState.autoSelectedBlocker;
-                    delete gameState.autoSelectedBlocker;
-                    delete gameState.autoSelectedBlockerRole;
+                // V20.182 : vérifier l'override avant l'auto-blocker
+                const overrideBlockerBO = getEffectivePlayer();
+                const blockerBO = overrideBlockerBO || gameState.autoSelectedBlocker;
+                delete gameState.autoSelectedBlocker;
+                delete gameState.autoSelectedBlockerRole;
+                if (blockerBO) {
                     gameState.defenseAutoSelected = false;
                     gameState.defenseAutoPlayer = null;
                     hideDefenseZones();
                     // Enregistrer le block out puis demander la trajectoire
                     gameState.rally.push({
                         type: 'block',
-                        player: blocker,
+                        player: blockerBO,
                         team: blockingTeamBO,
-                        role: getPlayerRole(blockingTeamBO, blocker),
+                        role: getPlayerRole(blockingTeamBO, blockerBO),
                         result: 'bloc_out'
                     });
                     startBlocOutTrajectory();
@@ -3610,17 +3613,18 @@
                     lastAttackAction.result = 'defended';
                 }
 
-                // Auto-sélection du bloqueur si clic sur zone split
-                if (gameState.autoSelectedBlocker) {
-                    const blocker = gameState.autoSelectedBlocker;
-                    delete gameState.autoSelectedBlocker;
-                    delete gameState.autoSelectedBlockerRole;
+                // V20.182 : vérifier l'override avant l'auto-blocker
+                const overrideBlockerBlk = getEffectivePlayer();
+                const blockerBlk = overrideBlockerBlk || gameState.autoSelectedBlocker;
+                delete gameState.autoSelectedBlocker;
+                delete gameState.autoSelectedBlockerRole;
+                if (blockerBlk) {
                     // Cacher les zones seulement si pas de défenseur auto-sélectionné
                     // (si défenseur auto, les zones seront cachées dans selectDefender)
                     if (!gameState.defenseAutoSelected) {
                         hideDefenseZones();
                     }
-                    selectAttackNetBlocker(blocker);
+                    selectAttackNetBlocker(blockerBlk);
                     return;
                 }
 

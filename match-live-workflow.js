@@ -1268,20 +1268,17 @@ WorkflowEngine.registerPhase('reception_net_choice', {
         const blockingTeam = gameState.servingTeam;
         gameState.context.source = 'reception_net';
 
-        // Auto-blocker ?
-        if (gameState.context.autoBlocker && gameState.context.autoBlocker.player) {
-            const blocker = gameState.context.autoBlocker;
+        // V20.182 : vérifier l'override avant l'auto-blocker
+        const overrideBlocker = getEffectivePlayer();
+        const blockerPlayer = overrideBlocker || (gameState.context.autoBlocker && gameState.context.autoBlocker.player);
+        if (blockerPlayer) {
             gameState.currentAction = {
                 type: 'block',
-                player: blocker.player,
+                player: blockerPlayer,
                 team: blockingTeam,
-                role: blocker.role || getPlayerRole(blockingTeam, blocker.player)
+                role: getPlayerRole(blockingTeam, blockerPlayer)
             };
-            if (gameState.context.pendingBlockEnd) {
-                WorkflowEngine.transition('net_block_end', { blockingTeam });
-            } else {
-                WorkflowEngine.transition('net_block_end', { blockingTeam });
-            }
+            WorkflowEngine.transition('net_block_end', { blockingTeam });
         } else {
             WorkflowEngine.transition('net_block_player', { blockingTeam });
         }
@@ -1908,13 +1905,15 @@ WorkflowEngine.registerPhase('pass_net_choice', {
         const blockingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
         gameState.context.source = 'pass_net';
 
-        if (gameState.context.autoBlocker && gameState.context.autoBlocker.player) {
-            const blocker = gameState.context.autoBlocker;
+        // V20.182 : vérifier l'override avant l'auto-blocker
+        const overrideBlocker = getEffectivePlayer();
+        const blockerPlayer = overrideBlocker || (gameState.context.autoBlocker && gameState.context.autoBlocker.player);
+        if (blockerPlayer) {
             gameState.currentAction = {
                 type: 'block',
-                player: blocker.player,
+                player: blockerPlayer,
                 team: blockingTeam,
-                role: blocker.role || getPlayerRole(blockingTeam, blocker.player)
+                role: getPlayerRole(blockingTeam, blockerPlayer)
             };
             WorkflowEngine.transition('net_block_end', { blockingTeam });
         } else {
@@ -2282,7 +2281,17 @@ WorkflowEngine.registerPhase('attack_net_choice', {
 
             const blockingTeam = defendingTeam;
 
-            if (gameState.context.autoBlocker && gameState.context.autoBlocker.player) {
+            // V20.182 : vérifier l'override avant l'auto-blocker
+            const overrideBlocker = getEffectivePlayer();
+            if (overrideBlocker) {
+                gameState.currentAction = {
+                    type: 'block',
+                    player: overrideBlocker,
+                    team: blockingTeam,
+                    role: getPlayerRole(blockingTeam, overrideBlocker)
+                };
+                WorkflowEngine.transition('net_block_end', { blockingTeam });
+            } else if (gameState.context.autoBlocker && gameState.context.autoBlocker.player) {
                 const blocker = gameState.context.autoBlocker;
                 gameState.currentAction = {
                     type: 'block',
@@ -2347,13 +2356,15 @@ WorkflowEngine.registerPhase('attack_net_choice', {
 
             const blockingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
 
-            if (gameState.context.autoBlocker && gameState.context.autoBlocker.player) {
-                const blocker = gameState.context.autoBlocker;
+            // V20.182 : vérifier l'override avant l'auto-blocker
+            const overrideBlockerBO = getEffectivePlayer();
+            const blockerPlayerBO = overrideBlockerBO || (gameState.context.autoBlocker && gameState.context.autoBlocker.player);
+            if (blockerPlayerBO) {
                 gameState.rally.push({
                     type: 'block',
-                    player: blocker.player,
+                    player: blockerPlayerBO,
                     team: blockingTeam,
-                    role: blocker.role || getPlayerRole(blockingTeam, blocker.player),
+                    role: getPlayerRole(blockingTeam, blockerPlayerBO),
                     result: 'bloc_out'
                 });
                 gameState.context.blocOutAttackingTeam = gameState.attackingTeam;
@@ -3175,11 +3186,13 @@ WorkflowEngine.registerPhase('result', {
                 WorkflowEngine.transition('defense', { attackerRole });
             } else if (autoDefender && autoDefender.player) {
                 // Défenseur connu mais pas de position → afficher zone D+
+                // V20.182 : vérifier l'override avant l'auto-defender
+                const effectiveDefenderAuto = getEffectivePlayer() || autoDefender.player;
                 gameState.currentAction = {
                     type: 'defense',
-                    player: autoDefender.player,
+                    player: effectiveDefenderAuto,
                     team: newAttackingTeam,
-                    role: getPlayerRole(newAttackingTeam, autoDefender.player)
+                    role: getPlayerRole(newAttackingTeam, effectiveDefenderAuto)
                 };
                 WorkflowEngine.transition('defense_end');
             } else {
