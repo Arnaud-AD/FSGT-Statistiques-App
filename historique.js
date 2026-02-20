@@ -1160,57 +1160,29 @@ const BilanView = {
         'Pointu':  { attaque: 0.30, bloc: 0.20, reception: 0.20, defense: 0.10, relance: 0.05, service: 0.15 }
     },
 
-    // 6 axes du spider chart (sens horaire depuis le haut)
-    //         Attaque (-90°)
-    //        /              \
-    // Reception (210°)    Bloc (-30°)
-    //       |                |
-    // Defense (150°)     Passe (30°)
-    //        \              /
-    //         Service (90°)
-    // Axes ailiers : Relance remplace Passe (plus pertinent pour R4/Pointu)
-    //         Attaque (-90°)
-    //        /              \
-    // Reception (210°)    Bloc (-30°)
-    //       |                |
-    // Defense (150°)     Relance (30°)
-    //        \              /
-    //         Service (90°)
+    // 7 axes du spider chart (heptagone, ordre UNIQUE pour tous les postes)
+    // Espacement uniforme : 360/7 ≈ 51.43°
+    // Sens horaire depuis le haut : Att → Blc → Rel → Srv → Pas → Def → Rec
+    //            Att (-90°)
+    //           /          \
+    //    Rec (-141°)    Blc (-39°)
+    //      |                |
+    //   Def (167°)     Rel (13°)
+    //      \              /
+    //    Pas (116°)  Srv (64°)
     SPIDER_AXES: [
         { key: 'attaque',   label: 'Att',  angle: -90 },
-        { key: 'bloc',      label: 'Blc',  angle: -30 },
-        { key: 'relance',   label: 'Rel',  angle: 30 },
-        { key: 'service',   label: 'Srv',  angle: 90 },
-        { key: 'defense',   label: 'Def',  angle: 150 },
-        { key: 'reception', label: 'Rec',  angle: 210 }
+        { key: 'bloc',      label: 'Blc',  angle: -38.57 },
+        { key: 'relance',   label: 'Rel',  angle: 12.86 },
+        { key: 'service',   label: 'Srv',  angle: 64.29 },
+        { key: 'passe',     label: 'Pas',  angle: 115.71 },
+        { key: 'defense',   label: 'Def',  angle: 167.14 },
+        { key: 'reception', label: 'Rec',  angle: 218.57 }
     ],
 
-    // Axes specifiques Passeur : Passe en haut, Relance remplace Reception
-    //         Passe (-90°)
-    //        /              \
-    // Relance (210°)      Bloc (-30°)
-    //       |                |
-    // Defense (150°)     Attaque (30°)
-    //        \              /
-    //         Service (90°)
-    SPIDER_AXES_PASSEUR: [
-        { key: 'passe',     label: 'Pas',  angle: -90 },
-        { key: 'bloc',      label: 'Blc',  angle: -30 },
-        { key: 'attaque',   label: 'Att',  angle: 30 },
-        { key: 'service',   label: 'Srv',  angle: 90 },
-        { key: 'defense',   label: 'Def',  angle: 150 },
-        { key: 'relance',   label: 'Rel',  angle: 210 }
-    ],
-
-    // Axes specifiques Centre : hexagone, Relance remplace Bloc
-    SPIDER_AXES_CENTRE: [
-        { key: 'attaque',   label: 'Att',  angle: -90 },
-        { key: 'relance',   label: 'Rel',  angle: -30 },
-        { key: 'passe',     label: 'Pas',  angle: 30 },
-        { key: 'service',   label: 'Srv',  angle: 90 },
-        { key: 'defense',   label: 'Def',  angle: 150 },
-        { key: 'reception', label: 'Rec',  angle: 210 }
-    ],
+    // Tous les postes utilisent SPIDER_AXES (ordre unique)
+    SPIDER_AXES_PASSEUR: null,  // -> SPIDER_AXES
+    SPIDER_AXES_CENTRE: null,   // -> SPIDER_AXES
 
     // --- Point d'entree ---
     render(match, container) {
@@ -1261,9 +1233,7 @@ const BilanView = {
         var allAway = [];
 
         self.FAMILY_ORDER.forEach(function(family) {
-            var familyAxes = (family === 'Passeur') ? self.SPIDER_AXES_PASSEUR
-                           : (family === 'Centre') ? self.SPIDER_AXES_CENTRE
-                           : self.SPIDER_AXES;
+            var familyAxes = self.SPIDER_AXES;
             var familyIpRole = (family === 'Ailier') ? 'R4' : family;
 
             function collectPlayers(familiesData) {
@@ -2039,56 +2009,49 @@ const BilanView = {
             html += '<line x1="' + cx + '" y1="' + cy + '" x2="' + pt.x.toFixed(1) + '" y2="' + pt.y.toFixed(1) + '" stroke="#e8eaed" stroke-width="0.8"/>';
         });
 
-        // Polygone de donnees — deux logiques distinctes :
-        // CENTRE : 'attaque' = zero structurel (toujours au centre)
-        //   les autres zeros : skip si 4+ actifs sur 5 restants, sinon centre
-        // AUTRES POSTES : zeros toujours traces au centre, jamais de skip
+        // Polygone de donnees — regle basee sur le nombre de sommets avec valeur :
+        // 7 sommets : heptagone complet
+        // 6 sommets (1 zero) : tracer le zero au centre
+        // 5 sommets (2 zeros) :
+        //   - 2 zeros voisins (consecutifs) : tracer au centre
+        //   - 2 zeros separés (encadrent une valeur) : skip les zeros
+        // 4 ou moins : skip les zeros
         var polyPoints = [];
         var dotPoints = [];
+        var n = axes.length;
 
-        if (role === 'Centre') {
-            // Centre : attaque = zero structurel (TOUJOURS au centre, jamais skip)
-            // Autres axes : meme logique que les autres postes (skip si 4 actifs sur 5 non-structurels)
-            var nonStructuralActive = axes.filter(function(a) {
-                return a.key !== 'attaque' && (axisScores[a.key] || 0) > 0;
-            }).length;
-            var skipNonStructuralZeros = nonStructuralActive === 4; // 4 sur 5 = losange
+        var vals = axes.map(function(a) { return axisScores[a.key] || 0; });
+        var vertexCount = vals.filter(function(v) { return v > 0; }).length;
 
-            axes.forEach(function(axis) {
-                var val = axisScores[axis.key] || 0;
-                // Forcer attaque a 0 pour Centre (zero structurel)
-                if (axis.key === 'attaque') val = 0;
-                if (val > 0) {
-                    var r = maxR * val / 100;
-                    var pt = self.polarToCartesian(cx, cy, r, axis.angle);
-                    polyPoints.push(pt);
-                    dotPoints.push(pt);
-                } else if (axis.key === 'attaque') {
-                    // Att structurel : TOUJOURS tracer au centre (jamais skip)
-                    polyPoints.push({ x: cx, y: cy });
-                } else if (!skipNonStructuralZeros) {
-                    // Autre axe a 0, pas assez d'actifs : tracer au centre
-                    polyPoints.push({ x: cx, y: cy });
+        // Pour 5 sommets : detecter si les 2 zeros sont voisins (consecutifs)
+        var zerosAreConsecutive = false;
+        if (vertexCount === 5) {
+            for (var zi = 0; zi < n; zi++) {
+                if (vals[zi] === 0 && vals[(zi + 1) % n] === 0) {
+                    zerosAreConsecutive = true;
+                    break;
                 }
-                // sinon : skip (losange)
-            });
-        } else {
-            var activeCount = axes.filter(function(a) { return (axisScores[a.key] || 0) > 0; }).length;
-            var skipZeros = activeCount === 4;
-
-            axes.forEach(function(axis) {
-                var val = axisScores[axis.key] || 0;
-                if (val > 0) {
-                    var r = maxR * val / 100;
-                    var pt = self.polarToCartesian(cx, cy, r, axis.angle);
-                    polyPoints.push(pt);
-                    dotPoints.push(pt);
-                } else if (!skipZeros) {
-                    // 3 ou moins actifs : tracer au centre sans point
-                    polyPoints.push({ x: cx, y: cy });
-                }
-            });
+            }
         }
+
+        // Regle de skip :
+        // - 7 ou 6 sommets : jamais skip
+        // - 5 sommets + zeros consecutifs : jamais skip (tracer au centre)
+        // - 5 sommets + zeros separes : skip
+        // - 4 ou moins : skip
+        var skipZeros = (vertexCount <= 4) || (vertexCount === 5 && !zerosAreConsecutive);
+
+        axes.forEach(function(axis, i) {
+            var val = vals[i];
+            if (val > 0) {
+                var r = maxR * val / 100;
+                var pt = self.polarToCartesian(cx, cy, r, axis.angle);
+                polyPoints.push(pt);
+                dotPoints.push(pt);
+            } else if (!skipZeros) {
+                polyPoints.push({ x: cx, y: cy });
+            }
+        });
 
         if (polyPoints.length >= 2) {
             var dataPolygon = polyPoints.map(function(pt) { return pt.x.toFixed(1) + ',' + pt.y.toFixed(1); }).join(' ');
@@ -2107,36 +2070,30 @@ const BilanView = {
             var ovColor = '#9aa0a6'; // gris neutre pour l'overlay
             var ovPoints = [];
 
-            if (ovRole === 'Centre') {
-                var ovNonStructural = axes.filter(function(a) {
-                    return a.key !== 'attaque' && (ovScores[a.key] || 0) > 0;
-                }).length;
-                var ovSkip = ovNonStructural === 4;
-                axes.forEach(function(axis) {
-                    var val = ovScores[axis.key] || 0;
-                    if (axis.key === 'attaque') val = 0;
-                    if (val > 0) {
-                        var r = maxR * val / 100;
-                        ovPoints.push(self.polarToCartesian(cx, cy, r, axis.angle));
-                    } else if (axis.key === 'attaque') {
-                        ovPoints.push({ x: cx, y: cy });
-                    } else if (!ovSkip) {
-                        ovPoints.push({ x: cx, y: cy });
+            // Meme logique — seuil + detection zeros consecutifs
+            var ovVals = axes.map(function(a) { return ovScores[a.key] || 0; });
+            var ovVertexCount = ovVals.filter(function(v) { return v > 0; }).length;
+
+            var ovZerosConsecutive = false;
+            if (ovVertexCount === 5) {
+                for (var ozi = 0; ozi < n; ozi++) {
+                    if (ovVals[ozi] === 0 && ovVals[(ozi + 1) % n] === 0) {
+                        ovZerosConsecutive = true;
+                        break;
                     }
-                });
-            } else {
-                var ovActive = axes.filter(function(a) { return (ovScores[a.key] || 0) > 0; }).length;
-                var ovSkipZ = ovActive === 4;
-                axes.forEach(function(axis) {
-                    var val = ovScores[axis.key] || 0;
-                    if (val > 0) {
-                        var r = maxR * val / 100;
-                        ovPoints.push(self.polarToCartesian(cx, cy, r, axis.angle));
-                    } else if (!ovSkipZ) {
-                        ovPoints.push({ x: cx, y: cy });
-                    }
-                });
+                }
             }
+            var ovSkipZeros = (ovVertexCount <= 4) || (ovVertexCount === 5 && !ovZerosConsecutive);
+
+            axes.forEach(function(axis, i) {
+                var val = ovVals[i];
+                if (val > 0) {
+                    var r = maxR * val / 100;
+                    ovPoints.push(self.polarToCartesian(cx, cy, r, axis.angle));
+                } else if (!ovSkipZeros) {
+                    ovPoints.push({ x: cx, y: cy });
+                }
+            });
 
             if (ovPoints.length >= 2) {
                 var ovPoly = ovPoints.map(function(pt) { return pt.x.toFixed(1) + ',' + pt.y.toFixed(1); }).join(' ');
@@ -2146,7 +2103,7 @@ const BilanView = {
 
         // Labels d'axes a l'exterieur
         axes.forEach(function(axis) {
-            var labelR = 72; // fixe, independant de maxR
+            var labelR = 69; // fixe, independant de maxR
             var pt = self.polarToCartesian(cx, cy, labelR, axis.angle);
 
             // Alignement du texte selon l'angle (generique)
@@ -2162,7 +2119,7 @@ const BilanView = {
             else if (sin > 0.7) dy = 10; // bas
 
             html += '<text x="' + pt.x.toFixed(1) + '" y="' + (pt.y + dy).toFixed(1) + '" ';
-            html += 'text-anchor="' + anchor + '" font-size="10" font-weight="500" ';
+            html += 'text-anchor="' + anchor + '" font-size="8" font-weight="500" ';
             html += 'font-family="Google Sans, Roboto, sans-serif" fill="#5f6368">';
             html += axis.label + '</text>';
         });
@@ -2967,9 +2924,7 @@ const YearStatsView = {
         var allPlayerData = [];
 
         BilanView.FAMILY_ORDER.forEach(function(family) {
-            var familyAxes = (family === 'Passeur') ? BilanView.SPIDER_AXES_PASSEUR
-                           : (family === 'Centre') ? BilanView.SPIDER_AXES_CENTRE
-                           : BilanView.SPIDER_AXES;
+            var familyAxes = BilanView.SPIDER_AXES;
             var familyIpRole = (family === 'Ailier') ? 'R4' : family;
 
             var playersInFamily = [];
@@ -3088,7 +3043,7 @@ const YearStatsView = {
                 var awayCard = BilanView.renderSpiderChart(
                     awayPasseursAvg.name,
                     'Passeur', awayPasseursAvg.scores, awayPasseursAvg.ip,
-                    '#b4a0d6', BilanView.SPIDER_AXES_PASSEUR, true,
+                    '#b4a0d6', BilanView.SPIDER_AXES, true,
                     homePasseurOverlay, null
                 );
                 // Ajouter classe bilan-away-avg pour style distinct
