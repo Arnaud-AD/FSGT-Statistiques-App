@@ -274,10 +274,85 @@ function confirmResumeLastPoint() {
     clearMarkers();
     clearArrows();
     WorkflowEngine.clearStack();
+
+    // 10. Reconstruire le stack undo pour chaque action du rally restauré
+    // Comme ça, Retour peut remonter action par action dans le rally
+    _rebuildUndoStack(rally, serviceAction);
+
     redrawRally();
 
-    // 10. Déterminer la phase de reprise et y entrer
+    // 11. Déterminer la phase de reprise et y entrer
     _resumeToPhase(removedAction);
+}
+
+/**
+ * Reconstruit le stack undo à partir du rally restauré.
+ * Pour chaque action, on push un snapshot avec le rally tronqué à ce point,
+ * permettant de remonter action par action avec Retour.
+ */
+function _rebuildUndoStack(rally, serviceAction) {
+    if (!rally || rally.length === 0) return;
+
+    // Pour chaque action du rally, construire un snapshot intermédiaire
+    // Le snapshot i représente l'état AVANT l'action i (= rally[0..i-1])
+    for (let i = 0; i <= rally.length; i++) {
+        const rallySlice = rally.slice(0, i);
+        const currentAction = i < rally.length ? rally[i] : {};
+
+        // Déterminer l'attackingTeam à ce point du rally
+        let attackingTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
+        for (let j = 0; j < i; j++) {
+            const a = rally[j];
+            if (a.type === 'attack' && (a.result === 'defended' || a.result === 'blocked')) {
+                // Contre-attaque : l'équipe adverse attaque maintenant
+                attackingTeam = a.team === 'home' ? 'away' : 'home';
+            } else if (a.type === 'reception' || a.type === 'pass') {
+                attackingTeam = a.team;
+            }
+        }
+
+        // Déterminer la phase correspondante
+        let phase = 'server_selection';
+        if (i === 0) {
+            phase = 'server_selection';
+        } else {
+            const prevAction = rally[i - 1];
+            if (prevAction.type === 'service') {
+                if (prevAction.result === 'in') phase = 'reception';
+                else phase = 'serve_end';
+            } else if (prevAction.type === 'reception') {
+                phase = 'pass';
+            } else if (prevAction.type === 'pass') {
+                phase = 'attack_player';
+            } else if (prevAction.type === 'attack') {
+                if (prevAction.result === 'defended' || prevAction.result === 'blocked') phase = 'result';
+                else phase = 'attack_end';
+            } else if (prevAction.type === 'defense') {
+                phase = 'pass';
+            } else if (prevAction.type === 'block') {
+                phase = 'result';
+            }
+        }
+
+        const snapshot = {
+            label: 'rebuild_' + i,
+            phase: phase,
+            servingTeam: gameState.servingTeam,
+            attackingTeam: attackingTeam,
+            currentServer: gameState.currentServer,
+            homeScore: gameState.homeScore,
+            awayScore: gameState.awayScore,
+            setEnded: false,
+            currentAction: JSON.parse(JSON.stringify(i < rally.length ? {} : currentAction)),
+            rally: JSON.parse(JSON.stringify(rallySlice)),
+            context: JSON.parse(JSON.stringify(WorkflowEngine._freshContext())),
+            overridePlayer: null,
+            autoSelectedPlayer: null,
+            overrideTagsTeam: null
+        };
+
+        WorkflowEngine.stateStack.push(snapshot);
+    }
 }
 
 /**
@@ -358,9 +433,8 @@ function _resumeToPhase(removedAction) {
             break;
     }
 
-    // Pusher un état APRÈS la transition pour que le prochain Retour
-    // restaure cette phase (et non server_selection)
-    WorkflowEngine.pushState('resume_point');
+    // Le stack a déjà été reconstruit par _rebuildUndoStack()
+    // Pas besoin de pushState ici — le Retour remontera dans le rally
 }
 
 function redrawRally() {
