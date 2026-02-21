@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FSGT94 Volley</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo"><img src="logo.png" alt="FSGT94 Volley"></div>
+            <h1 class="header-title">FSGT94 Volley</h1>
+            <div class="championship-selector">
+                <select id="championship-select" onchange="switchChampionship(this.value)"></select>
+            </div>
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('classement')">Classement</button>
+                <button class="tab" onclick="showTab('matchs')">Matchs</button>
+                <button class="tab" onclick="showTab('powerranking')">Power Ranking</button>
+            </div>
+            <div class="ginette-tabs" style="display: none;">
+                <button class="tab active" onclick="showGinetteTab('ginette-classement')">Classement</button>
+                <button class="tab" onclick="showGinetteTab('ginette-pr')">Power Ranking</button>
+            </div>
+        </header>
+
+        <!-- Mobile Championship + Tabs -->
+        <div class="mobile-championship">
+            <select id="championship-select-mobile" onchange="switchChampionship(this.value)"></select>
+        </div>
+        <div class="mobile-tabs">
+            <button class="tab active" onclick="showTab('classement')">Classement</button>
+            <button class="tab" onclick="showTab('matchs')">Matchs</button>
+            <button class="tab" onclick="showTab('powerranking')">Power Ranking</button>
+        </div>
+        <div class="mobile-ginette-tabs" style="display: none;">
+            <button class="tab active" onclick="showGinetteTab('ginette-classement')">Classement</button>
+            <button class="tab" onclick="showGinetteTab('ginette-pr')">Power Ranking</button>
+        </div>
+
+        <!-- CLASSEMENT TAB -->
+        <div id="classement" class="tab-content active">
+            <h2 class="section-title">Classement</h2>
+            <div class="sub-tabs">
+                <button class="sub-tab active" onclick="showClassementSubTab('classement-table', this)">Classement</button>
+                <button class="sub-tab" onclick="showClassementSubTab('classement-evolution', this)">&#201;volution</button>
+            </div>
+            <div id="classement-table" class="classement-sub-tab-content active">
+                <div id="classement-table-content"></div>
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-bar" style="background: var(--rank-champion);"></div>Champion</div>
+                    <div class="legend-item"><div class="legend-bar" style="background: var(--rank-europe);"></div>Podium</div>
+                    <div class="legend-item"><div class="legend-bar" style="background: var(--rank-europa);"></div>Rel&#233;gation</div>
+                </div>
+            </div>
+            <div id="classement-evolution" class="classement-sub-tab-content">
+                <div class="chart-container" style="background: var(--bg-header); border-radius: 12px; padding: 20px; margin-top: 16px;">
+                    <canvas id="evolutionChart" width="800" height="400"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- MATCHS TAB -->
+        <div id="matchs" class="tab-content">
+            <h2 class="section-title">Matchs</h2>
+            <div id="matchs-content"></div>
+        </div>
+
+        <!-- POWER RANKING TAB -->
+        <div id="powerranking" class="tab-content">
+            <h2 class="section-title">Power Ranking</h2>
+            <div class="sub-tabs">
+                <button class="sub-tab active" onclick="showSubTab('pr-equipes', this)">&#201;quipes</button>
+                <button class="sub-tab" id="pr-joueurs-tab" onclick="showSubTab('pr-joueurs', this)">Joueurs</button>
+            </div>
+            <div id="pr-equipes" class="sub-tab-content active">
+                <div id="pr-equipes-content"></div>
+            </div>
+            <div id="pr-joueurs" class="sub-tab-content">
+                <div id="pr-joueurs-content"></div>
+            </div>
+        </div>
+
+        <!-- GINETTE (Coupe inter-divisions) -->
+        <div id="ginette" class="tab-content">
+            <!-- Ginette Classement -->
+            <div id="ginette-classement" class="ginette-tab-content active">
+                <h2 class="section-title">Classement — Coupe Ginette</h2>
+                <div class="sub-tabs">
+                    <button class="sub-tab active" onclick="showGinetteSubTab('ginette-tour1', this)">Tour 1</button>
+                    <button class="sub-tab" onclick="showGinetteSubTab('ginette-tour2', this)">Tour 2</button>
+                    <button class="sub-tab" onclick="showGinetteSubTab('ginette-8eme', this)">1/8&#232;me de finale</button>
+                </div>
+                <div id="ginette-tour1" class="ginette-sub-tab-content active"></div>
+                <div id="ginette-tour2" class="ginette-sub-tab-content"></div>
+                <div id="ginette-8eme" class="ginette-sub-tab-content"></div>
+            </div>
+
+            <!-- Ginette Power Ranking -->
+            <div id="ginette-pr" class="ginette-tab-content">
+                <h2 class="section-title">Power Ranking ELO — Coupe Ginette</h2>
+                <div id="ginette-content"></div>
+            </div>
+        </div>
+
+        <!-- Loading overlay -->
+        <div id="loading-overlay" class="loading-overlay">
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

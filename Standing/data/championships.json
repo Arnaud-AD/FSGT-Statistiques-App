@@ -1,0 +1,48 @@
+{
+  "championships": [
+    {
+      "id": 1,
+      "slug": "elite",
+      "name": "Elite",
+      "format": "4x4"
+    },
+    {
+      "id": 2,
+      "slug": "hard",
+      "name": "Hard",
+      "format": "4x4"
+    },
+    {
+      "id": 15,
+      "slug": "medium",
+      "name": "Medium",
+      "format": "4x4"
+    },
+    {
+      "id": 3,
+      "slug": "easy",
+      "name": "Easy",
+      "format": "4x4"
+    },
+    {
+      "id": 16,
+      "slug": "starter",
+      "name": "Starter",
+      "format": "4x4"
+    },
+    {
+      "id": 4,
+      "slug": "or6x6",
+      "name": "Or 6x6",
+      "format": "6x6"
+    },
+    {
+      "id": null,
+      "slug": "ginette",
+      "name": "Coupe Ginette",
+      "format": "coupe"
+    }
+  ],
+  "default": "elite",
+  "lastUpdated": "2026-02-21T00:42:34"
+}

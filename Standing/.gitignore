@@ -1,0 +1,10 @@
+.DS_Store
+.claude/
+CLAUDE.md
+scrape_fsgt.py
+ginette_elo.py
+__pycache__/
+championships_data/
+start.command
+icon1.jpg
+icon2.png

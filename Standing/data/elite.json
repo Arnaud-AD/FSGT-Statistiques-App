@@ -1,0 +1,2045 @@
+{
+  "meta": {
+    "id": 1,
+    "slug": "elite",
+    "name": "Elite",
+    "format": "4x4",
+    "url": "https://volley-fsgt94.fr/championnat/1",
+    "lastUpdated": "2026-02-21T00:42:31",
+    "teamCount": 10,
+    "matchesPlayed": 51,
+    "matchesUpcoming": 39
+  },
+  "teams": {
+    "jen": {
+      "name": "Jen et ses Saints",
+      "short": "JS",
+      "color": "#9b59b6"
+    },
+    "kiki": {
+      "name": "Kiki Team",
+      "short": "KT",
+      "color": "#3498db"
+    },
+    "rhsp": {
+      "name": "Red Hot Sucy Pépère",
+      "short": "RH",
+      "color": "#e74c3c"
+    },
+    "resc": {
+      "name": "Les Rescapés",
+      "short": "LR",
+      "color": "#2ecc71"
+    },
+    "marv": {
+      "name": "Marvels 4",
+      "short": "M4",
+      "color": "#f39c12"
+    },
+    "rsc": {
+      "name": "RSC Champigny 1",
+      "short": "RC",
+      "color": "#1abc9c"
+    },
+    "manu": {
+      "name": "Manu Andy-sport",
+      "short": "MA",
+      "color": "#e67e22"
+    },
+    "bier": {
+      "name": "Bières et le loup",
+      "short": "BL",
+      "color": "#f1c40f"
+    },
+    "rhin": {
+      "name": "Rhinos Féroces",
+      "short": "RF",
+      "color": "#95a5a6"
+    },
+    "star": {
+      "name": "StarPAFF",
+      "short": "SP",
+      "color": "#34495e"
+    }
+  },
+  "standings": [
+    {
+      "rank": 1,
+      "team": "jen",
+      "mj": 11,
+      "g": 11,
+      "p": 0,
+      "setPlus": 33,
+      "setMinus": 3,
+      "ds": 30,
+      "coefSet": "11.00",
+      "ptsPlus": 893,
+      "ptsMinus": 676,
+      "dp": "+217",
+      "coefPts": "1.32",
+      "pts": 22,
+      "formAller": [
+        "W",
+        "W",
+        "W",
+        "W",
+        "W",
+        "W",
+        "W",
+        "W",
+        "W"
+      ],
+      "formRetour": [
+        "W",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 2,
+      "team": "kiki",
+      "mj": 10,
+      "g": 8,
+      "p": 2,
+      "setPlus": 25,
+      "setMinus": 15,
+      "ds": 10,
+      "coefSet": "1.67",
+      "ptsPlus": 906,
+      "ptsMinus": 785,
+      "dp": "+121",
+      "coefPts": "1.15",
+      "pts": 18,
+      "formAller": [
+        "W",
+        "W",
+        "L",
+        "W",
+        "L",
+        "W",
+        "D",
+        "W",
+        "W"
+      ],
+      "formRetour": [
+        "W",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 3,
+      "team": "resc",
+      "mj": 9,
+      "g": 6,
+      "p": 3,
+      "setPlus": 23,
+      "setMinus": 14,
+      "ds": 9,
+      "coefSet": "1.64",
+      "ptsPlus": 838,
+      "ptsMinus": 788,
+      "dp": "+50",
+      "coefPts": "1.06",
+      "pts": 15,
+      "formAller": [
+        "W",
+        "W",
+        "W",
+        "D",
+        "L",
+        "L",
+        "D",
+        "W",
+        "L"
+      ],
+      "formRetour": [
+        "W",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 4,
+      "team": "rhsp",
+      "mj": 11,
+      "g": 7,
+      "p": 4,
+      "setPlus": 23,
+      "setMinus": 18,
+      "ds": 5,
+      "coefSet": "1.28",
+      "ptsPlus": 888,
+      "ptsMinus": 841,
+      "dp": "+47",
+      "coefPts": "1.06",
+      "pts": 18,
+      "formAller": [
+        "L",
+        "W",
+        "W",
+        "W",
+        "W",
+        "W",
+        "L",
+        "L",
+        "W"
+      ],
+      "formRetour": [
+        "L",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 5,
+      "team": "marv",
+      "mj": 11,
+      "g": 7,
+      "p": 4,
+      "setPlus": 25,
+      "setMinus": 20,
+      "ds": 5,
+      "coefSet": "1.25",
+      "ptsPlus": 979,
+      "ptsMinus": 950,
+      "dp": "+29",
+      "coefPts": "1.03",
+      "pts": 18,
+      "formAller": [
+        "W",
+        "W",
+        "W",
+        "L",
+        "W",
+        "W",
+        "L",
+        "W",
+        "L"
+      ],
+      "formRetour": [
+        "L",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 6,
+      "team": "bier",
+      "mj": 11,
+      "g": 5,
+      "p": 6,
+      "setPlus": 19,
+      "setMinus": 22,
+      "ds": -3,
+      "coefSet": "0.86",
+      "ptsPlus": 914,
+      "ptsMinus": 900,
+      "dp": "+14",
+      "coefPts": "1.02",
+      "pts": 16,
+      "formAller": [
+        "W",
+        "L",
+        "L",
+        "L",
+        "W",
+        "L",
+        "W",
+        "L",
+        "W"
+      ],
+      "formRetour": [
+        "W",
+        "L",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 7,
+      "team": "rsc",
+      "mj": 9,
+      "g": 3,
+      "p": 6,
+      "setPlus": 16,
+      "setMinus": 22,
+      "ds": -6,
+      "coefSet": "0.73",
+      "ptsPlus": 781,
+      "ptsMinus": 810,
+      "dp": "-29",
+      "coefPts": "0.96",
+      "pts": 12,
+      "formAller": [
+        "L",
+        "L",
+        "W",
+        "D",
+        "L",
+        "L",
+        "D",
+        "W",
+        "L"
+      ],
+      "formRetour": [
+        "W",
+        "L",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 8,
+      "team": "manu",
+      "mj": 9,
+      "g": 2,
+      "p": 7,
+      "setPlus": 10,
+      "setMinus": 21,
+      "ds": -11,
+      "coefSet": "0.48",
+      "ptsPlus": 657,
+      "ptsMinus": 721,
+      "dp": "-64",
+      "coefPts": "0.91",
+      "pts": 11,
+      "formAller": [
+        "L",
+        "L",
+        "L",
+        "D",
+        "W",
+        "L",
+        "D",
+        "L",
+        "W"
+      ],
+      "formRetour": [
+        "L",
+        "L",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 9,
+      "team": "rhin",
+      "mj": 10,
+      "g": 2,
+      "p": 8,
+      "setPlus": 16,
+      "setMinus": 24,
+      "ds": -8,
+      "coefSet": "0.67",
+      "ptsPlus": 818,
+      "ptsMinus": 895,
+      "dp": "-77",
+      "coefPts": "0.91",
+      "pts": 12,
+      "formAller": [
+        "L",
+        "L",
+        "L",
+        "D",
+        "L",
+        "W",
+        "W",
+        "L",
+        "L"
+      ],
+      "formRetour": [
+        "L",
+        "L",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 10,
+      "team": "star",
+      "mj": 11,
+      "g": 0,
+      "p": 11,
+      "setPlus": 2,
+      "setMinus": 33,
+      "ds": -31,
+      "coefSet": "0.06",
+      "ptsPlus": 561,
+      "ptsMinus": 869,
+      "dp": "-308",
+      "coefPts": "0.65",
+      "pts": 11,
+      "formAller": [
+        "L",
+        "L",
+        "L",
+        "L",
+        "L",
+        "L",
+        "L",
+        "L",
+        "L"
+      ],
+      "formRetour": [
+        "L",
+        "L",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    }
+  ],
+  "matchesPlayed": [
+    {
+      "date": "18/02/2026",
+      "home": "manu",
+      "away": "jen",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "18/02/2026",
+      "home": "rsc",
+      "away": "resc",
+      "scoreHome": 1,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "16/02/2026",
+      "home": "rhin",
+      "away": "kiki",
+      "scoreHome": 2,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "16/02/2026",
+      "home": "star",
+      "away": "marv",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "16/02/2026",
+      "home": "rhsp",
+      "away": "bier",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "12/02/2026",
+      "home": "jen",
+      "away": "rhsp",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "11/02/2026",
+      "home": "star",
+      "away": "kiki",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "11/02/2026",
+      "home": "rsc",
+      "away": "marv",
+      "scoreHome": 3,
+      "scoreAway": 2,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "10/02/2026",
+      "home": "bier",
+      "away": "manu",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "09/02/2026",
+      "home": "resc",
+      "away": "rhin",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "29/01/2026",
+      "home": "jen",
+      "away": "manu",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "29/01/2026",
+      "home": "marv",
+      "away": "rsc",
+      "scoreHome": 3,
+      "scoreAway": 2,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "27/01/2026",
+      "home": "bier",
+      "away": "star",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "26/01/2026",
+      "home": "kiki",
+      "away": "jen",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "26/01/2026",
+      "home": "rhin",
+      "away": "rhsp",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "22/01/2026",
+      "home": "jen",
+      "away": "resc",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "21/01/2026",
+      "home": "rsc",
+      "away": "bier",
+      "scoreHome": 2,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "21/01/2026",
+      "home": "manu",
+      "away": "rhin",
+      "scoreHome": 3,
+      "scoreAway": 2,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "19/01/2026",
+      "home": "kiki",
+      "away": "marv",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "19/01/2026",
+      "home": "rhsp",
+      "away": "star",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "15/01/2026",
+      "home": "marv",
+      "away": "manu",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "14/01/2026",
+      "home": "star",
+      "away": "rsc",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "13/01/2026",
+      "home": "bier",
+      "away": "resc",
+      "scoreHome": 1,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "12/01/2026",
+      "home": "rhin",
+      "away": "jen",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "12/01/2026",
+      "home": "rhsp",
+      "away": "kiki",
+      "scoreHome": 2,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "08/01/2026",
+      "home": "jen",
+      "away": "marv",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "11/12/2025",
+      "home": "jen",
+      "away": "rsc",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "11/12/2025",
+      "home": "marv",
+      "away": "bier",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "08/12/2025",
+      "home": "kiki",
+      "away": "manu",
+      "scoreHome": 2,
+      "scoreAway": 2,
+      "homeWin": true,
+      "status": "Kiki pts"
+    },
+    {
+      "date": "08/12/2025",
+      "home": "resc",
+      "away": "rhsp",
+      "scoreHome": 2,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "08/12/2025",
+      "home": "star",
+      "away": "rhin",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "03/12/2025",
+      "home": "manu",
+      "away": "star",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "02/12/2025",
+      "home": "marv",
+      "away": "resc",
+      "scoreHome": 3,
+      "scoreAway": 2,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "01/12/2025",
+      "home": "rhsp",
+      "away": "rsc",
+      "scoreHome": 3,
+      "scoreAway": 2,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "01/12/2025",
+      "home": "rhin",
+      "away": "bier",
+      "scoreHome": 1,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "26/11/2025",
+      "home": "star",
+      "away": "jen",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "25/11/2025",
+      "home": "bier",
+      "away": "kiki",
+      "scoreHome": 1,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "24/11/2025",
+      "home": "rhsp",
+      "away": "marv",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "20/11/2025",
+      "home": "jen",
+      "away": "bier",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "19/11/2025",
+      "home": "rsc",
+      "away": "kiki",
+      "scoreHome": 2,
+      "scoreAway": 2,
+      "homeWin": true,
+      "status": "RSC pts"
+    },
+    {
+      "date": "19/11/2025",
+      "home": "manu",
+      "away": "rhsp",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "19/11/2025",
+      "home": "star",
+      "away": "resc",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "17/11/2025",
+      "home": "rhin",
+      "away": "marv",
+      "scoreHome": 2,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "06/11/2025",
+      "home": "marv",
+      "away": "star",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "04/11/2025",
+      "home": "bier",
+      "away": "rhsp",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "03/11/2025",
+      "home": "kiki",
+      "away": "rhin",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "03/11/2025",
+      "home": "resc",
+      "away": "rsc",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "15/10/2025",
+      "home": "manu",
+      "away": "bier",
+      "scoreHome": 1,
+      "scoreAway": 2,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "13/10/2025",
+      "home": "rhsp",
+      "away": "jen",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "13/10/2025",
+      "home": "kiki",
+      "away": "star",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "13/10/2025",
+      "home": "rhin",
+      "away": "resc",
+      "scoreHome": 1,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    }
+  ],
+  "matchesUpcoming": [
+    {
+      "date": "N/C",
+      "home": "rsc",
+      "away": "rhin",
+      "status": "Reporté"
+    },
+    {
+      "date": "02/03/2026",
+      "home": "kiki",
+      "away": "resc",
+      "status": "Reporté"
+    },
+    {
+      "date": "09/03/2026",
+      "home": "kiki",
+      "away": "rsc",
+      "status": "Sem. 12"
+    },
+    {
+      "date": "09/03/2026",
+      "home": "rhsp",
+      "away": "manu",
+      "status": "Sem. 12"
+    },
+    {
+      "date": "09/03/2026",
+      "home": "resc",
+      "away": "star",
+      "status": "Sem. 12"
+    },
+    {
+      "date": "10/03/2026",
+      "home": "bier",
+      "away": "jen",
+      "status": "Sem. 12"
+    },
+    {
+      "date": "12/03/2026",
+      "home": "marv",
+      "away": "rhin",
+      "status": "Sem. 12"
+    },
+    {
+      "date": "18/03/2026",
+      "home": "rsc",
+      "away": "manu",
+      "status": "Reporté"
+    },
+    {
+      "date": "23/03/2026",
+      "home": "kiki",
+      "away": "bier",
+      "status": "Sem. 13"
+    },
+    {
+      "date": "23/03/2026",
+      "home": "rhin",
+      "away": "rsc",
+      "status": "Sem. 13"
+    },
+    {
+      "date": "25/03/2026",
+      "home": "manu",
+      "away": "resc",
+      "status": "Sem. 13"
+    },
+    {
+      "date": "26/03/2026",
+      "home": "jen",
+      "away": "star",
+      "status": "Sem. 13"
+    },
+    {
+      "date": "26/03/2026",
+      "home": "marv",
+      "away": "rhsp",
+      "status": "Sem. 13"
+    },
+    {
+      "date": "30/03/2026",
+      "home": "resc",
+      "away": "marv",
+      "status": "Sem. 14"
+    },
+    {
+      "date": "30/03/2026",
+      "home": "star",
+      "away": "manu",
+      "status": "Sem. 14"
+    },
+    {
+      "date": "31/03/2026",
+      "home": "bier",
+      "away": "rhin",
+      "status": "Sem. 14"
+    },
+    {
+      "date": "01/04/2026",
+      "home": "rsc",
+      "away": "rhsp",
+      "status": "Sem. 14"
+    },
+    {
+      "date": "02/04/2026",
+      "home": "jen",
+      "away": "kiki",
+      "status": "Sem. 14"
+    },
+    {
+      "date": "06/04/2026",
+      "home": "rhsp",
+      "away": "resc",
+      "status": "Sem. 15"
+    },
+    {
+      "date": "06/04/2026",
+      "home": "rhin",
+      "away": "star",
+      "status": "Sem. 15"
+    },
+    {
+      "date": "07/04/2026",
+      "home": "bier",
+      "away": "marv",
+      "status": "Sem. 15"
+    },
+    {
+      "date": "08/04/2026",
+      "home": "rsc",
+      "away": "jen",
+      "status": "Sem. 15"
+    },
+    {
+      "date": "08/04/2026",
+      "home": "manu",
+      "away": "kiki",
+      "status": "Sem. 15"
+    },
+    {
+      "date": "04/05/2026",
+      "home": "resc",
+      "away": "kiki",
+      "status": "Sem. 16"
+    },
+    {
+      "date": "04/05/2026",
+      "home": "rhsp",
+      "away": "rhin",
+      "status": "Sem. 16"
+    },
+    {
+      "date": "04/05/2026",
+      "home": "star",
+      "away": "bier",
+      "status": "Sem. 16"
+    },
+    {
+      "date": "06/05/2026",
+      "home": "manu",
+      "away": "rsc",
+      "status": "Sem. 16"
+    },
+    {
+      "date": "07/05/2026",
+      "home": "marv",
+      "away": "jen",
+      "status": "Sem. 16"
+    },
+    {
+      "date": "11/05/2026",
+      "home": "kiki",
+      "away": "rhsp",
+      "status": "Sem. 17"
+    },
+    {
+      "date": "11/05/2026",
+      "home": "resc",
+      "away": "bier",
+      "status": "Sem. 17"
+    },
+    {
+      "date": "13/05/2026",
+      "home": "manu",
+      "away": "marv",
+      "status": "Sem. 17"
+    },
+    {
+      "date": "13/05/2026",
+      "home": "rsc",
+      "away": "star",
+      "status": "Sem. 17"
+    },
+    {
+      "date": "14/05/2026",
+      "home": "jen",
+      "away": "rhin",
+      "status": "Sem. 17"
+    },
+    {
+      "date": "18/05/2026",
+      "home": "resc",
+      "away": "jen",
+      "status": "Sem. 18"
+    },
+    {
+      "date": "18/05/2026",
+      "home": "star",
+      "away": "rhsp",
+      "status": "Sem. 18"
+    },
+    {
+      "date": "18/05/2026",
+      "home": "rhin",
+      "away": "manu",
+      "status": "Sem. 18"
+    },
+    {
+      "date": "19/05/2026",
+      "home": "bier",
+      "away": "rsc",
+      "status": "Sem. 18"
+    },
+    {
+      "date": "21/05/2026",
+      "home": "marv",
+      "away": "kiki",
+      "status": "Sem. 18"
+    },
+    {
+      "date": "01/06/2026",
+      "home": "resc",
+      "away": "manu",
+      "status": "Reporté"
+    }
+  ],
+  "prTeams": [
+    {
+      "rank": 1,
+      "team": "jen",
+      "elo": 1743.3,
+      "movement": 12.1,
+      "record": "11-0",
+      "power": 97.7,
+      "calendar": "V x11",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 2,
+      "team": "kiki",
+      "elo": 1612.6,
+      "movement": 17.6,
+      "record": "8-2",
+      "power": 72.1,
+      "calendar": "V vs Rhinos",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 3,
+      "team": "resc",
+      "elo": 1586.2,
+      "movement": 26.2,
+      "record": "6-3",
+      "power": 66.9,
+      "calendar": "V vs RSC",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 4,
+      "team": "rhsp",
+      "elo": 1547.5,
+      "movement": 27.8,
+      "record": "7-4",
+      "power": 59.3,
+      "calendar": "V vs Bières",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 5,
+      "team": "marv",
+      "elo": 1535.8,
+      "movement": 17.8,
+      "record": "7-4",
+      "power": 57.0,
+      "calendar": "V vs StarPAFF",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 6,
+      "team": "bier",
+      "elo": 1475.5,
+      "movement": -27.8,
+      "record": "5-6",
+      "power": 45.2,
+      "calendar": "D vs Red",
+      "diffClass": "diff-hard"
+    },
+    {
+      "rank": 7,
+      "team": "rsc",
+      "elo": 1446.9,
+      "movement": -26.2,
+      "record": "3-6",
+      "power": 39.6,
+      "calendar": "D vs Les",
+      "diffClass": "diff-hard"
+    },
+    {
+      "rank": 8,
+      "team": "rhin",
+      "elo": 1408.0,
+      "movement": -17.6,
+      "record": "2-8",
+      "power": 32.0,
+      "calendar": "D vs Kiki",
+      "diffClass": "diff-hard"
+    },
+    {
+      "rank": 9,
+      "team": "manu",
+      "elo": 1399.4,
+      "movement": -12.1,
+      "record": "2-7",
+      "power": 30.3,
+      "calendar": "D x3",
+      "diffClass": "diff-hard"
+    },
+    {
+      "rank": 10,
+      "team": "star",
+      "elo": 1244.9,
+      "movement": -17.8,
+      "record": "0-11",
+      "power": 0.0,
+      "calendar": "D x11",
+      "diffClass": "diff-hard"
+    }
+  ],
+  "prPlayers": [
+    {
+      "rank": 1,
+      "name": "Delmoly Alexandre ⭐⭐",
+      "team": "jen",
+      "pos": "Passeur",
+      "power": 100.0
+    },
+    {
+      "rank": 2,
+      "name": "Alves dupont Arnaud ⭐",
+      "team": "jen",
+      "pos": "R4",
+      "power": 98.5
+    },
+    {
+      "rank": 3,
+      "name": "Moroni Mikael",
+      "team": "jen",
+      "pos": "R4",
+      "power": 98.5
+    },
+    {
+      "rank": 4,
+      "name": "Melart Tom",
+      "team": "jen",
+      "pos": "Pointu",
+      "power": 98.2
+    },
+    {
+      "rank": 5,
+      "name": "Bouvier Lenny",
+      "team": "jen",
+      "pos": "Pointu",
+      "power": 98.2
+    },
+    {
+      "rank": 6,
+      "name": "Moroni Antoine",
+      "team": "jen",
+      "pos": "Pointu",
+      "power": 98.2
+    },
+    {
+      "rank": 7,
+      "name": "Gombert Jennifer",
+      "team": "jen",
+      "pos": "Centre",
+      "power": 97.9
+    },
+    {
+      "rank": 8,
+      "name": "Assumpcao Nicolas",
+      "team": "jen",
+      "pos": "Centre",
+      "power": 97.9
+    },
+    {
+      "rank": 9,
+      "name": "Le bihan Cyril",
+      "team": "kiki",
+      "pos": "Centre",
+      "power": 71.7
+    },
+    {
+      "rank": 10,
+      "name": "Simic Anthony",
+      "team": "kiki",
+      "pos": "Pointu",
+      "power": 71.5
+    },
+    {
+      "rank": 11,
+      "name": "Hure Robin ⭐",
+      "team": "kiki",
+      "pos": "Pointu",
+      "power": 71.5
+    },
+    {
+      "rank": 12,
+      "name": "Hibon Nicolas ⭐",
+      "team": "kiki",
+      "pos": "R4",
+      "power": 71.2
+    },
+    {
+      "rank": 13,
+      "name": "Popelut Romain",
+      "team": "kiki",
+      "pos": "R4",
+      "power": 71.2
+    },
+    {
+      "rank": 14,
+      "name": "Cotard Baptiste",
+      "team": "kiki",
+      "pos": "R4",
+      "power": 71.2
+    },
+    {
+      "rank": 15,
+      "name": "Pazmino Omar",
+      "team": "kiki",
+      "pos": "Passeur",
+      "power": 70.9
+    },
+    {
+      "rank": 16,
+      "name": "Leur Maxime ⭐⭐",
+      "team": "kiki",
+      "pos": "Passeur",
+      "power": 69.9
+    },
+    {
+      "rank": 17,
+      "name": "Martin Xavier",
+      "team": "resc",
+      "pos": "Centre",
+      "power": 69.7
+    },
+    {
+      "rank": 18,
+      "name": "Oliver Julien ⭐",
+      "team": "rhsp",
+      "pos": "Passeur",
+      "power": 69.4
+    },
+    {
+      "rank": 19,
+      "name": "Meridiano Yannick ⭐",
+      "team": "rhsp",
+      "pos": "R4",
+      "power": 69.0
+    },
+    {
+      "rank": 20,
+      "name": "Godeau Bastien",
+      "team": "rhsp",
+      "pos": "R4",
+      "power": 69.0
+    },
+    {
+      "rank": 21,
+      "name": "Bailly Jean-philippe ⭐",
+      "team": "resc",
+      "pos": "Pointu",
+      "power": 68.7
+    },
+    {
+      "rank": 22,
+      "name": "Evesque Mateusz ⭐",
+      "team": "rhsp",
+      "pos": "Pointu",
+      "power": 68.6
+    },
+    {
+      "rank": 23,
+      "name": "Goujon Adrien",
+      "team": "rhsp",
+      "pos": "Pointu",
+      "power": 68.6
+    },
+    {
+      "rank": 24,
+      "name": "Techer Kevin",
+      "team": "rhsp",
+      "pos": "Centre",
+      "power": 68.2
+    },
+    {
+      "rank": 25,
+      "name": "Vieira Matthieu",
+      "team": "rhsp",
+      "pos": "Centre",
+      "power": 68.2
+    },
+    {
+      "rank": 26,
+      "name": "Martins Celia",
+      "team": "rhsp",
+      "pos": "Centre",
+      "power": 68.2
+    },
+    {
+      "rank": 27,
+      "name": "Shue Yven ⭐",
+      "team": "resc",
+      "pos": "R4",
+      "power": 67.7
+    },
+    {
+      "rank": 28,
+      "name": "Michard Hugo",
+      "team": "resc",
+      "pos": "R4",
+      "power": 67.7
+    },
+    {
+      "rank": 29,
+      "name": "Michard Arthur ⭐⭐",
+      "team": "resc",
+      "pos": "Passeur",
+      "power": 62.8
+    },
+    {
+      "rank": 30,
+      "name": "Nedjar Yannick ⭐",
+      "team": "marv",
+      "pos": "Passeur",
+      "power": 59.3
+    },
+    {
+      "rank": 31,
+      "name": "Lavenet Jerome ⭐",
+      "team": "marv",
+      "pos": "R4",
+      "power": 58.0
+    },
+    {
+      "rank": 32,
+      "name": "Pauvert Thomas",
+      "team": "marv",
+      "pos": "R4",
+      "power": 58.0
+    },
+    {
+      "rank": 33,
+      "name": "Donjon Thibaud",
+      "team": "marv",
+      "pos": "R4",
+      "power": 58.0
+    },
+    {
+      "rank": 34,
+      "name": "Darrigol Hugo",
+      "team": "marv",
+      "pos": "Pointu",
+      "power": 56.8
+    },
+    {
+      "rank": 35,
+      "name": "Galland Matthieu ⭐",
+      "team": "marv",
+      "pos": "Centre",
+      "power": 55.6
+    },
+    {
+      "rank": 36,
+      "name": "Rocton Gaylord ⭐",
+      "team": "rsc",
+      "pos": "Passeur",
+      "power": 54.1
+    },
+    {
+      "rank": 37,
+      "name": "Redlich Olivier ⭐",
+      "team": "rsc",
+      "pos": "R4",
+      "power": 53.7
+    },
+    {
+      "rank": 38,
+      "name": "Teboul Jean pierre",
+      "team": "rsc",
+      "pos": "R4",
+      "power": 53.7
+    },
+    {
+      "rank": 39,
+      "name": "Kanounnikoff Francois",
+      "team": "rsc",
+      "pos": "Pointu",
+      "power": 53.3
+    },
+    {
+      "rank": 40,
+      "name": "Roux Philippe",
+      "team": "rsc",
+      "pos": "Pointu",
+      "power": 53.3
+    },
+    {
+      "rank": 41,
+      "name": "Courcelle Guillaume",
+      "team": "rsc",
+      "pos": "Centre",
+      "power": 52.9
+    },
+    {
+      "rank": 42,
+      "name": "Bisaro Marylin",
+      "team": "rsc",
+      "pos": "Centre",
+      "power": 52.9
+    },
+    {
+      "rank": 43,
+      "name": "Denis Natacha",
+      "team": "rsc",
+      "pos": "Centre",
+      "power": 52.9
+    },
+    {
+      "rank": 44,
+      "name": "Nicolas-flores Krystel",
+      "team": "rsc",
+      "pos": "Centre",
+      "power": 52.9
+    },
+    {
+      "rank": 45,
+      "name": "Garric Julien ⭐⭐⭐",
+      "team": "bier",
+      "pos": "Passeur",
+      "power": 48.9
+    },
+    {
+      "rank": 46,
+      "name": "Breleur Tony ⭐",
+      "team": "bier",
+      "pos": "R4",
+      "power": 48.8
+    },
+    {
+      "rank": 47,
+      "name": "Chaulet Didier ⭐",
+      "team": "bier",
+      "pos": "Pointu",
+      "power": 48.8
+    },
+    {
+      "rank": 48,
+      "name": "Bone Ida",
+      "team": "bier",
+      "pos": "Centre",
+      "power": 48.8
+    },
+    {
+      "rank": 49,
+      "name": "Neyraud Gawen ⭐",
+      "team": "bier",
+      "pos": "Centre",
+      "power": 48.8
+    },
+    {
+      "rank": 50,
+      "name": "Noyelle Nolwen",
+      "team": "bier",
+      "pos": "Centre",
+      "power": 48.8
+    },
+    {
+      "rank": 51,
+      "name": "Patrocinio Neli",
+      "team": "bier",
+      "pos": "Centre",
+      "power": 48.8
+    },
+    {
+      "rank": 52,
+      "name": "Buyse Henri ⭐",
+      "team": "rhin",
+      "pos": "Centre",
+      "power": 42.4
+    },
+    {
+      "rank": 53,
+      "name": "Pelleray Mathieu",
+      "team": "rhin",
+      "pos": "Centre",
+      "power": 42.4
+    },
+    {
+      "rank": 54,
+      "name": "Leca Arthur",
+      "team": "rhin",
+      "pos": "Pointu",
+      "power": 41.3
+    },
+    {
+      "rank": 55,
+      "name": "Blanquer Antoine",
+      "team": "rhin",
+      "pos": "R4",
+      "power": 40.1
+    },
+    {
+      "rank": 56,
+      "name": "Wairy Jean ⭐",
+      "team": "rhin",
+      "pos": "Passeur",
+      "power": 39.0
+    },
+    {
+      "rank": 57,
+      "name": "Amesee Stephane ⭐",
+      "team": "manu",
+      "pos": "Passeur",
+      "power": 36.9
+    },
+    {
+      "rank": 58,
+      "name": "Vernazobres Lionel",
+      "team": "manu",
+      "pos": "R4",
+      "power": 36.7
+    },
+    {
+      "rank": 59,
+      "name": "Poncharville Prosper",
+      "team": "manu",
+      "pos": "Pointu",
+      "power": 36.4
+    },
+    {
+      "rank": 60,
+      "name": "De gonfreville Emmanuelle",
+      "team": "manu",
+      "pos": "Centre",
+      "power": 36.1
+    },
+    {
+      "rank": 61,
+      "name": "Roussiere Andy",
+      "team": "manu",
+      "pos": "Centre",
+      "power": 36.1
+    },
+    {
+      "rank": 62,
+      "name": "Rabiarivelo Ilo",
+      "team": "star",
+      "pos": "Centre",
+      "power": 0.6
+    },
+    {
+      "rank": 63,
+      "name": "Mehallel Hamsa",
+      "team": "star",
+      "pos": "Centre",
+      "power": 0.6
+    },
+    {
+      "rank": 64,
+      "name": "Bakouri Mehdi",
+      "team": "star",
+      "pos": "Centre",
+      "power": 0.6
+    },
+    {
+      "rank": 65,
+      "name": "Nieto Victor",
+      "team": "star",
+      "pos": "Pointu",
+      "power": 0.4
+    },
+    {
+      "rank": 66,
+      "name": "Ha Bryan",
+      "team": "star",
+      "pos": "Pointu",
+      "power": 0.4
+    },
+    {
+      "rank": 67,
+      "name": "Ty Samneang",
+      "team": "star",
+      "pos": "R4",
+      "power": 0.2
+    },
+    {
+      "rank": 68,
+      "name": "Bento dos santos Lucas",
+      "team": "star",
+      "pos": "R4",
+      "power": 0.2
+    },
+    {
+      "rank": 69,
+      "name": "Vulgaire Thierry",
+      "team": "star",
+      "pos": "R4",
+      "power": 0.2
+    },
+    {
+      "rank": 70,
+      "name": "Julien François",
+      "team": "star",
+      "pos": "R4",
+      "power": 0.2
+    },
+    {
+      "rank": 71,
+      "name": "Vincent dit mahaut Julien ⭐",
+      "team": "star",
+      "pos": "Passeur",
+      "power": 0.0
+    }
+  ],
+  "eloHistory": {
+    "jen": [
+      1500,
+      1537.0,
+      1557.5,
+      1582.7,
+      1605.9,
+      1632.6,
+      1651.1,
+      1669.5,
+      1702.0,
+      1711.5,
+      1731.2,
+      1743.3
+    ],
+    "kiki": [
+      1500,
+      1527.8,
+      1547.2,
+      1528.2,
+      1553.6,
+      1566.3,
+      1589.9,
+      1613.3,
+      1580.8,
+      1595.0,
+      1612.6
+    ],
+    "rhsp": [
+      1500,
+      1463.0,
+      1504.0,
+      1537.5,
+      1563.0,
+      1578.3,
+      1598.7,
+      1575.2,
+      1586.1,
+      1539.4,
+      1519.7,
+      1547.5
+    ],
+    "resc": [
+      1500,
+      1530.6,
+      1551.3,
+      1578.2,
+      1556.2,
+      1535.7,
+      1557.2,
+      1538.8,
+      1560.0,
+      1586.2
+    ],
+    "marv": [
+      1500,
+      1525.0,
+      1543.3,
+      1517.7,
+      1539.8,
+      1558.5,
+      1531.7,
+      1554.8,
+      1531.3,
+      1546.1,
+      1518.0,
+      1535.8
+    ],
+    "rsc": [
+      1500,
+      1479.3,
+      1498.4,
+      1483.1,
+      1459.9,
+      1485.4,
+      1459.7,
+      1445.0,
+      1473.1,
+      1446.9
+    ],
+    "manu": [
+      1500,
+      1475.1,
+      1441.7,
+      1469.9,
+      1457.2,
+      1434.1,
+      1452.1,
+      1442.5,
+      1411.4,
+      1399.4
+    ],
+    "bier": [
+      1500,
+      1524.9,
+      1483.8,
+      1463.4,
+      1437.9,
+      1468.6,
+      1449.9,
+      1428.4,
+      1454.0,
+      1472.1,
+      1503.3,
+      1475.5
+    ],
+    "rhin": [
+      1500,
+      1469.4,
+      1450.0,
+      1431.7,
+      1401.0,
+      1436.6,
+      1418.1,
+      1400.2,
+      1446.8,
+      1425.6,
+      1408.0
+    ],
+    "star": [
+      1500,
+      1472.2,
+      1447.2,
+      1420.3,
+      1395.0,
+      1366.9,
+      1331.3,
+      1305.9,
+      1294.9,
+      1276.8,
+      1262.6,
+      1244.9
+    ]
+  },
+  "evolutionData": {
+    "teams": {
+      "jen": {
+        "points": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          10,
+          12,
+          14,
+          16,
+          18,
+          20,
+          22
+        ],
+        "rank": 1
+      },
+      "kiki": {
+        "points": [
+          0,
+          2,
+          4,
+          5,
+          7,
+          9,
+          11,
+          13,
+          14,
+          16,
+          18
+        ],
+        "rank": 2
+      },
+      "rhsp": {
+        "points": [
+          0,
+          1,
+          3,
+          5,
+          7,
+          9,
+          11,
+          12,
+          14,
+          15,
+          16,
+          18
+        ],
+        "rank": 4
+      },
+      "resc": {
+        "points": [
+          0,
+          2,
+          4,
+          6,
+          7,
+          8,
+          10,
+          11,
+          13,
+          15
+        ],
+        "rank": 3
+      },
+      "marv": {
+        "points": [
+          0,
+          2,
+          4,
+          5,
+          7,
+          9,
+          10,
+          12,
+          13,
+          15,
+          16,
+          18
+        ],
+        "rank": 5
+      },
+      "rsc": {
+        "points": [
+          0,
+          1,
+          3,
+          4,
+          5,
+          7,
+          8,
+          9,
+          11,
+          12
+        ],
+        "rank": 7
+      },
+      "manu": {
+        "points": [
+          0,
+          1,
+          2,
+          4,
+          5,
+          6,
+          8,
+          9,
+          10,
+          11
+        ],
+        "rank": 8
+      },
+      "bier": {
+        "points": [
+          0,
+          2,
+          3,
+          4,
+          5,
+          7,
+          8,
+          9,
+          11,
+          13,
+          15,
+          16
+        ],
+        "rank": 6
+      },
+      "rhin": {
+        "points": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          6,
+          7,
+          8,
+          10,
+          11,
+          12
+        ],
+        "rank": 9
+      },
+      "star": {
+        "points": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "rank": 10
+      }
+    }
+  }
+}

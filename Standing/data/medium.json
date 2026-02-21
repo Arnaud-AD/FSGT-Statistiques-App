@@ -1,0 +1,1275 @@
+{
+  "meta": {
+    "id": 15,
+    "slug": "medium",
+    "name": "Medium",
+    "format": "4x4",
+    "url": "https://volley-fsgt94.fr/championnat/15",
+    "lastUpdated": "2026-02-21T00:42:32",
+    "teamCount": 9,
+    "matchesPlayed": 39,
+    "matchesUpcoming": 33
+  },
+  "teams": {
+    "coch": {
+      "name": "Cochonou",
+      "short": "CO",
+      "color": "#e74c3c"
+    },
+    "gint": {
+      "name": "Ginto",
+      "short": "GI",
+      "color": "#3498db"
+    },
+    "rhum": {
+      "name": "Les Rhum'Antik",
+      "short": "RH",
+      "color": "#2ecc71"
+    },
+    "olym": {
+      "name": "Olympe BB volley",
+      "short": "OB",
+      "color": "#f39c12"
+    },
+    "mort": {
+      "name": "Morts de Soif",
+      "short": "MS",
+      "color": "#9b59b6"
+    },
+    "team": {
+      "name": "Team Glouglou",
+      "short": "TG",
+      "color": "#1abc9c"
+    },
+    "boit": {
+      "name": "Boîte de 4",
+      "short": "B4",
+      "color": "#e67e22"
+    },
+    "tigr": {
+      "name": "Les Tigres & Gorilles",
+      "short": "T&",
+      "color": "#f1c40f"
+    },
+    "ryoi": {
+      "name": "RYŌIKI TENKAI",
+      "short": "RT",
+      "color": "#95a5a6"
+    }
+  },
+  "standings": [
+    {
+      "rank": 1,
+      "team": "coch",
+      "mj": 9,
+      "g": 9,
+      "p": 0,
+      "setPlus": 26,
+      "setMinus": 4,
+      "ds": 22,
+      "coefSet": "6.50",
+      "ptsPlus": 734,
+      "ptsMinus": 568,
+      "dp": "+166",
+      "coefPts": "1.29",
+      "pts": 18,
+      "formAller": [
+        "W",
+        "W",
+        "W",
+        "W",
+        "W",
+        "W",
+        "W",
+        "W"
+      ],
+      "formRetour": [
+        "W",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 2,
+      "team": "olym",
+      "mj": 7,
+      "g": 5,
+      "p": 2,
+      "setPlus": 17,
+      "setMinus": 11,
+      "ds": 6,
+      "coefSet": "1.55",
+      "ptsPlus": 627,
+      "ptsMinus": 579,
+      "dp": "+48",
+      "coefPts": "1.08",
+      "pts": 12,
+      "formAller": [
+        "L",
+        "W",
+        "W",
+        "W",
+        "W",
+        "D",
+        "W",
+        "L"
+      ],
+      "formRetour": [
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 3,
+      "team": "gint",
+      "mj": 10,
+      "g": 7,
+      "p": 3,
+      "setPlus": 23,
+      "setMinus": 15,
+      "ds": 8,
+      "coefSet": "1.53",
+      "ptsPlus": 843,
+      "ptsMinus": 815,
+      "dp": "+28",
+      "coefPts": "1.03",
+      "pts": 17,
+      "formAller": [
+        "L",
+        "W",
+        "W",
+        "L",
+        "W",
+        "L",
+        "W",
+        "W"
+      ],
+      "formRetour": [
+        "W",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 4,
+      "team": "mort",
+      "mj": 8,
+      "g": 4,
+      "p": 4,
+      "setPlus": 16,
+      "setMinus": 14,
+      "ds": 2,
+      "coefSet": "1.14",
+      "ptsPlus": 630,
+      "ptsMinus": 634,
+      "dp": "-4",
+      "coefPts": "0.99",
+      "pts": 12,
+      "formAller": [
+        "L",
+        "W",
+        "L",
+        "W",
+        "L",
+        "D",
+        "W",
+        "L"
+      ],
+      "formRetour": [
+        "W",
+        "D",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 5,
+      "team": "team",
+      "mj": 8,
+      "g": 4,
+      "p": 4,
+      "setPlus": 15,
+      "setMinus": 16,
+      "ds": -1,
+      "coefSet": "0.94",
+      "ptsPlus": 651,
+      "ptsMinus": 647,
+      "dp": "+4",
+      "coefPts": "1.01",
+      "pts": 12,
+      "formAller": [
+        "W",
+        "L",
+        "W",
+        "L",
+        "W",
+        "L",
+        "D",
+        "W"
+      ],
+      "formRetour": [
+        "L",
+        "D",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 6,
+      "team": "rhum",
+      "mj": 9,
+      "g": 5,
+      "p": 4,
+      "setPlus": 16,
+      "setMinus": 19,
+      "ds": -3,
+      "coefSet": "0.84",
+      "ptsPlus": 785,
+      "ptsMinus": 760,
+      "dp": "+25",
+      "coefPts": "1.03",
+      "pts": 14,
+      "formAller": [
+        "W",
+        "W",
+        "L",
+        "W",
+        "L",
+        "W",
+        "L",
+        "L"
+      ],
+      "formRetour": [
+        "W",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 7,
+      "team": "boit",
+      "mj": 9,
+      "g": 3,
+      "p": 6,
+      "setPlus": 16,
+      "setMinus": 21,
+      "ds": -5,
+      "coefSet": "0.76",
+      "ptsPlus": 767,
+      "ptsMinus": 840,
+      "dp": "-73",
+      "coefPts": "0.91",
+      "pts": 12,
+      "formAller": [
+        "L",
+        "L",
+        "W",
+        "L",
+        "L",
+        "W",
+        "L",
+        "W"
+      ],
+      "formRetour": [
+        "L",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 8,
+      "team": "ryoi",
+      "mj": 8,
+      "g": 0,
+      "p": 8,
+      "setPlus": 9,
+      "setMinus": 23,
+      "ds": -14,
+      "coefSet": "0.39",
+      "ptsPlus": 627,
+      "ptsMinus": 742,
+      "dp": "-115",
+      "coefPts": "0.85",
+      "pts": 8,
+      "formAller": [
+        "L",
+        "L",
+        "L",
+        "L",
+        "L",
+        "L",
+        "D",
+        "L"
+      ],
+      "formRetour": [
+        "L",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 9,
+      "team": "tigr",
+      "mj": 10,
+      "g": 2,
+      "p": 8,
+      "setPlus": 11,
+      "setMinus": 26,
+      "ds": -15,
+      "coefSet": "0.42",
+      "ptsPlus": 753,
+      "ptsMinus": 832,
+      "dp": "-79",
+      "coefPts": "0.91",
+      "pts": 12,
+      "formAller": [
+        "W",
+        "L",
+        "L",
+        "L",
+        "L",
+        "L",
+        "W",
+        "L"
+      ],
+      "formRetour": [
+        "L",
+        "L",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    }
+  ],
+  "matchesPlayed": [
+    {
+      "date": "17/02/2026",
+      "home": "tigr",
+      "away": "gint",
+      "scoreHome": 1,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "11/02/2026",
+      "home": "mort",
+      "away": "tigr",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "10/02/2026",
+      "home": "boit",
+      "away": "coch",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "10/02/2026",
+      "home": "rhum",
+      "away": "ryoi",
+      "scoreHome": 3,
+      "scoreAway": 2,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "09/02/2026",
+      "home": "gint",
+      "away": "team",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "02/02/2026",
+      "home": "olym",
+      "away": "ryoi",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "28/01/2026",
+      "home": "ryoi",
+      "away": "mort",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "26/01/2026",
+      "home": "gint",
+      "away": "coch",
+      "scoreHome": 2,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "23/01/2026",
+      "home": "team",
+      "away": "olym",
+      "scoreHome": 3,
+      "scoreAway": 2,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "20/01/2026",
+      "home": "rhum",
+      "away": "gint",
+      "scoreHome": 1,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "20/01/2026",
+      "home": "boit",
+      "away": "mort",
+      "scoreHome": 3,
+      "scoreAway": 2,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "20/01/2026",
+      "home": "tigr",
+      "away": "ryoi",
+      "scoreHome": 3,
+      "scoreAway": 2,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "14/01/2026",
+      "home": "coch",
+      "away": "tigr",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "14/01/2026",
+      "home": "mort",
+      "away": "rhum",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "12/01/2026",
+      "home": "ryoi",
+      "away": "gint",
+      "scoreHome": 1,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "12/01/2026",
+      "home": "olym",
+      "away": "boit",
+      "scoreHome": 3,
+      "scoreAway": 2,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "06/01/2026",
+      "home": "boit",
+      "away": "tigr",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "10/12/2025",
+      "home": "coch",
+      "away": "mort",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "09/12/2025",
+      "home": "rhum",
+      "away": "team",
+      "scoreHome": 3,
+      "scoreAway": 2,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "08/12/2025",
+      "home": "gint",
+      "away": "boit",
+      "scoreHome": 2,
+      "scoreAway": 2,
+      "homeWin": true,
+      "status": "Ginto pts"
+    },
+    {
+      "date": "05/12/2025",
+      "home": "team",
+      "away": "boit",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "03/12/2025",
+      "home": "coch",
+      "away": "rhum",
+      "scoreHome": 2,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "02/12/2025",
+      "home": "tigr",
+      "away": "olym",
+      "scoreHome": 2,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "28/11/2025",
+      "home": "team",
+      "away": "coch",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "25/11/2025",
+      "home": "rhum",
+      "away": "tigr",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "25/11/2025",
+      "home": "boit",
+      "away": "ryoi",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "24/11/2025",
+      "home": "olym",
+      "away": "gint",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "18/11/2025",
+      "home": "tigr",
+      "away": "team",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "17/11/2025",
+      "home": "ryoi",
+      "away": "coch",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "17/11/2025",
+      "home": "gint",
+      "away": "mort",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "17/11/2025",
+      "home": "olym",
+      "away": "rhum",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "14/11/2025",
+      "home": "team",
+      "away": "gint",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "05/11/2025",
+      "home": "coch",
+      "away": "olym",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "05/11/2025",
+      "home": "mort",
+      "away": "team",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "04/11/2025",
+      "home": "rhum",
+      "away": "boit",
+      "scoreHome": 3,
+      "scoreAway": 2,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "03/11/2025",
+      "home": "gint",
+      "away": "tigr",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "15/10/2025",
+      "home": "coch",
+      "away": "boit",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "15/10/2025",
+      "home": "ryoi",
+      "away": "rhum",
+      "scoreHome": 2,
+      "scoreAway": 2,
+      "homeWin": false,
+      "status": "Les pts"
+    },
+    {
+      "date": "14/10/2025",
+      "home": "tigr",
+      "away": "mort",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    }
+  ],
+  "matchesUpcoming": [
+    {
+      "date": "20/02/2026",
+      "home": "team",
+      "away": "mort",
+      "status": "Reporté"
+    },
+    {
+      "date": "10/03/2026",
+      "home": "rhum",
+      "away": "olym",
+      "status": "Sem. 11"
+    },
+    {
+      "date": "11/03/2026",
+      "home": "coch",
+      "away": "ryoi",
+      "status": "Sem. 11"
+    },
+    {
+      "date": "11/03/2026",
+      "home": "mort",
+      "away": "gint",
+      "status": "Sem. 11"
+    },
+    {
+      "date": "13/03/2026",
+      "home": "team",
+      "away": "tigr",
+      "status": "Sem. 11"
+    },
+    {
+      "date": "18/03/2026",
+      "home": "ryoi",
+      "away": "team",
+      "status": "Reporté"
+    },
+    {
+      "date": "23/03/2026",
+      "home": "gint",
+      "away": "olym",
+      "status": "Sem. 12"
+    },
+    {
+      "date": "24/03/2026",
+      "home": "tigr",
+      "away": "rhum",
+      "status": "Sem. 12"
+    },
+    {
+      "date": "25/03/2026",
+      "home": "ryoi",
+      "away": "boit",
+      "status": "Sem. 11"
+    },
+    {
+      "date": "25/03/2026",
+      "home": "coch",
+      "away": "team",
+      "status": "Sem. 12"
+    },
+    {
+      "date": "30/03/2026",
+      "home": "olym",
+      "away": "tigr",
+      "status": "Sem. 12"
+    },
+    {
+      "date": "31/03/2026",
+      "home": "rhum",
+      "away": "coch",
+      "status": "Sem. 13"
+    },
+    {
+      "date": "31/03/2026",
+      "home": "boit",
+      "away": "team",
+      "status": "Sem. 13"
+    },
+    {
+      "date": "01/04/2026",
+      "home": "mort",
+      "away": "ryoi",
+      "status": "Sem. 12"
+    },
+    {
+      "date": "06/04/2026",
+      "home": "olym",
+      "away": "ryoi",
+      "status": "Sem. 13"
+    },
+    {
+      "date": "07/04/2026",
+      "home": "boit",
+      "away": "gint",
+      "status": "Sem. 13"
+    },
+    {
+      "date": "08/04/2026",
+      "home": "mort",
+      "away": "coch",
+      "status": "Sem. 14"
+    },
+    {
+      "date": "10/04/2026",
+      "home": "team",
+      "away": "rhum",
+      "status": "Sem. 14"
+    },
+    {
+      "date": "14/04/2026",
+      "home": "boit",
+      "away": "rhum",
+      "status": "Sem. 10"
+    },
+    {
+      "date": "15/04/2026",
+      "home": "mort",
+      "away": "olym",
+      "status": "Reporté"
+    },
+    {
+      "date": "04/05/2026",
+      "home": "olym",
+      "away": "mort",
+      "status": "Sem. 14"
+    },
+    {
+      "date": "05/05/2026",
+      "home": "tigr",
+      "away": "boit",
+      "status": "Sem. 14"
+    },
+    {
+      "date": "06/05/2026",
+      "home": "coch",
+      "away": "gint",
+      "status": "Sem. 15"
+    },
+    {
+      "date": "08/05/2026",
+      "home": "team",
+      "away": "ryoi",
+      "status": "Sem. 15"
+    },
+    {
+      "date": "11/05/2026",
+      "home": "gint",
+      "away": "ryoi",
+      "status": "Sem. 15"
+    },
+    {
+      "date": "12/05/2026",
+      "home": "rhum",
+      "away": "mort",
+      "status": "Sem. 15"
+    },
+    {
+      "date": "12/05/2026",
+      "home": "boit",
+      "away": "olym",
+      "status": "Sem. 15"
+    },
+    {
+      "date": "12/05/2026",
+      "home": "tigr",
+      "away": "coch",
+      "status": "Sem. 16"
+    },
+    {
+      "date": "18/05/2026",
+      "home": "gint",
+      "away": "rhum",
+      "status": "Sem. 16"
+    },
+    {
+      "date": "18/05/2026",
+      "home": "olym",
+      "away": "team",
+      "status": "Sem. 16"
+    },
+    {
+      "date": "20/05/2026",
+      "home": "mort",
+      "away": "boit",
+      "status": "Sem. 16"
+    },
+    {
+      "date": "20/05/2026",
+      "home": "ryoi",
+      "away": "tigr",
+      "status": "Sem. 16"
+    },
+    {
+      "date": "01/06/2026",
+      "home": "olym",
+      "away": "coch",
+      "status": "Sem. 10"
+    }
+  ],
+  "prTeams": [
+    {
+      "rank": 1,
+      "team": "coch",
+      "elo": 1698.6,
+      "movement": 21.9,
+      "record": "9-0",
+      "power": 100.0,
+      "calendar": "V x9",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 2,
+      "team": "gint",
+      "elo": 1591.3,
+      "movement": 16.5,
+      "record": "7-3",
+      "power": 73.0,
+      "calendar": "V vs Les",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 3,
+      "team": "olym",
+      "elo": 1561.0,
+      "movement": 11.5,
+      "record": "5-2",
+      "power": 65.4,
+      "calendar": "V vs RYŌIKI",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 4,
+      "team": "mort",
+      "elo": 1521.2,
+      "movement": 18.8,
+      "record": "4-4",
+      "power": 55.3,
+      "calendar": "V vs Les",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 5,
+      "team": "team",
+      "elo": 1498.9,
+      "movement": -33.3,
+      "record": "4-4",
+      "power": 49.7,
+      "calendar": "D vs Ginto",
+      "diffClass": "diff-hard"
+    },
+    {
+      "rank": 6,
+      "team": "rhum",
+      "elo": 1487.1,
+      "movement": 14.6,
+      "record": "5-4",
+      "power": 46.8,
+      "calendar": "V vs RYŌIKI",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 7,
+      "team": "boit",
+      "elo": 1447.3,
+      "movement": -21.9,
+      "record": "3-6",
+      "power": 36.7,
+      "calendar": "D vs Cochonou",
+      "diffClass": "diff-hard"
+    },
+    {
+      "rank": 8,
+      "team": "tigr",
+      "elo": 1368.2,
+      "movement": -16.5,
+      "record": "2-8",
+      "power": 16.8,
+      "calendar": "D vs Ginto",
+      "diffClass": "diff-hard"
+    },
+    {
+      "rank": 9,
+      "team": "ryoi",
+      "elo": 1326.4,
+      "movement": -14.6,
+      "record": "0-8",
+      "power": 0.0,
+      "calendar": "D x8",
+      "diffClass": "diff-hard"
+    }
+  ],
+  "prPlayers": [],
+  "eloHistory": {
+    "coch": [
+      1500,
+      1531.2,
+      1558.5,
+      1587.5,
+      1621.1,
+      1634.8,
+      1648.7,
+      1660.3,
+      1676.7,
+      1698.6
+    ],
+    "gint": [
+      1500,
+      1532.1,
+      1500.2,
+      1525.2,
+      1493.6,
+      1508.5,
+      1533.0,
+      1557.9,
+      1541.5,
+      1574.8,
+      1591.3
+    ],
+    "rhum": [
+      1500,
+      1519.2,
+      1534.9,
+      1498.7,
+      1527.5,
+      1513.8,
+      1534.9,
+      1497.4,
+      1472.4,
+      1487.1
+    ],
+    "olym": [
+      1500,
+      1472.7,
+      1508.8,
+      1540.5,
+      1557.6,
+      1571.5,
+      1549.6,
+      1561.0
+    ],
+    "mort": [
+      1500,
+      1470.4,
+      1497.3,
+      1472.3,
+      1458.4,
+      1495.9,
+      1473.7,
+      1502.3,
+      1521.2
+    ],
+    "team": [
+      1500,
+      1473.1,
+      1505.0,
+      1542.4,
+      1508.8,
+      1531.2,
+      1510.2,
+      1532.2,
+      1498.9
+    ],
+    "boit": [
+      1500,
+      1468.8,
+      1453.2,
+      1477.2,
+      1454.7,
+      1439.8,
+      1460.9,
+      1447.0,
+      1469.2,
+      1447.3
+    ],
+    "tigr": [
+      1500,
+      1529.6,
+      1497.5,
+      1460.1,
+      1431.3,
+      1414.2,
+      1393.1,
+      1381.4,
+      1403.5,
+      1384.7,
+      1368.2
+    ],
+    "ryoi": [
+      1500,
+      1480.8,
+      1451.8,
+      1427.8,
+      1403.3,
+      1381.2,
+      1352.5,
+      1341.0,
+      1326.4
+    ]
+  },
+  "evolutionData": {
+    "teams": {
+      "coch": {
+        "points": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          10,
+          12,
+          14,
+          16,
+          18
+        ],
+        "rank": 1
+      },
+      "gint": {
+        "points": [
+          0,
+          2,
+          3,
+          5,
+          6,
+          8,
+          10,
+          12,
+          13,
+          15,
+          17
+        ],
+        "rank": 3
+      },
+      "rhum": {
+        "points": [
+          0,
+          2,
+          4,
+          5,
+          7,
+          8,
+          10,
+          11,
+          12,
+          14
+        ],
+        "rank": 6
+      },
+      "olym": {
+        "points": [
+          0,
+          1,
+          3,
+          5,
+          7,
+          9,
+          10,
+          12
+        ],
+        "rank": 2
+      },
+      "mort": {
+        "points": [
+          0,
+          1,
+          3,
+          4,
+          5,
+          7,
+          8,
+          10,
+          12
+        ],
+        "rank": 4
+      },
+      "team": {
+        "points": [
+          0,
+          1,
+          3,
+          5,
+          6,
+          8,
+          9,
+          11,
+          12
+        ],
+        "rank": 5
+      },
+      "boit": {
+        "points": [
+          0,
+          1,
+          2,
+          4,
+          5,
+          6,
+          8,
+          9,
+          11,
+          12
+        ],
+        "rank": 7
+      },
+      "tigr": {
+        "points": [
+          0,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          10,
+          11,
+          12
+        ],
+        "rank": 9
+      },
+      "ryoi": {
+        "points": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "rank": 8
+      }
+    }
+  }
+}
