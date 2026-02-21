@@ -1170,12 +1170,12 @@ const BilanView = {
         'Pointu': '#22C532'     // vert decale
     },
 
-    // Ponderations IP par poste
+    // Ponderations IP par poste (V20.25)
     IP_WEIGHTS: {
-        'Passeur': { attaque: 0.05, bloc: 0.00, relance: 0.05, defense: 0.25, passe: 0.40, service: 0.25 },
-        'Centre':  { attaque: 0.00, relance: 0.20, reception: 0.30, defense: 0.20, passe: 0.05, service: 0.25 },
-        'R4':      { attaque: 0.30, bloc: 0.20, reception: 0.20, defense: 0.10, relance: 0.05, service: 0.15 },
-        'Pointu':  { attaque: 0.30, bloc: 0.20, reception: 0.20, defense: 0.10, relance: 0.05, service: 0.15 }
+        'Passeur': { attaque: 0.00, bloc: 0.00, relance: 0.05, reception: 0.00, defense: 0.25, passe: 0.45, service: 0.25 },
+        'Centre':  { attaque: 0.10, bloc: 0.05, relance: 0.20, reception: 0.20, defense: 0.20, passe: 0.05, service: 0.20 },
+        'R4':      { attaque: 0.45, bloc: 0.10, relance: 0.05, reception: 0.30, defense: 0.05, passe: 0.00, service: 0.05 },
+        'Pointu':  { attaque: 0.45, bloc: 0.10, relance: 0.05, reception: 0.30, defense: 0.05, passe: 0.00, service: 0.05 }
     },
 
     // 7 axes du spider chart (heptagone, ordre UNIQUE pour tous les postes)
@@ -1293,7 +1293,7 @@ const BilanView = {
                     })[0];
                     var primaryColor = self.ROLE_COLORS[primaryRoleInFamily];
 
-                    var scores = self.computeAxisScores(stats);
+                    var scores = self.computeAxisScores(stats, ipRole);
                     var ip = self.computeIP(scores, ipRole);
 
                     // Slot de tri : pour les ailiers, utiliser le role principal (R4 ou Pointu)
@@ -1401,7 +1401,7 @@ const BilanView = {
         var playerIPs = {};
         players.forEach(function(name) {
             var role = playerRoles[name].primaryRole;
-            var axisScores = self.computeAxisScores(homeTotals[name]);
+            var axisScores = self.computeAxisScores(homeTotals[name], role);
             playerIPs[name] = self.computeIP(axisScores, role);
         });
 
@@ -1850,7 +1850,7 @@ const BilanView = {
                 var playerTotals = StatsAggregator.aggregateStatsBySetIndices(completedSets, 'home', ms.setIndices);
                 var stats = playerTotals[name];
                 if (!stats) return;
-                var scores = self.computeAxisScores(stats);
+                var scores = self.computeAxisScores(stats, familyIpRole);
                 var ip = self.computeIP(scores, familyIpRole);
                 perMatchIPs.push(ip);
             });
@@ -1879,7 +1879,8 @@ const BilanView = {
     // - Score plancher pour eviter l'ecrasement
     // - Echelle genereuse : un joueur "correct" doit etre a 50-60, pas 30
     // - Bonus participation pour recompenser le volume d'actions
-    computeAxisScores(playerStats) {
+    // role: optionnel, utilise pour le bonus/plafond passe (Passeur +5, non-passeur cap 80)
+    computeAxisScores(playerStats, role) {
         var scores = {};
         var s = playerStats;
         var floor = this.AXIS_FLOOR;
@@ -1899,34 +1900,38 @@ const BilanView = {
             scores.service = 0;
         }
 
-        // RECEPTION : moyenne ponderee (R4=100, R3=75, R2=50, R1=25, FR=0)
-        // Naturellement 0-100, pas besoin d'ajustement
+        // RECEPTION (V20.25) : moyenne ponderee (R4=100, R3=75, R2=40, R1=15, FR=0)
+        // R2 et R1 plus penalisants qu'avant (50→40, 25→15)
         var rec = s.reception;
         if (rec.tot > 0) {
             scores.reception = this.clamp(floor, 100, Math.round(
-                (rec.r4 * 100 + rec.r3 * 75 + rec.r2 * 50 + rec.r1 * 25) / rec.tot
+                (rec.r4 * 100 + rec.r3 * 75 + rec.r2 * 40 + rec.r1 * 15) / rec.tot
             ));
         } else {
             scores.reception = 0;
         }
 
-        // PASSE : moyenne ponderee (P4=100, P3=75, P2=50, P1=25, FP=0)
+        // PASSE (V20.25) : moyenne ponderee + bonus Passeur (+5) / plafond non-passeur (80)
         var pas = s.pass || {};
         if (pas.tot > 0) {
-            scores.passe = this.clamp(floor, 100, Math.round(
-                (pas.p4 * 100 + pas.p3 * 75 + pas.p2 * 50 + pas.p1 * 25) / pas.tot
-            ));
+            var passeRaw = (pas.p4 * 100 + pas.p3 * 75 + pas.p2 * 50 + pas.p1 * 25) / pas.tot;
+            if (role === 'Passeur') {
+                passeRaw += 5; // Bonus passeur : son role premier, recompense la constance
+            } else if (role) {
+                passeRaw = Math.min(passeRaw, 80); // Non-passeur plafonne a 80
+            }
+            scores.passe = this.clamp(floor, 100, Math.round(passeRaw));
         } else {
             scores.passe = 0;
         }
 
-        // ATTAQUE : base 35 + kill% bonus - error penalty
-        // Un attaquant a 40% kill et peu de fautes = ~65. A 50%+ = 80+
+        // ATTAQUE (V20.25) : base 35 + kill% bonus - error penalty (30→40)
+        // Penalite d'erreur augmentee pour mieux differencier les attaquants propres
         var atk = s.attack;
         if (atk.tot > 0) {
             var killPct = atk.attplus / atk.tot;
             var errorPct = (atk.fatt + atk.bp) / atk.tot;
-            var raw = 35 + killPct * 80 - errorPct * 30;
+            var raw = 35 + killPct * 80 - errorPct * 40;
             scores.attaque = this.clamp(floor, 100, Math.round(raw));
         } else {
             scores.attaque = 0;
@@ -1954,15 +1959,16 @@ const BilanView = {
             scores.relance = 0;
         }
 
-        // DEFENSE (V20.15) : D+ vaut +50, D vaut +10, D- pénalise -10, FD pénalise -20
-        // Bonne defense (60% D+, peu de fautes) = ~65
+        // DEFENSE (V20.25) : refonte complete
+        // Base 40 + D+% bonus (×60) + D% neutre (×15) - D-% penalite (×15) - FD% penalite (×25)
+        // + bonus volume : min(tot, 15) × 1.5 (recompense la participation defensive)
         var def = s.defense;
         if (def.tot > 0) {
             var posRate = def.defplus / def.tot;
             var neutralRate = (def.defneutral || 0) / def.tot;
-            var faultRate = def.defminus / def.tot;
-            var untouchedRate = def.fdef / def.tot;
-            var raw = 30 + posRate * 50 + neutralRate * 10 - faultRate * 10 - untouchedRate * 20;
+            var negRate = def.defminus / def.tot;
+            var faultRate = def.fdef / def.tot;
+            var raw = 40 + posRate * 60 + neutralRate * 15 - negRate * 15 - faultRate * 25 + Math.min(def.tot, 15) * 1.5;
             scores.defense = this.clamp(floor, 100, Math.round(raw));
         } else {
             scores.defense = 0;
@@ -1972,12 +1978,31 @@ const BilanView = {
     },
 
     // --- Indice de Performance (somme ponderee par poste) ---
+    // V20.25 : redistribution proportionnelle des poids quand un axe est inactif (score=0)
+    // score=0 est un proxy fiable pour tot=0 car le floor=10 empeche un axe actif d'etre a 0
     computeIP(axisScores, role) {
         var weights = this.IP_WEIGHTS[role] || this.IP_WEIGHTS['R4'];
+
+        // Calculer le poids total des axes actifs (score > 0 ET poids > 0)
+        var activeWeight = 0;
+        Object.keys(weights).forEach(function(key) {
+            if (weights[key] > 0 && (axisScores[key] || 0) > 0) {
+                activeWeight += weights[key];
+            }
+        });
+
+        // Si aucun axe actif, IP = 0
+        if (activeWeight === 0) return 0;
+
+        // IP = somme ponderee normalisee sur les axes actifs
         var ip = 0;
         Object.keys(weights).forEach(function(key) {
-            ip += (axisScores[key] || 0) * weights[key];
+            var score = axisScores[key] || 0;
+            if (weights[key] > 0 && score > 0) {
+                ip += score * (weights[key] / activeWeight);
+            }
         });
+
         return Math.round(ip);
     },
 
@@ -2200,7 +2225,7 @@ const BilanView = {
                 var stats = playerTotals[name];
                 if (!stats) return;
 
-                var scores = self.computeAxisScores(stats);
+                var scores = self.computeAxisScores(stats, 'Passeur');
                 var hasAny = ['service', 'reception', 'passe', 'attaque', 'bloc', 'relance', 'defense'].some(function(k) {
                     return (scores[k] || 0) > 0;
                 });
@@ -2971,7 +2996,7 @@ const YearStatsView = {
             playersInFamily.forEach(function(name) {
                 var famData = playerFamiliesYear[name].families[family];
                 var stats = BilanView.aggregateStatsForFamilyYear(matches, name, famData);
-                var scores = BilanView.computeAxisScores(stats);
+                var scores = BilanView.computeAxisScores(stats, familyIpRole);
                 var ip = BilanView.computeIP(scores, familyIpRole);
 
                 var roleColors = Object.keys(famData.roles).map(function(r) {

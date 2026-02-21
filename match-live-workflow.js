@@ -222,6 +222,7 @@ const WorkflowEngine = {
         });
 
         recalculateAllStats();
+        saveCurrentSet();
 
         // Si le set est terminé, ne pas démarrer un nouveau point
         if (gameState.setEnded) {
