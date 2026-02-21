@@ -6367,9 +6367,20 @@
                         const oppositeTeam = team === 'home' ? 'away' : 'home';
 
                         if (isRelance) {
-                            // ===== RELANCE : pas de stats côté attaquant =====
-                            // La relance n'est pas une vraie attaque — les stats sont comptées
-                            // côté DÉFENSEUR (dans le case 'defense' quand l'attaque précédente est une relance)
+                            // ===== RELANCE : stats terminales comptées ici =====
+                            // Les cas défendus sont comptés côté DÉFENSEUR (case 'defense' isDefAfterRelance)
+                            // Seuls les cas terminaux (point, faute, bloc) n'ont pas de défense → comptés ici
+                            if (action.result === 'point' || action.result === 'bloc_out') {
+                                stats.relance.tot++;
+                                stats.relance.relplus++; // R+ : relance gagnante
+                            } else if (action.attackType === 'faute' || action.result === 'fault_net' || action.result === 'out') {
+                                stats.relance.tot++;
+                                stats.relance.frel++; // FR : faute de relance
+                            } else if (action.result === 'blocked') {
+                                stats.relance.tot++;
+                                stats.relance.relminus++; // R- : bloc pris sur relance
+                            }
+                            // Si result === 'defended' → tot + détail comptés dans case 'defense'
                             break;
                         }
 
