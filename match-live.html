@@ -6303,9 +6303,8 @@
                                     break;
                                 }
                             }
-                            // Compter une relance R- pour le passeur
-                            stats.relance.tot++;
-                            stats.relance.relminus++;
+                            // Passe relance : pas de stats passe (ni Tot ni qualité)
+                            // Si retour direct → la défense adverse gère via isDefAfterRelance
                             break;
                         }
 
@@ -6433,6 +6432,12 @@
                         for (let j = i - 1; j >= 0; j--) {
                             if (rally[j].type === 'attack' && rally[j].team === oppositeTeamDef) {
                                 isDefAfterRelance = rally[j].attackType === 'relance';
+                                break;
+                            }
+                            // Passe relance retour direct = même traitement qu'attaque relance
+                            if (rally[j].type === 'pass' && rally[j].team === oppositeTeamDef
+                                && rally[j].passType === 'relance' && rally[j].isDirectReturn) {
+                                isDefAfterRelance = true;
                                 break;
                             }
                             // Si on trouve un block ou une defense de notre équipe avant l'attaque → pas directement après relance
