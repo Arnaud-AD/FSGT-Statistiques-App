@@ -114,6 +114,13 @@ const WorkflowEngine = {
             handler.reenter();
         }
 
+        // Nettoyer et redessiner les flèches une dernière fois
+        // pour éliminer les doublons créés par reenter()
+        clearMarkers();
+        clearArrows();
+        redrawRally();
+        this._redrawCurrentAction();
+
         // Mettre à jour l'affichage
         updatePhase();
         updateScore();
