@@ -287,50 +287,88 @@ function confirmResumeLastPoint() {
 
 /**
  * Reconstruit le stack undo à partir du rally restauré.
- * Pour chaque action, on push un snapshot avec le rally tronqué à ce point,
- * permettant de remonter action par action avec Retour.
+ * Pour chaque action du rally, on push un snapshot qui représente l'état
+ * AVANT cette action. Quand popState() restaure ce snapshot, reenter()
+ * de la phase reconstruit l'UI correctement.
+ *
+ * Clé : chaque snapshot doit avoir le bon currentAction et context
+ * pour que reenter() fonctionne (override tags, zones, etc.)
  */
 function _rebuildUndoStack(rally, serviceAction) {
     if (!rally || rally.length === 0) return;
 
-    // Pour chaque action du rally, construire un snapshot intermédiaire
-    // Le snapshot i représente l'état AVANT l'action i (= rally[0..i-1])
     for (let i = 0; i <= rally.length; i++) {
         const rallySlice = rally.slice(0, i);
-        const currentAction = i < rally.length ? rally[i] : {};
 
-        // Déterminer l'attackingTeam à ce point du rally
+        // --- attackingTeam à ce point du rally ---
         let attackingTeam = gameState.servingTeam === 'home' ? 'away' : 'home';
         for (let j = 0; j < i; j++) {
             const a = rally[j];
             if (a.type === 'attack' && (a.result === 'defended' || a.result === 'blocked')) {
-                // Contre-attaque : l'équipe adverse attaque maintenant
                 attackingTeam = a.team === 'home' ? 'away' : 'home';
             } else if (a.type === 'reception' || a.type === 'pass') {
                 attackingTeam = a.team;
             }
         }
 
-        // Déterminer la phase correspondante
+        // --- Phase et currentAction pour ce snapshot ---
         let phase = 'server_selection';
+        let snapshotAction = {};
+        let snapshotContext = WorkflowEngine._freshContext();
+
         if (i === 0) {
             phase = 'server_selection';
         } else {
             const prevAction = rally[i - 1];
+
             if (prevAction.type === 'service') {
-                if (prevAction.result === 'in') phase = 'reception';
-                else phase = 'serve_end';
+                if (prevAction.result === 'in') {
+                    phase = 'reception';
+                } else {
+                    phase = 'serve_end';
+                }
+                // currentAction = le service en cours
+                snapshotAction = {
+                    type: 'service',
+                    player: prevAction.player,
+                    team: prevAction.team,
+                    role: prevAction.role,
+                    startPos: prevAction.startPos
+                };
+
             } else if (prevAction.type === 'reception') {
                 phase = 'pass';
+                // Après réception, le passeur sera auto-sélectionné
+                snapshotAction = {};
+
             } else if (prevAction.type === 'pass') {
                 phase = 'attack_player';
+                snapshotAction = {};
+
             } else if (prevAction.type === 'attack') {
-                if (prevAction.result === 'defended' || prevAction.result === 'blocked') phase = 'result';
-                else phase = 'attack_end';
+                if (prevAction.result === 'defended' || prevAction.result === 'blocked') {
+                    phase = 'result';
+                    // Contexte : auto-defender basé sur la zone de défense
+                    snapshotContext.autoDefender = null;
+                } else {
+                    phase = 'attack_end';
+                    snapshotAction = {
+                        type: 'attack',
+                        player: prevAction.player,
+                        team: prevAction.team,
+                        role: prevAction.role,
+                        attackType: prevAction.attackType,
+                        startPos: prevAction.startPos
+                    };
+                }
+
             } else if (prevAction.type === 'defense') {
                 phase = 'pass';
+                snapshotAction = {};
+
             } else if (prevAction.type === 'block') {
                 phase = 'result';
+                snapshotContext.autoDefender = null;
             }
         }
 
@@ -343,9 +381,9 @@ function _rebuildUndoStack(rally, serviceAction) {
             homeScore: gameState.homeScore,
             awayScore: gameState.awayScore,
             setEnded: false,
-            currentAction: JSON.parse(JSON.stringify(i < rally.length ? {} : currentAction)),
+            currentAction: JSON.parse(JSON.stringify(snapshotAction)),
             rally: JSON.parse(JSON.stringify(rallySlice)),
-            context: JSON.parse(JSON.stringify(WorkflowEngine._freshContext())),
+            context: JSON.parse(JSON.stringify(snapshotContext)),
             overridePlayer: null,
             autoSelectedPlayer: null,
             overrideTagsTeam: null
