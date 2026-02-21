@@ -297,7 +297,7 @@ function confirmResumeLastPoint() {
 function _rebuildUndoStack(rally, serviceAction) {
     if (!rally || rally.length === 0) return;
 
-    for (let i = 0; i <= rally.length; i++) {
+    for (let i = 0; i < rally.length; i++) {
         const rallySlice = rally.slice(0, i);
 
         // --- attackingTeam à ce point du rally ---
@@ -324,17 +324,19 @@ function _rebuildUndoStack(rally, serviceAction) {
             if (prevAction.type === 'service') {
                 if (prevAction.result === 'in') {
                     phase = 'reception';
+                    // reception.enter() n'utilise pas currentAction → vide
+                    snapshotAction = {};
                 } else {
                     phase = 'serve_end';
+                    // serve_end a besoin du service en cours
+                    snapshotAction = {
+                        type: 'service',
+                        player: prevAction.player,
+                        team: prevAction.team,
+                        role: prevAction.role,
+                        startPos: prevAction.startPos
+                    };
                 }
-                // currentAction = le service en cours
-                snapshotAction = {
-                    type: 'service',
-                    player: prevAction.player,
-                    team: prevAction.team,
-                    role: prevAction.role,
-                    startPos: prevAction.startPos
-                };
 
             } else if (prevAction.type === 'reception') {
                 phase = 'pass';
