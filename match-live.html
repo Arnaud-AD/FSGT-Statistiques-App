@@ -689,6 +689,7 @@
     <div class="youtube-panel" id="youtubePanel">
         <div class="youtube-player-wrapper" id="youtubePlayerWrapper">
             <div id="youtubePlayer"></div>
+            <div class="yt-zoom-overlay" id="ytZoomOverlay"></div>
         </div>
         <div class="youtube-controls" id="youtubeControls">
             <button class="yt-ctrl-btn" onclick="ytRewind()" title="Reculer 2s (←)">
@@ -707,6 +708,9 @@
                 <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
                 <input type="range" class="yt-volume-slider" id="ytVolumeSlider" min="0" max="100" value="100" oninput="ytSetVolume(this.value)">
             </div>
+            <button class="yt-ctrl-btn" onclick="ytToggleZoom()" title="Zoom vidéo (Z)" id="ytZoomBtn">
+                <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+            </button>
         </div>
     </div>
 
@@ -947,10 +951,32 @@
             // Fonction conservée pour cohérence d'appel (init + confirm)
         }
 
+        // Zoom vidéo : masque l'app pour agrandir la vidéo
+        function ytToggleZoom() {
+            if (!document.body.classList.contains('video-mode')) return;
+            document.body.classList.toggle('video-zoom');
+            // Icône : plein écran ↔ réduire
+            const btn = document.getElementById('ytZoomBtn');
+            if (btn) {
+                const isZoomed = document.body.classList.contains('video-zoom');
+                btn.innerHTML = isZoomed
+                    ? '<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>'
+                    : '<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>';
+            }
+        }
+
         // Raccourcis clavier pour le player YouTube
         document.addEventListener('keydown', function(e) {
-            if (!ytPlayer || !ytReady) return;
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+
+            // Z = zoom vidéo (fonctionne même sans player prêt)
+            if (e.key === 'z' || e.key === 'Z') {
+                e.preventDefault();
+                ytToggleZoom();
+                return;
+            }
+
+            if (!ytPlayer || !ytReady) return;
 
             switch (e.code) {
                 case 'Space':

@@ -69,6 +69,31 @@
             min-width: 300px;
         }
 
+        /* Zoom vidéo : masque l'app, vidéo plein écran */
+        body.video-zoom .app-container {
+            display: none;
+        }
+
+        body.video-zoom .youtube-panel {
+            min-width: 100%;
+        }
+
+        /* Overlay anti-clic en mode zoom : bloque les clics sur l'iframe YouTube */
+        .yt-zoom-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10;
+            cursor: default;
+        }
+
+        body.video-zoom .yt-zoom-overlay {
+            display: block;
+        }
+
         .youtube-player-wrapper {
             flex: 1;
             position: relative;
