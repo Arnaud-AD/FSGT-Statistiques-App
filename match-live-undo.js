@@ -290,9 +290,6 @@ function _resumeToPhase(removedAction) {
         return;
     }
 
-    // Pusher un état pour que le prochain Retour fonctionne
-    WorkflowEngine.pushState('resume_point');
-
     switch (removedAction.type) {
         case 'attack': {
             // L'attaque a terminé le point (out, point, fault, bloc_out)
@@ -360,6 +357,10 @@ function _resumeToPhase(removedAction) {
             WorkflowEngine.transition('server_selection');
             break;
     }
+
+    // Pusher un état APRÈS la transition pour que le prochain Retour
+    // restaure cette phase (et non server_selection)
+    WorkflowEngine.pushState('resume_point');
 }
 
 function redrawRally() {
