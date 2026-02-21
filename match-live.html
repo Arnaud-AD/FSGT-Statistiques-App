@@ -6111,15 +6111,19 @@
                 if (a.team === oppositeTeam) {
                     // Defense fault = l'adversaire rate sa défense → l'attaque a forcé le point
                     if (a.type === 'defense' && a.result === 'fault') continue;
-                    // Block = la balle revient chez l'attaquant
-                    if (a.type === 'block') {
-                        // Chercher si l'équipe attaquante récupère réellement après le block
+                    // Block (sauf pass-through) : analyser où va la balle après
+                    if (a.type === 'block' && !a.passThrough) {
                         for (let j = i + 1; j < rally.length; j++) {
                             if (rally[j].team === attackingTeam) {
+                                // Balle côté attaquant : l'attaquant doit défendre
                                 if (rally[j].type === 'defense' && rally[j].result === 'fault') {
-                                    return 'blocked'; // Defense fault après block = BP
+                                    return 'blocked'; // Defense fault côté attaquant = BP
                                 }
                                 return 'continued'; // L'équipe récupère le block → A-
+                            }
+                            // V20.188 : si la défense du bloqueur rate, la balle est allée côté adverse → A+
+                            if (rally[j].team === oppositeTeam && rally[j].type === 'defense' && rally[j].result === 'fault') {
+                                return 'ended'; // Bloc dévie côté adverse, adversaire rate → A+
                             }
                         }
                         return 'blocked'; // Personne ne récupère → BP
@@ -6372,6 +6376,20 @@
                     }
 
                     case 'defense': {
+                        // V20.188 : Détecter bloc précédent (même équipe) pour ajuster la défense
+                        // - Après bloc_out → aucune défense comptée
+                        // - Après bloc normal → D- max (jamais FD)
+                        let blockBeforeType = null; // null | 'bloc_out' | 'normal'
+                        for (let j = i - 1; j >= 0; j--) {
+                            if (rally[j].type === 'block' && rally[j].team === team) {
+                                blockBeforeType = rally[j].result === 'bloc_out' ? 'bloc_out' : 'normal';
+                                break;
+                            }
+                            if (rally[j].type === 'pass' && rally[j].team === team) break;
+                            if (rally[j].type === 'attack' && rally[j].team === team) break;
+                        }
+                        if (blockBeforeType === 'bloc_out') break; // Aucune défense comptée après bloc out
+
                         // Chercher si l'attaque adverse précédente est une relance
                         const oppositeTeamDef = team === 'home' ? 'away' : 'home';
                         let isDefAfterRelance = false;
@@ -6398,17 +6416,8 @@
                                 // Retour direct non exploité → R-
                                 stats.relance.relminus++;
                             } else if (action.result === 'fault') {
-                                // Vérifier si un bloc précède
-                                let hasBlockBeforeRel = false;
-                                for (let j = i - 1; j >= 0; j--) {
-                                    if (rally[j].type === 'block' && rally[j].team === team) {
-                                        hasBlockBeforeRel = true;
-                                        break;
-                                    }
-                                    if (rally[j].type === 'pass' && rally[j].team === team) break;
-                                    if (rally[j].type === 'attack' && rally[j].team === team) break;
-                                }
-                                if (hasBlockBeforeRel) {
+                                // V20.188 : utilise blockBeforeType déjà calculé en début de case
+                                if (blockBeforeType === 'normal') {
                                     stats.relance.relminus++; // Bloc avant → R- (pas FR)
                                 } else {
                                     stats.relance.frel++; // Pas de bloc → FR
@@ -6426,8 +6435,13 @@
                             stats.defense.tot++;
 
                             if (action.untouched) {
-                                // Balle non-touchée dans la zone → FD
-                                stats.defense.fdef++;
+                                // V20.188 : après un bloc normal → D- max (le bloc a dévié la trajectoire)
+                                if (blockBeforeType === 'normal') {
+                                    stats.defense.defminus++;
+                                } else {
+                                    // Balle non-touchée dans la zone → FD
+                                    stats.defense.fdef++;
+                                }
                             } else {
                                 // Retour direct de défense exploité → D- (touchée mais perdue)
                                 const defExploited = action.isDirectReturn && !action.isDirectReturnWinner
@@ -6438,21 +6452,9 @@
                                     // Retour direct gagnant ou non exploité → D (touchée, pas optimale)
                                     stats.defense.defneutral++;
                                 } else if (action.result === 'fault') {
-                                    // Vérifier si un bloc précède cette défense dans le même échange
-                                    let hasBlockBefore = false;
-                                    for (let j = i - 1; j >= 0; j--) {
-                                        if (rally[j].type === 'block' && rally[j].team === team) {
-                                            hasBlockBefore = true;
-                                            break;
-                                        }
-                                        if (rally[j].type === 'pass' && rally[j].team === team) break;
-                                        if (rally[j].type === 'attack' && rally[j].team === team) break;
-                                    }
-                                    if (hasBlockBefore) {
-                                        stats.defense.defneutral++; // Responsabilité partagée bloc → D
-                                    } else {
-                                        stats.defense.defminus++; // Seul responsable → D-
-                                    }
+                                    // V20.188 : après bloc normal → D- max (pas FD, le bloc a dévié)
+                                    // Sans bloc → D- (seul responsable)
+                                    stats.defense.defminus++;
                                 } else {
                                     // Défense réussie : utiliser defenseQuality si disponible
                                     if (action.defenseQuality === 'positive') {
@@ -6469,64 +6471,31 @@
                     }
 
                     case 'block': {
+                        // V20.188 : Logique simplifiée
+                        // FB = bloc out uniquement (le statisticien juge le bloqueur fautif)
+                        // B+ = bloc kill direct OU bloc retourne côté attaquant ET défense attaquant rate
+                        // B- = tous les autres cas (pass-through, jeu continue, balle côté défenseur)
                         stats.block.tot++;
                         if (action.result === 'bloc_out') {
-                            // FB : bloc out
-                            stats.block.fblc++;
+                            stats.block.fblc++; // FB : bloc out
                         } else if (action.result === 'kill' || action.result === 'point') {
-                            // B+ : bloc kill direct
-                            stats.block.blcplus++;
+                            stats.block.blcplus++; // B+ : bloc kill direct
+                        } else if (action.passThrough) {
+                            stats.block.blcminus++; // B- : pass-through (balle traverse le bloc)
                         } else {
-                            // Bloc touché : analyser la suite du rally
-                            // Chercher la première défense après le bloc (peu importe l'équipe)
-                            let blockOutcome = 'unknown';
+                            // Bloc standard : B+ seulement si la balle revient côté attaquant
+                            // ET la défense de l'attaquant (team opposée au bloqueur) rate
+                            let isBlockKill = false;
                             for (let j = i + 1; j < rally.length; j++) {
                                 if (rally[j].type === 'defense') {
-                                    if (rally[j].result === 'fault') {
-                                        // Défense ratée : qui a raté ?
-                                        if (rally[j].team === team) {
-                                            // L'équipe du bloqueur rate sa défense → FB
-                                            blockOutcome = 'own_defense_fault';
-                                        } else {
-                                            // L'adversaire rate sa défense → B+ (bloc kill indirect)
-                                            blockOutcome = 'opponent_defense_fault';
-                                        }
-                                    } else {
-                                        // Défense réussie → B- (le jeu continue)
-                                        blockOutcome = 'play_continues';
+                                    if (rally[j].result === 'fault' && rally[j].team !== team) {
+                                        isBlockKill = true; // Défense attaquant rate → B+
                                     }
                                     break;
                                 }
-                                // Si on trouve une passe ou attaque sans défense préalable
-                                // → le jeu a continué → B-
-                                if (rally[j].type === 'pass' || rally[j].type === 'attack') {
-                                    blockOutcome = 'play_continues';
-                                    break;
-                                }
+                                if (rally[j].type === 'pass' || rally[j].type === 'attack') break;
                             }
-                            if (blockOutcome === 'play_continues') {
-                                stats.block.blcminus++; // B- : bloc touché, neutre, le jeu continue
-                            } else if (blockOutcome === 'own_defense_fault') {
-                                stats.block.fblc++; // FB : bloc qui n'a pas permis la défense de son équipe
-                            } else if (blockOutcome === 'opponent_defense_fault') {
-                                stats.block.blcplus++; // B+ : bloc kill (adversaire rate sa défense)
-                            } else {
-                                // unknown = fin du rally après le bloc sans suite claire
-                                // Vérifier qui a gagné le point : chercher la dernière attaque avant le bloc
-                                const lastAttackBeforeBlock = (() => {
-                                    for (let j = i - 1; j >= 0; j--) {
-                                        if (rally[j].type === 'attack') return rally[j];
-                                    }
-                                    return null;
-                                })();
-                                if (lastAttackBeforeBlock && lastAttackBeforeBlock.result === 'point' && lastAttackBeforeBlock.team !== team) {
-                                    // L'attaquant adverse a fait le point malgré le bloc → B- (bloc ralenti mais pas décisif)
-                                    stats.block.blcminus++;
-                                } else {
-                                    // Le bloc a fait le point → B+
-                                    stats.block.blcplus++;
-                                }
-                            }
+                            stats.block[isBlockKill ? 'blcplus' : 'blcminus']++;
                         }
                         break;
                     }

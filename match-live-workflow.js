@@ -2304,11 +2304,30 @@ WorkflowEngine.registerPhase('attack_net_choice', {
                 WorkflowEngine.transition('net_block_player', { blockingTeam });
             }
         } else if (clickData.courtSide === defendingCourtSide) {
-            // Clic côté défenseur = l'attaque passe le filet → transition vers result
+            // Clic côté défenseur = l'attaque passe à travers le bloc → transition vers result
+            // V20.188 : enregistrer le bloc (B- pass-through) avant de passer à result
             WorkflowEngine.pushState('attack_net_pass_through');
 
             const lastAttack = [...gameState.rally].reverse().find(a => a.type === 'attack');
             if (lastAttack && !lastAttack.result) lastAttack.result = 'defended';
+
+            // Enregistrer le bloc pass-through (le bloqueur a touché la balle mais elle passe)
+            const blockingTeam = defendingTeam;
+            const overrideBlocker = getEffectivePlayer();
+            const autoBlocker = gameState.context.autoBlocker;
+            const blockerPlayer = overrideBlocker || (autoBlocker ? autoBlocker.player : null);
+            if (blockerPlayer) {
+                const blockerRole = overrideBlocker
+                    ? getPlayerRole(blockingTeam, overrideBlocker)
+                    : (autoBlocker.role || getPlayerRole(blockingTeam, blockerPlayer));
+                gameState.rally.push({
+                    type: 'block',
+                    player: blockerPlayer,
+                    team: blockingTeam,
+                    role: blockerRole,
+                    passThrough: true  // Marqueur : la balle a traversé le bloc
+                });
+            }
 
             hideDefenseZones();
             document.getElementById('outArea').classList.remove('active');
@@ -2388,6 +2407,24 @@ WorkflowEngine.registerPhase('attack_net_choice', {
 
             const lastAttack = [...gameState.rally].reverse().find(a => a.type === 'attack');
             if (lastAttack && !lastAttack.result) lastAttack.result = 'defended';
+
+            // V20.188 : Enregistrer le bloc pass-through (la balle passe côté défenseur)
+            const blockingTeamDZ = gameState.attackingTeam === 'home' ? 'away' : 'home';
+            const overrideBlockerDZ = getEffectivePlayer();
+            const autoBlockerDZ = gameState.context.autoBlocker;
+            const blockerPlayerDZ = overrideBlockerDZ || (autoBlockerDZ ? autoBlockerDZ.player : null);
+            if (blockerPlayerDZ) {
+                const blockerRoleDZ = overrideBlockerDZ
+                    ? getPlayerRole(blockingTeamDZ, overrideBlockerDZ)
+                    : (autoBlockerDZ.role || getPlayerRole(blockingTeamDZ, blockerPlayerDZ));
+                gameState.rally.push({
+                    type: 'block',
+                    player: blockerPlayerDZ,
+                    team: blockingTeamDZ,
+                    role: blockerRoleDZ,
+                    passThrough: true
+                });
+            }
 
             // Dessiner la flèche filet → zone de défense (rose = touché par le filet/bloc)
             if (defClickData) {
