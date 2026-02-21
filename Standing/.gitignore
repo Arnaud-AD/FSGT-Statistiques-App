@@ -1,10 +1,19 @@
+# OS
 .DS_Store
+
+# Dev tools
 .claude/
 CLAUDE.md
+__pycache__/
+
+# Scripts (scraping, ELO, lancement local)
 scrape_fsgt.py
 ginette_elo.py
-__pycache__/
-championships_data/
 start.command
+
+# Données brutes scrappées
+championships_data/
+
+# Assets obsolètes
 icon1.jpg
 icon2.png

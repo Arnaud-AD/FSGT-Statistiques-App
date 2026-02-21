@@ -40,6 +40,25 @@
             border-bottom: 1px solid var(--border-color);
         }
 
+        .back-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            background: var(--bg-header);
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+
+        .back-btn:hover {
+            background: var(--border-color);
+        }
+
         .logo {
             width: 48px;
             height: 48px;
