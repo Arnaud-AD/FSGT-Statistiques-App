@@ -66,10 +66,8 @@ const WorkflowEngine = {
      * Retourne true si restauration réussie, false si pile vide.
      */
     popState() {
-        console.log('[DEBUG popState] stackSize:', this.stateStack.length);
-        if (this.stateStack.length === 0) { console.log('[DEBUG popState] EMPTY STACK'); return false; }
+        if (this.stateStack.length === 0) return false;
         const snapshot = this.stateStack.pop();
-        console.log('[DEBUG popState] restoring phase:', snapshot.phase, 'label:', snapshot.label);
 
         // Restaurer gameState
         gameState.phase = snapshot.phase;
@@ -217,16 +215,30 @@ const WorkflowEngine = {
      * Finalise le rally en cours : sauvegarde le point, recalcule les stats.
      */
     endRally() {
-        // Sauvegarder le point
+        // Sauvegarder le point avec le stack undo pour pouvoir reprendre identiquement
         const serviceAction = gameState.rally.find(a => a.type === 'service');
-        currentSet.points.push({
+        const point = {
             rally: JSON.parse(JSON.stringify(gameState.rally)),
             homeScore: gameState.homeScore,
             awayScore: gameState.awayScore,
             servingTeam: serviceAction ? serviceAction.team : gameState.servingTeam,
             server: serviceAction ? serviceAction.player : null,
-            timestamp: Date.now()
-        });
+            timestamp: Date.now(),
+            // V20.27 : cache du stack undo pour resume fidèle
+            _undoStack: JSON.parse(JSON.stringify(this.stateStack))
+        };
+        currentSet.points.push(point);
+
+        // Rolling window : ne garder le stack que sur les 5 derniers points
+        const points = currentSet.points;
+        const UNDO_CACHE_SIZE = 5;
+        if (points.length > UNDO_CACHE_SIZE) {
+            for (let i = 0; i < points.length - UNDO_CACHE_SIZE; i++) {
+                if (points[i]._undoStack) {
+                    delete points[i]._undoStack;
+                }
+            }
+        }
 
         recalculateAllStats();
         saveCurrentSet();
@@ -551,6 +563,16 @@ function getValidAutoBlocker(blockingTeam) {
     return ab;
 }
 
+// V20.27 : Helper — retourne l'override player seulement s'il appartient à blockingTeam
+// Évite d'assigner un joueur attaquant comme bloqueur quand les tags override
+// affichent encore l'équipe attaquante
+function getValidOverrideBlocker(blockingTeam) {
+    const override = getEffectivePlayer();
+    if (!override) return null;
+    if (!getLineupPlayers(blockingTeam).includes(override)) return null;
+    return override;
+}
+
 // ==================== PHASE : server_selection ====================
 WorkflowEngine.registerPhase('server_selection', {
     enter(context) {
@@ -660,13 +682,6 @@ WorkflowEngine.registerPhase('serve_start', {
     reenter() {
         hideAllSections();
         showServiceZone();
-        console.log('[DEBUG serve_start.reenter]', {
-            phase: gameState.phase,
-            currentServer: gameState.currentServer,
-            servingTeam: gameState.servingTeam,
-            serviceZoneTopActive: document.getElementById('serviceZoneTop').classList.contains('active'),
-            serviceZoneBottomActive: document.getElementById('serviceZoneBottom').classList.contains('active')
-        });
         const banner = document.getElementById('serverContinue');
         const selection = document.getElementById('serverSelection');
         banner.classList.add('hidden');
@@ -1287,8 +1302,8 @@ WorkflowEngine.registerPhase('reception_net_choice', {
         const blockingTeam = gameState.servingTeam;
         gameState.context.source = 'reception_net';
 
-        // V20.182 : vérifier l'override avant l'auto-blocker
-        const overrideBlocker = getEffectivePlayer();
+        // V20.27 : valider que l'override appartient bien à blockingTeam
+        const overrideBlocker = getValidOverrideBlocker(blockingTeam);
         const validAutoBlocker = getValidAutoBlocker(blockingTeam);
         const blockerPlayer = overrideBlocker || (validAutoBlocker && validAutoBlocker.player);
         if (blockerPlayer) {
@@ -1935,8 +1950,8 @@ WorkflowEngine.registerPhase('pass_net_choice', {
         const blockingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
         gameState.context.source = 'pass_net';
 
-        // V20.182 : vérifier l'override avant l'auto-blocker
-        const overrideBlocker = getEffectivePlayer();
+        // V20.27 : valider que l'override appartient bien à blockingTeam
+        const overrideBlocker = getValidOverrideBlocker(blockingTeam);
         const validAutoBlocker = getValidAutoBlocker(blockingTeam);
         const blockerPlayer = overrideBlocker || (validAutoBlocker && validAutoBlocker.player);
         if (blockerPlayer) {
@@ -2312,8 +2327,8 @@ WorkflowEngine.registerPhase('attack_net_choice', {
 
             const blockingTeam = defendingTeam;
 
-            // V20.182 : vérifier l'override avant l'auto-blocker
-            const overrideBlocker = getEffectivePlayer();
+            // V20.27 : valider que l'override appartient bien à blockingTeam
+            const overrideBlocker = getValidOverrideBlocker(blockingTeam);
             if (overrideBlocker) {
                 gameState.currentAction = {
                     type: 'block',
@@ -2346,19 +2361,24 @@ WorkflowEngine.registerPhase('attack_net_choice', {
 
             // Enregistrer le bloc pass-through (le bloqueur a touché la balle mais elle passe)
             const blockingTeam = defendingTeam;
-            const overrideBlocker = getEffectivePlayer();
+            // V20.27 : valider que l'override appartient bien à blockingTeam
+            const overrideBlocker = getValidOverrideBlocker(blockingTeam);
             const validAutoBlockerPT = getValidAutoBlocker(blockingTeam);
             const blockerPlayer = overrideBlocker || (validAutoBlockerPT ? validAutoBlockerPT.player : null);
             if (blockerPlayer) {
                 const blockerRole = overrideBlocker
                     ? getPlayerRole(blockingTeam, overrideBlocker)
                     : (validAutoBlockerPT.role || getPlayerRole(blockingTeam, blockerPlayer));
+                // V20.27 : endPos au filet pour que la flèche bloc→défense fonctionne
+                const lastAttackPT = [...gameState.rally].reverse().find(a => a.type === 'attack');
+                const netEndPos = (lastAttackPT && lastAttackPT.endPos) ? getNetCenteredPos(lastAttackPT.endPos) : null;
                 gameState.rally.push({
                     type: 'block',
                     player: blockerPlayer,
                     team: blockingTeam,
                     role: blockerRole,
-                    passThrough: true  // Marqueur : la balle a traversé le bloc
+                    passThrough: true,
+                    endPos: netEndPos
                 });
             }
 
@@ -2408,8 +2428,8 @@ WorkflowEngine.registerPhase('attack_net_choice', {
 
             const blockingTeam = gameState.attackingTeam === 'home' ? 'away' : 'home';
 
-            // V20.182 : vérifier l'override avant l'auto-blocker
-            const overrideBlockerBO = getEffectivePlayer();
+            // V20.27 : valider que l'override appartient bien à blockingTeam
+            const overrideBlockerBO = getValidOverrideBlocker(blockingTeam);
             const validAutoBlockerBO = getValidAutoBlocker(blockingTeam);
             const blockerPlayerBO = overrideBlockerBO || (validAutoBlockerBO && validAutoBlockerBO.player);
             if (blockerPlayerBO) {
@@ -2442,21 +2462,24 @@ WorkflowEngine.registerPhase('attack_net_choice', {
             const lastAttack = [...gameState.rally].reverse().find(a => a.type === 'attack');
             if (lastAttack && !lastAttack.result) lastAttack.result = 'defended';
 
-            // V20.188 : Enregistrer le bloc pass-through (la balle passe côté défenseur)
+            // V20.27 : Enregistrer le bloc pass-through (la balle passe côté défenseur)
             const blockingTeamDZ = gameState.attackingTeam === 'home' ? 'away' : 'home';
-            const overrideBlockerDZ = getEffectivePlayer();
+            const overrideBlockerDZ = getValidOverrideBlocker(blockingTeamDZ);
             const validAutoBlockerDZ = getValidAutoBlocker(blockingTeamDZ);
             const blockerPlayerDZ = overrideBlockerDZ || (validAutoBlockerDZ ? validAutoBlockerDZ.player : null);
             if (blockerPlayerDZ) {
                 const blockerRoleDZ = overrideBlockerDZ
                     ? getPlayerRole(blockingTeamDZ, overrideBlockerDZ)
                     : (validAutoBlockerDZ.role || getPlayerRole(blockingTeamDZ, blockerPlayerDZ));
+                // V20.27 : endPos au filet pour que la flèche bloc→défense fonctionne
+                const netEndPosDZ = (lastAttack && lastAttack.endPos) ? getNetCenteredPos(lastAttack.endPos) : null;
                 gameState.rally.push({
                     type: 'block',
                     player: blockerPlayerDZ,
                     team: blockingTeamDZ,
                     role: blockerRoleDZ,
-                    passThrough: true
+                    passThrough: true,
+                    endPos: netEndPosDZ
                 });
             }
 
