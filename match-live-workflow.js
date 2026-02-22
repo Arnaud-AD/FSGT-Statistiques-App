@@ -308,7 +308,8 @@ const WorkflowEngine = {
             defenseAttackerRole: null,
             showDirectAttack: false,
             receptionOpponentClickData: null,
-            passRelance: false
+            passRelance: false,
+            isBlockSupport: false
         };
     },
 
@@ -1429,11 +1430,12 @@ WorkflowEngine.registerPhase('net_block_end', {
 
         // Déterminer qui défend après le block
         if (clickData.courtSide === blockingCourtSide || clickData.courtSide === 'out') {
-            // Block revient chez le bloqueur
+            // Block revient chez le bloqueur — pas un soutien
             gameState.attackingTeam = blockingTeam;
         } else {
-            // Block va chez l'adversaire
+            // Block va chez l'adversaire — soutien de bloc
             gameState.attackingTeam = otherTeam;
+            gameState.context.isBlockSupport = true;
         }
 
         document.getElementById('outArea').classList.remove('active');
@@ -2543,7 +2545,8 @@ WorkflowEngine.registerPhase('block_end', {
         gameState.rally.push({ ...gameState.currentAction });
 
         document.getElementById('outArea').classList.remove('active');
-        // Passer à la défense — pas de zones auto (bloc dévié = imprévisible)
+        // Soutien de bloc : la balle revient chez l'attaquant après un bloc
+        gameState.context.isBlockSupport = true;
         WorkflowEngine.transition('defense', {
             attackerRole: null,
             showDirectAttack: true
@@ -2828,7 +2831,10 @@ WorkflowEngine.registerPhase('defense_end', {
         });
 
         document.getElementById('defenseFaultSection').classList.remove('hidden');
-        showDefenseQualityZones();
+        // Soutien de bloc : pas de zone D+ (position non pertinente, D+ auto si balle récupérée)
+        if (!gameState.context.isBlockSupport) {
+            showDefenseQualityZones();
+        }
         highlightCourt(team);
 
         document.getElementById('outArea').classList.add('active');
@@ -2872,9 +2878,11 @@ WorkflowEngine.registerPhase('defense_end', {
             return;
         }
 
-        // D+/D- normal
+        // D+/D- normal (soutien de bloc → D+ auto si balle récupérée)
         if (clickData.courtSide === 'out') {
             gameState.currentAction.defenseQuality = 'negative';
+        } else if (gameState.context.isBlockSupport) {
+            gameState.currentAction.defenseQuality = 'positive';
         } else {
             gameState.currentAction.defenseQuality = calculateDefenseQuality(clickData);
         }

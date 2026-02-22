@@ -400,6 +400,10 @@ function _rebuildUndoStack(rally, serviceAction) {
                     // Bloc return : flow forward → defense directement
                     phase = 'defense';
                     snapshotContext.showDirectAttack = true;
+                    // V20.28 : soutien de bloc si la défense est sur l'autre équipe que le bloqueur
+                    if (i < rally.length && rally[i].type === 'defense' && rally[i].team !== prevAction.team) {
+                        snapshotContext.isBlockSupport = true;
+                    }
                 }
             }
         }
