@@ -1982,6 +1982,7 @@ const BilanView = {
         scores._tots = {
             service: srv.tot,
             reception: rec.tot,
+            reception_r4: rec.r4,  // V20.285 : discriminant ailier 1 recep R4
             passe: (pas.tot || 0),
             attaque: atk.tot,
             bloc: blk.tot,
@@ -2034,6 +2035,18 @@ const BilanView = {
             if (weights[key] > 0) totalWeight += weights[key];
         });
 
+        // V20.285 : helper pour verifier si un axe atteint le seuil minimum d'actions
+        // Exception ailier : 1 seule reception R4 compte, sinon 1 recep ne compte pas
+        var isAilier = (role === 'R4' || role === 'Pointu');
+        function meetsMinActions(key) {
+            var tot = tots[key];
+            if (tot === undefined || !minActions[key]) return true; // pas de seuil defini
+            if (tot >= minActions[key]) return true; // seuil atteint
+            // Exception ailier : 1 reception unique R4 compte dans l'IP
+            if (isAilier && key === 'reception' && tot === 1 && (tots.reception_r4 || 0) === 1) return true;
+            return false;
+        }
+
         // Calculer le poids total des axes actifs
         // Actif = score > 0 ET poids > 0 ET volume >= seuil minimum
         var activeWeight = 0;
@@ -2041,9 +2054,7 @@ const BilanView = {
             if (weights[key] <= 0) return;
             var score = axisScores[key] || 0;
             if (score <= 0) return;
-            // Verifier le seuil minimum si les volumes sont disponibles
-            var tot = tots[key];
-            if (tot !== undefined && minActions[key] && tot < minActions[key]) return;
+            if (!meetsMinActions(key)) return;
             activeWeight += weights[key];
         });
 
@@ -2060,8 +2071,7 @@ const BilanView = {
             if (weights[key] <= 0) return;
             var score = axisScores[key] || 0;
             if (score <= 0) return;
-            var tot = tots[key];
-            if (tot !== undefined && minActions[key] && tot < minActions[key]) return;
+            if (!meetsMinActions(key)) return;
             ip += score * weights[key];
         });
         ip = ip / effectiveDenominator;
