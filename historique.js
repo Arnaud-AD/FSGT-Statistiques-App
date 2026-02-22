@@ -3752,6 +3752,11 @@ document.addEventListener('DOMContentLoaded', async function() {
                     console.warn('[Historique] Migration Firebase échouée :', err.message);
                 }
             }
+            // Afficher le bouton "Démarrer un match" uniquement si admin
+            var startBtn = document.getElementById('emptyStateStartMatch');
+            if (startBtn) {
+                startBtn.style.display = (typeof FirebaseSync !== 'undefined' && FirebaseSync.isAdmin()) ? '' : 'none';
+            }
         });
     }
 
