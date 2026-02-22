@@ -391,23 +391,18 @@ function _rebuildUndoStack(rally, serviceAction) {
                 }
 
             } else if (prevAction.type === 'block') {
-                // V20.27 : reconstruire blockingTeam et defenseAttackerRole
+                // V20.27 : reconstruire blockingTeam
                 snapshotContext.blockingTeam = prevAction.team;
-                // Chercher l'attaque qui a précédé le bloc pour defenseAttackerRole
-                for (let j = i - 2; j >= 0; j--) {
-                    if (rally[j].type === 'attack') {
-                        snapshotContext.defenseAttackerRole = rally[j].role;
-                        break;
-                    }
-                }
+                // Après un bloc, les zones de défense ne sont PAS affichées (attackerRole: null)
+                snapshotContext.defenseAttackerRole = null;
                 if (prevAction.passThrough) {
-                    // Pass-through : le jeu continue côté défenseur → phase result
+                    // Pass-through : flow forward → result → defense
                     phase = 'result';
                     snapshotContext.autoDefender = null;
-                    snapshotContext.showDirectAttack = true;
                 } else {
-                    phase = 'result';
-                    snapshotContext.autoDefender = null;
+                    // Bloc return : flow forward → defense directement
+                    phase = 'defense';
+                    snapshotContext.showDirectAttack = true;
                 }
             }
         }
@@ -584,15 +579,20 @@ function redrawRally() {
                 drawArrow(prevAction.endPos, action.endPos, arrowType);
             }
         } else if (action.type === 'block') {
-            if (action.endPos) {
-                addMarker(action.endPos, 'block-touch');
-            }
-            // 2 flèches : attaque → filet + filet → atterrissage bloc
-            const lastAttack = [...gameState.rally.slice(0, i)].reverse().find(a => a.type === 'attack');
-            if (lastAttack && lastAttack.endPos && action.endPos) {
-                const netPos = getNetCenteredPos(lastAttack.endPos);
-                drawArrow(lastAttack.endPos, netPos, getAttackArrowType(lastAttack.attackType));
-                drawArrow(netPos, action.endPos, 'block-touch');
+            if (action.passThrough) {
+                // V20.27 : pass-through — pas de flèches bloc (la balle continue)
+                // La défense suivante dessinera sa flèche depuis block.endPos (filet)
+            } else {
+                if (action.endPos) {
+                    addMarker(action.endPos, 'block-touch');
+                }
+                // 2 flèches : attaque → filet + filet → atterrissage bloc
+                const lastAttack = [...gameState.rally.slice(0, i)].reverse().find(a => a.type === 'attack');
+                if (lastAttack && lastAttack.endPos && action.endPos) {
+                    const netPos = getNetCenteredPos(lastAttack.endPos);
+                    drawArrow(lastAttack.endPos, netPos, getAttackArrowType(lastAttack.attackType));
+                    drawArrow(netPos, action.endPos, 'block-touch');
+                }
             }
         } else if (action.type === 'defense') {
             // Marqueur au point de départ de la défense (zone auto-select) si disponible

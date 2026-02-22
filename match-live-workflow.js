@@ -2355,12 +2355,16 @@ WorkflowEngine.registerPhase('attack_net_choice', {
                 const blockerRole = overrideBlocker
                     ? getPlayerRole(blockingTeam, overrideBlocker)
                     : (validAutoBlockerPT.role || getPlayerRole(blockingTeam, blockerPlayer));
+                // V20.27 : endPos au filet pour que la flèche bloc→défense fonctionne
+                const lastAttackPT = [...gameState.rally].reverse().find(a => a.type === 'attack');
+                const netEndPos = (lastAttackPT && lastAttackPT.endPos) ? getNetCenteredPos(lastAttackPT.endPos) : null;
                 gameState.rally.push({
                     type: 'block',
                     player: blockerPlayer,
                     team: blockingTeam,
                     role: blockerRole,
-                    passThrough: true  // Marqueur : la balle a traversé le bloc
+                    passThrough: true,
+                    endPos: netEndPos
                 });
             }
 
@@ -2453,12 +2457,15 @@ WorkflowEngine.registerPhase('attack_net_choice', {
                 const blockerRoleDZ = overrideBlockerDZ
                     ? getPlayerRole(blockingTeamDZ, overrideBlockerDZ)
                     : (validAutoBlockerDZ.role || getPlayerRole(blockingTeamDZ, blockerPlayerDZ));
+                // V20.27 : endPos au filet pour que la flèche bloc→défense fonctionne
+                const netEndPosDZ = (lastAttack && lastAttack.endPos) ? getNetCenteredPos(lastAttack.endPos) : null;
                 gameState.rally.push({
                     type: 'block',
                     player: blockerPlayerDZ,
                     team: blockingTeamDZ,
                     role: blockerRoleDZ,
-                    passThrough: true
+                    passThrough: true,
+                    endPos: netEndPosDZ
                 });
             }
 
