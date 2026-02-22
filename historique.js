@@ -2038,6 +2038,9 @@ const BilanView = {
         // V20.285 : helper pour verifier si un axe atteint le seuil minimum d'actions
         // Exception ailier : 1 seule reception R4 compte, sinon 1 recep ne compte pas
         var isAilier = (role === 'R4' || role === 'Pointu');
+        // V20.285b : axes exclus par seuil mais avec du volume → redistribution 100% (pas de penalite)
+        // Cas : ailier avec 1 recep FR → la recep est exclue mais ne penalise pas l'IP
+        var fullRedistWeight = 0;
         function meetsMinActions(key) {
             var tot = tots[key];
             if (tot === undefined || !minActions[key]) return true; // pas de seuil defini
@@ -2050,19 +2053,26 @@ const BilanView = {
         // Calculer le poids total des axes actifs
         // Actif = score > 0 ET poids > 0 ET volume >= seuil minimum
         var activeWeight = 0;
+        fullRedistWeight = 0;
         Object.keys(weights).forEach(function(key) {
             if (weights[key] <= 0) return;
             var score = axisScores[key] || 0;
             if (score <= 0) return;
-            if (!meetsMinActions(key)) return;
+            if (!meetsMinActions(key)) {
+                // V20.285b : ailier avec 1 recep non-R4 → redistribution 100% (pas de penalite)
+                if (isAilier && key === 'reception' && (tots[key] || 0) === 1 && (tots.reception_r4 || 0) === 0) {
+                    fullRedistWeight += weights[key];
+                }
+                return;
+            }
             activeWeight += weights[key];
         });
 
         // Si aucun axe actif, IP = 0
         if (activeWeight === 0) return 0;
 
-        // Redistribution partielle : seuls 50% du poids perdu sont redistribues
-        var lostWeight = totalWeight - activeWeight;
+        // Redistribution : axes sous seuil avec volume (fullRedist) → 100%, axes inactifs → 50%
+        var lostWeight = totalWeight - activeWeight - fullRedistWeight;
         var effectiveDenominator = activeWeight + lostWeight * 0.5;
 
         // IP = somme ponderee / denominateur effectif
