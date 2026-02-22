@@ -86,47 +86,63 @@ function closeUndoPointModal(event) {
 function confirmUndoLastPoint() {
     const points = currentSet.points;
     if (!points || points.length === 0) return;
-    
+
     // Retirer le dernier point
     const removedPoint = points.pop();
-    
+
     // Restaurer le score
     const prevPoint = points.length > 0 ? points[points.length - 1] : null;
     const initialHome = currentSet.initialHomeScore || 0;
     const initialAway = currentSet.initialAwayScore || 0;
-    
+
     gameState.homeScore = prevPoint ? prevPoint.homeScore : initialHome;
     gameState.awayScore = prevPoint ? prevPoint.awayScore : initialAway;
-    
-    // Restaurer l'équipe au service
-    // Le serveur du point supprimé avait servi pour son équipe
-    // Si cette équipe a perdu le point, le service avait changé → on rétablit
+
+    // V20.27 : Restaurer l'équipe au service ET le serveur intelligemment
     const serviceAction = removedPoint.rally.find(a => a.type === 'service');
     if (serviceAction) {
         gameState.servingTeam = serviceAction.team;
+
+        // Chercher le point précédent pour déterminer si le serveur continue
+        if (prevPoint) {
+            const prevServiceAction = prevPoint.rally.find(a => a.type === 'service');
+            if (prevServiceAction && prevServiceAction.team === serviceAction.team) {
+                // Même équipe servait au point précédent → garder le serveur précédent
+                gameState.currentServer = prevServiceAction.player;
+            } else {
+                // Side-out : le serveur du point supprimé était le bon serveur pour cette équipe
+                gameState.currentServer = serviceAction.player;
+            }
+        } else {
+            // Premier point du set → on ne sait pas qui servait avant
+            gameState.currentServer = null;
+        }
+    } else {
+        gameState.currentServer = null;
     }
-    
-    // Réinitialiser le serveur (on ne sait pas forcément qui servait avant)
-    gameState.currentServer = null;
-    
+
     // Mettre à jour l'affichage
     updateScore();
-    
+
     // Recalculer les stats
     recalculateAllStats();
-    
+
     // Sauvegarder
     saveCurrentSet();
-    
+
     // Fermer la modal
     closeUndoPointModal();
-    
+
     // Reset pour nouveau point via WorkflowEngine
     WorkflowEngine._resetRallyState();
     WorkflowEngine.clearStack();
 
-    // Démarrer un nouveau point
-    WorkflowEngine.transition('server_selection');
+    // V20.27 : Transition vers serve_start si le serveur est connu, sinon server_selection
+    if (gameState.currentServer) {
+        WorkflowEngine.transition('serve_start', { serverContinue: true });
+    } else {
+        WorkflowEngine.transition('server_selection');
+    }
 }
 
 // ==================== V20.183 : Revenir dans le point précédent ====================
@@ -291,8 +307,8 @@ function confirmResumeLastPoint() {
  * AVANT cette action. Quand popState() restaure ce snapshot, reenter()
  * de la phase reconstruit l'UI correctement.
  *
- * Clé : chaque snapshot doit avoir le bon currentAction et context
- * pour que reenter() fonctionne (override tags, zones, etc.)
+ * V20.27 : Les flags de contexte sont reconstruits depuis le rally
+ * pour que reenter() affiche les bonnes zones et auto-sélections.
  */
 function _rebuildUndoStack(rally, serviceAction) {
     if (!rally || rally.length === 0) return;
@@ -324,11 +340,9 @@ function _rebuildUndoStack(rally, serviceAction) {
             if (prevAction.type === 'service') {
                 if (prevAction.result === 'in') {
                     phase = 'reception';
-                    // reception.enter() n'utilise pas currentAction → vide
                     snapshotAction = {};
                 } else {
                     phase = 'serve_end';
-                    // serve_end a besoin du service en cours
                     snapshotAction = {
                         type: 'service',
                         player: prevAction.player,
@@ -340,8 +354,11 @@ function _rebuildUndoStack(rally, serviceAction) {
 
             } else if (prevAction.type === 'reception') {
                 phase = 'pass';
-                // Après réception, le passeur sera auto-sélectionné
                 snapshotAction = {};
+                // V20.27 : si l'action suivante est une passe relance, le flag devait être actif
+                if (i < rally.length && rally[i].type === 'pass' && rally[i].passType === 'relance') {
+                    snapshotContext.passRelance = true;
+                }
 
             } else if (prevAction.type === 'pass') {
                 phase = 'attack_player';
@@ -350,8 +367,9 @@ function _rebuildUndoStack(rally, serviceAction) {
             } else if (prevAction.type === 'attack') {
                 if (prevAction.result === 'defended' || prevAction.result === 'blocked') {
                     phase = 'result';
-                    // Contexte : auto-defender basé sur la zone de défense
                     snapshotContext.autoDefender = null;
+                    // V20.27 : reconstruire defenseAttackerRole pour les zones de défense
+                    snapshotContext.defenseAttackerRole = prevAction.role;
                 } else {
                     phase = 'attack_end';
                     snapshotAction = {
@@ -367,10 +385,30 @@ function _rebuildUndoStack(rally, serviceAction) {
             } else if (prevAction.type === 'defense') {
                 phase = 'pass';
                 snapshotAction = {};
+                // V20.27 : si l'action suivante est une passe relance, le flag devait être actif
+                if (i < rally.length && rally[i].type === 'pass' && rally[i].passType === 'relance') {
+                    snapshotContext.passRelance = true;
+                }
 
             } else if (prevAction.type === 'block') {
-                phase = 'result';
-                snapshotContext.autoDefender = null;
+                // V20.27 : reconstruire blockingTeam et defenseAttackerRole
+                snapshotContext.blockingTeam = prevAction.team;
+                // Chercher l'attaque qui a précédé le bloc pour defenseAttackerRole
+                for (let j = i - 2; j >= 0; j--) {
+                    if (rally[j].type === 'attack') {
+                        snapshotContext.defenseAttackerRole = rally[j].role;
+                        break;
+                    }
+                }
+                if (prevAction.passThrough) {
+                    // Pass-through : le jeu continue côté défenseur → phase result
+                    phase = 'result';
+                    snapshotContext.autoDefender = null;
+                    snapshotContext.showDirectAttack = true;
+                } else {
+                    phase = 'result';
+                    snapshotContext.autoDefender = null;
+                }
             }
         }
 
