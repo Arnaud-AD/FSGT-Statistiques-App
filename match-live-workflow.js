@@ -215,16 +215,30 @@ const WorkflowEngine = {
      * Finalise le rally en cours : sauvegarde le point, recalcule les stats.
      */
     endRally() {
-        // Sauvegarder le point
+        // Sauvegarder le point avec le stack undo pour pouvoir reprendre identiquement
         const serviceAction = gameState.rally.find(a => a.type === 'service');
-        currentSet.points.push({
+        const point = {
             rally: JSON.parse(JSON.stringify(gameState.rally)),
             homeScore: gameState.homeScore,
             awayScore: gameState.awayScore,
             servingTeam: serviceAction ? serviceAction.team : gameState.servingTeam,
             server: serviceAction ? serviceAction.player : null,
-            timestamp: Date.now()
-        });
+            timestamp: Date.now(),
+            // V20.27 : cache du stack undo pour resume fidèle
+            _undoStack: JSON.parse(JSON.stringify(this.stateStack))
+        };
+        currentSet.points.push(point);
+
+        // Rolling window : ne garder le stack que sur les 5 derniers points
+        const points = currentSet.points;
+        const UNDO_CACHE_SIZE = 5;
+        if (points.length > UNDO_CACHE_SIZE) {
+            for (let i = 0; i < points.length - UNDO_CACHE_SIZE; i++) {
+                if (points[i]._undoStack) {
+                    delete points[i]._undoStack;
+                }
+            }
+        }
 
         recalculateAllStats();
         saveCurrentSet();

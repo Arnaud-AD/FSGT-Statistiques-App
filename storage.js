@@ -321,6 +321,17 @@ const Storage = {
      * @param {string} endReason - 'normal' | 'interruption'
      */
     finalizeMatch(match, endReason = 'normal') {
+        // V20.27 : Nettoyer les caches _undoStack des points (inutiles après finalisation)
+        if (match.sets) {
+            for (const set of match.sets) {
+                if (set.points) {
+                    for (const point of set.points) {
+                        delete point._undoStack;
+                    }
+                }
+            }
+        }
+
         const setScore = this.getSetScore(match);
 
         match.status = 'completed';

@@ -233,9 +233,9 @@ function confirmResumeLastPoint() {
 
     // 1. Retirer le dernier point
     const removedPoint = points.pop();
-    const rally = JSON.parse(JSON.stringify(removedPoint.rally));
+    const savedStack = removedPoint._undoStack;
 
-    // 2. Restaurer le score
+    // 2. Restaurer le score (avant ce point)
     const prevPoint = points.length > 0 ? points[points.length - 1] : null;
     const initialHome = currentSet.initialHomeScore || 0;
     const initialAway = currentSet.initialAwayScore || 0;
@@ -249,56 +249,53 @@ function confirmResumeLastPoint() {
         gameState.currentServer = serviceAction.player;
     }
 
-    // 4. Retirer la dernière action (celle qui a terminé le point)
-    const removedAction = rally.pop();
-
-    // 5. Restaurer le rally (sans la dernière action)
-    gameState.rally = rally;
-    gameState.currentAction = {};
-    gameState.context = WorkflowEngine._freshContext();
-    gameState.overridePlayer = null;
-    gameState.autoSelectedPlayer = null;
-    gameState.overrideTagsTeam = null;
-
-    // 6. Restaurer l'attackingTeam depuis le contexte du rally
-    // L'équipe qui attaquait = l'équipe de la dernière action retirée (sauf si c'est une défense/réception)
-    if (removedAction) {
-        if (removedAction.type === 'attack' || removedAction.type === 'pass') {
-            gameState.attackingTeam = removedAction.team;
-        } else if (removedAction.type === 'defense') {
-            // La défense est faite par l'équipe adverse de l'attaquant
-            gameState.attackingTeam = removedAction.team === 'home' ? 'away' : 'home';
-        } else if (removedAction.type === 'service') {
-            gameState.attackingTeam = removedAction.team === 'home' ? 'away' : 'home';
-        } else if (removedAction.type === 'reception') {
-            gameState.attackingTeam = removedAction.team;
-        } else if (removedAction.type === 'block') {
-            // Le block est fait par l'équipe adverse de l'attaquant
-            gameState.attackingTeam = removedAction.team === 'home' ? 'away' : 'home';
-        }
-    }
-
-    // 7. Recalculer les stats et sauvegarder
+    // 4. Recalculer les stats et sauvegarder
     updateScore();
     recalculateAllStats();
     saveCurrentSet();
 
-    // 8. Fermer la modal
+    // 5. Fermer la modal
     closeResumePointModal();
 
-    // 9. Reconstruire les visuels
-    clearMarkers();
-    clearArrows();
-    WorkflowEngine.clearStack();
+    if (savedStack && savedStack.length > 0) {
+        // V20.27 : stack caché → popState() fait EXACTEMENT comme un undo normal
+        // Le dernier snapshot du stack = état juste avant l'action terminale
+        WorkflowEngine.stateStack = JSON.parse(JSON.stringify(savedStack));
+        WorkflowEngine.popState();
+    } else {
+        // Fallback : points anciens sans cache → reconstruction manuelle
+        const rally = JSON.parse(JSON.stringify(removedPoint.rally));
+        const removedAction = rally.pop();
 
-    // 10. Reconstruire le stack undo pour chaque action du rally restauré
-    // Comme ça, Retour peut remonter action par action dans le rally
-    _rebuildUndoStack(rally, serviceAction);
+        gameState.rally = rally;
+        gameState.currentAction = {};
+        gameState.context = WorkflowEngine._freshContext();
+        gameState.overridePlayer = null;
+        gameState.autoSelectedPlayer = null;
+        gameState.overrideTagsTeam = null;
 
-    redrawRally();
+        // Restaurer l'attackingTeam depuis le contexte du rally
+        if (removedAction) {
+            if (removedAction.type === 'attack' || removedAction.type === 'pass') {
+                gameState.attackingTeam = removedAction.team;
+            } else if (removedAction.type === 'defense') {
+                gameState.attackingTeam = removedAction.team === 'home' ? 'away' : 'home';
+            } else if (removedAction.type === 'service') {
+                gameState.attackingTeam = removedAction.team === 'home' ? 'away' : 'home';
+            } else if (removedAction.type === 'reception') {
+                gameState.attackingTeam = removedAction.team;
+            } else if (removedAction.type === 'block') {
+                gameState.attackingTeam = removedAction.team === 'home' ? 'away' : 'home';
+            }
+        }
 
-    // 11. Déterminer la phase de reprise et y entrer
-    _resumeToPhase(removedAction);
+        clearMarkers();
+        clearArrows();
+        WorkflowEngine.clearStack();
+        _rebuildUndoStack(rally, serviceAction);
+        redrawRally();
+        _resumeToPhase(removedAction);
+    }
 }
 
 /**
@@ -506,7 +503,7 @@ function _resumeToPhase(removedAction) {
             break;
     }
 
-    // Le stack a déjà été reconstruit par _rebuildUndoStack()
+    // Le stack a déjà été restauré (cache V20.27) ou reconstruit (_rebuildUndoStack)
     // Pas besoin de pushState ici — le Retour remontera dans le rally
 }
 
