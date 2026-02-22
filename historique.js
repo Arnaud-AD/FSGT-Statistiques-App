@@ -2016,7 +2016,9 @@ const BilanView = {
 
         // V20.282 : Ailiers (R4/Pointu) qui servent — booster service de 0.05 à 0.20 (comme Centre)
         // Redistribution proportionnelle sur 115% pour rester à 100%
-        if ((role === 'R4' || role === 'Pointu') && axisScores.service && axisScores.service > 0) {
+        // V20.283 : seuil minimum 5 services pour activer le boost (évite surpondération sur petit volume)
+        var ailierServiceTot = tots.service || 0;
+        if ((role === 'R4' || role === 'Pointu') && axisScores.service && axisScores.service > 0 && ailierServiceTot >= 5) {
             var boosted = {};
             Object.keys(weights).forEach(function(key) { boosted[key] = weights[key]; });
             boosted.service = 0.20;
