@@ -1808,6 +1808,11 @@ WorkflowEngine.registerPhase('pass_end', {
 
         gameState.currentAction.endPos = clickData;
         gameState.currentAction.netPos = clickData;
+        // V20.26 : propager le flag relance passe
+        if (gameState.context.passRelance) {
+            gameState.currentAction.passType = 'relance';
+            gameState.context.passRelance = false;
+        }
         gameState.currentAction.startPos = _getStartPosFromLastAction();
         addMarker(clickData, 'pass');
         gameState.rally.push({ ...gameState.currentAction });
@@ -1833,6 +1838,11 @@ WorkflowEngine.registerPhase('pass_end', {
             WorkflowEngine.pushState('pass_end_attack_zone');
 
             gameState.currentAction.endPos = clickData;
+            // V20.26 : propager le flag relance passe
+            if (gameState.context.passRelance) {
+                gameState.currentAction.passType = 'relance';
+                gameState.context.passRelance = false;
+            }
             gameState.currentAction.startPos = _getStartPosFromLastAction();
             addMarker(clickData, 'pass');
             _drawArrowFromPrev(clickData, 'pass');

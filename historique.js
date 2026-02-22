@@ -294,11 +294,32 @@ const StatsAggregator = {
      * Agrege les stats d'une equipe sur plusieurs sets.
      * Gere les noms de champs legacy (fs/fser, fd/attplus, bl/blcplus, faute/frec).
      */
-    aggregateStats(setsData, teamKey) {
+    aggregateStats(setsData, teamKey, validPlayers) {
+        // V20.26 : auto-construire la liste des joueurs valides depuis les lineups
+        // pour exclure les joueurs adverses enregistres par erreur avec le mauvais team
+        var lineupPlayers = null;
+        if (!validPlayers) {
+            var lineupKey = teamKey === 'home' ? 'homeLineup' : 'awayLineup';
+            var initialKey = teamKey === 'home' ? 'initialHomeLineup' : 'initialAwayLineup';
+            lineupPlayers = {};
+            setsData.forEach(function(s) {
+                [initialKey, lineupKey].forEach(function(k) {
+                    var lineup = s[k];
+                    if (!lineup) return;
+                    Object.keys(lineup).forEach(function(pos) {
+                        if (lineup[pos]) lineupPlayers[lineup[pos]] = true;
+                    });
+                });
+            });
+        }
+        var allowed = validPlayers || lineupPlayers;
+
         const playerTotals = {};
         setsData.forEach(function(s) {
             if (!s.stats || !s.stats[teamKey]) return;
             for (const [name, data] of Object.entries(s.stats[teamKey])) {
+                // V20.26 : exclure les joueurs qui ne font pas partie du roster/lineups
+                if (allowed && (Array.isArray(allowed) ? allowed.indexOf(name) === -1 : !allowed[name])) continue;
                 if (!playerTotals[name]) {
                     playerTotals[name] = StatsAggregator.initPlayerStats();
                 }
@@ -382,9 +403,9 @@ const StatsAggregator = {
     /**
      * Comme aggregateStats, mais filtre les sets par indices.
      */
-    aggregateStatsBySetIndices(setsData, teamKey, setIndices) {
+    aggregateStatsBySetIndices(setsData, teamKey, setIndices, validPlayers) {
         var filtered = setIndices.map(function(i) { return setsData[i]; }).filter(Boolean);
-        return this.aggregateStats(filtered, teamKey);
+        return this.aggregateStats(filtered, teamKey, validPlayers);
     },
 
     /**
@@ -1391,26 +1412,49 @@ const BilanView = {
     },
 
     // --- Distinctions : MVP + meilleurs joueurs par categorie ---
+    // V20.26 : unifie sur computeAxisScores + IP_MIN_ACTIONS pour coherence avec spider charts
     renderDistinctions(homeTotals, playerRoles, filteredPlayers) {
         var self = this;
         var players = filteredPlayers || Object.keys(homeTotals).filter(function(name) {
             return playerRoles[name];
         });
+        var minActions = self.IP_MIN_ACTIONS;
 
-        // --- Calculer IP de chaque joueur pour le MVP ---
-        var playerIPs = {};
+        // --- Calculer axes + IP de chaque joueur une seule fois ---
+        var playerData = {};
         players.forEach(function(name) {
             var role = playerRoles[name].primaryRole;
-            var axisScores = self.computeAxisScores(homeTotals[name], role);
-            playerIPs[name] = self.computeIP(axisScores, role);
+            var axes = self.computeAxisScores(homeTotals[name], role);
+            var ip = self.computeIP(axes, role);
+            playerData[name] = { role: role, axes: axes, ip: ip, stats: homeTotals[name] };
         });
 
+        // --- Helper : trouver le meilleur joueur sur un axe ---
+        // eligibleRoles : tableau optionnel de roles eligibles (ex: ['Passeur','Centre'])
+        function findBestOnAxis(axisKey, eligibleRoles) {
+            var bestName = null, bestScore = -1;
+            players.forEach(function(name) {
+                var d = playerData[name];
+                // Filtrer par role si specifie
+                if (eligibleRoles && eligibleRoles.indexOf(d.role) === -1) return;
+                var score = d.axes[axisKey] || 0;
+                if (score <= 0) return;
+                // Verifier seuil minimum via _tots
+                var tot = d.axes._tots ? d.axes._tots[axisKey] : undefined;
+                if (tot !== undefined && minActions[axisKey] && tot < minActions[axisKey]) return;
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestName = name;
+                }
+            });
+            return bestName ? { name: bestName, score: bestScore } : null;
+        }
+
         // --- Trouver le MVP (meilleur IP) ---
-        var mvpName = null;
-        var mvpIP = -1;
+        var mvpName = null, mvpIP = -1;
         players.forEach(function(name) {
-            if (playerIPs[name] > mvpIP) {
-                mvpIP = playerIPs[name];
+            if (playerData[name].ip > mvpIP) {
+                mvpIP = playerData[name].ip;
                 mvpName = name;
             }
         });
@@ -1421,9 +1465,8 @@ const BilanView = {
 
         // --- MVP ---
         if (mvpName) {
-            var mvpRole = playerRoles[mvpName].primaryRole;
-            var mvpColor = self.ROLE_COLORS[mvpRole] || '#5f6368';
-            var mvpStats = homeTotals[mvpName];
+            var mvp = playerData[mvpName];
+            var mvpColor = self.ROLE_COLORS[mvp.role] || '#5f6368';
             html += '<div class="distinction-row distinction-mvp">';
             html += '<div class="distinction-header">';
             html += '<span class="distinction-emoji">👑</span>';
@@ -1433,146 +1476,66 @@ const BilanView = {
             html += '</div>';
             html += '<div class="distinction-stats">';
             html += '<span class="distinction-stat-highlight">IP ' + mvpIP + '</span>';
-            // Stats impactantes selon le poste
-            html += '<span class="distinction-stat-detail">' + self._mvpStats(mvpStats, mvpRole) + '</span>';
+            html += '<span class="distinction-stat-detail">' + self._mvpStats(mvp.stats, mvp.role) + '</span>';
             html += '</div>';
             html += '</div>';
         }
 
-        // --- Meilleur Serveur ---
-        var bestSrv = self._findBest(players, function(name) {
-            var s = homeTotals[name].service;
-            if (s.tot < 3) return null;
-            var recCount = s.recCountAdv + s.ace;
-            var moy = recCount > 0 ? s.recSumAdv / recCount : 4;
-            return { score: -moy, stats: s, moy: moy };
-        });
-        if (bestSrv) {
-            var s = bestSrv.data.stats;
-            var srvRole = playerRoles[bestSrv.name].primaryRole;
-            var srvColor = self.ROLE_COLORS[srvRole] || '#5f6368';
-            var totalSrv = s.tot;
-            html += '<div class="distinction-row">';
-            html += '<div class="distinction-header">';
-            html += '<span class="distinction-emoji">🎯</span>';
-            html += '<span class="distinction-label">Meilleur Serveur</span>';
-            html += '<span class="bilan-role-dot" style="background:' + srvColor + '"></span>';
-            html += '<span class="distinction-name">' + Utils.escapeHtml(bestSrv.name) + '</span>';
-            html += '</div>';
-            html += '<div class="distinction-stats">';
-            html += 'Tot : ' + totalSrv;
-            html += ' · Ace : ' + s.ace + ' (' + self._pct(s.ace, totalSrv) + ')';
-            html += ' · FS : ' + s.fser + ' (' + self._pct(s.fser, totalSrv) + ')';
-            html += ' · Moy Adv : ' + bestSrv.data.moy.toFixed(1);
-            html += '</div>';
-            html += '</div>';
-        }
+        // --- Definition des distinctions par axe ---
+        var distinctions = [
+            { axisKey: 'service',   emoji: '🎯', label: 'Meilleur Serveur',       statsFn: function(s) {
+                var srv = s.service;
+                var recCount = srv.recCountAdv + srv.ace;
+                var moy = recCount > 0 ? srv.recSumAdv / recCount : 0;
+                return 'Tot : ' + srv.tot + ' · Ace : ' + srv.ace + ' (' + self._pct(srv.ace, srv.tot) + ')' +
+                       ' · FS : ' + srv.fser + ' (' + self._pct(srv.fser, srv.tot) + ')' +
+                       ' · Moy Adv : ' + moy.toFixed(1);
+            }},
+            { axisKey: 'reception', emoji: '🏐', label: 'Meilleur Réceptionneur', statsFn: function(s) {
+                var r = s.reception;
+                var moy = r.tot > 0 ? (r.r4 * 4 + r.r3 * 3 + r.r2 * 2 + r.r1 * 1) / r.tot : 0;
+                return 'R4 : ' + r.r4 + ' (' + self._pct(r.r4, r.tot) + ')' +
+                       ' · R1(FR) : ' + (r.r1 + r.frec) + ' (' + self._pct(r.r1 + r.frec, r.tot) + ')' +
+                       ' · Moy : ' + moy.toFixed(1);
+            }},
+            { axisKey: 'attaque',   emoji: '⚔️', label: 'Meilleur Attaquant',     statsFn: function(s) {
+                var a = s.attack;
+                return 'A+ : ' + a.attplus + ' (' + self._pct(a.attplus, a.tot) + ')' +
+                       ' · A- : ' + a.attminus + ' (' + self._pct(a.attminus, a.tot) + ')' +
+                       ' · FA(BP) : ' + a.fatt + '(' + a.bp + ') (' + self._pct(a.fatt + a.bp, a.tot) + ')';
+            }},
+            { axisKey: 'defense',   emoji: '🛡️', label: 'Meilleur Défenseur',     eligibleRoles: ['Passeur', 'Centre'], statsFn: function(s) {
+                var d = s.defense;
+                var rl = s.relance;
+                return 'D+ : ' + d.defplus + ' · D- : ' + d.defminus + ' · FD : ' + d.fdef +
+                       ' · R+ : ' + rl.relplus + ' · R- : ' + rl.relminus + ' · FR : ' + rl.frel;
+            }},
+            { axisKey: 'bloc',      emoji: '🧱', label: 'Meilleur Bloqueur',      statsFn: function(s) {
+                var b = s.block;
+                return 'B+ : ' + b.blcplus + ' (' + self._pct(b.blcplus, b.tot) + ')' +
+                       ' · B- : ' + b.blcminus + ' (' + self._pct(b.blcminus, b.tot) + ')' +
+                       ' · FB : ' + b.fblc + ' (' + self._pct(b.fblc, b.tot) + ')';
+            }}
+        ];
 
-        // --- Meilleur Réceptionneur ---
-        var bestRec = self._findBest(players, function(name) {
-            var r = homeTotals[name].reception;
-            if (r.tot < 3) return null;
-            var moy = (r.r4 * 4 + r.r3 * 3 + r.r2 * 2 + r.r1 * 1) / r.tot;
-            return { score: moy, stats: r, moy: moy };
-        });
-        if (bestRec) {
-            var r = bestRec.data.stats;
-            var recRole = playerRoles[bestRec.name].primaryRole;
-            var recColor = self.ROLE_COLORS[recRole] || '#5f6368';
+        distinctions.forEach(function(dist) {
+            var best = findBestOnAxis(dist.axisKey, dist.eligibleRoles);
+            if (!best) return;
+            var d = playerData[best.name];
+            var color = self.ROLE_COLORS[d.role] || '#5f6368';
             html += '<div class="distinction-row">';
             html += '<div class="distinction-header">';
-            html += '<span class="distinction-emoji">🏐</span>';
-            html += '<span class="distinction-label">Meilleur Réceptionneur</span>';
-            html += '<span class="bilan-role-dot" style="background:' + recColor + '"></span>';
-            html += '<span class="distinction-name">' + Utils.escapeHtml(bestRec.name) + '</span>';
+            html += '<span class="distinction-emoji">' + dist.emoji + '</span>';
+            html += '<span class="distinction-label">' + dist.label + '</span>';
+            html += '<span class="bilan-role-dot" style="background:' + color + '"></span>';
+            html += '<span class="distinction-name">' + Utils.escapeHtml(best.name) + '</span>';
             html += '</div>';
             html += '<div class="distinction-stats">';
-            html += 'R4 : ' + r.r4 + ' (' + self._pct(r.r4, r.tot) + ')';
-            html += ' · R1(FR) : ' + (r.r1 + r.frec) + ' (' + self._pct(r.r1 + r.frec, r.tot) + ')';
-            html += ' · Moy : ' + bestRec.data.moy.toFixed(1);
+            html += '<span class="distinction-stat-highlight">IP ' + d.ip + '</span>';
+            html += '<span class="distinction-stat-detail">' + dist.statsFn(d.stats) + '</span>';
             html += '</div>';
             html += '</div>';
-        }
-
-        // --- Meilleur Attaquant ---
-        var bestAtt = self._findBest(players, function(name) {
-            var a = homeTotals[name].attack;
-            if (a.tot < 3) return null;
-            var killPct = a.attplus / a.tot * 100;
-            return { score: killPct, stats: a };
         });
-        if (bestAtt) {
-            var a = bestAtt.data.stats;
-            var attRole = playerRoles[bestAtt.name].primaryRole;
-            var attColor = self.ROLE_COLORS[attRole] || '#5f6368';
-            html += '<div class="distinction-row">';
-            html += '<div class="distinction-header">';
-            html += '<span class="distinction-emoji">⚔️</span>';
-            html += '<span class="distinction-label">Meilleur Attaquant</span>';
-            html += '<span class="bilan-role-dot" style="background:' + attColor + '"></span>';
-            html += '<span class="distinction-name">' + Utils.escapeHtml(bestAtt.name) + '</span>';
-            html += '</div>';
-            html += '<div class="distinction-stats">';
-            html += 'A+ : ' + a.attplus + ' (' + self._pct(a.attplus, a.tot) + ')';
-            html += ' · A- : ' + a.attminus + ' (' + self._pct(a.attminus, a.tot) + ')';
-            html += ' · FA(BP) : ' + a.fatt + '(' + a.bp + ') (' + self._pct(a.fatt + a.bp, a.tot) + ')';
-            html += '</div>';
-            html += '</div>';
-        }
-
-        // --- Meilleur Défenseur ---
-        var bestDef = self._findBest(players, function(name) {
-            var d = homeTotals[name].defense;
-            var r = homeTotals[name].relance;
-            var totalActions = d.tot + r.tot;
-            if (totalActions < 2) return null;
-            var positives = d.defplus + r.relplus;
-            return { score: positives, def: d, rel: r, totalActions: totalActions };
-        });
-        if (bestDef) {
-            var d = bestDef.data.def;
-            var rl = bestDef.data.rel;
-            var defRole = playerRoles[bestDef.name].primaryRole;
-            var defColor = self.ROLE_COLORS[defRole] || '#5f6368';
-            html += '<div class="distinction-row">';
-            html += '<div class="distinction-header">';
-            html += '<span class="distinction-emoji">🛡️</span>';
-            html += '<span class="distinction-label">Meilleur Défenseur</span>';
-            html += '<span class="bilan-role-dot" style="background:' + defColor + '"></span>';
-            html += '<span class="distinction-name">' + Utils.escapeHtml(bestDef.name) + '</span>';
-            html += '</div>';
-            html += '<div class="distinction-stats">';
-            html += 'D+ : ' + d.defplus + ' · D : ' + (d.defneutral || 0) + ' · D- : ' + d.defminus + ' · FD : ' + d.fdef;
-            html += ' · R+ : ' + rl.relplus + ' · R- : ' + rl.relminus + ' · FR : ' + rl.frel;
-            html += '</div>';
-            html += '</div>';
-        }
-
-        // --- Meilleur Bloqueur ---
-        var bestBlc = self._findBest(players, function(name) {
-            var b = homeTotals[name].block;
-            if (b.tot < 1) return null;
-            var impact = b.blcplus + b.blcminus * 0.5;
-            return { score: impact, stats: b };
-        });
-        if (bestBlc) {
-            var b = bestBlc.data.stats;
-            var blcRole = playerRoles[bestBlc.name].primaryRole;
-            var blcColor = self.ROLE_COLORS[blcRole] || '#5f6368';
-            html += '<div class="distinction-row">';
-            html += '<div class="distinction-header">';
-            html += '<span class="distinction-emoji">🧱</span>';
-            html += '<span class="distinction-label">Meilleur Bloqueur</span>';
-            html += '<span class="bilan-role-dot" style="background:' + blcColor + '"></span>';
-            html += '<span class="distinction-name">' + Utils.escapeHtml(bestBlc.name) + '</span>';
-            html += '</div>';
-            html += '<div class="distinction-stats">';
-            html += 'B+ : ' + b.blcplus + ' (' + self._pct(b.blcplus, b.tot) + ')';
-            html += ' · B- : ' + b.blcminus + ' (' + self._pct(b.blcminus, b.tot) + ')';
-            html += ' · FB : ' + b.fblc + ' (' + self._pct(b.fblc, b.tot) + ')';
-            html += '</div>';
-            html += '</div>';
-        }
 
         html += '</div>'; // bilan-distinctions
         html += '</div>'; // bilan-section
@@ -1655,6 +1618,19 @@ const BilanView = {
                 if (!roleCounts[playerName]) roleCounts[playerName] = {};
                 roleCounts[playerName][role] = (roleCounts[playerName][role] || 0) + 1;
             });
+            // V20.26 : inclure aussi les joueurs entrés en substitution (lineup final)
+            var finalLineup = set[lineupKey];
+            if (finalLineup && finalLineup !== lineup) {
+                Object.keys(finalLineup).forEach(function(pos) {
+                    var playerName = finalLineup[pos];
+                    if (!playerName) return;
+                    if (roleCounts[playerName]) return; // Déjà compté via initialLineup
+                    var role = positionRoles[pos];
+                    if (!role) return;
+                    roleCounts[playerName] = {};
+                    roleCounts[playerName][role] = 1;
+                });
+            }
         });
 
         var result = {};
@@ -1678,26 +1654,39 @@ const BilanView = {
         var result = {};
 
         completedSets.forEach(function(set, setIndex) {
-            var lineup = set[initialKey] || set[lineupKey];
-            if (!lineup) return;
-            Object.keys(lineup).forEach(function(pos) {
-                var playerName = lineup[pos];
-                if (!playerName) return;
-                var role = positionRoles[pos];
-                if (!role) return;
-                var family = self.ROLE_TO_FAMILY[role];
-                if (!family) return;
+            // V20.26 : helper pour ajouter un joueur depuis un lineup
+            function addFromLineup(lu) {
+                if (!lu) return;
+                Object.keys(lu).forEach(function(pos) {
+                    var playerName = lu[pos];
+                    if (!playerName) return;
+                    var role = positionRoles[pos];
+                    if (!role) return;
+                    var family = self.ROLE_TO_FAMILY[role];
+                    if (!family) return;
 
-                if (!result[playerName]) result[playerName] = { families: {} };
-                if (!result[playerName].families[family]) {
-                    result[playerName].families[family] = { setIndices: [], roles: {} };
-                }
-                var fam = result[playerName].families[family];
-                if (fam.setIndices.indexOf(setIndex) === -1) {
-                    fam.setIndices.push(setIndex);
-                }
-                fam.roles[role] = (fam.roles[role] || 0) + 1;
-            });
+                    if (!result[playerName]) result[playerName] = { families: {} };
+                    if (!result[playerName].families[family]) {
+                        result[playerName].families[family] = { setIndices: [], roles: {} };
+                    }
+                    var fam = result[playerName].families[family];
+                    if (fam.setIndices.indexOf(setIndex) === -1) {
+                        fam.setIndices.push(setIndex);
+                    }
+                    fam.roles[role] = (fam.roles[role] || 0) + 1;
+                });
+            }
+            var lineup = set[initialKey] || set[lineupKey];
+            addFromLineup(lineup);
+            // V20.26 : inclure aussi les joueurs entrés en substitution
+            var finalLineup = set[lineupKey];
+            if (finalLineup && finalLineup !== lineup) {
+                Object.keys(finalLineup).forEach(function(pos) {
+                    var playerName = finalLineup[pos];
+                    if (!playerName || result[playerName]) return; // Déjà compté
+                    addFromLineup(finalLineup);
+                });
+            }
         });
 
         return result;
@@ -1765,10 +1754,8 @@ const BilanView = {
         matches.forEach(function(match, matchIndex) {
             var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
             completedSets.forEach(function(set, setIndex) {
-                var lineup = set.initialHomeLineup || set.homeLineup;
-                if (!lineup) return;
-                Object.keys(lineup).forEach(function(pos) {
-                    var playerName = lineup[pos];
+                // V20.26 : helper pour ajouter un joueur depuis un lineup
+                function addPlayer(pos, playerName) {
                     if (!playerName) return;
                     var role = self.POSITION_ROLES_HOME[pos];
                     if (!role) return;
@@ -1792,7 +1779,19 @@ const BilanView = {
                     if (ms.setIndices.indexOf(setIndex) === -1) {
                         ms.setIndices.push(setIndex);
                     }
-                });
+                }
+                var lineup = set.initialHomeLineup || set.homeLineup;
+                if (!lineup) return;
+                Object.keys(lineup).forEach(function(pos) { addPlayer(pos, lineup[pos]); });
+                // V20.26 : inclure aussi les joueurs entrés en substitution
+                var finalLineup = set.homeLineup;
+                if (finalLineup && finalLineup !== lineup) {
+                    Object.keys(finalLineup).forEach(function(pos) {
+                        var playerName = finalLineup[pos];
+                        if (!playerName || result[playerName]) return; // Déjà compté
+                        addPlayer(pos, playerName);
+                    });
+                }
             });
         });
 
@@ -1885,28 +1884,32 @@ const BilanView = {
         var s = playerStats;
         var floor = this.AXIS_FLOOR;
 
-        // SERVICE : composite ace rate + moy adverse + taux sans faute
-        // Echelle : 0 faute + quelques ace = 70+, match normal = 40-60
+        // SERVICE (V20.26) : moyenne adverse recentrée sur 3.5 + bonus volume
+        // Echelle : moy 2.0 + aces = 90+, moy 2.7 + peu de fautes = 65-70, moy 3.5 = 40-50
         var srv = s.service;
-        if (srv.tot > 0) {
+        if (srv.tot >= 3) {
             var aceRate = (srv.ace + srv.splus) / srv.tot;
             var faultRate = srv.fser / srv.tot;
             var recCount = srv.recCountAdv + srv.ace;
-            var moyScore = recCount > 0 ? (4 - srv.recSumAdv / recCount) / 4 : 0.5;
-            // Base 40 + ace bonus + moy bonus - fault penalty
-            var raw = 40 + aceRate * 120 + moyScore * 30 - faultRate * 40;
+            // Moyenne adverse recentrée : 3.5 = neutre, < 3.5 = bonus, > 3.5 = pénalité
+            var moyBonus = recCount > 0 ? (3.5 - srv.recSumAdv / recCount) * 20 : 0;
+            // Bonus volume : servir beaucoup = fiabilite prouvee (plafonné à 60)
+            var volBonus = Math.min(srv.tot, 60) * 0.3;
+            var raw = 30 + moyBonus + aceRate * 80 - faultRate * 80 + volBonus;
             scores.service = this.clamp(floor, 100, Math.round(raw));
         } else {
             scores.service = 0;
         }
 
-        // RECEPTION (V20.25) : moyenne ponderee (R4=100, R3=75, R2=40, R1=15, FR=0)
-        // R2 et R1 plus penalisants qu'avant (50→40, 25→15)
+        // RECEPTION (V20.26) : moyenne ponderee + bonus taux positif (R4+R3)
+        // Bonus : un joueur avec >50% de R4+R3 est recompense pour sa regularite
         var rec = s.reception;
         if (rec.tot > 0) {
-            scores.reception = this.clamp(floor, 100, Math.round(
-                (rec.r4 * 100 + rec.r3 * 75 + rec.r2 * 40 + rec.r1 * 15) / rec.tot
-            ));
+            var recRaw = (rec.r4 * 100 + rec.r3 * 75 + rec.r2 * 40 + rec.r1 * 15) / rec.tot;
+            // Bonus taux positif : (R4+R3)/tot au-dessus de 50% → jusqu'à +10
+            var positiveRate = (rec.r4 + rec.r3) / rec.tot;
+            var recBonus = Math.max(0, positiveRate - 0.5) * 20;
+            scores.reception = this.clamp(floor, 100, Math.round(recRaw + recBonus));
         } else {
             scores.reception = 0;
         }
@@ -1925,13 +1928,13 @@ const BilanView = {
             scores.passe = 0;
         }
 
-        // ATTAQUE (V20.25) : base 35 + kill% bonus - error penalty (30→40)
-        // Penalite d'erreur augmentee pour mieux differencier les attaquants propres
+        // ATTAQUE (V20.26) : base 35 + kill% bonus - error penalty (30→40)
+        // Seuil minimum 3 attaques pour eviter les scores gonfles (1 kill = 100)
         var atk = s.attack;
-        if (atk.tot > 0) {
+        if (atk.tot >= 3) {
             var killPct = atk.attplus / atk.tot;
             var errorPct = (atk.fatt + atk.bp) / atk.tot;
-            var raw = 35 + killPct * 80 - errorPct * 40;
+            var raw = 40 + killPct * 80 - errorPct * 40;
             scores.attaque = this.clamp(floor, 100, Math.round(raw));
         } else {
             scores.attaque = 0;
@@ -1974,34 +1977,80 @@ const BilanView = {
             scores.defense = 0;
         }
 
+        // Stocker les volumes bruts par axe (V20.25)
+        // Utilises par computeIP pour le seuil minimum d'echantillon
+        scores._tots = {
+            service: srv.tot,
+            reception: rec.tot,
+            passe: (pas.tot || 0),
+            attaque: atk.tot,
+            bloc: blk.tot,
+            relance: (rel && rel.tot) || 0,
+            defense: def.tot
+        };
+
         return scores;
     },
 
+    // Seuils minimums d'actions par axe pour compter dans l'IP (V20.25)
+    // Si tot < seuil, le score est VISIBLE sur le spider chart mais EXCLU de l'IP
+    // Evite qu'un joueur avec 2 services dont 1 ace ait un IP gonfle
+    IP_MIN_ACTIONS: {
+        service: 5,     // 2 services = pas significatif
+        reception: 2,   // 1 reception ratee = pas representatif, 2+ = ok
+        passe: 3,       // 1-2 passes = anecdotique
+        attaque: 3,     // 1-2 attaques = pas significatif
+        bloc: 1,        // le bloc est rare, 1 suffit
+        relance: 1,     // la relance est rare, 1 suffit
+        defense: 2      // 1 defense = anecdotique
+    },
+
     // --- Indice de Performance (somme ponderee par poste) ---
-    // V20.25 : redistribution proportionnelle des poids quand un axe est inactif (score=0)
-    // score=0 est un proxy fiable pour tot=0 car le floor=10 empeche un axe actif d'etre a 0
+    // V20.26 : redistribution partielle 50% des poids des axes inactifs
+    // Un axe inactif ne redistribue que 50% de son poids aux axes actifs
+    // Les 50% restants sont "perdus" = penalite pour ne pas avoir joue sur cet axe
     computeIP(axisScores, role) {
         var weights = this.IP_WEIGHTS[role] || this.IP_WEIGHTS['R4'];
+        var minActions = this.IP_MIN_ACTIONS;
+        var tots = axisScores._tots || {}; // volumes bruts (absent pour les scores moyennes)
 
-        // Calculer le poids total des axes actifs (score > 0 ET poids > 0)
+        // Calculer le poids total de tous les axes du role (= 1.0 normalement)
+        var totalWeight = 0;
+        Object.keys(weights).forEach(function(key) {
+            if (weights[key] > 0) totalWeight += weights[key];
+        });
+
+        // Calculer le poids total des axes actifs
+        // Actif = score > 0 ET poids > 0 ET volume >= seuil minimum
         var activeWeight = 0;
         Object.keys(weights).forEach(function(key) {
-            if (weights[key] > 0 && (axisScores[key] || 0) > 0) {
-                activeWeight += weights[key];
-            }
+            if (weights[key] <= 0) return;
+            var score = axisScores[key] || 0;
+            if (score <= 0) return;
+            // Verifier le seuil minimum si les volumes sont disponibles
+            var tot = tots[key];
+            if (tot !== undefined && minActions[key] && tot < minActions[key]) return;
+            activeWeight += weights[key];
         });
 
         // Si aucun axe actif, IP = 0
         if (activeWeight === 0) return 0;
 
-        // IP = somme ponderee normalisee sur les axes actifs
+        // Redistribution partielle : seuls 50% du poids perdu sont redistribues
+        var lostWeight = totalWeight - activeWeight;
+        var effectiveDenominator = activeWeight + lostWeight * 0.5;
+
+        // IP = somme ponderee / denominateur effectif
         var ip = 0;
         Object.keys(weights).forEach(function(key) {
+            if (weights[key] <= 0) return;
             var score = axisScores[key] || 0;
-            if (weights[key] > 0 && score > 0) {
-                ip += score * (weights[key] / activeWeight);
-            }
+            if (score <= 0) return;
+            var tot = tots[key];
+            if (tot !== undefined && minActions[key] && tot < minActions[key]) return;
+            ip += score * weights[key];
         });
+        ip = ip / effectiveDenominator;
 
         return Math.round(ip);
     },
@@ -2082,7 +2131,8 @@ const BilanView = {
         // - 5 sommets + zeros consecutifs : jamais skip (tracer au centre)
         // - 5 sommets + zeros separes : skip
         // - 4 ou moins : skip
-        var skipZeros = (vertexCount <= 4) || (vertexCount === 5 && !zerosAreConsecutive);
+        // V20.26 : Passeur — toujours skip les zeros pour relier Def→Att directement
+        var skipZeros = (role === 'Passeur') || (vertexCount <= 4) || (vertexCount === 5 && !zerosAreConsecutive);
 
         axes.forEach(function(axis, i) {
             var val = vals[i];
@@ -2243,14 +2293,26 @@ const BilanView = {
 
         if (bestPerMatch.length === 0) return null;
 
-        // Moyenne par axe uniquement sur les passeurs ayant des stats sur cet axe
+        // Moyenne par axe uniquement sur les passeurs ayant des stats
+        // significatives sur cet axe (V20.26 : respect du seuil IP_MIN_ACTIONS)
         var avgScores = {};
+        var avgTots = {};
+        var minActions = self.IP_MIN_ACTIONS;
         ['service', 'reception', 'passe', 'attaque', 'bloc', 'relance', 'defense'].forEach(function(k) {
-            var withStats = bestPerMatch.filter(function(sc) { return (sc[k] || 0) > 0; });
-            if (withStats.length === 0) { avgScores[k] = 0; return; }
-            var sum = withStats.reduce(function(s, sc) { return s + sc[k]; }, 0);
-            avgScores[k] = Math.round(sum / withStats.length);
+            // Ne moyenner que les scores dont le volume depasse le seuil minimum
+            var withStats = bestPerMatch.filter(function(sc) {
+                if ((sc[k] || 0) <= 0) return false;
+                var tots = sc._tots || {};
+                if (tots[k] !== undefined && minActions[k] && tots[k] < minActions[k]) return false;
+                return true;
+            });
+            if (withStats.length === 0) { avgScores[k] = 0; avgTots[k] = 0; return; }
+            var sumScores = withStats.reduce(function(s, sc) { return s + sc[k]; }, 0);
+            var sumTots = withStats.reduce(function(s, sc) { return s + ((sc._tots || {})[k] || 0); }, 0);
+            avgScores[k] = Math.round(sumScores / withStats.length);
+            avgTots[k] = Math.round(sumTots / withStats.length);
         });
+        avgScores._tots = avgTots;
 
         return {
             name: 'Passeurs Adv.',
@@ -3501,9 +3563,16 @@ const SetsPlayedView = {
                     });
                 } else {
                     // ---- Fallback : pas de substitutions ----
-                    // Tous les joueurs qui apparaissent dans les stats du set = 1 set complet
+                    // V20.26 : construire la liste des joueurs home valides depuis les lineups
+                    var validHomePlayers = {};
+                    [set.initialHomeLineup, set.homeLineup].forEach(function(lu) {
+                        if (!lu) return;
+                        Object.keys(lu).forEach(function(pos) { if (lu[pos]) validHomePlayers[lu[pos]] = true; });
+                    });
+                    // Tous les joueurs qui apparaissent dans les stats du set ET dans un lineup home
                     var statsHome = (set.stats && set.stats.home) ? set.stats.home : {};
                     var playersInSet = Object.keys(statsHome).filter(function(name) {
+                        if (!validHomePlayers[name]) return false; // exclure joueurs adverses
                         var s = statsHome[name];
                         // Verifier qu'il a au moins 1 action
                         return s && (
