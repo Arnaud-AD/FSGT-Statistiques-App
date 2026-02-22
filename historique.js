@@ -2014,6 +2014,18 @@ const BilanView = {
         var minActions = this.IP_MIN_ACTIONS;
         var tots = axisScores._tots || {}; // volumes bruts (absent pour les scores moyennes)
 
+        // V20.282 : Ailiers (R4/Pointu) qui servent — booster service de 0.05 à 0.20 (comme Centre)
+        // Redistribution proportionnelle sur 115% pour rester à 100%
+        if ((role === 'R4' || role === 'Pointu') && axisScores.service && axisScores.service > 0) {
+            var boosted = {};
+            Object.keys(weights).forEach(function(key) { boosted[key] = weights[key]; });
+            boosted.service = 0.20;
+            var newTotal = 0;
+            Object.keys(boosted).forEach(function(key) { newTotal += boosted[key]; });
+            Object.keys(boosted).forEach(function(key) { boosted[key] = boosted[key] / newTotal; });
+            weights = boosted;
+        }
+
         // Calculer le poids total de tous les axes du role (= 1.0 normalement)
         var totalWeight = 0;
         Object.keys(weights).forEach(function(key) {
@@ -2176,7 +2188,7 @@ const BilanView = {
                     }
                 }
             }
-            var ovSkipZeros = (ovVertexCount <= 4) || (ovVertexCount === 5 && !ovZerosConsecutive);
+            var ovSkipZeros = (ovRole === 'Passeur') || (ovVertexCount <= 4) || (ovVertexCount === 5 && !ovZerosConsecutive);
 
             axes.forEach(function(axis, i) {
                 var val = ovVals[i];
