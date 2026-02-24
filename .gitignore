@@ -14,6 +14,8 @@ CLAUDE.md
 *-service-account*.json
 firebase-admin-sdk*.json
 firebase-debug.log
+firestore_export*.json
+firestore_backup*.json
 
 # Config admin (contient le UID propriétaire — JAMAIS commiter)
 admin-config.js

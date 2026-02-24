@@ -267,6 +267,475 @@ const SideOutAnalysis = {
     }
 };
 
+// ==================== STATS REPAIR (V20.287) ====================
+// Recalcule les stats d'un set depuis les rallies quand des joueurs sont manquants
+const StatsRepair = {
+
+    // Detecte si un set a des stats manquantes (joueurs avec actions mais sans entree stats)
+    needsRepair(set) {
+        if (!set || !set.points || set.points.length === 0) return false;
+        if (!set.stats) return true;
+        var stats = set.stats;
+        for (var pi = 0; pi < set.points.length; pi++) {
+            var rally = set.points[pi].rally;
+            if (!rally) continue;
+            for (var ri = 0; ri < rally.length; ri++) {
+                var a = rally[ri];
+                if (a.team && a.player) {
+                    if (!stats[a.team] || !stats[a.team][a.player]) return true;
+                }
+            }
+        }
+        return false;
+    },
+
+    // Recalcule entierement les stats d'un set depuis les rallies
+    repairSetStats(set) {
+        if (!set || !set.points || set.points.length === 0) return;
+
+        // Sauvegarder les stats passe originales (evaluees avec les grilles)
+        // pour les restaurer apres recalcul (la reparation ne peut pas evaluer P4/P3/P2/P1)
+        var originalPassStats = {};
+        if (set.stats) {
+            ['home', 'away'].forEach(function(team) {
+                if (!set.stats[team]) return;
+                Object.keys(set.stats[team]).forEach(function(name) {
+                    var data = set.stats[team][name];
+                    if (data && data.pass && data.pass.tot > 0) {
+                        originalPassStats[team + ':' + name] = JSON.parse(JSON.stringify(data.pass));
+                    }
+                });
+            });
+        }
+
+        // Construire un setStats vierge avec tous les joueurs
+        var repaired = { home: {}, away: {} };
+        var self = this;
+
+        // 1. Joueurs des lineups (initial + actuel)
+        ['home', 'away'].forEach(function(team) {
+            var lineupKey = team === 'home' ? 'homeLineup' : 'awayLineup';
+            var initialKey = team === 'home' ? 'initialHomeLineup' : 'initialAwayLineup';
+            [initialKey, lineupKey].forEach(function(k) {
+                var lu = set[k];
+                if (!lu) return;
+                Object.values(lu).forEach(function(name) {
+                    if (name && !repaired[team][name]) {
+                        repaired[team][name] = StatsAggregator.initPlayerStats();
+                    }
+                });
+            });
+        });
+
+        // 2. Joueurs des substitutions
+        if (set.substitutions) {
+            set.substitutions.forEach(function(sub) {
+                if (sub.playerOut && !repaired[sub.team][sub.playerOut]) {
+                    repaired[sub.team][sub.playerOut] = StatsAggregator.initPlayerStats();
+                }
+                if (sub.playerIn && !repaired[sub.team][sub.playerIn]) {
+                    repaired[sub.team][sub.playerIn] = StatsAggregator.initPlayerStats();
+                }
+            });
+        }
+
+        // 3. Joueurs des rallies (filet de securite)
+        set.points.forEach(function(point) {
+            if (!point.rally) return;
+            point.rally.forEach(function(a) {
+                if (a.team && a.player && !repaired[a.team][a.player]) {
+                    repaired[a.team][a.player] = StatsAggregator.initPlayerStats();
+                }
+            });
+        });
+
+        // 4. Traiter chaque rally
+        set.points.forEach(function(point) {
+            if (!point.rally) return;
+            self._processRally(point.rally, repaired);
+        });
+
+        // 5. Restaurer les stats passe originales (avec P4/P3/P2/P1 evaluees par grille)
+        ['home', 'away'].forEach(function(team) {
+            Object.keys(repaired[team]).forEach(function(name) {
+                var key = team + ':' + name;
+                if (originalPassStats[key]) {
+                    repaired[team][name].pass = originalPassStats[key];
+                }
+            });
+        });
+
+        // 6. Ecraser les stats du set
+        set.stats = repaired;
+    },
+
+    // --- Helpers ---
+    _recQualityToNote(quality) {
+        if (!quality || !quality.label) return null;
+        switch (quality.label) {
+            case 'Excellente': return 4;
+            case 'Positive':   return 3;
+            case 'Jouable':    return 2;
+            case 'Négative':   return 1;
+            case 'Faute':      return 0;
+            default: return (typeof quality.score === 'number') ? quality.score : null;
+        }
+    },
+
+    _findNext(rally, afterIndex, type) {
+        for (var i = afterIndex + 1; i < rally.length; i++) {
+            if (rally[i].type === type) return { action: rally[i], index: i };
+        }
+        return null;
+    },
+
+    _analyzeAfterDefended(rally, afterIndex, oppositeTeam) {
+        var attackingTeam = oppositeTeam === 'home' ? 'away' : 'home';
+        for (var i = afterIndex + 1; i < rally.length; i++) {
+            var a = rally[i];
+            if (a.team === oppositeTeam) {
+                if (a.type === 'defense' && a.result === 'fault') continue;
+                if (a.type === 'block' && a.passThrough) continue;
+                if (a.type === 'block') {
+                    for (var j = i + 1; j < rally.length; j++) {
+                        if (rally[j].team === attackingTeam) {
+                            if (rally[j].type === 'defense' && rally[j].result === 'fault') return 'blocked';
+                            return 'continued';
+                        }
+                        if (rally[j].team === oppositeTeam && rally[j].type === 'defense' && rally[j].result === 'fault') return 'ended';
+                    }
+                    return 'blocked';
+                }
+                return 'continued';
+            }
+        }
+        return 'ended';
+    },
+
+    _isDirectReturnExploited(rally, index, team) {
+        var oppositeTeam = team === 'home' ? 'away' : 'home';
+        for (var j = index + 1; j < rally.length; j++) {
+            var a = rally[j];
+            if (a.team === team && (a.type === 'pass' || a.type === 'attack')) return false;
+            if (a.team === oppositeTeam && a.type === 'pass') return false;
+            if (a.team === oppositeTeam && a.type === 'attack' && (a.result === 'point' || a.result === 'bloc_out')) return true;
+            if (a.team === team && a.type === 'defense' && a.result === 'fault') return true;
+        }
+        return false;
+    },
+
+    // --- Traitement d'un rally complet ---
+    _processRally(rally, setStats) {
+        if (!rally || rally.length === 0) return;
+        var self = this;
+
+        for (var i = 0; i < rally.length; i++) {
+            var action = rally[i];
+            var team = action.team;
+            var player = action.player;
+            if (!team || !player) continue;
+
+            var stats = setStats[team] && setStats[team][player];
+            if (!stats) continue;
+
+            switch (action.type) {
+                case 'service':
+                    stats.service.tot++;
+                    if (action.result === 'ace') {
+                        stats.service.ace++;
+                        var recAce = self._findNext(rally, i, 'reception');
+                        if (recAce) {
+                            var noteAce = self._recQualityToNote(recAce.action.quality);
+                            if (noteAce !== null) {
+                                stats.service.recSumAdv += noteAce;
+                                stats.service.recCountAdv++;
+                            }
+                        }
+                    } else if (action.result === 'fault' || action.result === 'fault_out' || action.result === 'fault_net') {
+                        stats.service.fser++;
+                    } else {
+                        var recAction = self._findNext(rally, i, 'reception');
+                        if (recAction) {
+                            var rec = recAction.action;
+                            var note = self._recQualityToNote(rec.quality);
+                            if (note !== null) {
+                                if (rec.isDirectReturnWinner) {
+                                    note = 0;
+                                } else if (rec.isDirectReturn && !rec.isDirectReturnWinner) {
+                                    if (self._isDirectReturnExploited(rally, recAction.index, rec.team)) note = 0;
+                                }
+                                stats.service.recSumAdv += note;
+                                stats.service.recCountAdv++;
+                                if (note === 0) stats.service.splus++;
+                            }
+                        }
+                    }
+                    break;
+
+                case 'reception':
+                    stats.reception.tot++;
+                    var recExploited = action.isDirectReturn && !action.isDirectReturnWinner
+                        && self._isDirectReturnExploited(rally, i, action.team);
+                    if (recExploited) {
+                        stats.reception.frec++;
+                    } else if (action.quality) {
+                        switch (action.quality.label) {
+                            case 'Excellente': stats.reception.r4++; break;
+                            case 'Positive':   stats.reception.r3++; break;
+                            case 'Jouable':    stats.reception.r2++; break;
+                            case 'Négative':   stats.reception.r1++; break;
+                            case 'Faute':      stats.reception.frec++; break;
+                            default:
+                                if (action.quality.score === 0) stats.reception.frec++;
+                                break;
+                        }
+                    }
+                    break;
+
+                case 'pass':
+                    if (action.passType === 'relance') {
+                        if (action.result === 'out') break;
+                        // Retrograder reception/defense precedente
+                        for (var j = i - 1; j >= 0; j--) {
+                            var prev = rally[j];
+                            if (prev.team !== action.team) continue;
+                            var prevPlayer = prev.player;
+                            if (!prevPlayer) continue;
+                            var prevStats = setStats[team] && setStats[team][prevPlayer];
+                            if (!prevStats) break;
+                            if (prev.type === 'reception' && prev.quality) {
+                                switch (prev.quality.label) {
+                                    case 'Excellente': prevStats.reception.r4--; break;
+                                    case 'Positive':   prevStats.reception.r3--; break;
+                                    case 'Jouable':    prevStats.reception.r2--; break;
+                                    case 'Négative':   break;
+                                    case 'Faute':      prevStats.reception.frec--; break;
+                                }
+                                if (prev.quality.label !== 'Négative') prevStats.reception.r1++;
+                                break;
+                            }
+                            if (prev.type === 'defense') {
+                                if (prev.defenseQuality === 'positive') {
+                                    prevStats.defense.defplus--;
+                                    prevStats.defense.defneutral++;
+                                }
+                                break;
+                            }
+                        }
+                        break;
+                    }
+
+                    // Passe normale — compter tot + FP (qualite sans grille impossible)
+                    if (action.isDirectReturn) {
+                        if (!action.isDirectReturnWinner) {
+                            if (self._isDirectReturnExploited(rally, i, action.team)) {
+                                stats.pass.tot++;
+                                stats.pass.fp++;
+                            }
+                        }
+                        break;
+                    }
+                    if (!action.endPos || action.endPos.courtSide === 'net') {
+                        stats.pass.tot++;
+                        stats.pass.fp++;
+                        break;
+                    }
+                    // Passe normale valide — tot seulement (qualite P4/P3/P2/P1 non evaluable sans grille)
+                    stats.pass.tot++;
+                    break;
+
+                case 'attack':
+                    var isRelance = action.attackType === 'relance';
+                    var oppTeam = team === 'home' ? 'away' : 'home';
+
+                    if (isRelance) {
+                        if (action.result === 'point' || action.result === 'bloc_out') {
+                            stats.relance.tot++;
+                            stats.relance.relplus++;
+                        } else if (action.attackType === 'faute' || action.result === 'fault_net' || action.result === 'out') {
+                            stats.relance.tot++;
+                            stats.relance.frel++;
+                        } else if (action.result === 'blocked') {
+                            stats.relance.tot++;
+                            stats.relance.relminus++;
+                        }
+                        break;
+                    }
+
+                    stats.attack.tot++;
+                    if (action.attackType === 'faute' || action.result === 'fault_net' || action.result === 'out') {
+                        stats.attack.fatt++;
+                    } else if (action.result === 'point') {
+                        stats.attack.attplus++;
+                    } else if (action.result === 'bloc_out') {
+                        stats.attack.attplus++;
+                    } else if (action.result === 'blocked') {
+                        stats.attack.bp++;
+                    } else if (action.result === 'defended') {
+                        var outcome = self._analyzeAfterDefended(rally, i, oppTeam);
+                        if (outcome === 'continued') stats.attack.attminus++;
+                        else if (outcome === 'blocked') stats.attack.bp++;
+                        else stats.attack.attplus++;
+                    }
+                    break;
+
+                case 'defense':
+                    var blockBeforeType = null;
+                    for (var bj = i - 1; bj >= 0; bj--) {
+                        if (rally[bj].type === 'block' && rally[bj].team === team) {
+                            blockBeforeType = rally[bj].result === 'bloc_out' ? 'bloc_out' : 'normal';
+                            break;
+                        }
+                        if (rally[bj].type === 'pass' && rally[bj].team === team) break;
+                        if (rally[bj].type === 'attack' && rally[bj].team === team) break;
+                    }
+                    if (blockBeforeType === 'bloc_out') break;
+
+                    var oppTeamDef = team === 'home' ? 'away' : 'home';
+                    var isDefAfterRelance = false;
+                    for (var dj = i - 1; dj >= 0; dj--) {
+                        if (rally[dj].type === 'attack' && rally[dj].team === oppTeamDef) {
+                            isDefAfterRelance = rally[dj].attackType === 'relance';
+                            break;
+                        }
+                        if (rally[dj].type === 'pass' && rally[dj].team === oppTeamDef
+                            && rally[dj].passType === 'relance' && rally[dj].isDirectReturn) {
+                            isDefAfterRelance = true;
+                            break;
+                        }
+                        if (rally[dj].type === 'block' || (rally[dj].type === 'defense' && rally[dj].team === team)) break;
+                    }
+
+                    if (isDefAfterRelance) {
+                        stats.relance.tot++;
+                        var relExploited = action.isDirectReturn && !action.isDirectReturnWinner
+                            && self._isDirectReturnExploited(rally, i, action.team);
+                        if (relExploited) {
+                            stats.relance.frel++;
+                        } else if (action.isDirectReturn) {
+                            stats.relance.relminus++;
+                        } else if (action.result === 'fault') {
+                            if (blockBeforeType === 'normal') stats.relance.relminus++;
+                            else stats.relance.frel++;
+                        } else {
+                            if (action.defenseQuality === 'positive') stats.relance.relplus++;
+                            else stats.relance.relminus++;
+                        }
+                    } else {
+                        stats.defense.tot++;
+                        if (action.untouched) {
+                            if (blockBeforeType === 'normal') stats.defense.defminus++;
+                            else stats.defense.fdef++;
+                        } else {
+                            var defExploited = action.isDirectReturn && !action.isDirectReturnWinner
+                                && self._isDirectReturnExploited(rally, i, action.team);
+                            if (defExploited) {
+                                stats.defense.defminus++;
+                            } else if (action.isDirectReturn) {
+                                stats.defense.defneutral++;
+                            } else if (action.result === 'fault') {
+                                stats.defense.defminus++;
+                            } else {
+                                if (action.defenseQuality === 'positive') stats.defense.defplus++;
+                                else if (action.defenseQuality === 'negative') stats.defense.defneutral++;
+                                else stats.defense.defplus++;
+                            }
+                        }
+                    }
+                    break;
+
+                case 'block':
+                    stats.block.tot++;
+                    if (action.result === 'bloc_out') {
+                        stats.block.fblc++;
+                    } else if (action.result === 'kill' || action.result === 'point') {
+                        stats.block.blcplus++;
+                    } else if (action.passThrough) {
+                        stats.block.blcminus++;
+                    } else {
+                        var isBlockKill = false;
+                        for (var bk = i + 1; bk < rally.length; bk++) {
+                            if (rally[bk].type === 'defense') {
+                                if (rally[bk].result === 'fault' && rally[bk].team !== team) isBlockKill = true;
+                                break;
+                            }
+                            if (rally[bk].type === 'pass' || rally[bk].type === 'attack') break;
+                        }
+                        stats.block[isBlockKill ? 'blcplus' : 'blcminus']++;
+                    }
+                    break;
+            }
+        }
+    }
+};
+
+// ==================== REPAIR FIREBASE (admin console) ====================
+// Fonction manuelle pour reparer les stats Firebase en une seule fois.
+// Usage : ouvrir la console sur historique.html (admin connecte) et taper :
+//   await repairFirebaseStats()      → repare et pousse vers Firebase
+//   await repairFirebaseStats(true)  → dry-run, ne modifie rien
+window.repairFirebaseStats = async function(dryRun) {
+    if (typeof FirebaseSync === 'undefined' || !FirebaseSync.isConfigured()) {
+        console.error('[Repair] Firebase non configure');
+        return;
+    }
+    if (!dryRun && !FirebaseSync.isAdmin()) {
+        console.error('[Repair] Vous devez etre connecte en admin pour ecrire dans Firebase');
+        return;
+    }
+
+    console.log('[Repair] Chargement des matchs depuis Firebase...');
+    var snapshot = await db.collection('matches').where('status', '==', 'completed').get();
+    var matches = [];
+    snapshot.forEach(function(doc) { matches.push(doc.data()); });
+    console.log('[Repair] ' + matches.length + ' matchs completed trouves');
+
+    var repairedCount = 0;
+    for (var mi = 0; mi < matches.length; mi++) {
+        var match = matches[mi];
+        if (!match.sets) continue;
+        var matchRepaired = false;
+        match.sets.forEach(function(set) {
+            if (StatsRepair.needsRepair(set)) {
+                StatsRepair.repairSetStats(set);
+                matchRepaired = true;
+            }
+        });
+        if (matchRepaired) {
+            repairedCount++;
+            if (dryRun) {
+                console.log('[Repair DRY-RUN] A reparer :', match.opponent, '(' + match.id + ')');
+            } else {
+                await FirebaseSync.saveMatchAny(match);
+                console.log('[Repair] Repare et pousse :', match.opponent, '(' + match.id + ')');
+            }
+        }
+    }
+    console.log('[Repair] Termine : ' + repairedCount + '/' + matches.length + ' match(s) ' + (dryRun ? 'a reparer' : 'repare(s)'));
+    return repairedCount;
+};
+
+// Fonction pour exporter un backup Firebase depuis la console.
+// Usage : await exportFirebaseBackup()
+window.exportFirebaseBackup = async function() {
+    if (typeof db === 'undefined') { console.error('Firebase non disponible'); return; }
+    var snapshot = await db.collection('matches').get();
+    var matches = [];
+    snapshot.forEach(function(doc) { matches.push(doc.data()); });
+    var json = JSON.stringify(matches, null, 2);
+    var blob = new Blob([json], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    var ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    a.download = 'firestore_backup_' + ts + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    console.log('[Backup] Exporte ' + matches.length + ' matchs (' + json.length + ' bytes)');
+};
+
 // ==================== STATS AGGREGATION ====================
 const StatsAggregator = {
 
@@ -295,6 +764,13 @@ const StatsAggregator = {
      * Gere les noms de champs legacy (fs/fser, fd/attplus, bl/blcplus, faute/frec).
      */
     aggregateStats(setsData, teamKey, validPlayers) {
+        // V20.287 : reparer les stats manquantes depuis les rallies avant aggregation
+        setsData.forEach(function(s) {
+            if (StatsRepair.needsRepair(s)) {
+                StatsRepair.repairSetStats(s);
+            }
+        });
+
         // V20.26 : auto-construire la liste des joueurs valides depuis les lineups
         // pour exclure les joueurs adverses enregistres par erreur avec le mauvais team
         var lineupPlayers = null;
@@ -2096,6 +2572,13 @@ const BilanView = {
         var self = this;
         var axes = chartAxes || self.SPIDER_AXES;
 
+        // V20.286 — Reduction visuelle axe Passe pour les non-passeurs (cosmétique uniquement)
+        var isPasseur = (role === 'Passeur');
+        var axisMaxR = {};
+        axes.forEach(function(axis) {
+            axisMaxR[axis.key] = (axis.key === 'passe' && !isPasseur) ? maxR * 0.5 : maxR;
+        });
+
         // Meme couleur home/away (couleurs originales ROLE_COLORS)
         var chartColor = roleColor;
 
@@ -2120,7 +2603,7 @@ const BilanView = {
         // SVG spider chart
         html += '<svg class="spider-chart" viewBox="0 0 150 160" xmlns="http://www.w3.org/2000/svg">';
 
-        // Polygones concentriques de fond (25%, 50%, 75%, 100%)
+        // Polygones concentriques de fond (25%, 50%, 75%, 100%) — grille reguliere (non deformee)
         [0.25, 0.5, 0.75, 1.0].forEach(function(scale) {
             var points = axes.map(function(axis) {
                 var pt = self.polarToCartesian(cx, cy, maxR * scale, axis.angle);
@@ -2129,7 +2612,7 @@ const BilanView = {
             html += '<polygon points="' + points + '" fill="none" stroke="#e8eaed" stroke-width="0.8"/>';
         });
 
-        // Lignes d'axes (centre → sommet)
+        // Lignes d'axes (centre → sommet) — longueur reguliere (grille non deformee)
         axes.forEach(function(axis) {
             var pt = self.polarToCartesian(cx, cy, maxR, axis.angle);
             html += '<line x1="' + cx + '" y1="' + cy + '" x2="' + pt.x.toFixed(1) + '" y2="' + pt.y.toFixed(1) + '" stroke="#e8eaed" stroke-width="0.8"/>';
@@ -2171,7 +2654,7 @@ const BilanView = {
         axes.forEach(function(axis, i) {
             var val = vals[i];
             if (val > 0) {
-                var r = maxR * val / 100;
+                var r = axisMaxR[axis.key] * val / 100;
                 var pt = self.polarToCartesian(cx, cy, r, axis.angle);
                 polyPoints.push(pt);
                 dotPoints.push(pt);
@@ -2212,10 +2695,17 @@ const BilanView = {
             }
             var ovSkipZeros = (ovRole === 'Passeur') || (ovVertexCount <= 4) || (ovVertexCount === 5 && !ovZerosConsecutive);
 
+            // V20.286 — axisMaxR de l'overlay basé sur le role overlay
+            var ovIsPasseur = (ovRole === 'Passeur');
+            var ovAxisMaxR = {};
+            axes.forEach(function(axis) {
+                ovAxisMaxR[axis.key] = (axis.key === 'passe' && !ovIsPasseur) ? maxR * 0.5 : maxR;
+            });
+
             axes.forEach(function(axis, i) {
                 var val = ovVals[i];
                 if (val > 0) {
-                    var r = maxR * val / 100;
+                    var r = ovAxisMaxR[axis.key] * val / 100;
                     ovPoints.push(self.polarToCartesian(cx, cy, r, axis.angle));
                 } else if (!ovSkipZeros) {
                     ovPoints.push({ x: cx, y: cy });
@@ -3754,7 +4244,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Charger les données Firebase en arrière-plan puis rafraîchir
     const hasFirebaseData = await HistoriqueData.loadFromFirebase();
     if (hasFirebaseData) {
-        // Forcer le re-rendu des vues avec les données mergées
         MatchStatsView._rendered = false;
         YearStatsView._rendered = false;
         SetsPlayedView._rendered = false;

@@ -1052,21 +1052,58 @@
 
         function initSetStats() {
             setStats = { home: {}, away: {} };
-            
-            // Initialiser les stats pour les joueurs de l'équipe home
+
+            // Initialiser les stats pour les joueurs du lineup actuel
             if (currentSet && currentSet.homeLineup) {
                 Object.values(currentSet.homeLineup).forEach(name => {
                     if (name) setStats.home[name] = initPlayerStats(name);
                 });
             }
-            
-            // Initialiser les stats pour les joueurs de l'équipe adverse
             if (currentSet && currentSet.awayLineup) {
                 Object.values(currentSet.awayLineup).forEach(name => {
                     if (name) setStats.away[name] = initPlayerStats(name);
                 });
             }
-            
+
+            // V20.287 : inclure aussi les joueurs du lineup initial (avant substitutions)
+            if (currentSet) {
+                ['initialHomeLineup', 'initialAwayLineup'].forEach(key => {
+                    const team = key.includes('Home') ? 'home' : 'away';
+                    const lineup = currentSet[key];
+                    if (!lineup) return;
+                    Object.values(lineup).forEach(name => {
+                        if (name && !setStats[team][name]) {
+                            setStats[team][name] = initPlayerStats(name);
+                        }
+                    });
+                });
+            }
+
+            // V20.287 : inclure les joueurs des substitutions (entrants et sortants)
+            if (currentSet && currentSet.substitutions) {
+                currentSet.substitutions.forEach(sub => {
+                    if (sub.playerOut && !setStats[sub.team][sub.playerOut]) {
+                        setStats[sub.team][sub.playerOut] = initPlayerStats(sub.playerOut);
+                    }
+                    if (sub.playerIn && !setStats[sub.team][sub.playerIn]) {
+                        setStats[sub.team][sub.playerIn] = initPlayerStats(sub.playerIn);
+                    }
+                });
+            }
+
+            // V20.287 : scanner les rallies pour tout joueur ayant des actions
+            // (filet de sécurité si substitution non enregistrée)
+            if (currentSet && currentSet.points) {
+                currentSet.points.forEach(point => {
+                    if (!point.rally) return;
+                    point.rally.forEach(action => {
+                        if (action.team && action.player && !setStats[action.team][action.player]) {
+                            setStats[action.team][action.player] = initPlayerStats(action.player);
+                        }
+                    });
+                });
+            }
+
             renderStatsTables();
         }
 
@@ -2966,17 +3003,18 @@
         }
 
         // Helper : obtenir les stats d'un joueur (avec init auto)
-        // V20.27 : garde — le joueur doit appartenir au lineup de l'équipe
-        // (ou avoir déjà des stats via substitution) pour éviter les stats fantômes
+        // V20.287 : accepter tout joueur qui a déjà des stats OU qui est dans un lineup (actuel/initial)
+        // OU qui a des actions dans les rallies (substitués, joueurs manqués par initSetStats)
         function getPlayerStats(team, player) {
             if (!team || !player) return null;
-            // Si le joueur a déjà des stats pour cette équipe, OK (substitué ou déjà compté)
+            // Si le joueur a déjà des stats pour cette équipe, OK
             if (setStats[team][player]) return setStats[team][player];
-            // Sinon, vérifier qu'il appartient au lineup actuel de l'équipe
+            // Vérifier lineup actuel OU initial
             const lineup = team === 'home' ? currentSet.homeLineup : currentSet.awayLineup;
-            if (!lineup) return null;
-            const onCourt = Object.values(lineup).filter(name => name !== null);
-            if (!onCourt.includes(player)) {
+            const initialLineup = team === 'home' ? currentSet.initialHomeLineup : currentSet.initialAwayLineup;
+            const inCurrentLineup = lineup && Object.values(lineup).includes(player);
+            const inInitialLineup = initialLineup && Object.values(initialLineup).includes(player);
+            if (!inCurrentLineup && !inInitialLineup) {
                 // Joueur inconnu pour cette équipe — ne pas créer d'entrée stats fantôme
                 return null;
             }
@@ -3016,8 +3054,10 @@
                 if (a.team === oppositeTeam) {
                     // Defense fault = l'adversaire rate sa défense → l'attaque a forcé le point
                     if (a.type === 'defense' && a.result === 'fault') continue;
-                    // Block (sauf pass-through) : analyser où va la balle après
-                    if (a.type === 'block' && !a.passThrough) {
+                    // Block pass-through : la balle traverse le bloc, continuer l'analyse
+                    if (a.type === 'block' && a.passThrough) continue;
+                    // Block (non pass-through) : analyser où va la balle après
+                    if (a.type === 'block') {
                         for (let j = i + 1; j < rally.length; j++) {
                             if (rally[j].team === attackingTeam) {
                                 // Balle côté attaquant : l'attaquant doit défendre
