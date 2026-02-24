@@ -4029,7 +4029,27 @@ const SetsPlayedView = {
      * Retourne un tableau trié par setsPlayed décroissant.
      */
     computePlayingTime(matches, playerRoles) {
-        var players = {}; // { name: { setsPlayed, matchesPresent: Set, matchesStarting: Set, details } }
+        var players = {}; // { name: { setsPlayed, setsPlayedByRole, matchIds, startingMatchIds } }
+        var posRoles = BilanView.POSITION_ROLES_HOME;
+
+        function ensurePlayer(name) {
+            if (!players[name]) players[name] = { setsPlayed: 0, setsPlayedByRole: {}, matchIds: {}, startingMatchIds: {} };
+            return players[name];
+        }
+
+        function addByRole(name, role, amount) {
+            var p = ensurePlayer(name);
+            p.setsPlayedByRole[role] = (p.setsPlayedByRole[role] || 0) + amount;
+        }
+
+        // Construit le map joueur → role depuis un lineup (position → joueur)
+        function buildRoleMap(lineup) {
+            var map = {};
+            Object.keys(lineup).forEach(function(pos) {
+                if (lineup[pos]) map[lineup[pos]] = posRoles[pos] || 'Autre';
+            });
+            return map;
+        }
 
         matches.forEach(function(match) {
             var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
@@ -4044,61 +4064,61 @@ const SetsPlayedView = {
                 // Determiner le lineup initial du set
                 var initialLineup = set.initialHomeLineup || set.homeLineup || {};
                 var initialPlayers = Object.values(initialLineup).filter(function(p) { return p !== null; });
+                var playerRoleMap = buildRoleMap(initialLineup);
 
                 if (homeSubs.length > 0) {
                     // ---- Calcul precis avec substitutions ----
-                    // Reconstruire la timeline : qui etait sur le terrain a chaque intervalle
-                    // Trier les subs par pointIndex
                     var sortedSubs = homeSubs.slice().sort(function(a, b) { return a.pointIndex - b.pointIndex; });
 
-                    // Construire les intervalles : [0, sub1.pointIndex), [sub1.pointIndex, sub2.pointIndex), ..., [lastSub.pointIndex, totalPoints)
                     var currentOnCourt = initialPlayers.slice();
+                    var currentRoleMap = Object.assign({}, playerRoleMap);
                     var intervals = [];
                     var prevIndex = 0;
 
                     sortedSubs.forEach(function(sub) {
                         if (sub.pointIndex > prevIndex) {
-                            intervals.push({ start: prevIndex, end: sub.pointIndex, players: currentOnCourt.slice() });
+                            intervals.push({ start: prevIndex, end: sub.pointIndex, players: currentOnCourt.slice(), roleMap: Object.assign({}, currentRoleMap) });
                         }
-                        // Appliquer la substitution
+                        // Appliquer la substitution — le remplacant herite du role
                         var idx = currentOnCourt.indexOf(sub.playerOut);
                         if (idx >= 0) {
                             currentOnCourt[idx] = sub.playerIn;
                         } else {
                             currentOnCourt.push(sub.playerIn);
                         }
+                        if (currentRoleMap[sub.playerOut]) {
+                            currentRoleMap[sub.playerIn] = currentRoleMap[sub.playerOut];
+                        }
                         prevIndex = sub.pointIndex;
                     });
 
                     // Dernier intervalle
                     if (prevIndex < totalPoints) {
-                        intervals.push({ start: prevIndex, end: totalPoints, players: currentOnCourt.slice() });
+                        intervals.push({ start: prevIndex, end: totalPoints, players: currentOnCourt.slice(), roleMap: Object.assign({}, currentRoleMap) });
                     }
 
-                    // Accumuler le prorata par joueur
+                    // Accumuler le prorata par joueur ET par role
                     intervals.forEach(function(interval) {
-                        var pointsInInterval = interval.end - interval.start;
-                        var ratio = pointsInInterval / totalPoints;
+                        var ratio = (interval.end - interval.start) / totalPoints;
                         interval.players.forEach(function(name) {
-                            if (!players[name]) players[name] = { setsPlayed: 0, matchIds: {}, startingMatchIds: {} };
-                            players[name].setsPlayed += ratio;
-                            players[name].matchIds[match.id] = true;
+                            var p = ensurePlayer(name);
+                            p.setsPlayed += ratio;
+                            p.matchIds[match.id] = true;
+                            var role = interval.roleMap[name] || 'Autre';
+                            addByRole(name, role, ratio);
                         });
                     });
                 } else {
                     // ---- Fallback : pas de substitutions ----
-                    // V20.26 : construire la liste des joueurs home valides depuis les lineups
                     var validHomePlayers = {};
                     [set.initialHomeLineup, set.homeLineup].forEach(function(lu) {
                         if (!lu) return;
                         Object.keys(lu).forEach(function(pos) { if (lu[pos]) validHomePlayers[lu[pos]] = true; });
                     });
-                    // Tous les joueurs qui apparaissent dans les stats du set ET dans un lineup home
                     var statsHome = (set.stats && set.stats.home) ? set.stats.home : {};
                     var playersInSet = Object.keys(statsHome).filter(function(name) {
-                        if (!validHomePlayers[name]) return false; // exclure joueurs adverses
+                        if (!validHomePlayers[name]) return false;
                         var s = statsHome[name];
-                        // Verifier qu'il a au moins 1 action
                         return s && (
                             (s.service && s.service.tot > 0) ||
                             (s.reception && s.reception.tot > 0) ||
@@ -4110,23 +4130,23 @@ const SetsPlayedView = {
                         );
                     });
 
-                    // Si aucun joueur dans les stats, utiliser le lineup
                     if (playersInSet.length === 0) {
                         playersInSet = initialPlayers.slice();
                     }
 
                     playersInSet.forEach(function(name) {
-                        if (!players[name]) players[name] = { setsPlayed: 0, matchIds: {}, startingMatchIds: {} };
-                        players[name].setsPlayed += 1;
-                        players[name].matchIds[match.id] = true;
+                        var p = ensurePlayer(name);
+                        p.setsPlayed += 1;
+                        p.matchIds[match.id] = true;
+                        var role = playerRoleMap[name] || 'Autre';
+                        addByRole(name, role, 1);
                     });
                 }
 
                 // Titulaire = dans le lineup initial du Set 1 (setIdx === 0)
                 if (setIdx === 0) {
                     initialPlayers.forEach(function(name) {
-                        if (!players[name]) players[name] = { setsPlayed: 0, matchIds: {}, startingMatchIds: {} };
-                        players[name].startingMatchIds[match.id] = true;
+                        ensurePlayer(name).startingMatchIds[match.id] = true;
                     });
                 }
             });
@@ -4139,10 +4159,16 @@ const SetsPlayedView = {
             var matchesPresent = Object.keys(p.matchIds).length;
             var matchesStarting = Object.keys(p.startingMatchIds).length;
             var role = (playerRoles && playerRoles[name]) ? playerRoles[name].primaryRole : null;
+            // Fusionner le temps 'Autre' dans le role principal
+            if (p.setsPlayedByRole['Autre'] && role && role !== 'Autre') {
+                p.setsPlayedByRole[role] = (p.setsPlayedByRole[role] || 0) + p.setsPlayedByRole['Autre'];
+                delete p.setsPlayedByRole['Autre'];
+            }
             return {
                 name: name,
                 role: role || 'Autre',
                 setsPlayed: p.setsPlayed,
+                setsPlayedByRole: p.setsPlayedByRole,
                 matchesPresent: matchesPresent,
                 matchesStarting: matchesStarting,
                 setsPerMatch: matchesPresent > 0 ? p.setsPlayed / matchesPresent : 0
@@ -4205,12 +4231,42 @@ const SetsPlayedView = {
             var pctValue = totalSets > 0 ? (p.setsPlayed / totalSets * 100) : 0;
             var pctDisplay = Math.round(pctValue);
             var barWidth = maxSets > 0 ? (p.setsPlayed / maxSets * 100) : 0;
-            var dotColor = roleColors[p.role] || '#5f6368';
+
+            // Roles tries par temps decroissant
+            var rolesByTime = Object.keys(p.setsPlayedByRole || {}).sort(function(a, b) {
+                return (p.setsPlayedByRole[b] || 0) - (p.setsPlayedByRole[a] || 0);
+            });
+
+            // Pastilles : empilees si multi-postes, simple sinon
+            var dotsHtml;
+            if (rolesByTime.length > 1) {
+                dotsHtml = '<span class="role-dots">';
+                rolesByTime.forEach(function(r) {
+                    dotsHtml += '<span class="role-dot role-dot-stacked" style="background:' + (roleColors[r] || '#5f6368') + '"></span>';
+                });
+                dotsHtml += '</span>';
+            } else {
+                var dotColor = roleColors[p.role] || '#5f6368';
+                dotsHtml = '<span class="role-dot" style="background:' + dotColor + '"></span>';
+            }
+
+            // Barre : segmentee si multi-postes, simple sinon
+            var barHtml;
+            if (rolesByTime.length > 1 && p.setsPlayed > 0) {
+                barHtml = '';
+                rolesByTime.forEach(function(r) {
+                    var segWidth = maxSets > 0 ? ((p.setsPlayedByRole[r] || 0) / maxSets * 100) : 0;
+                    barHtml += '<div class="pt-bar-segment" style="width:' + segWidth.toFixed(1) + '%;background:' + (roleColors[r] || '#5f6368') + '"></div>';
+                });
+            } else {
+                var dotColor = roleColors[p.role] || '#5f6368';
+                barHtml = '<div class="pt-bar" style="width:' + barWidth.toFixed(1) + '%;background:' + dotColor + '"></div>';
+            }
 
             html += '<tr>';
             html += '<td class="pt-td-name">';
-            html += '<div class="pt-player-name"><span class="role-dot" style="background:' + dotColor + '"></span>' + Utils.escapeHtml(p.name) + '</div>';
-            html += '<div class="pt-bar-container"><div class="pt-bar" style="width:' + barWidth.toFixed(1) + '%;background:' + dotColor + '"></div></div>';
+            html += '<div class="pt-player-name">' + dotsHtml + Utils.escapeHtml(p.name) + '</div>';
+            html += '<div class="pt-bar-container">' + barHtml + '</div>';
             html += '</td>';
             html += '<td class="pt-td-num pt-pct">' + pctDisplay + '%</td>';
             html += '<td class="pt-td-num pt-sets-val">' + setsDisplay + '</td>';

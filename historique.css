@@ -1138,6 +1138,7 @@ body {
 }
 
 .pt-bar-container {
+    display: flex;
     height: 4px;
     background: var(--bg-container);
     border-radius: 2px;
@@ -1149,6 +1150,11 @@ body {
 .pt-bar {
     height: 100%;
     border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.pt-bar-segment {
+    height: 100%;
     transition: width 0.3s ease;
 }
 
