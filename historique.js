@@ -1729,11 +1729,14 @@ const BilanView = {
         });
 
         // --- Head to head : Jen (gauche) vs Adverse (droite) ---
-        var html = '<div class="bilan-section">';
+        var html = '<div class="hist-section bilan-section">';
+        html += '<div class="hist-section-title">Profils radar</div>';
         html += '<div class="bilan-h2h-header">';
         html += '<span class="bilan-h2h-team">Jen et ses Saints</span>';
         html += '<span class="bilan-h2h-vs">vs</span>';
         html += '<span class="bilan-h2h-team">' + Utils.escapeHtml(match.opponent || 'Adverse') + '</span>';
+        html += '</div>';
+        html += '<div class="bilan-compare-bar">';
         html += '<button class="bilan-compare-toggle" onclick="BilanView.toggleCompare(this)" title="Superposer l\'adversaire">';
         html += '<span class="bilan-compare-icon">👁</span> Comparer</button>';
         html += '</div>';
@@ -1935,8 +1938,8 @@ const BilanView = {
             }
         });
 
-        var html = '<div class="bilan-section">';
-        html += '<div class="bilan-section-title">Distinctions</div>';
+        var html = '<div class="hist-section bilan-section">';
+        html += '<div class="hist-section-title">Distinctions</div>';
         html += '<div class="bilan-distinctions">';
 
         // --- MVP ---
@@ -3548,9 +3551,12 @@ const YearStatsView = {
         var playerFamiliesYear = BilanView.getPlayerFamiliesYear(matches);
         if (Object.keys(playerFamiliesYear).length === 0) return '';
 
-        var html = '<div class="bilan-section">';
+        var html = '<div class="hist-section bilan-section">';
+        html += '<div class="hist-section-title">Profils radar</div>';
         html += '<div class="bilan-h2h-header">';
         html += '<span class="bilan-h2h-team">Jen et ses Saints</span>';
+        html += '</div>';
+        html += '<div class="bilan-compare-bar">';
         html += '<button class="bilan-compare-toggle" onclick="BilanView.toggleCompareYear(this)" title="Comparer au meilleur au poste">';
         html += '<span class="bilan-compare-icon">\uD83D\uDC41</span> Comparer</button>';
         html += '</div>';
@@ -3741,8 +3747,8 @@ const YearStatsView = {
             agg[team].brkPercent = agg[team].brkTotal > 0 ? Math.round(agg[team].brkWon / agg[team].brkTotal * 100) : null;
         });
 
-        var html = '<div class="sideout-section">';
-        html += '<div class="sideout-section-title">Side Out / Break Out</div>';
+        var html = '<div class="hist-section sideout-section">';
+        html += '<div class="hist-section-title">Side Out / Break Out</div>';
         html += '<table class="sideout-table">';
         html += '<thead><tr><th></th><th>Jen</th><th>Adversaires</th></tr></thead><tbody>';
         html += '<tr><td>Side Out</td>';
@@ -3840,8 +3846,8 @@ const YearStatsView = {
             return 'rgb(' + r + ',' + g + ',' + b + ')';
         }
 
-        var html = '<div class="momentum-section">';
-        html += '<div class="momentum-section-title">Momentum <span class="momentum-subtitle">' + curves.length + ' sets</span></div>';
+        var html = '<div class="hist-section momentum-section">';
+        html += '<div class="hist-section-title">Momentum <span class="momentum-subtitle">' + curves.length + ' sets</span></div>';
 
         html += '<svg class="momentum-chart" viewBox="0 0 ' + svgWidth + ' ' + svgHeight + '">';
 
@@ -3917,7 +3923,8 @@ const YearStatsView = {
         SharedComponents.playerRolesMap = BilanView.getPlayerRolesYear(matches);
 
         // Mobile : onglets categorie + premier onglet service
-        var html = '<div class="stats-section">';
+        var html = '<div class="hist-section stats-section">';
+        html += '<div class="hist-section-title">Tableaux de Statistiques</div>';
         html += '<div class="segmented-tabs stats-category-tabs" id="yearCategoryTabs">';
         var cats = ['service', 'reception', 'passe', 'attack', 'relance', 'defense', 'block'];
         var labels = { service: 'Serv', reception: 'Rec', passe: 'Pas', attack: 'Att', relance: 'Rel', defense: 'Def', block: 'Blc' };
@@ -4337,6 +4344,15 @@ document.addEventListener('DOMContentLoaded', async function() {
         btn.addEventListener('click', function() {
             TabNav.switchTo(btn.dataset.tab);
         });
+    });
+
+    // Toggle sections collapsibles (delegation)
+    document.addEventListener('click', function(e) {
+        var title = e.target.closest('.hist-section-title');
+        if (!title) return;
+        var section = title.closest('.hist-section');
+        if (!section) return;
+        section.classList.toggle('collapsed');
     });
 
     // Bouton fermer detail

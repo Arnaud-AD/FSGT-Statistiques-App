@@ -455,6 +455,50 @@ body {
     flex-shrink: 0;
 }
 
+/* ==================== SECTIONS (unified) ==================== */
+.hist-section {
+    padding: 0;
+    margin-top: 16px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 12px;
+}
+
+.hist-section-title {
+    display: flex;
+    align-items: center;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.hist-section-title::after {
+    content: '';
+    margin-left: auto;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid var(--text-secondary);
+    flex-shrink: 0;
+    transition: transform 0.2s;
+}
+
+.hist-section.collapsed .hist-section-title {
+    margin-bottom: 0;
+}
+
+.hist-section.collapsed .hist-section-title::after {
+    transform: rotate(-90deg);
+}
+
+.hist-section.collapsed > *:not(.hist-section-title) {
+    display: none !important;
+}
+
 /* ==================== DETAIL SECTIONS ==================== */
 .detail-section {
     padding: 12px 16px;
@@ -474,20 +518,6 @@ body {
 }
 
 /* ==================== TIMELINE ==================== */
-.timeline-section {
-    padding: 0;
-    margin-top: 12px;
-    border-top: 1px solid var(--border-color);
-    padding-top: 12px;
-}
-
-.timeline-section-title {
-    font-family: 'Google Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 10px;
-}
 
 .timeline-set {
     margin-bottom: 14px;
@@ -573,20 +603,6 @@ body {
 .tl-block.empty { background: transparent; }
 
 /* ==================== SIDE OUT / BREAK OUT ==================== */
-.sideout-section {
-    padding: 0;
-    margin-top: 12px;
-    border-top: 1px solid var(--border-color);
-    padding-top: 12px;
-}
-
-.sideout-section-title {
-    font-family: 'Google Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 8px;
-}
 
 .sideout-table {
     width: 100%;
@@ -629,20 +645,6 @@ body {
 .sideout-table .moy-val { color: var(--text-secondary); }
 
 /* ==================== MOMENTUM ==================== */
-.momentum-section {
-    padding: 0;
-    margin-top: 12px;
-    border-top: 1px solid var(--border-color);
-    padding-top: 12px;
-}
-
-.momentum-section-title {
-    font-family: 'Google Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 10px;
-}
 
 .momentum-subtitle {
     font-weight: 400;
@@ -704,9 +706,7 @@ body {
 }
 
 /* ==================== STATS: CATEGORY TABS (mobile) ==================== */
-.stats-section {
-    padding: 0;
-}
+/* stats-section padding handled by hist-section */
 
 .stats-category-tabs {
     margin: 0 0 4px;
@@ -1347,19 +1347,7 @@ body {
     padding: 0;
 }
 
-.bilan-section {
-    margin-top: 12px;
-    border-top: 1px solid var(--border-color);
-    padding-top: 12px;
-}
-
-.bilan-section-title {
-    font-family: 'Google Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 8px;
-}
+/* bilan-section specifics handled by hist-section */
 
 /* --- Head to head header --- */
 .bilan-h2h-header {
@@ -1385,6 +1373,13 @@ body {
     font-weight: 500;
     color: var(--text-secondary);
     text-transform: uppercase;
+}
+
+/* Barre comparer (alignee a droite, sous le header) */
+.bilan-compare-bar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 0 8px;
 }
 
 /* Bouton toggle comparer */
