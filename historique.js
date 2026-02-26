@@ -1732,9 +1732,9 @@ const BilanView = {
         var html = '<div class="hist-section bilan-section">';
         html += '<div class="hist-section-title">Profils radar</div>';
         html += '<div class="bilan-h2h-header">';
-        html += '<span class="bilan-h2h-team">Jen et ses Saints</span>';
+        html += '<span class="bilan-h2h-team" style="color:#0056D2">Jen et ses Saints</span>';
         html += '<span class="bilan-h2h-vs">vs</span>';
-        html += '<span class="bilan-h2h-team">' + Utils.escapeHtml(match.opponent || 'Adverse') + '</span>';
+        html += '<span class="bilan-h2h-team" style="color:#ea4335">' + Utils.escapeHtml(match.opponent || 'Adverse') + '</span>';
         html += '</div>';
         html += '<div class="bilan-compare-bar">';
         html += '<button class="bilan-compare-toggle" onclick="BilanView.toggleCompare(this)" title="Superposer l\'adversaire">';
@@ -2779,10 +2779,12 @@ const BilanView = {
         return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     },
 
-    // --- Agreger les passeurs adverses de la saison (moyenne des scores axes) ---
-    aggregateAwayPasseursYear(matches) {
+    // --- Agreger le meilleur joueur adverse d'un role sur la saison (moyenne des scores axes) ---
+    // role: 'Passeur' | 'R4' | 'Pointu' | 'Centre'
+    aggregateAwayRoleYear(matches, role) {
         var self = this;
-        var bestPerMatch = []; // meilleur passeur adverse de chaque match
+        var family = self.ROLE_TO_FAMILY[role]; // 'Passeur', 'Ailier', ou 'Centre'
+        var bestPerMatch = [];
 
         matches.forEach(function(match) {
             var awayFamilies = self.getPlayerFamilies(match, 'away');
@@ -2793,8 +2795,16 @@ const BilanView = {
             var bestIp = -1;
 
             Object.keys(awayFamilies).forEach(function(name) {
-                var fam = awayFamilies[name].families['Passeur'];
+                var fam = awayFamilies[name].families[family];
                 if (!fam) return;
+
+                // Pour Ailier : filtrer par role primaire (R4 vs Pointu)
+                if (family === 'Ailier') {
+                    var primaryRole = Object.keys(fam.roles).sort(function(a, b) {
+                        return (fam.roles[b] || 0) - (fam.roles[a] || 0);
+                    })[0];
+                    if (primaryRole !== role) return;
+                }
 
                 var playerTotals = StatsAggregator.aggregateStatsBySetIndices(
                     completedSets, 'away', fam.setIndices
@@ -2802,13 +2812,13 @@ const BilanView = {
                 var stats = playerTotals[name];
                 if (!stats) return;
 
-                var scores = self.computeAxisScores(stats, 'Passeur');
+                var scores = self.computeAxisScores(stats, role);
                 var hasAny = ['service', 'reception', 'passe', 'attaque', 'bloc', 'relance', 'defense'].some(function(k) {
                     return (scores[k] || 0) > 0;
                 });
                 if (!hasAny) return;
 
-                var ip = self.computeIP(scores, 'Passeur');
+                var ip = self.computeIP(scores, role);
                 if (ip > bestIp) {
                     bestIp = ip;
                     bestScores = scores;
@@ -2820,13 +2830,12 @@ const BilanView = {
 
         if (bestPerMatch.length === 0) return null;
 
-        // Moyenne par axe uniquement sur les passeurs ayant des stats
-        // significatives sur cet axe (V20.26 : respect du seuil IP_MIN_ACTIONS)
+        // Moyenne par axe uniquement sur les joueurs ayant des stats
+        // significatives sur cet axe (respect du seuil IP_MIN_ACTIONS)
         var avgScores = {};
         var avgTots = {};
         var minActions = self.IP_MIN_ACTIONS;
         ['service', 'reception', 'passe', 'attaque', 'bloc', 'relance', 'defense'].forEach(function(k) {
-            // Ne moyenner que les scores dont le volume depasse le seuil minimum
             var withStats = bestPerMatch.filter(function(sc) {
                 if ((sc[k] || 0) <= 0) return false;
                 var tots = sc._tots || {};
@@ -2841,12 +2850,18 @@ const BilanView = {
         });
         avgScores._tots = avgTots;
 
+        var ROLE_LABELS = { 'Passeur': 'Passeurs', 'R4': 'R4', 'Pointu': 'Pointus', 'Centre': 'Centres' };
         return {
-            name: 'Passeurs Adv.',
+            name: (ROLE_LABELS[role] || role) + ' Adv.',
             scores: avgScores,
-            ip: self.computeIP(avgScores, 'Passeur'),
+            ip: self.computeIP(avgScores, role),
             count: bestPerMatch.length
         };
+    },
+
+    // Wrapper retrocompatible
+    aggregateAwayPasseursYear(matches) {
+        return this.aggregateAwayRoleYear(matches, 'Passeur');
     },
 
     // --- Toggle comparaison : affiche/masque les overlays adverses ---
@@ -2859,6 +2874,14 @@ const BilanView = {
     // --- Toggle comparaison Stats Annee : meilleur coequipier au poste ---
     toggleCompareYear(btn) {
         var grid = btn.closest('.bilan-section').querySelector('.bilan-grid-year');
+        if (!grid) return;
+        var active = grid.classList.toggle('bilan-compare-active');
+        btn.classList.toggle('active', active);
+    },
+
+    // --- Toggle comparaison Stats Annee : meilleur Jen au poste (section adversaire) ---
+    toggleCompareYearAway(btn) {
+        var grid = btn.closest('.bilan-section').querySelector('.bilan-grid-year-away');
         if (!grid) return;
         var active = grid.classList.toggle('bilan-compare-active');
         btn.classList.toggle('active', active);
@@ -3554,7 +3577,7 @@ const YearStatsView = {
         var html = '<div class="hist-section bilan-section">';
         html += '<div class="hist-section-title">Profils radar</div>';
         html += '<div class="bilan-h2h-header">';
-        html += '<span class="bilan-h2h-team">Jen et ses Saints</span>';
+        html += '<span class="bilan-h2h-team" style="color:#0056D2">Jen et ses Saints</span>';
         html += '</div>';
         html += '<div class="bilan-compare-bar">';
         html += '<button class="bilan-compare-toggle" onclick="BilanView.toggleCompareYear(this)" title="Comparer au meilleur au poste">';
@@ -3656,12 +3679,12 @@ const YearStatsView = {
             dataBySlot[d.slot].push(d);
         });
 
-        // Rendu cartes par slot, case vide si nombre impair
+        // Rendu cartes Jen par slot, case vide si nombre impair
         SLOT_ORDER_YEAR.forEach(function(slot) {
             var slotData = dataBySlot[slot] || [];
             var totalCards = slotData.length;
 
-            // Pour le slot Passeur : ajouter la carte moyenne adverse
+            // Pour le slot Passeur : ajouter la carte moyenne adverse lilas
             var showAwayPasseurCard = (slot === 'Passeur' && awayPasseursAvg);
             if (showAwayPasseurCard) totalCards++;
 
@@ -3680,7 +3703,7 @@ const YearStatsView = {
                 html += BilanView.renderSpiderChart(d.name, d.effectiveRole, d.scores, d.ip, d.primaryColor, d.axes, false, overlay, d.roleColors);
             });
 
-            // Carte moyenne passeurs adverses
+            // Carte moyenne passeurs adverses (lilas, avec overlay comparaison)
             if (showAwayPasseurCard) {
                 var homePasseurOverlay = (passeurCount === 1 && familyOverlays['Passeur'] && familyOverlays['Passeur'].best)
                     ? familyOverlays['Passeur'].best : null;
@@ -3690,17 +3713,58 @@ const YearStatsView = {
                     '#b4a0d6', BilanView.SPIDER_AXES, true,
                     homePasseurOverlay, null
                 );
-                // Ajouter classe bilan-away-avg pour style distinct
-                html += awayCard.replace('bilan-player-card"', 'bilan-player-card bilan-away-avg"');
+                html += awayCard.replace('bilan-player-card"', 'bilan-player-card bilan-away-avg bilan-away-avg-lilas"');
             }
 
-            // Case vide si nombre impair pour completer la ligne de la grille
             if (totalCards % 2 !== 0) {
                 html += '<div class="bilan-player-card bilan-player-empty"></div>';
             }
         });
 
         html += '</div>'; // bilan-grid-year
+
+        // --- Section Adversaire moyen (4 roles) ---
+        var AWAY_ROLES = ['Passeur', 'R4', 'Pointu', 'Centre'];
+        var awayCards = [];
+        AWAY_ROLES.forEach(function(role) {
+            var avg = BilanView.aggregateAwayRoleYear(matches, role);
+            if (avg) awayCards.push({ role: role, data: avg });
+        });
+
+        if (awayCards.length > 0) {
+            // Pre-calculer meilleur Jen par role pour overlay
+            var bestJenByRole = {};
+            allPlayerData.forEach(function(d) {
+                var role = d.slot; // slot = role effectif (Passeur, R4, Pointu, Centre)
+                if (!bestJenByRole[role] || d.ip > bestJenByRole[role].ip) {
+                    bestJenByRole[role] = { name: d.name, scores: d.scores, role: d.effectiveRole };
+                }
+            });
+
+            html += '<div class="bilan-h2h-header">';
+            html += '<span class="bilan-h2h-team" style="color:#ea4335">Adversaire moyen</span>';
+            html += '</div>';
+            html += '<div class="bilan-compare-bar">';
+            html += '<button class="bilan-compare-toggle" onclick="BilanView.toggleCompareYearAway(this)" title="Comparer au meilleur Jen au poste">';
+            html += '<span class="bilan-compare-icon">\uD83D\uDC41</span> Comparer</button>';
+            html += '</div>';
+            html += '<div class="bilan-grid-year bilan-grid-year-away">';
+            awayCards.forEach(function(ac) {
+                var roleColor = BilanView.ROLE_COLORS[ac.role] || '#ea4335';
+                var mutedColor = BilanView._lightenColor(roleColor, 0.35);
+                var overlay = bestJenByRole[ac.role] || null;
+                var awayCard = BilanView.renderSpiderChart(
+                    ac.data.name, ac.role, ac.data.scores, ac.data.ip,
+                    mutedColor, BilanView.SPIDER_AXES, true, overlay, null
+                );
+                html += awayCard.replace('bilan-player-card"', 'bilan-player-card bilan-away-avg bilan-away-avg-lilas"');
+            });
+            if (awayCards.length % 2 !== 0) {
+                html += '<div class="bilan-player-card bilan-player-empty"></div>';
+            }
+            html += '</div>'; // bilan-grid-year-away
+        }
+
         html += '</div>'; // bilan-section
         return html;
     },

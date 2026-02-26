@@ -1357,6 +1357,9 @@ body {
     gap: 10px;
     padding: 8px 0 12px;
 }
+.bilan-h2h-header ~ .bilan-h2h-header {
+    margin-top: 12px;
+}
 
 .bilan-h2h-team {
     font-family: 'Google Sans', sans-serif;
@@ -1442,12 +1445,13 @@ body {
     opacity: 0;
 }
 
-/* Carte moyenne passeurs adverses */
+/* Carte moyenne adversaires */
 .bilan-away-avg .bilan-player-name {
     color: #5f6368;
 }
-.bilan-away-avg .bilan-ip {
-    color: #b4a0d6 !important;
+/* Cartes lilas : IP prend la couleur inline du role attenue */
+.bilan-away-avg-lilas .bilan-ip {
+    color: inherit;
 }
 
 /* Titre de section famille (span toute la grille) */
