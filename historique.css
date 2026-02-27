@@ -606,8 +606,12 @@ body {
 
 .sideout-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: 13px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    overflow: hidden;
 }
 
 .sideout-table th {
@@ -623,6 +627,7 @@ body {
 
 .sideout-table th:first-child {
     text-align: left;
+    padding-left: 12px;
 }
 
 .sideout-table td {
@@ -637,8 +642,10 @@ body {
     color: var(--text-secondary);
     font-weight: 400;
     font-size: 12px;
+    padding-left: 12px;
 }
 
+.sideout-table tr:last-child td { border-bottom: none; }
 .sideout-table .home-val { color: var(--accent-blue); }
 .sideout-table .away-val { color: var(--loss-color); }
 .sideout-table .moy-row td { padding: 2px 8px; font-size: 11px; font-weight: 400; border-bottom: 1px solid var(--border-color); }
@@ -724,7 +731,7 @@ body {
 
 /* ==================== STATS: TABLE (mobile) ==================== */
 .stats-team-block {
-    padding: 0 16px 12px;
+    padding: 0 0 12px;
 }
 
 .stats-team-title {
@@ -740,8 +747,12 @@ body {
 
 .stats-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: 13px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    overflow: hidden;
 }
 
 .stats-table th {
@@ -757,7 +768,7 @@ body {
 
 .stats-table th:first-child {
     text-align: left;
-    padding-left: 0;
+    padding-left: 12px;
 }
 
 .stats-table td {
@@ -770,7 +781,7 @@ body {
 .stats-table td:first-child {
     text-align: left;
     font-weight: 500;
-    padding-left: 0;
+    padding-left: 12px;
 }
 
 .stats-table tr:last-child td {
