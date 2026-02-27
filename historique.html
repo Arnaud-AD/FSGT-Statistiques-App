@@ -109,14 +109,18 @@
                     <!-- Vue Bilan : spider charts + IP -->
                     <div id="bilanContainer" style="display: none;"></div>
 
-                    <!-- Onglets categorie mobile : [Serv] [Rec] [Att] [Def] [Blc] -->
-                    <div class="segmented-tabs stats-category-tabs" id="statsCategoryTabs"></div>
+                    <!-- Section tableaux de stats (collapsible, ouverte par défaut) -->
+                    <div class="hist-section stats-section" id="statsSection">
+                        <div class="hist-section-title">Tableaux de Statistiques</div>
+                        <!-- Onglets categorie mobile : [Serv] [Rec] [Att] [Def] [Blc] -->
+                        <div class="segmented-tabs stats-category-tabs" id="statsCategoryTabs"></div>
 
-                    <!-- Vue mobile : tableau categorie selectionnee -->
-                    <div class="stats-mobile" id="statsMobileContainer"></div>
+                        <!-- Vue mobile : tableau categorie selectionnee -->
+                        <div class="stats-mobile" id="statsMobileContainer"></div>
 
-                    <!-- Vue desktop : multi-cartes horizontales -->
-                    <div class="stats-desktop" id="statsDesktopContainer"></div>
+                        <!-- Vue desktop : multi-cartes horizontales -->
+                        <div class="stats-desktop" id="statsDesktopContainer"></div>
+                    </div>
 
                     <!-- Side Out / Break Out -->
                     <div class="hist-section sideout-section">

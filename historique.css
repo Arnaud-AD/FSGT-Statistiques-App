@@ -1780,14 +1780,6 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
         display: block !important;
     }
 
-    /* Bilan actif : forcer le masquage des stats desktop */
-    .stats-desktop.bilan-hidden {
-        display: none !important;
-    }
-
-    .stats-mobile.bilan-hidden {
-        display: none !important;
-    }
 
     /* Bilan : 4 colonnes sur desktop */
     .bilan-grid {

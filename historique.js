@@ -3424,16 +3424,12 @@ const MatchStatsView = {
     },
 
     showBilanView(match) {
-        // Masquer les sections stats normales (classe pour overrider !important)
-        var catTabs = document.getElementById('statsCategoryTabs');
-        var mobile = document.getElementById('statsMobileContainer');
-        var desktop = document.getElementById('statsDesktopContainer');
+        // Masquer les sections stats normales
+        var statsSection = document.getElementById('statsSection');
         var sideout = document.querySelector('.sideout-section');
         var timeline = document.getElementById('timelineSection');
 
-        if (catTabs) catTabs.style.display = 'none';
-        if (mobile) { mobile.style.display = 'none'; mobile.classList.add('bilan-hidden'); }
-        if (desktop) { desktop.style.display = 'none'; desktop.classList.add('bilan-hidden'); }
+        if (statsSection) statsSection.style.display = 'none';
         if (sideout) sideout.style.display = 'none';
         if (timeline) timeline.style.display = 'none';
 
@@ -3450,14 +3446,10 @@ const MatchStatsView = {
         if (bilanContainer) bilanContainer.style.display = 'none';
 
         // Restaurer les sections normales
-        var catTabs = document.getElementById('statsCategoryTabs');
-        var mobile = document.getElementById('statsMobileContainer');
-        var desktop = document.getElementById('statsDesktopContainer');
+        var statsSection = document.getElementById('statsSection');
         var sideout = document.querySelector('.sideout-section');
 
-        if (catTabs) catTabs.style.display = '';
-        if (mobile) { mobile.style.display = ''; mobile.classList.remove('bilan-hidden'); }
-        if (desktop) { desktop.style.display = ''; desktop.classList.remove('bilan-hidden'); }
+        if (statsSection) statsSection.style.display = '';
         if (sideout) sideout.style.display = '';
         // timeline : sa visibilite est geree par renderTimeline()
     },
