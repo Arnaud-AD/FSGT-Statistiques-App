@@ -5080,14 +5080,11 @@ const SetsPlayedView = {
         var btns = container.querySelectorAll('[data-pt-avg]');
         btns.forEach(function(btn) {
             btn.addEventListener('click', function() {
-                var mode = btn.dataset.ptAvg;
-                if (mode !== self._ptAvgMode) {
-                    self._ptAvgMode = mode;
-                    // Tri naturel : % en Tot, S/M en Moy
-                    self._sortCol = (mode === 'moy') ? 'sm' : 'pct';
-                    self._sortAsc = false;
-                    self._renderWithSort(container);
-                }
+                self._ptAvgMode = self._ptAvgMode === 'tot' ? 'moy' : 'tot';
+                // Tri naturel : % en Tot, S/M en Moy
+                self._sortCol = (self._ptAvgMode === 'moy') ? 'sm' : 'pct';
+                self._sortAsc = false;
+                self._renderWithSort(container);
             });
         });
     },
@@ -5580,8 +5577,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.addEventListener('click', function(e) {
         var btn = e.target.closest('[data-impact-avg]');
         if (!btn) return;
-        var mode = btn.dataset.impactAvg;
-        if (mode === ImpactView._avgMode) return;
         ImpactView.toggleAvgMode();
         var section = btn.closest('.impact-section');
         if (section && ImpactView._lastData) {

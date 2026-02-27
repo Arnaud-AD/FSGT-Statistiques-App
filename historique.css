@@ -723,7 +723,8 @@ body {
 .display-mode-toggle {
     display: flex;
     flex-shrink: 0;
-    background: #f1f3f4;
+    background: #fff;
+    border: 1px solid #dadce0;
     border-radius: 16px;
     padding: 2px;
 }
