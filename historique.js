@@ -736,6 +736,358 @@ window.exportFirebaseBackup = async function() {
     console.log('[Backup] Exporte ' + matches.length + ' matchs (' + json.length + ' bytes)');
 };
 
+// ==================== IMPACT +/- CALCULATOR ====================
+const PlusMinusCalculator = {
+
+    _initRecord() {
+        return {
+            ptsPlayed: 0, setsPlayed: 0, teamScored: 0, teamConceded: 0, plusMinus: 0,
+            ace: 0, attplus: 0, blcplus: 0,
+            fser: 0, fatt: 0, bp: 0, frec: 0, fdef: 0, fblc: 0, fp: 0,
+            recWinner: 0, passWinner: 0, defWinner: 0,
+            dirPlus: 0, dirMinus: 0, indirect: 0,
+            servImpact: 0, recImpact: 0, pasImpact: 0,
+            attImpact: 0, defImpact: 0, blcImpact: 0
+        };
+    },
+
+    compute(sets, team) {
+        var self = this;
+        var results = {};
+
+        sets.forEach(function(set) {
+            if (!set.points || set.points.length === 0) return;
+
+            var lineups = self._getLineupAtEachPoint(set, team);
+
+            // Tracker qui a joue dans ce set (pour setsPlayed)
+            var playedInSet = {};
+
+            set.points.forEach(function(point, pi) {
+                var onCourt = lineups[pi];
+                if (!onCourt || onCourt.length === 0) return;
+
+                // Qui a marque ce point ? (tenir compte des points de mixite initiaux)
+                var prevHome = pi > 0 ? set.points[pi - 1].homeScore : (set.initialHomeScore || 0);
+                var prevAway = pi > 0 ? set.points[pi - 1].awayScore : (set.initialAwayScore || 0);
+                var homeScored = point.homeScore > prevHome;
+                var teamScored = (team === 'home') ? homeScored : !homeScored;
+
+                // Maj ptsPlayed / teamScored / teamConceded pour chaque joueur sur le terrain
+                onCourt.forEach(function(name) {
+                    if (!results[name]) results[name] = self._initRecord();
+                    var r = results[name];
+                    r.ptsPlayed++;
+                    if (teamScored) r.teamScored++;
+                    else r.teamConceded++;
+                    playedInSet[name] = true;
+                });
+
+                // Contributions directes depuis le rally
+                var contribs = self._scanRally(point.rally || [], team, teamScored);
+                Object.keys(contribs).forEach(function(name) {
+                    if (!results[name]) results[name] = self._initRecord();
+                    var r = results[name];
+                    var c = contribs[name];
+                    var fields = ['ace', 'attplus', 'blcplus', 'fser', 'fatt', 'bp', 'frec', 'fdef', 'fblc', 'fp', 'recWinner', 'passWinner', 'defWinner'];
+                    fields.forEach(function(k) { r[k] += (c[k] || 0); });
+                });
+            });
+
+            // Incrementer setsPlayed pour chaque joueur ayant joue dans ce set
+            Object.keys(playedInSet).forEach(function(name) {
+                if (results[name]) results[name].setsPlayed++;
+            });
+        });
+
+        // Calcul des derives
+        Object.keys(results).forEach(function(name) {
+            var r = results[name];
+            r.plusMinus = r.teamScored - r.teamConceded;
+            r.dirPlus = r.ace + r.attplus + r.blcplus + r.recWinner + r.passWinner + r.defWinner;
+            r.dirMinus = r.fser + r.fatt + r.bp + r.frec + r.fdef + r.fblc + r.fp;
+            r.indirect = r.plusMinus - (r.dirPlus - r.dirMinus);
+            r.servImpact = r.ace - r.fser;
+            r.recImpact = r.recWinner - r.frec;
+            r.pasImpact = r.passWinner - r.fp;
+            r.attImpact = r.attplus - r.fatt - r.bp;
+            r.defImpact = r.defWinner - r.fdef;
+            r.blcImpact = r.blcplus - r.fblc;
+        });
+
+        return results;
+    },
+
+    _getLineupAtEachPoint(set, team) {
+        var lineupKey = (team === 'home') ? 'initialHomeLineup' : 'initialAwayLineup';
+        var fallbackKey = (team === 'home') ? 'homeLineup' : 'awayLineup';
+        var initialLineup = set[lineupKey] || set[fallbackKey] || {};
+        var initialPlayers = Object.values(initialLineup).filter(function(p) { return p !== null && p !== undefined; });
+
+        var subs = (set.substitutions || []).filter(function(s) { return s.team === team; });
+        subs.sort(function(a, b) { return a.pointIndex - b.pointIndex; });
+
+        var totalPoints = (set.points || []).length;
+        if (totalPoints === 0) return [];
+
+        // Detecter les joueurs non enregistres dans les subs mais presents dans les rallies
+        // (meme pattern que PlayingTimeView fallback)
+        var registeredPlayers = {};
+        initialPlayers.forEach(function(p) { registeredPlayers[p] = true; });
+        subs.forEach(function(s) { registeredPlayers[s.playerIn] = true; registeredPlayers[s.playerOut] = true; });
+
+        // Joueurs dans le lineup final (source de verite pour les subs non enregistrees)
+        var finalLineup = set[fallbackKey] || {};
+        var finalPlayers = {};
+        Object.values(finalLineup).forEach(function(p) { if (p) finalPlayers[p] = true; });
+
+        var unregistered = {}; // name -> { firstPt, lastPt, count }
+        (set.points || []).forEach(function(pt, pi) {
+            (pt.rally || []).forEach(function(a) {
+                if (a.team === team && a.player && !registeredPlayers[a.player]) {
+                    if (!unregistered[a.player]) unregistered[a.player] = { firstPt: pi, lastPt: pi, count: 1 };
+                    else { unregistered[a.player].lastPt = pi; unregistered[a.player].count++; }
+                }
+            });
+        });
+
+        // Filtrer : garder uniquement les joueurs dans le lineup final OU avec 3+ actions
+        // (exclut les joueurs adverses avec 1 action mal taguee)
+        Object.keys(unregistered).forEach(function(name) {
+            if (!finalPlayers[name] && unregistered[name].count < 3) {
+                delete unregistered[name];
+            }
+        });
+
+        // Convertir en subs inferees : entree au firstPt, et chercher qui a ete remplace
+        var inferredSubs = [];
+        Object.keys(unregistered).forEach(function(name) {
+            var info = unregistered[name];
+            // Trouver qui ce joueur a remplace : chercher un joueur initial absent des rallies apres firstPt
+            var replacedPlayer = null;
+            var bestScore = -1;
+            initialPlayers.forEach(function(ip) {
+                if (registeredPlayers[ip] && !unregistered[ip]) {
+                    // Compter les actions de ce joueur initial APRES le firstPt du non-enregistre
+                    var actionsAfter = 0;
+                    for (var p = info.firstPt; p < totalPoints; p++) {
+                        (set.points[p].rally || []).forEach(function(a) {
+                            if (a.team === team && a.player === ip) actionsAfter++;
+                        });
+                    }
+                    // Le joueur initial avec le moins d'actions apres est probablement celui remplace
+                    if (replacedPlayer === null || actionsAfter < bestScore) {
+                        bestScore = actionsAfter;
+                        replacedPlayer = ip;
+                    }
+                }
+            });
+            inferredSubs.push({ pointIndex: info.firstPt, playerIn: name, playerOut: replacedPlayer || '' });
+        });
+
+        // Fusionner subs enregistrees + inferees, trier par pointIndex
+        var allSubs = subs.concat(inferredSubs);
+        allSubs.sort(function(a, b) { return a.pointIndex - b.pointIndex; });
+
+        // Construire le lineup a chaque point
+        var currentOnCourt = initialPlayers.slice();
+        var lineups = [];
+        var subIdx = 0;
+
+        for (var pi = 0; pi < totalPoints; pi++) {
+            while (subIdx < allSubs.length && allSubs[subIdx].pointIndex <= pi) {
+                var sub = allSubs[subIdx];
+                var idx = currentOnCourt.indexOf(sub.playerOut);
+                if (idx >= 0) {
+                    currentOnCourt[idx] = sub.playerIn;
+                } else {
+                    currentOnCourt.push(sub.playerIn);
+                }
+                subIdx++;
+            }
+            lineups[pi] = currentOnCourt.slice();
+        }
+
+        return lineups;
+    },
+
+    _scanRally(rally, team, teamWonPoint) {
+        var contribs = {};
+        var self = this;
+
+        function ensure(name) {
+            if (!contribs[name]) contribs[name] = {
+                ace: 0, attplus: 0, blcplus: 0,
+                fser: 0, fatt: 0, bp: 0, frec: 0, fdef: 0, fblc: 0, fp: 0,
+                recWinner: 0, passWinner: 0, defWinner: 0
+            };
+            return contribs[name];
+        }
+
+        for (var i = 0; i < rally.length; i++) {
+            var action = rally[i];
+            if (action.team !== team || !action.player) continue;
+            var c = ensure(action.player);
+
+            switch (action.type) {
+                case 'service':
+                    if (action.result === 'ace') c.ace++;
+                    else if (action.result === 'fault' || action.result === 'fault_out' || action.result === 'fault_net') c.fser++;
+                    break;
+
+                case 'reception':
+                    if (action.isDirectReturnWinner) {
+                        c.recWinner++;
+                    } else if (action.quality && (action.quality.label === 'Faute' || action.quality.score === 0)) {
+                        c.frec++;
+                    } else if (action.isDirectReturn && !action.isDirectReturnWinner) {
+                        if (StatsRepair._isDirectReturnExploited(rally, i, action.team)) c.frec++;
+                    }
+                    break;
+
+                case 'pass':
+                    if (action.attackType === 'relance' || action.passType === 'relance') break;
+                    if (action.isDirectReturnWinner) {
+                        c.passWinner++;
+                    } else if (action.isDirectReturn) {
+                        if (StatsRepair._isDirectReturnExploited(rally, i, action.team)) {
+                            c.fp++;
+                        } else if (teamWonPoint && self._isLastTeamAction(rally, i, team)) {
+                            c.passWinner++;
+                        }
+                    } else if (!action.endPos || action.endPos.courtSide === 'net') {
+                        c.fp++;
+                    }
+                    break;
+
+                case 'attack':
+                    if (action.attackType === 'relance') break;
+                    if (action.attackType === 'faute' || action.result === 'fault_net' || action.result === 'out') {
+                        c.fatt++;
+                    } else if (action.result === 'point' || action.result === 'bloc_out') {
+                        c.attplus++;
+                    } else if (action.result === 'blocked') {
+                        c.bp++;
+                    } else if (action.result === 'defended') {
+                        var oppTeam = team === 'home' ? 'away' : 'home';
+                        var outcome = StatsRepair._analyzeAfterDefended(rally, i, oppTeam);
+                        if (outcome === 'blocked') c.bp++;
+                        else if (outcome !== 'continued') c.attplus++;
+                    }
+                    break;
+
+                case 'defense': {
+                    // Bloc avant cette defense ?
+                    var blockBefore = null;
+                    for (var bj = i - 1; bj >= 0; bj--) {
+                        if (rally[bj].type === 'block' && rally[bj].team === team) {
+                            blockBefore = rally[bj].result === 'bloc_out' ? 'bloc_out' : 'normal';
+                            break;
+                        }
+                        if (rally[bj].type === 'pass' && rally[bj].team === team) break;
+                        if (rally[bj].type === 'attack' && rally[bj].team === team) break;
+                    }
+                    if (blockBefore === 'bloc_out') break;
+
+                    // Defense apres relance adverse ? → exclure
+                    var oppTeamDef = team === 'home' ? 'away' : 'home';
+                    var isDefAfterRelance = false;
+                    for (var dj = i - 1; dj >= 0; dj--) {
+                        if (rally[dj].type === 'attack' && rally[dj].team === oppTeamDef) {
+                            isDefAfterRelance = rally[dj].attackType === 'relance';
+                            break;
+                        }
+                        if (rally[dj].type === 'pass' && rally[dj].team === oppTeamDef
+                            && rally[dj].passType === 'relance' && rally[dj].isDirectReturn) {
+                            isDefAfterRelance = true;
+                            break;
+                        }
+                        if (rally[dj].type === 'block' || (rally[dj].type === 'defense' && rally[dj].team === team)) break;
+                    }
+                    if (isDefAfterRelance) break;
+
+                    if (action.isDirectReturnWinner) {
+                        c.defWinner++;
+                    } else if (action.untouched) {
+                        if (blockBefore !== 'normal') c.fdef++;
+                    } else if (action.result === 'fault') {
+                        if (blockBefore !== 'normal') c.fdef++;
+                    } else if (action.isDirectReturn && !action.isDirectReturnWinner) {
+                        if (StatsRepair._isDirectReturnExploited(rally, i, action.team)) c.fdef++;
+                    }
+                    break;
+                }
+
+                case 'block':
+                    if (action.result === 'bloc_out') {
+                        c.fblc++;
+                    } else if (action.result === 'kill' || action.result === 'point') {
+                        c.blcplus++;
+                    } else if (!action.passThrough) {
+                        var isBlockKill = false;
+                        for (var bk = i + 1; bk < rally.length; bk++) {
+                            if (rally[bk].type === 'defense') {
+                                if (rally[bk].result === 'fault' && rally[bk].team !== team) isBlockKill = true;
+                                break;
+                            }
+                            if (rally[bk].type === 'pass' || rally[bk].type === 'attack') break;
+                        }
+                        if (isBlockKill) c.blcplus++;
+                    }
+                    break;
+            }
+        }
+
+        return contribs;
+    },
+
+    _isLastTeamAction(rally, index, team) {
+        for (var i = index + 1; i < rally.length; i++) {
+            if (rally[i].team === team && rally[i].player) return false;
+        }
+        return true;
+    },
+
+    aggregateAcrossMatches(matches, team) {
+        var self = this;
+        var combined = {};
+
+        matches.forEach(function(match) {
+            var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+            if (completedSets.length === 0) return;
+
+            var matchData = self.compute(completedSets, team);
+            Object.keys(matchData).forEach(function(name) {
+                if (!combined[name]) combined[name] = self._initRecord();
+                var dst = combined[name];
+                var src = matchData[name];
+                // Sommer les champs bruts seulement
+                var rawFields = ['ptsPlayed', 'setsPlayed', 'teamScored', 'teamConceded',
+                    'ace', 'attplus', 'blcplus', 'fser', 'fatt', 'bp', 'frec', 'fdef', 'fblc', 'fp',
+                    'recWinner', 'passWinner', 'defWinner'];
+                rawFields.forEach(function(k) { dst[k] += src[k]; });
+            });
+        });
+
+        // Recalcul des derives
+        Object.keys(combined).forEach(function(name) {
+            var r = combined[name];
+            r.plusMinus = r.teamScored - r.teamConceded;
+            r.dirPlus = r.ace + r.attplus + r.blcplus + r.recWinner + r.passWinner + r.defWinner;
+            r.dirMinus = r.fser + r.fatt + r.bp + r.frec + r.fdef + r.fblc + r.fp;
+            r.indirect = r.plusMinus - (r.dirPlus - r.dirMinus);
+            r.servImpact = r.ace - r.fser;
+            r.recImpact = r.recWinner - r.frec;
+            r.pasImpact = r.passWinner - r.fp;
+            r.attImpact = r.attplus - r.fatt - r.bp;
+            r.defImpact = r.defWinner - r.fdef;
+            r.blcImpact = r.blcplus - r.fblc;
+        });
+
+        return combined;
+    }
+};
+
 // ==================== STATS AGGREGATION ====================
 const StatsAggregator = {
 
@@ -2161,6 +2513,9 @@ const BilanView = {
         html += '</div>'; // ferme bilan-grid
         html += '</div>'; // ferme bilan-section
 
+        // Section Impact +/-
+        html += ImpactView.renderForMatch(match, 'home');
+
         // Section Distinctions (home uniquement, stats agregees completes)
         html += this.renderDistinctions(homeTotals, homeRoles, homePlayers);
 
@@ -3172,6 +3527,179 @@ const BilanView = {
     }
 };
 
+// ==================== IMPACT +/- VIEW ====================
+const ImpactView = {
+
+    _avgMode: 'tot', // 'tot' ou 'moy'
+    _showToggle: false, // visible si multi-sets
+    _lastData: null, // cache pour re-render toggle
+    _lastPlayerRoles: null,
+
+    renderForMatch(match, team) {
+        var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+        if (completedSets.length === 0) return '';
+
+        var data = PlusMinusCalculator.compute(completedSets, team);
+        if (Object.keys(data).length === 0) return '';
+
+        var playerRoles = BilanView.getPlayerRoles(match, team);
+        this._showToggle = completedSets.filter(function(s) { return s.points && s.points.length > 0; }).length > 1;
+        this._lastData = data;
+        this._lastPlayerRoles = playerRoles;
+        return this._renderSection(data, playerRoles);
+    },
+
+    renderForYear(matches, team) {
+        if (matches.length === 0) return '';
+
+        var data = PlusMinusCalculator.aggregateAcrossMatches(matches, team);
+        if (Object.keys(data).length === 0) return '';
+
+        var playerRoles = BilanView.getPlayerRolesYear(matches, team);
+        this._showToggle = true;
+        this._lastData = data;
+        this._lastPlayerRoles = playerRoles;
+        return this._renderSection(data, playerRoles);
+    },
+
+    _renderSection(data, playerRoles) {
+        var isMoy = this._avgMode === 'moy';
+        var html = '<div class="hist-section impact-section">';
+        html += '<div class="hist-section-title">Impact +/\u2212</div>';
+        html += this._renderClaudeTable(data, playerRoles);
+        html += this._renderArnaudTable(data, playerRoles);
+        html += '</div>';
+        return html;
+    },
+
+    toggleAvgMode() {
+        this._avgMode = this._avgMode === 'tot' ? 'moy' : 'tot';
+    },
+
+    _sortPlayers(data) {
+        var isMoy = this._avgMode === 'moy';
+        return Object.keys(data).filter(function(name) {
+            return data[name].ptsPlayed > 0;
+        }).sort(function(a, b) {
+            var pmA = isMoy && data[a].setsPlayed > 0 ? data[a].plusMinus / data[a].setsPlayed : data[a].plusMinus;
+            var pmB = isMoy && data[b].setsPlayed > 0 ? data[b].plusMinus / data[b].setsPlayed : data[b].plusMinus;
+            return pmB - pmA;
+        });
+    },
+
+    _fmtVal(val, setsPlayed) {
+        var isMoy = this._avgMode === 'moy';
+        var v = val;
+        if (isMoy && setsPlayed > 1) v = val / setsPlayed;
+        if (isMoy) {
+            if (Math.abs(v) < 0.05) return '<span class="impact-zero">\u2212</span>';
+            var cls = v > 0 ? 'positive' : 'negative';
+            var formatted = (v > 0 ? '+' : '') + v.toFixed(1);
+            return '<span class="' + cls + '">' + formatted + '</span>';
+        }
+        if (v === 0) return '<span class="impact-zero">\u2212</span>';
+        var cls = v > 0 ? 'positive' : 'negative';
+        return '<span class="' + cls + '">' + (v > 0 ? '+' : '') + v + '</span>';
+    },
+
+    _fmtDirVal(val, setsPlayed) {
+        var isMoy = this._avgMode === 'moy';
+        var v = val;
+        if (isMoy && setsPlayed > 1) v = val / setsPlayed;
+        if (isMoy) {
+            if (v < 0.05) return '<span class="impact-zero">\u2212</span>';
+            return v.toFixed(1);
+        }
+        if (v === 0) return '<span class="impact-zero">\u2212</span>';
+        return String(v);
+    },
+
+    _renderPlayerCell(name, playerRoles) {
+        var savedMap = SharedComponents.playerRolesMap;
+        SharedComponents.playerRolesMap = playerRoles;
+        var dot = SharedComponents.renderRoleDots(name);
+        SharedComponents.playerRolesMap = savedMap;
+        return '<div class="player-cell">' + dot + Utils.escapeHtml(name) + '</div>';
+    },
+
+    _renderClaudeTable(data, playerRoles) {
+        var players = this._sortPlayers(data);
+        if (players.length === 0) return '';
+        var self = this;
+        var isMoy = this._avgMode === 'moy';
+        var ptsLabel = isMoy ? 'Pts/S' : 'Pts';
+
+        var html = '<div class="impact-table-wrapper">';
+        html += '<div class="impact-table-label"><span>Impact +/\u2212 Claude</span>';
+        if (this._showToggle) {
+            html += '<div class="display-mode-toggle impact-avg-toggle">';
+            html += '<button class="avg-mode-btn' + (!isMoy ? ' active' : '') + '" data-impact-avg="tot">Tot</button>';
+            html += '<button class="avg-mode-btn' + (isMoy ? ' active' : '') + '" data-impact-avg="moy">Moy</button>';
+            html += '</div>';
+        }
+        html += '</div>';
+        html += '<table class="stats-table impact-table">';
+        html += '<thead><tr>';
+        html += '<th>Joueur</th><th>' + ptsLabel + '</th><th class="impact-col-main">+/\u2212</th><th>Dir+</th><th>Dir\u2212</th><th>Ind.</th>';
+        html += '</tr></thead><tbody>';
+
+        players.forEach(function(name) {
+            var r = data[name];
+            var sp = r.setsPlayed || 1;
+            var ptsDisplay = isMoy ? (sp > 1 ? (r.ptsPlayed / sp).toFixed(0) : r.ptsPlayed) : r.ptsPlayed;
+            html += '<tr>';
+            html += '<td>' + self._renderPlayerCell(name, playerRoles) + '</td>';
+            html += '<td>' + ptsDisplay + '</td>';
+            html += '<td class="impact-col-main">' + self._fmtVal(r.plusMinus, sp) + '</td>';
+            html += '<td>' + (r.dirPlus > 0 ? '<span class="positive">' + self._fmtDirVal(r.dirPlus, sp) + '</span>' : '<span class="impact-zero">\u2212</span>') + '</td>';
+            html += '<td>' + (r.dirMinus > 0 ? '<span class="negative">' + self._fmtDirVal(r.dirMinus, sp) + '</span>' : '<span class="impact-zero">\u2212</span>') + '</td>';
+            html += '<td>' + self._fmtVal(r.indirect, sp) + '</td>';
+            html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+        html += '</div>';
+        return html;
+    },
+
+    _renderArnaudTable(data, playerRoles) {
+        var players = this._sortPlayers(data);
+        if (players.length === 0) return '';
+        var self = this;
+        var isMoy = this._avgMode === 'moy';
+        var ptsLabel = isMoy ? 'Pts/S' : 'Pts';
+
+        var html = '<div class="impact-table-wrapper">';
+        html += '<div class="impact-table-label">Impact +/\u2212 Arnaud</div>';
+        html += '<table class="stats-table impact-table">';
+        html += '<thead><tr>';
+        html += '<th>Joueur</th><th>' + ptsLabel + '</th><th class="impact-col-main">+/\u2212</th>';
+        html += '<th>Serv</th><th>Rec</th><th>Pas</th><th>Att</th><th>Def</th><th>Blc</th>';
+        html += '</tr></thead><tbody>';
+
+        players.forEach(function(name) {
+            var r = data[name];
+            var sp = r.setsPlayed || 1;
+            var ptsDisplay = isMoy ? (sp > 1 ? (r.ptsPlayed / sp).toFixed(0) : r.ptsPlayed) : r.ptsPlayed;
+            html += '<tr>';
+            html += '<td>' + self._renderPlayerCell(name, playerRoles) + '</td>';
+            html += '<td>' + ptsDisplay + '</td>';
+            html += '<td class="impact-col-main">' + self._fmtVal(r.plusMinus, sp) + '</td>';
+
+            var cats = ['servImpact', 'recImpact', 'pasImpact', 'attImpact', 'defImpact', 'blcImpact'];
+            cats.forEach(function(key) {
+                html += '<td>' + self._fmtVal(r[key], sp) + '</td>';
+            });
+
+            html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+        html += '</div>';
+        return html;
+    }
+};
+
 // ==================== TAB NAVIGATION ====================
 const TabNav = {
     currentTab: 'yearStats',
@@ -3734,6 +4262,9 @@ const YearStatsView = {
 
         // Distinctions saison
         html += this.renderYearDistinctions(filtered);
+
+        // Impact +/- saison
+        html += ImpactView.renderForYear(filtered, 'home');
 
         // Stats joueurs cumulees (meme composant que Tab 1)
         html += this.renderPlayerStats(filtered);
@@ -5043,6 +5574,22 @@ document.addEventListener('DOMContentLoaded', async function() {
         var section = title.closest('.hist-section');
         if (!section) return;
         section.classList.toggle('collapsed');
+    });
+
+    // Toggle Tot/Moy Impact +/- (delegation)
+    document.addEventListener('click', function(e) {
+        var btn = e.target.closest('[data-impact-avg]');
+        if (!btn) return;
+        var mode = btn.dataset.impactAvg;
+        if (mode === ImpactView._avgMode) return;
+        ImpactView.toggleAvgMode();
+        var section = btn.closest('.impact-section');
+        if (section && ImpactView._lastData) {
+            var html = ImpactView._renderSection(ImpactView._lastData, ImpactView._lastPlayerRoles);
+            var temp = document.createElement('div');
+            temp.innerHTML = html;
+            section.replaceWith(temp.firstChild);
+        }
     });
 
     // Bouton fermer detail

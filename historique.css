@@ -1749,6 +1749,56 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
 
 }
 
+/* ==================== IMPACT +/- ==================== */
+.impact-section {
+    /* herite de .hist-section */
+}
+.impact-avg-toggle {
+    margin-left: auto;
+}
+
+.impact-table-wrapper {
+    margin-bottom: 14px;
+}
+
+.impact-table-wrapper:last-child {
+    margin-bottom: 0;
+}
+
+.impact-table-label {
+    display: flex;
+    align-items: center;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    padding: 4px 0 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+.impact-table-label > span { flex: 1; }
+
+.impact-table th,
+.impact-table td {
+    min-width: 28px;
+    padding: 8px 5px;
+}
+
+.impact-table th:first-child,
+.impact-table td:first-child {
+    min-width: auto;
+}
+
+.impact-col-main {
+    border-left: 2px solid var(--border-color);
+    border-right: 2px solid var(--border-color);
+}
+
+.impact-zero {
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
 /* ==================== RESPONSIVE: DESKTOP (>=1024px) ==================== */
 @media (min-width: 1024px) {
     .app-container {
