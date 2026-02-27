@@ -3511,8 +3511,10 @@ const MatchStatsView = {
         var awayTotals = StatsAggregator.aggregateStats(setsToUse, 'away');
 
         // Toggle Tot/Moy : visible uniquement en Set ALL (multi-sets)
-        SharedComponents._showAvgToggle = (setFilter === 'all' && setsToUse.length > 1);
-        SharedComponents._totalSets = setsToUse.length;
+        // V20.293 : ne compter que les sets avec stats (exclure sets sans camera)
+        var setsWithStats = setsToUse.filter(function(s) { return s.stats && (s.stats.home || s.stats.away); });
+        SharedComponents._showAvgToggle = (setFilter === 'all' && setsWithStats.length > 1);
+        SharedComponents._totalSets = setsWithStats.length;
         if (!SharedComponents._showAvgToggle) SharedComponents._avgMode = 'tot';
 
         // Roles par joueur pour pastilles colorees
@@ -4282,8 +4284,10 @@ const YearStatsView = {
         if (Object.keys(homeTotals).length === 0) return '';
 
         // Toggle Tot/Moy : toujours visible en Stats Annee (multi-sets)
-        SharedComponents._showAvgToggle = (allSets.length > 1);
-        SharedComponents._totalSets = allSets.length;
+        // V20.293 : ne compter que les sets avec stats (exclure sets sans camera)
+        var setsWithStats = allSets.filter(function(s) { return s.stats && (s.stats.home || s.stats.away); });
+        SharedComponents._showAvgToggle = (setsWithStats.length > 1);
+        SharedComponents._totalSets = setsWithStats.length;
 
         var homeRoles = BilanView.getPlayerRolesYear(matches, 'home');
         var awayRoles = BilanView.getPlayerRolesYear(matches, 'away');
@@ -4342,8 +4346,10 @@ const YearStatsView = {
         var homeTotals = StatsAggregator.aggregateStats(allSets, 'home');
 
         // Toggle Tot/Moy : toujours visible en Stats Annee (multi-sets)
-        SharedComponents._showAvgToggle = (allSets.length > 1);
-        SharedComponents._totalSets = allSets.length;
+        // V20.293 : ne compter que les sets avec stats (exclure sets sans camera)
+        var setsWithStats2 = allSets.filter(function(s) { return s.stats && (s.stats.home || s.stats.away); });
+        SharedComponents._showAvgToggle = (setsWithStats2.length > 1);
+        SharedComponents._totalSets = setsWithStats2.length;
 
         var homeRoles = BilanView.getPlayerRolesYear(filtered, 'home');
         var awayRoles = BilanView.getPlayerRolesYear(filtered, 'away');
@@ -4443,6 +4449,7 @@ const SetsPlayedView = {
     _rendered: false,
     _sortCol: 'pct',    // colonne de tri par defaut
     _sortAsc: false,     // decroissant par defaut
+    _ptAvgMode: 'tot',   // 'tot' = totaux, 'moy' = moyenne par match
     _cachedData: null,
     _cachedMatches: null,
 
@@ -4474,6 +4481,7 @@ const SetsPlayedView = {
         var sortedData = this._sortDataByRole(data, totalMatches);
         container.innerHTML = this.renderTable(sortedData, matches);
         this._bindSortHeaders(container);
+        this._bindAvgToggle(container);
     },
 
     _sortDataByRole(data, totalMatches) {
@@ -4490,16 +4498,18 @@ const SetsPlayedView = {
 
         var col = this._sortCol;
         var asc = this._sortAsc;
+        var isMoy = this._ptAvgMode === 'moy';
 
         function getSortValue(p) {
             switch (col) {
-                case 'name': return p.name.toLowerCase();
+                case 'name':
                 case 'pct':
-                case 'sets': return p.setsPlayed;
+                case 'sets':
+                case 'sm':
+                    return isMoy ? p.setsPerMatch : p.setsPlayed;
                 case 'matchs': return p.matchesPresent;
-                case 'sm': return p.setsPerMatch;
                 case 'titu': return p.matchesPresent > 0 ? p.matchesStarting / p.matchesPresent : 0;
-                default: return p.setsPlayed;
+                default: return isMoy ? p.setsPerMatch : p.setsPlayed;
             }
         }
 
@@ -4535,9 +4545,26 @@ const SetsPlayedView = {
                     self._sortAsc = !self._sortAsc;
                 } else {
                     self._sortCol = col;
-                    self._sortAsc = (col === 'name'); // alpha = asc par defaut, numerique = desc
+                    self._sortAsc = false; // toujours desc par defaut
                 }
                 self._renderWithSort(container);
+            });
+        });
+    },
+
+    _bindAvgToggle(container) {
+        var self = this;
+        var btns = container.querySelectorAll('[data-pt-avg]');
+        btns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var mode = btn.dataset.ptAvg;
+                if (mode !== self._ptAvgMode) {
+                    self._ptAvgMode = mode;
+                    // Tri naturel : % en Tot, S/M en Moy
+                    self._sortCol = (mode === 'moy') ? 'sm' : 'pct';
+                    self._sortAsc = false;
+                    self._renderWithSort(container);
+                }
             });
         });
     },
@@ -4775,12 +4802,24 @@ const SetsPlayedView = {
             });
         });
 
+        // Calculer le nombre de sets completes par match (pour mode Moy)
+        var setsPerMatchId = {};
+        matches.forEach(function(match) {
+            var count = (match.sets || []).filter(function(s) { return s.completed; }).length;
+            setsPerMatchId[match.id] = count;
+        });
+
         // Convertir en tableau avec role principal
         var roleOrder = { 'Passeur': 0, 'R4': 1, 'Pointu': 2, 'Centre': 3 };
         var result = Object.keys(players).map(function(name) {
             var p = players[name];
             var matchesPresent = Object.keys(p.matchIds).length;
             var matchesStarting = Object.keys(p.startingMatchIds).length;
+            // Somme des sets completes dans les matchs ou le joueur etait present
+            var totalSetsWhenPresent = 0;
+            Object.keys(p.matchIds).forEach(function(mid) {
+                totalSetsWhenPresent += (setsPerMatchId[mid] || 0);
+            });
             var role = (playerRoles && playerRoles[name]) ? playerRoles[name].primaryRole : null;
             // Fusionner le temps 'Autre' dans le role principal
             if (p.setsPlayedByRole['Autre'] && role && role !== 'Autre') {
@@ -4794,7 +4833,8 @@ const SetsPlayedView = {
                 setsPlayedByRole: p.setsPlayedByRole,
                 matchesPresent: matchesPresent,
                 matchesStarting: matchesStarting,
-                setsPerMatch: matchesPresent > 0 ? p.setsPlayed / matchesPresent : 0
+                setsPerMatch: matchesPresent > 0 ? p.setsPlayed / matchesPresent : 0,
+                totalSetsWhenPresent: totalSetsWhenPresent
             };
         });
 
@@ -4821,10 +4861,17 @@ const SetsPlayedView = {
             });
         });
         var totalMatches = matches.length;
-        var maxSets = data[0].setsPlayed; // pour la barre de progression
+        var maxSets = 0;
+        var maxSM = 0;
+        data.forEach(function(p) {
+            if (p.setsPlayed > maxSets) maxSets = p.setsPlayed;
+            if (p.setsPerMatch > maxSM) maxSM = p.setsPerMatch;
+        });
+        var isMoy = this._ptAvgMode === 'moy';
 
         var roleColors = BilanView.ROLE_COLORS;
         var currentRole = null;
+        var numCols = 5;
 
         var self = this;
         var sortCol = self._sortCol;
@@ -4834,14 +4881,26 @@ const SetsPlayedView = {
             return '<span style="font-size:8px;opacity:0.7">' + (sortAsc ? '\u25B2' : '\u25BC') + '</span>';
         }
 
-        var html = '<div class="pt-table-container">';
+        // Mini bilan + Toggle Tot/Moy
+        var isTot = !isMoy;
+        var html = '<div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg-container);border-radius:10px;padding:8px 14px;margin-bottom:8px;">';
+        html += '<span style="font-size:13px;font-weight:700;color:var(--text-primary);font-family:Google Sans,sans-serif;">' + totalMatches + ' matchs</span>';
+        html += '<div class="display-mode-toggle avg-mode-toggle">';
+        html += '<button class="avg-mode-btn' + (isTot ? ' active' : '') + '" data-pt-avg="tot">Tot</button>';
+        html += '<button class="avg-mode-btn' + (isMoy ? ' active' : '') + '" data-pt-avg="moy">Moy</button>';
+        html += '</div></div>';
+
+        html += '<div class="pt-table-container">';
         html += '<table class="pt-table">';
         html += '<thead><tr>';
         html += '<th class="pt-th-name" data-sort="name">Joueur' + sortIcon('name') + '</th>';
         html += '<th class="pt-th-num" data-sort="pct">%' + sortIcon('pct') + '</th>';
-        html += '<th class="pt-th-num" data-sort="sets">Sets' + sortIcon('sets') + '</th>';
+        if (isMoy) {
+            html += '<th class="pt-th-num" data-sort="sm">S/M' + sortIcon('sm') + '</th>';
+        } else {
+            html += '<th class="pt-th-num" data-sort="sets">Sets' + sortIcon('sets') + '</th>';
+        }
         html += '<th class="pt-th-num" data-sort="matchs">Matchs' + sortIcon('matchs') + '</th>';
-        html += '<th class="pt-th-num" data-sort="sm">S/M' + sortIcon('sm') + '</th>';
         html += '<th class="pt-th-num" data-sort="titu">Titu.' + sortIcon('titu') + '</th>';
         html += '</tr></thead>';
         html += '<tbody>';
@@ -4851,16 +4910,24 @@ const SetsPlayedView = {
             if (p.role !== currentRole) {
                 currentRole = p.role;
                 var roleColor = roleColors[currentRole] || '#5f6368';
-                html += '<tr class="pt-role-header"><td colspan="6">';
+                html += '<tr class="pt-role-header"><td colspan="' + numCols + '">';
                 html += '<span class="pt-role-header-bar" style="background:' + roleColor + '"></span>';
                 html += currentRole;
                 html += '</td></tr>';
             }
 
-            var setsDisplay = (p.setsPlayed % 1 === 0) ? p.setsPlayed.toFixed(0) : p.setsPlayed.toFixed(1);
+            // % toujours base sur totalSets (part de la saison), valeur centrale selon le mode
             var pctValue = totalSets > 0 ? (p.setsPlayed / totalSets * 100) : 0;
+            var centralDisplay;
+            if (isMoy) {
+                centralDisplay = p.setsPerMatch.toFixed(1);
+            } else {
+                centralDisplay = (p.setsPlayed % 1 === 0) ? p.setsPlayed.toFixed(0) : p.setsPlayed.toFixed(1);
+            }
             var pctDisplay = Math.round(pctValue);
-            var barWidth = maxSets > 0 ? (p.setsPlayed / maxSets * 100) : 0;
+            var barWidth = isMoy
+                ? (maxSM > 0 ? (p.setsPerMatch / maxSM * 100) : 0)
+                : (maxSets > 0 ? (p.setsPlayed / maxSets * 100) : 0);
 
             // Roles tries par temps decroissant
             var rolesByTime = Object.keys(p.setsPlayedByRole || {}).sort(function(a, b) {
@@ -4884,10 +4951,19 @@ const SetsPlayedView = {
             var barHtml;
             if (rolesByTime.length > 1 && p.setsPlayed > 0) {
                 barHtml = '';
-                rolesByTime.forEach(function(r) {
-                    var segWidth = maxSets > 0 ? ((p.setsPlayedByRole[r] || 0) / maxSets * 100) : 0;
-                    barHtml += '<div class="pt-bar-segment" style="width:' + segWidth.toFixed(1) + '%;background:' + (roleColors[r] || '#5f6368') + '"></div>';
-                });
+                if (isMoy) {
+                    // En mode Moy, proportionner les segments par role sur la base S/M
+                    rolesByTime.forEach(function(r) {
+                        var roleShare = p.setsPlayed > 0 ? (p.setsPlayedByRole[r] || 0) / p.setsPlayed : 0;
+                        var segWidth = barWidth * roleShare;
+                        barHtml += '<div class="pt-bar-segment" style="width:' + segWidth.toFixed(1) + '%;background:' + (roleColors[r] || '#5f6368') + '"></div>';
+                    });
+                } else {
+                    rolesByTime.forEach(function(r) {
+                        var segWidth = maxSets > 0 ? ((p.setsPlayedByRole[r] || 0) / maxSets * 100) : 0;
+                        barHtml += '<div class="pt-bar-segment" style="width:' + segWidth.toFixed(1) + '%;background:' + (roleColors[r] || '#5f6368') + '"></div>';
+                    });
+                }
             } else {
                 var dotColor = roleColors[p.role] || '#5f6368';
                 barHtml = '<div class="pt-bar" style="width:' + barWidth.toFixed(1) + '%;background:' + dotColor + '"></div>';
@@ -4899,10 +4975,9 @@ const SetsPlayedView = {
             html += '<div class="pt-bar-container">' + barHtml + '</div>';
             html += '</td>';
             html += '<td class="pt-td-num pt-pct">' + pctDisplay + '%</td>';
-            html += '<td class="pt-td-num pt-sets-val">' + setsDisplay + '</td>';
-            html += '<td class="pt-td-num">' + p.matchesPresent + '/' + totalMatches + '</td>';
-            html += '<td class="pt-td-num">' + p.setsPerMatch.toFixed(1) + '</td>';
-            html += '<td class="pt-td-num">' + p.matchesStarting + '/' + p.matchesPresent + '</td>';
+            html += '<td class="pt-td-num pt-sets-val">' + centralDisplay + '</td>';
+            html += '<td class="pt-td-num">' + p.matchesPresent + '</td>';
+            html += '<td class="pt-td-num">' + p.matchesStarting + '</td>';
             html += '</tr>';
         });
 

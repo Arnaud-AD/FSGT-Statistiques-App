@@ -1265,7 +1265,7 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
 .pt-td-num {
     text-align: center;
     font-variant-numeric: tabular-nums;
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 .pt-frac {
