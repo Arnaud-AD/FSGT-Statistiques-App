@@ -4064,6 +4064,10 @@ const YearStatsView = {
 // ==================== TAB 3: TEMPS DE JEU ====================
 const SetsPlayedView = {
     _rendered: false,
+    _sortCol: 'pct',    // colonne de tri par defaut
+    _sortAsc: false,     // decroissant par defaut
+    _cachedData: null,
+    _cachedMatches: null,
 
     render() {
         var container = document.getElementById('content-setsStats');
@@ -4076,9 +4080,89 @@ const SetsPlayedView = {
         }
 
         var playerRoles = BilanView.getPlayerRolesYear(matches);
-        var data = this.computePlayingTime(matches, playerRoles);
-        container.innerHTML = this.renderTable(data, matches);
+        this._cachedData = this.computePlayingTime(matches, playerRoles);
+        this._cachedMatches = matches;
+        this._renderWithSort(container);
         this._rendered = true;
+    },
+
+    _renderWithSort(container) {
+        var data = this._cachedData;
+        var matches = this._cachedMatches;
+        if (!data || !matches) return;
+
+        // Trier au sein de chaque groupe de role
+        var totalMatches = matches.length;
+        var self = this;
+        var sortedData = this._sortDataByRole(data, totalMatches);
+        container.innerHTML = this.renderTable(sortedData, matches);
+        this._bindSortHeaders(container);
+    },
+
+    _sortDataByRole(data, totalMatches) {
+        // Grouper par role, trier chaque groupe, reconstituer
+        var roleOrder = ['Passeur', 'R4', 'Pointu', 'Centre'];
+        var groups = {};
+        roleOrder.forEach(function(r) { groups[r] = []; });
+        groups['Autre'] = [];
+
+        data.forEach(function(p) {
+            var key = groups[p.role] ? p.role : 'Autre';
+            groups[key].push(p);
+        });
+
+        var col = this._sortCol;
+        var asc = this._sortAsc;
+
+        function getSortValue(p) {
+            switch (col) {
+                case 'name': return p.name.toLowerCase();
+                case 'pct':
+                case 'sets': return p.setsPlayed;
+                case 'matchs': return p.matchesPresent;
+                case 'sm': return p.setsPerMatch;
+                case 'titu': return p.matchesPresent > 0 ? p.matchesStarting / p.matchesPresent : 0;
+                default: return p.setsPlayed;
+            }
+        }
+
+        roleOrder.concat(['Autre']).forEach(function(role) {
+            if (!groups[role]) return;
+            groups[role].sort(function(a, b) {
+                var va = getSortValue(a);
+                var vb = getSortValue(b);
+                if (typeof va === 'string') {
+                    return asc ? va.localeCompare(vb) : vb.localeCompare(va);
+                }
+                return asc ? va - vb : vb - va;
+            });
+        });
+
+        var result = [];
+        roleOrder.concat(['Autre']).forEach(function(role) {
+            if (groups[role] && groups[role].length > 0) {
+                result = result.concat(groups[role]);
+            }
+        });
+        return result;
+    },
+
+    _bindSortHeaders(container) {
+        var self = this;
+        var headers = container.querySelectorAll('th[data-sort]');
+        headers.forEach(function(th) {
+            th.style.cursor = 'pointer';
+            th.addEventListener('click', function() {
+                var col = th.dataset.sort;
+                if (self._sortCol === col) {
+                    self._sortAsc = !self._sortAsc;
+                } else {
+                    self._sortCol = col;
+                    self._sortAsc = (col === 'name'); // alpha = asc par defaut, numerique = desc
+                }
+                self._renderWithSort(container);
+            });
+        });
     },
 
     renderEmpty(container) {
@@ -4092,12 +4176,13 @@ const SetsPlayedView = {
     },
 
     /**
-     * Calcule le temps de jeu par joueur.
-     * Pour chaque set :
-     * - Si substitutions[] existe → prorata précis basé sur les points joués
-     * - Sinon → fallback : chaque joueur avec des stats compte pour 1 set complet
+     * Calcule le temps de jeu par joueur (V20.26).
+     * Pour chaque set, le total doit etre exactement 4.0 (4 slots).
+     * - Si substitutions[] existe → prorata precis base sur les points joues
+     * - Sinon, si >4 joueurs avec stats → infere les substitutions depuis les rallies
+     * - Sinon → chaque joueur = 1 set complet (4 joueurs × 1.0 = 4.0)
      *
-     * Retourne un tableau trié par setsPlayed décroissant.
+     * Retourne un tableau trie par role puis setsPlayed decroissant.
      */
     computePlayingTime(matches, playerRoles) {
         var players = {}; // { name: { setsPlayed, setsPlayedByRole, matchIds, startingMatchIds } }
@@ -4137,57 +4222,85 @@ const SetsPlayedView = {
                 var initialPlayers = Object.values(initialLineup).filter(function(p) { return p !== null; });
                 var playerRoleMap = buildRoleMap(initialLineup);
 
-                if (homeSubs.length > 0) {
-                    // ---- Calcul precis avec substitutions ----
-                    var sortedSubs = homeSubs.slice().sort(function(a, b) { return a.pointIndex - b.pointIndex; });
+                // ---- Fonction commune : accumuler les intervalles ----
+                // Normalise a 4 joueurs par intervalle (filet de securite si push a cree >4)
+                function accumulateIntervals(intervals, totalPts, matchId) {
+                    intervals.forEach(function(interval) {
+                        var duration = (interval.end - interval.start) / totalPts;
+                        var nPlayers = interval.players.length;
+                        // Chaque intervalle = 4 slots. Si >4 joueurs, normaliser pour garder 4.0 total
+                        var perPlayer = nPlayers > 4 ? (duration * 4 / nPlayers) : duration;
+                        interval.players.forEach(function(name) {
+                            var p = ensurePlayer(name);
+                            p.setsPlayed += perPlayer;
+                            p.matchIds[matchId] = true;
+                            var role = interval.roleMap[name] || 'Autre';
+                            addByRole(name, role, perPlayer);
+                        });
+                    });
+                }
 
-                    var currentOnCourt = initialPlayers.slice();
-                    var currentRoleMap = Object.assign({}, playerRoleMap);
+                // ---- Fonction commune : construire les intervalles depuis des subs ----
+                function buildIntervals(sortedSubs, startPlayers, startRoleMap, totalPts) {
+                    var currentOnCourt = startPlayers.slice();
+                    var currentRoleMap = Object.assign({}, startRoleMap);
                     var intervals = [];
-                    var prevIndex = 0;
+                    var prevIdx = 0;
 
                     sortedSubs.forEach(function(sub) {
-                        if (sub.pointIndex > prevIndex) {
-                            intervals.push({ start: prevIndex, end: sub.pointIndex, players: currentOnCourt.slice(), roleMap: Object.assign({}, currentRoleMap) });
+                        if (sub.pointIndex > prevIdx) {
+                            intervals.push({ start: prevIdx, end: sub.pointIndex, players: currentOnCourt.slice(), roleMap: Object.assign({}, currentRoleMap) });
                         }
                         // Appliquer la substitution — le remplacant herite du role
                         var idx = currentOnCourt.indexOf(sub.playerOut);
                         if (idx >= 0) {
                             currentOnCourt[idx] = sub.playerIn;
                         } else {
+                            // playerOut introuvable (nom different dans lineup) → trouver le slot libre
+                            // Chercher un joueur du currentOnCourt absent des rallies recents
                             currentOnCourt.push(sub.playerIn);
                         }
                         if (currentRoleMap[sub.playerOut]) {
                             currentRoleMap[sub.playerIn] = currentRoleMap[sub.playerOut];
                         }
-                        prevIndex = sub.pointIndex;
+                        prevIdx = sub.pointIndex;
                     });
 
                     // Dernier intervalle
-                    if (prevIndex < totalPoints) {
-                        intervals.push({ start: prevIndex, end: totalPoints, players: currentOnCourt.slice(), roleMap: Object.assign({}, currentRoleMap) });
+                    if (prevIdx < totalPts) {
+                        intervals.push({ start: prevIdx, end: totalPts, players: currentOnCourt.slice(), roleMap: Object.assign({}, currentRoleMap) });
                     }
+                    return intervals;
+                }
 
-                    // Accumuler le prorata par joueur ET par role
-                    intervals.forEach(function(interval) {
-                        var ratio = (interval.end - interval.start) / totalPoints;
-                        interval.players.forEach(function(name) {
-                            var p = ensurePlayer(name);
-                            p.setsPlayed += ratio;
-                            p.matchIds[match.id] = true;
-                            var role = interval.roleMap[name] || 'Autre';
-                            addByRole(name, role, ratio);
+                if (homeSubs.length > 0) {
+                    // ---- Calcul precis avec substitutions enregistrees ----
+                    var sortedSubs = homeSubs.slice().sort(function(a, b) { return a.pointIndex - b.pointIndex; });
+                    var intervals = buildIntervals(sortedSubs, initialPlayers, playerRoleMap, totalPoints);
+                    accumulateIntervals(intervals, totalPoints, match.id);
+                } else {
+                    // ---- Fallback : detecter substitutions depuis les rallies ----
+                    // Trouver tous les joueurs home avec des actions dans les rallies
+                    var playerFirstPoint = {}; // joueur → premier point avec action
+                    var playerLastPoint = {};  // joueur → dernier point avec action
+                    (set.points || []).forEach(function(point, pi) {
+                        (point.rally || []).forEach(function(action) {
+                            if (action.team === 'home' && action.player) {
+                                var name = action.player;
+                                if (playerFirstPoint[name] === undefined) playerFirstPoint[name] = pi;
+                                playerLastPoint[name] = pi;
+                            }
                         });
                     });
-                } else {
-                    // ---- Fallback : pas de substitutions ----
+
+                    // Collecter aussi les joueurs des lineups + stats
                     var validHomePlayers = {};
                     [set.initialHomeLineup, set.homeLineup].forEach(function(lu) {
                         if (!lu) return;
                         Object.keys(lu).forEach(function(pos) { if (lu[pos]) validHomePlayers[lu[pos]] = true; });
                     });
                     var statsHome = (set.stats && set.stats.home) ? set.stats.home : {};
-                    var playersInSet = Object.keys(statsHome).filter(function(name) {
+                    var playersWithStats = Object.keys(statsHome).filter(function(name) {
                         if (!validHomePlayers[name]) return false;
                         var s = statsHome[name];
                         return s && (
@@ -4201,17 +4314,79 @@ const SetsPlayedView = {
                         );
                     });
 
-                    if (playersInSet.length === 0) {
-                        playersInSet = initialPlayers.slice();
+                    if (playersWithStats.length === 0) {
+                        playersWithStats = initialPlayers.slice();
                     }
 
-                    playersInSet.forEach(function(name) {
-                        var p = ensurePlayer(name);
-                        p.setsPlayed += 1;
-                        p.matchIds[match.id] = true;
-                        var role = playerRoleMap[name] || 'Autre';
-                        addByRole(name, role, 1);
-                    });
+                    if (playersWithStats.length <= 4) {
+                        // Pas de substitution : chaque joueur = 1 set complet
+                        playersWithStats.forEach(function(name) {
+                            var p = ensurePlayer(name);
+                            p.setsPlayed += 1;
+                            p.matchIds[match.id] = true;
+                            var role = playerRoleMap[name] || 'Autre';
+                            addByRole(name, role, 1);
+                        });
+                    } else {
+                        // Plus de 4 joueurs → substitution(s) non enregistree(s)
+                        // Inferer les changements depuis les rallies (first/last action)
+                        var inferredSubs = [];
+                        var nonInitial = playersWithStats.filter(function(name) {
+                            return initialPlayers.indexOf(name) === -1;
+                        });
+
+                        nonInitial.forEach(function(newPlayer) {
+                            var entryPoint = playerFirstPoint[newPlayer] || 0;
+                            // Qui a-t-il remplace ? Le titulaire dont la derniere action est avant l'entree
+                            var candidates = initialPlayers.filter(function(name) {
+                                return playerLastPoint[name] !== undefined && playerLastPoint[name] < entryPoint &&
+                                    inferredSubs.every(function(s) { return s.playerOut !== name; }); // pas deja remplace
+                            });
+                            var replacedPlayer = null;
+                            if (candidates.length === 1) {
+                                replacedPlayer = candidates[0];
+                            } else if (candidates.length > 1) {
+                                // Plusieurs candidats : celui dont la derniere action est la plus proche de l'entree
+                                candidates.sort(function(a, b) { return playerLastPoint[b] - playerLastPoint[a]; });
+                                replacedPlayer = candidates[0];
+                            } else {
+                                // Aucun candidat clair : chercher parmi tous les joueurs on-court
+                                // dont la derniere action est avant ou egale a l'entree
+                                var allOnCourt = initialPlayers.filter(function(name) {
+                                    return inferredSubs.every(function(s) { return s.playerOut !== name; });
+                                });
+                                var fallbackCandidates = allOnCourt.filter(function(name) {
+                                    return playerLastPoint[name] === undefined || playerLastPoint[name] <= entryPoint;
+                                });
+                                if (fallbackCandidates.length > 0) {
+                                    replacedPlayer = fallbackCandidates[0];
+                                }
+                            }
+                            if (replacedPlayer) {
+                                inferredSubs.push({
+                                    pointIndex: entryPoint,
+                                    playerIn: newPlayer,
+                                    playerOut: replacedPlayer
+                                });
+                            }
+                        });
+
+                        if (inferredSubs.length > 0) {
+                            inferredSubs.sort(function(a, b) { return a.pointIndex - b.pointIndex; });
+                            var intervals = buildIntervals(inferredSubs, initialPlayers, playerRoleMap, totalPoints);
+                            accumulateIntervals(intervals, totalPoints, match.id);
+                        } else {
+                            // Impossible d'inferer → repartir equitablement sur 4 slots
+                            var share = 4 / playersWithStats.length;
+                            playersWithStats.forEach(function(name) {
+                                var p = ensurePlayer(name);
+                                p.setsPlayed += share;
+                                p.matchIds[match.id] = true;
+                                var role = playerRoleMap[name] || 'Autre';
+                                addByRole(name, role, share);
+                            });
+                        }
+                    }
                 }
 
                 // Titulaire = dans le lineup initial du Set 1 (setIdx === 0)
@@ -4274,15 +4449,23 @@ const SetsPlayedView = {
         var roleColors = BilanView.ROLE_COLORS;
         var currentRole = null;
 
+        var self = this;
+        var sortCol = self._sortCol;
+        var sortAsc = self._sortAsc;
+        function sortIcon(col) {
+            if (sortCol !== col) return '';
+            return ' <span style="font-size:8px;opacity:0.7">' + (sortAsc ? '\u25B2' : '\u25BC') + '</span>';
+        }
+
         var html = '<div class="pt-table-container">';
         html += '<table class="pt-table">';
         html += '<thead><tr>';
-        html += '<th class="pt-th-name">Joueur</th>';
-        html += '<th class="pt-th-num">%</th>';
-        html += '<th class="pt-th-num">Sets</th>';
-        html += '<th class="pt-th-num">Matchs</th>';
-        html += '<th class="pt-th-num">S/M</th>';
-        html += '<th class="pt-th-num">Titu.</th>';
+        html += '<th class="pt-th-name" data-sort="name">Joueur' + sortIcon('name') + '</th>';
+        html += '<th class="pt-th-num" data-sort="pct">%' + sortIcon('pct') + '</th>';
+        html += '<th class="pt-th-num" data-sort="sets">Sets' + sortIcon('sets') + '</th>';
+        html += '<th class="pt-th-num" data-sort="matchs">Matchs' + sortIcon('matchs') + '</th>';
+        html += '<th class="pt-th-num" data-sort="sm">S/M' + sortIcon('sm') + '</th>';
+        html += '<th class="pt-th-num" data-sort="titu">Titu.' + sortIcon('titu') + '</th>';
         html += '</tr></thead>';
         html += '<tbody>';
 
@@ -4298,7 +4481,6 @@ const SetsPlayedView = {
             }
 
             var setsDisplay = (p.setsPlayed % 1 === 0) ? p.setsPlayed.toFixed(0) : p.setsPlayed.toFixed(1);
-            var spmDisplay = p.setsPerMatch.toFixed(2);
             var pctValue = totalSets > 0 ? (p.setsPlayed / totalSets * 100) : 0;
             var pctDisplay = Math.round(pctValue);
             var barWidth = maxSets > 0 ? (p.setsPlayed / maxSets * 100) : 0;
@@ -4342,8 +4524,8 @@ const SetsPlayedView = {
             html += '<td class="pt-td-num pt-pct">' + pctDisplay + '%</td>';
             html += '<td class="pt-td-num pt-sets-val">' + setsDisplay + '</td>';
             html += '<td class="pt-td-num">' + p.matchesPresent + '/' + totalMatches + '</td>';
-            html += '<td class="pt-td-num">' + spmDisplay + '</td>';
-            html += '<td class="pt-td-num">' + p.matchesStarting + '</td>';
+            html += '<td class="pt-td-num">' + p.setsPerMatch.toFixed(1) + '</td>';
+            html += '<td class="pt-td-num">' + p.matchesStarting + '/' + p.matchesPresent + '</td>';
             html += '</tr>';
         });
 

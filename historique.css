@@ -1081,7 +1081,7 @@ body {
     font-size: 10px;
     font-weight: 600;
     color: var(--text-secondary);
-    text-transform: uppercase;
+    text-transform: none;
     letter-spacing: 0.5px;
     padding: 10px 8px;
     text-align: center;
