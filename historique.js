@@ -3800,7 +3800,7 @@ const ImpactView = {
         }
         html += '</div>';
         html += '<table class="stats-table impact-table">';
-        html += '<colgroup><col style="width:26%"><col style="width:11%"><col style="width:11%"><col style="width:13%"><col style="width:13%"><col style="width:13%"><col style="width:13%"></colgroup>';
+        html += '<colgroup><col style="width:22%"><col style="width:11%"><col style="width:11%"><col style="width:14%"><col style="width:14%"><col style="width:14%"><col style="width:14%"></colgroup>';
         html += '<thead><tr>';
         html += '<th data-sort-col="player" class="impact-sortable">Joueur' + self._sortIcon('player') + '</th>';
         html += '<th data-sort-col="pts" class="impact-sortable">' + ptsLabel + self._sortIcon('pts') + '</th>';
@@ -3861,7 +3861,7 @@ const ImpactView = {
         }
         html += '</div>';
         html += '<table class="stats-table impact-table">';
-        html += '<colgroup><col style="width:26%"><col style="width:11%"><col style="width:11%"><col style="width:13%"><col style="width:13%"><col style="width:13%"><col style="width:13%"></colgroup>';
+        html += '<colgroup><col style="width:22%"><col style="width:11%"><col style="width:11%"><col style="width:14%"><col style="width:14%"><col style="width:14%"><col style="width:14%"></colgroup>';
         html += '<thead><tr>';
         html += '<th data-sort-col="player" class="impact-sortable">Joueur' + self._sortIcon('player') + '</th>';
         html += '<th data-sort-col="pts" class="impact-sortable">' + ptsLabel + self._sortIcon('pts') + '</th>';
