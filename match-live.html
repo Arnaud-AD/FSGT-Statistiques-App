@@ -1440,15 +1440,15 @@
             // Passeur
             if (agg.passeur.tot > 0) {
                 html += passRow('Passeur', agg.passeur, 'pass-type-row');
-                if (agg.passeur.confort.tot > 0) html += passRow('\u2514 Confort', agg.passeur.confort, 'pass-ctx-row');
-                if (agg.passeur.contraint.tot > 0) html += passRow('\u2514 Contraint', agg.passeur.contraint, 'pass-ctx-row');
-                if (agg.passeur.transition.tot > 0) html += passRow('\u2514 Transition', agg.passeur.transition, 'pass-ctx-row');
+                if (agg.passeur.confort.tot > 0) html += passRow('\u2514 Maxi', agg.passeur.confort, 'pass-ctx-row');
+                if (agg.passeur.contraint.tot > 0) html += passRow('\u2514 Moyen', agg.passeur.contraint, 'pass-ctx-row');
+                if (agg.passeur.transition.tot > 0) html += passRow('\u2514 Mini', agg.passeur.transition, 'pass-ctx-row');
             }
             // Autres
             if (agg.autre.tot > 0) {
                 html += passRow('Autres', agg.autre, 'pass-type-row');
-                if (agg.autre.contraint.tot > 0) html += passRow('\u2514 Contraint', agg.autre.contraint, 'pass-ctx-row');
-                if (agg.autre.transition.tot > 0) html += passRow('\u2514 Transition', agg.autre.transition, 'pass-ctx-row');
+                if (agg.autre.contraint.tot > 0) html += passRow('\u2514 Moyen', agg.autre.contraint, 'pass-ctx-row');
+                if (agg.autre.transition.tot > 0) html += passRow('\u2514 Mini', agg.autre.transition, 'pass-ctx-row');
             }
 
             html += '</tbody></table></div>';

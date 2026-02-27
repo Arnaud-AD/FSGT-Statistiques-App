@@ -1618,13 +1618,13 @@ const SharedComponents = {
             html += '</tr></thead><tbody>';
 
             html += typeRow('Passeur', psr, 'pass-type-row');
-            if (psr.confort) html += ctxRow('Confort', psr.confort);
-            if (psr.contraint) html += ctxRow('Contraint', psr.contraint);
-            if (psr.transition) html += ctxRow('Transition', psr.transition);
+            if (psr.confort) html += ctxRow('Maxi', psr.confort);
+            if (psr.contraint) html += ctxRow('Moyen', psr.contraint);
+            if (psr.transition) html += ctxRow('Mini', psr.transition);
 
             html += typeRow('Autres', aut, 'pass-type-row');
-            if (aut.contraint) html += ctxRow('Contraint', aut.contraint);
-            if (aut.transition) html += ctxRow('Transition', aut.transition);
+            if (aut.contraint) html += ctxRow('Moyen', aut.contraint);
+            if (aut.transition) html += ctxRow('Mini', aut.transition);
 
             html += '</tbody></table>';
         }
@@ -3680,14 +3680,14 @@ const MatchStatsView = {
                 var pt = totals.pass || {};
                 if (pt.passeur && (pt.passeur.tot || pt.passeur.fp)) {
                     text += exportPassLine('Passeur', pt.passeur);
-                    if (pt.passeur.confort) text += exportPassLine('  Confort', pt.passeur.confort);
-                    if (pt.passeur.contraint) text += exportPassLine('  Contraint', pt.passeur.contraint);
-                    if (pt.passeur.transition) text += exportPassLine('  Transition', pt.passeur.transition);
+                    if (pt.passeur.confort) text += exportPassLine('  Maxi', pt.passeur.confort);
+                    if (pt.passeur.contraint) text += exportPassLine('  Moyen', pt.passeur.contraint);
+                    if (pt.passeur.transition) text += exportPassLine('  Mini', pt.passeur.transition);
                 }
                 if (pt.autre && (pt.autre.tot || pt.autre.fp)) {
                     text += exportPassLine('Autres', pt.autre);
-                    if (pt.autre.contraint) text += exportPassLine('  Contraint', pt.autre.contraint);
-                    if (pt.autre.transition) text += exportPassLine('  Transition', pt.autre.transition);
+                    if (pt.autre.contraint) text += exportPassLine('  Moyen', pt.autre.contraint);
+                    if (pt.autre.transition) text += exportPassLine('  Mini', pt.autre.transition);
                 }
             }
             text += '\n';
