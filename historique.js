@@ -3791,7 +3791,7 @@ const ImpactView = {
         var ptsLabel = isMoy ? 'Pts/Set' : 'Pts jou\u00e9s';
 
         var html = '<div class="impact-table-wrapper">';
-        html += '<div class="impact-table-label"><span>Impact +/\u2212 Claude</span>';
+        html += '<div class="impact-table-label"><span>Impact Global</span>';
         if (this._showToggle) {
             html += '<div class="display-mode-toggle impact-avg-toggle">';
             html += '<button class="avg-mode-btn' + (!isMoy ? ' active' : '') + '" data-impact-avg="tot">Tot</button>';
@@ -3852,7 +3852,7 @@ const ImpactView = {
         var ptsLabel = isMoy ? 'Pts/Set' : 'Pts jou\u00e9s';
 
         var html = '<div class="impact-table-wrapper">';
-        html += '<div class="impact-table-label"><span>Impact +/\u2212 Arnaud</span>';
+        html += '<div class="impact-table-label"><span>Impact Technique</span>';
         if (this._showToggle) {
             html += '<div class="display-mode-toggle impact-avg-toggle">';
             html += '<button class="avg-mode-btn' + (!isMoy ? ' active' : '') + '" data-impact-avg="tot">Tot</button>';
