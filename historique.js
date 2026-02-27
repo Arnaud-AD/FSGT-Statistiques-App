@@ -885,6 +885,41 @@ const StatsAggregator = {
     },
 
     /**
+     * Fusionne les stats joueurs par poste (role).
+     * Retourne { 'Passeur Adv.': stats, 'R4 Adv.': stats, 'Pointu Adv.': stats, 'Centre Adv.': stats }
+     */
+    aggregateByRole(playerTotals, playerRolesMap) {
+        var ROLE_LABELS = { 'Passeur': 'Passeur Adv.', 'R4': 'R4 Adv.', 'Pointu': 'Pointu Adv.', 'Centre': 'Centre Adv.' };
+        var self = this;
+        var roleTotals = {};
+        Object.keys(ROLE_LABELS).forEach(function(role) {
+            roleTotals[ROLE_LABELS[role]] = self.initPlayerStats();
+        });
+
+        // Helper recursif pour sommer toutes les proprietes numeriques
+        function sumInto(dst, src) {
+            Object.keys(src).forEach(function(key) {
+                if (typeof src[key] === 'number') {
+                    dst[key] = (dst[key] || 0) + src[key];
+                } else if (typeof src[key] === 'object' && src[key] !== null) {
+                    if (!dst[key]) dst[key] = {};
+                    sumInto(dst[key], src[key]);
+                }
+            });
+        }
+
+        Object.keys(playerTotals).forEach(function(name) {
+            var roleInfo = playerRolesMap ? playerRolesMap[name] : null;
+            var primaryRole = roleInfo ? roleInfo.primaryRole : null;
+            var label = primaryRole ? ROLE_LABELS[primaryRole] : null;
+            if (!label) return;
+            sumInto(roleTotals[label], playerTotals[name]);
+        });
+
+        return roleTotals;
+    },
+
+    /**
      * Calcule les totaux equipe a partir des totaux joueurs.
      */
     computeTotals(playerTotals) {
@@ -1089,6 +1124,22 @@ const SharedComponents = {
         return variant === 'aggregated' ? this.CATEGORIES_AGGREGATED : this.CATEGORIES_MATCH;
     },
 
+    // --- Toggle #/% ---
+    _displayMode: 'hash',   // 'hash' = valeurs absolues en grand, 'pct' = pourcentages en grand
+
+    renderDisplayModeToggle() {
+        var isHash = this._displayMode === 'hash';
+        return '<div class="display-mode-toggle">' +
+            '<button class="display-mode-btn' + (isHash ? ' active' : '') + '" data-mode="hash">#</button>' +
+            '<button class="display-mode-btn' + (!isHash ? ' active' : '') + '" data-mode="pct">%</button>' +
+            '</div>';
+    },
+
+    toggleDisplayMode(rerenderFn) {
+        this._displayMode = this._displayMode === 'hash' ? 'pct' : 'hash';
+        if (rerenderFn) rerenderFn();
+    },
+
     // --- Tri des tableaux de stats ---
     _statsSortCol: null,     // colonne active (null = defaut, 'player' = defaut aussi)
     _statsSortCat: null,     // categorie active (ex: 'service', 'attack')
@@ -1200,6 +1251,13 @@ const SharedComponents = {
                 rerenderFn();
             });
         });
+
+        // Toggle #/%
+        container.querySelectorAll('.display-mode-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                self.toggleDisplayMode(rerenderFn);
+            });
+        });
     },
 
     /**
@@ -1219,7 +1277,10 @@ const SharedComponents = {
 
         // Header avec tri
         let html = '<div class="stats-team-block">';
-        html += '<div class="stats-team-title ' + teamClass + '">' + Utils.escapeHtml(teamLabel) + '</div>';
+        html += '<div class="stats-team-title ' + teamClass + '">';
+        html += '<span>' + Utils.escapeHtml(teamLabel) + '</span>';
+        html += SharedComponents.renderDisplayModeToggle();
+        html += '</div>';
         html += '<table class="stats-table"><thead><tr>';
         html += '<th data-sort-col="player" data-sort-cat="' + category + '">Joueur' + self._sortIcon('player', category) + '</th>';
         catDef.columns.forEach(function(col) {
@@ -1287,22 +1348,32 @@ const SharedComponents = {
         }
 
         // Pourcentage
-        var pctStr = '';
+        var pctVal = null;
         if (col.pct && val > 0) {
             var tot = catData.tot || 0;
             // Pour acePlus, le tot est dans service
             if (col.computed === 'acePlus') tot = (playerStats.service || {}).tot || 0;
             // Pour faBp, le tot est dans attack
             if (col.computed === 'faBp') tot = (playerStats.attack || {}).tot || 0;
-            if (tot > 0) {
-                pctStr = ' <span class="stat-pct">' + Math.round(val / tot * 100) + '%</span>';
-            }
+            if (tot > 0) pctVal = Math.round(val / tot * 100);
         }
 
-        display = val > 0 ? val : '-';
         var cls = val > 0 ? col.cls : '';
 
-        if (val > 0 && extraInfo) {
+        if (val <= 0) {
+            return '<td class="">-</td>';
+        }
+
+        // Mode % : pourcentage en grand, valeur absolue en petit
+        if (this._displayMode === 'pct' && pctVal !== null) {
+            var secondary = extraInfo ? val + extraInfo : val;
+            return '<td class="' + cls + '">' + pctVal + '% <span class="stat-secondary">' + secondary + '</span></td>';
+        }
+
+        // Mode # (defaut) : valeur absolue en grand, pourcentage en petit
+        var pctStr = pctVal !== null ? ' <span class="stat-pct">' + pctVal + '%</span>' : '';
+        display = val;
+        if (extraInfo) {
             return '<td class="' + cls + '">' + display + extraInfo + pctStr + '</td>';
         }
         return '<td class="' + cls + '">' + display + pctStr + '</td>';
@@ -1333,7 +1404,10 @@ const SharedComponents = {
         const totals = StatsAggregator.computeTotals(playerTotals);
         let html = '';
 
-        html += '<div class="stats-team-title ' + teamClass + '">' + Utils.escapeHtml(teamLabel) + '</div>';
+        html += '<div class="stats-team-title ' + teamClass + '">';
+        html += '<span>' + Utils.escapeHtml(teamLabel) + '</span>';
+        html += SharedComponents.renderDisplayModeToggle();
+        html += '</div>';
         html += '<div class="stats-tables-container">';
 
         // Colonne noms joueurs (sticky)
@@ -1407,11 +1481,17 @@ const SharedComponents = {
 
         function cell(bucket, key, cls) {
             var v = bucket[key] || 0;
-            var pct = '';
-            if (v > 0 && (key === 'p4' || key === 'fp') && bucket.tot > 0) {
-                pct = ' <span class="stat-pct">' + Math.round(v / bucket.tot * 100) + '%</span>';
+            if (v <= 0) return '<td class="">-</td>';
+            var pctVal = null;
+            if ((key === 'p4' || key === 'fp') && bucket.tot > 0) {
+                pctVal = Math.round(v / bucket.tot * 100);
             }
-            return '<td class="' + (v > 0 ? cls : '') + '">' + (v > 0 ? v : '-') + pct + '</td>';
+            var colorCls = v > 0 ? cls : '';
+            if (SharedComponents._displayMode === 'pct' && pctVal !== null) {
+                return '<td class="' + colorCls + '">' + pctVal + '% <span class="stat-secondary">' + v + '</span></td>';
+            }
+            var pct = pctVal !== null ? ' <span class="stat-pct">' + pctVal + '%</span>' : '';
+            return '<td class="' + colorCls + '">' + v + pct + '</td>';
         }
 
         function typeRow(label, bucket, cssClass) {
@@ -1429,7 +1509,10 @@ const SharedComponents = {
         }
 
         var html = '<div class="stats-team-block">';
-        html += '<div class="stats-team-title ' + teamClass + '">' + Utils.escapeHtml(teamLabel) + '</div>';
+        html += '<div class="stats-team-title ' + teamClass + '">';
+        html += '<span>' + Utils.escapeHtml(teamLabel) + '</span>';
+        html += SharedComponents.renderDisplayModeToggle();
+        html += '</div>';
 
         // -- Tableau par joueur (standard) --
         var passCatDef = { columns: cols };
@@ -2339,11 +2422,12 @@ const BilanView = {
         }
     },
 
-    getPlayerRolesYear(matches) {
+    getPlayerRolesYear(matches, team) {
         var self = this;
+        var side = team || 'home';
         var mergedCounts = {};
         matches.forEach(function(match) {
-            var roles = self.getPlayerRoles(match, 'home');
+            var roles = self.getPlayerRoles(match, side);
             Object.keys(roles).forEach(function(name) {
                 if (!mergedCounts[name]) mergedCounts[name] = {};
                 Object.keys(roles[name].roles).forEach(function(role) {
@@ -4125,8 +4209,16 @@ const YearStatsView = {
         var homeTotals = StatsAggregator.aggregateStats(allSets, 'home');
         if (Object.keys(homeTotals).length === 0) return '';
 
-        // Roles annee pour pastilles colorees
-        SharedComponents.playerRolesMap = BilanView.getPlayerRolesYear(matches);
+        var homeRoles = BilanView.getPlayerRolesYear(matches, 'home');
+        var awayRoles = BilanView.getPlayerRolesYear(matches, 'away');
+        var awayTotalsRaw = StatsAggregator.aggregateStats(allSets, 'away');
+        var awayByRole = StatsAggregator.aggregateByRole(awayTotalsRaw, awayRoles);
+        var awayRoleMap = {
+            'Passeur Adv.': { primaryRole: 'Passeur', roles: { 'Passeur': 1 } },
+            'R4 Adv.': { primaryRole: 'R4', roles: { 'R4': 1 } },
+            'Pointu Adv.': { primaryRole: 'Pointu', roles: { 'Pointu': 1 } },
+            'Centre Adv.': { primaryRole: 'Centre', roles: { 'Centre': 1 } }
+        };
 
         // Mobile : onglets categorie + premier onglet service
         var html = '<div class="hist-section stats-section">';
@@ -4140,12 +4232,18 @@ const YearStatsView = {
         html += '</div>';
 
         html += '<div class="stats-mobile" id="yearStatsMobile">';
+        SharedComponents.playerRolesMap = homeRoles;
         html += SharedComponents.renderCategoryTable(homeTotals, 'service', 'Jen et ses Saints', 'home', 'aggregated');
+        SharedComponents.playerRolesMap = awayRoleMap;
+        html += SharedComponents.renderCategoryTable(awayByRole, 'service', 'Adversaire', 'away', 'aggregated');
         html += '</div>';
 
         // Desktop
         html += '<div class="stats-desktop" id="yearStatsDesktop">';
+        SharedComponents.playerRolesMap = homeRoles;
         html += SharedComponents.renderDesktopStatsTable(homeTotals, 'Jen et ses Saints', 'home', 'aggregated');
+        SharedComponents.playerRolesMap = awayRoleMap;
+        html += SharedComponents.renderDesktopStatsTable(awayByRole, 'Adversaire', 'away', 'aggregated');
         html += '</div>';
 
         SharedComponents.playerRolesMap = null;
@@ -4166,7 +4264,16 @@ const YearStatsView = {
             (m.sets || []).filter(function(s) { return s.completed; }).forEach(function(s) { allSets.push(s); });
         });
         var homeTotals = StatsAggregator.aggregateStats(allSets, 'home');
-        SharedComponents.playerRolesMap = BilanView.getPlayerRolesYear(filtered);
+        var homeRoles = BilanView.getPlayerRolesYear(filtered, 'home');
+        var awayRoles = BilanView.getPlayerRolesYear(filtered, 'away');
+        var awayTotalsRaw = StatsAggregator.aggregateStats(allSets, 'away');
+        var awayByRole = StatsAggregator.aggregateByRole(awayTotalsRaw, awayRoles);
+        var awayRoleMap = {
+            'Passeur Adv.': { primaryRole: 'Passeur', roles: { 'Passeur': 1 } },
+            'R4 Adv.': { primaryRole: 'R4', roles: { 'R4': 1 } },
+            'Pointu Adv.': { primaryRole: 'Pointu', roles: { 'Pointu': 1 } },
+            'Centre Adv.': { primaryRole: 'Centre', roles: { 'Centre': 1 } }
+        };
 
         var self = this;
         var rerenderFn = function() { self._rerenderStatsContainers(activeCat); };
@@ -4174,18 +4281,30 @@ const YearStatsView = {
         // Mobile
         var mobileContainer = document.getElementById('yearStatsMobile');
         if (mobileContainer) {
+            var mobileHtml = '';
             if (activeCat === 'passe') {
-                mobileContainer.innerHTML = SharedComponents.renderPassDetailView(homeTotals, 'Jen et ses Saints', 'home');
+                SharedComponents.playerRolesMap = homeRoles;
+                mobileHtml += SharedComponents.renderPassDetailView(homeTotals, 'Jen et ses Saints', 'home');
+                SharedComponents.playerRolesMap = awayRoleMap;
+                mobileHtml += SharedComponents.renderPassDetailView(awayByRole, 'Adversaire', 'away');
             } else {
-                mobileContainer.innerHTML = SharedComponents.renderCategoryTable(homeTotals, activeCat, 'Jen et ses Saints', 'home', 'aggregated');
+                SharedComponents.playerRolesMap = homeRoles;
+                mobileHtml += SharedComponents.renderCategoryTable(homeTotals, activeCat, 'Jen et ses Saints', 'home', 'aggregated');
+                SharedComponents.playerRolesMap = awayRoleMap;
+                mobileHtml += SharedComponents.renderCategoryTable(awayByRole, activeCat, 'Adversaire', 'away', 'aggregated');
             }
+            mobileContainer.innerHTML = mobileHtml;
             SharedComponents.bindStatsSortHandlers(mobileContainer, rerenderFn);
         }
 
         // Desktop
         var desktopContainer = document.getElementById('yearStatsDesktop');
         if (desktopContainer) {
-            desktopContainer.innerHTML = SharedComponents.renderDesktopStatsTable(homeTotals, 'Jen et ses Saints', 'home', 'aggregated');
+            SharedComponents.playerRolesMap = homeRoles;
+            var desktopHtml = SharedComponents.renderDesktopStatsTable(homeTotals, 'Jen et ses Saints', 'home', 'aggregated');
+            SharedComponents.playerRolesMap = awayRoleMap;
+            desktopHtml += SharedComponents.renderDesktopStatsTable(awayByRole, 'Adversaire', 'away', 'aggregated');
+            desktopContainer.innerHTML = desktopHtml;
             SharedComponents.bindStatsSortHandlers(desktopContainer, rerenderFn);
         }
 
