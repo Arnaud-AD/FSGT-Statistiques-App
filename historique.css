@@ -860,7 +860,7 @@ body {
 
 .stats-table .positive { color: var(--win-color); font-weight: 600; }
 .stats-table .negative { color: var(--loss-color); font-weight: 600; }
-.stats-table .warning { color: #e65100; font-weight: 600; }
+.stats-table .warning { color: #D48800; font-weight: 600; }
 .stats-table .neutral { color: var(--text-secondary); }
 .stats-table .stat-pct { font-size: 10px; color: var(--text-secondary); font-weight: 400; }
 .stats-table .stat-secondary { font-size: 10px; color: var(--text-secondary); font-weight: 400; }
@@ -1020,7 +1020,7 @@ body {
 
 .detail-stats-table .positive { color: var(--win-color); font-weight: 600; }
 .detail-stats-table .negative { color: var(--loss-color); font-weight: 600; }
-.detail-stats-table .warning { color: #e65100; font-weight: 600; }
+.detail-stats-table .warning { color: #D48800; font-weight: 600; }
 .detail-stats-table .neutral { color: var(--text-secondary); }
 .detail-stats-table .stat-pct { font-size: 8px; color: var(--text-secondary); font-weight: 400; }
 .detail-stats-table .stat-secondary { font-size: 8px; color: var(--text-secondary); font-weight: 400; }

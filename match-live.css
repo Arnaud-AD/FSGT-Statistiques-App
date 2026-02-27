@@ -1717,6 +1717,11 @@
             font-weight: 600;
         }
 
+        .detail-stats-table .warning {
+            color: #D48800;
+            font-weight: 600;
+        }
+
         .detail-stats-table .neutral {
             color: #5f6368;
         }

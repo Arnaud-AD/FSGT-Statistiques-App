@@ -1243,7 +1243,7 @@
                     '<td>' + (p.reception.tot || '-') + '</td>' +
                     cell(p.reception.r4, 'positive') +
                     cell(p.reception.r3, 'positive') +
-                    cell(p.reception.r2, 'neutral') +
+                    cell(p.reception.r2, 'warning') +
                     cell(p.reception.r1, 'negative') +
                     cell(p.reception.frec, 'negative') +
                 '</tr>';
@@ -1252,7 +1252,7 @@
                 '<td>' + (totals.reception.tot || '-') + '</td>' +
                 cell(totals.reception.r4, 'positive') +
                 cell(totals.reception.r3, 'positive') +
-                cell(totals.reception.r2, 'neutral') +
+                cell(totals.reception.r2, 'warning') +
                 cell(totals.reception.r1, 'negative') +
                 cell(totals.reception.frec, 'negative') +
             '</tr></tbody></table></div>';
@@ -1269,7 +1269,7 @@
                     '<td>' + (p.pass.tot || '-') + '</td>' +
                     cell(p.pass.p4, 'positive') +
                     cell(p.pass.p3, 'positive') +
-                    cell(p.pass.p2, 'neutral') +
+                    cell(p.pass.p2, 'warning') +
                     cell(p.pass.p1, 'negative') +
                     cell(p.pass.fp, 'negative') +
                 '</tr>';
@@ -1278,7 +1278,7 @@
                 '<td>' + (totals.pass.tot || '-') + '</td>' +
                 cell(totals.pass.p4, 'positive') +
                 cell(totals.pass.p3, 'positive') +
-                cell(totals.pass.p2, 'neutral') +
+                cell(totals.pass.p2, 'warning') +
                 cell(totals.pass.p1, 'negative') +
                 cell(totals.pass.fp, 'negative') +
             '</tr></tbody></table></div>';
@@ -1341,7 +1341,7 @@
                     '<td>' + (p.defense.tot || '-') + '</td>' +
                     cell(p.defense.defplus, 'positive') +
                     cell(p.defense.defneutral, 'neutral') +
-                    cell(p.defense.defminus, 'negative') +
+                    cell(p.defense.defminus, 'warning') +
                     cell(p.defense.fdef, 'negative') +
                 '</tr>';
             });
@@ -1349,7 +1349,7 @@
                 '<td>' + (totals.defense.tot || '-') + '</td>' +
                 cell(totals.defense.defplus, 'positive') +
                 cell(totals.defense.defneutral, 'neutral') +
-                cell(totals.defense.defminus, 'negative') +
+                cell(totals.defense.defminus, 'warning') +
                 cell(totals.defense.fdef, 'negative') +
             '</tr></tbody></table></div>';
 
