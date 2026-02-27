@@ -124,12 +124,35 @@ const FirebaseSync = {
         // Ajouter les matchs locaux
         localMatches.forEach(m => merged.set(m.id, m));
 
-        // Les matchs Firebase écrasent les locaux (source de vérité partagée)
-        // Sauf ceux marqués comme supprimés localement
-        firebaseMatches.forEach(m => {
-            if (tombstones.indexOf(m.id) === -1) {
-                merged.set(m.id, m);
+        // Merge Firebase : garder la version la plus complète (offline-first)
+        // Évite qu'un push async non terminé soit écrasé par un pull Firebase stale
+        firebaseMatches.forEach(fbMatch => {
+            if (tombstones.indexOf(fbMatch.id) !== -1) return;
+
+            const localMatch = merged.get(fbMatch.id);
+            if (!localMatch) {
+                // Match uniquement dans Firebase → ajouter
+                merged.set(fbMatch.id, fbMatch);
+                return;
             }
+
+            // Match existe des deux côtés → garder le plus avancé
+            const localSets = localMatch.sets?.length || 0;
+            const fbSets = fbMatch.sets?.length || 0;
+
+            if (fbSets > localSets) {
+                // Firebase a plus de sets → Firebase gagne
+                merged.set(fbMatch.id, fbMatch);
+            } else if (fbSets === localSets) {
+                // Même nombre de sets → comparer le total de points
+                const countPoints = (match) => (match.sets || [])
+                    .reduce((sum, s) => sum + (s.points?.length || 0), 0);
+                if (countPoints(fbMatch) > countPoints(localMatch)) {
+                    merged.set(fbMatch.id, fbMatch);
+                }
+                // Si égal ou local a plus de points → garder local (offline-first)
+            }
+            // Si local a plus de sets → garder local (déjà dans la map)
         });
 
         // Trier par date décroissante
