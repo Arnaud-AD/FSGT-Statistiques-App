@@ -4453,8 +4453,8 @@ const SetsPlayedView = {
         var sortCol = self._sortCol;
         var sortAsc = self._sortAsc;
         function sortIcon(col) {
-            if (sortCol !== col) return '';
-            return ' <span style="font-size:8px;opacity:0.7">' + (sortAsc ? '\u25B2' : '\u25BC') + '</span>';
+            if (sortCol !== col) return '<span style="font-size:8px;visibility:hidden">\u25BC</span>';
+            return '<span style="font-size:8px;opacity:0.7">' + (sortAsc ? '\u25B2' : '\u25BC') + '</span>';
         }
 
         var html = '<div class="pt-table-container">';
