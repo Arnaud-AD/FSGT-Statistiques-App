@@ -1161,15 +1161,25 @@ const SharedComponents = {
         }
         var dataKey = (category === 'passe') ? 'pass' : category;
         var catData = playerStats[dataKey] || {};
+        var val;
         if (col.computed === 'acePlus') {
             var srvData = playerStats.service || {};
-            return (srvData.ace || 0) + (srvData.splus || 0);
-        }
-        if (col.computed === 'faBp') {
+            val = (srvData.ace || 0) + (srvData.splus || 0);
+        } else if (col.computed === 'faBp') {
             var atkData = playerStats.attack || {};
-            return (atkData.fatt || 0) + (atkData.bp || 0);
+            val = (atkData.fatt || 0) + (atkData.bp || 0);
+        } else {
+            val = catData[col.key] || 0;
         }
-        return catData[col.key] || 0;
+
+        // En mode %, trier par pourcentage
+        if (this._displayMode === 'pct' && col.pct && val > 0) {
+            var tot = catData.tot || 0;
+            if (col.computed === 'acePlus') tot = (playerStats.service || {}).tot || 0;
+            if (col.computed === 'faBp') tot = (playerStats.attack || {}).tot || 0;
+            return tot > 0 ? (val / tot * 100) : 0;
+        }
+        return val;
     },
 
     /**
