@@ -742,10 +742,11 @@ const PlusMinusCalculator = {
     _initRecord() {
         return {
             ptsPlayed: 0, setsPlayed: 0, teamScored: 0, teamConceded: 0, plusMinus: 0,
-            ace: 0, attplus: 0, blcplus: 0,
-            fser: 0, fatt: 0, bp: 0, frec: 0, fdef: 0, fblc: 0, fp: 0,
+            offPtsPlayed: 0, offTeamScored: 0, offTeamConceded: 0,
+            ace: 0, attplus: 0, blcplus: 0, defplus: 0,
+            fser: 0, fatt: 0, bp: 0, frec: 0, fdef: 0, defminus: 0, fblc: 0, fp: 0,
             recWinner: 0, passWinner: 0, defWinner: 0,
-            dirPlus: 0, dirMinus: 0, indirect: 0,
+            dirPlus: 0, dirMinus: 0, indirect: 0, onOff: null, influence: null,
             servImpact: 0, recImpact: 0, pasImpact: 0,
             attImpact: 0, defImpact: 0, blcImpact: 0
         };
@@ -755,10 +756,30 @@ const PlusMinusCalculator = {
         var self = this;
         var results = {};
 
+        // Pre-collecter tous les joueurs de tous les sets (pour off-court tracking)
+        var allPlayersMap = {};
+        var lineupCache = [];
         sets.forEach(function(set) {
+            if (!set.points || set.points.length === 0) {
+                lineupCache.push(null);
+                return;
+            }
+            var lineups = self._getLineupAtEachPoint(set, team);
+            lineupCache.push(lineups);
+            lineups.forEach(function(lineup) {
+                if (lineup) lineup.forEach(function(name) { allPlayersMap[name] = true; });
+            });
+        });
+        var allPlayerNames = Object.keys(allPlayersMap);
+        // Initialiser les records pour tous les joueurs
+        allPlayerNames.forEach(function(name) {
+            if (!results[name]) results[name] = self._initRecord();
+        });
+
+        sets.forEach(function(set, setIdx) {
             if (!set.points || set.points.length === 0) return;
 
-            var lineups = self._getLineupAtEachPoint(set, team);
+            var lineups = lineupCache[setIdx];
 
             // Tracker qui a joue dans ce set (pour setsPlayed)
             var playedInSet = {};
@@ -783,13 +804,23 @@ const PlusMinusCalculator = {
                     playedInSet[name] = true;
                 });
 
+                // Off-court : joueurs du match qui sont sur le banc
+                allPlayerNames.forEach(function(name) {
+                    if (onCourt.indexOf(name) === -1) {
+                        var r = results[name];
+                        r.offPtsPlayed++;
+                        if (teamScored) r.offTeamScored++;
+                        else r.offTeamConceded++;
+                    }
+                });
+
                 // Contributions directes depuis le rally
                 var contribs = self._scanRally(point.rally || [], team, teamScored);
                 Object.keys(contribs).forEach(function(name) {
                     if (!results[name]) results[name] = self._initRecord();
                     var r = results[name];
                     var c = contribs[name];
-                    var fields = ['ace', 'attplus', 'blcplus', 'fser', 'fatt', 'bp', 'frec', 'fdef', 'fblc', 'fp', 'recWinner', 'passWinner', 'defWinner'];
+                    var fields = ['ace', 'attplus', 'blcplus', 'defplus', 'fser', 'fatt', 'bp', 'frec', 'fdef', 'defminus', 'fblc', 'fp', 'recWinner', 'passWinner', 'defWinner'];
                     fields.forEach(function(k) { r[k] += (c[k] || 0); });
                 });
             });
@@ -804,14 +835,24 @@ const PlusMinusCalculator = {
         Object.keys(results).forEach(function(name) {
             var r = results[name];
             r.plusMinus = r.teamScored - r.teamConceded;
-            r.dirPlus = r.ace + r.attplus + r.blcplus + r.recWinner + r.passWinner + r.defWinner;
-            r.dirMinus = r.fser + r.fatt + r.bp + r.frec + r.fdef + r.fblc + r.fp;
+            r.dirPlus = r.ace + r.attplus + r.blcplus + r.defplus + r.recWinner + r.passWinner + r.defWinner;
+            r.dirMinus = r.fser + r.fatt + r.bp + r.frec + r.fdef + r.defminus + r.fblc + r.fp;
             r.indirect = r.plusMinus - (r.dirPlus - r.dirMinus);
+            // On/Off : +/- reel vs +/- attendu si l'equipe jouait au meme rythme que sans le joueur
+            if (r.offPtsPlayed > 0 && r.ptsPlayed > 0) {
+                var offRate = (r.offTeamScored - r.offTeamConceded) / r.offPtsPlayed;
+                r.onOff = r.plusMinus - offRate * r.ptsPlayed;
+                // Influence = On/Off - 0.5*(Dir+ - Dir-) : α=0.5 reconnait que le direct est aide par les coequipiers
+                r.influence = r.onOff - 0.5 * (r.dirPlus - r.dirMinus);
+            } else {
+                r.onOff = null;
+                r.influence = null;
+            }
             r.servImpact = r.ace - r.fser;
             r.recImpact = r.recWinner - r.frec;
             r.pasImpact = r.passWinner - r.fp;
             r.attImpact = r.attplus - r.fatt - r.bp;
-            r.defImpact = r.defWinner - r.fdef;
+            r.defImpact = r.defplus + r.defWinner - r.fdef - r.defminus;
             r.blcImpact = r.blcplus - r.fblc;
         });
 
@@ -917,8 +958,8 @@ const PlusMinusCalculator = {
 
         function ensure(name) {
             if (!contribs[name]) contribs[name] = {
-                ace: 0, attplus: 0, blcplus: 0,
-                fser: 0, fatt: 0, bp: 0, frec: 0, fdef: 0, fblc: 0, fp: 0,
+                ace: 0, attplus: 0, blcplus: 0, defplus: 0,
+                fser: 0, fatt: 0, bp: 0, frec: 0, fdef: 0, defminus: 0, fblc: 0, fp: 0,
                 recWinner: 0, passWinner: 0, defWinner: 0
             };
             return contribs[name];
@@ -1009,11 +1050,16 @@ const PlusMinusCalculator = {
                     if (action.isDirectReturnWinner) {
                         c.defWinner++;
                     } else if (action.untouched) {
-                        if (blockBefore !== 'normal') c.fdef++;
+                        if (blockBefore === 'normal') c.defminus++; // D- : avec bloc avant
+                        else c.fdef++; // FD : sans bloc
                     } else if (action.result === 'fault') {
-                        if (blockBefore !== 'normal') c.fdef++;
+                        if (blockBefore === 'normal') c.defminus++; // D- : avec bloc avant
+                        else c.fdef++; // FD : sans bloc
                     } else if (action.isDirectReturn && !action.isDirectReturnWinner) {
                         if (StatsRepair._isDirectReturnExploited(rally, i, action.team)) c.fdef++;
+                        else c.defplus++; // Retour direct non exploite = defense reussie
+                    } else if (action.result !== 'fault' && !action.untouched) {
+                        c.defplus++; // D+ ou D neutre : defense reussie, jeu continue
                     }
                     break;
                 }
@@ -1063,7 +1109,8 @@ const PlusMinusCalculator = {
                 var src = matchData[name];
                 // Sommer les champs bruts seulement
                 var rawFields = ['ptsPlayed', 'setsPlayed', 'teamScored', 'teamConceded',
-                    'ace', 'attplus', 'blcplus', 'fser', 'fatt', 'bp', 'frec', 'fdef', 'fblc', 'fp',
+                    'offPtsPlayed', 'offTeamScored', 'offTeamConceded',
+                    'ace', 'attplus', 'blcplus', 'defplus', 'fser', 'fatt', 'bp', 'frec', 'fdef', 'defminus', 'fblc', 'fp',
                     'recWinner', 'passWinner', 'defWinner'];
                 rawFields.forEach(function(k) { dst[k] += src[k]; });
             });
@@ -1073,14 +1120,22 @@ const PlusMinusCalculator = {
         Object.keys(combined).forEach(function(name) {
             var r = combined[name];
             r.plusMinus = r.teamScored - r.teamConceded;
-            r.dirPlus = r.ace + r.attplus + r.blcplus + r.recWinner + r.passWinner + r.defWinner;
-            r.dirMinus = r.fser + r.fatt + r.bp + r.frec + r.fdef + r.fblc + r.fp;
+            r.dirPlus = r.ace + r.attplus + r.blcplus + r.defplus + r.recWinner + r.passWinner + r.defWinner;
+            r.dirMinus = r.fser + r.fatt + r.bp + r.frec + r.fdef + r.defminus + r.fblc + r.fp;
             r.indirect = r.plusMinus - (r.dirPlus - r.dirMinus);
+            if (r.offPtsPlayed > 0 && r.ptsPlayed > 0) {
+                var offRate = (r.offTeamScored - r.offTeamConceded) / r.offPtsPlayed;
+                r.onOff = r.plusMinus - offRate * r.ptsPlayed;
+                r.influence = r.onOff - 0.5 * (r.dirPlus - r.dirMinus);
+            } else {
+                r.onOff = null;
+                r.influence = null;
+            }
             r.servImpact = r.ace - r.fser;
             r.recImpact = r.recWinner - r.frec;
             r.pasImpact = r.passWinner - r.fp;
             r.attImpact = r.attplus - r.fatt - r.bp;
-            r.defImpact = r.defWinner - r.fdef;
+            r.defImpact = r.defplus + r.defWinner - r.fdef - r.defminus;
             r.blcImpact = r.blcplus - r.fblc;
         });
 
@@ -3534,6 +3589,8 @@ const ImpactView = {
     _showToggle: false, // visible si multi-sets
     _lastData: null, // cache pour re-render toggle
     _lastPlayerRoles: null,
+    _sortCol: null, // null = tri par defaut (role + pm), sinon colKey
+    _sortAsc: false, // desc par defaut pour valeurs numeriques
 
     renderForMatch(match, team) {
         var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
@@ -3576,29 +3633,116 @@ const ImpactView = {
         this._avgMode = this._avgMode === 'tot' ? 'moy' : 'tot';
     },
 
-    _sortPlayers(data) {
-        var isMoy = this._avgMode === 'moy';
-        return Object.keys(data).filter(function(name) {
-            return data[name].ptsPlayed > 0;
-        }).sort(function(a, b) {
-            var pmA = isMoy && data[a].setsPlayed > 0 ? data[a].plusMinus / data[a].setsPlayed : data[a].plusMinus;
-            var pmB = isMoy && data[b].setsPlayed > 0 ? data[b].plusMinus / data[b].setsPlayed : data[b].plusMinus;
-            return pmB - pmA;
-        });
+    // Icone de tri (fleche) pour les headers
+    _sortIcon(colKey) {
+        var active;
+        if (colKey === 'player') {
+            active = !this._sortCol || this._sortCol === 'player';
+        } else {
+            active = this._sortCol === colKey;
+        }
+        if (!active) return ' <span class="sort-arrow">\u25BC</span>';
+        var arrow = this._sortAsc ? '\u25B2' : '\u25BC';
+        if (colKey === 'player' && !this._sortCol) arrow = '\u25BC';
+        return ' <span class="sort-arrow active">' + arrow + '</span>';
     },
 
-    _fmtVal(val, setsPlayed) {
+    // Valeur brute pour le tri d'une colonne
+    _getSortValue(r, colKey) {
+        var isMoy = this._avgMode === 'moy';
+        var sp = r.setsPlayed || 1;
+        var raw;
+        switch (colKey) {
+            case 'pts': raw = r.ptsPlayed; break;
+            case 'pm': raw = r.plusMinus; break;
+            case 'dir': raw = r.dirPlus - r.dirMinus; break;
+            case 'dirPlus': raw = r.dirPlus; break;
+            case 'dirMinus': raw = r.dirMinus; break;
+            case 'indirect': raw = r.indirect; break;
+            case 'onOff': raw = r.onOff !== null ? r.onOff : -9999; break;
+            case 'influence': raw = r.influence !== null ? r.influence : -9999; break;
+            case 'serv': raw = r.servImpact; break;
+            case 'rec': raw = r.recImpact; break;
+            case 'pas': raw = r.pasImpact; break;
+            case 'att': raw = r.attImpact; break;
+            case 'def': raw = r.defImpact; break;
+            case 'blc': raw = r.blcImpact; break;
+            default: raw = r.plusMinus;
+        }
+        return isMoy && sp > 1 ? raw / sp : raw;
+    },
+
+    _sortPlayers(data, playerRoles) {
+        var self = this;
+        var isMoy = this._avgMode === 'moy';
+        var players = Object.keys(data).filter(function(name) {
+            return data[name].ptsPlayed > 0;
+        });
+
+        // Tri par defaut (pas de colonne selectionnee ou 'player') : role puis +/- desc
+        if (!this._sortCol || this._sortCol === 'player') {
+            var roleOrder = { 'Passeur': 0, 'R4': 1, 'Pointu': 2, 'Centre': 3 };
+            var asc = this._sortCol === 'player' ? this._sortAsc : false;
+            players.sort(function(a, b) {
+                var roleA = playerRoles && playerRoles[a] ? playerRoles[a].primaryRole : null;
+                var roleB = playerRoles && playerRoles[b] ? playerRoles[b].primaryRole : null;
+                var orderA = roleA && roleOrder[roleA] !== undefined ? roleOrder[roleA] : 9;
+                var orderB = roleB && roleOrder[roleB] !== undefined ? roleOrder[roleB] : 9;
+                var roleCmp = asc ? orderB - orderA : orderA - orderB;
+                if (roleCmp !== 0) return roleCmp;
+                // Meme poste : meilleur +/- en premier
+                var pmA = isMoy && data[a].setsPlayed > 0 ? data[a].plusMinus / data[a].setsPlayed : data[a].plusMinus;
+                var pmB = isMoy && data[b].setsPlayed > 0 ? data[b].plusMinus / data[b].setsPlayed : data[b].plusMinus;
+                return asc ? pmA - pmB : pmB - pmA;
+            });
+            return players;
+        }
+
+        // Tri par colonne numerique
+        var col = this._sortCol;
+        var asc = this._sortAsc;
+        players.sort(function(a, b) {
+            var valA = self._getSortValue(data[a], col);
+            var valB = self._getSortValue(data[b], col);
+            return asc ? valA - valB : valB - valA;
+        });
+        return players;
+    },
+
+    _teamTotals(data, players) {
+        var fields = ['ptsPlayed', 'plusMinus', 'dirPlus', 'dirMinus', 'indirect',
+            'servImpact', 'recImpact', 'pasImpact', 'attImpact', 'defImpact', 'blcImpact'];
+        var t = { setsPlayed: 0, onOff: null, influence: null };
+        fields.forEach(function(f) { t[f] = 0; });
+        // setsPlayed = max parmi les joueurs (nombre total de sets du match/saison)
+        players.forEach(function(name) {
+            var r = data[name];
+            fields.forEach(function(f) { t[f] += r[f]; });
+            if (r.setsPlayed > t.setsPlayed) t.setsPlayed = r.setsPlayed;
+        });
+        return t;
+    },
+
+    // colorMode: undefined=vert/rouge, 'dark'=noir, 'infl'=violet/parme
+    _colorCls(v, colorMode) {
+        if (colorMode === 'dark') return 'impact-dark';
+        if (!colorMode) return v > 0 ? 'positive' : 'negative';
+        return v > 0 ? (colorMode + '-pos') : (colorMode + '-neg');
+    },
+
+    _fmtVal(val, setsPlayed, showZero, colorMode) {
         var isMoy = this._avgMode === 'moy';
         var v = val;
         if (isMoy && setsPlayed > 1) v = val / setsPlayed;
+        var zeroLabel = showZero ? '0' : '\u2212';
         if (isMoy) {
-            if (Math.abs(v) < 0.05) return '<span class="impact-zero">\u2212</span>';
-            var cls = v > 0 ? 'positive' : 'negative';
+            if (Math.abs(v) < 0.05) return '<span class="impact-zero">' + zeroLabel + '</span>';
+            var cls = this._colorCls(v, colorMode);
             var formatted = (v > 0 ? '+' : '') + v.toFixed(1);
             return '<span class="' + cls + '">' + formatted + '</span>';
         }
-        if (v === 0) return '<span class="impact-zero">\u2212</span>';
-        var cls = v > 0 ? 'positive' : 'negative';
+        if (v === 0) return '<span class="impact-zero">' + zeroLabel + '</span>';
+        var cls = this._colorCls(v, colorMode);
         return '<span class="' + cls + '">' + (v > 0 ? '+' : '') + v + '</span>';
     },
 
@@ -3614,6 +3758,17 @@ const ImpactView = {
         return String(v);
     },
 
+    _fmtOnOff(val, setsPlayed, isPlayer, colorMode) {
+        if (val === null || val === undefined) return '<span class="impact-zero">' + (isPlayer ? '\u221E' : '\u2212') + '</span>';
+        var isMoy = this._avgMode === 'moy';
+        var v = val;
+        if (isMoy && setsPlayed > 1) v = val / setsPlayed;
+        if (Math.abs(v) < 0.05) return '<span class="impact-zero">\u2212</span>';
+        var cls = this._colorCls(v, colorMode || 'dark');
+        var formatted = (v > 0 ? '+' : '') + v.toFixed(1);
+        return '<span class="' + cls + '">' + formatted + '</span>';
+    },
+
     _renderPlayerCell(name, playerRoles) {
         var savedMap = SharedComponents.playerRolesMap;
         SharedComponents.playerRolesMap = playerRoles;
@@ -3623,11 +3778,11 @@ const ImpactView = {
     },
 
     _renderClaudeTable(data, playerRoles) {
-        var players = this._sortPlayers(data);
+        var players = this._sortPlayers(data, playerRoles);
         if (players.length === 0) return '';
         var self = this;
         var isMoy = this._avgMode === 'moy';
-        var ptsLabel = isMoy ? 'Pts/S' : 'Pts';
+        var ptsLabel = isMoy ? 'Pts/Set' : 'Pts jou\u00e9s';
 
         var html = '<div class="impact-table-wrapper">';
         html += '<div class="impact-table-label"><span>Impact +/\u2212 Claude</span>';
@@ -3640,7 +3795,13 @@ const ImpactView = {
         html += '</div>';
         html += '<table class="stats-table impact-table">';
         html += '<thead><tr>';
-        html += '<th>Joueur</th><th>' + ptsLabel + '</th><th class="impact-col-main">+/\u2212</th><th>Dir+</th><th>Dir\u2212</th><th>Ind.</th>';
+        html += '<th data-sort-col="player" class="impact-sortable">Joueur' + self._sortIcon('player') + '</th>';
+        html += '<th data-sort-col="pts" class="impact-sortable">' + ptsLabel + self._sortIcon('pts') + '</th>';
+        html += '<th data-sort-col="pm" class="impact-col-main impact-sortable">+/\u2212' + self._sortIcon('pm') + '</th>';
+        html += '<th data-sort-col="dir" class="impact-sortable">Direct' + self._sortIcon('dir') + '</th>';
+        html += '<th data-sort-col="indirect" class="impact-sortable">Indirect' + self._sortIcon('indirect') + '</th>';
+        html += '<th data-sort-col="onOff" class="impact-sortable">On/Off' + self._sortIcon('onOff') + '</th>';
+        html += '<th data-sort-col="influence" class="impact-sortable">Influence' + self._sortIcon('influence') + '</th>';
         html += '</tr></thead><tbody>';
 
         players.forEach(function(name) {
@@ -3650,12 +3811,26 @@ const ImpactView = {
             html += '<tr>';
             html += '<td>' + self._renderPlayerCell(name, playerRoles) + '</td>';
             html += '<td>' + ptsDisplay + '</td>';
-            html += '<td class="impact-col-main">' + self._fmtVal(r.plusMinus, sp) + '</td>';
-            html += '<td>' + (r.dirPlus > 0 ? '<span class="positive">' + self._fmtDirVal(r.dirPlus, sp) + '</span>' : '<span class="impact-zero">\u2212</span>') + '</td>';
-            html += '<td>' + (r.dirMinus > 0 ? '<span class="negative">' + self._fmtDirVal(r.dirMinus, sp) + '</span>' : '<span class="impact-zero">\u2212</span>') + '</td>';
+            html += '<td class="impact-col-main">' + self._fmtVal(r.plusMinus, sp, true, 'dark') + '</td>';
+            html += '<td>' + self._fmtVal(r.dirPlus - r.dirMinus, sp) + '</td>';
             html += '<td>' + self._fmtVal(r.indirect, sp) + '</td>';
+            html += '<td>' + self._fmtOnOff(r.onOff, sp, true, 'dark') + '</td>';
+            html += '<td>' + self._fmtOnOff(r.influence, sp, true, 'infl') + '</td>';
             html += '</tr>';
         });
+
+        // Ligne Total equipe
+        var t = this._teamTotals(data, players);
+        var tsp = t.setsPlayed || 1;
+        var tPts = isMoy ? (tsp > 1 ? (t.ptsPlayed / tsp).toFixed(0) : t.ptsPlayed) : t.ptsPlayed;
+        html += '<tr class="total-row"><td>Total</td>';
+        html += '<td>' + tPts + '</td>';
+        html += '<td class="impact-col-main">' + self._fmtVal(t.plusMinus, tsp, true, 'dark') + '</td>';
+        html += '<td>' + self._fmtVal(t.dirPlus - t.dirMinus, tsp) + '</td>';
+        html += '<td>' + self._fmtVal(t.indirect, tsp) + '</td>';
+        html += '<td><span class="impact-zero">\u2212</span></td>';
+        html += '<td><span class="impact-zero">\u2212</span></td>';
+        html += '</tr>';
 
         html += '</tbody></table>';
         html += '</div>';
@@ -3663,18 +3838,25 @@ const ImpactView = {
     },
 
     _renderArnaudTable(data, playerRoles) {
-        var players = this._sortPlayers(data);
+        var players = this._sortPlayers(data, playerRoles);
         if (players.length === 0) return '';
         var self = this;
         var isMoy = this._avgMode === 'moy';
-        var ptsLabel = isMoy ? 'Pts/S' : 'Pts';
+        var ptsLabel = isMoy ? 'Pts/Set' : 'Pts jou\u00e9s';
 
         var html = '<div class="impact-table-wrapper">';
         html += '<div class="impact-table-label">Impact +/\u2212 Arnaud</div>';
         html += '<table class="stats-table impact-table">';
         html += '<thead><tr>';
-        html += '<th>Joueur</th><th>' + ptsLabel + '</th><th class="impact-col-main">+/\u2212</th>';
-        html += '<th>Serv</th><th>Rec</th><th>Pas</th><th>Att</th><th>Def</th><th>Blc</th>';
+        html += '<th data-sort-col="player" class="impact-sortable">Joueur' + self._sortIcon('player') + '</th>';
+        html += '<th data-sort-col="pts" class="impact-sortable">' + ptsLabel + self._sortIcon('pts') + '</th>';
+        html += '<th data-sort-col="pm" class="impact-col-main impact-sortable">+/\u2212' + self._sortIcon('pm') + '</th>';
+        html += '<th data-sort-col="serv" class="impact-sortable">Serv' + self._sortIcon('serv') + '</th>';
+        html += '<th data-sort-col="rec" class="impact-sortable">Rec' + self._sortIcon('rec') + '</th>';
+        html += '<th data-sort-col="pas" class="impact-sortable">Pas' + self._sortIcon('pas') + '</th>';
+        html += '<th data-sort-col="att" class="impact-sortable">Att' + self._sortIcon('att') + '</th>';
+        html += '<th data-sort-col="def" class="impact-sortable">Def' + self._sortIcon('def') + '</th>';
+        html += '<th data-sort-col="blc" class="impact-sortable">Blc' + self._sortIcon('blc') + '</th>';
         html += '</tr></thead><tbody>';
 
         players.forEach(function(name) {
@@ -3684,7 +3866,7 @@ const ImpactView = {
             html += '<tr>';
             html += '<td>' + self._renderPlayerCell(name, playerRoles) + '</td>';
             html += '<td>' + ptsDisplay + '</td>';
-            html += '<td class="impact-col-main">' + self._fmtVal(r.plusMinus, sp) + '</td>';
+            html += '<td class="impact-col-main">' + self._fmtVal(r.plusMinus, sp, true, 'dark') + '</td>';
 
             var cats = ['servImpact', 'recImpact', 'pasImpact', 'attImpact', 'defImpact', 'blcImpact'];
             cats.forEach(function(key) {
@@ -3693,6 +3875,19 @@ const ImpactView = {
 
             html += '</tr>';
         });
+
+        // Ligne Total equipe
+        var t = this._teamTotals(data, players);
+        var tsp = t.setsPlayed || 1;
+        var tPts = isMoy ? (tsp > 1 ? (t.ptsPlayed / tsp).toFixed(0) : t.ptsPlayed) : t.ptsPlayed;
+        html += '<tr class="total-row"><td>Total</td>';
+        html += '<td>' + tPts + '</td>';
+        html += '<td class="impact-col-main">' + self._fmtVal(t.plusMinus, tsp, true, 'dark') + '</td>';
+        var cats = ['servImpact', 'recImpact', 'pasImpact', 'attImpact', 'defImpact', 'blcImpact'];
+        cats.forEach(function(key) {
+            html += '<td>' + self._fmtVal(t[key], tsp) + '</td>';
+        });
+        html += '</tr>';
 
         html += '</tbody></table>';
         html += '</div>';
@@ -5579,6 +5774,33 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (!btn) return;
         ImpactView.toggleAvgMode();
         var section = btn.closest('.impact-section');
+        if (section && ImpactView._lastData) {
+            var html = ImpactView._renderSection(ImpactView._lastData, ImpactView._lastPlayerRoles);
+            var temp = document.createElement('div');
+            temp.innerHTML = html;
+            section.replaceWith(temp.firstChild);
+        }
+    });
+
+    // Tri colonnes Impact +/- (delegation)
+    document.addEventListener('click', function(e) {
+        var th = e.target.closest('.impact-table th[data-sort-col]');
+        if (!th) return;
+        var col = th.dataset.sortCol;
+        if (col === 'player') {
+            if (ImpactView._sortCol === 'player') {
+                ImpactView._sortAsc = !ImpactView._sortAsc;
+            } else {
+                ImpactView._sortCol = 'player';
+                ImpactView._sortAsc = false;
+            }
+        } else if (ImpactView._sortCol === col) {
+            ImpactView._sortAsc = !ImpactView._sortAsc;
+        } else {
+            ImpactView._sortCol = col;
+            ImpactView._sortAsc = false;
+        }
+        var section = th.closest('.impact-section');
         if (section && ImpactView._lastData) {
             var html = ImpactView._renderSection(ImpactView._lastData, ImpactView._lastPlayerRoles);
             var temp = document.createElement('div');

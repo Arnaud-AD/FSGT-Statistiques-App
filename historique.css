@@ -1784,6 +1784,11 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
     min-width: 28px;
     padding: 8px 5px;
 }
+.impact-table th[data-sort-col] {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
 
 .impact-table th:first-child,
 .impact-table td:first-child {
@@ -1799,6 +1804,11 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
     color: var(--text-secondary);
     font-weight: 400;
 }
+/* Colonnes secondaires : texte noir bold */
+.impact-table .impact-dark { color: var(--text-primary); font-weight: 600; }
+/* Influence : violet / parme */
+.impact-table .infl-pos { color: #7c3aed; font-weight: 600; }
+.impact-table .infl-neg { color: #a78bfa; font-weight: 600; }
 
 /* ==================== RESPONSIVE: DESKTOP (>=1024px) ==================== */
 @media (min-width: 1024px) {
