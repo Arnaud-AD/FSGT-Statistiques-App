@@ -3869,7 +3869,7 @@ const ImpactView = {
         html += '<th data-sort-col="serv" class="impact-sortable">Serv' + self._sortIcon('serv') + '</th>';
         html += '<th data-sort-col="rec" class="impact-sortable">Rec' + self._sortIcon('rec') + '</th>';
         html += '<th data-sort-col="att" class="impact-sortable">Att' + self._sortIcon('att') + '</th>';
-        html += '<th data-sort-col="defblc" class="impact-sortable">Def/Blc' + self._sortIcon('defblc') + '</th>';
+        html += '<th data-sort-col="defblc" class="impact-sortable">Def&amp;Blc' + self._sortIcon('defblc') + '</th>';
         html += '</tr></thead><tbody>';
 
         players.forEach(function(name) {
