@@ -798,8 +798,10 @@ const StatsAggregator = {
                 if (allowed && (Array.isArray(allowed) ? allowed.indexOf(name) === -1 : !allowed[name])) continue;
                 if (!playerTotals[name]) {
                     playerTotals[name] = StatsAggregator.initPlayerStats();
+                    playerTotals[name]._setsPlayed = 0;
                 }
                 const t = playerTotals[name];
+                t._setsPlayed++;
 
                 // Service
                 t.service.tot += (data.service?.tot || 0);
@@ -1124,6 +1126,25 @@ const SharedComponents = {
         return variant === 'aggregated' ? this.CATEGORIES_AGGREGATED : this.CATEGORIES_MATCH;
     },
 
+    // --- Toggle Tot/Moy ---
+    _avgMode: 'tot',         // 'tot' = totaux cumules, 'moy' = moyenne par set joue
+    _showAvgToggle: false,   // visible uniquement en Set ALL et Stats Annee
+    _totalSets: 1,           // nombre total de sets (pour la ligne Total en mode moy)
+
+    renderAvgModeToggle() {
+        if (!this._showAvgToggle) return '';
+        var isTot = this._avgMode === 'tot';
+        return '<div class="display-mode-toggle avg-mode-toggle">' +
+            '<button class="avg-mode-btn' + (isTot ? ' active' : '') + '" data-avg="tot">Tot</button>' +
+            '<button class="avg-mode-btn' + (!isTot ? ' active' : '') + '" data-avg="moy">Moy</button>' +
+            '</div>';
+    },
+
+    toggleAvgMode(rerenderFn) {
+        this._avgMode = this._avgMode === 'tot' ? 'moy' : 'tot';
+        if (rerenderFn) rerenderFn();
+    },
+
     // --- Toggle #/% ---
     _displayMode: 'hash',   // 'hash' = valeurs absolues en grand, 'pct' = pourcentages en grand
 
@@ -1178,6 +1199,10 @@ const SharedComponents = {
             if (col.computed === 'acePlus') tot = (playerStats.service || {}).tot || 0;
             if (col.computed === 'faBp') tot = (playerStats.attack || {}).tot || 0;
             return tot > 0 ? (val / tot * 100) : 0;
+        }
+        // En mode Moy, trier par moyenne par set joue
+        if (this._avgMode === 'moy' && playerStats._setsPlayed > 1) {
+            return val / playerStats._setsPlayed;
         }
         return val;
     },
@@ -1262,6 +1287,13 @@ const SharedComponents = {
             });
         });
 
+        // Toggle Tot/Moy
+        container.querySelectorAll('.avg-mode-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                self.toggleAvgMode(rerenderFn);
+            });
+        });
+
         // Toggle #/%
         container.querySelectorAll('.display-mode-btn').forEach(function(btn) {
             btn.addEventListener('click', function() {
@@ -1289,6 +1321,7 @@ const SharedComponents = {
         let html = '<div class="stats-team-block">';
         html += '<div class="stats-team-title ' + teamClass + '">';
         html += '<span>' + Utils.escapeHtml(teamLabel) + '</span>';
+        html += SharedComponents.renderAvgModeToggle();
         html += SharedComponents.renderDisplayModeToggle();
         html += '</div>';
         html += '<table class="stats-table"><thead><tr>';
@@ -1316,8 +1349,9 @@ const SharedComponents = {
         // V19.1 fix : la cle UI 'passe' correspond a la cle data 'pass'
         var totDataKey = (category === 'passe') ? 'pass' : category;
         html += '<tr class="total-row"><td>Total</td>';
+        var totalRowStats = { [totDataKey]: totals[totDataKey], service: totals.service, _setsPlayed: SharedComponents._totalSets };
         catDef.columns.forEach(function(col) {
-            html += SharedComponents.renderCell({ [totDataKey]: totals[totDataKey], service: totals.service }, category, col);
+            html += SharedComponents.renderCell(totalRowStats, category, col);
         });
         html += '</tr>';
 
@@ -1357,7 +1391,7 @@ const SharedComponents = {
             val = catData[col.key] || 0;
         }
 
-        // Pourcentage
+        // Pourcentage (calcule sur valeurs brutes, avant division moy)
         var pctVal = null;
         if (col.pct && val > 0) {
             var tot = catData.tot || 0;
@@ -1368,25 +1402,37 @@ const SharedComponents = {
             if (tot > 0) pctVal = Math.round(val / tot * 100);
         }
 
+        // Mode Moy : diviser par sets joues
+        if (this._avgMode === 'moy' && playerStats._setsPlayed > 1) {
+            val = val / playerStats._setsPlayed;
+            if (extraInfo) {
+                var atkData2 = playerStats.attack || {};
+                var bpMoy = (atkData2.bp || 0) / playerStats._setsPlayed;
+                extraInfo = '(' + (bpMoy % 1 === 0 ? bpMoy : bpMoy.toFixed(1)) + ')';
+            }
+        }
+
         var cls = val > 0 ? col.cls : '';
 
         if (val <= 0) {
             return '<td class="">-</td>';
         }
 
+        // Formater la valeur (entier ou 1 decimale si moy)
+        var displayVal = (val % 1 === 0) ? val : val.toFixed(1);
+
         // Mode % : pourcentage en grand, valeur absolue en petit
         if (this._displayMode === 'pct' && pctVal !== null) {
-            var secondary = extraInfo ? val + extraInfo : val;
+            var secondary = extraInfo ? displayVal + extraInfo : displayVal;
             return '<td class="' + cls + '">' + pctVal + '% <span class="stat-secondary">' + secondary + '</span></td>';
         }
 
         // Mode # (defaut) : valeur absolue en grand, pourcentage en petit
         var pctStr = pctVal !== null ? ' <span class="stat-pct">' + pctVal + '%</span>' : '';
-        display = val;
         if (extraInfo) {
-            return '<td class="' + cls + '">' + display + extraInfo + pctStr + '</td>';
+            return '<td class="' + cls + '">' + displayVal + extraInfo + pctStr + '</td>';
         }
-        return '<td class="' + cls + '">' + display + pctStr + '</td>';
+        return '<td class="' + cls + '">' + displayVal + pctStr + '</td>';
     },
 
     /**
@@ -1416,6 +1462,7 @@ const SharedComponents = {
 
         html += '<div class="stats-team-title ' + teamClass + '">';
         html += '<span>' + Utils.escapeHtml(teamLabel) + '</span>';
+        html += SharedComponents.renderAvgModeToggle();
         html += SharedComponents.renderDisplayModeToggle();
         html += '</div>';
         html += '<div class="stats-tables-container">';
@@ -1456,8 +1503,9 @@ const SharedComponents = {
             // V19.1 fix : la cle UI 'passe' correspond a la cle data 'pass'
             var totDataK = (catKey === 'passe') ? 'pass' : catKey;
             html += '<tr class="total-row">';
+            var totRowStats = { [totDataK]: totals[totDataK], service: totals.service, _setsPlayed: SharedComponents._totalSets };
             catDef.columns.forEach(function(col) {
-                html += SharedComponents.renderCell({ [totDataK]: totals[totDataK], service: totals.service }, catKey, col);
+                html += SharedComponents.renderCell(totRowStats, catKey, col);
             });
             html += '</tr>';
 
@@ -1489,31 +1537,38 @@ const SharedComponents = {
             { key: 'fp', label: 'FP', cls: 'negative' }
         ];
 
-        function cell(bucket, key, cls) {
+        function cell(bucket, key, cls, setsPlayed) {
             var v = bucket[key] || 0;
             if (v <= 0) return '<td class="">-</td>';
             var pctVal = null;
             if ((key === 'p4' || key === 'fp') && bucket.tot > 0) {
                 pctVal = Math.round(v / bucket.tot * 100);
             }
+            // Mode Moy : diviser par sets joues
+            if (SharedComponents._avgMode === 'moy' && setsPlayed > 1) {
+                v = v / setsPlayed;
+            }
             var colorCls = v > 0 ? cls : '';
+            var displayVal = (v % 1 === 0) ? v : v.toFixed(1);
             if (SharedComponents._displayMode === 'pct' && pctVal !== null) {
-                return '<td class="' + colorCls + '">' + pctVal + '% <span class="stat-secondary">' + v + '</span></td>';
+                return '<td class="' + colorCls + '">' + pctVal + '% <span class="stat-secondary">' + displayVal + '</span></td>';
             }
             var pct = pctVal !== null ? ' <span class="stat-pct">' + pctVal + '%</span>' : '';
-            return '<td class="' + colorCls + '">' + v + pct + '</td>';
+            return '<td class="' + colorCls + '">' + displayVal + pct + '</td>';
         }
 
         function typeRow(label, bucket, cssClass) {
+            var sp = SharedComponents._totalSets;
             var html = '<tr class="' + cssClass + '"><td>' + label + '</td>';
-            cols.forEach(function(c) { html += cell(bucket, c.key, c.cls); });
+            cols.forEach(function(c) { html += cell(bucket, c.key, c.cls, sp); });
             html += '</tr>';
             return html;
         }
 
         function ctxRow(label, bucket) {
+            var sp = SharedComponents._totalSets;
             var html = '<tr class="pass-ctx-row"><td>\u2514 ' + label + '</td>';
-            cols.forEach(function(c) { html += cell(bucket, c.key, c.cls); });
+            cols.forEach(function(c) { html += cell(bucket, c.key, c.cls, sp); });
             html += '</tr>';
             return html;
         }
@@ -1521,6 +1576,7 @@ const SharedComponents = {
         var html = '<div class="stats-team-block">';
         html += '<div class="stats-team-title ' + teamClass + '">';
         html += '<span>' + Utils.escapeHtml(teamLabel) + '</span>';
+        html += SharedComponents.renderAvgModeToggle();
         html += SharedComponents.renderDisplayModeToggle();
         html += '</div>';
 
@@ -1536,17 +1592,19 @@ const SharedComponents = {
 
         players.forEach(function(name) {
             var p = playerTotals[name].pass || {};
+            var sp = playerTotals[name]._setsPlayed || 1;
             html += '<tr><td><div class="player-cell">';
             html += SharedComponents.renderRoleDots(name);
             html += Utils.escapeHtml(name);
             html += '</div></td>';
-            cols.forEach(function(c) { html += cell(p, c.key, c.cls); });
+            cols.forEach(function(c) { html += cell(p, c.key, c.cls, sp); });
             html += '</tr>';
         });
 
         // Total
+        var totalSP = SharedComponents._totalSets;
         html += '<tr class="total-row"><td>Total</td>';
-        cols.forEach(function(c) { html += cell(passData, c.key, c.cls); });
+        cols.forEach(function(c) { html += cell(passData, c.key, c.cls, totalSP); });
         html += '</tr>';
         html += '</tbody></table>';
 
@@ -3453,6 +3511,11 @@ const MatchStatsView = {
         var homeTotals = StatsAggregator.aggregateStats(setsToUse, 'home');
         var awayTotals = StatsAggregator.aggregateStats(setsToUse, 'away');
 
+        // Toggle Tot/Moy : visible uniquement en Set ALL (multi-sets)
+        SharedComponents._showAvgToggle = (setFilter === 'all' && setsToUse.length > 1);
+        SharedComponents._totalSets = setsToUse.length;
+        if (!SharedComponents._showAvgToggle) SharedComponents._avgMode = 'tot';
+
         // Roles par joueur pour pastilles colorees
         var homeRoles = BilanView.getPlayerRoles(match, 'home');
         var awayRoles = BilanView.getPlayerRoles(match, 'away');
@@ -4219,6 +4282,10 @@ const YearStatsView = {
         var homeTotals = StatsAggregator.aggregateStats(allSets, 'home');
         if (Object.keys(homeTotals).length === 0) return '';
 
+        // Toggle Tot/Moy : toujours visible en Stats Annee (multi-sets)
+        SharedComponents._showAvgToggle = (allSets.length > 1);
+        SharedComponents._totalSets = allSets.length;
+
         var homeRoles = BilanView.getPlayerRolesYear(matches, 'home');
         var awayRoles = BilanView.getPlayerRolesYear(matches, 'away');
         var awayTotalsRaw = StatsAggregator.aggregateStats(allSets, 'away');
@@ -4274,6 +4341,11 @@ const YearStatsView = {
             (m.sets || []).filter(function(s) { return s.completed; }).forEach(function(s) { allSets.push(s); });
         });
         var homeTotals = StatsAggregator.aggregateStats(allSets, 'home');
+
+        // Toggle Tot/Moy : toujours visible en Stats Annee (multi-sets)
+        SharedComponents._showAvgToggle = (allSets.length > 1);
+        SharedComponents._totalSets = allSets.length;
+
         var homeRoles = BilanView.getPlayerRolesYear(filtered, 'home');
         var awayRoles = BilanView.getPlayerRolesYear(filtered, 'away');
         var awayTotalsRaw = StatsAggregator.aggregateStats(allSets, 'away');

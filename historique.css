@@ -751,6 +751,34 @@ body {
     color: var(--text-primary);
 }
 
+/* Toggle Tot/Moy (reutilise le style pill) */
+.avg-mode-btn {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: #5f6368;
+    background: transparent;
+    border: none;
+    border-radius: 14px;
+    padding: 3px 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1;
+}
+
+.avg-mode-btn.active {
+    background: #1a73e8;
+    color: #fff;
+}
+
+.avg-mode-btn:not(.active):hover {
+    color: var(--text-primary);
+}
+
+.avg-mode-toggle {
+    margin-right: 4px;
+}
+
 .cat-tab.active { color: white; font-weight: 700; }
 
 .cat-tab[data-cat="service"].active { background: var(--cat-service); }
@@ -774,8 +802,9 @@ body {
     color: var(--text-primary);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 6px;
 }
+.stats-team-title > span { flex: 1; }
 
 .stats-team-title.home { color: var(--accent-blue); }
 .stats-team-title.away { color: var(--loss-color); }
