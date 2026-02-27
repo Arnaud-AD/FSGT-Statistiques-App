@@ -1207,26 +1207,24 @@
                 return '';
             }
 
-            // ===== SERVICE =====
+            // ===== SERVICE (Ace = ace + S+) =====
             html += '<div class="stat-table-card">' +
                 '<div class="stat-table-header service">Service</div>' +
                 '<table class="detail-stats-table"><thead><tr>' +
-                '<th>Tot</th><th>Ace</th><th>S+</th><th>FS</th><th>Moy</th>' +
+                '<th>Tot</th><th>Ace</th><th>FS</th><th>Moy</th>' +
                 '</tr></thead><tbody>';
             players.forEach(name => {
                 const p = stats[name];
                 html += '<tr>' +
                     '<td>' + (p.service.tot || '-') + '</td>' +
-                    cell(p.service.ace, 'positive') +
-                    cell(p.service.splus, 'positive') +
+                    cell((p.service.ace || 0) + (p.service.splus || 0), 'positive') +
                     cell(p.service.fser, 'negative') +
                     '<td class="' + srvMoyClass(p) + '">' + srvMoy(p) + '</td>' +
                 '</tr>';
             });
             html += '<tr class="total-row">' +
                 '<td>' + (totals.service.tot || '-') + '</td>' +
-                cell(totals.service.ace, 'positive') +
-                cell(totals.service.splus, 'positive') +
+                cell((totals.service.ace || 0) + (totals.service.splus || 0), 'positive') +
                 cell(totals.service.fser, 'negative') +
                 '<td class="' + srvMoyClass({ service: totals.service }) + '">' + srvMoy({ service: totals.service }) + '</td>' +
             '</tr></tbody></table></div>';

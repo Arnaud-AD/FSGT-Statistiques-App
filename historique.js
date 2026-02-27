@@ -974,14 +974,13 @@ const StatsAggregator = {
 // ==================== SHARED COMPONENTS ====================
 const SharedComponents = {
 
-    // Definition des colonnes par categorie — variante MATCH (Tab 1 : Ace et S+ separes, FA et BP separes)
+    // Definition des colonnes par categorie — variante MATCH (Tab 1 : FA et BP separes)
     CATEGORIES_MATCH: {
         service: {
             label: 'Service', key: 'service',
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
-                { key: 'ace', label: 'Ace', cls: 'positive', pct: true },
-                { key: 'splus', label: 'S+', cls: 'positive', pct: true },
+                { key: '_acePlus', label: 'Ace', cls: 'positive', pct: true, computed: 'acePlus' },
                 { key: 'fser', label: 'FS', cls: 'negative', pct: true },
                 { key: '_moy', label: 'Moy', cls: '_srvMoy' }
             ]
