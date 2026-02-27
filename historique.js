@@ -1089,6 +1089,119 @@ const SharedComponents = {
         return variant === 'aggregated' ? this.CATEGORIES_AGGREGATED : this.CATEGORIES_MATCH;
     },
 
+    // --- Tri des tableaux de stats ---
+    _statsSortCol: null,     // colonne active (null = defaut, 'player' = defaut aussi)
+    _statsSortCat: null,     // categorie active (ex: 'service', 'attack')
+    _statsSortAsc: false,    // direction
+
+    resetStatsSort() {
+        this._statsSortCol = null;
+        this._statsSortCat = null;
+        this._statsSortAsc = false;
+    },
+
+    /**
+     * Extrait la valeur numerique d'une colonne pour un joueur (pour le tri).
+     */
+    getStatSortValue(playerStats, category, col) {
+        if (col.key === '_moy') {
+            var moy = StatsAggregator.srvMoy(playerStats);
+            return moy !== null ? moy : 99; // pas de data → tri en dernier
+        }
+        var dataKey = (category === 'passe') ? 'pass' : category;
+        var catData = playerStats[dataKey] || {};
+        if (col.computed === 'acePlus') {
+            var srvData = playerStats.service || {};
+            return (srvData.ace || 0) + (srvData.splus || 0);
+        }
+        if (col.computed === 'faBp') {
+            var atkData = playerStats.attack || {};
+            return (atkData.fatt || 0) + (atkData.bp || 0);
+        }
+        return catData[col.key] || 0;
+    },
+
+    /**
+     * Tri des joueurs pour les tableaux de stats.
+     * Si un tri par colonne est actif et correspond a la categorie, trie par cette colonne.
+     * Sinon, tri par defaut (role + volume).
+     */
+    sortPlayersForStats(names, playerTotals, category, catDef) {
+        if (!this._statsSortCol || this._statsSortCol === 'player' || this._statsSortCat !== category) {
+            return this.sortPlayers(names, playerTotals);
+        }
+        var self = this;
+        var sortCol = null;
+        catDef.columns.forEach(function(c) {
+            if (c.key === self._statsSortCol || c.computed === self._statsSortCol) sortCol = c;
+        });
+        if (!sortCol) return this.sortPlayers(names, playerTotals);
+
+        var asc = this._statsSortAsc;
+        return names.slice().sort(function(a, b) {
+            var va = self.getStatSortValue(playerTotals[a], category, sortCol);
+            var vb = self.getStatSortValue(playerTotals[b], category, sortCol);
+            // Joueurs sans donnees (0 ou null/99 pour Moy) toujours en fin de liste
+            var aEmpty = (sortCol.key === '_moy') ? (va >= 99) : (va === 0);
+            var bEmpty = (sortCol.key === '_moy') ? (vb >= 99) : (vb === 0);
+            if (aEmpty && !bEmpty) return 1;
+            if (!aEmpty && bEmpty) return -1;
+            if (aEmpty && bEmpty) return 0;
+            return asc ? (va - vb) : (vb - va);
+        });
+    },
+
+    /**
+     * Genere l'icone de tri pour un header.
+     */
+    _sortIcon(colKey, category) {
+        var active;
+        if (colKey === 'player') {
+            // Joueur actif quand : pas de tri colonne (defaut), ou tri explicitement 'player'
+            active = !this._statsSortCol || this._statsSortCol === 'player';
+        } else {
+            active = this._statsSortCol === colKey && this._statsSortCat === category;
+        }
+        if (!active) return ' <span class="sort-arrow">\u25BC</span>';
+        var arrow = this._statsSortAsc ? '\u25B2' : '\u25BC';
+        // Defaut (pas de tri explicite) : toujours fleche descendante
+        if (colKey === 'player' && !this._statsSortCol) arrow = '\u25BC';
+        return ' <span class="sort-arrow active">' + arrow + '</span>';
+    },
+
+    /**
+     * Lie les handlers de tri sur les headers cliquables d'un container.
+     * @param {Element} container - le container DOM
+     * @param {Function} rerenderFn - fonction appelee apres changement de tri
+     */
+    bindStatsSortHandlers(container, rerenderFn) {
+        var self = this;
+        var headers = container.querySelectorAll('th[data-sort-col], .player-header[data-sort-col]');
+        headers.forEach(function(th) {
+            th.addEventListener('click', function() {
+                var col = th.dataset.sortCol;
+                var cat = th.dataset.sortCat || null;
+                if (col === 'player') {
+                    // Joueur : toggle visuel mais toujours tri par defaut
+                    if (self._statsSortCol === 'player') {
+                        self._statsSortAsc = !self._statsSortAsc;
+                    } else {
+                        self._statsSortCol = 'player';
+                        self._statsSortCat = null;
+                        self._statsSortAsc = false;
+                    }
+                } else if (self._statsSortCol === col && self._statsSortCat === cat) {
+                    self._statsSortAsc = !self._statsSortAsc;
+                } else {
+                    self._statsSortCol = col;
+                    self._statsSortCat = cat;
+                    self._statsSortAsc = false; // numerique = desc par defaut
+                }
+                rerenderFn();
+            });
+        });
+    },
+
     /**
      * Genere le HTML du tableau stats mobile pour une categorie et une equipe.
      * @param {string} variant - 'match' ou 'aggregated'
@@ -1098,18 +1211,20 @@ const SharedComponents = {
         const catDef = cats[category];
         if (!catDef) return '';
 
-        const players = this.sortPlayers(Object.keys(playerTotals), playerTotals);
+        const players = this.sortPlayersForStats(Object.keys(playerTotals), playerTotals, category, catDef);
         if (players.length === 0) return '';
 
         const totals = StatsAggregator.computeTotals(playerTotals);
+        var self = this;
 
-        // Header
+        // Header avec tri
         let html = '<div class="stats-team-block">';
         html += '<div class="stats-team-title ' + teamClass + '">' + Utils.escapeHtml(teamLabel) + '</div>';
         html += '<table class="stats-table"><thead><tr>';
-        html += '<th>Joueur</th>';
+        html += '<th data-sort-col="player" data-sort-cat="' + category + '">Joueur' + self._sortIcon('player', category) + '</th>';
         catDef.columns.forEach(function(col) {
-            html += '<th>' + col.label + '</th>';
+            var sortKey = col.computed || col.key;
+            html += '<th data-sort-col="' + sortKey + '" data-sort-cat="' + category + '">' + col.label + self._sortIcon(sortKey, category) + '</th>';
         });
         html += '</tr></thead><tbody>';
 
@@ -1198,10 +1313,23 @@ const SharedComponents = {
      * @param {string} variant - 'match' ou 'aggregated'
      */
     renderDesktopStatsTable(playerTotals, teamLabel, teamClass, variant) {
-        const players = this.sortPlayers(Object.keys(playerTotals), playerTotals);
+        const cats = this.getCategories(variant);
+        const self = this;
+
+        // Tri : si un tri par colonne est actif, l'appliquer globalement (toutes categories partagent le meme ordre joueurs)
+        var players;
+        if (this._statsSortCol && this._statsSortCol !== 'player' && this._statsSortCat) {
+            var sortCatDef = cats[this._statsSortCat];
+            if (sortCatDef) {
+                players = this.sortPlayersForStats(Object.keys(playerTotals), playerTotals, this._statsSortCat, sortCatDef);
+            } else {
+                players = this.sortPlayers(Object.keys(playerTotals), playerTotals);
+            }
+        } else {
+            players = this.sortPlayers(Object.keys(playerTotals), playerTotals);
+        }
         if (players.length === 0) return '';
 
-        const cats = this.getCategories(variant);
         const totals = StatsAggregator.computeTotals(playerTotals);
         let html = '';
 
@@ -1210,7 +1338,7 @@ const SharedComponents = {
 
         // Colonne noms joueurs (sticky)
         html += '<div class="stats-players-col">';
-        html += '<div class="player-header">Joueur</div>';
+        html += '<div class="player-header" data-sort-col="player">Joueur' + self._sortIcon('player', null) + '</div>';
         html += '<div class="player-subheader"></div>';
         players.forEach(function(name) {
             html += '<div class="player-name">' + Utils.escapeHtml(name) + '</div>';
@@ -1226,7 +1354,8 @@ const SharedComponents = {
             html += '<div class="stat-table-header ' + catKey + '">' + catDef.label + '</div>';
             html += '<table class="detail-stats-table"><thead><tr>';
             catDef.columns.forEach(function(col) {
-                html += '<th>' + col.label + '</th>';
+                var sortKey = col.computed || col.key;
+                html += '<th data-sort-col="' + sortKey + '" data-sort-cat="' + catKey + '">' + col.label + self._sortIcon(sortKey, catKey) + '</th>';
             });
             html += '</tr></thead><tbody>';
 
@@ -1303,9 +1432,13 @@ const SharedComponents = {
         html += '<div class="stats-team-title ' + teamClass + '">' + Utils.escapeHtml(teamLabel) + '</div>';
 
         // -- Tableau par joueur (standard) --
-        var players = SharedComponents.sortPlayers(Object.keys(playerTotals), playerTotals);
-        html += '<table class="stats-table"><thead><tr><th>Joueur</th>';
-        cols.forEach(function(c) { html += '<th>' + c.label + '</th>'; });
+        var passCatDef = { columns: cols };
+        var players = SharedComponents.sortPlayersForStats(Object.keys(playerTotals), playerTotals, 'passe', passCatDef);
+        html += '<table class="stats-table"><thead><tr>';
+        html += '<th data-sort-col="player" data-sort-cat="passe">Joueur' + SharedComponents._sortIcon('player', 'passe') + '</th>';
+        cols.forEach(function(c) {
+            html += '<th data-sort-col="' + c.key + '" data-sort-cat="passe">' + c.label + SharedComponents._sortIcon(c.key, 'passe') + '</th>';
+        });
         html += '</tr></thead><tbody>';
 
         players.forEach(function(name) {
@@ -2997,6 +3130,7 @@ const MatchStatsView = {
         this.currentMatch = match;
         this.currentSetFilter = 'bilan';
         this.currentCategory = 'service';
+        SharedComponents.resetStatsSort();
 
         // Mise a jour du select
         var matchSelect = document.getElementById('matchSelect');
@@ -3199,6 +3333,7 @@ const MatchStatsView = {
 
     switchCategory(category) {
         this.currentCategory = category;
+        SharedComponents.resetStatsSort();
 
         document.querySelectorAll('.cat-tab').forEach(function(tab) {
             tab.classList.toggle('active', tab.dataset.cat === category);
@@ -3229,6 +3364,7 @@ const MatchStatsView = {
         var awayRoles = BilanView.getPlayerRoles(match, 'away');
 
         // Vue mobile : categorie selectionnee
+        var self = this;
         if (mobileContainer) {
             var cat = this.currentCategory;
             if (cat === 'passe') {
@@ -3245,6 +3381,9 @@ const MatchStatsView = {
                 mobileContainer.innerHTML = homeHtml + awayHtml;
             }
             SharedComponents.playerRolesMap = null;
+            SharedComponents.bindStatsSortHandlers(mobileContainer, function() {
+                self.renderStats(self.currentMatch, self.currentSetFilter);
+            });
         }
 
         // Vue desktop : tableau complet
@@ -3255,6 +3394,9 @@ const MatchStatsView = {
             var awayDesktop = SharedComponents.renderDesktopStatsTable(awayTotals, opponent, 'away', 'match');
             SharedComponents.playerRolesMap = null;
             desktopContainer.innerHTML = homeDesktop + awayDesktop;
+            SharedComponents.bindStatsSortHandlers(desktopContainer, function() {
+                self.renderStats(self.currentMatch, self.currentSetFilter);
+            });
         }
     },
 
@@ -4012,6 +4154,44 @@ const YearStatsView = {
         return html;
     },
 
+    /**
+     * Re-rend les tableaux stats (mobile + desktop) pour Stats Annee.
+     * Utilise par les handlers de tri et les onglets categorie.
+     */
+    _rerenderStatsContainers(activeCat) {
+        var matches = SeasonSelector.getFilteredMatches();
+        var filtered = this.applyFilter(matches);
+        var allSets = [];
+        filtered.forEach(function(m) {
+            (m.sets || []).filter(function(s) { return s.completed; }).forEach(function(s) { allSets.push(s); });
+        });
+        var homeTotals = StatsAggregator.aggregateStats(allSets, 'home');
+        SharedComponents.playerRolesMap = BilanView.getPlayerRolesYear(filtered);
+
+        var self = this;
+        var rerenderFn = function() { self._rerenderStatsContainers(activeCat); };
+
+        // Mobile
+        var mobileContainer = document.getElementById('yearStatsMobile');
+        if (mobileContainer) {
+            if (activeCat === 'passe') {
+                mobileContainer.innerHTML = SharedComponents.renderPassDetailView(homeTotals, 'Jen et ses Saints', 'home');
+            } else {
+                mobileContainer.innerHTML = SharedComponents.renderCategoryTable(homeTotals, activeCat, 'Jen et ses Saints', 'home', 'aggregated');
+            }
+            SharedComponents.bindStatsSortHandlers(mobileContainer, rerenderFn);
+        }
+
+        // Desktop
+        var desktopContainer = document.getElementById('yearStatsDesktop');
+        if (desktopContainer) {
+            desktopContainer.innerHTML = SharedComponents.renderDesktopStatsTable(homeTotals, 'Jen et ses Saints', 'home', 'aggregated');
+            SharedComponents.bindStatsSortHandlers(desktopContainer, rerenderFn);
+        }
+
+        SharedComponents.playerRolesMap = null;
+    },
+
     bindEvents(container) {
         var self = this;
 
@@ -4023,6 +4203,22 @@ const YearStatsView = {
                 self.render();
             });
         });
+
+        // Bind tri sur le rendu initial
+        var mobileInit = document.getElementById('yearStatsMobile');
+        if (mobileInit) {
+            SharedComponents.bindStatsSortHandlers(mobileInit, function() {
+                var activeTab = document.querySelector('#yearCategoryTabs .cat-tab.active');
+                self._rerenderStatsContainers(activeTab ? activeTab.dataset.cat : 'service');
+            });
+        }
+        var desktopInit = document.getElementById('yearStatsDesktop');
+        if (desktopInit) {
+            SharedComponents.bindStatsSortHandlers(desktopInit, function() {
+                var activeTab = document.querySelector('#yearCategoryTabs .cat-tab.active');
+                self._rerenderStatsContainers(activeTab ? activeTab.dataset.cat : 'service');
+            });
+        }
 
         // Onglets categorie (mobile)
         var catTabs = document.getElementById('yearCategoryTabs');
@@ -4036,26 +4232,7 @@ const YearStatsView = {
                     t.classList.toggle('active', t.dataset.cat === cat);
                 });
 
-                var matches = SeasonSelector.getFilteredMatches();
-                var filtered = self.applyFilter(matches);
-                var allSets = [];
-                filtered.forEach(function(m) {
-                    (m.sets || []).filter(function(s) { return s.completed; }).forEach(function(s) { allSets.push(s); });
-                });
-                var homeTotals = StatsAggregator.aggregateStats(allSets, 'home');
-
-                // Roles annee pour pastilles colorees
-                SharedComponents.playerRolesMap = BilanView.getPlayerRolesYear(filtered);
-
-                var mobileContainer = document.getElementById('yearStatsMobile');
-                if (mobileContainer) {
-                    if (cat === 'passe') {
-                        mobileContainer.innerHTML = SharedComponents.renderPassDetailView(homeTotals, 'Jen et ses Saints', 'home');
-                    } else {
-                        mobileContainer.innerHTML = SharedComponents.renderCategoryTable(homeTotals, cat, 'Jen et ses Saints', 'home', 'aggregated');
-                    }
-                }
-                SharedComponents.playerRolesMap = null;
+                self._rerenderStatsContainers(cat);
             };
         }
     }

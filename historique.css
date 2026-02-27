@@ -948,6 +948,33 @@ body {
 .detail-stats-table .neutral { color: var(--text-secondary); }
 .detail-stats-table .stat-pct { font-size: 8px; color: var(--text-secondary); font-weight: 400; }
 
+/* ==================== V20.27 SORTABLE TABLE HEADERS ==================== */
+.stats-table th[data-sort-col],
+.detail-stats-table th[data-sort-col],
+.player-header[data-sort-col] {
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s;
+}
+.stats-table th[data-sort-col]:hover,
+.detail-stats-table th[data-sort-col]:hover,
+.player-header[data-sort-col]:hover {
+    color: var(--text-primary);
+}
+.sort-arrow {
+    font-size: 7px;
+    opacity: 0;
+    margin-left: 1px;
+    transition: opacity 0.15s;
+}
+.sort-arrow.active {
+    opacity: 0.6;
+}
+th[data-sort-col]:hover .sort-arrow:not(.active),
+.player-header[data-sort-col]:hover .sort-arrow:not(.active) {
+    opacity: 0.25;
+}
+
 /* ==================== V19.2 PASS VENTILATION ==================== */
 .pass-ventilation-title {
     font-family: 'Google Sans', sans-serif;
