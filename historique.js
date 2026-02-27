@@ -3699,12 +3699,17 @@ const ImpactView = {
             return players;
         }
 
-        // Tri par colonne numerique
+        // Tri par colonne numerique — zeros en fin de liste
         var col = this._sortCol;
         var asc = this._sortAsc;
         players.sort(function(a, b) {
             var valA = self._getSortValue(data[a], col);
             var valB = self._getSortValue(data[b], col);
+            var aZero = (valA === 0);
+            var bZero = (valB === 0);
+            if (aZero && !bZero) return 1;
+            if (!aZero && bZero) return -1;
+            if (aZero && bZero) return 0;
             return asc ? valA - valB : valB - valA;
         });
         return players;
