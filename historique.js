@@ -944,7 +944,7 @@ const SharedComponents = {
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
                 { key: 'ace', label: 'Ace', cls: 'positive', pct: true },
-                { key: 'splus', label: 'S+', cls: 'positive' },
+                { key: 'splus', label: 'S+', cls: 'positive', pct: true },
                 { key: 'fser', label: 'FS', cls: 'negative', pct: true },
                 { key: '_moy', label: 'Moy', cls: '_srvMoy' }
             ]
@@ -954,9 +954,9 @@ const SharedComponents = {
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
                 { key: 'r4', label: 'R4', cls: 'positive', pct: true },
-                { key: 'r3', label: 'R3', cls: '' },
-                { key: 'r2', label: 'R2', cls: '' },
-                { key: 'r1', label: 'R1', cls: 'warning' },
+                { key: 'r3', label: 'R3', cls: '', pct: true },
+                { key: 'r2', label: 'R2', cls: '', pct: true },
+                { key: 'r1', label: 'R1', cls: 'warning', pct: true },
                 { key: 'frec', label: 'FR', cls: 'negative', pct: true }
             ]
         },
@@ -965,9 +965,9 @@ const SharedComponents = {
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
                 { key: 'p4', label: 'P4', cls: 'positive', pct: true },
-                { key: 'p3', label: 'P3', cls: '' },
-                { key: 'p2', label: 'P2', cls: '' },
-                { key: 'p1', label: 'P1', cls: 'warning' },
+                { key: 'p3', label: 'P3', cls: '', pct: true },
+                { key: 'p2', label: 'P2', cls: '', pct: true },
+                { key: 'p1', label: 'P1', cls: 'warning', pct: true },
                 { key: 'fp', label: 'FP', cls: 'negative', pct: true }
             ]
         },
@@ -976,7 +976,7 @@ const SharedComponents = {
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
                 { key: 'attplus', label: 'A+', cls: 'positive', pct: true },
-                { key: 'attminus', label: 'A-', cls: 'neutral' },
+                { key: 'attminus', label: 'A-', cls: 'neutral', pct: true },
                 { key: '_faBp', label: 'FA(BP)', cls: 'negative', pct: true, computed: 'faBp' }
             ]
         },
@@ -985,7 +985,7 @@ const SharedComponents = {
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
                 { key: 'relplus', label: 'R+', cls: 'positive', pct: true },
-                { key: 'relminus', label: 'R-', cls: 'neutral' },
+                { key: 'relminus', label: 'R-', cls: 'neutral', pct: true },
                 { key: 'frel', label: 'FRel', cls: 'negative', pct: true }
             ]
         },
@@ -994,7 +994,7 @@ const SharedComponents = {
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
                 { key: 'defplus', label: 'D+', cls: 'positive', pct: true },
-                { key: 'defneutral', label: 'D', cls: 'neutral' },
+                { key: 'defneutral', label: 'D', cls: 'neutral', pct: true },
                 { key: 'defminus', label: 'D-', cls: 'negative', pct: true },
                 { key: 'fdef', label: 'FD', cls: 'negative', pct: true }
             ]
@@ -1003,9 +1003,9 @@ const SharedComponents = {
             label: 'Bloc', key: 'block',
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
-                { key: 'blcplus', label: 'B+', cls: 'positive' },
-                { key: 'blcminus', label: 'B-', cls: 'neutral' },
-                { key: 'fblc', label: 'FB', cls: 'negative' }
+                { key: 'blcplus', label: 'B+', cls: 'positive', pct: true },
+                { key: 'blcminus', label: 'B-', cls: 'neutral', pct: true },
+                { key: 'fblc', label: 'FB', cls: 'negative', pct: true }
             ]
         }
     },
@@ -1026,9 +1026,9 @@ const SharedComponents = {
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
                 { key: 'r4', label: 'R4', cls: 'positive', pct: true },
-                { key: 'r3', label: 'R3', cls: '' },
-                { key: 'r2', label: 'R2', cls: '' },
-                { key: 'r1', label: 'R1', cls: 'warning' },
+                { key: 'r3', label: 'R3', cls: '', pct: true },
+                { key: 'r2', label: 'R2', cls: '', pct: true },
+                { key: 'r1', label: 'R1', cls: 'warning', pct: true },
                 { key: 'frec', label: 'FR', cls: 'negative', pct: true }
             ]
         },
@@ -1037,9 +1037,9 @@ const SharedComponents = {
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
                 { key: 'p4', label: 'P4', cls: 'positive', pct: true },
-                { key: 'p3', label: 'P3', cls: '' },
-                { key: 'p2', label: 'P2', cls: '' },
-                { key: 'p1', label: 'P1', cls: 'warning' },
+                { key: 'p3', label: 'P3', cls: '', pct: true },
+                { key: 'p2', label: 'P2', cls: '', pct: true },
+                { key: 'p1', label: 'P1', cls: 'warning', pct: true },
                 { key: 'fp', label: 'FP', cls: 'negative', pct: true }
             ]
         },
@@ -1048,7 +1048,7 @@ const SharedComponents = {
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
                 { key: 'attplus', label: 'A+', cls: 'positive', pct: true },
-                { key: 'attminus', label: 'A-', cls: 'neutral' },
+                { key: 'attminus', label: 'A-', cls: 'neutral', pct: true },
                 { key: '_faBp', label: 'FA(BP)', cls: 'negative', pct: true, computed: 'faBp' }
             ]
         },
@@ -1057,7 +1057,7 @@ const SharedComponents = {
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
                 { key: 'relplus', label: 'R+', cls: 'positive', pct: true },
-                { key: 'relminus', label: 'R-', cls: 'neutral' },
+                { key: 'relminus', label: 'R-', cls: 'neutral', pct: true },
                 { key: 'frel', label: 'FRel', cls: 'negative', pct: true }
             ]
         },
@@ -1066,7 +1066,7 @@ const SharedComponents = {
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
                 { key: 'defplus', label: 'D+', cls: 'positive', pct: true },
-                { key: 'defneutral', label: 'D', cls: 'neutral' },
+                { key: 'defneutral', label: 'D', cls: 'neutral', pct: true },
                 { key: 'defminus', label: 'D-', cls: 'negative', pct: true },
                 { key: 'fdef', label: 'FD', cls: 'negative', pct: true }
             ]
@@ -1075,9 +1075,9 @@ const SharedComponents = {
             label: 'Bloc', key: 'block',
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
-                { key: 'blcplus', label: 'B+', cls: 'positive' },
-                { key: 'blcminus', label: 'B-', cls: 'neutral' },
-                { key: 'fblc', label: 'FB', cls: 'negative' }
+                { key: 'blcplus', label: 'B+', cls: 'positive', pct: true },
+                { key: 'blcminus', label: 'B-', cls: 'neutral', pct: true },
+                { key: 'fblc', label: 'FB', cls: 'negative', pct: true }
             ]
         }
     },
