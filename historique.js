@@ -3667,6 +3667,7 @@ const ImpactView = {
             case 'att': raw = r.attImpact; break;
             case 'def': raw = r.defImpact; break;
             case 'blc': raw = r.blcImpact; break;
+            case 'defblc': raw = r.defImpact + r.blcImpact; break;
             default: raw = r.plusMinus;
         }
         return isMoy && sp > 1 ? raw / sp : raw;
@@ -3794,6 +3795,7 @@ const ImpactView = {
         }
         html += '</div>';
         html += '<table class="stats-table impact-table">';
+        html += '<colgroup><col style="width:26%"><col style="width:11%"><col style="width:11%"><col style="width:13%"><col style="width:13%"><col style="width:13%"><col style="width:13%"></colgroup>';
         html += '<thead><tr>';
         html += '<th data-sort-col="player" class="impact-sortable">Joueur' + self._sortIcon('player') + '</th>';
         html += '<th data-sort-col="pts" class="impact-sortable">' + ptsLabel + self._sortIcon('pts') + '</th>';
@@ -3845,18 +3847,24 @@ const ImpactView = {
         var ptsLabel = isMoy ? 'Pts/Set' : 'Pts jou\u00e9s';
 
         var html = '<div class="impact-table-wrapper">';
-        html += '<div class="impact-table-label">Impact +/\u2212 Arnaud</div>';
+        html += '<div class="impact-table-label"><span>Impact +/\u2212 Arnaud</span>';
+        if (this._showToggle) {
+            html += '<div class="display-mode-toggle impact-avg-toggle">';
+            html += '<button class="avg-mode-btn' + (!isMoy ? ' active' : '') + '" data-impact-avg="tot">Tot</button>';
+            html += '<button class="avg-mode-btn' + (isMoy ? ' active' : '') + '" data-impact-avg="moy">Moy</button>';
+            html += '</div>';
+        }
+        html += '</div>';
         html += '<table class="stats-table impact-table">';
+        html += '<colgroup><col style="width:26%"><col style="width:11%"><col style="width:11%"><col style="width:13%"><col style="width:13%"><col style="width:13%"><col style="width:13%"></colgroup>';
         html += '<thead><tr>';
         html += '<th data-sort-col="player" class="impact-sortable">Joueur' + self._sortIcon('player') + '</th>';
         html += '<th data-sort-col="pts" class="impact-sortable">' + ptsLabel + self._sortIcon('pts') + '</th>';
         html += '<th data-sort-col="pm" class="impact-col-main impact-sortable">+/\u2212' + self._sortIcon('pm') + '</th>';
         html += '<th data-sort-col="serv" class="impact-sortable">Serv' + self._sortIcon('serv') + '</th>';
         html += '<th data-sort-col="rec" class="impact-sortable">Rec' + self._sortIcon('rec') + '</th>';
-        html += '<th data-sort-col="pas" class="impact-sortable">Pas' + self._sortIcon('pas') + '</th>';
         html += '<th data-sort-col="att" class="impact-sortable">Att' + self._sortIcon('att') + '</th>';
-        html += '<th data-sort-col="def" class="impact-sortable">Def' + self._sortIcon('def') + '</th>';
-        html += '<th data-sort-col="blc" class="impact-sortable">Blc' + self._sortIcon('blc') + '</th>';
+        html += '<th data-sort-col="defblc" class="impact-sortable">Def/Blc' + self._sortIcon('defblc') + '</th>';
         html += '</tr></thead><tbody>';
 
         players.forEach(function(name) {
@@ -3867,12 +3875,10 @@ const ImpactView = {
             html += '<td>' + self._renderPlayerCell(name, playerRoles) + '</td>';
             html += '<td>' + ptsDisplay + '</td>';
             html += '<td class="impact-col-main">' + self._fmtVal(r.plusMinus, sp, true, 'dark') + '</td>';
-
-            var cats = ['servImpact', 'recImpact', 'pasImpact', 'attImpact', 'defImpact', 'blcImpact'];
-            cats.forEach(function(key) {
-                html += '<td>' + self._fmtVal(r[key], sp) + '</td>';
-            });
-
+            html += '<td>' + self._fmtVal(r.servImpact, sp) + '</td>';
+            html += '<td>' + self._fmtVal(r.recImpact, sp) + '</td>';
+            html += '<td>' + self._fmtVal(r.attImpact, sp) + '</td>';
+            html += '<td>' + self._fmtVal(r.defImpact + r.blcImpact, sp) + '</td>';
             html += '</tr>';
         });
 
@@ -3883,10 +3889,10 @@ const ImpactView = {
         html += '<tr class="total-row"><td>Total</td>';
         html += '<td>' + tPts + '</td>';
         html += '<td class="impact-col-main">' + self._fmtVal(t.plusMinus, tsp, true, 'dark') + '</td>';
-        var cats = ['servImpact', 'recImpact', 'pasImpact', 'attImpact', 'defImpact', 'blcImpact'];
-        cats.forEach(function(key) {
-            html += '<td>' + self._fmtVal(t[key], tsp) + '</td>';
-        });
+        html += '<td>' + self._fmtVal(t.servImpact, tsp) + '</td>';
+        html += '<td>' + self._fmtVal(t.recImpact, tsp) + '</td>';
+        html += '<td>' + self._fmtVal(t.attImpact, tsp) + '</td>';
+        html += '<td>' + self._fmtVal(t.defImpact + t.blcImpact, tsp) + '</td>';
         html += '</tr>';
 
         html += '</tbody></table>';

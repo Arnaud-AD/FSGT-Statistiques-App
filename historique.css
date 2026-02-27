@@ -1779,20 +1779,20 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
 }
 .impact-table-label > span { flex: 1; }
 
+.impact-table {
+    table-layout: fixed;
+    width: 100%;
+}
 .impact-table th,
 .impact-table td {
-    min-width: 28px;
     padding: 8px 5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .impact-table th[data-sort-col] {
     cursor: pointer;
     user-select: none;
     white-space: nowrap;
-}
-
-.impact-table th:first-child,
-.impact-table td:first-child {
-    min-width: auto;
 }
 
 .impact-col-main {
