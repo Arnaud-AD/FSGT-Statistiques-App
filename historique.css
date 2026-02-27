@@ -1068,13 +1068,9 @@ body {
 
 .pt-table {
     width: 100%;
-    table-layout: fixed;
     border-collapse: collapse;
     font-size: 12px;
 }
-
-.pt-th-num { width: 52px; }
-.pt-th-name { width: auto; }
 
 .pt-table thead {
     background: var(--bg-container);
