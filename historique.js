@@ -5876,26 +5876,91 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     });
 
-    // Toggle sections collapsibles (delegation) + auto-scroll à l'ouverture
+    // Toggle sections collapsibles (delegation) + animation ouverture/fermeture
     document.addEventListener('click', function(e) {
         var title = e.target.closest('.hist-section-title');
         if (!title) return;
         var section = title.closest('.hist-section');
         if (!section) return;
+        if (section._animating) return;
         var wasCollapsed = section.classList.contains('collapsed');
-        section.classList.toggle('collapsed');
         OpenSections.track(title.textContent, wasCollapsed);
-        // Auto-scroll quand on ouvre une section
+        section._animating = true;
+
+        function cleanup() {
+            section.style.height = '';
+            section.style.overflow = '';
+            section.style.transition = '';
+            section._animating = false;
+        }
+
         if (wasCollapsed) {
+            // OUVERTURE : instantanée + smooth scroll
+            section.classList.remove('collapsed');
+            section._animating = false;
             requestAnimationFrame(function() {
                 var headerOffset = 8;
                 var titleRect = title.getBoundingClientRect();
                 var scrollTarget = window.pageYOffset + titleRect.top - headerOffset;
-                // Si la section est trop courte pour scroller le titre en haut, scroll au max
                 var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
                 var finalScroll = Math.min(scrollTarget, maxScroll);
                 window.scrollTo({ top: finalScroll, behavior: 'smooth' });
             });
+        } else {
+            // FERMETURE : scroll vers le titre, puis animer la hauteur
+            var headerOffset = 8;
+            var titleRect = title.getBoundingClientRect();
+            var needsScroll = titleRect.top < -10 || titleRect.top > 80;
+
+            function animateClose() {
+                var currentH = section.offsetHeight;
+                section.classList.add('collapsed');
+                var targetH = section.offsetHeight;
+                section.classList.remove('collapsed');
+                section.style.height = currentH + 'px';
+                section.style.overflow = 'hidden';
+                var closeDone = false;
+                function onCloseDone() {
+                    if (closeDone) return;
+                    closeDone = true;
+                    clearTimeout(closeTimer);
+                    section.classList.add('collapsed');
+                    cleanup();
+                }
+                section.addEventListener('transitionend', function handler(ev) {
+                    if (ev.propertyName !== 'height') return;
+                    section.removeEventListener('transitionend', handler);
+                    onCloseDone();
+                });
+                var closeTimer = setTimeout(onCloseDone, 350);
+                requestAnimationFrame(function() {
+                    section.style.transition = 'height 0.25s ease-in-out';
+                    section.style.height = targetH + 'px';
+                });
+            }
+
+            if (needsScroll) {
+                // Scroll custom avec easing doux
+                var scrollStart = window.pageYOffset;
+                var scrollTarget = scrollStart + titleRect.top - headerOffset;
+                var scrollDist = scrollTarget - scrollStart;
+                var duration = Math.min(450, Math.max(250, Math.abs(scrollDist) * 0.4));
+                var startTime = null;
+                function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+                function scrollStep(ts) {
+                    if (!startTime) startTime = ts;
+                    var progress = Math.min((ts - startTime) / duration, 1);
+                    window.scrollTo(0, scrollStart + scrollDist * easeOutCubic(progress));
+                    if (progress < 1) {
+                        requestAnimationFrame(scrollStep);
+                    } else {
+                        animateClose();
+                    }
+                }
+                requestAnimationFrame(scrollStep);
+            } else {
+                animateClose();
+            }
         }
     });
 
