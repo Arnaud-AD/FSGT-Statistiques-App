@@ -2419,7 +2419,7 @@ const BilanView = {
         });
 
         // --- Head to head : Jen (gauche) vs Adverse (droite) ---
-        var html = '<div class="hist-section bilan-section">';
+        var html = '<div class="hist-section bilan-section collapsed">';
         html += '<div class="hist-section-title">Profils radar</div>';
         html += '<div class="bilan-h2h-header">';
         html += '<span class="bilan-h2h-team" style="color:#0056D2">Jen et ses Saints</span>';
@@ -3620,7 +3620,7 @@ const ImpactView = {
 
     _renderSection(data, playerRoles) {
         var isMoy = this._avgMode === 'moy';
-        var html = '<div class="hist-section impact-section">';
+        var html = '<div class="hist-section impact-section collapsed">';
         html += '<div class="hist-section-title">Impact +/\u2212</div>';
         html += this._renderClaudeTable(data, playerRoles);
         html += this._renderArnaudTable(data, playerRoles);
@@ -4649,7 +4649,7 @@ const YearStatsView = {
         var playerFamiliesYear = BilanView.getPlayerFamiliesYear(matches);
         if (Object.keys(playerFamiliesYear).length === 0) return '';
 
-        var html = '<div class="hist-section bilan-section">';
+        var html = '<div class="hist-section bilan-section collapsed">';
         html += '<div class="hist-section-title">Profils radar</div>';
         html += '<div class="bilan-h2h-header">';
         html += '<span class="bilan-h2h-team" style="color:#0056D2">Jen et ses Saints</span>';
@@ -4886,7 +4886,7 @@ const YearStatsView = {
             agg[team].brkPercent = agg[team].brkTotal > 0 ? Math.round(agg[team].brkWon / agg[team].brkTotal * 100) : null;
         });
 
-        var html = '<div class="hist-section sideout-section">';
+        var html = '<div class="hist-section sideout-section collapsed">';
         html += '<div class="hist-section-title">Side Out / Break Out</div>';
         html += '<table class="sideout-table">';
         html += '<thead><tr><th></th><th>Jen</th><th>Adversaires</th></tr></thead><tbody>';
@@ -4985,7 +4985,7 @@ const YearStatsView = {
             return 'rgb(' + r + ',' + g + ',' + b + ')';
         }
 
-        var html = '<div class="hist-section momentum-section">';
+        var html = '<div class="hist-section momentum-section collapsed">';
         html += '<div class="hist-section-title">Momentum <span class="momentum-subtitle">' + curves.length + ' sets</span></div>';
 
         html += '<svg class="momentum-chart" viewBox="0 0 ' + svgWidth + ' ' + svgHeight + '">';
@@ -5076,7 +5076,7 @@ const YearStatsView = {
         };
 
         // Mobile : onglets categorie + premier onglet service
-        var html = '<div class="hist-section stats-section">';
+        var html = '<div class="hist-section stats-section collapsed">';
         html += '<div class="hist-section-title">Tableaux de Statistiques</div>';
         html += '<div class="segmented-tabs stats-category-tabs" id="yearCategoryTabs">';
         var cats = ['service', 'reception', 'passe', 'attack', 'relance', 'defense', 'block'];
@@ -5856,13 +5856,26 @@ document.addEventListener('DOMContentLoaded', async function() {
         });
     });
 
-    // Toggle sections collapsibles (delegation)
+    // Toggle sections collapsibles (delegation) + auto-scroll à l'ouverture
     document.addEventListener('click', function(e) {
         var title = e.target.closest('.hist-section-title');
         if (!title) return;
         var section = title.closest('.hist-section');
         if (!section) return;
+        var wasCollapsed = section.classList.contains('collapsed');
         section.classList.toggle('collapsed');
+        // Auto-scroll quand on ouvre une section
+        if (wasCollapsed) {
+            requestAnimationFrame(function() {
+                var headerOffset = 8;
+                var titleRect = title.getBoundingClientRect();
+                var scrollTarget = window.pageYOffset + titleRect.top - headerOffset;
+                // Si la section est trop courte pour scroller le titre en haut, scroll au max
+                var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                var finalScroll = Math.min(scrollTarget, maxScroll);
+                window.scrollTo({ top: finalScroll, behavior: 'smooth' });
+            });
+        }
     });
 
     // Toggle Tot/Moy Impact +/- (delegation)
@@ -5872,10 +5885,13 @@ document.addEventListener('DOMContentLoaded', async function() {
         ImpactView.toggleAvgMode();
         var section = btn.closest('.impact-section');
         if (section && ImpactView._lastData) {
+            var wasOpen = !section.classList.contains('collapsed');
             var html = ImpactView._renderSection(ImpactView._lastData, ImpactView._lastPlayerRoles);
             var temp = document.createElement('div');
             temp.innerHTML = html;
-            section.replaceWith(temp.firstChild);
+            var newSection = temp.firstChild;
+            if (wasOpen) newSection.classList.remove('collapsed');
+            section.replaceWith(newSection);
         }
     });
 
@@ -5899,10 +5915,13 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
         var section = th.closest('.impact-section');
         if (section && ImpactView._lastData) {
+            var wasOpen = !section.classList.contains('collapsed');
             var html = ImpactView._renderSection(ImpactView._lastData, ImpactView._lastPlayerRoles);
             var temp = document.createElement('div');
             temp.innerHTML = html;
-            section.replaceWith(temp.firstChild);
+            var newSection = temp.firstChild;
+            if (wasOpen) newSection.classList.remove('collapsed');
+            section.replaceWith(newSection);
         }
     });
 
