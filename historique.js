@@ -1947,7 +1947,7 @@ const SharedComponents = {
             var v = bucket[key] || 0;
             if (v <= 0) return '<td class="">-</td>';
             var pctVal = null;
-            if ((key === 'p4' || key === 'fp') && bucket.tot > 0) {
+            if (key !== 'tot' && bucket.tot > 0) {
                 pctVal = Math.round(v / bucket.tot * 100);
             }
             // Mode Moy : diviser par sets joues
