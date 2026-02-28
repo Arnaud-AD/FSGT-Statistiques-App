@@ -2535,10 +2535,10 @@ const BilanView = {
         self.FAMILY_ORDER.forEach(function(fam) {
             var bestA = null;
             allAway.forEach(function(d) { if (d.family === fam && (!bestA || d.ip > bestA.ip)) bestA = d; });
-            if (bestA) bestAwayByFamily[fam] = { scores: bestA.scores, role: bestA.effectiveRole, name: bestA.name };
+            if (bestA) bestAwayByFamily[fam] = { scores: bestA.scores, role: bestA.effectiveRole, name: bestA.name, ip: bestA.ip };
             var bestH = null;
             allHome.forEach(function(d) { if (d.family === fam && (!bestH || d.ip > bestH.ip)) bestH = d; });
-            if (bestH) bestHomeByFamily[fam] = { scores: bestH.scores, role: bestH.effectiveRole, name: bestH.name };
+            if (bestH) bestHomeByFamily[fam] = { scores: bestH.scores, role: bestH.effectiveRole, name: bestH.name, ip: bestH.ip };
         });
 
         // Rendu paires home/away alignees par slot
@@ -3442,7 +3442,12 @@ const BilanView = {
 
         // Label du joueur compare (visible uniquement quand toggle comparer actif)
         if (overlayData && overlayData.name) {
-            html += '<div class="spider-overlay bilan-compare-label">' + Utils.escapeHtml(overlayData.name) + '</div>';
+            html += '<div class="spider-overlay bilan-compare-label">';
+            html += '<span class="bilan-compare-name">' + Utils.escapeHtml(overlayData.name) + '</span>';
+            if (overlayData.ip != null) {
+                html += '<span class="bilan-compare-ip">IP ' + overlayData.ip + '</span>';
+            }
+            html += '</div>';
         }
 
         html += '</div>';
@@ -3869,7 +3874,7 @@ const ImpactView = {
         html += '<th data-sort-col="serv" class="impact-sortable">Serv' + self._sortIcon('serv') + '</th>';
         html += '<th data-sort-col="rec" class="impact-sortable">Rec' + self._sortIcon('rec') + '</th>';
         html += '<th data-sort-col="att" class="impact-sortable">Att' + self._sortIcon('att') + '</th>';
-        html += '<th data-sort-col="defblc" class="impact-sortable">Def&amp;Blc' + self._sortIcon('defblc') + '</th>';
+        html += '<th data-sort-col="defblc" class="impact-sortable">Def<span style="font-family:serif">&amp;</span>Blc' + self._sortIcon('defblc') + '</th>';
         html += '</tr></thead><tbody>';
 
         players.forEach(function(name) {
@@ -4683,8 +4688,8 @@ const YearStatsView = {
             var inFam = allPlayerData.filter(function(d) { return d.family === fam; });
             inFam.sort(function(a, b) { return b.ip - a.ip; });
             familyOverlays[fam] = {
-                best: inFam.length > 0 ? { name: inFam[0].name, scores: inFam[0].scores, role: inFam[0].effectiveRole } : null,
-                second: inFam.length > 1 ? { name: inFam[1].name, scores: inFam[1].scores, role: inFam[1].effectiveRole } : null
+                best: inFam.length > 0 ? { name: inFam[0].name, scores: inFam[0].scores, role: inFam[0].effectiveRole, ip: inFam[0].ip } : null,
+                second: inFam.length > 1 ? { name: inFam[1].name, scores: inFam[1].scores, role: inFam[1].effectiveRole, ip: inFam[1].ip } : null
             };
         });
 
@@ -4766,7 +4771,7 @@ const YearStatsView = {
             allPlayerData.forEach(function(d) {
                 var role = d.slot; // slot = role effectif (Passeur, R4, Pointu, Centre)
                 if (!bestJenByRole[role] || d.ip > bestJenByRole[role].ip) {
-                    bestJenByRole[role] = { name: d.name, scores: d.scores, role: d.effectiveRole };
+                    bestJenByRole[role] = { name: d.name, scores: d.scores, role: d.effectiveRole, ip: d.ip };
                 }
             });
 

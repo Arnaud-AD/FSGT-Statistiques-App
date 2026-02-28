@@ -1523,15 +1523,23 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
     display: inline;
 }
 .bilan-compare-active .bilan-compare-label {
-    display: block;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     position: absolute;
     bottom: 4px;
-    right: 6px;
+    left: 12px;
+    right: 12px;
     font-family: 'Google Sans', sans-serif;
     font-size: 11px;
-    font-weight: 500;
     color: #9aa0a6;
     white-space: nowrap;
+}
+.bilan-compare-name {
+    font-weight: 500;
+}
+.bilan-compare-ip {
+    font-weight: 700;
 }
 
 .bilan-h2h-role-title {
