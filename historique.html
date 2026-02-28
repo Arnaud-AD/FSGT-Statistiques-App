@@ -98,8 +98,11 @@
                     <div class="detail-opponent" id="detailOpponent">vs Adversaire</div>
                     <div class="detail-meta" id="detailMeta"></div>
 
-                    <!-- Lien YouTube -->
-                    <div id="detailYoutubeLink" style="display: none;"></div>
+                    <!-- Boutons Distinctions + YouTube -->
+                    <div class="detail-header-actions">
+                        <div id="detailDistinctionsLink" style="display: none;"></div>
+                        <div id="detailYoutubeLink" style="display: none;"></div>
+                    </div>
                 </div>
 
                 <!-- Onglets sets : [Bilan] [Set ALL] [S1] [S2] ... [S5] -->
@@ -191,6 +194,15 @@
     <script src="firebase-config.js?v=17.3"></script>
     <script src="admin-config.js"></script>
     <script src="firebase-sync.js?v=17.3"></script>
+
+    <!-- Modal Distinctions -->
+    <div class="distinctions-modal-overlay" id="distinctionsModal" style="display:none">
+        <div class="distinctions-modal">
+            <button class="distinctions-modal-close" id="distinctionsModalClose">&times;</button>
+            <div class="distinctions-modal-title" id="distinctionsModalTitle">Distinctions</div>
+            <div class="distinctions-modal-body" id="distinctionsModalBody"></div>
+        </div>
+    </div>
 
     <script src="storage.js?v=20.287"></script>
     <script src="historique.js?v=20.287"></script>

@@ -2571,9 +2571,6 @@ const BilanView = {
         // Section Impact +/-
         html += ImpactView.renderForMatch(match, 'home');
 
-        // Section Distinctions (home uniquement, stats agregees completes)
-        html += this.renderDistinctions(homeTotals, homeRoles, homePlayers);
-
         container.innerHTML = html;
     },
 
@@ -2631,9 +2628,7 @@ const BilanView = {
             }
         });
 
-        var html = '<div class="hist-section bilan-section">';
-        html += '<div class="hist-section-title">Distinctions</div>';
-        html += '<div class="bilan-distinctions">';
+        var html = '<div class="bilan-distinctions">';
 
         // --- MVP ---
         if (mvpName) {
@@ -2710,7 +2705,6 @@ const BilanView = {
         });
 
         html += '</div>'; // bilan-distinctions
-        html += '</div>'; // bilan-section
         return html;
     },
 
@@ -4071,6 +4065,40 @@ const MatchStatsView = {
 
         // Lien YouTube
         this.renderYoutubeLink(match);
+
+        // Bouton Distinctions
+        this.renderDistinctionsButton(match);
+    },
+
+    renderDistinctionsButton(match) {
+        var container = document.getElementById('detailDistinctionsLink');
+        if (!container) return;
+
+        var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+        if (completedSets.length === 0) {
+            container.innerHTML = '';
+            container.style.display = 'none';
+            return;
+        }
+
+        container.innerHTML = '<button class="detail-distinctions-btn" id="matchDistinctionsBtn">' +
+            '<span class="distinctions-star">\u2B50</span>' +
+            '<span>Distinctions</span></button>';
+        container.style.display = 'block';
+
+        var btn = document.getElementById('matchDistinctionsBtn');
+        btn.addEventListener('click', function() {
+            var homeTotals = StatsAggregator.aggregateStats(completedSets, 'home');
+            var homeRoles = BilanView.getPlayerRoles(match, 'home');
+            var statCategories = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'];
+            var homePlayers = Object.keys(homeTotals).filter(function(name) {
+                if (!homeRoles[name]) return false;
+                var p = homeTotals[name];
+                return statCategories.some(function(cat) { return p[cat] && p[cat].tot > 0; });
+            });
+            var html = BilanView.renderDistinctions(homeTotals, homeRoles, homePlayers);
+            DistinctionsModal.open(html, 'Distinctions \u2014 vs ' + (match.opponent || 'Adversaire'));
+        });
     },
 
     renderHeaderSets(match) {
@@ -4471,9 +4499,6 @@ const YearStatsView = {
         // Spider charts par famille
         html += this.renderSpiderCharts(filtered);
 
-        // Distinctions saison
-        html += this.renderYearDistinctions(filtered);
-
         // Impact +/- saison
         html += ImpactView.renderForYear(filtered, 'home');
 
@@ -4488,6 +4513,19 @@ const YearStatsView = {
 
         container.innerHTML = html;
         this.bindEvents(container);
+
+        // Bouton Distinctions dans Bilan Saison
+        var yearDistBtn = document.getElementById('yearDistinctionsBtn');
+        if (yearDistBtn) {
+            var self = this;
+            yearDistBtn.addEventListener('click', function() {
+                var distinctionsHtml = self.renderYearDistinctions(filtered);
+                if (distinctionsHtml) {
+                    DistinctionsModal.open(distinctionsHtml, 'Distinctions \u2014 ' + SeasonSelector.getLabel());
+                }
+            });
+        }
+
         this._rendered = true;
     },
 
@@ -4536,6 +4574,9 @@ const YearStatsView = {
         if (draws > 0) html += ' \u00b7 <span style="color:var(--draw-color);font-weight:600">' + draws + 'N</span>';
         html += '</div>';
         html += '<div class="year-summary-row">Sets: <strong>' + setsWon + '-' + setsLost + '</strong></div>';
+        html += '<button class="year-distinctions-btn" id="yearDistinctionsBtn">' +
+            '<span class="distinctions-star">\u2B50</span>' +
+            '<span>Distinctions</span></button>';
         html += '</div>';
         return html;
     },
@@ -5718,12 +5759,52 @@ const SetsPlayedView = {
     }
 };
 
+// ==================== MODAL DISTINCTIONS ====================
+var DistinctionsModal = {
+    open(contentHtml, title) {
+        var modal = document.getElementById('distinctionsModal');
+        if (!modal) return;
+        document.getElementById('distinctionsModalTitle').textContent = title || 'Distinctions';
+        document.getElementById('distinctionsModalBody').innerHTML = contentHtml;
+        modal.style.display = 'flex';
+    },
+
+    close() {
+        var modal = document.getElementById('distinctionsModal');
+        if (modal) modal.style.display = 'none';
+    },
+
+    init() {
+        var modal = document.getElementById('distinctionsModal');
+        if (!modal) return;
+
+        // Fermeture par clic sur le backdrop
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) DistinctionsModal.close();
+        });
+
+        // Fermeture par bouton X
+        var closeBtn = document.getElementById('distinctionsModalClose');
+        if (closeBtn) closeBtn.addEventListener('click', function() { DistinctionsModal.close(); });
+
+        // Fermeture par Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.style.display !== 'none') {
+                DistinctionsModal.close();
+            }
+        });
+    }
+};
+
 // ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', async function() {
     // Init Firebase Auth UI
     if (typeof FirebaseAuthUI !== 'undefined') {
         FirebaseAuthUI.init();
     }
+
+    // Init modal distinctions
+    DistinctionsModal.init();
 
     // Init season selector + tabs
     SeasonSelector.init();

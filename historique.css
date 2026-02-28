@@ -429,12 +429,69 @@ body {
     color: #d93025;
 }
 
+/* Conteneur boutons actions header (Distinctions + YouTube) */
+.detail-header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+/* Bouton Distinctions (style pill comme YouTube) */
+.detail-distinctions-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #606060;
+    background: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: 'Google Sans', sans-serif;
+}
+
+.detail-distinctions-btn:hover {
+    background: #f2f2f2;
+}
+
+.detail-distinctions-btn .distinctions-star {
+    font-size: 14px;
+    line-height: 1;
+}
+
+/* Bouton Distinctions dans Bilan Saison */
+.year-distinctions-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #606060;
+    background: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: 'Google Sans', sans-serif;
+    margin-top: 10px;
+}
+
+.year-distinctions-btn:hover {
+    background: #f2f2f2;
+}
+
 /* Lien YouTube style natif dans le header */
 .detail-youtube-link {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    margin-top: 8px;
     padding: 5px 12px 5px 8px;
     border-radius: 8px;
     font-size: 12px;
@@ -453,6 +510,68 @@ body {
     width: 18px;
     height: 13px;
     flex-shrink: 0;
+}
+
+/* ==================== MODAL DISTINCTIONS ==================== */
+.distinctions-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.distinctions-modal {
+    background: #fff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 420px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    animation: distinctions-modal-in 0.2s ease-out;
+}
+
+@keyframes distinctions-modal-in {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.distinctions-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #5f6368;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.distinctions-modal-close:hover {
+    background: #f1f3f4;
+}
+
+.distinctions-modal-title {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    padding: 16px 16px 8px;
+}
+
+.distinctions-modal-body {
+    padding: 0 8px 12px;
 }
 
 /* ==================== SECTIONS (unified) ==================== */
