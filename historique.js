@@ -4205,6 +4205,7 @@ const MatchStatsView = {
         if (bilanContainer) {
             bilanContainer.style.display = 'block';
             BilanView.render(match, bilanContainer);
+            OpenSections.restore(bilanContainer);
         }
     },
 
@@ -4512,6 +4513,7 @@ const YearStatsView = {
         html += this.renderYearMomentum(filtered);
 
         container.innerHTML = html;
+        OpenSections.restore(container);
         this.bindEvents(container);
 
         // Bouton Distinctions dans Bilan Saison
@@ -5796,6 +5798,24 @@ var DistinctionsModal = {
     }
 };
 
+// ==================== SECTIONS OUVERTES (tracking) ====================
+const OpenSections = {
+    _open: new Set(),
+    track(titleText, isOpen) {
+        var key = titleText.trim();
+        if (isOpen) this._open.add(key); else this._open.delete(key);
+    },
+    restore(container) {
+        if (!container) return;
+        container.querySelectorAll('.hist-section.collapsed').forEach(function(section) {
+            var title = section.querySelector('.hist-section-title');
+            if (title && OpenSections._open.has(title.textContent.trim())) {
+                section.classList.remove('collapsed');
+            }
+        });
+    }
+};
+
 // ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', async function() {
     // Init Firebase Auth UI
@@ -5864,6 +5884,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (!section) return;
         var wasCollapsed = section.classList.contains('collapsed');
         section.classList.toggle('collapsed');
+        OpenSections.track(title.textContent, wasCollapsed);
         // Auto-scroll quand on ouvre une section
         if (wasCollapsed) {
             requestAnimationFrame(function() {
