@@ -4135,7 +4135,7 @@ const ImpactView = {
         html += '<colgroup><col style="width:18%"><col style="width:10%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:12%"></colgroup>';
         html += '<thead><tr>';
         html += '<th data-sort-col="player" class="impact-sortable">Joueur' + self._sortIcon('player') + '</th>';
-        html += '<th data-sort-col="pts" class="impact-sortable">Pts' + self._sortIcon('pts') + '</th>';
+        html += '<th data-sort-col="pts" class="impact-sortable">Pts Jou\u00e9s' + self._sortIcon('pts') + '</th>';
         html += '<th data-sort-col="pm" class="impact-col-main impact-sortable">+/\u2212' + self._sortIcon('pm') + '</th>';
         html += '<th data-sort-col="dir" class="impact-sortable">Direct' + self._sortIcon('dir') + '</th>';
         html += '<th data-sort-col="indirect" class="impact-sortable">Indirect' + self._sortIcon('indirect') + '</th>';
