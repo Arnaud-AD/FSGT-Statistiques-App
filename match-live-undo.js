@@ -804,10 +804,25 @@ function subSlotClick(role) {
             // Swap positions between the two roles
             const pos1 = getPosForRole(team, subState.selectedSlot);
             const pos2 = pos;
-            const temp = lineup[pos1];
-            lineup[pos1] = lineup[pos2];
-            lineup[pos2] = temp;
-            
+            const player1 = lineup[pos1];
+            const player2 = lineup[pos2];
+            lineup[pos1] = player2;
+            lineup[pos2] = player1;
+
+            // Log role swap for historique
+            if (!currentSet.substitutions) currentSet.substitutions = [];
+            currentSet.substitutions.push({
+                type: 'swap',
+                pointIndex: (currentSet.points || []).length,
+                team: team,
+                player1: player1,
+                role1: subState.selectedSlot,
+                player2: player2,
+                role2: role,
+                homeScore: currentSet.homeScore || 0,
+                awayScore: currentSet.awayScore || 0
+            });
+
             subState.selectedSlot = null;
             saveCurrentSet();
             renderSubModal();
@@ -826,14 +841,27 @@ function subBenchClick(playerName) {
         const team = subState.team;
         const lineup = team === 'home' ? currentSet.homeLineup : currentSet.awayLineup;
         const pos = getPosForRole(team, subState.selectedSlot);
-        
+        const oldPlayer = lineup[pos];
+
         lineup[pos] = playerName;
-        
+
+        // Log substitution for playing time tracking
+        if (!currentSet.substitutions) currentSet.substitutions = [];
+        currentSet.substitutions.push({
+            pointIndex: (currentSet.points || []).length,
+            team: team,
+            playerOut: oldPlayer,
+            playerIn: playerName,
+            position: parseInt(pos),
+            homeScore: currentSet.homeScore || 0,
+            awayScore: currentSet.awayScore || 0
+        });
+
         const statsTeam = team === 'home' ? setStats.home : setStats.away;
         if (!statsTeam[playerName]) {
             statsTeam[playerName] = initPlayerStats(playerName);
         }
-        
+
         subState.selectedSlot = null;
         saveCurrentSet();
         renderStatsTables();

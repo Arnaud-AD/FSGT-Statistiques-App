@@ -1849,6 +1849,50 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
     color: #5f6368;
 }
 
+/* ==================== REMPLACEMENTS ==================== */
+.remplacement-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 0;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 12px;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+.remplacement-set {
+    font-weight: 700;
+    min-width: 20px;
+}
+
+.remplacement-score {
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 4px;
+}
+
+.remplacement-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.remplacement-sep {
+    color: var(--text-secondary);
+    font-size: 11px;
+}
+
+.remplacement-name {
+    font-weight: 600;
+}
+
+.remplacement-arrow {
+    color: var(--text-secondary);
+    font-size: 15px;
+    margin: 0 6px;
+}
+
 /* ==================== FOOTER ==================== */
 .footer {
     margin-top: auto;

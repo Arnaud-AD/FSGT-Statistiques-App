@@ -4148,6 +4148,150 @@ const MatchStatsView = {
         }
     },
 
+    renderSubstitutions(match, filter) {
+        var section = document.getElementById('remplacementsSection');
+        var container = document.getElementById('remplacementsContainer');
+        if (!section || !container) return;
+
+        var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+        var posRoles = BilanView.POSITION_ROLES_HOME;
+        var roleColors = SharedComponents.ROLE_COLORS_CSS;
+
+        var entries = [];
+        completedSets.forEach(function(set, idx) {
+            if (filter !== 'all' && filter !== idx) return;
+
+            // Substitutions enregistrées
+            var recordedSubs = (set.substitutions || []).filter(function(s) { return s.team === 'home'; });
+            recordedSubs.forEach(function(sub) {
+                if (sub.type === 'swap') {
+                    entries.push({
+                        type: 'swap',
+                        setNum: idx + 1,
+                        homeScore: sub.homeScore || 0,
+                        awayScore: sub.awayScore || 0,
+                        role1: sub.role1,
+                        player1: sub.player1,
+                        role2: sub.role2,
+                        player2: sub.player2
+                    });
+                } else {
+                    entries.push({
+                        type: 'sub',
+                        setNum: idx + 1,
+                        homeScore: sub.homeScore || 0,
+                        awayScore: sub.awayScore || 0,
+                        role: posRoles[sub.position] || '?',
+                        playerIn: sub.playerIn,
+                        playerOut: sub.playerOut
+                    });
+                }
+            });
+
+            // Inférer les substitutions manquantes (anciens matchs sans tracking)
+            var initial = set.initialHomeLineup || set.homeLineup;
+            var current = set.homeLineup;
+            if (initial && current) {
+                // Positions couvertes par les subs enregistrées
+                var coveredPositions = {};
+                recordedSubs.forEach(function(s) {
+                    if (s.type !== 'swap' && s.position) coveredPositions[s.position] = true;
+                });
+                var points = set.points || [];
+                Object.keys(initial).forEach(function(pos) {
+                    if (initial[pos] !== current[pos] && !coveredPositions[pos]) {
+                        // Estimer le score en croisant dernier point du sortant et premier du entrant
+                        var inPlayer = current[pos];
+                        var outPlayer = initial[pos];
+                        var estHome = '?', estAway = '?';
+                        // Dernier point où le joueur sortant agit
+                        var lastOutScore = null;
+                        for (var pi = points.length - 1; pi >= 0; pi--) {
+                            var rally = points[pi].rally || [];
+                            if (rally.some(function(a) { return a.player === outPlayer; })) {
+                                lastOutScore = { h: points[pi].homeScore || 0, a: points[pi].awayScore || 0 };
+                                break;
+                            }
+                        }
+                        // Premier point où le joueur entrant agit
+                        var firstInScore = null;
+                        for (var pi2 = 0; pi2 < points.length; pi2++) {
+                            var rally2 = points[pi2].rally || [];
+                            if (rally2.some(function(a) { return a.player === inPlayer; })) {
+                                firstInScore = { h: points[pi2].homeScore || 0, a: points[pi2].awayScore || 0 };
+                                break;
+                            }
+                        }
+                        // Priorité : score du dernier point du sortant (sub juste après)
+                        if (lastOutScore) {
+                            estHome = lastOutScore.h;
+                            estAway = lastOutScore.a;
+                        } else if (firstInScore) {
+                            estHome = firstInScore.h;
+                            estAway = firstInScore.a;
+                        }
+                        entries.push({
+                            type: 'sub',
+                            setNum: idx + 1,
+                            homeScore: estHome,
+                            awayScore: estAway,
+                            role: posRoles[pos] || '?',
+                            playerIn: inPlayer,
+                            playerOut: initial[pos]
+                        });
+                    }
+                });
+            }
+        });
+
+        // Tri : par set croissant, puis par score total croissant (premier changement en haut)
+        entries.sort(function(a, b) {
+            if (a.setNum !== b.setNum) return a.setNum - b.setNum;
+            var scoreA = (typeof a.homeScore === 'number' ? a.homeScore : 0) + (typeof a.awayScore === 'number' ? a.awayScore : 0);
+            var scoreB = (typeof b.homeScore === 'number' ? b.homeScore : 0) + (typeof b.awayScore === 'number' ? b.awayScore : 0);
+            return scoreA - scoreB;
+        });
+
+        if (entries.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+
+        section.style.display = '';
+        var html = '';
+        entries.forEach(function(s) {
+            html += '<div class="remplacement-row">';
+            html += '<span class="remplacement-set">S' + s.setNum + '</span> ';
+            html += '<span class="remplacement-score">[' + s.homeScore + '-' + s.awayScore + ']</span> ';
+            if (s.type === 'swap') {
+                var c1 = roleColors[s.role1] || 'var(--text-secondary)';
+                var c2 = roleColors[s.role2] || 'var(--text-secondary)';
+                html += '<span class="remplacement-label">switch</span>';
+                html += '<span class="remplacement-sep">/</span>';
+                html += '<span class="bilan-role-dot" style="background:' + c1 + '"></span>';
+                html += '<span class="remplacement-name">' + Utils.escapeHtml(s.player1) + '</span>';
+                html += '<span class="remplacement-arrow">\u2194</span>';
+                html += '<span class="bilan-role-dot" style="background:' + c2 + '"></span>';
+                html += '<span class="remplacement-name">' + Utils.escapeHtml(s.player2) + '</span>';
+                html += '<span class="remplacement-sep">/</span>';
+                html += '<span class="remplacement-label">switch</span>';
+            } else {
+                var color = roleColors[s.role] || 'var(--text-secondary)';
+                html += '<span class="remplacement-label">entrant</span>';
+                html += '<span class="remplacement-sep">/</span>';
+                html += '<span class="bilan-role-dot" style="background:' + color + '"></span>';
+                html += '<span class="remplacement-name">' + Utils.escapeHtml(s.playerIn) + '</span>';
+                html += '<span class="remplacement-arrow">\u2192</span>';
+                html += '<span class="bilan-role-dot" style="background:' + color + '"></span>';
+                html += '<span class="remplacement-name">' + Utils.escapeHtml(s.playerOut) + '</span>';
+                html += '<span class="remplacement-sep">/</span>';
+                html += '<span class="remplacement-label">sortant</span>';
+            }
+            html += '</div>';
+        });
+        container.innerHTML = html;
+    },
+
     renderDetailSetTabs(match) {
         var container = document.getElementById('detailSetTabs');
         if (!match.sets) { container.innerHTML = ''; return; }
@@ -4185,6 +4329,7 @@ const MatchStatsView = {
         } else {
             this.hideBilanView();
             this.renderStats(this.currentMatch, filter);
+            this.renderSubstitutions(this.currentMatch, filter);
             SharedComponents.renderSideOutBlock(this.currentMatch, filter, 'sideoutContainer');
             SharedComponents.renderTimeline(this.currentMatch, 'timelineContainer', filter);
         }
@@ -4195,10 +4340,12 @@ const MatchStatsView = {
         var statsSection = document.getElementById('statsSection');
         var sideout = document.querySelector('.sideout-section');
         var timeline = document.getElementById('timelineSection');
+        var remplacements = document.getElementById('remplacementsSection');
 
         if (statsSection) statsSection.style.display = 'none';
         if (sideout) sideout.style.display = 'none';
         if (timeline) timeline.style.display = 'none';
+        if (remplacements) remplacements.style.display = 'none';
 
         // Afficher et rendre le bilan
         var bilanContainer = document.getElementById('bilanContainer');
