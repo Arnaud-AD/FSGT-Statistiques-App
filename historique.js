@@ -4132,9 +4132,10 @@ const ImpactView = {
         }
         html += '</div>';
         html += '<table class="stats-table impact-table">';
-        html += '<colgroup><col style="width:20%"><col style="width:13%"><col style="width:14%"><col style="width:14%"><col style="width:13%"><col style="width:13%"></colgroup>';
+        html += '<colgroup><col style="width:18%"><col style="width:10%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:12%"></colgroup>';
         html += '<thead><tr>';
         html += '<th data-sort-col="player" class="impact-sortable">Joueur' + self._sortIcon('player') + '</th>';
+        html += '<th data-sort-col="pts" class="impact-sortable">Pts' + self._sortIcon('pts') + '</th>';
         html += '<th data-sort-col="pm" class="impact-col-main impact-sortable">+/\u2212' + self._sortIcon('pm') + '</th>';
         html += '<th data-sort-col="dir" class="impact-sortable">Direct' + self._sortIcon('dir') + '</th>';
         html += '<th data-sort-col="indirect" class="impact-sortable">Indirect' + self._sortIcon('indirect') + '</th>';
@@ -4148,6 +4149,7 @@ const ImpactView = {
             var score = self._computeScore(r, playerRoles, name, avgRoster);
             html += '<tr>';
             html += '<td>' + self._renderPlayerCell(name, playerRoles) + '</td>';
+            html += '<td><span class="impact-dark">' + r.ptsPlayed + '</span></td>';
             html += '<td class="impact-col-main">' + self._fmtVal(r.plusMinus, sp, true, 'dark') + '</td>';
             html += '<td>' + self._fmtVal(r.direct, sp) + '</td>';
             html += '<td>' + self._fmtVal(r.indirect, sp) + '</td>';
@@ -4172,6 +4174,7 @@ const ImpactView = {
             teamMental += self._computeScore(data[name], playerRoles, name, avgRoster);
         });
         html += '<tr class="total-row"><td>Total</td>';
+        html += '<td><span class="impact-dark">' + t.ptsPlayed + '</span></td>';
         html += '<td class="impact-col-main">' + self._fmtVal(t.plusMinus, tsp, true, 'dark') + '</td>';
         html += '<td>' + self._fmtVal(t.direct, tsp) + '</td>';
         html += '<td>' + self._fmtVal(t.indirect, tsp) + '</td>';
