@@ -1167,10 +1167,12 @@ body {
     margin-left: 1px;
     transition: opacity 0.15s;
 }
-/* Mobile detail tables: arrow doesn't push text */
+/* Sort arrow: positioned absolute so it doesn't push column text */
+.stats-table th,
 .detail-stats-table thead th {
     position: relative;
 }
+.stats-table th .sort-arrow,
 .detail-stats-table thead th .sort-arrow {
     position: absolute;
     margin-left: 0;
