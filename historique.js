@@ -4001,15 +4001,17 @@ const ImpactView = {
     },
 
     // Calcule Score a la volee pour un joueur
+    // roleAlign est TOUJOURS calcule depuis les valeurs brutes (Tot) pour eviter
+    // que le "+1" du denominateur ne change les ratios selon l'echelle Tot/Moy
     _computeScore(r, playerRoles, name, avgRoster) {
         if (!playerRoles || !playerRoles[name]) return 0;
         var role = playerRoles[name].primaryRole;
         var sp = r.proratedSets || r.setsPlayed || 1;
         var isMoy = this._avgMode === 'moy';
-        // En Moy, utiliser les valeurs par set pour coherence avec les autres colonnes
+        // Seul pm change d'echelle en Moy — roleAlign reste structurel (valeurs brutes)
         var pm = isMoy ? r.plusMinus / sp : r.plusMinus;
-        var dir = isMoy ? (r.direct || 0) / sp : (r.direct || 0);
-        var ind = isMoy ? (r.indirect || 0) / sp : (r.indirect || 0);
+        var dir = r.direct || 0;
+        var ind = r.indirect || 0;
         var absDir = Math.abs(dir);
         var absInd = Math.abs(ind);
         var denom = absDir + absInd + 1;
