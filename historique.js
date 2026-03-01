@@ -118,6 +118,7 @@ const SeasonSelector = {
         YearStatsView._rendered = false;
         SetsPlayedView._rendered = false;
         ImpactView._seasonRoster = null; // invalider le cache roster
+        ImpactView._seasonDirPerSet = null;
 
         // Adapter les onglets selon la saison
         this._updateTabs();
@@ -3775,19 +3776,60 @@ const ImpactView = {
     _showToggle: false, // visible si multi-sets
     _lastData: null, // cache pour re-render toggle
     _lastPlayerRoles: null,
-    _seasonRoster: null, // cache du roster saisonnier (toujours utilise, meme en vue match)
+    _seasonRoster: null, // cache du roster saisonnier
+    _seasonDirPerSet: null, // cache du Direct/set saisonnier (pour calcul roster match)
     _sortCol: null, // null = tri par defaut (role + pm), sinon colKey
     _sortAsc: false, // desc par defaut pour valeurs numeriques
 
-    // Calcule et cache le roster saisonnier si pas encore fait
-    _ensureSeasonRoster(team) {
-        if (this._seasonRoster) return;
+    // Calcule et cache les donnees saisonnieres si pas encore fait
+    _ensureSeasonData(team) {
+        if (this._seasonRoster && this._seasonDirPerSet) return;
         var matches = SeasonSelector.getFilteredMatches();
         if (!matches || matches.length === 0) return;
         var seasonData = PlusMinusCalculator.aggregateAcrossMatches(matches, team);
         var seasonRoster = {};
-        Object.keys(seasonData).forEach(function(name) { seasonRoster[name] = seasonData[name].roster; });
+        var seasonDirPerSet = {};
+        Object.keys(seasonData).forEach(function(name) {
+            seasonRoster[name] = seasonData[name].roster;
+            var r = seasonData[name];
+            seasonDirPerSet[name] = r.proratedSets > 0 ? r.direct / r.proratedSets : 0;
+        });
         this._seasonRoster = seasonRoster;
+        this._seasonDirPerSet = seasonDirPerSet;
+    },
+
+    // Calcule le roster specifique a un match (force des coequipiers presents)
+    // Utilise seasonDirPerSet comme reference de force, mais lineups du match
+    _computeMatchRoster(match, team, players) {
+        var seasonDirPerSet = this._seasonDirPerSet || {};
+        var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+        var rosterSum = {};
+        var rosterWeight = {};
+        players.forEach(function(name) { rosterSum[name] = 0; rosterWeight[name] = 0; });
+
+        completedSets.forEach(function(set) {
+            if (!set.points || set.points.length < 20) return;
+            var lineups = PlusMinusCalculator._getLineupAtEachPoint(set, team);
+            for (var pi = 0; pi < lineups.length; pi++) {
+                var onCourt = lineups[pi];
+                if (!onCourt || onCourt.length < 2) continue;
+                onCourt.forEach(function(name) {
+                    if (rosterSum[name] === undefined) return;
+                    onCourt.forEach(function(coPlayer) {
+                        if (coPlayer !== name && seasonDirPerSet[coPlayer] !== undefined) {
+                            rosterSum[name] += seasonDirPerSet[coPlayer];
+                            rosterWeight[name]++;
+                        }
+                    });
+                });
+            }
+        });
+
+        var matchRoster = {};
+        players.forEach(function(name) {
+            matchRoster[name] = rosterWeight[name] > 0 ? rosterSum[name] / rosterWeight[name] : 0;
+        });
+        return matchRoster;
     },
 
     renderForMatch(match, team) {
@@ -3797,11 +3839,12 @@ const ImpactView = {
         var data = PlusMinusCalculator.compute(completedSets, team);
         if (Object.keys(data).length === 0) return '';
 
-        // Injecter le roster saisonnier (calcule a la volee si pas encore cache)
-        this._ensureSeasonRoster(team);
-        var seasonRoster = this._seasonRoster || {};
-        Object.keys(data).forEach(function(name) {
-            data[name].roster = seasonRoster[name] || 0;
+        // Calculer le roster specifique au match (coequipiers presents dans CE match)
+        this._ensureSeasonData(team);
+        var players = Object.keys(data);
+        var matchRoster = this._computeMatchRoster(match, team, players);
+        players.forEach(function(name) {
+            data[name].roster = matchRoster[name] || 0;
         });
 
         var playerRoles = BilanView.getPlayerRoles(match, team);
@@ -3817,10 +3860,16 @@ const ImpactView = {
         var data = PlusMinusCalculator.aggregateAcrossMatches(matches, team);
         if (Object.keys(data).length === 0) return '';
 
-        // Cache du roster saisonnier pour reutilisation en vue match
+        // Cache du roster et dirPerSet saisonniers pour reutilisation en vue match
         var seasonRoster = {};
-        Object.keys(data).forEach(function(name) { seasonRoster[name] = data[name].roster; });
+        var seasonDirPerSet = {};
+        Object.keys(data).forEach(function(name) {
+            seasonRoster[name] = data[name].roster;
+            var r = data[name];
+            seasonDirPerSet[name] = r.proratedSets > 0 ? r.direct / r.proratedSets : 0;
+        });
         this._seasonRoster = seasonRoster;
+        this._seasonDirPerSet = seasonDirPerSet;
 
         var playerRoles = BilanView.getPlayerRolesYear(matches, team);
         this._showToggle = true;
