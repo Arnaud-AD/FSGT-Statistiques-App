@@ -1329,6 +1329,9 @@ const StatsAggregator = {
         const playerTotals = {};
         setsData.forEach(function(s) {
             if (!s.stats || !s.stats[teamKey]) return;
+            // V21.1 : calcul proraté de _setsPlayed (cohérent avec proratedSets de l'Impact)
+            var totalPts = (s.points || []).length;
+            var lineups = (totalPts >= 20) ? PlusMinusCalculator._getLineupAtEachPoint(s, teamKey) : null;
             for (const [name, data] of Object.entries(s.stats[teamKey])) {
                 // V20.26 : exclure les joueurs qui ne font pas partie du roster/lineups
                 if (allowed && (Array.isArray(allowed) ? allowed.indexOf(name) === -1 : !allowed[name])) continue;
@@ -1337,7 +1340,14 @@ const StatsAggregator = {
                     playerTotals[name]._setsPlayed = 0;
                 }
                 const t = playerTotals[name];
-                t._setsPlayed++;
+                // V21.1 : prorata par points joués (comme Impact) au lieu de +1 entier
+                if (lineups && totalPts > 0) {
+                    var ptsInSet = 0;
+                    for (var pp = 0; pp < lineups.length; pp++) {
+                        if (lineups[pp] && lineups[pp].indexOf(name) >= 0) ptsInSet++;
+                    }
+                    t._setsPlayed += ptsInSet / totalPts;
+                }
 
                 // Service
                 t.service.tot += (data.service?.tot || 0);
