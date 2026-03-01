@@ -4026,7 +4026,7 @@ const MatchStatsView = {
         sorted.forEach(function(match, index) {
             var resultEmoji = match.result === 'win' ? '🟢' : (match.result === 'loss' ? '🔴' : '🟡');
             var setsDisplay = (match.setsWon !== undefined && match.setsLost !== undefined)
-                ? match.setsWon + '-' + match.setsLost : '';
+                ? '(' + match.setsWon + '-' + match.setsLost + ')' : '';
             var opponent = match.opponent || 'Adversaire';
             var selected = self.selectedMatchIndex === index ? ' selected' : '';
 
