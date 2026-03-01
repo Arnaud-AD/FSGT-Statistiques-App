@@ -895,9 +895,9 @@ const PlusMinusCalculator = {
             // Service bonus
             var moyRecAdv = (r.recCountAdv + r.ace) > 0 ? r.recSumAdv / (r.recCountAdv + r.ace) : 3;
             r.servBonus = r.servTot > 0 ? r.servTot * (3 - moyRecAdv) / 19 : 0;
-            // New Indirect (passe /10, R2 negatif, D neutre = 0)
-            var indPlus = (r.r4 + r.r3) + (r.p4 + r.p3) / 10 + r.relplus + r.relminus + r.defplus + r.blcminus;
-            var indMinus = r.r2 + r.r1 + r.frec + (r.p1 + r.fp) / 10 + r.frel + r.defminus + r.fdef;
+            // New Indirect (passe /3, R2 negatif, D neutre = 0)
+            var indPlus = (r.r4 + r.r3) + (r.p4 + r.p3) / 3 + r.relplus + r.relminus + r.defplus + r.blcminus;
+            var indMinus = r.r2 + r.r1 + r.frec + (r.p1 + r.fp) / 3 + r.frel + r.defminus + r.fdef;
             r.indirect = indPlus - indMinus + r.servBonus;
             // Impact Technique
             r.techServ = (r.ace + r.splus - r.fser) + r.servBonus;
@@ -1170,9 +1170,9 @@ const PlusMinusCalculator = {
             // Service bonus
             var moyRecAdv = (r.recCountAdv + r.ace) > 0 ? r.recSumAdv / (r.recCountAdv + r.ace) : 3;
             r.servBonus = r.servTot > 0 ? r.servTot * (3 - moyRecAdv) / 19 : 0;
-            // New Indirect (passe /10, R2 negatif, D neutre = 0)
-            var indPlus = (r.r4 + r.r3) + (r.p4 + r.p3) / 10 + r.relplus + r.relminus + r.defplus + r.blcminus;
-            var indMinus = r.r2 + r.r1 + r.frec + (r.p1 + r.fp) / 10 + r.frel + r.defminus + r.fdef;
+            // New Indirect (passe /3, R2 negatif, D neutre = 0)
+            var indPlus = (r.r4 + r.r3) + (r.p4 + r.p3) / 3 + r.relplus + r.relminus + r.defplus + r.blcminus;
+            var indMinus = r.r2 + r.r1 + r.frec + (r.p1 + r.fp) / 3 + r.frel + r.defminus + r.fdef;
             r.indirect = indPlus - indMinus + r.servBonus;
             // Impact Technique
             r.techServ = (r.ace + r.splus - r.fser) + r.servBonus;
