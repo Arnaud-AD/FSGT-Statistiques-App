@@ -749,7 +749,7 @@ const PlusMinusCalculator = {
             fser: 0, fatt: 0, bp: 0, frec: 0, fdef: 0, defminus: 0, fblc: 0, fp: 0,
             recWinner: 0, passWinner: 0, defWinner: 0,
             // Champs qualite extraits de set.stats
-            splus: 0, r4: 0, r3: 0, r1: 0, p4: 0, p3: 0, p1: 0,
+            splus: 0, r4: 0, r3: 0, r2: 0, r1: 0, p4: 0, p3: 0, p1: 0,
             relplus: 0, relminus: 0, frel: 0, blcminus: 0,
             servTot: 0, recSumAdv: 0, recCountAdv: 0, defTot: 0, neutralDef: 0,
             // Derives
@@ -858,9 +858,10 @@ const PlusMinusCalculator = {
                     r.servTot += (ps.service && ps.service.tot) || 0;
                     r.recSumAdv += (ps.service && ps.service.recSumAdv) || 0;
                     r.recCountAdv += (ps.service && ps.service.recCountAdv) || 0;
-                    // Reception : r4, r3, r1
+                    // Reception : r4, r3, r2, r1
                     r.r4 += (ps.reception && ps.reception.r4) || 0;
                     r.r3 += (ps.reception && ps.reception.r3) || 0;
+                    r.r2 += (ps.reception && ps.reception.r2) || 0;
                     r.r1 += (ps.reception && ps.reception.r1) || 0;
                     // Passe : p4, p3, p1
                     r.p4 += (ps.pass && ps.pass.p4) || 0;
@@ -894,17 +895,17 @@ const PlusMinusCalculator = {
             // Service bonus
             var moyRecAdv = (r.recCountAdv + r.ace) > 0 ? r.recSumAdv / (r.recCountAdv + r.ace) : 3;
             r.servBonus = r.servTot > 0 ? r.servTot * (3 - moyRecAdv) / 19 : 0;
-            // New Indirect (passe /10)
-            var indPlus = (r.r4 + r.r3) + (r.p4 + r.p3) / 10 + r.relplus + r.relminus + r.defplus + r.neutralDef + r.blcminus;
-            var indMinus = r.r1 + r.frec + (r.p1 + r.fp) / 10 + r.frel + r.defminus + r.fdef;
+            // New Indirect (passe /10, R2 negatif, D neutre = 0)
+            var indPlus = (r.r4 + r.r3) + (r.p4 + r.p3) / 10 + r.relplus + r.relminus + r.defplus + r.blcminus;
+            var indMinus = r.r2 + r.r1 + r.frec + (r.p1 + r.fp) / 10 + r.frel + r.defminus + r.fdef;
             r.indirect = indPlus - indMinus + r.servBonus;
             // Impact Technique
             r.techServ = (r.ace + r.splus - r.fser) + r.servBonus;
-            r.techRec = r.r4 + r.r3 - r.r1 - r.frec;
+            r.techRec = r.r4 + r.r3 - r.r2 - r.r1 - r.frec;
             r.techPasse = r.p4 + r.p3 - r.p1 - r.fp;
             r.techAtt = r.attplus - r.fatt - r.bp;
             r.techRel = r.relplus + r.relminus - r.frel;
-            r.techDef = (r.relplus + r.relminus - r.frel) + (r.defplus + r.neutralDef - r.defminus - r.fdef);
+            r.techDef = (r.relplus + r.relminus - r.frel) + (r.defplus - r.defminus - r.fdef);
             r.techBlc = r.blcplus + r.blcminus - r.fblc;
             r.techDefBlc = r.techDef + r.techBlc;
             // On/Off (conserve pour backward compat)
@@ -1150,7 +1151,7 @@ const PlusMinusCalculator = {
                     'offPtsPlayed', 'offTeamScored', 'offTeamConceded',
                     'ace', 'attplus', 'blcplus', 'defplus', 'fser', 'fatt', 'bp', 'frec', 'fdef', 'defminus', 'fblc', 'fp',
                     'recWinner', 'passWinner', 'defWinner',
-                    'splus', 'r4', 'r3', 'r1', 'p4', 'p3', 'p1',
+                    'splus', 'r4', 'r3', 'r2', 'r1', 'p4', 'p3', 'p1',
                     'relplus', 'relminus', 'frel', 'blcminus',
                     'servTot', 'recSumAdv', 'recCountAdv', 'defTot'];
                 rawFields.forEach(function(k) { dst[k] += src[k]; });
@@ -1169,17 +1170,17 @@ const PlusMinusCalculator = {
             // Service bonus
             var moyRecAdv = (r.recCountAdv + r.ace) > 0 ? r.recSumAdv / (r.recCountAdv + r.ace) : 3;
             r.servBonus = r.servTot > 0 ? r.servTot * (3 - moyRecAdv) / 19 : 0;
-            // New Indirect (passe /10)
-            var indPlus = (r.r4 + r.r3) + (r.p4 + r.p3) / 10 + r.relplus + r.relminus + r.defplus + r.neutralDef + r.blcminus;
-            var indMinus = r.r1 + r.frec + (r.p1 + r.fp) / 10 + r.frel + r.defminus + r.fdef;
+            // New Indirect (passe /10, R2 negatif, D neutre = 0)
+            var indPlus = (r.r4 + r.r3) + (r.p4 + r.p3) / 10 + r.relplus + r.relminus + r.defplus + r.blcminus;
+            var indMinus = r.r2 + r.r1 + r.frec + (r.p1 + r.fp) / 10 + r.frel + r.defminus + r.fdef;
             r.indirect = indPlus - indMinus + r.servBonus;
             // Impact Technique
             r.techServ = (r.ace + r.splus - r.fser) + r.servBonus;
-            r.techRec = r.r4 + r.r3 - r.r1 - r.frec;
+            r.techRec = r.r4 + r.r3 - r.r2 - r.r1 - r.frec;
             r.techPasse = r.p4 + r.p3 - r.p1 - r.fp;
             r.techAtt = r.attplus - r.fatt - r.bp;
             r.techRel = r.relplus + r.relminus - r.frel;
-            r.techDef = (r.relplus + r.relminus - r.frel) + (r.defplus + r.neutralDef - r.defminus - r.fdef);
+            r.techDef = (r.relplus + r.relminus - r.frel) + (r.defplus - r.defminus - r.fdef);
             r.techBlc = r.blcplus + r.blcminus - r.fblc;
             r.techDefBlc = r.techDef + r.techBlc;
             // On/Off (conserve pour backward compat)
