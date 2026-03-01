@@ -4004,8 +4004,12 @@ const ImpactView = {
     _computeScore(r, playerRoles, name, avgRoster) {
         if (!playerRoles || !playerRoles[name]) return 0;
         var role = playerRoles[name].primaryRole;
-        var dir = r.direct || 0;
-        var ind = r.indirect || 0;
+        var sp = r.proratedSets || r.setsPlayed || 1;
+        var isMoy = this._avgMode === 'moy';
+        // En Moy, utiliser les valeurs par set pour coherence avec les autres colonnes
+        var pm = isMoy ? r.plusMinus / sp : r.plusMinus;
+        var dir = isMoy ? (r.direct || 0) / sp : (r.direct || 0);
+        var ind = isMoy ? (r.indirect || 0) / sp : (r.indirect || 0);
         var absDir = Math.abs(dir);
         var absInd = Math.abs(ind);
         var denom = absDir + absInd + 1;
@@ -4018,7 +4022,7 @@ const ImpactView = {
             roleAlign = (Math.max(0, dir) + Math.max(0, ind)) / (2 * denom);
         }
         var rosterCoeff = avgRoster > 0 ? 1 + 0.5 * (avgRoster - r.roster) / avgRoster : 1;
-        return r.plusMinus * (1 + roleAlign) * rosterCoeff;
+        return pm * (1 + roleAlign) * rosterCoeff;
     },
 
     // Calcule avgRoster (moyenne des rosters des joueurs avec >= 4 setsPlayed)
@@ -4036,10 +4040,13 @@ const ImpactView = {
         return '<span class="impact-roster">' + val.toFixed(1) + '</span>';
     },
 
-    _fmtScore(val) {
-        if (Math.abs(val) < 0.5) return '<span class="impact-zero">\u2212</span>';
-        var cls = val > 0 ? 'impact-score-pos' : 'impact-score-neg';
-        var rounded = Math.round(val);
+    _fmtScore(val, setsPlayed) {
+        // setsPlayed optionnel : pour la ligne Total en mode Moy, diviser la somme
+        var isMoy = this._avgMode === 'moy';
+        var v = (isMoy && setsPlayed && setsPlayed > 1) ? val / setsPlayed : val;
+        if (Math.abs(v) < 0.5) return '<span class="impact-zero">\u2212</span>';
+        var cls = v > 0 ? 'impact-score-pos' : 'impact-score-neg';
+        var rounded = Math.round(v);
         return '<span class="' + cls + '">' + (rounded > 0 ? '+' : '') + rounded + '</span>';
     },
 
@@ -4087,12 +4094,24 @@ const ImpactView = {
         // Ligne Total equipe
         var t = this._teamTotals(data, players);
         var tsp = t.proratedSets || t.setsPlayed || 1;
+        // Roster total = moyenne des rosters individuels
+        var rosterSum = 0, rosterCount = 0;
+        players.forEach(function(name) {
+            var rv = data[name].roster;
+            if (rv && rv !== 0) { rosterSum += rv; rosterCount++; }
+        });
+        var teamRoster = rosterCount > 0 ? rosterSum / rosterCount : 0;
+        // Mental total = somme des mental individuels
+        var teamMental = 0;
+        players.forEach(function(name) {
+            teamMental += self._computeScore(data[name], playerRoles, name, avgRoster);
+        });
         html += '<tr class="total-row"><td>Total</td>';
         html += '<td class="impact-col-main">' + self._fmtVal(t.plusMinus, tsp, true, 'dark') + '</td>';
         html += '<td>' + self._fmtVal(t.direct, tsp) + '</td>';
         html += '<td>' + self._fmtVal(t.indirect, tsp) + '</td>';
-        html += '<td><span class="impact-zero">\u2212</span></td>';
-        html += '<td><span class="impact-zero">\u2212</span></td>';
+        html += '<td>' + self._fmtRoster(teamRoster) + '</td>';
+        html += '<td>' + self._fmtScore(teamMental, tsp) + '</td>';
         html += '</tr>';
 
         html += '</tbody></table>';
