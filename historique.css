@@ -1176,9 +1176,9 @@ body {
 .detail-stats-table thead th .sort-arrow {
     position: absolute;
     margin-left: 0;
-    bottom: 1px;
     right: 1px;
-    font-size: 5px;
+    top: 50%;
+    transform: translateY(-50%);
 }
 .sort-arrow.active {
     opacity: 0.6;
