@@ -4025,13 +4025,17 @@ const MatchStatsView = {
         var optionsHtml = '<option value="" disabled' + (!hasSelection ? ' selected' : '') + '>Sélectionner un match…</option>';
         sorted.forEach(function(match, index) {
             var resultEmoji = match.result === 'win' ? '🟢' : (match.result === 'loss' ? '🔴' : '🟡');
-            var setsDisplay = (match.setsWon !== undefined && match.setsLost !== undefined)
-                ? '(' + match.setsWon + '-' + match.setsLost + ')' : '';
             var opponent = match.opponent || 'Adversaire';
+            var detail = '';
+            if (match.type === 'ginette' && match.round) {
+                detail = ' (' + match.round + ')';
+            } else if (match.location) {
+                detail = ' (' + (match.location === 'domicile' ? 'dom' : 'ext') + ')';
+            }
             var selected = self.selectedMatchIndex === index ? ' selected' : '';
 
             optionsHtml += '<option value="' + index + '"' + selected + '>' +
-                resultEmoji + ' ' + opponent + ' ' + setsDisplay +
+                resultEmoji + ' ' + opponent + detail +
                 '</option>';
         });
         matchSelect.innerHTML = optionsHtml;
