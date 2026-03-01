@@ -872,7 +872,10 @@ const PlusMinusCalculator = {
                     r.frel += (ps.relance && ps.relance.frel) || 0;
                     // Bloc : blcminus
                     r.blcminus += (ps.block && ps.block.blcminus) || 0;
-                    // Defense : defTot
+                    // Defense : defplus, defminus, fdef, defTot (source de verite = set.stats)
+                    r.defplus += (ps.defense && ps.defense.defplus) || 0;
+                    r.defminus += (ps.defense && ps.defense.defminus) || 0;
+                    r.fdef += (ps.defense && ps.defense.fdef) || 0;
                     r.defTot += (ps.defense && ps.defense.tot) || 0;
                 });
             }
@@ -1083,48 +1086,10 @@ const PlusMinusCalculator = {
                     break;
 
                 case 'defense': {
-                    // Bloc avant cette defense ?
-                    var blockBefore = null;
-                    for (var bj = i - 1; bj >= 0; bj--) {
-                        if (rally[bj].type === 'block' && rally[bj].team === team) {
-                            blockBefore = rally[bj].result === 'bloc_out' ? 'bloc_out' : 'normal';
-                            break;
-                        }
-                        if (rally[bj].type === 'pass' && rally[bj].team === team) break;
-                        if (rally[bj].type === 'attack' && rally[bj].team === team) break;
-                    }
-                    if (blockBefore === 'bloc_out') break;
-
-                    // Defense apres relance adverse ? → exclure
-                    var oppTeamDef = team === 'home' ? 'away' : 'home';
-                    var isDefAfterRelance = false;
-                    for (var dj = i - 1; dj >= 0; dj--) {
-                        if (rally[dj].type === 'attack' && rally[dj].team === oppTeamDef) {
-                            isDefAfterRelance = rally[dj].attackType === 'relance';
-                            break;
-                        }
-                        if (rally[dj].type === 'pass' && rally[dj].team === oppTeamDef
-                            && rally[dj].passType === 'relance' && rally[dj].isDirectReturn) {
-                            isDefAfterRelance = true;
-                            break;
-                        }
-                        if (rally[dj].type === 'block' || (rally[dj].type === 'defense' && rally[dj].team === team)) break;
-                    }
-                    if (isDefAfterRelance) break;
-
+                    // defplus/defminus/fdef sont extraits de set.stats (source de verite)
+                    // _scanRally ne compte que defWinner (retour direct gagnant)
                     if (action.isDirectReturnWinner) {
                         c.defWinner++;
-                    } else if (action.untouched) {
-                        if (blockBefore === 'normal') c.defminus++; // D- : avec bloc avant
-                        else c.fdef++; // FD : sans bloc
-                    } else if (action.result === 'fault') {
-                        if (blockBefore === 'normal') c.defminus++; // D- : avec bloc avant
-                        else c.fdef++; // FD : sans bloc
-                    } else if (action.isDirectReturn && !action.isDirectReturnWinner) {
-                        if (StatsRepair._isDirectReturnExploited(rally, i, action.team)) c.fdef++;
-                        else c.defplus++; // Retour direct non exploite = defense reussie
-                    } else if (action.result !== 'fault' && !action.untouched) {
-                        c.defplus++; // D+ ou D neutre : defense reussie, jeu continue
                     }
                     break;
                 }
