@@ -117,6 +117,7 @@ const SeasonSelector = {
         MatchStatsView.currentMatch = null;
         YearStatsView._rendered = false;
         SetsPlayedView._rendered = false;
+        ImpactView._seasonRoster = null; // invalider le cache roster
 
         // Adapter les onglets selon la saison
         this._updateTabs();
@@ -741,12 +742,19 @@ const PlusMinusCalculator = {
 
     _initRecord() {
         return {
-            ptsPlayed: 0, setsPlayed: 0, teamScored: 0, teamConceded: 0, plusMinus: 0,
+            ptsPlayed: 0, setsPlayed: 0, proratedSets: 0, teamScored: 0, teamConceded: 0, plusMinus: 0,
             offPtsPlayed: 0, offTeamScored: 0, offTeamConceded: 0,
             ace: 0, attplus: 0, blcplus: 0, defplus: 0,
             fser: 0, fatt: 0, bp: 0, frec: 0, fdef: 0, defminus: 0, fblc: 0, fp: 0,
             recWinner: 0, passWinner: 0, defWinner: 0,
-            dirPlus: 0, dirMinus: 0, indirect: 0, onOff: null, influence: null,
+            // Champs qualite extraits de set.stats
+            splus: 0, r4: 0, r3: 0, r1: 0, p4: 0, p3: 0, p1: 0,
+            relplus: 0, relminus: 0, frel: 0, blcminus: 0,
+            servTot: 0, recSumAdv: 0, recCountAdv: 0, defTot: 0, neutralDef: 0,
+            // Derives
+            dirPlus: 0, dirMinus: 0, direct: 0, indirect: 0, servBonus: 0,
+            roster: 0, onOff: null, influence: null,
+            techServ: 0, techRec: 0, techPasse: 0, techAtt: 0, techRel: 0, techDefBlc: 0,
             servImpact: 0, recImpact: 0, pasImpact: 0,
             attImpact: 0, defImpact: 0, blcImpact: 0
         };
@@ -829,20 +837,74 @@ const PlusMinusCalculator = {
             Object.keys(playedInSet).forEach(function(name) {
                 if (results[name]) results[name].setsPlayed++;
             });
+
+            // Extraire stats qualite depuis set.stats (champs non couverts par _scanRally)
+            var totalPtsInSet = set.points.length;
+            if (totalPtsInSet >= 20) {
+                var teamStats = (set.stats && set.stats[team]) || {};
+                Object.keys(playedInSet).forEach(function(name) {
+                    var r = results[name];
+                    var ps = teamStats[name];
+                    if (!ps) return;
+                    // Compter les points joues dans ce set par ce joueur (pour prorata)
+                    var ptsInSet = 0;
+                    for (var pp = 0; pp < totalPtsInSet; pp++) {
+                        if (lineups[pp] && lineups[pp].indexOf(name) >= 0) ptsInSet++;
+                    }
+                    r.proratedSets += ptsInSet / totalPtsInSet;
+                    // Service : splus, servTot, recSumAdv, recCountAdv
+                    r.splus += (ps.service && ps.service.splus) || 0;
+                    r.servTot += (ps.service && ps.service.tot) || 0;
+                    r.recSumAdv += (ps.service && ps.service.recSumAdv) || 0;
+                    r.recCountAdv += (ps.service && ps.service.recCountAdv) || 0;
+                    // Reception : r4, r3, r1
+                    r.r4 += (ps.reception && ps.reception.r4) || 0;
+                    r.r3 += (ps.reception && ps.reception.r3) || 0;
+                    r.r1 += (ps.reception && ps.reception.r1) || 0;
+                    // Passe : p4, p3, p1
+                    r.p4 += (ps.pass && ps.pass.p4) || 0;
+                    r.p3 += (ps.pass && ps.pass.p3) || 0;
+                    r.p1 += (ps.pass && ps.pass.p1) || 0;
+                    // Relance : relplus, relminus, frel
+                    r.relplus += (ps.relance && ps.relance.relplus) || 0;
+                    r.relminus += (ps.relance && ps.relance.relminus) || 0;
+                    r.frel += (ps.relance && ps.relance.frel) || 0;
+                    // Bloc : blcminus
+                    r.blcminus += (ps.block && ps.block.blcminus) || 0;
+                    // Defense : defTot
+                    r.defTot += (ps.defense && ps.defense.tot) || 0;
+                });
+            }
         });
 
         // Calcul des derives
         Object.keys(results).forEach(function(name) {
             var r = results[name];
             r.plusMinus = r.teamScored - r.teamConceded;
-            r.dirPlus = r.ace + r.attplus + r.blcplus + r.defplus + r.recWinner + r.passWinner + r.defWinner;
-            r.dirMinus = r.fser + r.fatt + r.bp + r.frec + r.fdef + r.defminus + r.fblc + r.fp;
-            r.indirect = r.plusMinus - (r.dirPlus - r.dirMinus);
-            // On/Off : +/- reel vs +/- attendu si l'equipe jouait au meme rythme que sans le joueur
+            // Defense neutre
+            r.neutralDef = Math.max(0, r.defTot - r.defplus - r.defminus - r.fdef);
+            // New Direct
+            r.dirPlus = (r.ace + r.splus) + r.attplus + r.blcplus;
+            r.dirMinus = r.fser + (r.fatt + r.bp) + r.fblc;
+            r.direct = r.dirPlus - r.dirMinus;
+            // Service bonus
+            var moyRecAdv = (r.recCountAdv + r.ace) > 0 ? r.recSumAdv / (r.recCountAdv + r.ace) : 3;
+            r.servBonus = r.servTot > 0 ? r.servTot * (3 - moyRecAdv) / 19 : 0;
+            // New Indirect (passe /10)
+            var indPlus = (r.r4 + r.r3) + (r.p4 + r.p3) / 10 + r.relplus + r.relminus + r.defplus + r.neutralDef + r.blcminus;
+            var indMinus = r.r1 + r.frec + (r.p1 + r.fp) / 10 + r.frel + r.defminus + r.fdef;
+            r.indirect = indPlus - indMinus + r.servBonus;
+            // Impact Technique
+            r.techServ = (r.ace + r.splus - r.fser) + r.servBonus;
+            r.techRec = r.r4 + r.r3 - r.r1 - r.frec;
+            r.techPasse = r.p4 + r.p3 - r.p1 - r.fp;
+            r.techAtt = r.attplus - r.fatt - r.bp;
+            r.techRel = r.relplus + r.relminus - r.frel;
+            r.techDefBlc = (r.defplus + r.neutralDef - r.defminus - r.fdef) + (r.blcplus + r.blcminus - r.fblc);
+            // On/Off (conserve pour backward compat)
             if (r.offPtsPlayed > 0 && r.ptsPlayed > 0) {
                 var offRate = (r.offTeamScored - r.offTeamConceded) / r.offPtsPlayed;
                 r.onOff = r.plusMinus - offRate * r.ptsPlayed;
-                // Influence = On/Off - 0.5*(Dir+ - Dir-) : α=0.5 reconnait que le direct est aide par les coequipiers
                 r.influence = r.onOff - 0.5 * (r.dirPlus - r.dirMinus);
             } else {
                 r.onOff = null;
@@ -1098,7 +1160,16 @@ const PlusMinusCalculator = {
         var self = this;
         var combined = {};
 
-        matches.forEach(function(match) {
+        // Filtrer les matchs sans rallies (0 points total)
+        var validMatches = matches.filter(function(m) {
+            var totalRallies = 0;
+            (m.sets || []).forEach(function(s) {
+                if (s.completed && s.points) totalRallies += s.points.length;
+            });
+            return totalRallies > 0;
+        });
+
+        validMatches.forEach(function(match) {
             var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
             if (completedSets.length === 0) return;
 
@@ -1107,11 +1178,13 @@ const PlusMinusCalculator = {
                 if (!combined[name]) combined[name] = self._initRecord();
                 var dst = combined[name];
                 var src = matchData[name];
-                // Sommer les champs bruts seulement
-                var rawFields = ['ptsPlayed', 'setsPlayed', 'teamScored', 'teamConceded',
+                var rawFields = ['ptsPlayed', 'setsPlayed', 'proratedSets', 'teamScored', 'teamConceded',
                     'offPtsPlayed', 'offTeamScored', 'offTeamConceded',
                     'ace', 'attplus', 'blcplus', 'defplus', 'fser', 'fatt', 'bp', 'frec', 'fdef', 'defminus', 'fblc', 'fp',
-                    'recWinner', 'passWinner', 'defWinner'];
+                    'recWinner', 'passWinner', 'defWinner',
+                    'splus', 'r4', 'r3', 'r1', 'p4', 'p3', 'p1',
+                    'relplus', 'relminus', 'frel', 'blcminus',
+                    'servTot', 'recSumAdv', 'recCountAdv', 'defTot'];
                 rawFields.forEach(function(k) { dst[k] += src[k]; });
             });
         });
@@ -1120,9 +1193,26 @@ const PlusMinusCalculator = {
         Object.keys(combined).forEach(function(name) {
             var r = combined[name];
             r.plusMinus = r.teamScored - r.teamConceded;
-            r.dirPlus = r.ace + r.attplus + r.blcplus + r.defplus + r.recWinner + r.passWinner + r.defWinner;
-            r.dirMinus = r.fser + r.fatt + r.bp + r.frec + r.fdef + r.defminus + r.fblc + r.fp;
-            r.indirect = r.plusMinus - (r.dirPlus - r.dirMinus);
+            r.neutralDef = Math.max(0, r.defTot - r.defplus - r.defminus - r.fdef);
+            // New Direct
+            r.dirPlus = (r.ace + r.splus) + r.attplus + r.blcplus;
+            r.dirMinus = r.fser + (r.fatt + r.bp) + r.fblc;
+            r.direct = r.dirPlus - r.dirMinus;
+            // Service bonus
+            var moyRecAdv = (r.recCountAdv + r.ace) > 0 ? r.recSumAdv / (r.recCountAdv + r.ace) : 3;
+            r.servBonus = r.servTot > 0 ? r.servTot * (3 - moyRecAdv) / 19 : 0;
+            // New Indirect (passe /10)
+            var indPlus = (r.r4 + r.r3) + (r.p4 + r.p3) / 10 + r.relplus + r.relminus + r.defplus + r.neutralDef + r.blcminus;
+            var indMinus = r.r1 + r.frec + (r.p1 + r.fp) / 10 + r.frel + r.defminus + r.fdef;
+            r.indirect = indPlus - indMinus + r.servBonus;
+            // Impact Technique
+            r.techServ = (r.ace + r.splus - r.fser) + r.servBonus;
+            r.techRec = r.r4 + r.r3 - r.r1 - r.frec;
+            r.techPasse = r.p4 + r.p3 - r.p1 - r.fp;
+            r.techAtt = r.attplus - r.fatt - r.bp;
+            r.techRel = r.relplus + r.relminus - r.frel;
+            r.techDefBlc = (r.defplus + r.neutralDef - r.defminus - r.fdef) + (r.blcplus + r.blcminus - r.fblc);
+            // On/Off (conserve pour backward compat)
             if (r.offPtsPlayed > 0 && r.ptsPlayed > 0) {
                 var offRate = (r.offTeamScored - r.offTeamConceded) / r.offPtsPlayed;
                 r.onOff = r.plusMinus - offRate * r.ptsPlayed;
@@ -1137,6 +1227,45 @@ const PlusMinusCalculator = {
             r.attImpact = r.attplus - r.fatt - r.bp;
             r.defImpact = r.defplus + r.defWinner - r.fdef - r.defminus;
             r.blcImpact = r.blcplus - r.fblc;
+        });
+
+        // --- Roster saisonnier : force des coequipiers point-par-point ---
+        // Phase 1 : seasonDirectPerSet pour chaque joueur
+        var seasonDirPerSet = {};
+        Object.keys(combined).forEach(function(name) {
+            var r = combined[name];
+            seasonDirPerSet[name] = r.proratedSets > 0 ? r.direct / r.proratedSets : 0;
+        });
+
+        // Phase 2 : parcourir chaque match > set > point pour accumuler co-players' strength
+        var rosterSum = {};  // name -> sum of co-players' seasonDirPerSet
+        var rosterWeight = {};  // name -> total co-player count
+        Object.keys(combined).forEach(function(name) { rosterSum[name] = 0; rosterWeight[name] = 0; });
+
+        validMatches.forEach(function(match) {
+            var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+            completedSets.forEach(function(set) {
+                if (!set.points || set.points.length < 20) return;
+                var lineups = self._getLineupAtEachPoint(set, team);
+                for (var pi = 0; pi < lineups.length; pi++) {
+                    var onCourt = lineups[pi];
+                    if (!onCourt || onCourt.length < 2) continue;
+                    onCourt.forEach(function(name) {
+                        if (!combined[name]) return;
+                        onCourt.forEach(function(coPlayer) {
+                            if (coPlayer !== name && seasonDirPerSet[coPlayer] !== undefined) {
+                                rosterSum[name] += seasonDirPerSet[coPlayer];
+                                rosterWeight[name]++;
+                            }
+                        });
+                    });
+                }
+            });
+        });
+
+        // Phase 3 : roster = weighted average
+        Object.keys(combined).forEach(function(name) {
+            combined[name].roster = rosterWeight[name] > 0 ? rosterSum[name] / rosterWeight[name] : 0;
         });
 
         return combined;
@@ -3636,8 +3765,20 @@ const ImpactView = {
     _showToggle: false, // visible si multi-sets
     _lastData: null, // cache pour re-render toggle
     _lastPlayerRoles: null,
+    _seasonRoster: null, // cache du roster saisonnier (toujours utilise, meme en vue match)
     _sortCol: null, // null = tri par defaut (role + pm), sinon colKey
     _sortAsc: false, // desc par defaut pour valeurs numeriques
+
+    // Calcule et cache le roster saisonnier si pas encore fait
+    _ensureSeasonRoster(team) {
+        if (this._seasonRoster) return;
+        var matches = SeasonSelector.getFilteredMatches();
+        if (!matches || matches.length === 0) return;
+        var seasonData = PlusMinusCalculator.aggregateAcrossMatches(matches, team);
+        var seasonRoster = {};
+        Object.keys(seasonData).forEach(function(name) { seasonRoster[name] = seasonData[name].roster; });
+        this._seasonRoster = seasonRoster;
+    },
 
     renderForMatch(match, team) {
         var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
@@ -3645,6 +3786,13 @@ const ImpactView = {
 
         var data = PlusMinusCalculator.compute(completedSets, team);
         if (Object.keys(data).length === 0) return '';
+
+        // Injecter le roster saisonnier (calcule a la volee si pas encore cache)
+        this._ensureSeasonRoster(team);
+        var seasonRoster = this._seasonRoster || {};
+        Object.keys(data).forEach(function(name) {
+            data[name].roster = seasonRoster[name] || 0;
+        });
 
         var playerRoles = BilanView.getPlayerRoles(match, team);
         this._showToggle = completedSets.filter(function(s) { return s.points && s.points.length > 0; }).length > 1;
@@ -3658,6 +3806,11 @@ const ImpactView = {
 
         var data = PlusMinusCalculator.aggregateAcrossMatches(matches, team);
         if (Object.keys(data).length === 0) return '';
+
+        // Cache du roster saisonnier pour reutilisation en vue match
+        var seasonRoster = {};
+        Object.keys(data).forEach(function(name) { seasonRoster[name] = data[name].roster; });
+        this._seasonRoster = seasonRoster;
 
         var playerRoles = BilanView.getPlayerRolesYear(matches, team);
         this._showToggle = true;
@@ -3694,27 +3847,29 @@ const ImpactView = {
         return ' <span class="sort-arrow active">' + arrow + '</span>';
     },
 
-    // Valeur brute pour le tri d'une colonne
-    _getSortValue(r, colKey) {
+    // Valeur brute pour le tri d'une colonne (name requis pour 'mental')
+    _getSortValue(r, colKey, name) {
         var isMoy = this._avgMode === 'moy';
-        var sp = r.setsPlayed || 1;
+        var sp = r.proratedSets || r.setsPlayed || 1;
         var raw;
         switch (colKey) {
             case 'pts': raw = r.ptsPlayed; break;
             case 'pm': raw = r.plusMinus; break;
-            case 'dir': raw = r.dirPlus - r.dirMinus; break;
-            case 'dirPlus': raw = r.dirPlus; break;
-            case 'dirMinus': raw = r.dirMinus; break;
+            case 'dir': raw = r.direct; break;
             case 'indirect': raw = r.indirect; break;
-            case 'onOff': raw = r.onOff !== null ? r.onOff : -9999; break;
-            case 'influence': raw = r.influence !== null ? r.influence : -9999; break;
-            case 'serv': raw = r.servImpact; break;
-            case 'rec': raw = r.recImpact; break;
-            case 'pas': raw = r.pasImpact; break;
-            case 'att': raw = r.attImpact; break;
-            case 'def': raw = r.defImpact; break;
-            case 'blc': raw = r.blcImpact; break;
-            case 'defblc': raw = r.defImpact + r.blcImpact; break;
+            case 'roster': return r.roster || 0;
+            case 'mental': {
+                if (!this._lastData || !name) return 0;
+                var players = Object.keys(this._lastData).filter(function(n) { return this._lastData[n].ptsPlayed > 0; }.bind(this));
+                var avgR = this._computeAvgRoster(this._lastData, players);
+                return this._computeScore(r, this._lastPlayerRoles, name, avgR);
+            }
+            case 'serv': raw = r.techServ; break;
+            case 'rec': raw = r.techRec; break;
+            case 'passe': raw = r.techPasse; break;
+            case 'att': raw = r.techAtt; break;
+            case 'rel': raw = r.techRel; break;
+            case 'defblc': raw = r.techDefBlc; break;
             default: raw = r.plusMinus;
         }
         return isMoy && sp > 1 ? raw / sp : raw;
@@ -3739,8 +3894,10 @@ const ImpactView = {
                 var roleCmp = asc ? orderB - orderA : orderA - orderB;
                 if (roleCmp !== 0) return roleCmp;
                 // Meme poste : meilleur +/- en premier
-                var pmA = isMoy && data[a].setsPlayed > 0 ? data[a].plusMinus / data[a].setsPlayed : data[a].plusMinus;
-                var pmB = isMoy && data[b].setsPlayed > 0 ? data[b].plusMinus / data[b].setsPlayed : data[b].plusMinus;
+                var spA = data[a].proratedSets || data[a].setsPlayed || 1;
+                var spB = data[b].proratedSets || data[b].setsPlayed || 1;
+                var pmA = isMoy && spA > 1 ? data[a].plusMinus / spA : data[a].plusMinus;
+                var pmB = isMoy && spB > 1 ? data[b].plusMinus / spB : data[b].plusMinus;
                 return asc ? pmA - pmB : pmB - pmA;
             });
             return players;
@@ -3750,8 +3907,8 @@ const ImpactView = {
         var col = this._sortCol;
         var asc = this._sortAsc;
         players.sort(function(a, b) {
-            var valA = self._getSortValue(data[a], col);
-            var valB = self._getSortValue(data[b], col);
+            var valA = self._getSortValue(data[a], col, a);
+            var valB = self._getSortValue(data[b], col, b);
             var aZero = (valA === 0);
             var bZero = (valB === 0);
             if (aZero && !bZero) return 1;
@@ -3763,15 +3920,16 @@ const ImpactView = {
     },
 
     _teamTotals(data, players) {
-        var fields = ['ptsPlayed', 'plusMinus', 'dirPlus', 'dirMinus', 'indirect',
+        var fields = ['ptsPlayed', 'plusMinus', 'direct', 'indirect',
+            'techServ', 'techRec', 'techPasse', 'techAtt', 'techRel', 'techDefBlc',
             'servImpact', 'recImpact', 'pasImpact', 'attImpact', 'defImpact', 'blcImpact'];
-        var t = { setsPlayed: 0, onOff: null, influence: null };
+        var t = { setsPlayed: 0, proratedSets: 0, onOff: null, influence: null, roster: 0 };
         fields.forEach(function(f) { t[f] = 0; });
-        // setsPlayed = max parmi les joueurs (nombre total de sets du match/saison)
         players.forEach(function(name) {
             var r = data[name];
             fields.forEach(function(f) { t[f] += r[f]; });
             if (r.setsPlayed > t.setsPlayed) t.setsPlayed = r.setsPlayed;
+            if (r.proratedSets > t.proratedSets) t.proratedSets = r.proratedSets;
         });
         return t;
     },
@@ -3794,9 +3952,11 @@ const ImpactView = {
             var formatted = (v > 0 ? '+' : '') + v.toFixed(1);
             return '<span class="' + cls + '">' + formatted + '</span>';
         }
-        if (v === 0) return '<span class="impact-zero">' + zeroLabel + '</span>';
+        if (Math.abs(v) < 0.05) return '<span class="impact-zero">' + zeroLabel + '</span>';
         var cls = this._colorCls(v, colorMode);
-        return '<span class="' + cls + '">' + (v > 0 ? '+' : '') + v + '</span>';
+        // En Tot : arrondir a 1 decimale si float (servBonus rend certaines valeurs non-entieres)
+        var display = (v % 1 !== 0) ? v.toFixed(1) : String(v);
+        return '<span class="' + cls + '">' + (v > 0 ? '+' : '') + display + '</span>';
     },
 
     _fmtDirVal(val, setsPlayed) {
@@ -3830,12 +3990,55 @@ const ImpactView = {
         return '<div class="player-cell">' + dot + Utils.escapeHtml(name) + '</div>';
     },
 
+    // Calcule Score a la volee pour un joueur
+    _computeScore(r, playerRoles, name, avgRoster) {
+        if (!playerRoles || !playerRoles[name]) return 0;
+        var role = playerRoles[name].primaryRole;
+        var dir = r.direct || 0;
+        var ind = r.indirect || 0;
+        var absDir = Math.abs(dir);
+        var absInd = Math.abs(ind);
+        var denom = absDir + absInd + 1;
+        var roleAlign;
+        if (role === 'R4' || role === 'Pointu') {
+            roleAlign = Math.max(0, dir) / denom;
+        } else if (role === 'Centre') {
+            roleAlign = Math.max(0, ind) / denom;
+        } else { // Passeur
+            roleAlign = (Math.max(0, dir) + Math.max(0, ind)) / (2 * denom);
+        }
+        var rosterCoeff = avgRoster > 0 ? 1 + 0.5 * (avgRoster - r.roster) / avgRoster : 1;
+        return r.plusMinus * (1 + roleAlign) * rosterCoeff;
+    },
+
+    // Calcule avgRoster (moyenne des rosters des joueurs avec >= 4 setsPlayed)
+    _computeAvgRoster(data, players) {
+        var sum = 0, count = 0;
+        players.forEach(function(name) {
+            var r = data[name];
+            if (r.setsPlayed >= 4 && r.roster !== 0) { sum += r.roster; count++; }
+        });
+        return count > 0 ? sum / count : 0;
+    },
+
+    _fmtRoster(val) {
+        if (val === 0 || val === null || val === undefined) return '<span class="impact-zero">\u2212</span>';
+        return '<span class="impact-roster">' + val.toFixed(1) + '</span>';
+    },
+
+    _fmtScore(val) {
+        if (Math.abs(val) < 0.5) return '<span class="impact-zero">\u2212</span>';
+        var cls = val > 0 ? 'impact-score-pos' : 'impact-score-neg';
+        var rounded = Math.round(val);
+        return '<span class="' + cls + '">' + (rounded > 0 ? '+' : '') + rounded + '</span>';
+    },
+
     _renderClaudeTable(data, playerRoles) {
         var players = this._sortPlayers(data, playerRoles);
         if (players.length === 0) return '';
         var self = this;
         var isMoy = this._avgMode === 'moy';
-        var ptsLabel = isMoy ? 'Pts/Set' : 'Pts jou\u00e9s';
+        var avgRoster = this._computeAvgRoster(data, players);
 
         var html = '<div class="impact-table-wrapper">';
         html += '<div class="impact-table-label"><span>Impact Global</span>';
@@ -3847,40 +4050,36 @@ const ImpactView = {
         }
         html += '</div>';
         html += '<table class="stats-table impact-table">';
-        html += '<colgroup><col style="width:22%"><col style="width:13.5%"><col style="width:12%"><col style="width:12%"><col style="width:13.5%"><col style="width:13.5%"><col style="width:13.5%"></colgroup>';
+        html += '<colgroup><col style="width:20%"><col style="width:13%"><col style="width:14%"><col style="width:14%"><col style="width:13%"><col style="width:13%"></colgroup>';
         html += '<thead><tr>';
         html += '<th data-sort-col="player" class="impact-sortable">Joueur' + self._sortIcon('player') + '</th>';
-        html += '<th data-sort-col="pts" class="impact-sortable">' + ptsLabel + self._sortIcon('pts') + '</th>';
         html += '<th data-sort-col="pm" class="impact-col-main impact-sortable">+/\u2212' + self._sortIcon('pm') + '</th>';
         html += '<th data-sort-col="dir" class="impact-sortable">Direct' + self._sortIcon('dir') + '</th>';
         html += '<th data-sort-col="indirect" class="impact-sortable">Indirect' + self._sortIcon('indirect') + '</th>';
-        html += '<th data-sort-col="onOff" class="impact-sortable">On/Off' + self._sortIcon('onOff') + '</th>';
-        html += '<th data-sort-col="influence" class="impact-sortable">Influence' + self._sortIcon('influence') + '</th>';
+        html += '<th data-sort-col="roster" class="impact-sortable">Roster' + self._sortIcon('roster') + '</th>';
+        html += '<th data-sort-col="mental" class="impact-sortable">Mental' + self._sortIcon('mental') + '</th>';
         html += '</tr></thead><tbody>';
 
         players.forEach(function(name) {
             var r = data[name];
-            var sp = r.setsPlayed || 1;
-            var ptsDisplay = isMoy ? (sp > 1 ? (r.ptsPlayed / sp).toFixed(0) : r.ptsPlayed) : r.ptsPlayed;
+            var sp = r.proratedSets || r.setsPlayed || 1;
+            var score = self._computeScore(r, playerRoles, name, avgRoster);
             html += '<tr>';
             html += '<td>' + self._renderPlayerCell(name, playerRoles) + '</td>';
-            html += '<td>' + ptsDisplay + '</td>';
             html += '<td class="impact-col-main">' + self._fmtVal(r.plusMinus, sp, true, 'dark') + '</td>';
-            html += '<td>' + self._fmtVal(r.dirPlus - r.dirMinus, sp) + '</td>';
+            html += '<td>' + self._fmtVal(r.direct, sp) + '</td>';
             html += '<td>' + self._fmtVal(r.indirect, sp) + '</td>';
-            html += '<td>' + self._fmtOnOff(r.onOff, sp, true, 'dark') + '</td>';
-            html += '<td>' + self._fmtOnOff(r.influence, sp, true, 'infl') + '</td>';
+            html += '<td>' + self._fmtRoster(r.roster) + '</td>';
+            html += '<td>' + self._fmtScore(score) + '</td>';
             html += '</tr>';
         });
 
         // Ligne Total equipe
         var t = this._teamTotals(data, players);
-        var tsp = t.setsPlayed || 1;
-        var tPts = isMoy ? (tsp > 1 ? (t.ptsPlayed / tsp).toFixed(0) : t.ptsPlayed) : t.ptsPlayed;
+        var tsp = t.proratedSets || t.setsPlayed || 1;
         html += '<tr class="total-row"><td>Total</td>';
-        html += '<td>' + tPts + '</td>';
         html += '<td class="impact-col-main">' + self._fmtVal(t.plusMinus, tsp, true, 'dark') + '</td>';
-        html += '<td>' + self._fmtVal(t.dirPlus - t.dirMinus, tsp) + '</td>';
+        html += '<td>' + self._fmtVal(t.direct, tsp) + '</td>';
         html += '<td>' + self._fmtVal(t.indirect, tsp) + '</td>';
         html += '<td><span class="impact-zero">\u2212</span></td>';
         html += '<td><span class="impact-zero">\u2212</span></td>';
@@ -3896,7 +4095,6 @@ const ImpactView = {
         if (players.length === 0) return '';
         var self = this;
         var isMoy = this._avgMode === 'moy';
-        var ptsLabel = isMoy ? 'Pts/Set' : 'Pts jou\u00e9s';
 
         var html = '<div class="impact-table-wrapper">';
         html += '<div class="impact-table-label"><span>Impact Technique</span>';
@@ -3908,43 +4106,41 @@ const ImpactView = {
         }
         html += '</div>';
         html += '<table class="stats-table impact-table">';
-        html += '<colgroup><col style="width:22%"><col style="width:13.5%"><col style="width:12%"><col style="width:12%"><col style="width:13.5%"><col style="width:13.5%"><col style="width:13.5%"></colgroup>';
+        html += '<colgroup><col style="width:19%"><col style="width:13.5%"><col style="width:13.5%"><col style="width:13.5%"><col style="width:13.5%"><col style="width:13.5%"><col style="width:13.5%"></colgroup>';
         html += '<thead><tr>';
         html += '<th data-sort-col="player" class="impact-sortable">Joueur' + self._sortIcon('player') + '</th>';
-        html += '<th data-sort-col="pts" class="impact-sortable">' + ptsLabel + self._sortIcon('pts') + '</th>';
-        html += '<th data-sort-col="pm" class="impact-col-main impact-sortable">+/\u2212' + self._sortIcon('pm') + '</th>';
         html += '<th data-sort-col="serv" class="impact-sortable">Serv' + self._sortIcon('serv') + '</th>';
         html += '<th data-sort-col="rec" class="impact-sortable">Rec' + self._sortIcon('rec') + '</th>';
+        html += '<th data-sort-col="passe" class="impact-sortable">Passe' + self._sortIcon('passe') + '</th>';
         html += '<th data-sort-col="att" class="impact-sortable">Att' + self._sortIcon('att') + '</th>';
+        html += '<th data-sort-col="rel" class="impact-sortable">Rel' + self._sortIcon('rel') + '</th>';
         html += '<th data-sort-col="defblc" class="impact-sortable">Def<span style="font-family:serif">&amp;</span>Blc' + self._sortIcon('defblc') + '</th>';
         html += '</tr></thead><tbody>';
 
         players.forEach(function(name) {
             var r = data[name];
-            var sp = r.setsPlayed || 1;
-            var ptsDisplay = isMoy ? (sp > 1 ? (r.ptsPlayed / sp).toFixed(0) : r.ptsPlayed) : r.ptsPlayed;
+            var sp = r.proratedSets || r.setsPlayed || 1;
             html += '<tr>';
             html += '<td>' + self._renderPlayerCell(name, playerRoles) + '</td>';
-            html += '<td>' + ptsDisplay + '</td>';
-            html += '<td class="impact-col-main">' + self._fmtVal(r.plusMinus, sp, true, 'dark') + '</td>';
-            html += '<td>' + self._fmtVal(r.servImpact, sp) + '</td>';
-            html += '<td>' + self._fmtVal(r.recImpact, sp) + '</td>';
-            html += '<td>' + self._fmtVal(r.attImpact, sp) + '</td>';
-            html += '<td>' + self._fmtVal(r.defImpact + r.blcImpact, sp) + '</td>';
+            html += '<td>' + self._fmtVal(r.techServ, sp) + '</td>';
+            html += '<td>' + self._fmtVal(r.techRec, sp) + '</td>';
+            html += '<td>' + self._fmtVal(r.techPasse, sp) + '</td>';
+            html += '<td>' + self._fmtVal(r.techAtt, sp) + '</td>';
+            html += '<td>' + self._fmtVal(r.techRel, sp) + '</td>';
+            html += '<td>' + self._fmtVal(r.techDefBlc, sp) + '</td>';
             html += '</tr>';
         });
 
         // Ligne Total equipe
         var t = this._teamTotals(data, players);
-        var tsp = t.setsPlayed || 1;
-        var tPts = isMoy ? (tsp > 1 ? (t.ptsPlayed / tsp).toFixed(0) : t.ptsPlayed) : t.ptsPlayed;
+        var tsp = t.proratedSets || t.setsPlayed || 1;
         html += '<tr class="total-row"><td>Total</td>';
-        html += '<td>' + tPts + '</td>';
-        html += '<td class="impact-col-main">' + self._fmtVal(t.plusMinus, tsp, true, 'dark') + '</td>';
-        html += '<td>' + self._fmtVal(t.servImpact, tsp) + '</td>';
-        html += '<td>' + self._fmtVal(t.recImpact, tsp) + '</td>';
-        html += '<td>' + self._fmtVal(t.attImpact, tsp) + '</td>';
-        html += '<td>' + self._fmtVal(t.defImpact + t.blcImpact, tsp) + '</td>';
+        html += '<td>' + self._fmtVal(t.techServ, tsp) + '</td>';
+        html += '<td>' + self._fmtVal(t.techRec, tsp) + '</td>';
+        html += '<td>' + self._fmtVal(t.techPasse, tsp) + '</td>';
+        html += '<td>' + self._fmtVal(t.techAtt, tsp) + '</td>';
+        html += '<td>' + self._fmtVal(t.techRel, tsp) + '</td>';
+        html += '<td>' + self._fmtVal(t.techDefBlc, tsp) + '</td>';
         html += '</tr>';
 
         html += '</tbody></table>';
@@ -5164,7 +5360,9 @@ const YearStatsView = {
     renderYearMomentum(matches) {
         // Collecter les courbes d'ecart de chaque set
         var curves = [];
+        var totalCompletedSets = 0;
         matches.forEach(function(m) {
+            (m.sets || []).forEach(function(s) { if (s.completed) totalCompletedSets++; });
             (m.sets || []).filter(function(s) { return s.completed && s.points && s.points.length >= 20; }).forEach(function(s) {
                 var pts = s.points;
                 var ih = s.initialHomeScore || 0;
@@ -5245,7 +5443,7 @@ const YearStatsView = {
         }
 
         var html = '<div class="hist-section momentum-section collapsed">';
-        html += '<div class="hist-section-title">Momentum <span class="momentum-subtitle">' + curves.length + ' sets</span></div>';
+        html += '<div class="hist-section-title">Momentum <span class="momentum-subtitle">' + curves.length + ' sets filmés (sur ' + totalCompletedSets + ' sets joués)</span></div>';
 
         html += '<svg class="momentum-chart" viewBox="0 0 ' + svgWidth + ' ' + svgHeight + '">';
 

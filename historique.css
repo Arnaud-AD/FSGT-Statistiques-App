@@ -777,6 +777,7 @@ body {
     font-weight: 400;
     font-size: 11px;
     color: var(--text-secondary);
+    margin-left: 6px;
 }
 
 .momentum-chart {
@@ -2021,9 +2022,14 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
 }
 /* Colonnes secondaires : texte noir bold */
 .impact-table .impact-dark { color: var(--text-primary); font-weight: 600; }
-/* Influence : violet / parme */
+/* Influence : violet / parme (legacy) */
 .impact-table .infl-pos { color: #7c3aed; font-weight: 600; }
 .impact-table .infl-neg { color: #a78bfa; font-weight: 600; }
+/* Roster : orange */
+.impact-table .impact-roster { color: #ea580c; font-weight: 600; }
+/* Score : violet fonce / violet clair */
+.impact-table .impact-score-pos { color: #7c3aed; font-weight: 700; }
+.impact-table .impact-score-neg { color: #a78bfa; font-weight: 600; }
 
 /* ==================== RESPONSIVE: DESKTOP (>=1024px) ==================== */
 @media (min-width: 1024px) {
