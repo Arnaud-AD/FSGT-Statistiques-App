@@ -157,7 +157,7 @@ const FirebaseSync = {
 
         // Trier par date décroissante
         return Array.from(merged.values())
-            .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            .sort((a, b) => (b.matchDate || b.timestamp || 0) - (a.matchDate || a.timestamp || 0));
     },
 
     /**

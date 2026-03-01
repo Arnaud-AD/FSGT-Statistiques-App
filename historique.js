@@ -4017,7 +4017,7 @@ const MatchStatsView = {
         emptyState.style.display = 'none';
         matchesContainer.style.display = 'block';
 
-        var sorted = matchHistory.slice().sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
+        var sorted = matchHistory.slice().sort(function(a, b) { return (b.matchDate || b.timestamp || 0) - (a.matchDate || a.timestamp || 0); });
         var self = this;
 
         // Générer les options du select
@@ -4027,12 +4027,11 @@ const MatchStatsView = {
             var resultEmoji = match.result === 'win' ? '🟢' : (match.result === 'loss' ? '🔴' : '🟡');
             var setsDisplay = (match.setsWon !== undefined && match.setsLost !== undefined)
                 ? match.setsWon + '-' + match.setsLost : '';
-            var dateStr = match.timestamp ? Utils.formatDate(match.timestamp) : '';
             var opponent = match.opponent || 'Adversaire';
             var selected = self.selectedMatchIndex === index ? ' selected' : '';
 
             optionsHtml += '<option value="' + index + '"' + selected + '>' +
-                resultEmoji + ' ' + opponent + '  ' + setsDisplay + '  ' + dateStr +
+                resultEmoji + ' ' + opponent + ' ' + setsDisplay +
                 '</option>';
         });
         matchSelect.innerHTML = optionsHtml;
@@ -4054,7 +4053,7 @@ const MatchStatsView = {
 
     selectMatch(index) {
         var matchHistory = SeasonSelector.getFilteredMatches();
-        var sorted = matchHistory.slice().sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
+        var sorted = matchHistory.slice().sort(function(a, b) { return (b.matchDate || b.timestamp || 0) - (a.matchDate || a.timestamp || 0); });
         var match = sorted[index];
         if (!match) return;
 
@@ -4073,6 +4072,7 @@ const MatchStatsView = {
         this.renderCategoryTabs();
         this.showBilanView(match);
         this.setupDeleteButton(match);
+        this.setupDatePicker(match);
         this.setupExportButton(match);
 
         document.getElementById('matchDetailContainer').classList.add('active');
@@ -4090,7 +4090,7 @@ const MatchStatsView = {
         document.getElementById('detailOpponent').textContent = 'vs ' + opponent;
 
         // Meta
-        var matchDate = match.timestamp ? Utils.formatDate(match.timestamp) : '';
+        var matchDate = (match.matchDate || match.timestamp) ? Utils.formatDate(match.matchDate || match.timestamp) : '';
         var typeName = match.type === 'ginette' ? 'Ginette' : 'Championnat';
         document.getElementById('detailMeta').innerHTML =
             '<span class="match-type-badge ' + (match.type === 'ginette' ? 'ginette' : 'championnat') + '">' + typeName + '</span>' +
@@ -4545,6 +4545,48 @@ const MatchStatsView = {
                 // Re-render la liste sans auto-sélection
                 self.renderMatchGrid();
             }
+        };
+    },
+
+    setupDatePicker(match) {
+        var item = document.getElementById('detailDateItem');
+        var input = document.getElementById('detailDateInput');
+        if (!item || !input) return;
+        var self = this;
+
+        // Admin only
+        var adminOk = typeof FirebaseSync !== 'undefined' && FirebaseSync.isAdmin();
+        item.style.display = adminOk ? '' : 'none';
+        if (!adminOk) return;
+
+        // Pré-remplir avec matchDate ou timestamp
+        var ts = match.matchDate || match.timestamp;
+        if (ts) {
+            var d = new Date(ts);
+            // Format yyyy-mm-dd pour l'input date
+            var yyyy = d.getFullYear();
+            var mm = String(d.getMonth() + 1).padStart(2, '0');
+            var dd = String(d.getDate()).padStart(2, '0');
+            input.value = yyyy + '-' + mm + '-' + dd;
+        } else {
+            input.value = '';
+        }
+
+        input.onchange = function() {
+            if (!input.value) return;
+            // Convertir la date ISO (yyyy-mm-dd) en timestamp à midi (éviter décalages timezone)
+            var parts = input.value.split('-');
+            var dateObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]), 12, 0, 0);
+            match.matchDate = dateObj.getTime();
+
+            // Sauvegarder
+            Storage.saveMatch(match);
+            HistoriqueData.invalidateCache();
+
+            // Mettre à jour l'affichage meta
+            self.renderDetailHeader(match);
+            // Re-trier le dropdown
+            self.renderMatchGrid();
         };
     },
 
@@ -6267,7 +6309,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
             // Chercher l'index dans les matchs filtrés
             var filtered = SeasonSelector.getFilteredMatches()
-                .slice().sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
+                .slice().sort(function(a, b) { return (b.matchDate || b.timestamp || 0) - (a.matchDate || a.timestamp || 0); });
             var index = filtered.findIndex(function(m) { return m.id === matchId; });
             if (index >= 0) {
                 MatchStatsView.render();

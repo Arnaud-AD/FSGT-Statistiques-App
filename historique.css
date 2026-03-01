@@ -1552,6 +1552,34 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
     background: #fce8e6;
 }
 
+/* Date picker inside gear menu */
+.gear-menu-item.date-picker {
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-top: 1px solid var(--border-color);
+}
+
+.gear-menu-item.date-picker:hover {
+    background: #f5f5f5;
+}
+
+.gear-menu-item.date-picker input[type="date"] {
+    margin-left: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 12px;
+    color: var(--text-primary);
+    background: white;
+    cursor: pointer;
+}
+
+.gear-menu-item.date-picker input[type="date"]:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+}
+
 /* Export feedback inside menu */
 .export-feedback {
     position: absolute;
