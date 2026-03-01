@@ -1127,6 +1127,13 @@
             function cell(val, cls) {
                 return '<td class="' + (val > 0 ? cls : '') + '">' + (val || '-') + '</td>';
             }
+            // Helper pour cellule fusionnée (ex: R1+FR, P1+FP) — détail faute entre parenthèses
+            function cellMerged(v1, v2, cls) {
+                var sum = (v1 || 0) + (v2 || 0);
+                if (!sum) return '<td>-</td>';
+                var extra = v2 > 0 ? '<span class="stat-pct">(' + v2 + ')</span>' : '';
+                return '<td class="' + cls + '">' + sum + extra + '</td>';
+            }
 
             // Calculer les totaux
             const totals = {
@@ -1233,7 +1240,7 @@
             html += '<div class="stat-table-card">' +
                 '<div class="stat-table-header reception">Réception</div>' +
                 '<table class="detail-stats-table"><thead><tr>' +
-                '<th>Tot</th><th>R4</th><th>R3</th><th>R2</th><th>R1</th><th>FR</th>' +
+                '<th>Tot</th><th>R4</th><th>R3</th><th>R2</th><th>R1/FR</th>' +
                 '</tr></thead><tbody>';
             players.forEach(name => {
                 const p = stats[name];
@@ -1242,8 +1249,7 @@
                     cell(p.reception.r4, 'positive') +
                     cell(p.reception.r3, 'positive') +
                     cell(p.reception.r2, 'warning') +
-                    cell(p.reception.r1, 'negative') +
-                    cell(p.reception.frec, 'negative') +
+                    cellMerged(p.reception.r1, p.reception.frec, 'negative') +
                 '</tr>';
             });
             html += '<tr class="total-row">' +
@@ -1251,15 +1257,14 @@
                 cell(totals.reception.r4, 'positive') +
                 cell(totals.reception.r3, 'positive') +
                 cell(totals.reception.r2, 'warning') +
-                cell(totals.reception.r1, 'negative') +
-                cell(totals.reception.frec, 'negative') +
+                cellMerged(totals.reception.r1, totals.reception.frec, 'negative') +
             '</tr></tbody></table></div>';
 
             // ===== PASSE =====
             html += '<div class="stat-table-card">' +
                 '<div class="stat-table-header passe">Passe</div>' +
                 '<table class="detail-stats-table"><thead><tr>' +
-                '<th>Tot</th><th>P4</th><th>P3</th><th>P2</th><th>P1</th><th>FP</th>' +
+                '<th>Tot</th><th>P4</th><th>P3</th><th>P2</th><th>P1/FP</th>' +
                 '</tr></thead><tbody>';
             players.forEach(name => {
                 const p = stats[name];
@@ -1268,8 +1273,7 @@
                     cell(p.pass.p4, 'positive') +
                     cell(p.pass.p3, 'positive') +
                     cell(p.pass.p2, 'warning') +
-                    cell(p.pass.p1, 'negative') +
-                    cell(p.pass.fp, 'negative') +
+                    cellMerged(p.pass.p1, p.pass.fp, 'negative') +
                 '</tr>';
             });
             html += '<tr class="total-row">' +
@@ -1277,8 +1281,7 @@
                 cell(totals.pass.p4, 'positive') +
                 cell(totals.pass.p3, 'positive') +
                 cell(totals.pass.p2, 'warning') +
-                cell(totals.pass.p1, 'negative') +
-                cell(totals.pass.fp, 'negative') +
+                cellMerged(totals.pass.p1, totals.pass.fp, 'negative') +
             '</tr></tbody></table></div>';
 
             // ===== ATTAQUE =====
@@ -1418,21 +1421,23 @@
                 return '<td class="' + (val > 0 ? cls : '') + '">' + (val || '-') + '</td>';
             }
             function passRow(label, data, cls) {
+                var p1fp = (data.p1 || 0) + (data.fp || 0);
+                var p1fpExtra = data.fp > 0 ? '<span class="stat-pct">(' + data.fp + ')</span>' : '';
+                var p1fpCell = p1fp > 0 ? '<td class="negative">' + p1fp + p1fpExtra + '</td>' : '<td>-</td>';
                 return '<tr class="' + cls + '">' +
                     '<td>' + label + '</td>' +
                     '<td>' + (data.tot || '-') + '</td>' +
                     cell(data.p4, 'positive') +
                     cell(data.p3, 'positive') +
                     cell(data.p2, 'neutral') +
-                    cell(data.p1, 'negative') +
-                    cell(data.fp, 'negative') +
+                    p1fpCell +
                 '</tr>';
             }
 
             var html = '<div class="stat-table-card pass-detail-card">' +
                 '<div class="stat-table-header passe">Passe d\u00e9taill\u00e9e</div>' +
                 '<table class="detail-stats-table"><thead><tr>' +
-                '<th></th><th>Tot</th><th>P4</th><th>P3</th><th>P2</th><th>P1</th><th>FP</th>' +
+                '<th></th><th>Tot</th><th>P4</th><th>P3</th><th>P2</th><th>P1/FP</th>' +
                 '</tr></thead><tbody>';
 
             // Passeur

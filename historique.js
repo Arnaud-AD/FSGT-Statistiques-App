@@ -1399,8 +1399,7 @@ const SharedComponents = {
                 { key: 'r4', label: 'R4', cls: 'positive', pct: true },
                 { key: 'r3', label: 'R3', cls: '', pct: true },
                 { key: 'r2', label: 'R2', cls: 'warning', pct: true },
-                { key: 'r1', label: 'R1', cls: 'negative', pct: true },
-                { key: 'frec', label: 'FR', cls: 'negative', pct: true }
+                { key: '_r1Fr', label: 'R1/FR', cls: 'negative', pct: true, computed: 'r1Fr' }
             ]
         },
         passe: {
@@ -1410,8 +1409,7 @@ const SharedComponents = {
                 { key: 'p4', label: 'P4', cls: 'positive', pct: true },
                 { key: 'p3', label: 'P3', cls: '', pct: true },
                 { key: 'p2', label: 'P2', cls: 'warning', pct: true },
-                { key: 'p1', label: 'P1', cls: 'negative', pct: true },
-                { key: 'fp', label: 'FP', cls: 'negative', pct: true }
+                { key: '_p1Fp', label: 'P1/FP', cls: 'negative', pct: true, computed: 'p1Fp' }
             ]
         },
         attack: {
@@ -1471,8 +1469,7 @@ const SharedComponents = {
                 { key: 'r4', label: 'R4', cls: 'positive', pct: true },
                 { key: 'r3', label: 'R3', cls: '', pct: true },
                 { key: 'r2', label: 'R2', cls: 'warning', pct: true },
-                { key: 'r1', label: 'R1', cls: 'negative', pct: true },
-                { key: 'frec', label: 'FR', cls: 'negative', pct: true }
+                { key: '_r1Fr', label: 'R1/FR', cls: 'negative', pct: true, computed: 'r1Fr' }
             ]
         },
         passe: {
@@ -1482,8 +1479,7 @@ const SharedComponents = {
                 { key: 'p4', label: 'P4', cls: 'positive', pct: true },
                 { key: 'p3', label: 'P3', cls: '', pct: true },
                 { key: 'p2', label: 'P2', cls: 'warning', pct: true },
-                { key: 'p1', label: 'P1', cls: 'negative', pct: true },
-                { key: 'fp', label: 'FP', cls: 'negative', pct: true }
+                { key: '_p1Fp', label: 'P1/FP', cls: 'negative', pct: true, computed: 'p1Fp' }
             ]
         },
         attack: {
@@ -1595,6 +1591,12 @@ const SharedComponents = {
         } else if (col.computed === 'faBp') {
             var atkData = playerStats.attack || {};
             val = (atkData.fatt || 0) + (atkData.bp || 0);
+        } else if (col.computed === 'r1Fr') {
+            var recData = playerStats.reception || {};
+            val = (recData.r1 || 0) + (recData.frec || 0);
+        } else if (col.computed === 'p1Fp') {
+            var passD = playerStats[dataKey] || {};
+            val = (passD.p1 || 0) + (passD.fp || 0);
         } else {
             val = catData[col.key] || 0;
         }
@@ -1604,6 +1606,8 @@ const SharedComponents = {
             var tot = catData.tot || 0;
             if (col.computed === 'acePlus') tot = (playerStats.service || {}).tot || 0;
             if (col.computed === 'faBp') tot = (playerStats.attack || {}).tot || 0;
+            if (col.computed === 'r1Fr') tot = (playerStats.reception || {}).tot || 0;
+            if (col.computed === 'p1Fp') tot = (playerStats[dataKey] || {}).tot || 0;
             return tot > 0 ? (val / tot * 100) : 0;
         }
         // En mode Moy, trier par moyenne par set joue
@@ -1793,6 +1797,20 @@ const SharedComponents = {
             var bp = atkData.bp || 0;
             val = fa + bp;
             if (bp > 0) extraInfo = '(' + bp + ')';
+        } else if (col.computed === 'r1Fr') {
+            // R1/FR fusionne = r1 + frec, affiche frec entre parentheses
+            var recData = playerStats.reception || {};
+            var r1 = recData.r1 || 0;
+            var fr = recData.frec || 0;
+            val = r1 + fr;
+            if (fr > 0) extraInfo = '(' + fr + ')';
+        } else if (col.computed === 'p1Fp') {
+            // P1/FP fusionne = p1 + fp, affiche fp entre parentheses
+            var passData2 = playerStats[dataKey] || {};
+            var p1 = passData2.p1 || 0;
+            var fp = passData2.fp || 0;
+            val = p1 + fp;
+            if (fp > 0) extraInfo = '(' + fp + ')';
         } else {
             val = catData[col.key] || 0;
         }
@@ -1812,9 +1830,11 @@ const SharedComponents = {
         if (this._avgMode === 'moy' && playerStats._setsPlayed > 1) {
             val = val / playerStats._setsPlayed;
             if (extraInfo) {
-                var atkData2 = playerStats.attack || {};
-                var bpMoy = (atkData2.bp || 0) / playerStats._setsPlayed;
-                extraInfo = '(' + (bpMoy % 1 === 0 ? bpMoy : bpMoy.toFixed(1)) + ')';
+                var detailMoy = 0;
+                if (col.computed === 'faBp') detailMoy = ((playerStats.attack || {}).bp || 0) / playerStats._setsPlayed;
+                else if (col.computed === 'r1Fr') detailMoy = ((playerStats.reception || {}).frec || 0) / playerStats._setsPlayed;
+                else if (col.computed === 'p1Fp') detailMoy = ((playerStats[dataKey] || {}).fp || 0) / playerStats._setsPlayed;
+                extraInfo = '(' + (detailMoy % 1 === 0 ? detailMoy : detailMoy.toFixed(1)) + ')';
             }
         }
 
@@ -1936,37 +1956,49 @@ const SharedComponents = {
 
         var cols = [
             { key: 'tot', label: 'Tot', cls: '' },
-            { key: 'p4', label: 'P4', cls: 'positive' },
-            { key: 'p3', label: 'P3', cls: '' },
-            { key: 'p2', label: 'P2', cls: 'warning' },
-            { key: 'p1', label: 'P1', cls: 'negative' },
-            { key: 'fp', label: 'FP', cls: 'negative' }
+            { key: 'p4', label: 'P4', cls: 'positive', pct: true },
+            { key: 'p3', label: 'P3', cls: '', pct: true },
+            { key: 'p2', label: 'P2', cls: 'warning', pct: true },
+            { key: '_p1Fp', label: 'P1/FP', cls: 'negative', pct: true, merged: ['p1', 'fp'], computed: 'p1Fp' }
         ];
 
-        function cell(bucket, key, cls, setsPlayed) {
-            var v = bucket[key] || 0;
+        function cell(bucket, col, setsPlayed) {
+            var v, detail = 0;
+            if (col.merged) {
+                v = (bucket[col.merged[0]] || 0) + (bucket[col.merged[1]] || 0);
+                detail = bucket[col.merged[1]] || 0;
+            } else {
+                v = bucket[col.key] || 0;
+            }
             if (v <= 0) return '<td class="">-</td>';
             var pctVal = null;
-            if (key !== 'tot' && bucket.tot > 0) {
+            if (col.key !== 'tot' && bucket.tot > 0) {
                 pctVal = Math.round(v / bucket.tot * 100);
             }
             // Mode Moy : diviser par sets joues
+            var detailMoy = detail;
             if (SharedComponents._avgMode === 'moy' && setsPlayed > 1) {
                 v = v / setsPlayed;
+                if (detail) detailMoy = detail / setsPlayed;
             }
-            var colorCls = v > 0 ? cls : '';
+            var colorCls = v > 0 ? col.cls : '';
             var displayVal = (v % 1 === 0) ? v : v.toFixed(1);
+            var extraInfo = (col.merged && detail > 0) ? '(' + (detailMoy % 1 === 0 ? detailMoy : detailMoy.toFixed(1)) + ')' : '';
             if (SharedComponents._displayMode === 'pct' && pctVal !== null) {
-                return '<td class="' + colorCls + '">' + pctVal + '% <span class="stat-secondary">' + displayVal + '</span></td>';
+                var secondary = extraInfo ? displayVal + extraInfo : displayVal;
+                return '<td class="' + colorCls + '">' + pctVal + '% <span class="stat-secondary">' + secondary + '</span></td>';
             }
             var pct = pctVal !== null ? ' <span class="stat-pct">' + pctVal + '%</span>' : '';
+            if (extraInfo) {
+                return '<td class="' + colorCls + '">' + displayVal + extraInfo + pct + '</td>';
+            }
             return '<td class="' + colorCls + '">' + displayVal + pct + '</td>';
         }
 
         function typeRow(label, bucket, cssClass) {
             var sp = SharedComponents._totalSets;
             var html = '<tr class="' + cssClass + '"><td>' + label + '</td>';
-            cols.forEach(function(c) { html += cell(bucket, c.key, c.cls, sp); });
+            cols.forEach(function(c) { html += cell(bucket, c, sp); });
             html += '</tr>';
             return html;
         }
@@ -1974,7 +2006,7 @@ const SharedComponents = {
         function ctxRow(label, bucket) {
             var sp = SharedComponents._totalSets;
             var html = '<tr class="pass-ctx-row"><td>\u2514 ' + label + '</td>';
-            cols.forEach(function(c) { html += cell(bucket, c.key, c.cls, sp); });
+            cols.forEach(function(c) { html += cell(bucket, c, sp); });
             html += '</tr>';
             return html;
         }
@@ -1992,7 +2024,8 @@ const SharedComponents = {
         html += '<table class="stats-table"><thead><tr>';
         html += '<th data-sort-col="player" data-sort-cat="passe">Joueur' + SharedComponents._sortIcon('player', 'passe') + '</th>';
         cols.forEach(function(c) {
-            html += '<th data-sort-col="' + c.key + '" data-sort-cat="passe">' + c.label + SharedComponents._sortIcon(c.key, 'passe') + '</th>';
+            var sortKey = c.computed || c.key;
+            html += '<th data-sort-col="' + sortKey + '" data-sort-cat="passe">' + c.label + SharedComponents._sortIcon(sortKey, 'passe') + '</th>';
         });
         html += '</tr></thead><tbody>';
 
@@ -2003,14 +2036,14 @@ const SharedComponents = {
             html += SharedComponents.renderRoleDots(name);
             html += Utils.escapeHtml(name);
             html += '</div></td>';
-            cols.forEach(function(c) { html += cell(p, c.key, c.cls, sp); });
+            cols.forEach(function(c) { html += cell(p, c, sp); });
             html += '</tr>';
         });
 
         // Total
         var totalSP = SharedComponents._totalSets;
         html += '<tr class="total-row"><td>Total</td>';
-        cols.forEach(function(c) { html += cell(passData, c.key, c.cls, totalSP); });
+        cols.forEach(function(c) { html += cell(passData, c, totalSP); });
         html += '</tr>';
         html += '</tbody></table>';
 
@@ -4562,7 +4595,7 @@ const MatchStatsView = {
             // Header
             text += 'Joueur'.padEnd(14);
             catDef.columns.forEach(function(col) {
-                var w = (col.computed === 'faBp') ? 7 : 5;
+                var w = col.computed ? 7 : 5;
                 text += col.label.padStart(w);
             });
             text += '\n';
@@ -4581,6 +4614,18 @@ const MatchStatsView = {
                         var combined = fa + bp;
                         var cell = combined > 0 ? String(combined) + (bp > 0 ? '(' + bp + ')' : '') : '-';
                         text += cell.padStart(7);
+                    } else if (col.computed === 'r1Fr') {
+                        var recData = p.reception || {};
+                        var r1v = recData.r1 || 0, frv = recData.frec || 0;
+                        var sum = r1v + frv;
+                        var cell = sum > 0 ? String(sum) + (frv > 0 ? '(' + frv + ')' : '') : '-';
+                        text += cell.padStart(7);
+                    } else if (col.computed === 'p1Fp') {
+                        var passD = p[exportDataKey] || {};
+                        var p1v = passD.p1 || 0, fpv = passD.fp || 0;
+                        var sum = p1v + fpv;
+                        var cell = sum > 0 ? String(sum) + (fpv > 0 ? '(' + fpv + ')' : '') : '-';
+                        text += cell.padStart(7);
                     } else {
                         var val = p[exportDataKey] ? (p[exportDataKey][col.key] || 0) : 0;
                         text += (val > 0 ? String(val) : '-').padStart(5);
@@ -4590,14 +4635,18 @@ const MatchStatsView = {
             });
             // V19.2 : ventilation passe equipe apres les lignes joueurs
             if (catKey === 'passe') {
-                var passKeys = ['tot', 'p4', 'p3', 'p2', 'p1', 'fp'];
                 function exportPassLine(label, bucket) {
                     if (!bucket || !bucket.tot) return '';
                     var line = label.padEnd(14);
-                    passKeys.forEach(function(k) {
+                    // Tot, P4, P3, P2 puis P1/FP fusionné
+                    ['tot', 'p4', 'p3', 'p2'].forEach(function(k) {
                         var v = bucket[k] || 0;
                         line += (v > 0 ? String(v) : '-').padStart(5);
                     });
+                    var p1v = bucket.p1 || 0, fpv = bucket.fp || 0;
+                    var sum = p1v + fpv;
+                    var cell = sum > 0 ? String(sum) + (fpv > 0 ? '(' + fpv + ')' : '') : '-';
+                    line += cell.padStart(7);
                     return line + '\n';
                 }
                 var pt = totals.pass || {};
