@@ -901,7 +901,7 @@ const PlusMinusCalculator = {
             r.techPasse = r.p4 + r.p3 - r.p1 - r.fp;
             r.techAtt = r.attplus - r.fatt - r.bp;
             r.techRel = r.relplus + r.relminus - r.frel;
-            r.techDefBlc = (r.defplus + r.neutralDef - r.defminus - r.fdef) + (r.blcplus + r.blcminus - r.fblc);
+            r.techDefBlc = (r.relplus + r.relminus - r.frel) + (r.defplus + r.neutralDef - r.defminus - r.fdef) + (r.blcplus + r.blcminus - r.fblc);
             // On/Off (conserve pour backward compat)
             if (r.offPtsPlayed > 0 && r.ptsPlayed > 0) {
                 var offRate = (r.offTeamScored - r.offTeamConceded) / r.offPtsPlayed;
@@ -1212,7 +1212,7 @@ const PlusMinusCalculator = {
             r.techPasse = r.p4 + r.p3 - r.p1 - r.fp;
             r.techAtt = r.attplus - r.fatt - r.bp;
             r.techRel = r.relplus + r.relminus - r.frel;
-            r.techDefBlc = (r.defplus + r.neutralDef - r.defminus - r.fdef) + (r.blcplus + r.blcminus - r.fblc);
+            r.techDefBlc = (r.relplus + r.relminus - r.frel) + (r.defplus + r.neutralDef - r.defminus - r.fdef) + (r.blcplus + r.blcminus - r.fblc);
             // On/Off (conserve pour backward compat)
             if (r.offPtsPlayed > 0 && r.ptsPlayed > 0) {
                 var offRate = (r.offTeamScored - r.offTeamConceded) / r.offPtsPlayed;
@@ -4203,15 +4203,14 @@ const ImpactView = {
         }
         html += '</div>';
         html += '<table class="stats-table impact-table">';
-        html += '<colgroup><col style="width:19%"><col style="width:13.5%"><col style="width:13.5%"><col style="width:13.5%"><col style="width:13.5%"><col style="width:13.5%"><col style="width:13.5%"></colgroup>';
+        html += '<colgroup><col style="width:22%"><col style="width:13%"><col style="width:13%"><col style="width:13%"><col style="width:13%"><col style="width:13%"></colgroup>';
         html += '<thead><tr>';
         html += '<th data-sort-col="player" class="impact-sortable">Joueur' + self._sortIcon('player') + '</th>';
         html += '<th data-sort-col="serv" class="impact-sortable">Serv' + self._sortIcon('serv') + '</th>';
         html += '<th data-sort-col="rec" class="impact-sortable">Rec' + self._sortIcon('rec') + '</th>';
         html += '<th data-sort-col="passe" class="impact-sortable">Passe' + self._sortIcon('passe') + '</th>';
         html += '<th data-sort-col="att" class="impact-sortable">Att' + self._sortIcon('att') + '</th>';
-        html += '<th data-sort-col="rel" class="impact-sortable">Rel' + self._sortIcon('rel') + '</th>';
-        html += '<th data-sort-col="defblc" class="impact-sortable">Def<span style="font-family:serif">&amp;</span>Blc' + self._sortIcon('defblc') + '</th>';
+        html += '<th data-sort-col="defblc" class="impact-sortable">RDB' + self._sortIcon('defblc') + '</th>';
         html += '</tr></thead><tbody>';
 
         players.forEach(function(name) {
@@ -4223,7 +4222,6 @@ const ImpactView = {
             html += '<td>' + self._fmtVal(r.techRec, sp) + '</td>';
             html += '<td>' + self._fmtVal(r.techPasse, sp) + '</td>';
             html += '<td>' + self._fmtVal(r.techAtt, sp) + '</td>';
-            html += '<td>' + self._fmtVal(r.techRel, sp) + '</td>';
             html += '<td>' + self._fmtVal(r.techDefBlc, sp) + '</td>';
             html += '</tr>';
         });
@@ -4236,7 +4234,6 @@ const ImpactView = {
         html += '<td>' + self._fmtVal(t.techRec, tsp) + '</td>';
         html += '<td>' + self._fmtVal(t.techPasse, tsp) + '</td>';
         html += '<td>' + self._fmtVal(t.techAtt, tsp) + '</td>';
-        html += '<td>' + self._fmtVal(t.techRel, tsp) + '</td>';
         html += '<td>' + self._fmtVal(t.techDefBlc, tsp) + '</td>';
         html += '</tr>';
 
