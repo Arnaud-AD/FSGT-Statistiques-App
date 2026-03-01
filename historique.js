@@ -2097,13 +2097,22 @@ const SharedComponents = {
 
     /**
      * Genere le HTML des pastilles de role pour un joueur.
-     * Multi-postes : pastilles empilees verticalement.
+     * Multi-postes : plusieurs pastilles si le joueur a joué différents rôles.
      */
     renderRoleDots(name) {
         if (this.playerRolesMap && this.playerRolesMap[name]) {
             var info = this.playerRolesMap[name];
-            // Toujours 1 seule pastille = role principal (le plus joue)
-            // Les anciens matchs sans initialLineup ont des roles pollues par les substitutions
+            var roleKeys = Object.keys(info.roles || {});
+            if (roleKeys.length > 1) {
+                // Multi-pastilles empilées verticalement (comme Temps de jeu / Profils radar)
+                var sorted = roleKeys.sort(function(a, b) { return (info.roles[b] || 0) - (info.roles[a] || 0); });
+                var html = '<span class="role-dots">';
+                for (var i = 0; i < sorted.length; i++) {
+                    html += '<span class="role-dot role-dot-stacked" style="background:' + (this.ROLE_COLORS_CSS[sorted[i]] || 'var(--text-secondary)') + '"></span>';
+                }
+                html += '</span>';
+                return html;
+            }
             return '<span class="role-dot" style="background:' + (this.ROLE_COLORS_CSS[info.primaryRole] || 'var(--text-secondary)') + '"></span>';
         }
         return '<span class="role-dot" style="background:' + this.getRoleColor(name) + '"></span>';
@@ -2763,7 +2772,7 @@ const BilanView = {
     },
 
     // --- Determiner le role primaire de chaque joueur depuis les lineups ---
-    getPlayerRoles(match, team) {
+    getPlayerRoles(match, team, setFilter) {
         var roleCounts = {};
         var self = this;
         var side = team || 'home';
@@ -2773,7 +2782,13 @@ const BilanView = {
         var positionRoles = (side === 'away') ? self.POSITION_ROLES_AWAY : self.POSITION_ROLES_HOME;
         var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
 
-        completedSets.forEach(function(set) {
+        // V20.69 : filtrer par set si setFilter spécifié (index numérique)
+        var setsToScan = completedSets;
+        if (typeof setFilter === 'number') {
+            setsToScan = [completedSets[setFilter]].filter(Boolean);
+        }
+
+        setsToScan.forEach(function(set) {
             var lineup = set[initialKey] || set[lineupKey];
             if (!lineup) return;
             Object.keys(lineup).forEach(function(pos) {
@@ -4424,9 +4439,9 @@ const MatchStatsView = {
         SharedComponents._totalSets = setsWithStats.length;
         if (!SharedComponents._showAvgToggle) SharedComponents._avgMode = 'tot';
 
-        // Roles par joueur pour pastilles colorees
-        var homeRoles = BilanView.getPlayerRoles(match, 'home');
-        var awayRoles = BilanView.getPlayerRoles(match, 'away');
+        // Roles par joueur pour pastilles colorees — filtrés par set si vue Set X
+        var homeRoles = BilanView.getPlayerRoles(match, 'home', setFilter === 'all' ? undefined : setFilter);
+        var awayRoles = BilanView.getPlayerRoles(match, 'away', setFilter === 'all' ? undefined : setFilter);
 
         // Vue mobile : categorie selectionnee
         var self = this;

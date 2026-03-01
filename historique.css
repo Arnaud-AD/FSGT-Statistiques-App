@@ -1002,16 +1002,18 @@ body {
 
 /* Pastilles empilees verticalement (multi-postes dans stat tables) */
 .role-dots {
-    display: flex;
+    display: inline-flex;
     flex-direction: column;
     gap: 1px;
     flex-shrink: 0;
+    vertical-align: middle;
 }
 
 .role-dot.role-dot-stacked {
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
 }
+
 
 /* ==================== STATS: DESKTOP MULTI-CARD ==================== */
 .stats-desktop {
