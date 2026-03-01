@@ -4037,7 +4037,17 @@ const ImpactView = {
 
     _fmtRoster(val) {
         if (val === 0 || val === null || val === undefined) return '<span class="impact-zero">\u2212</span>';
-        return '<span class="impact-roster">' + val.toFixed(1) + '</span>';
+        // Degrade bleu : 4 niveaux bases sur les quartiles min/max des joueurs
+        var min = this._rosterMin || 0;
+        var max = this._rosterMax || 4;
+        var range = max - min || 1;
+        var norm = (val - min) / range; // 0..1
+        var level;
+        if (norm <= 0.25) level = 1;
+        else if (norm <= 0.5) level = 2;
+        else if (norm <= 0.75) level = 3;
+        else level = 4;
+        return '<span class="impact-roster-' + level + '">' + val.toFixed(1) + '</span>';
     },
 
     _fmtScore(val, setsPlayed) {
@@ -4056,6 +4066,10 @@ const ImpactView = {
         var self = this;
         var isMoy = this._avgMode === 'moy';
         var avgRoster = this._computeAvgRoster(data, players);
+        // Calculer min/max roster pour le degrade de couleur
+        var rosterVals = players.map(function(n) { return data[n].roster || 0; }).filter(function(v) { return v !== 0; });
+        this._rosterMin = rosterVals.length > 0 ? Math.min.apply(null, rosterVals) : 0;
+        this._rosterMax = rosterVals.length > 0 ? Math.max.apply(null, rosterVals) : 4;
 
         var html = '<div class="impact-table-wrapper">';
         html += '<div class="impact-table-label"><span>Impact Global</span>';
