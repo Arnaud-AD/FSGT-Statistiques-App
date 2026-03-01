@@ -1167,6 +1167,17 @@ body {
     margin-left: 1px;
     transition: opacity 0.15s;
 }
+/* Mobile detail tables: arrow doesn't push text */
+.detail-stats-table thead th {
+    position: relative;
+}
+.detail-stats-table thead th .sort-arrow {
+    position: absolute;
+    margin-left: 0;
+    bottom: 1px;
+    right: 1px;
+    font-size: 5px;
+}
 .sort-arrow.active {
     opacity: 0.6;
 }
