@@ -354,24 +354,12 @@
             <div id="firebase-auth-container" style="margin-left: auto;"></div>
         </header>
 
-        <!-- Bandeau match en cours (géré par checkInProgressMatch, admin only) -->
+        <!-- Bandeaux matchs en cours (générés par checkInProgressMatch, admin only) -->
         <div class="resume-section-header" id="resumeSectionHeader" style="display:none;">
             <span class="resume-section-icon">⚡</span>
-            <span class="resume-section-label">En cours</span>
+            <span class="resume-section-label">EN COURS</span>
         </div>
-        <div id="resumeBanner" class="resume-banner">
-            <div class="resume-content">
-                <div class="resume-opponent" id="resumeOpponent"></div>
-                <div class="resume-location" id="resumeLocation"></div>
-                <div class="resume-status" id="resumeStatus"></div>
-            </div>
-            <div class="resume-actions">
-                <button class="resume-action-btn resume" onclick="resumeMatch()">Reprendre</button>
-                <button class="resume-action-btn delete" onclick="deleteCurrentMatch(event)" title="Supprimer">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                </button>
-            </div>
-        </div>
+        <div id="resumeBannersContainer"></div>
 
         <!-- Menu principal -->
         <nav class="menu-section">
@@ -497,69 +485,63 @@
             // Le bandeau match en cours n'est visible qu'en mode admin
             if (!isAdmin) return;
 
-            const currentId = Storage.getCurrentMatchId();
-            const banner = document.getElementById('resumeBanner');
             const sectionHeader = document.getElementById('resumeSectionHeader');
+            const container = document.getElementById('resumeBannersContainer');
 
-            let match = null;
+            // Collecter tous les matchs in_progress
+            const allMatches = Storage.getAllMatches();
+            const inProgressMatches = allMatches.filter(m => m.status === 'in_progress');
 
-            if (currentId) {
-                const m = Storage.getMatchById(currentId);
-                if (m && m.status !== 'completed') {
-                    match = m;
-                }
+            if (inProgressMatches.length === 0) {
+                sectionHeader.style.display = 'none';
+                container.innerHTML = '';
+                return;
             }
 
-            // Vérifier aussi s'il y a un match in_progress sans pointeur actif
-            if (!match) {
-                const allMatches = Storage.getAllMatches();
-                const inProgress = allMatches.find(m => m.status === 'in_progress');
-                if (inProgress) {
-                    match = inProgress;
-                    banner.dataset.matchId = inProgress.id;
-                }
-            }
+            // Générer un bandeau par match
+            container.innerHTML = inProgressMatches.map(match => {
+                const opponent = match.opponent || 'Adversaire';
+                const setScore = Storage.getSetScore(match);
+                const setNum = match.sets ? match.sets.length : 0;
+                const lastSet = match.sets && match.sets.length > 0 ? match.sets[match.sets.length - 1] : null;
+                const live = lastSet && !lastSet.completed ? ` (${lastSet.homeScore||0}-${lastSet.awayScore||0})` : '';
+                const location = match.location || '';
+                const locClass = location === 'domicile' ? 'domicile' : 'exterieur';
+                const locLabel = location === 'domicile' ? 'Domicile' : (location === 'extérieur' ? 'Extérieur' : '');
+                const locHtml = locLabel ? `<span class="location-badge ${locClass}">${locLabel}</span>` : '';
 
-            if (!match) return;
-
-            const opponent = match.opponent || 'Adversaire';
-            const setScore = Storage.getSetScore(match);
-            const setNum = match.sets ? match.sets.length : 0;
-            const lastSet = match.sets && match.sets.length > 0 ? match.sets[match.sets.length - 1] : null;
-            const live = lastSet && !lastSet.completed ? ` (${lastSet.homeScore||0}-${lastSet.awayScore||0})` : '';
-
-            // Location badge
-            const location = match.location || '';
-            const locClass = location === 'domicile' ? 'domicile' : 'exterieur';
-            const locLabel = location === 'domicile' ? 'Domicile' : (location === 'extérieur' ? 'Extérieur' : '');
-
-            document.getElementById('resumeOpponent').textContent = opponent;
-            document.getElementById('resumeLocation').innerHTML = locLabel ? `<span class="location-badge ${locClass}">${locLabel}</span>` : '';
-            document.getElementById('resumeStatus').innerHTML = `Set ${setNum} • Sets : <span class="set-score">${setScore.homeWins}-${setScore.awayWins}</span>${live}`;
+                return `<div class="resume-banner visible" data-match-id="${match.id}">
+                    <div class="resume-content">
+                        <div class="resume-opponent">${opponent}</div>
+                        <div class="resume-location">${locHtml}</div>
+                        <div class="resume-status">Set ${setNum} • Sets : <span class="set-score">${setScore.homeWins}-${setScore.awayWins}</span>${live}</div>
+                    </div>
+                    <div class="resume-actions">
+                        <button class="resume-action-btn resume" onclick="resumeMatch('${match.id}')">Reprendre</button>
+                        <button class="resume-action-btn delete" onclick="deleteCurrentMatch(event, '${match.id}')" title="Supprimer">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
 
             sectionHeader.style.display = 'flex';
-            banner.classList.add('visible');
         }
 
-        function deleteCurrentMatch(event) {
+        function deleteCurrentMatch(event, matchId) {
             event.stopPropagation();
-            const banner = document.getElementById('resumeBanner');
-            let matchId = banner.dataset.matchId || Storage.getCurrentMatchId();
             if (!matchId) return;
             const match = Storage.getMatchById(matchId);
             if (!match) return;
             const opponent = match.opponent || 'Adversaire';
             if (confirm(`Supprimer ce match et toutes ses données ?\n${opponent}`)) {
                 Storage.deleteMatch(matchId);
-                banner.classList.remove('visible');
-                document.getElementById('resumeSectionHeader').style.display = 'none';
+                // Rafraîchir les bandeaux
+                checkInProgressMatch();
             }
         }
 
-        function resumeMatch() {
-            const banner = document.getElementById('resumeBanner');
-            let matchId = banner.dataset.matchId || Storage.getCurrentMatchId();
-
+        function resumeMatch(matchId) {
             if (!matchId) return;
 
             const match = Storage.getMatchById(matchId);

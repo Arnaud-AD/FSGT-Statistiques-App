@@ -5211,7 +5211,6 @@ const YearStatsView = {
                 var famData = playerFamiliesYear[name].families[family];
                 var stats = BilanView.aggregateStatsForFamilyYear(matches, name, famData);
                 var scores = BilanView.computeAxisScores(stats, familyIpRole);
-                var ip = BilanView.computeIP(scores, familyIpRole);
 
                 var roleColors = Object.keys(famData.roles).map(function(r) {
                     return BilanView.ROLE_COLORS[r];
@@ -5229,12 +5228,27 @@ const YearStatsView = {
                 if (!hasAnyStats) return;
 
                 allPlayerData.push({
-                    name: name, scores: scores, ip: ip, stats: stats,
+                    name: name, scores: scores, ip: 0, stats: stats,
                     primaryColor: primaryColor, roleColors: roleColors,
                     effectiveRole: familyIpRole, family: family, slot: slot,
                     axes: familyAxes, bestName: bestName, secondBestName: secondBestName
                 });
             });
+        });
+
+        // V21.21 : Seuil 10% — exclure le service du radar Stats Année
+        // si un joueur a servi moins de 10% du total équipe (ex: remplacement ponctuel)
+        // La perf reste visible dans Stats Matchs (match individuel = mérité)
+        var teamTotalService = 0;
+        allPlayerData.forEach(function(d) {
+            teamTotalService += (d.scores._tots && d.scores._tots.service) || 0;
+        });
+        allPlayerData.forEach(function(d) {
+            var playerSrvTot = (d.scores._tots && d.scores._tots.service) || 0;
+            if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.10) {
+                d.scores.service = 0;
+            }
+            d.ip = BilanView.computeIP(d.scores, d.effectiveRole);
         });
 
         // Trier par slot puis IP desc
@@ -6096,6 +6110,14 @@ const SetsPlayedView = {
                     initialPlayers.forEach(function(name) {
                         ensurePlayer(name).startingMatchIds[match.id] = true;
                     });
+                }
+            });
+
+            // Joueur present dans le roster du match mais n'ayant joue aucun set → compter comme present
+            (match.players || []).forEach(function(p) {
+                var name = (typeof p === 'object' && p !== null) ? p.prenom : p;
+                if (name) {
+                    ensurePlayer(name).matchIds[match.id] = true;
                 }
             });
         });

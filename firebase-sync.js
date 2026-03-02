@@ -147,10 +147,17 @@ const FirebaseSync = {
                 // Même nombre de sets → comparer le total de points
                 const countPoints = (match) => (match.sets || [])
                     .reduce((sum, s) => sum + (s.points?.length || 0), 0);
-                if (countPoints(fbMatch) > countPoints(localMatch)) {
+                const localPoints = countPoints(localMatch);
+                const fbPoints = countPoints(fbMatch);
+                if (fbPoints > localPoints) {
                     merged.set(fbMatch.id, fbMatch);
+                } else if (fbPoints === localPoints) {
+                    // Tiebreaker : completed > in_progress (finalisé sur un autre device)
+                    if (fbMatch.status === 'completed' && localMatch.status !== 'completed') {
+                        merged.set(fbMatch.id, fbMatch);
+                    }
                 }
-                // Si égal ou local a plus de points → garder local (offline-first)
+                // Si local a plus de points → garder local (offline-first)
             }
             // Si local a plus de sets → garder local (déjà dans la map)
         });
@@ -376,6 +383,20 @@ const FirebaseSync = {
         const remoteId = await this.getCurrentMatchId();
         if (remoteId) {
             localStorage.setItem(Storage.KEYS.CURRENT_ID, remoteId);
+        }
+        // Cohérence : si le currentMatchId (local ou remote) pointe vers un match completed, nettoyer
+        const effectiveId = localStorage.getItem(Storage.KEYS.CURRENT_ID);
+        if (effectiveId) {
+            const matches = JSON.parse(localStorage.getItem(Storage.KEYS.MATCHES) || '[]');
+            const match = matches.find(m => m.id === effectiveId);
+            if (match && match.status === 'completed') {
+                localStorage.removeItem(Storage.KEYS.CURRENT_ID);
+                // Nettoyer aussi Firebase si c'est lui qui avait l'ID stale
+                if (this.isAdmin()) {
+                    this.saveCurrentMatchId(null).catch(() => {});
+                }
+                console.log('[FirebaseSync] pullAll: currentMatchId nettoyé (match completed)');
+            }
         }
 
         // Pass grids — ne jamais ecraser des grilles calibrees locales
