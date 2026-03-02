@@ -5822,6 +5822,7 @@ const SetsPlayedView = {
                 case 'sets':
                 case 'sm':
                     return isMoy ? p.setsPerMatch : p.setsPlayed;
+                case 'pts': return isMoy ? p.pointsPerMatch : p.pointsPlayed;
                 case 'matchs': return p.matchesPresent;
                 case 'titu': return p.matchesPresent > 0 ? p.matchesStarting / p.matchesPresent : 0;
                 default: return isMoy ? p.setsPerMatch : p.setsPlayed;
@@ -5901,11 +5902,11 @@ const SetsPlayedView = {
      * Retourne un tableau trie par role puis setsPlayed decroissant.
      */
     computePlayingTime(matches, playerRoles) {
-        var players = {}; // { name: { setsPlayed, setsPlayedByRole, matchIds, startingMatchIds } }
+        var players = {}; // { name: { setsPlayed, setsPlayedByRole, matchIds, startingMatchIds, pointsPlayed } }
         var posRoles = BilanView.POSITION_ROLES_HOME;
 
         function ensurePlayer(name) {
-            if (!players[name]) players[name] = { setsPlayed: 0, setsPlayedByRole: {}, matchIds: {}, startingMatchIds: {} };
+            if (!players[name]) players[name] = { setsPlayed: 0, setsPlayedByRole: {}, matchIds: {}, startingMatchIds: {}, pointsPlayed: 0 };
             return players[name];
         }
 
@@ -5929,7 +5930,12 @@ const SetsPlayedView = {
 
             completedSets.forEach(function(set, setIdx) {
                 var totalPoints = (set.points || []).length;
-                if (totalPoints === 0) totalPoints = 1; // eviter division par 0
+                // Points reels joues : depuis points[] ou depuis les scores (matchs sans stats detaillees)
+                // Fallback : finalHomeScore/finalAwayScore si homeScore/awayScore === 0
+                var scoreHome = (set.homeScore || 0) || (set.finalHomeScore || 0);
+                var scoreAway = (set.awayScore || 0) || (set.finalAwayScore || 0);
+                var totalPointsReal = totalPoints > 0 ? totalPoints : (scoreHome + scoreAway);
+                if (totalPoints === 0) totalPoints = 1; // eviter division par 0 pour setsPlayed
                 var subs = set.substitutions || [];
                 var homeSubs = subs.filter(function(s) { return s.team === 'home'; });
 
@@ -5940,15 +5946,17 @@ const SetsPlayedView = {
 
                 // ---- Fonction commune : accumuler les intervalles ----
                 // Normalise a 4 joueurs par intervalle (filet de securite si push a cree >4)
-                function accumulateIntervals(intervals, totalPts, matchId) {
+                function accumulateIntervals(intervals, totalPts, totalPtsReal, matchId) {
                     intervals.forEach(function(interval) {
                         var duration = (interval.end - interval.start) / totalPts;
+                        var pointsInInterval = Math.round((interval.end - interval.start) / totalPts * totalPtsReal);
                         var nPlayers = interval.players.length;
                         // Chaque intervalle = 4 slots. Si >4 joueurs, normaliser pour garder 4.0 total
                         var perPlayer = nPlayers > 4 ? (duration * 4 / nPlayers) : duration;
                         interval.players.forEach(function(name) {
                             var p = ensurePlayer(name);
                             p.setsPlayed += perPlayer;
+                            p.pointsPlayed += pointsInInterval;
                             p.matchIds[matchId] = true;
                             var role = interval.roleMap[name] || 'Autre';
                             addByRole(name, role, perPlayer);
@@ -5993,7 +6001,7 @@ const SetsPlayedView = {
                     // ---- Calcul precis avec substitutions enregistrees ----
                     var sortedSubs = homeSubs.slice().sort(function(a, b) { return a.pointIndex - b.pointIndex; });
                     var intervals = buildIntervals(sortedSubs, initialPlayers, playerRoleMap, totalPoints);
-                    accumulateIntervals(intervals, totalPoints, match.id);
+                    accumulateIntervals(intervals, totalPoints, totalPointsReal, match.id);
                 } else {
                     // ---- Fallback : detecter substitutions depuis les rallies ----
                     // Trouver tous les joueurs home avec des actions dans les rallies
@@ -6033,12 +6041,20 @@ const SetsPlayedView = {
                     if (playersWithStats.length === 0) {
                         playersWithStats = initialPlayers.slice();
                     }
+                    // Fallback roster : si ni lineup ni stats, utiliser le roster du match (premiers 4 joueurs)
+                    if (playersWithStats.length === 0 && totalPointsReal > 0) {
+                        var roster = (match.players || []).map(function(p) {
+                            return (typeof p === 'object' && p !== null) ? p.prenom : p;
+                        }).filter(Boolean);
+                        playersWithStats = roster.slice(0, 4);
+                    }
 
                     if (playersWithStats.length <= 4) {
                         // Pas de substitution : chaque joueur = 1 set complet
                         playersWithStats.forEach(function(name) {
                             var p = ensurePlayer(name);
                             p.setsPlayed += 1;
+                            p.pointsPlayed += totalPointsReal;
                             p.matchIds[match.id] = true;
                             var role = playerRoleMap[name] || 'Autre';
                             addByRole(name, role, 1);
@@ -6090,13 +6106,14 @@ const SetsPlayedView = {
                         if (inferredSubs.length > 0) {
                             inferredSubs.sort(function(a, b) { return a.pointIndex - b.pointIndex; });
                             var intervals = buildIntervals(inferredSubs, initialPlayers, playerRoleMap, totalPoints);
-                            accumulateIntervals(intervals, totalPoints, match.id);
+                            accumulateIntervals(intervals, totalPoints, totalPointsReal, match.id);
                         } else {
                             // Impossible d'inferer → repartir equitablement sur 4 slots
                             var share = 4 / playersWithStats.length;
                             playersWithStats.forEach(function(name) {
                                 var p = ensurePlayer(name);
                                 p.setsPlayed += share;
+                                p.pointsPlayed += totalPointsReal;
                                 p.matchIds[match.id] = true;
                                 var role = playerRoleMap[name] || 'Autre';
                                 addByRole(name, role, share);
@@ -6154,6 +6171,8 @@ const SetsPlayedView = {
                 matchesPresent: matchesPresent,
                 matchesStarting: matchesStarting,
                 setsPerMatch: matchesPresent > 0 ? p.setsPlayed / matchesPresent : 0,
+                pointsPlayed: p.pointsPlayed,
+                pointsPerMatch: matchesPresent > 0 ? p.pointsPlayed / matchesPresent : 0,
                 totalSetsWhenPresent: totalSetsWhenPresent
             };
         });
@@ -6191,7 +6210,7 @@ const SetsPlayedView = {
 
         var roleColors = BilanView.ROLE_COLORS;
         var currentRole = null;
-        var numCols = 5;
+        var numCols = 6;
 
         var self = this;
         var sortCol = self._sortCol;
@@ -6220,6 +6239,7 @@ const SetsPlayedView = {
         } else {
             html += '<th class="pt-th-num" data-sort="sets">Sets' + sortIcon('sets') + '</th>';
         }
+        html += '<th class="pt-th-num" data-sort="pts">Pts' + sortIcon('pts') + '</th>';
         html += '<th class="pt-th-num" data-sort="matchs">Matchs' + sortIcon('matchs') + '</th>';
         html += '<th class="pt-th-num" data-sort="titu">Titu.' + sortIcon('titu') + '</th>';
         html += '</tr></thead>';
@@ -6294,8 +6314,10 @@ const SetsPlayedView = {
             html += '<div class="pt-player-name">' + dotsHtml + Utils.escapeHtml(p.name) + '</div>';
             html += '<div class="pt-bar-container">' + barHtml + '</div>';
             html += '</td>';
+            var ptsDisplay = isMoy ? p.pointsPerMatch.toFixed(0) : p.pointsPlayed;
             html += '<td class="pt-td-num pt-pct">' + pctDisplay + '%</td>';
             html += '<td class="pt-td-num pt-sets-val">' + centralDisplay + '</td>';
+            html += '<td class="pt-td-num">' + ptsDisplay + '</td>';
             html += '<td class="pt-td-num">' + p.matchesPresent + '</td>';
             html += '<td class="pt-td-num">' + p.matchesStarting + '</td>';
             html += '</tr>';
