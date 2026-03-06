@@ -2043,9 +2043,14 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
 
 /* ==================== RANKING TAB ==================== */
 
+/* Filtres Tous/Champ/Ginette (meme style que year-filters dans Annee) */
+.ranking-filters {
+    margin-bottom: 12px;
+}
+
 /* Sous-onglets Equipes / Joueurs */
 .ranking-sub-tabs {
-    margin: 8px 16px;
+    margin: 0 0 8px;
 }
 
 .ranking-sub-btn.active {
@@ -2054,15 +2059,17 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
     font-weight: 700;
 }
 
-/* Filtres Tous/Champ/Ginette */
-.ranking-filters {
-    margin: 0 16px 12px;
-}
-
 .ranking-filter-btn.active {
     background: var(--accent-blue);
     color: white;
     font-weight: 700;
+}
+
+/* Toggle Tous/Poste (joueurs) */
+.ranking-group-toggle-bar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 12px 6px;
 }
 
 /* Tableau Equipes */
@@ -2088,6 +2095,15 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
     border-bottom: 2px solid #e0e0e0;
 }
 
+.ranking-table th[data-sort-col] {
+    cursor: pointer;
+    user-select: none;
+}
+
+.ranking-table th[data-sort-col]:hover .sort-arrow:not(.active) {
+    opacity: 0.25;
+}
+
 .ranking-table th:first-child {
     width: 28px;
     text-align: center;
@@ -2103,6 +2119,12 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
     color: #9aa0a6;
     font-weight: 600;
     font-size: 12px;
+}
+
+/* Headers de poste (mode Poste) — apres td:first-child pour le surcharger */
+.ranking-table tr.pt-role-header td {
+    text-align: left;
+    color: var(--text-secondary);
 }
 
 .ranking-row {

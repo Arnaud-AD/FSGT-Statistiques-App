@@ -2512,8 +2512,8 @@ const BilanView = {
 
     // Ponderations IP par poste (V20.25)
     IP_WEIGHTS: {
-        'Passeur': { attaque: 0.00, bloc: 0.00, relance: 0.05, reception: 0.00, defense: 0.25, passe: 0.45, service: 0.25 },
-        'Centre':  { attaque: 0.10, bloc: 0.05, relance: 0.20, reception: 0.20, defense: 0.20, passe: 0.05, service: 0.20 },
+        'Passeur': { attaque: 0.00, bloc: 0.00, relance: 0.05, reception: 0.00, defense: 0.35, passe: 0.35, service: 0.25 },
+        'Centre':  { attaque: 0.10, bloc: 0.05, relance: 0.10, reception: 0.25, defense: 0.25, passe: 0.05, service: 0.20 },
         'R4':      { attaque: 0.45, bloc: 0.10, relance: 0.05, reception: 0.30, defense: 0.05, passe: 0.00, service: 0.05 },
         'Pointu':  { attaque: 0.45, bloc: 0.10, relance: 0.05, reception: 0.30, defense: 0.05, passe: 0.00, service: 0.05 }
     },
@@ -3266,10 +3266,10 @@ const BilanView = {
             scores.reception = 0;
         }
 
-        // PASSE (V20.25) : moyenne ponderee + bonus Passeur (+5) / plafond non-passeur (80)
+        // PASSE (V22.05) : P4 majore pour recompenser la precision — plafond non-passeur (80)
         var pas = s.pass || {};
         if (pas.tot > 0) {
-            var passeRaw = (pas.p4 * 100 + pas.p3 * 75 + pas.p2 * 50 + pas.p1 * 25) / pas.tot;
+            var passeRaw = (pas.p4 * 120 + pas.p3 * 60 + pas.p2 * 30 + pas.p1 * 10) / pas.tot;
             if (role === 'Passeur') {
                 passeRaw += 5; // Bonus passeur : son role premier, recompense la constance
             } else if (role) {
@@ -3354,7 +3354,7 @@ const BilanView = {
         passe: 3,       // 1-2 passes = anecdotique
         attaque: 3,     // 1-2 attaques = pas significatif
         bloc: 1,        // le bloc est rare, 1 suffit
-        relance: 1,     // la relance est rare, 1 suffit
+        relance: 5,     // V22.05 : 2-4 relances donnent souvent score 100 → non significatif
         defense: 2      // 1 defense = anecdotique
     },
 
@@ -3381,6 +3381,30 @@ const BilanView = {
             weights = boosted;
         }
 
+        // V22.05 : Passeur polyvalent — boost attaque (+0.10) et bloc (+0.05) si volume suffisant
+        // En 4v4, les passeurs attaquent et bloquent souvent. Redistribution proportionnelle pour rester a 100%
+        if (role === 'Passeur') {
+            var passeurAttTot = tots.attaque || 0;
+            var passeurBlcTot = tots.bloc || 0;
+            var needsPasseurBoost = false;
+            if (axisScores.attaque && axisScores.attaque > 0 && passeurAttTot >= 3) needsPasseurBoost = true;
+            if (axisScores.bloc && axisScores.bloc > 0 && passeurBlcTot >= 1) needsPasseurBoost = true;
+            if (needsPasseurBoost) {
+                var boosted = {};
+                Object.keys(weights).forEach(function(key) { boosted[key] = weights[key]; });
+                if (axisScores.attaque && axisScores.attaque > 0 && passeurAttTot >= 3) {
+                    boosted.attaque = 0.10;
+                }
+                if (axisScores.bloc && axisScores.bloc > 0 && passeurBlcTot >= 1) {
+                    boosted.bloc = 0.05;
+                }
+                var newTotal = 0;
+                Object.keys(boosted).forEach(function(key) { newTotal += boosted[key]; });
+                Object.keys(boosted).forEach(function(key) { boosted[key] = boosted[key] / newTotal; });
+                weights = boosted;
+            }
+        }
+
         // Calculer le poids total de tous les axes du role (= 1.0 normalement)
         var totalWeight = 0;
         Object.keys(weights).forEach(function(key) {
@@ -3390,9 +3414,6 @@ const BilanView = {
         // V20.285 : helper pour verifier si un axe atteint le seuil minimum d'actions
         // Exception ailier : 1 seule reception R4 compte, sinon 1 recep ne compte pas
         var isAilier = (role === 'R4' || role === 'Pointu');
-        // V20.285b : axes exclus par seuil mais avec du volume → redistribution 100% (pas de penalite)
-        // Cas : ailier avec 1 recep FR → la recep est exclue mais ne penalise pas l'IP
-        var fullRedistWeight = 0;
         function meetsMinActions(key) {
             var tot = tots[key];
             if (tot === undefined || !minActions[key]) return true; // pas de seuil defini
@@ -3402,30 +3423,28 @@ const BilanView = {
             return false;
         }
 
-        // Calculer le poids total des axes actifs
-        // Actif = score > 0 ET poids > 0 ET volume >= seuil minimum
+        // Calculer le poids des axes actifs et inactifs (score > 0 + seuil atteint)
+        // V22.05 : approche hybride — axes offensifs (attaque, bloc) penalises a 50% si inactifs
+        // Axes defensifs (tout le reste) : redistribution 100% (pas de penalite)
+        // Logique : en 4v4, ne jamais attaquer/bloquer est une vraie limitation,
+        // mais 0 defense peut etre contextuel (adversaire evite le joueur)
+        var OFFENSIVE_AXES = { attaque: true, bloc: true, service: true };
         var activeWeight = 0;
-        fullRedistWeight = 0;
+        var inactiveOffWeight = 0;
         Object.keys(weights).forEach(function(key) {
             if (weights[key] <= 0) return;
             var score = axisScores[key] || 0;
-            if (score <= 0) return;
-            if (!meetsMinActions(key)) {
-                // V20.285b : ailier avec 1 recep non-R4 → redistribution 100% (pas de penalite)
-                if (isAilier && key === 'reception' && (tots[key] || 0) === 1 && (tots.reception_r4 || 0) === 0) {
-                    fullRedistWeight += weights[key];
-                }
+            if (score <= 0 || !meetsMinActions(key)) {
+                if (OFFENSIVE_AXES[key]) inactiveOffWeight += weights[key];
+                // Axes defensifs inactifs : redistribution 100% (poids ignore)
                 return;
             }
             activeWeight += weights[key];
         });
-
-        // Si aucun axe actif, IP = 0
         if (activeWeight === 0) return 0;
 
-        // Redistribution : axes sous seuil avec volume (fullRedist) → 100%, axes inactifs → 50%
-        var lostWeight = totalWeight - activeWeight - fullRedistWeight;
-        var effectiveDenominator = activeWeight + lostWeight * 0.5;
+        // Denominateur : actifs + 50% des offensifs inactifs (penalite polyvalence)
+        var effectiveDenominator = activeWeight + inactiveOffWeight * 0.5;
 
         // IP = somme ponderee / denominateur effectif
         var ip = 0;
@@ -3448,11 +3467,12 @@ const BilanView = {
         var self = this;
         var axes = chartAxes || self.SPIDER_AXES;
 
-        // V20.286 — Reduction visuelle axe Passe pour les non-passeurs (cosmétique uniquement)
-        var isPasseur = (role === 'Passeur');
+        // V20.286 — Reduction visuelle axe Passe pour les ailiers uniquement (cosmétique)
+        // V22.05 : Centres affichent Passe a 100% pour eviter l'effet noeud papillon
+        var isAilier = (role === 'R4' || role === 'Pointu' || role === 'Ailier');
         var axisMaxR = {};
         axes.forEach(function(axis) {
-            axisMaxR[axis.key] = (axis.key === 'passe' && !isPasseur) ? maxR * 0.5 : maxR;
+            axisMaxR[axis.key] = (axis.key === 'passe' && isAilier) ? maxR * 0.5 : maxR;
         });
 
         // Meme couleur home/away (couleurs originales ROLE_COLORS)
@@ -3572,10 +3592,11 @@ const BilanView = {
             var ovSkipZeros = (ovRole === 'Passeur') || (ovVertexCount <= 4) || (ovVertexCount === 5 && !ovZerosConsecutive);
 
             // V20.286 — axisMaxR de l'overlay basé sur le role overlay
-            var ovIsPasseur = (ovRole === 'Passeur');
+            // V22.05 : Centres affichent Passe a 100% (coherence avec le joueur principal)
+            var ovIsAilier = (ovRole === 'R4' || ovRole === 'Pointu' || ovRole === 'Ailier');
             var ovAxisMaxR = {};
             axes.forEach(function(axis) {
-                ovAxisMaxR[axis.key] = (axis.key === 'passe' && !ovIsPasseur) ? maxR * 0.5 : maxR;
+                ovAxisMaxR[axis.key] = (axis.key === 'passe' && ovIsAilier) ? maxR * 0.5 : maxR;
             });
 
             axes.forEach(function(axis, i) {
@@ -3708,17 +3729,14 @@ const BilanView = {
 
         if (bestPerMatch.length === 0) return null;
 
-        // Moyenne par axe uniquement sur les joueurs ayant des stats
-        // significatives sur cet axe (respect du seuil IP_MIN_ACTIONS)
+        // Moyenne par axe sur les joueurs ayant un score > 0
+        // V22.05 : pas de seuil IP_MIN_ACTIONS ici — les scores individuels sont deja calcules,
+        // on moyenne tous les non-zero (le seuil s'applique dans computeIP, pas dans la moyenne)
         var avgScores = {};
         var avgTots = {};
-        var minActions = self.IP_MIN_ACTIONS;
         ['service', 'reception', 'passe', 'attaque', 'bloc', 'relance', 'defense'].forEach(function(k) {
             var withStats = bestPerMatch.filter(function(sc) {
-                if ((sc[k] || 0) <= 0) return false;
-                var tots = sc._tots || {};
-                if (tots[k] !== undefined && minActions[k] && tots[k] < minActions[k]) return false;
-                return true;
+                return (sc[k] || 0) > 0;
             });
             if (withStats.length === 0) { avgScores[k] = 0; avgTots[k] = 0; return; }
             var sumScores = withStats.reduce(function(s, sc) { return s + sc[k]; }, 0);
@@ -4264,6 +4282,9 @@ const RankingView = {
     currentFilter: 'all',
     currentSubTab: 'equipes',
     _cachedData: null,
+    _equipesSort: { col: 'ipStarters', asc: false },
+    _joueursSort: { col: 'ip', asc: false },
+    _joueursGroupMode: 'tous', // 'tous' | 'poste'
 
     render() {
         var container = document.getElementById('content-ranking');
@@ -4282,8 +4303,8 @@ const RankingView = {
         this._cachedData = this._computeRankingData(filtered);
 
         var html = '';
-        html += this.renderSubTabs();
         html += this.renderFilters();
+        html += this.renderSubTabs();
         html += '<div class="ranking-subtab-content" id="rankingEquipes">' + this.renderEquipes(this._cachedData) + '</div>';
         html += '<div class="ranking-subtab-content" id="rankingJoueurs" style="display:none">' + this.renderJoueurs(this._cachedData) + '</div>';
         container.innerHTML = html;
@@ -4358,6 +4379,15 @@ const RankingView = {
 
         // Tri par ipStarters decroissant
         teams.sort(function(a, b) { return b.ipStarters - a.ipStarters; });
+
+        // V22.05 : exclure les joueurs avec trop peu d'actions (non significatif)
+        var MIN_TOTAL_ACTIONS = 15;
+        allPlayerCards = allPlayerCards.filter(function(p) {
+            var t = p.scores && p.scores._tots ? p.scores._tots : {};
+            var total = (t.service||0) + (t.reception||0) + (t.passe||0) + (t.attaque||0) + (t.bloc||0) + (t.relance||0) + (t.defense||0);
+            return total >= MIN_TOTAL_ACTIONS;
+        });
+
         // Tri joueurs par IP decroissant
         allPlayerCards.sort(function(a, b) { return b.ip - a.ip; });
 
@@ -4365,76 +4395,166 @@ const RankingView = {
     },
 
     _computeTeamData(matches, teamKey, teamName) {
-        var allSets = [];
-        matches.forEach(function(m) {
-            (m.sets || []).forEach(function(s) {
-                if (s.completed) allSets.push(s);
-            });
+        var isAway = (teamKey === 'away');
+        var matchesWithSets = matches.filter(function(m) {
+            return (m.sets || []).some(function(s) { return s.completed; });
         });
 
-        if (allSets.length === 0) {
-            return { name: teamName, isHome: teamKey === 'home', matchCount: matches.length,
+        if (matchesWithSets.length === 0) {
+            return { name: teamName, isHome: !isAway, matchCount: matches.length,
                      allPlayers: [], starters: [], ipAll: 0, ipStarters: 0 };
         }
 
-        var playerTotals = StatsAggregator.aggregateStats(allSets, teamKey);
-        var mergedRoles = BilanView.getPlayerRolesYear(matches, teamKey);
-
-        // Detecter les titulaires (initialLineup)
-        var initialKey = (teamKey === 'away') ? 'initialAwayLineup' : 'initialHomeLineup';
-        var fallbackKey = (teamKey === 'away') ? 'awayLineup' : 'homeLineup';
-        var starterNames = {};
-        matches.forEach(function(m) {
-            (m.sets || []).forEach(function(set) {
-                if (!set.completed) return;
-                var lineup = set[initialKey] || set[fallbackKey];
-                if (lineup) {
-                    Object.values(lineup).forEach(function(name) {
-                        if (name) starterNames[name] = true;
-                    });
-                }
-            });
-        });
-
+        // --- Approche Profils Radar Annee : agreger TOUTES les stats saison → IP unique ---
+        // (et non IP par match puis moyenne, qui donne des resultats differents car formules non-lineaires)
         var allPlayers = [];
-        var starters = [];
 
-        Object.keys(playerTotals).forEach(function(name) {
-            var roleInfo = mergedRoles[name];
-            if (!roleInfo) return;
-            var stats = playerTotals[name];
+        if (!isAway) {
+            // HOME (Jen) : getPlayerFamiliesYear + aggregateStatsForFamilyYear (identique a Annee)
+            var playerFamiliesYear = BilanView.getPlayerFamiliesYear(matchesWithSets);
+            var playerRolesYear = BilanView.getPlayerRolesYear(matchesWithSets, 'home');
 
-            // Verifier que le joueur a au moins une action
-            var hasStats = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'].some(function(cat) {
-                return stats[cat] && stats[cat].tot > 0;
+            // Phase 1 : collecter scores (ip=0) pour tous les joueurs
+            BilanView.FAMILY_ORDER.forEach(function(family) {
+                var familyIpRole = (family === 'Ailier') ? 'R4' : family;
+
+                Object.keys(playerFamiliesYear).forEach(function(name) {
+                    if (playerFamiliesYear[name].primaryFamily !== family) return;
+                    var famData = playerFamiliesYear[name].families[family];
+                    if (!famData) return;
+
+                    var stats = BilanView.aggregateStatsForFamilyYear(matchesWithSets, name, famData);
+                    var hasStats = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'].some(function(cat) {
+                        return stats[cat] && stats[cat].tot > 0;
+                    });
+                    if (!hasStats) return;
+
+                    var scores = BilanView.computeAxisScores(stats, familyIpRole);
+
+                    var roleInfo = playerRolesYear[name];
+                    var primaryRole = roleInfo ? roleInfo.primaryRole : family;
+                    var roleColor = BilanView.ROLE_COLORS[primaryRole] || '#5f6368';
+
+                    allPlayers.push({
+                        name: name, role: primaryRole, roleColor: roleColor,
+                        scores: scores, ip: 0, effectiveRole: familyIpRole,
+                        matchCount: famData.matchSets.length
+                    });
+                });
             });
-            if (!hasStats) return;
 
-            var role = roleInfo.primaryRole;
-            var scores = BilanView.computeAxisScores(stats, role);
-            var ip = BilanView.computeIP(scores, role);
-            var roleColor = BilanView.ROLE_COLORS[role] || '#5f6368';
+            // Phase 2 : seuil 10% service (identique a Annee Profils radar V21.21)
+            var teamTotalService = 0;
+            allPlayers.forEach(function(d) {
+                teamTotalService += (d.scores._tots && d.scores._tots.service) || 0;
+            });
+            allPlayers.forEach(function(d) {
+                var playerSrvTot = (d.scores._tots && d.scores._tots.service) || 0;
+                if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.10) {
+                    d.scores.service = 0;
+                }
+                d.ip = BilanView.computeIP(d.scores, d.effectiveRole);
+            });
+        } else {
+            // AWAY : agreger stats par joueur sur tous les matchs → IP unique
+            var mergedData = {}; // name → { stats, roles: {role: count}, matchCount }
 
-            var playerObj = { name: name, role: role, roleColor: roleColor, stats: stats, scores: scores, ip: ip };
-            allPlayers.push(playerObj);
-            if (starterNames[name]) {
-                starters.push(playerObj);
-            }
-        });
+            matchesWithSets.forEach(function(match) {
+                var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+                if (completedSets.length === 0) return;
 
+                var families = BilanView.getPlayerFamilies(match, 'away');
+                var roles = BilanView.getPlayerRoles(match, 'away');
+
+                Object.keys(families).forEach(function(name) {
+                    var roleInfo = roles[name];
+                    if (!roleInfo) return;
+                    var primaryRole = roleInfo.primaryRole;
+                    var primaryFamily = BilanView.ROLE_TO_FAMILY[primaryRole];
+                    if (!primaryFamily) return;
+
+                    var famData = families[name].families[primaryFamily];
+                    if (!famData) return;
+                    var playerTotals = StatsAggregator.aggregateStatsBySetIndices(completedSets, 'away', famData.setIndices);
+                    var stats = playerTotals[name];
+                    if (!stats) return;
+
+                    if (!mergedData[name]) {
+                        mergedData[name] = {
+                            stats: StatsAggregator.initPlayerStats(),
+                            roles: {}, matchCount: 0
+                        };
+                    }
+                    BilanView._mergePlayerStats(mergedData[name].stats, stats);
+                    mergedData[name].roles[primaryRole] = (mergedData[name].roles[primaryRole] || 0) + 1;
+                    mergedData[name].matchCount++;
+                });
+            });
+
+            Object.keys(mergedData).forEach(function(name) {
+                var entry = mergedData[name];
+                var stats = entry.stats;
+
+                var hasStats = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'].some(function(cat) {
+                    return stats[cat] && stats[cat].tot > 0;
+                });
+                if (!hasStats) return;
+
+                var primaryRole = Object.keys(entry.roles).sort(function(a, b) { return entry.roles[b] - entry.roles[a]; })[0];
+                var primaryFamily = BilanView.ROLE_TO_FAMILY[primaryRole];
+                var ipRole = (primaryFamily === 'Ailier') ? 'R4' : primaryFamily;
+
+                // V22.05 : pas de detection centre offensif dans le Ranking
+                // Tous les centres sont evalues comme Centre (coherence home/away)
+
+                var scores = BilanView.computeAxisScores(stats, ipRole);
+                var roleColor = BilanView.ROLE_COLORS[primaryRole] || '#5f6368';
+
+                allPlayers.push({
+                    name: name, role: primaryRole, roleColor: roleColor,
+                    scores: scores, ip: 0, effectiveRole: ipRole, matchCount: entry.matchCount
+                });
+            });
+
+            // Phase 2 Away : seuil 10% service (coherence avec Home, V22.05)
+            var teamTotalService = 0;
+            allPlayers.forEach(function(d) {
+                teamTotalService += (d.scores._tots && d.scores._tots.service) || 0;
+            });
+            allPlayers.forEach(function(d) {
+                var playerSrvTot = (d.scores._tots && d.scores._tots.service) || 0;
+                if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.10) {
+                    d.scores.service = 0;
+                }
+                d.ip = BilanView.computeIP(d.scores, d.effectiveRole);
+            });
+        }
+
+        // --- IP EQUIPE = moyenne de tous les IP joueurs ---
         var ipAll = allPlayers.length > 0
             ? Math.round(allPlayers.reduce(function(s, p) { return s + p.ip; }, 0) / allPlayers.length)
             : 0;
-        var ipStarters = starters.length > 0
-            ? Math.round(starters.reduce(function(s, p) { return s + p.ip; }, 0) / starters.length)
+
+        // --- IP TITULAIRES = meilleur joueur par poste, IP moyen ---
+        var POSITIONS = ['Passeur', 'R4', 'Centre', 'Pointu'];
+        var bestByPos = {};
+        POSITIONS.forEach(function(pos) {
+            var candidates = allPlayers.filter(function(p) { return p.role === pos; });
+            if (candidates.length === 0) return;
+            candidates.sort(function(a, b) { return b.ip - a.ip; });
+            bestByPos[pos] = candidates[0];
+        });
+        var posValues = POSITIONS.map(function(pos) { return bestByPos[pos] ? bestByPos[pos].ip : null; }).filter(function(v) { return v !== null; });
+        var ipStarters = posValues.length > 0
+            ? Math.round(posValues.reduce(function(s, v) { return s + v; }, 0) / posValues.length)
             : 0;
 
         return {
             name: teamName,
-            isHome: teamKey === 'home',
-            matchCount: matches.length,
+            isHome: !isAway,
+            matchCount: matchesWithSets.length,
             allPlayers: allPlayers,
-            starters: starters,
+            starters: Object.values(bestByPos),
             ipAll: ipAll,
             ipStarters: ipStarters
         };
@@ -4442,18 +4562,22 @@ const RankingView = {
 
     // --- Rendu sous-onglet Equipes ---
     renderEquipes(data) {
+        var self = this;
+        var s = this._equipesSort;
+        var sorted = this._sortData(data.teams, s.col, s.asc);
+
         var html = '<div class="ranking-table-wrap">';
-        html += '<table class="ranking-table">';
+        html += '<table class="ranking-table" data-ranking-table="equipes">';
         html += '<thead><tr>';
         html += '<th>#</th>';
-        html += '<th>Équipe</th>';
-        html += '<th>Matchs</th>';
-        html += '<th>IP Équipe</th>';
-        html += '<th>IP Titulaires</th>';
+        html += '<th data-sort-col="ipStarters">Équipe' + self._sortIcon('ipStarters', s) + '</th>';
+        html += '<th data-sort-col="matchCount">Matchs' + self._sortIcon('matchCount', s) + '</th>';
+        html += '<th data-sort-col="ipAll">IP Équipe' + self._sortIcon('ipAll', s) + '</th>';
+        html += '<th data-sort-col="ipStarters">IP Titulaires' + self._sortIcon('ipStarters', s) + '</th>';
         html += '</tr></thead>';
         html += '<tbody>';
 
-        data.teams.forEach(function(team, idx) {
+        sorted.forEach(function(team, idx) {
             var teamColor = TEAM_COLORS[team.name] || '#999';
             html += '<tr class="ranking-row" data-team="' + team.name.replace(/"/g, '&quot;') + '">';
             html += '<td>' + (idx + 1) + '</td>';
@@ -4470,25 +4594,80 @@ const RankingView = {
 
     // --- Rendu sous-onglet Joueurs ---
     renderJoueurs(data) {
-        var html = '<div class="ranking-table-wrap">';
-        html += '<table class="ranking-table">';
+        var self = this;
+        var s = this._joueursSort;
+        var isPoste = this._joueursGroupMode === 'poste';
+        var isTous = !isPoste;
+
+        // Toggle Tous/Poste
+        var html = '<div class="ranking-group-toggle-bar">';
+        html += '<div class="display-mode-toggle avg-mode-toggle">';
+        html += '<button class="avg-mode-btn' + (isTous ? ' active' : '') + '" data-ranking-group="tous">Tous</button>';
+        html += '<button class="avg-mode-btn' + (isPoste ? ' active' : '') + '" data-ranking-group="poste">Poste</button>';
+        html += '</div></div>';
+
+        html += '<div class="ranking-table-wrap">';
+        html += '<table class="ranking-table" data-ranking-table="joueurs">';
         html += '<thead><tr>';
         html += '<th>#</th>';
-        html += '<th>Joueur</th>';
-        html += '<th>Équipe</th>';
-        html += '<th>IP</th>';
+        html += '<th data-sort-col="ip">Joueur' + self._sortIcon('ip', s) + '</th>';
+        html += '<th data-sort-col="teamName">Équipe' + self._sortIcon('teamName', s) + '</th>';
+        html += '<th data-sort-col="ip">IP' + self._sortIcon('ip', s) + '</th>';
         html += '</tr></thead>';
         html += '<tbody>';
 
-        data.allPlayerCards.forEach(function(p, idx) {
-            var teamColor = TEAM_COLORS[p.teamName] || '#999';
-            html += '<tr class="ranking-row ranking-player-row" data-player-idx="' + idx + '">';
-            html += '<td>' + (idx + 1) + '</td>';
-            html += '<td><span class="bilan-role-dot" style="background:' + p.roleColor + '"></span> ' + p.name + '</td>';
-            html += '<td class="ranking-matchcount"><span class="ranking-team-badge ranking-team-badge-sm" style="background:' + teamColor + '">' + p.teamName + '</span></td>';
-            html += '<td class="ranking-ip-cell">' + p.ip + '</td>';
-            html += '</tr>';
-        });
+        if (isPoste) {
+            // Grouper par famille (Passeur → Ailier → Centre), tri intra-groupe
+            var FAMILY_ORDER = ['Passeur', 'Ailier', 'Centre'];
+            var FAMILY_LABELS = { 'Passeur': 'Passeurs', 'Ailier': 'Ailiers', 'Centre': 'Centres' };
+            var FAMILY_COLORS = { 'Passeur': '#8b5cf6', 'Ailier': '#3b82f6', 'Centre': '#ef4444' };
+            var roleToFamily = BilanView.ROLE_TO_FAMILY;
+
+            var groups = {};
+            FAMILY_ORDER.forEach(function(f) { groups[f] = []; });
+            data.allPlayerCards.forEach(function(p) {
+                var fam = roleToFamily[p.role] || 'Ailier';
+                if (groups[fam]) groups[fam].push(p);
+            });
+
+            // Trier chaque groupe par IP desc (ou par le sort actif)
+            FAMILY_ORDER.forEach(function(fam) {
+                groups[fam] = self._sortData(groups[fam], s.col, s.asc);
+            });
+
+            FAMILY_ORDER.forEach(function(fam) {
+                if (groups[fam].length === 0) return;
+                // En-tete de categorie (meme style que T.Jeu)
+                html += '<tr class="pt-role-header"><td colspan="4">';
+                html += '<span class="pt-role-header-bar" style="background:' + FAMILY_COLORS[fam] + '"></span>';
+                html += FAMILY_LABELS[fam];
+                html += '</td></tr>';
+
+                var rank = 1; // # repart a 1 pour chaque poste
+                groups[fam].forEach(function(p) {
+                    var teamColor = TEAM_COLORS[p.teamName] || '#999';
+                    html += '<tr class="ranking-row ranking-player-row" data-player-name="' + p.name.replace(/"/g, '&quot;') + '" data-player-team="' + p.teamName.replace(/"/g, '&quot;') + '">';
+                    html += '<td>' + rank + '</td>';
+                    html += '<td><span class="bilan-role-dot" style="background:' + p.roleColor + '"></span> ' + p.name + '</td>';
+                    html += '<td class="ranking-matchcount"><span class="ranking-team-badge ranking-team-badge-sm" style="background:' + teamColor + '">' + p.teamName + '</span></td>';
+                    html += '<td class="ranking-ip-cell">' + p.ip + '</td>';
+                    html += '</tr>';
+                    rank++;
+                });
+            });
+        } else {
+            // Mode Tous : tri global
+            var sorted = this._sortData(data.allPlayerCards, s.col, s.asc);
+            sorted.forEach(function(p, idx) {
+                var teamColor = TEAM_COLORS[p.teamName] || '#999';
+                html += '<tr class="ranking-row ranking-player-row" data-player-name="' + p.name.replace(/"/g, '&quot;') + '" data-player-team="' + p.teamName.replace(/"/g, '&quot;') + '">';
+                html += '<td>' + (idx + 1) + '</td>';
+                html += '<td><span class="bilan-role-dot" style="background:' + p.roleColor + '"></span> ' + p.name + '</td>';
+                html += '<td class="ranking-matchcount"><span class="ranking-team-badge ranking-team-badge-sm" style="background:' + teamColor + '">' + p.teamName + '</span></td>';
+                html += '<td class="ranking-ip-cell">' + p.ip + '</td>';
+                html += '</tr>';
+            });
+        }
 
         html += '</tbody></table></div>';
         return html;
@@ -4534,6 +4713,110 @@ const RankingView = {
 
         html += '</div>';
         return html;
+    },
+
+    // --- Tri ---
+    _sortIcon(col, sortState) {
+        var active = sortState.col === col;
+        var arrow = active ? (sortState.asc ? '\u25B2' : '\u25BC') : '\u25BC';
+        return ' <span class="sort-arrow' + (active ? ' active' : '') + '">' + arrow + '</span>';
+    },
+
+    _sortData(array, col, asc) {
+        var ALPHA_COLS = { name: true, teamName: true };
+        return array.slice().sort(function(a, b) {
+            var va = a[col], vb = b[col];
+            if (ALPHA_COLS[col]) {
+                va = (va || '').toLowerCase();
+                vb = (vb || '').toLowerCase();
+                return asc ? va.localeCompare(vb) : vb.localeCompare(va);
+            }
+            return asc ? (va - vb) : (vb - va);
+        });
+    },
+
+    _rerenderTable(subTab) {
+        var container = document.getElementById('content-ranking');
+        if (!container || !this._cachedData) return;
+
+        if (subTab === 'equipes' || !subTab) {
+            var eqDiv = document.getElementById('rankingEquipes');
+            if (eqDiv) {
+                eqDiv.innerHTML = this.renderEquipes(this._cachedData);
+                this._bindTableEvents(container, 'equipes');
+                this._equalizeBadges(container);
+            }
+        }
+        if (subTab === 'joueurs' || !subTab) {
+            var joDiv = document.getElementById('rankingJoueurs');
+            if (joDiv) {
+                joDiv.innerHTML = this.renderJoueurs(this._cachedData);
+                this._bindTableEvents(container, 'joueurs');
+                this._equalizeBadges(container);
+            }
+        }
+    },
+
+    _bindTableEvents(container, subTab) {
+        var self = this;
+
+        // Sort handlers
+        var tableSelector = 'table[data-ranking-table="' + subTab + '"]';
+        var table = container.querySelector(tableSelector);
+        if (table) {
+            table.querySelectorAll('th[data-sort-col]').forEach(function(th) {
+                th.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    var col = th.dataset.sortCol;
+                    var sortState = (subTab === 'equipes') ? self._equipesSort : self._joueursSort;
+
+                    // Toggle direction si meme colonne, sinon desc par defaut (asc pour alpha)
+                    if (sortState.col === col) {
+                        sortState.asc = !sortState.asc;
+                    } else {
+                        sortState.col = col;
+                        sortState.asc = (col === 'teamName');
+                    }
+                    self._rerenderTable(subTab);
+                });
+            });
+        }
+
+        // Toggle Tous/Poste (joueurs only)
+        if (subTab === 'joueurs') {
+            container.querySelectorAll('#rankingJoueurs [data-ranking-group]').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var mode = btn.dataset.rankingGroup;
+                    if (mode === self._joueursGroupMode) return;
+                    self._joueursGroupMode = mode;
+                    self._rerenderTable('joueurs');
+                });
+            });
+        }
+
+        // Row click handlers
+        if (subTab === 'equipes') {
+            container.querySelectorAll('#rankingEquipes .ranking-row[data-team]').forEach(function(row) {
+                row.addEventListener('click', function() {
+                    var teamName = row.dataset.team;
+                    var teamData = self._cachedData.teams.find(function(t) { return t.name === teamName; });
+                    if (!teamData) return;
+                    RankingTeamModal.open(self.renderTeamModal(teamData), teamName);
+                });
+            });
+        } else {
+            container.querySelectorAll('#rankingJoueurs .ranking-player-row').forEach(function(row) {
+                row.addEventListener('click', function() {
+                    var name = row.dataset.playerName;
+                    var team = row.dataset.playerTeam;
+                    var playerData = self._cachedData.allPlayerCards.find(function(p) {
+                        return p.name === name && p.teamName === team;
+                    });
+                    if (!playerData) return;
+                    RankingTeamModal.open(self.renderPlayerModal(playerData), playerData.name);
+                });
+            });
+        }
     },
 
     _updateSubTabVisibility() {
@@ -4585,28 +4868,10 @@ const RankingView = {
             });
         });
 
-        // Egaliser la largeur des badges équipe (taille du plus large)
+        // Bind sort + row click handlers pour les deux tableaux
+        this._bindTableEvents(container, 'equipes');
+        this._bindTableEvents(container, 'joueurs');
         this._equalizeBadges(container);
-
-        // Clic sur une ligne equipe → ouvrir modal equipe
-        container.querySelectorAll('.ranking-row[data-team]').forEach(function(row) {
-            row.addEventListener('click', function() {
-                var teamName = row.dataset.team;
-                var teamData = self._cachedData.teams.find(function(t) { return t.name === teamName; });
-                if (!teamData) return;
-                RankingTeamModal.open(self.renderTeamModal(teamData), teamName);
-            });
-        });
-
-        // Clic sur une ligne joueur → ouvrir modal joueur
-        container.querySelectorAll('.ranking-player-row').forEach(function(row) {
-            row.addEventListener('click', function() {
-                var idx = parseInt(row.dataset.playerIdx, 10);
-                var playerData = self._cachedData.allPlayerCards[idx];
-                if (!playerData) return;
-                RankingTeamModal.open(self.renderPlayerModal(playerData), playerData.name);
-            });
-        });
     }
 };
 
