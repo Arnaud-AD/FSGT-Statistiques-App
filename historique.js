@@ -117,6 +117,7 @@ const SeasonSelector = {
         MatchStatsView.currentMatch = null;
         YearStatsView._rendered = false;
         SetsPlayedView._rendered = false;
+        RankingView._rendered = false;
         ImpactView._seasonRoster = null; // invalider le cache roster
         ImpactView._seasonDirPerSet = null;
 
@@ -160,9 +161,9 @@ const SeasonSelector = {
         // Masquer/afficher Stats Matchs
         var matchStatsBtn = document.querySelector('.tab-btn[data-tab="matchStats"]');
         if (matchStatsBtn) matchStatsBtn.style.display = isAll ? 'none' : '';
-        // Renommer Stats Année / Stats Années
+        // Renommer Année / Années
         var yearStatsBtn = document.querySelector('.tab-btn[data-tab="yearStats"]');
-        if (yearStatsBtn) yearStatsBtn.textContent = isAll ? 'Stats Années' : 'Stats Année';
+        if (yearStatsBtn) yearStatsBtn.textContent = isAll ? 'Années' : 'Année';
     },
 
     _updateFooter() {
@@ -2752,17 +2753,30 @@ const BilanView = {
 
         // --- Helper : trouver le meilleur joueur sur un axe ---
         // eligibleRoles : tableau optionnel de roles eligibles (ex: ['Passeur','Centre'])
-        function findBestOnAxis(axisKey, eligibleRoles) {
+        // customScoreFn : fonction optionnelle (stats) => score pour remplacer le score d'axe
+        // Seuil : un joueur doit avoir >= 5% du total des actions de la categorie
+        function findBestOnAxis(axisKey, eligibleRoles, customScoreFn) {
+            // Calculer le total d'actions de tous les joueurs pour cet axe
+            var totalActions = 0;
+            players.forEach(function(name) {
+                var d = playerData[name];
+                var tot = d.axes._tots ? d.axes._tots[axisKey] : 0;
+                totalActions += (tot || 0);
+            });
+
             var bestName = null, bestScore = -1;
             players.forEach(function(name) {
                 var d = playerData[name];
                 // Filtrer par role si specifie
                 if (eligibleRoles && eligibleRoles.indexOf(d.role) === -1) return;
-                var score = d.axes[axisKey] || 0;
+                // Score : custom ou axe standard
+                var score = customScoreFn ? customScoreFn(d.stats) : (d.axes[axisKey] || 0);
                 if (score <= 0) return;
                 // Verifier seuil minimum via _tots
                 var tot = d.axes._tots ? d.axes._tots[axisKey] : undefined;
                 if (tot !== undefined && minActions[axisKey] && tot < minActions[axisKey]) return;
+                // Seuil proportionnel : au moins 5% du total des actions de la categorie
+                if (totalActions > 0 && tot !== undefined && tot / totalActions < 0.05) return;
                 if (score > bestScore) {
                     bestScore = score;
                     bestName = name;
@@ -2829,7 +2843,20 @@ const BilanView = {
                 return 'D+ : ' + d.defplus + ' · D- : ' + d.defminus + ' · FD : ' + d.fdef +
                        ' · R+ : ' + rl.relplus + ' · R- : ' + rl.relminus + ' · FR : ' + rl.frel;
             }},
-            { axisKey: 'bloc',      emoji: '🧱', label: 'Meilleur Bloqueur',      statsFn: function(s) {
+            { axisKey: 'bloc',      emoji: '🧱', label: 'Meilleur Bloqueur',
+              // Score custom : meme formule que computeAxisScores mais volume normalise par set joue
+              // Cela recompense la production par set (presence au filet) plutot que le total brut
+              // Un joueur qui bloque 6/set sur 11 sets bat un joueur qui bloque 3.6/set sur 15 sets
+              customScoreFn: function(stats) {
+                var blk = stats.block;
+                if (!blk || blk.tot <= 0) return 0;
+                var setsPlayed = stats._setsPlayed || 1;
+                var effectiveSuccess = (blk.blcplus + blk.blcminus * 0.5) / blk.tot;
+                var perSetTot = blk.tot / setsPlayed;
+                var volBonus = Math.min(perSetTot, 6) * 5;
+                return self.clamp(self.AXIS_FLOOR, 100, Math.round(20 + effectiveSuccess * 50 + volBonus));
+              },
+              statsFn: function(s) {
                 var b = s.block;
                 return 'B+ : ' + b.blcplus + ' (' + self._pct(b.blcplus, b.tot) + ')' +
                        ' · B- : ' + b.blcminus + ' (' + self._pct(b.blcminus, b.tot) + ')' +
@@ -2838,7 +2865,7 @@ const BilanView = {
         ];
 
         distinctions.forEach(function(dist) {
-            var best = findBestOnAxis(dist.axisKey, dist.eligibleRoles);
+            var best = findBestOnAxis(dist.axisKey, dist.eligibleRoles, dist.customScoreFn);
             if (!best) return;
             var d = playerData[best.name];
             var color = self.ROLE_COLORS[d.role] || '#5f6368';
@@ -4218,6 +4245,371 @@ const ImpactView = {
     }
 };
 
+// ==================== TAB 5: RANKING VIEW ====================
+const TEAM_COLORS = {
+    'Jen et ses Saints': '#9b59b6',
+    'Kiki Team': '#3498db',
+    'Red Hot Sucy Pépère': '#e74c3c',
+    'Les Rescapés': '#2ecc71',
+    'Marvels 4': '#f39c12',
+    'RSC Champigny 1': '#1abc9c',
+    'Manu Andy-sport': '#e67e22',
+    'Bières et le loup': '#f1c40f',
+    'Rhinos Féroces': '#95a5a6',
+    'StarPAFF': '#34495e'
+};
+
+const RankingView = {
+    _rendered: false,
+    currentFilter: 'all',
+    currentSubTab: 'equipes',
+    _cachedData: null,
+
+    render() {
+        var container = document.getElementById('content-ranking');
+        if (!container) return;
+        if (this._rendered) return;
+
+        var matches = SeasonSelector.getFilteredMatches();
+        if (matches.length === 0) {
+            container.innerHTML = '<div class="empty-state"><h3 class="empty-state-title">Aucun match</h3>' +
+                '<p class="empty-state-desc">Aucun match trouvé pour cette saison.</p></div>';
+            this._rendered = true;
+            return;
+        }
+
+        var filtered = this.applyFilter(matches);
+        this._cachedData = this._computeRankingData(filtered);
+
+        var html = '';
+        html += this.renderSubTabs();
+        html += this.renderFilters();
+        html += '<div class="ranking-subtab-content" id="rankingEquipes">' + this.renderEquipes(this._cachedData) + '</div>';
+        html += '<div class="ranking-subtab-content" id="rankingJoueurs" style="display:none">' + this.renderJoueurs(this._cachedData) + '</div>';
+        container.innerHTML = html;
+
+        this._updateSubTabVisibility();
+        this.bindEvents(container);
+        this._rendered = true;
+    },
+
+    applyFilter(matches) {
+        if (this.currentFilter === 'all') return matches;
+        return matches.filter(function(m) { return m.type === this.currentFilter; }.bind(this));
+    },
+
+    renderSubTabs() {
+        var self = this;
+        var html = '<div class="segmented-tabs ranking-sub-tabs">';
+        [{ key: 'equipes', label: 'Équipes' }, { key: 'joueurs', label: 'Joueurs' }].forEach(function(t) {
+            html += '<button class="seg-tab ranking-sub-btn' + (self.currentSubTab === t.key ? ' active' : '') + '" data-subtab="' + t.key + '">' + t.label + '</button>';
+        });
+        html += '</div>';
+        return html;
+    },
+
+    renderFilters() {
+        var self = this;
+        var html = '<div class="segmented-tabs year-filters ranking-filters">';
+        [{ key: 'all', label: 'Tous' }, { key: 'championnat', label: 'Championnat' }, { key: 'ginette', label: 'Ginette' }].forEach(function(f) {
+            html += '<button class="seg-tab ranking-filter-btn' + (self.currentFilter === f.key ? ' active' : '') + '" data-filter="' + f.key + '">' + f.label + '</button>';
+        });
+        html += '</div>';
+        return html;
+    },
+
+    // --- Calcul central des donnees ---
+    _computeRankingData(matches) {
+        var self = this;
+        var teams = [];
+        var allPlayerCards = [];
+
+        // 1. Jen et ses Saints (home)
+        var jenData = self._computeTeamData(matches, 'home', 'Jen et ses Saints');
+        teams.push(jenData);
+        jenData.allPlayers.forEach(function(p) {
+            allPlayerCards.push({
+                name: p.name, teamName: 'Jen et ses Saints',
+                role: p.role, roleColor: p.roleColor,
+                scores: p.scores, ip: p.ip
+            });
+        });
+
+        // 2. Grouper les matchs par adversaire
+        var opponentGroups = {};
+        matches.forEach(function(m) {
+            var opp = m.opponent || 'Adversaire';
+            if (!opponentGroups[opp]) opponentGroups[opp] = [];
+            opponentGroups[opp].push(m);
+        });
+
+        Object.keys(opponentGroups).forEach(function(oppName) {
+            var oppMatches = opponentGroups[oppName];
+            var oppData = self._computeTeamData(oppMatches, 'away', oppName);
+            teams.push(oppData);
+            oppData.allPlayers.forEach(function(p) {
+                allPlayerCards.push({
+                    name: p.name, teamName: oppName,
+                    role: p.role, roleColor: p.roleColor,
+                    scores: p.scores, ip: p.ip
+                });
+            });
+        });
+
+        // Tri par ipStarters decroissant
+        teams.sort(function(a, b) { return b.ipStarters - a.ipStarters; });
+        // Tri joueurs par IP decroissant
+        allPlayerCards.sort(function(a, b) { return b.ip - a.ip; });
+
+        return { teams: teams, allPlayerCards: allPlayerCards };
+    },
+
+    _computeTeamData(matches, teamKey, teamName) {
+        var allSets = [];
+        matches.forEach(function(m) {
+            (m.sets || []).forEach(function(s) {
+                if (s.completed) allSets.push(s);
+            });
+        });
+
+        if (allSets.length === 0) {
+            return { name: teamName, isHome: teamKey === 'home', matchCount: matches.length,
+                     allPlayers: [], starters: [], ipAll: 0, ipStarters: 0 };
+        }
+
+        var playerTotals = StatsAggregator.aggregateStats(allSets, teamKey);
+        var mergedRoles = BilanView.getPlayerRolesYear(matches, teamKey);
+
+        // Detecter les titulaires (initialLineup)
+        var initialKey = (teamKey === 'away') ? 'initialAwayLineup' : 'initialHomeLineup';
+        var fallbackKey = (teamKey === 'away') ? 'awayLineup' : 'homeLineup';
+        var starterNames = {};
+        matches.forEach(function(m) {
+            (m.sets || []).forEach(function(set) {
+                if (!set.completed) return;
+                var lineup = set[initialKey] || set[fallbackKey];
+                if (lineup) {
+                    Object.values(lineup).forEach(function(name) {
+                        if (name) starterNames[name] = true;
+                    });
+                }
+            });
+        });
+
+        var allPlayers = [];
+        var starters = [];
+
+        Object.keys(playerTotals).forEach(function(name) {
+            var roleInfo = mergedRoles[name];
+            if (!roleInfo) return;
+            var stats = playerTotals[name];
+
+            // Verifier que le joueur a au moins une action
+            var hasStats = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'].some(function(cat) {
+                return stats[cat] && stats[cat].tot > 0;
+            });
+            if (!hasStats) return;
+
+            var role = roleInfo.primaryRole;
+            var scores = BilanView.computeAxisScores(stats, role);
+            var ip = BilanView.computeIP(scores, role);
+            var roleColor = BilanView.ROLE_COLORS[role] || '#5f6368';
+
+            var playerObj = { name: name, role: role, roleColor: roleColor, stats: stats, scores: scores, ip: ip };
+            allPlayers.push(playerObj);
+            if (starterNames[name]) {
+                starters.push(playerObj);
+            }
+        });
+
+        var ipAll = allPlayers.length > 0
+            ? Math.round(allPlayers.reduce(function(s, p) { return s + p.ip; }, 0) / allPlayers.length)
+            : 0;
+        var ipStarters = starters.length > 0
+            ? Math.round(starters.reduce(function(s, p) { return s + p.ip; }, 0) / starters.length)
+            : 0;
+
+        return {
+            name: teamName,
+            isHome: teamKey === 'home',
+            matchCount: matches.length,
+            allPlayers: allPlayers,
+            starters: starters,
+            ipAll: ipAll,
+            ipStarters: ipStarters
+        };
+    },
+
+    // --- Rendu sous-onglet Equipes ---
+    renderEquipes(data) {
+        var html = '<div class="ranking-table-wrap">';
+        html += '<table class="ranking-table">';
+        html += '<thead><tr>';
+        html += '<th>#</th>';
+        html += '<th>Équipe</th>';
+        html += '<th>Matchs</th>';
+        html += '<th>IP Équipe</th>';
+        html += '<th>IP Titulaires</th>';
+        html += '</tr></thead>';
+        html += '<tbody>';
+
+        data.teams.forEach(function(team, idx) {
+            var teamColor = TEAM_COLORS[team.name] || '#999';
+            html += '<tr class="ranking-row" data-team="' + team.name.replace(/"/g, '&quot;') + '">';
+            html += '<td>' + (idx + 1) + '</td>';
+            html += '<td class="ranking-team-name"><span class="ranking-team-badge" style="background:' + teamColor + '">' + team.name + '</span></td>';
+            html += '<td class="ranking-matchcount">' + team.matchCount + '</td>';
+            html += '<td class="ranking-ip-cell">' + team.ipAll + '</td>';
+            html += '<td class="ranking-ip-cell">' + team.ipStarters + '</td>';
+            html += '</tr>';
+        });
+
+        html += '</tbody></table></div>';
+        return html;
+    },
+
+    // --- Rendu sous-onglet Joueurs ---
+    renderJoueurs(data) {
+        var html = '<div class="ranking-table-wrap">';
+        html += '<table class="ranking-table">';
+        html += '<thead><tr>';
+        html += '<th>#</th>';
+        html += '<th>Joueur</th>';
+        html += '<th>Équipe</th>';
+        html += '<th>IP</th>';
+        html += '</tr></thead>';
+        html += '<tbody>';
+
+        data.allPlayerCards.forEach(function(p, idx) {
+            var teamColor = TEAM_COLORS[p.teamName] || '#999';
+            html += '<tr class="ranking-row ranking-player-row" data-player-idx="' + idx + '">';
+            html += '<td>' + (idx + 1) + '</td>';
+            html += '<td><span class="bilan-role-dot" style="background:' + p.roleColor + '"></span> ' + p.name + '</td>';
+            html += '<td class="ranking-matchcount"><span class="ranking-team-badge ranking-team-badge-sm" style="background:' + teamColor + '">' + p.teamName + '</span></td>';
+            html += '<td class="ranking-ip-cell">' + p.ip + '</td>';
+            html += '</tr>';
+        });
+
+        html += '</tbody></table></div>';
+        return html;
+    },
+
+    // --- Rendu modal joueur (1 spider chart) ---
+    renderPlayerModal(playerData) {
+        var html = '<div class="ranking-team-info">';
+        html += playerData.teamName + ' · ' + playerData.role;
+        html += '</div>';
+        html += '<div style="max-width:300px;margin:0 auto">';
+        html += BilanView.renderSpiderChart(
+            playerData.name, playerData.role, playerData.scores, playerData.ip, playerData.roleColor,
+            BilanView.SPIDER_AXES, false, null, null
+        );
+        html += '</div>';
+        return html;
+    },
+
+    // --- Rendu modal equipe (4 spider charts) ---
+    renderTeamModal(teamData) {
+        var SLOT_ORDER = ['Passeur', 'R4', 'Pointu', 'Centre'];
+        var sorted = teamData.starters.slice().sort(function(a, b) {
+            return SLOT_ORDER.indexOf(a.role) - SLOT_ORDER.indexOf(b.role);
+        });
+
+        var html = '<div class="ranking-team-info">';
+        html += teamData.matchCount + ' match' + (teamData.matchCount > 1 ? 's' : '') +
+            ' · IP Équipe : ' + teamData.ipAll + ' · IP Titulaires : ' + teamData.ipStarters;
+        html += '</div>';
+        html += '<div class="ranking-modal-grid">';
+
+        sorted.forEach(function(p) {
+            html += BilanView.renderSpiderChart(
+                p.name, p.role, p.scores, p.ip, p.roleColor,
+                BilanView.SPIDER_AXES, !teamData.isHome, null, null
+            );
+        });
+        // Remplir les cases vides si moins de 4 titulaires
+        for (var i = sorted.length; i < 4; i++) {
+            html += '<div class="bilan-player-card bilan-player-empty" style="min-height:160px"></div>';
+        }
+
+        html += '</div>';
+        return html;
+    },
+
+    _updateSubTabVisibility() {
+        var eq = document.getElementById('rankingEquipes');
+        var jo = document.getElementById('rankingJoueurs');
+        if (eq) eq.style.display = this.currentSubTab === 'equipes' ? '' : 'none';
+        if (jo) jo.style.display = this.currentSubTab === 'joueurs' ? '' : 'none';
+    },
+
+    _equalizeBadges(container) {
+        // Pour chaque groupe visible, trouver le badge le plus large et appliquer à tous
+        ['rankingEquipes', 'rankingJoueurs'].forEach(function(id) {
+            var section = container.querySelector('#' + id);
+            if (!section || section.style.display === 'none') return;
+            var badges = section.querySelectorAll('.ranking-team-badge');
+            if (badges.length === 0) return;
+            // Reset pour mesurer la taille naturelle
+            badges.forEach(function(b) { b.style.width = ''; });
+            var maxW = 0;
+            badges.forEach(function(b) { if (b.offsetWidth > maxW) maxW = b.offsetWidth; });
+            badges.forEach(function(b) { b.style.width = maxW + 'px'; });
+        });
+    },
+
+    bindEvents(container) {
+        var self = this;
+
+        // Sous-onglets Equipes / Joueurs
+        container.querySelectorAll('.ranking-sub-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                self.currentSubTab = btn.dataset.subtab;
+                container.querySelectorAll('.ranking-sub-btn').forEach(function(b) {
+                    b.classList.toggle('active', b.dataset.subtab === self.currentSubTab);
+                });
+                self._updateSubTabVisibility();
+                self._equalizeBadges(container);
+            });
+        });
+
+        // Filtres Tous/Championnat/Ginette
+        container.querySelectorAll('.ranking-filter-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                self.currentFilter = btn.dataset.filter;
+                container.querySelectorAll('.ranking-filter-btn').forEach(function(b) {
+                    b.classList.toggle('active', b.dataset.filter === self.currentFilter);
+                });
+                self._rendered = false;
+                self.render();
+            });
+        });
+
+        // Egaliser la largeur des badges équipe (taille du plus large)
+        this._equalizeBadges(container);
+
+        // Clic sur une ligne equipe → ouvrir modal equipe
+        container.querySelectorAll('.ranking-row[data-team]').forEach(function(row) {
+            row.addEventListener('click', function() {
+                var teamName = row.dataset.team;
+                var teamData = self._cachedData.teams.find(function(t) { return t.name === teamName; });
+                if (!teamData) return;
+                RankingTeamModal.open(self.renderTeamModal(teamData), teamName);
+            });
+        });
+
+        // Clic sur une ligne joueur → ouvrir modal joueur
+        container.querySelectorAll('.ranking-player-row').forEach(function(row) {
+            row.addEventListener('click', function() {
+                var idx = parseInt(row.dataset.playerIdx, 10);
+                var playerData = self._cachedData.allPlayerCards[idx];
+                if (!playerData) return;
+                RankingTeamModal.open(self.renderPlayerModal(playerData), playerData.name);
+            });
+        });
+    }
+};
+
 // ==================== TAB NAVIGATION ====================
 const TabNav = {
     currentTab: 'yearStats',
@@ -4236,6 +4628,15 @@ const TabNav = {
         document.querySelectorAll('.main-tabs .tab-btn').forEach(function(btn) {
             btn.classList.toggle('active', btn.dataset.tab === tab);
         });
+        // Auto-scroll l'onglet actif au centre (après layout)
+        requestAnimationFrame(function() {
+            var tabsContainer = document.querySelector('.main-tabs');
+            var activeBtn = tabsContainer && tabsContainer.querySelector('.tab-btn.active');
+            if (activeBtn && tabsContainer) {
+                var scrollLeft = activeBtn.offsetLeft - (tabsContainer.offsetWidth - activeBtn.offsetWidth) / 2;
+                tabsContainer.scrollTo({left: Math.max(0, scrollLeft), behavior: 'smooth'});
+            }
+        });
 
         document.querySelectorAll('.tab-content').forEach(function(content) {
             content.classList.toggle('active', content.id === 'content-' + tab);
@@ -4247,6 +4648,7 @@ const TabNav = {
             case 'yearStats': YearStatsView.render(); break;
             case 'setsStats': SetsPlayedView.render(); break;
             case 'visualStats': break; // placeholder
+            case 'ranking': RankingView.render(); break;
         }
     }
 };
@@ -6366,6 +6768,40 @@ var DistinctionsModal = {
     }
 };
 
+// ==================== RANKING TEAM MODAL ====================
+var RankingTeamModal = {
+    open(contentHtml, title) {
+        var modal = document.getElementById('rankingTeamModal');
+        if (!modal) return;
+        document.getElementById('rankingTeamModalTitle').textContent = title || 'Équipe';
+        document.getElementById('rankingTeamModalBody').innerHTML = contentHtml;
+        modal.style.display = 'flex';
+    },
+
+    close() {
+        var modal = document.getElementById('rankingTeamModal');
+        if (modal) modal.style.display = 'none';
+    },
+
+    init() {
+        var modal = document.getElementById('rankingTeamModal');
+        if (!modal) return;
+
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) RankingTeamModal.close();
+        });
+
+        var closeBtn = document.getElementById('rankingTeamModalClose');
+        if (closeBtn) closeBtn.addEventListener('click', function() { RankingTeamModal.close(); });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.style.display !== 'none') {
+                RankingTeamModal.close();
+            }
+        });
+    }
+};
+
 // ==================== SECTIONS OUVERTES (tracking) ====================
 const OpenSections = {
     _open: new Set(),
@@ -6393,6 +6829,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Init modal distinctions
     DistinctionsModal.init();
+    RankingTeamModal.init();
 
     // Init season selector + tabs
     SeasonSelector.init();
@@ -6408,6 +6845,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         MatchStatsView._rendered = false;
         YearStatsView._rendered = false;
         SetsPlayedView._rendered = false;
+        RankingView._rendered = false;
         TabNav.switchTo(TabNav.currentTab);
     }
 

@@ -215,6 +215,13 @@ body {
     margin-bottom: 12px;
 }
 
+.main-tabs .seg-tab {
+    flex: 1 0 auto;
+    padding: 8px 10px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
 .tab-btn.active {
     background: var(--accent-blue);
     color: white;
@@ -2034,6 +2041,230 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
 .impact-table .impact-score-pos { color: #7c3aed; font-weight: 700; }
 .impact-table .impact-score-neg { color: #a78bfa; font-weight: 600; }
 
+/* ==================== RANKING TAB ==================== */
+
+/* Sous-onglets Equipes / Joueurs */
+.ranking-sub-tabs {
+    margin: 8px 16px;
+}
+
+.ranking-sub-btn.active {
+    background: var(--accent-blue);
+    color: white;
+    font-weight: 700;
+}
+
+/* Filtres Tous/Champ/Ginette */
+.ranking-filters {
+    margin: 0 16px 12px;
+}
+
+.ranking-filter-btn.active {
+    background: var(--accent-blue);
+    color: white;
+    font-weight: 700;
+}
+
+/* Tableau Equipes */
+.ranking-table-wrap {
+    padding: 0 12px;
+}
+
+.ranking-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 13px;
+}
+
+.ranking-table th {
+    text-align: left;
+    padding: 8px 6px;
+    font-weight: 600;
+    color: #5f6368;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.ranking-table th:first-child {
+    width: 28px;
+    text-align: center;
+}
+
+.ranking-table td {
+    padding: 10px 6px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.ranking-table td:first-child {
+    text-align: center;
+    color: #9aa0a6;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.ranking-row {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.ranking-row:hover {
+    background: #f1f3f4;
+}
+
+.ranking-row:active {
+    background: #e8eaed;
+}
+
+/* Badge équipe coloré (style rectangulaire comme bouton "Tous") */
+.ranking-team-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 7px;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.ranking-team-badge-sm {
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 500;
+}
+
+.ranking-table .bilan-role-dot {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+.ranking-row-home:hover {
+    background: #d2e3fc;
+}
+
+.ranking-team-name {
+    font-weight: 500;
+}
+
+.ranking-ip-cell {
+    font-weight: 700;
+    font-family: 'Google Sans', sans-serif;
+}
+
+.ranking-matchcount {
+    color: #9aa0a6;
+    font-size: 12px;
+}
+
+/* Grille joueurs (mobile: 2 colonnes) */
+.ranking-players-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 0 8px;
+}
+
+/* Carte joueur (enrichie avec nom equipe) */
+.ranking-player-team {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 10px;
+    color: #9aa0a6;
+    text-align: center;
+    margin-top: -2px;
+    padding-bottom: 4px;
+}
+
+/* Ranking position badge dans la carte joueur */
+.ranking-player-rank {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    color: #9aa0a6;
+    background: #f1f3f4;
+    border-radius: 6px;
+    padding: 1px 5px;
+    line-height: 1.4;
+}
+
+/* Modal Ranking (plus large pour 2x2 spider charts) */
+.ranking-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.ranking-modal {
+    background: #fff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    animation: distinctions-modal-in 0.2s ease-out;
+}
+
+.ranking-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #5f6368;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.ranking-modal-close:hover {
+    background: #f1f3f4;
+}
+
+.ranking-modal-title {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #202124;
+    padding: 16px 16px 8px;
+}
+
+.ranking-modal-body {
+    padding: 0 12px 16px;
+}
+
+.ranking-team-info {
+    text-align: center;
+    padding: 0 8px 12px;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 13px;
+    color: #5f6368;
+}
+
+/* Grille spider charts dans la modal (2x2) */
+.ranking-modal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
 /* ==================== RESPONSIVE: DESKTOP (>=1024px) ==================== */
 @media (min-width: 1024px) {
     .app-container {
@@ -2086,5 +2317,20 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
 
     .year-top-row > * {
         flex: 1;
+    }
+
+    /* Ranking: 3 colonnes sur desktop */
+    .ranking-players-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        padding: 0 16px;
+    }
+
+    .ranking-table {
+        font-size: 14px;
+    }
+
+    .ranking-table-wrap {
+        padding: 0 16px;
     }
 }

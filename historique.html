@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Historique - Jen et ses Saints</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="historique.css">
+    <link rel="stylesheet" href="historique.css?v=22.02">
 </head>
 <body>
     <div class="app-container">
@@ -33,10 +33,11 @@
 
         <!-- Onglets principaux -->
         <nav class="segmented-tabs main-tabs">
-            <button class="seg-tab tab-btn" data-tab="matchStats">Stats Matchs</button>
-            <button class="seg-tab tab-btn active" data-tab="yearStats">Stats Année</button>
-            <button class="seg-tab tab-btn" data-tab="setsStats">Temps de jeu</button>
-            <button class="seg-tab tab-btn" data-tab="visualStats">Stats visuelles</button>
+            <button class="seg-tab tab-btn" data-tab="matchStats">Matchs</button>
+            <button class="seg-tab tab-btn active" data-tab="yearStats">Année</button>
+            <button class="seg-tab tab-btn" data-tab="setsStats">T.Jeu</button>
+            <button class="seg-tab tab-btn" data-tab="visualStats">Data</button>
+            <button class="seg-tab tab-btn" data-tab="ranking">Ranking</button>
         </nav>
 
         <!-- ==================== TAB 1 : Stats Matchs ==================== -->
@@ -194,6 +195,11 @@
             </div>
         </main>
 
+        <!-- ==================== TAB 5 : Ranking ==================== -->
+        <main class="tab-content" id="content-ranking">
+            <!-- Contenu genere dynamiquement par RankingView.render() -->
+        </main>
+
         <!-- Footer -->
         <footer class="footer">
             FSGT 4×4 • Saison 2025-2026
@@ -217,7 +223,16 @@
         </div>
     </div>
 
+    <!-- Modal Ranking Team -->
+    <div class="ranking-modal-overlay" id="rankingTeamModal" style="display:none">
+        <div class="ranking-modal">
+            <button class="ranking-modal-close" id="rankingTeamModalClose">&times;</button>
+            <div class="ranking-modal-title" id="rankingTeamModalTitle"></div>
+            <div class="ranking-modal-body" id="rankingTeamModalBody"></div>
+        </div>
+    </div>
+
     <script src="storage.js?v=20.287"></script>
-    <script src="historique.js?v=20.287"></script>
+    <script src="historique.js?v=22.02"></script>
 </body>
 </html>
