@@ -2586,7 +2586,7 @@ const PassAttackAnalyzer = {
                 html += '<td><span class="pa-tag ' + catTags[cat] + '">' + catLabels[cat] + '</span></td>';
 
                 // Base
-                var baseHighlight = cat === 'aplus' ? ' pa-positive' : (cat === 'fabp' && basePct >= 15 ? ' pa-negative' : '');
+                var baseHighlight = cat === 'aplus' ? ' pa-positive' : (cat === 'fabp' ? ' pa-negative' : '');
                 html += '<td class="pa-funnel-base"><span class="' + baseHighlight + '"><strong>' + basePct + '%</strong></span>';
                 html += '<br><span class="pa-stat-detail">' + base + '</span></td>';
 
