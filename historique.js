@@ -1867,7 +1867,7 @@ const PassAttackAnalyzer = {
         if (data.all.length === 0) return '';
 
         var html = '<div class="hist-section pa-section collapsed">';
-        html += '<div class="hist-section-title">Relation Passe / Attaque</div>';
+        html += '<div class="hist-section-title" style="color:#7c3aed">Relation Passe / Attaque</div>';
         html += '<div id="pa-content-match">';
         html += this._renderContent(data, match, team, 'match');
         html += '</div>';
@@ -1887,7 +1887,7 @@ const PassAttackAnalyzer = {
         if (allSequences.length === 0) return '';
 
         var html = '<div class="hist-section pa-section collapsed">';
-        html += '<div class="hist-section-title">Relation Passe / Attaque</div>';
+        html += '<div class="hist-section-title" style="color:#7c3aed">Relation Passe / Attaque</div>';
         html += '<div id="pa-content-year">';
         html += this._renderContent({ all: allSequences, bySet: null }, null, team, 'year');
         html += '</div>';
