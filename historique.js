@@ -2535,14 +2535,27 @@ const PassAttackAnalyzer = {
         if (attackers.length === 0) return '';
 
         var html = '';
-        var cats = ['aplus', 'aminus', 'bp', 'fa'];
-        var catLabels = { aplus: 'A+', aminus: 'A\u2212', bp: 'BP', fa: 'FA' };
-        var catTags = { aplus: 'pa-tag-aplus', aminus: 'pa-tag-aminus', bp: 'pa-tag-bp', fa: 'pa-tag-fa' };
+        // 3 lignes : A+, A-, FA(BP) — BP et FA fusionnés pour échantillon significatif
+        var cats = ['aplus', 'aminus', 'fabp'];
+        var catLabels = { aplus: 'A+', aminus: 'A\u2212', fabp: 'FA(BP)' };
+        var catTags = { aplus: 'pa-tag-aplus', aminus: 'pa-tag-aminus', fabp: 'pa-tag-fa' };
 
         attackers.forEach(function(name) {
             var d = funnelData[name];
+            // Fusionner BP + FA en une seule catégorie
+            var mergedBase = d.base.bp + d.base.fa;
+            var mergedSit = {
+                total: d.situations.bp.total + d.situations.fa.total,
+                rf: d.situations.bp.rf + d.situations.fa.rf,
+                rfAplus: d.situations.bp.rfAplus + d.situations.fa.rfAplus,
+                sw: d.situations.bp.sw + d.situations.fa.sw,
+                swAplus: d.situations.bp.swAplus + d.situations.fa.swAplus
+            };
+            var mergedData = { base: { aplus: d.base.aplus, aminus: d.base.aminus, fabp: mergedBase },
+                situations: { aplus: d.situations.aplus, aminus: d.situations.aminus, fabp: mergedSit } };
+
             var totalSit = 0;
-            cats.forEach(function(c) { totalSit += d.situations[c].total; });
+            cats.forEach(function(c) { totalSit += mergedData.situations[c].total; });
 
             html += '<div class="pa-funnel-card">';
             html += '<div class="pa-funnel-header">';
@@ -2565,15 +2578,15 @@ const PassAttackAnalyzer = {
             html += '</thead><tbody>';
 
             cats.forEach(function(cat) {
-                var base = d.base[cat];
+                var base = mergedData.base[cat];
                 var basePct = d.totalAtt > 0 ? Math.round(base / d.totalAtt * 100) : 0;
-                var s = d.situations[cat];
+                var s = mergedData.situations[cat];
 
                 html += '<tr>';
                 html += '<td><span class="pa-tag ' + catTags[cat] + '">' + catLabels[cat] + '</span></td>';
 
                 // Base
-                var baseHighlight = cat === 'aplus' ? ' pa-positive' : (cat === 'fa' && basePct >= 15 ? ' pa-negative' : '');
+                var baseHighlight = cat === 'aplus' ? ' pa-positive' : (cat === 'fabp' && basePct >= 15 ? ' pa-negative' : '');
                 html += '<td class="pa-funnel-base"><span class="' + baseHighlight + '"><strong>' + basePct + '%</strong></span>';
                 html += '<br><span class="pa-stat-detail">' + base + '</span></td>';
 
