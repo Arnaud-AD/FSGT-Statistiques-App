@@ -289,6 +289,20 @@ const StatsRepair = {
                 }
             }
         }
+        // Detecter ventilation passe manquante (match pre-V19.2)
+        var teams = ['home', 'away'];
+        for (var ti = 0; ti < teams.length; ti++) {
+            var teamStats = stats[teams[ti]];
+            if (!teamStats) continue;
+            var names = Object.keys(teamStats);
+            for (var ni = 0; ni < names.length; ni++) {
+                var p = teamStats[names[ni]] && teamStats[names[ni]].pass;
+                if (p && p.tot > 0) {
+                    var ventilTot = (p.passeur ? p.passeur.tot : 0) + (p.autre ? p.autre.tot : 0);
+                    if (ventilTot === 0) return true;
+                }
+            }
+        }
         return false;
     },
 
@@ -352,18 +366,33 @@ const StatsRepair = {
             });
         });
 
-        // 4. Traiter chaque rally
+        // 4. Traiter chaque rally (passer set pour ventilation passe)
         set.points.forEach(function(point) {
             if (!point.rally) return;
-            self._processRally(point.rally, repaired);
+            self._processRally(point.rally, repaired, set);
         });
 
         // 5. Restaurer les stats passe originales (avec P4/P3/P2/P1 evaluees par grille)
+        // SAUF si la ventilation originale est absente (match pre-V19.2)
         ['home', 'away'].forEach(function(team) {
             Object.keys(repaired[team]).forEach(function(name) {
                 var key = team + ':' + name;
                 if (originalPassStats[key]) {
-                    repaired[team][name].pass = originalPassStats[key];
+                    var orig = originalPassStats[key];
+                    var ventilOK = orig.tot === 0 ||
+                        ((orig.passeur ? orig.passeur.tot : 0) + (orig.autre ? orig.autre.tot : 0)) > 0;
+                    if (ventilOK) {
+                        // Ventilation originale coherente — restaurer (P4/P3/P2/P1 calibrees)
+                        repaired[team][name].pass = orig;
+                    } else {
+                        // Ventilation absente — garder le recalcul (tot+fp+ventilation)
+                        // mais copier les P4/P3/P2/P1 de l'original si disponibles
+                        var rec = repaired[team][name].pass;
+                        if (orig.p4) rec.p4 = orig.p4;
+                        if (orig.p3) rec.p3 = orig.p3;
+                        if (orig.p2) rec.p2 = orig.p2;
+                        if (orig.p1) rec.p1 = orig.p1;
+                    }
                 }
             });
         });
@@ -373,6 +402,57 @@ const StatsRepair = {
     },
 
     // --- Helpers ---
+
+    // Determine le role d'un joueur dans un set (depuis le lineup actuel ou initial)
+    _getPlayerRole(player, team, set) {
+        if (!set || !player) return null;
+        var lineupKey = team === 'home' ? 'homeLineup' : 'awayLineup';
+        var initialKey = team === 'home' ? 'initialHomeLineup' : 'initialAwayLineup';
+        // Chercher dans le lineup actuel puis initial
+        var lineups = [set[lineupKey], set[initialKey]];
+        for (var li = 0; li < lineups.length; li++) {
+            var lu = lineups[li];
+            if (!lu) continue;
+            var positions = Object.keys(lu);
+            for (var pi = 0; pi < positions.length; pi++) {
+                if (lu[positions[pi]] === player) {
+                    // Position → role via POSITION_ROLES
+                    var posRoles = team === 'home'
+                        ? { 1: 'Passeur', 2: 'R4', 3: 'Centre', 4: 'Pointu' }
+                        : { 4: 'Passeur', 1: 'R4', 2: 'Centre', 3: 'Pointu' };
+                    return posRoles[positions[pi]] || null;
+                }
+            }
+        }
+        return null;
+    },
+
+    // Port simplifie de getPassContext pour la reparation
+    _getPassContextForRepair(rally, passIndex, passerRole) {
+        var isPasseur = (passerRole === 'Passeur');
+        var playerType = isPasseur ? 'Passeur' : 'Autre';
+        var passAction = rally[passIndex];
+        var team = passAction.team;
+        // Chercher la derniere reception ou defense de la meme equipe avant la passe
+        for (var i = passIndex - 1; i >= 0; i--) {
+            var a = rally[i];
+            if (a.team !== team) continue;
+            if (a.type === 'reception') {
+                var score = a.quality ? (typeof a.quality.score === 'number' ? a.quality.score : 2) : 2;
+                if (isPasseur) {
+                    return { playerType: playerType, context: score === 4 ? 'confort' : 'contraint' };
+                } else {
+                    return { playerType: playerType, context: score >= 3 ? 'transition' : 'contraint' };
+                }
+            }
+            if (a.type === 'defense') {
+                var defQ = a.defenseQuality || 'negative';
+                return { playerType: playerType, context: defQ === 'positive' ? 'contraint' : 'transition' };
+            }
+        }
+        return { playerType: playerType, context: 'transition' };
+    },
+
     _recQualityToNote(quality) {
         if (!quality || !quality.label) return null;
         switch (quality.label) {
@@ -428,7 +508,7 @@ const StatsRepair = {
     },
 
     // --- Traitement d'un rally complet ---
-    _processRally(rally, setStats) {
+    _processRally(rally, setStats, set) {
         if (!rally || rally.length === 0) return;
         var self = this;
 
@@ -528,23 +608,43 @@ const StatsRepair = {
                         break;
                     }
 
-                    // Passe normale — compter tot + FP (qualite sans grille impossible)
+                    // Passe normale — compter tot + FP + ventilation passeur/autre
+                    var isFP = false;
                     if (action.isDirectReturn) {
                         if (!action.isDirectReturnWinner) {
                             if (self._isDirectReturnExploited(rally, i, action.team)) {
                                 stats.pass.tot++;
                                 stats.pass.fp++;
+                                isFP = true;
+                            } else {
+                                break;
                             }
+                        } else {
+                            break;
                         }
-                        break;
-                    }
-                    if (!action.endPos || action.endPos.courtSide === 'net') {
+                    } else if (!action.endPos || action.endPos.courtSide === 'net') {
                         stats.pass.tot++;
                         stats.pass.fp++;
-                        break;
+                        isFP = true;
+                    } else {
+                        // Passe normale valide — tot seulement (qualite P4/P3/P2/P1 non evaluable sans grille)
+                        stats.pass.tot++;
                     }
-                    // Passe normale valide — tot seulement (qualite P4/P3/P2/P1 non evaluable sans grille)
-                    stats.pass.tot++;
+                    // Ventilation passeur/autre si set disponible
+                    if (set) {
+                        var role = action.role || self._getPlayerRole(player, team, set);
+                        var ctx = self._getPassContextForRepair(rally, i, role);
+                        var bucket = ctx.playerType === 'Passeur' ? stats.pass.passeur : stats.pass.autre;
+                        if (bucket) {
+                            bucket.tot++;
+                            if (isFP) bucket.fp++;
+                            var ctxBucket = bucket[ctx.context];
+                            if (ctxBucket) {
+                                ctxBucket.tot++;
+                                if (isFP) ctxBucket.fp++;
+                            }
+                        }
+                    }
                     break;
 
                 case 'attack':
@@ -1241,6 +1341,1110 @@ const PlusMinusCalculator = {
         });
 
         return combined;
+    }
+};
+
+// ==================== RELATION PASSE/ATTAQUE (V23) ====================
+const PassAttackAnalyzer = {
+
+    // Couleurs des zones d'attaque (2 zones en 4v4 : pas de centre)
+    ZONE_COLORS: { 'R4': '#3b82f6', 'Pointu': '#10b981' },
+
+    // Etat du toggle contexte (Recep / Def / Tot)
+    _contextFilter: 'all', // 'reception' | 'defense' | 'all'
+
+    // --- Helpers portes depuis match-live-helpers.js ---
+
+    _getCourtSide(team, cameraSide) {
+        if (cameraSide === 'home') {
+            return team === 'home' ? 'bottom' : 'top';
+        } else {
+            return team === 'home' ? 'top' : 'bottom';
+        }
+    },
+
+    _getPassZone(endPos, team, cameraSide) {
+        if (!endPos || endPos.x === undefined) return null;
+        var courtSide = this._getCourtSide(team, cameraSide);
+        var x = endPos.x;
+        // 2 zones seulement en 4v4 (pas d'attaque centrale)
+        if (courtSide === 'bottom') {
+            return x < 50 ? 'R4' : 'Pointu';
+        } else {
+            return x < 50 ? 'Pointu' : 'R4';
+        }
+    },
+
+    // 3 zones pour le renversement : R4 (40%) | Centre (20%) | Pointu (40%)
+    // Le centre est une zone neutre = passe classique
+    _getReversalZone(endPos, team, cameraSide) {
+        if (!endPos || endPos.x === undefined) return null;
+        var courtSide = this._getCourtSide(team, cameraSide);
+        var x = endPos.x;
+        if (courtSide === 'bottom') {
+            if (x < 40) return 'R4';
+            if (x > 60) return 'Pointu';
+            return 'Centre';
+        } else {
+            if (x < 40) return 'Pointu';
+            if (x > 60) return 'R4';
+            return 'Centre';
+        }
+    },
+
+    // Port simplifie de evaluatePassQuality (match-live-helpers.js)
+    // Retourne un score 1-4 (P1-P4) ou null si pas de grilles
+    _evaluatePassScore(endPos, zone, context, team, cameraSide) {
+        if (!endPos || endPos.x === undefined || endPos.y === undefined) return null;
+        // Charger grilles depuis localStorage (cache)
+        if (!this._passGrids) {
+            try {
+                this._passGrids = JSON.parse(localStorage.getItem('volleyball_pass_grids') || 'null');
+            } catch(e) { this._passGrids = null; }
+        }
+        if (!this._passGrids) return null;
+
+        var grid = this._passGrids[zone] && this._passGrids[zone][context];
+        if (!grid || !grid[0]) return null;
+
+        var courtSide = this._getCourtSide(team, cameraSide);
+        // Distance depuis le filet (0% = filet, 100% = fond)
+        var distFromNet = courtSide === 'bottom' ? endPos.y : (100 - endPos.y);
+        var GRID_DEPTH = 44; // % du demi-terrain couvert
+        var GRID_ROWS = 8;
+        var GRID_OVERFLOW = 22.22;
+
+        // Au-dela de la zone de detail → P1
+        if (distFromNet > GRID_DEPTH) return 1;
+
+        var totalCols = grid[0].length; // 22 pour R4/Pointu, 18 pour Centre
+        var row = Math.min(GRID_ROWS - 1, Math.max(0, Math.floor(distFromNet / GRID_DEPTH * GRID_ROWS)));
+
+        var col;
+        if (zone === 'R4' || zone === 'Pointu') {
+            var totalWidth = 100 + GRID_OVERFLOW;
+            var overflowLeft = (zone === 'R4' && courtSide === 'bottom') || (zone === 'Pointu' && courtSide === 'top');
+            var xShifted = overflowLeft ? endPos.x + GRID_OVERFLOW : endPos.x;
+            col = Math.min(totalCols - 1, Math.max(0, Math.floor(xShifted / totalWidth * totalCols)));
+        } else {
+            col = Math.min(totalCols - 1, Math.max(0, Math.floor(endPos.x / 100 * totalCols)));
+        }
+
+        // Miroir top court
+        if (courtSide === 'top') col = totalCols - 1 - col;
+
+        return (grid[row] && grid[row][col]) || 1;
+    },
+
+    // Port de analyzeAfterDefended (match-live.html)
+    // Retourne : 'continued' (A-), 'blocked' (BP), 'ended' (A+)
+    _analyzeAfterDefended(rally, afterIndex, oppositeTeam) {
+        var attackingTeam = oppositeTeam === 'home' ? 'away' : 'home';
+        for (var i = afterIndex + 1; i < rally.length; i++) {
+            var a = rally[i];
+            if (a.team === oppositeTeam) {
+                // Defense fault = l'adversaire rate sa defense → l'attaque a force le point
+                if (a.type === 'defense' && a.result === 'fault') continue;
+                // Block pass-through : la balle traverse le bloc, continuer l'analyse
+                if (a.type === 'block' && a.passThrough) continue;
+                // Block (non pass-through) : analyser ou va la balle apres
+                if (a.type === 'block') {
+                    for (var j = i + 1; j < rally.length; j++) {
+                        if (rally[j].team === attackingTeam) {
+                            // Balle cote attaquant : l'attaquant doit defendre
+                            if (rally[j].type === 'defense' && rally[j].result === 'fault') {
+                                return 'blocked'; // Defense fault cote attaquant = BP
+                            }
+                            return 'continued'; // L'equipe recupere le block → A-
+                        }
+                        // Si la defense du bloqueur rate, balle allee cote adverse → A+
+                        if (rally[j].team === oppositeTeam && rally[j].type === 'defense' && rally[j].result === 'fault') {
+                            return 'ended';
+                        }
+                    }
+                    return 'blocked'; // Personne ne recupere → BP
+                }
+                // Toute autre action adverse (pass, attack, defense reussie) = jeu continue
+                return 'continued';
+            }
+        }
+        return 'ended';
+    },
+
+    // --- Extraction donnees rallies ---
+
+    analyzeSet(set, team) {
+        var self = this;
+        var cameraSide = set.cameraSide || 'home';
+        var points = set.points || [];
+        var sequences = [];
+
+        points.forEach(function(point, pointIndex) {
+            var rally = point.rally;
+            if (!rally || rally.length === 0) return;
+
+            for (var i = 0; i < rally.length; i++) {
+                var action = rally[i];
+                // Passes de l'equipe (pas relance)
+                if (action.type !== 'pass' || action.team !== team) continue;
+                if (action.passType === 'relance') continue;
+
+                // Zone de la passe
+                var zone = action.endPos
+                    ? self._getPassZone(action.endPos, team, cameraSide)
+                    : null;
+
+                // Qualite de passe (score 1-4 via grilles calibrees)
+                var passScore = null;
+                if (zone && action.endPos) {
+                    // Contexte simplifie : on utilise 'confort' pour Passeur, 'transition' pour autres
+                    var passContext = (action.role === 'Passeur') ? 'confort' : 'transition';
+                    passScore = self._evaluatePassScore(action.endPos, zone, passContext, team, cameraSide);
+                }
+
+                // Chercher l'attaque suivante (meme equipe, pas le passeur lui-meme)
+                var attackAction = null;
+                for (var j = i + 1; j < rally.length; j++) {
+                    if (rally[j].team === team && rally[j].type === 'attack') {
+                        if (rally[j].player === action.player) continue; // Ignorer passe vers soi-meme (override errone)
+                        attackAction = rally[j];
+                        break;
+                    }
+                    if (rally[j].team !== team && rally[j].type !== 'block') break;
+                }
+
+                // Contexte amont : reception ou defense ?
+                var contextAction = null;
+                var contextType = null;
+                for (var k = i - 1; k >= 0; k--) {
+                    if (rally[k].team === team) {
+                        if (rally[k].type === 'reception') {
+                            contextAction = rally[k];
+                            contextType = 'reception';
+                            break;
+                        }
+                        if (rally[k].type === 'defense') {
+                            contextAction = rally[k];
+                            contextType = 'defense';
+                            break;
+                        }
+                    }
+                }
+
+                // Zone de reception/defense (pour renversement)
+                var receptionZone = null;
+                if (contextAction && contextAction.endPos) {
+                    receptionZone = self._getPassZone(contextAction.endPos, team, cameraSide);
+                }
+
+                // Zone 3 bandes pour renversement (reception seulement) : R4 (35%) | Centre (30%) | Pointu (35%)
+                // La passe va toujours vers R4 ou Pointu (zone = _getPassZone, 2 zones)
+                var recReversalZone = (contextAction && contextAction.endPos)
+                    ? self._getReversalZone(contextAction.endPos, team, cameraSide)
+                    : null;
+
+                // Determiner le resultat d'attaque categorise
+                // Port de analyzeAfterDefended (match-live.html) pour detecter BP
+                var attackCat = null;
+                if (attackAction) {
+                    var isRelance = attackAction.attackType === 'relance';
+                    if (!isRelance) {
+                        if (attackAction.result === 'point' || attackAction.result === 'bloc_out') {
+                            attackCat = 'aplus';
+                        } else if (attackAction.result === 'blocked') {
+                            attackCat = 'bp';
+                        } else if (attackAction.result === 'fault_net' || attackAction.result === 'out' || attackAction.attackType === 'faute') {
+                            attackCat = 'fa';
+                        } else if (attackAction.result === 'defended') {
+                            // Analyser la suite du rally (port de analyzeAfterDefended)
+                            var afterIdx = rally.indexOf(attackAction);
+                            var otherTeam = team === 'home' ? 'away' : 'home';
+                            var outcome = self._analyzeAfterDefended(rally, afterIdx, otherTeam);
+                            if (outcome === 'blocked') {
+                                attackCat = 'bp';
+                            } else if (outcome === 'continued') {
+                                attackCat = 'aminus';
+                            } else {
+                                attackCat = 'aplus'; // 'ended'
+                            }
+                        }
+                    }
+                }
+
+                sequences.push({
+                    passer: action.player,
+                    passerRole: action.role || null,
+                    zone: zone,
+                    attacker: attackAction ? attackAction.player : null,
+                    attackerRole: attackAction ? (attackAction.role || null) : null,
+                    attackResult: attackAction ? attackAction.result : null,
+                    attackCat: attackCat,
+                    attackType: attackAction ? attackAction.attackType : null,
+                    contextType: contextType,
+                    contextPlayer: contextAction ? contextAction.player : null,
+                    contextRole: contextAction ? (contextAction.role || null) : null,
+                    receptionZone: receptionZone,
+                    recReversalZone: recReversalZone,
+                    passScore: passScore,
+                    // Renversement (grand cote) : reception cote R4 → passe Pointu, ou inversement
+                    isReversal: (zone && recReversalZone
+                        && recReversalZone !== 'Centre'
+                        && zone !== recReversalZone),
+                    // Petit cote : reception cote R4 → passe R4 (meme cote), ou Pointu → Pointu
+                    isPetitCote: (zone && recReversalZone
+                        && recReversalZone !== 'Centre'
+                        && zone === recReversalZone),
+                    // Passe classique : reception zone centre (neutre, ni renversement ni petit cote)
+                    isClassique: (zone && recReversalZone
+                        && recReversalZone === 'Centre'),
+                    homeScore: point.homeScore,
+                    awayScore: point.awayScore,
+                    setIndex: set.number || 0,
+                    samePlayerRecAttack: (contextType === 'reception'
+                        && contextAction && attackAction
+                        && contextAction.player === attackAction.player
+                        && contextAction.player !== action.player)
+                });
+            }
+        });
+
+        return sequences;
+    },
+
+    analyzeMatch(match, team) {
+        var self = this;
+        var allSequences = [];
+        var sequencesBySet = [];
+
+        (match.sets || []).filter(function(s) { return s.completed; }).forEach(function(set, idx) {
+            var setSeqs = self.analyzeSet(set, team);
+            setSeqs.forEach(function(s) { s.setIndex = idx; });
+            sequencesBySet.push(setSeqs);
+            allSequences = allSequences.concat(setSeqs);
+        });
+
+        return { all: allSequences, bySet: sequencesBySet };
+    },
+
+    // --- Fonctions d'agregation ---
+
+    _filterByContext(sequences, filter) {
+        if (filter === 'all') return sequences;
+        return sequences.filter(function(s) { return s.contextType === filter; });
+    },
+
+    computeDistribution(sequences, filter) {
+        var filtered = this._filterByContext(sequences, filter || this._contextFilter);
+        var zones = {};
+        var self = this;
+        Object.keys(self.ZONE_COLORS).forEach(function(z) {
+            zones[z] = { total: 0, byAttacker: {}, attackCats: { aplus: 0, aminus: 0, bp: 0, fa: 0 } };
+        });
+        var unknown = 0;
+
+        filtered.forEach(function(s) {
+            if (!s.zone) { unknown++; return; }
+            var z = zones[s.zone];
+            z.total++;
+            if (s.attacker) {
+                if (!z.byAttacker[s.attacker]) {
+                    z.byAttacker[s.attacker] = { total: 0, attackCats: { aplus: 0, aminus: 0, bp: 0, fa: 0 }, role: s.attackerRole };
+                }
+                z.byAttacker[s.attacker].total++;
+                if (s.attackCat) z.byAttacker[s.attacker].attackCats[s.attackCat]++;
+            }
+            if (s.attackCat) z.attackCats[s.attackCat]++;
+        });
+
+        return { zones: zones, total: filtered.length, unknown: unknown };
+    },
+
+    computeSamePlayerRecAttack(sequences) {
+        // Filtrer : receptions faites par des attaquants (R4/Pointu) uniquement
+        var recSeqs = sequences.filter(function(s) {
+            return s.contextType === 'reception' && s.attacker
+                && s.contextRole && s.contextRole !== 'Passeur' && s.contextRole !== 'Centre';
+        });
+        var samePlayer = recSeqs.filter(function(s) { return s.samePlayerRecAttack; });
+
+        // Stats par joueur (recepteur)
+        var byPlayer = {};
+        recSeqs.forEach(function(s) {
+            var name = s.contextPlayer;
+            if (!name) return;
+            if (!byPlayer[name]) byPlayer[name] = { total: 0, same: 0, role: s.contextRole };
+            byPlayer[name].total++;
+            if (s.samePlayerRecAttack) byPlayer[name].same++;
+        });
+
+        return {
+            total: recSeqs.length,
+            samePlayer: samePlayer.length,
+            percent: recSeqs.length > 0 ? Math.round(samePlayer.length / recSeqs.length * 100) : 0,
+            byPlayer: byPlayer
+        };
+    },
+
+    computeReversals(sequences) {
+        // Eligible = passes ou zone de passe ET zone reception 3 bandes sont connues
+        var eligible = sequences.filter(function(s) {
+            return s.zone && s.recReversalZone;
+        });
+        // Renversement (grand cote) : reception extreme → passe cote oppose
+        var reversals = eligible.filter(function(s) { return s.isReversal; });
+        // Petit cote : reception extreme → passe meme cote
+        var petitCote = eligible.filter(function(s) { return s.isPetitCote; });
+        // Passe classique : reception zone centre (neutre)
+        var classique = eligible.filter(function(s) { return s.isClassique; });
+
+        // Stats completes pour un groupe de sequences
+        function computeStats(seqs) {
+            var total = seqs.length;
+            if (total === 0) return { total: 0, quality: null, aplus: 0, aminus: 0, fabp: 0, aplusPct: 0, aminusPct: 0, fabpPct: 0 };
+            var aplus = seqs.filter(function(s) { return s.attackCat === 'aplus'; }).length;
+            var aminus = seqs.filter(function(s) { return s.attackCat === 'aminus'; }).length;
+            var fa = seqs.filter(function(s) { return s.attackCat === 'fa'; }).length;
+            var bp = seqs.filter(function(s) { return s.attackCat === 'bp'; }).length;
+            var fabp = fa + bp;
+            var scored = seqs.filter(function(s) { return s.passScore !== null; });
+            var qualSum = 0;
+            scored.forEach(function(s) { qualSum += s.passScore; });
+            var quality = scored.length > 0 ? Math.round(qualSum / scored.length * 10) / 10 : null;
+            return {
+                total: total, quality: quality,
+                aplus: aplus, aminus: aminus, fabp: fabp,
+                aplusPct: Math.round(aplus / total * 100),
+                aminusPct: Math.round(aminus / total * 100),
+                fabpPct: Math.round(fabp / total * 100)
+            };
+        }
+
+        // Par destination (R4 / Pointu)
+        var r4All = eligible.filter(function(s) { return s.zone === 'R4'; });
+        var pointuAll = eligible.filter(function(s) { return s.zone === 'Pointu'; });
+        var r4Grand = r4All.filter(function(s) { return s.isReversal; });
+        var r4Petit = r4All.filter(function(s) { return s.isPetitCote; });
+        var r4Classique = r4All.filter(function(s) { return s.isClassique; });
+        var pointuGrand = pointuAll.filter(function(s) { return s.isReversal; });
+        var pointuPetit = pointuAll.filter(function(s) { return s.isPetitCote; });
+        var pointuClassique = pointuAll.filter(function(s) { return s.isClassique; });
+
+        return {
+            eligible: eligible.length,
+            total: computeStats(eligible),
+            r4: computeStats(r4All),
+            r4Grand: computeStats(r4Grand),
+            r4Petit: computeStats(r4Petit),
+            r4Classique: computeStats(r4Classique),
+            pointu: computeStats(pointuAll),
+            pointuGrand: computeStats(pointuGrand),
+            pointuPetit: computeStats(pointuPetit),
+            pointuClassique: computeStats(pointuClassique)
+        };
+    },
+
+    computeReFeedAfterFailure(match, team) {
+        var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+        var results = {};
+
+        completedSets.forEach(function(set) {
+            var points = set.points || [];
+
+            for (var p = 0; p < points.length - 1; p++) {
+                var rally = points[p].rally;
+                if (!rally) continue;
+
+                // Trouver la derniere attaque et le dernier passeur (Passeur uniquement) de l'equipe dans ce rally
+                var lastAttack = null;
+                var lastPasser = null;
+                for (var i = rally.length - 1; i >= 0; i--) {
+                    if (rally[i].team === team && rally[i].type === 'attack' && !lastAttack) {
+                        lastAttack = rally[i];
+                    }
+                    if (rally[i].team === team && rally[i].type === 'pass' && rally[i].role === 'Passeur' && !lastPasser) {
+                        lastPasser = rally[i];
+                    }
+                }
+
+                if (!lastAttack || !lastPasser) continue;
+
+                // L'attaque est-elle un echec ?
+                var isRelance = lastAttack.attackType === 'relance';
+                if (isRelance) continue;
+
+                var isFailure = (lastAttack.result === 'blocked' ||
+                    lastAttack.result === 'fault_net' ||
+                    lastAttack.result === 'out' ||
+                    lastAttack.attackType === 'faute');
+
+                if (lastAttack.result === 'defended') {
+                    var otherTeam = team === 'home' ? 'away' : 'home';
+                    for (var j = rally.indexOf(lastAttack) + 1; j < rally.length; j++) {
+                        if (rally[j].team === otherTeam && rally[j].type === 'pass') {
+                            isFailure = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!isFailure) continue;
+
+                // Rally N+1 : meme passeur ?
+                var nextRally = points[p + 1].rally;
+                if (!nextRally) continue;
+
+                var nextPasser = null, nextAttacker = null;
+                for (var k = 0; k < nextRally.length; k++) {
+                    if (nextRally[k].team === team && nextRally[k].type === 'pass' && nextRally[k].role === 'Passeur' && !nextPasser) {
+                        nextPasser = nextRally[k];
+                    }
+                    if (nextRally[k].team === team && nextRally[k].type === 'attack' && !nextAttacker) {
+                        nextAttacker = nextRally[k];
+                    }
+                }
+
+                if (!nextPasser || !nextAttacker) continue;
+                if (nextPasser.player !== lastPasser.player) continue;
+
+                var passerName = lastPasser.player;
+                if (!results[passerName]) {
+                    results[passerName] = { reFeed: 0, switch_: 0, reFeedSuccess: 0, switchSuccess: 0, total: 0 };
+                }
+                results[passerName].total++;
+
+                var isReFeed = (nextAttacker.player === lastAttack.player);
+                var nextSuccess = (nextAttacker.result === 'point' || nextAttacker.result === 'bloc_out');
+
+                if (isReFeed) {
+                    results[passerName].reFeed++;
+                    if (nextSuccess) results[passerName].reFeedSuccess++;
+                } else {
+                    results[passerName].switch_++;
+                    if (nextSuccess) results[passerName].switchSuccess++;
+                }
+            }
+        });
+
+        return results;
+    },
+
+    computePressureDistribution(sequences) {
+        var pressure = { 'R4': 0, 'Pointu': 0, total: 0 };
+        var normal = { 'R4': 0, 'Pointu': 0, total: 0 };
+        var pressureBySet = {};
+        var normalBySet = {};
+
+        sequences.forEach(function(s) {
+            if (!s.zone) return;
+            var lead = (s.homeScore || 0) - (s.awayScore || 0); // positif = Jen mene
+            var bucket = lead <= 3 ? pressure : normal;
+            bucket[s.zone]++;
+            bucket.total++;
+
+            // Par set
+            var setNum = s.setIndex || 0;
+            var bySetMap = lead <= 3 ? pressureBySet : normalBySet;
+            if (!bySetMap[setNum]) bySetMap[setNum] = { 'R4': 0, 'Pointu': 0, total: 0 };
+            bySetMap[setNum][s.zone]++;
+            bySetMap[setNum].total++;
+        });
+
+        return { pressure: pressure, normal: normal, pressureBySet: pressureBySet, normalBySet: normalBySet };
+    },
+
+    computeDistributionBySet(sequencesBySet) {
+        return sequencesBySet.map(function(setSeqs) {
+            var zones = { 'R4': 0, 'Pointu': 0 };
+            setSeqs.forEach(function(s) { if (s.zone) zones[s.zone]++; });
+            return zones;
+        });
+    },
+
+    // --- Rendering ---
+
+    renderForMatch(match, team) {
+        var data = this.analyzeMatch(match, team);
+        if (data.all.length === 0) return '';
+
+        var html = '<div class="hist-section pa-section collapsed">';
+        html += '<div class="hist-section-title">Relation Passe / Attaque</div>';
+        html += '<div id="pa-content-match">';
+        html += this._renderContent(data, match, team, 'match');
+        html += '</div>';
+        html += '</div>';
+        return html;
+    },
+
+    renderForYear(matches, team) {
+        var self = this;
+        var allSequences = [];
+
+        matches.forEach(function(match) {
+            var data = self.analyzeMatch(match, team);
+            allSequences = allSequences.concat(data.all);
+        });
+
+        if (allSequences.length === 0) return '';
+
+        var html = '<div class="hist-section pa-section collapsed">';
+        html += '<div class="hist-section-title">Relation Passe / Attaque</div>';
+        html += '<div id="pa-content-year">';
+        html += this._renderContent({ all: allSequences, bySet: null }, null, team, 'year');
+        html += '</div>';
+        html += '</div>';
+        return html;
+    },
+
+    _renderContent(data, match, team, mode) {
+        var html = '';
+
+        // Construire playerRolesMap depuis les sequences pour les pastilles
+        var rolesMap = {};
+        data.all.forEach(function(s) {
+            if (s.attacker && s.attackerRole) {
+                if (!rolesMap[s.attacker]) rolesMap[s.attacker] = { primaryRole: s.attackerRole, roles: {} };
+                rolesMap[s.attacker].roles[s.attackerRole] = (rolesMap[s.attacker].roles[s.attackerRole] || 0) + 1;
+            }
+            if (s.passer && s.passerRole) {
+                if (!rolesMap[s.passer]) rolesMap[s.passer] = { primaryRole: s.passerRole, roles: {} };
+                rolesMap[s.passer].roles[s.passerRole] = (rolesMap[s.passer].roles[s.passerRole] || 0) + 1;
+            }
+        });
+        // Determiner le role principal (le plus frequent)
+        Object.keys(rolesMap).forEach(function(name) {
+            var roles = rolesMap[name].roles;
+            var best = null, bestCount = 0;
+            Object.keys(roles).forEach(function(r) { if (roles[r] > bestCount) { best = r; bestCount = roles[r]; } });
+            if (best) rolesMap[name].primaryRole = best;
+        });
+        SharedComponents.playerRolesMap = rolesMap;
+
+        // Separer sequences Passeur vs Transition (non-Passeur)
+        var passeurSeqs = data.all.filter(function(s) { return s.passerRole === 'Passeur'; });
+        var transitionSeqs = data.all.filter(function(s) { return s.passerRole && s.passerRole !== 'Passeur'; });
+
+        // A. Distribution Passeur (toggle integre dans le titre)
+        html += this._renderDistribution(passeurSeqs, mode);
+
+        // B. Distribution Transition (sans toggle)
+        html += this._renderDistributionTransition(transitionSeqs);
+
+        // C. Enchainement recep/attaque (Passeur uniquement)
+        html += this._renderSamePlayerRecAttack(passeurSeqs);
+
+        // D. Renversement (Passeur uniquement)
+        html += this._renderReversals(passeurSeqs);
+
+        // E. Mental passeur (Passeur uniquement)
+        html += this._renderMentalPasseur(match, team, passeurSeqs, mode);
+
+        // F. Courbe distribution par set (match uniquement, Passeur seulement)
+        if (mode === 'match' && data.bySet && data.bySet.length >= 2) {
+            var passeurBySet = data.bySet.map(function(setSeqs) {
+                return setSeqs.filter(function(s) { return s.passerRole === 'Passeur'; });
+            });
+            html += this._renderDistributionChart(passeurBySet, match);
+        }
+
+        SharedComponents.playerRolesMap = null;
+        return html;
+    },
+
+    _renderToggle(mode) {
+        var f = this._contextFilter;
+        var html = '<div class="pa-toggle-bar">';
+        html += '<button class="pa-toggle-btn' + (f === 'all' ? ' active' : '') + '" onclick="PassAttackAnalyzer._onToggle(\'all\',\'' + mode + '\')">Tot</button>';
+        html += '<button class="pa-toggle-btn' + (f === 'reception' ? ' active' : '') + '" onclick="PassAttackAnalyzer._onToggle(\'reception\',\'' + mode + '\')">Recep</button>';
+        html += '<button class="pa-toggle-btn' + (f === 'defense' ? ' active' : '') + '" onclick="PassAttackAnalyzer._onToggle(\'defense\',\'' + mode + '\')">D\u00e9f</button>';
+        html += '</div>';
+        return html;
+    },
+
+    _onToggle(filter, mode) {
+        this._contextFilter = filter;
+        // Re-render la section
+        var containerId = mode === 'match' ? 'pa-content-match' : 'pa-content-year';
+        var container = document.getElementById(containerId);
+        if (!container) return;
+
+        // Reconstruire les donnees
+        if (mode === 'match') {
+            var match = MatchStatsView.currentMatch;
+            if (!match) return;
+            var data = this.analyzeMatch(match, 'home');
+            container.innerHTML = this._renderContent(data, match, 'home', 'match');
+        } else {
+            // Stats Annee : reconstituer depuis les matchs filtres
+            var filtered = YearStatsView._lastFiltered || [];
+            var self = this;
+            var allSeqs = [];
+            filtered.forEach(function(m) {
+                var d = self.analyzeMatch(m, 'home');
+                allSeqs = allSeqs.concat(d.all);
+            });
+            container.innerHTML = this._renderContent({ all: allSeqs, bySet: null }, null, 'home', 'year');
+        }
+    },
+
+    _renderDistribution(sequences) {
+        var mode = arguments[1] || 'match';
+        var dist = this.computeDistribution(sequences, this._contextFilter);
+        if (dist.total === 0) return '<div class="pa-subsection"><div class="pa-empty">Aucune donn\u00e9e disponible</div></div>';
+
+        var self = this;
+        var html = '<div class="pa-subsection">';
+        html += '<div class="pa-subtitle" style="display:flex;align-items:center;justify-content:space-between;">';
+        html += '<span style="color:var(--cat-passe)">Distribution Passeur</span>';
+        html += this._renderToggle(mode);
+        html += '</div>';
+        html += '<table class="pa-table">';
+        html += '<thead><tr><th>Zone</th><th>Passes</th><th>%</th><th>A+</th><th>A\u2212</th><th>FA(BP)</th><th>+/\u2212</th></tr></thead>';
+        html += '<tbody>';
+
+        Object.keys(self.ZONE_COLORS).forEach(function(zone) {
+            var z = dist.zones[zone];
+            var pct = dist.total > 0 ? Math.round(z.total / dist.total * 100) : 0;
+            var fabp = (z.attackCats.fa || 0) + (z.attackCats.bp || 0);
+            var plusMinus = (z.attackCats.aplus || 0) - fabp;
+            var zAplusPct = z.total > 0 ? Math.round((z.attackCats.aplus || 0) / z.total * 100) : 0;
+            var zAminusPct = z.total > 0 ? Math.round((z.attackCats.aminus || 0) / z.total * 100) : 0;
+            var zFabpPct = z.total > 0 ? Math.round(fabp / z.total * 100) : 0;
+            html += '<tr class="pa-zone-row">';
+            html += '<td><span class="pt-role-header-bar" style="background:' + self.ZONE_COLORS[zone] + '"></span> ' + zone + '</td>';
+            html += '<td>' + z.total + '</td>';
+            html += '<td>' + pct + '%</td>';
+            html += '<td' + (z.attackCats.aplus ? ' class="pa-positive"' : '') + '>' + (z.attackCats.aplus ? zAplusPct + '%' : '-') + '</td>';
+            html += '<td>' + (z.attackCats.aminus ? zAminusPct + '%' : '-') + '</td>';
+            html += '<td' + (fabp ? ' class="pa-negative"' : '') + '>' + (fabp ? zFabpPct + '%' : '-') + '</td>';
+            html += '<td class="' + (plusMinus > 0 ? 'pa-positive' : plusMinus < 0 ? 'pa-negative' : '') + '">' + (plusMinus > 0 ? '+' : '') + plusMinus + '</td>';
+            html += '</tr>';
+
+            // Sous-lignes par attaquant
+            var attackers = Object.keys(z.byAttacker).sort(function(a, b) {
+                return z.byAttacker[b].total - z.byAttacker[a].total;
+            });
+            attackers.forEach(function(name) {
+                var a = z.byAttacker[name];
+                var aPct = dist.total > 0 ? Math.round(a.total / dist.total * 100) : 0;
+                var aFabp = (a.attackCats.fa || 0) + (a.attackCats.bp || 0);
+                var aPlusMinus = (a.attackCats.aplus || 0) - aFabp;
+                var aAplusPct = a.total > 0 ? Math.round((a.attackCats.aplus || 0) / a.total * 100) : 0;
+                var aAminusPct = a.total > 0 ? Math.round((a.attackCats.aminus || 0) / a.total * 100) : 0;
+                var aFabpPct = a.total > 0 ? Math.round(aFabp / a.total * 100) : 0;
+                html += '<tr class="pa-player-row">';
+                html += '<td><div class="player-cell">' + SharedComponents.renderRoleDots(name) + Utils.escapeHtml(name) + '</div></td>';
+                html += '<td>' + a.total + '</td>';
+                html += '<td>' + aPct + '%</td>';
+                html += '<td' + (a.attackCats.aplus ? ' class="pa-positive"' : '') + '>' + (a.attackCats.aplus ? aAplusPct + '%' : '-') + '</td>';
+                html += '<td>' + (a.attackCats.aminus ? aAminusPct + '%' : '-') + '</td>';
+                html += '<td' + (aFabp ? ' class="pa-negative"' : '') + '>' + (aFabp ? aFabpPct + '%' : '-') + '</td>';
+                html += '<td class="' + (aPlusMinus > 0 ? 'pa-positive' : aPlusMinus < 0 ? 'pa-negative' : '') + '">' + (aPlusMinus > 0 ? '+' : '') + aPlusMinus + '</td>';
+                html += '</tr>';
+            });
+        });
+
+        html += '</tbody></table></div>';
+        return html;
+    },
+
+    _renderDistributionTransition(sequences) {
+        // Quand le Passeur attaque en transition, forcer zone Pointu
+        var adjusted = sequences.map(function(s) {
+            if (s.attackerRole === 'Passeur' && s.zone !== 'Pointu') {
+                var copy = {};
+                for (var k in s) copy[k] = s[k];
+                copy.zone = 'Pointu';
+                return copy;
+            }
+            return s;
+        });
+        var dist = this.computeDistribution(adjusted, 'all');
+        if (dist.total === 0) return '';
+
+        var self = this;
+        var html = '<div class="pa-subsection">';
+        html += '<div class="pa-subtitle">Distribution Transition</div>';
+        html += '<table class="pa-table">';
+        html += '<thead><tr><th>Zone</th><th>Passes</th><th>%</th><th>A+</th><th>A\u2212</th><th>FA(BP)</th><th>+/\u2212</th></tr></thead>';
+        html += '<tbody>';
+
+        Object.keys(self.ZONE_COLORS).forEach(function(zone) {
+            var z = dist.zones[zone];
+            var pct = dist.total > 0 ? Math.round(z.total / dist.total * 100) : 0;
+            var fabp = (z.attackCats.fa || 0) + (z.attackCats.bp || 0);
+            var plusMinus = (z.attackCats.aplus || 0) - fabp;
+            var zAplusPct = z.total > 0 ? Math.round((z.attackCats.aplus || 0) / z.total * 100) : 0;
+            var zAminusPct = z.total > 0 ? Math.round((z.attackCats.aminus || 0) / z.total * 100) : 0;
+            var zFabpPct = z.total > 0 ? Math.round(fabp / z.total * 100) : 0;
+            html += '<tr class="pa-zone-row">';
+            html += '<td><span class="pt-role-header-bar" style="background:' + self.ZONE_COLORS[zone] + '"></span> ' + zone + '</td>';
+            html += '<td>' + z.total + '</td>';
+            html += '<td>' + pct + '%</td>';
+            html += '<td' + (z.attackCats.aplus ? ' class="pa-positive"' : '') + '>' + (z.attackCats.aplus ? zAplusPct + '%' : '-') + '</td>';
+            html += '<td>' + (z.attackCats.aminus ? zAminusPct + '%' : '-') + '</td>';
+            html += '<td' + (fabp ? ' class="pa-negative"' : '') + '>' + (fabp ? zFabpPct + '%' : '-') + '</td>';
+            html += '<td class="' + (plusMinus > 0 ? 'pa-positive' : plusMinus < 0 ? 'pa-negative' : '') + '">' + (plusMinus > 0 ? '+' : '') + plusMinus + '</td>';
+            html += '</tr>';
+
+            // Sous-lignes par attaquant
+            var attackers = Object.keys(z.byAttacker).sort(function(a, b) {
+                return z.byAttacker[b].total - z.byAttacker[a].total;
+            });
+            attackers.forEach(function(name) {
+                var a = z.byAttacker[name];
+                var aPct = dist.total > 0 ? Math.round(a.total / dist.total * 100) : 0;
+                var aFabp = (a.attackCats.fa || 0) + (a.attackCats.bp || 0);
+                var aPlusMinus = (a.attackCats.aplus || 0) - aFabp;
+                var aAplusPct = a.total > 0 ? Math.round((a.attackCats.aplus || 0) / a.total * 100) : 0;
+                var aAminusPct = a.total > 0 ? Math.round((a.attackCats.aminus || 0) / a.total * 100) : 0;
+                var aFabpPct = a.total > 0 ? Math.round(aFabp / a.total * 100) : 0;
+                html += '<tr class="pa-player-row">';
+                html += '<td><div class="player-cell">' + SharedComponents.renderRoleDots(name) + Utils.escapeHtml(name) + '</div></td>';
+                html += '<td>' + a.total + '</td>';
+                html += '<td>' + aPct + '%</td>';
+                html += '<td' + (a.attackCats.aplus ? ' class="pa-positive"' : '') + '>' + (a.attackCats.aplus ? aAplusPct + '%' : '-') + '</td>';
+                html += '<td>' + (a.attackCats.aminus ? aAminusPct + '%' : '-') + '</td>';
+                html += '<td' + (aFabp ? ' class="pa-negative"' : '') + '>' + (aFabp ? aFabpPct + '%' : '-') + '</td>';
+                html += '<td class="' + (aPlusMinus > 0 ? 'pa-positive' : aPlusMinus < 0 ? 'pa-negative' : '') + '">' + (aPlusMinus > 0 ? '+' : '') + aPlusMinus + '</td>';
+                html += '</tr>';
+            });
+        });
+
+        html += '</tbody></table></div>';
+        return html;
+    },
+
+    _renderSamePlayerRecAttack(sequences) {
+        var data = this.computeSamePlayerRecAttack(sequences);
+        if (data.total === 0) return '';
+
+        var html = '<div class="pa-subsection">';
+        html += '<div class="pa-subtitle">Encha\u00eenement R\u00e9ception \u2192 Attaque</div>';
+
+        // Tableau par joueur
+        html += '<table class="pa-table">';
+        html += '<thead><tr><th>Joueur</th><th>Recep</th><th>Encha\u00een\u00e9</th><th>%</th></tr></thead>';
+        html += '<tbody>';
+
+        // Trier par nombre de receptions decroissant
+        var players = Object.keys(data.byPlayer).sort(function(a, b) {
+            return data.byPlayer[b].total - data.byPlayer[a].total;
+        });
+        players.forEach(function(name) {
+            var p = data.byPlayer[name];
+            var pct = p.total > 0 ? Math.round(p.same / p.total * 100) : 0;
+            html += '<tr class="pa-player-row">';
+            html += '<td><div class="player-cell">' + SharedComponents.renderRoleDots(name) + Utils.escapeHtml(name) + '</div></td>';
+            html += '<td>' + p.total + '</td>';
+            html += '<td>' + p.same + '</td>';
+            html += '<td class="pa-positive">' + pct + '%</td>';
+            html += '</tr>';
+        });
+
+        // Ligne total
+        html += '<tr class="pa-zone-row">';
+        html += '<td>Total</td>';
+        html += '<td>' + data.total + '</td>';
+        html += '<td>' + data.samePlayer + '</td>';
+        html += '<td class="pa-positive">' + data.percent + '%</td>';
+        html += '</tr>';
+
+        html += '</tbody></table></div>';
+        return html;
+    },
+
+    _renderReversals(sequences) {
+        var data = this.computeReversals(sequences);
+        if (data.eligible === 0) return '';
+
+        // Helpers
+        function fmtQ(q) { return q !== null ? q.toFixed(1) : '-'; }
+        function pct(n, tot) { return tot > 0 ? Math.round(n / tot * 100) + '%' : '-'; }
+
+        // Render une ligne de stats
+        function renderRow(cls, label, stats, totalForPct) {
+            var row = '<tr class="' + cls + '">';
+            row += '<td>' + label + '</td>';
+            row += '<td>' + pct(stats.total, totalForPct) + '</td>';
+            row += '<td>' + fmtQ(stats.quality) + '</td>';
+            row += '<td' + (stats.aplus ? ' class="pa-positive"' : '') + '>' + (stats.aplus ? stats.aplusPct + '%' : '-') + '</td>';
+            row += '<td>' + (stats.aminus ? stats.aminusPct + '%' : '-') + '</td>';
+            var fabp = stats.fabp;
+            row += '<td' + (fabp ? ' class="pa-negative"' : '') + '>' + (fabp ? stats.fabpPct + '%' : '-') + '</td>';
+            row += '</tr>';
+            return row;
+        }
+
+        var html = '<div class="pa-subsection">';
+        html += '<div class="pa-subtitle">Renversement</div>';
+        html += '<table class="pa-table">';
+        html += '<thead><tr><th>Type</th><th>%</th><th>Qual.Passe</th><th>A+</th><th>A\u2212</th><th>FA(BP)</th></tr></thead>';
+        html += '<tbody>';
+
+        // ← R4
+        html += renderRow('pa-zone-row',
+            '<span class="pt-role-header-bar" style="background:' + this.ZONE_COLORS['R4'] + '"></span> <strong>\u2190 R4</strong> <strong>(' + data.r4.total + ')</strong>',
+            data.r4, data.eligible);
+        if (data.r4Grand.total > 0) {
+            html += renderRow('pa-player-row',
+                '\u2514 Grand c\u00f4t\u00e9 \ud83c\udf0a <span class="pa-stat-detail">(' + data.r4Grand.total + ')</span>',
+                data.r4Grand, data.r4.total);
+        }
+        if (data.r4Petit.total > 0) {
+            html += renderRow('pa-player-row',
+                '\u2514 Petit c\u00f4t\u00e9 <span class="pa-stat-detail">(' + data.r4Petit.total + ')</span>',
+                data.r4Petit, data.r4.total);
+        }
+        if (data.r4Classique.total > 0) {
+            html += renderRow('pa-player-row',
+                '\u2514 Classique <span class="pa-stat-detail">(' + data.r4Classique.total + ')</span>',
+                data.r4Classique, data.r4.total);
+        }
+
+        // → Pointu
+        html += renderRow('pa-zone-row',
+            '<span class="pt-role-header-bar" style="background:' + this.ZONE_COLORS['Pointu'] + '"></span> <strong>\u2192 Pointu</strong> <strong>(' + data.pointu.total + ')</strong>',
+            data.pointu, data.eligible);
+        if (data.pointuGrand.total > 0) {
+            html += renderRow('pa-player-row',
+                '\u2514 Grand c\u00f4t\u00e9 \ud83c\udf0a <span class="pa-stat-detail">(' + data.pointuGrand.total + ')</span>',
+                data.pointuGrand, data.pointu.total);
+        }
+        if (data.pointuPetit.total > 0) {
+            html += renderRow('pa-player-row',
+                '\u2514 Petit c\u00f4t\u00e9 <span class="pa-stat-detail">(' + data.pointuPetit.total + ')</span>',
+                data.pointuPetit, data.pointu.total);
+        }
+        if (data.pointuClassique.total > 0) {
+            html += renderRow('pa-player-row',
+                '\u2514 Classique <span class="pa-stat-detail">(' + data.pointuClassique.total + ')</span>',
+                data.pointuClassique, data.pointu.total);
+        }
+
+        // Total
+        html += '<tr class="pa-zone-row" style="border-top:2px solid var(--border-color)">';
+        html += '<td><span class="pt-role-header-bar" style="background:#9ca3af"></span> <strong>Total (' + data.eligible + ')</strong></td>';
+        html += '<td>100%</td>';
+        html += '<td>' + fmtQ(data.total.quality) + '</td>';
+        html += '<td>' + data.total.aplusPct + '%</td>';
+        html += '<td>' + data.total.aminusPct + '%</td>';
+        html += '<td>' + data.total.fabpPct + '%</td>';
+        html += '</tr>';
+
+        html += '</tbody></table></div>';
+        return html;
+    },
+
+    _renderMentalPasseur(match, team, sequences, mode) {
+        var html = '<div class="pa-subsection">';
+        html += '<div class="pa-subtitle">Mental Passeur</div>';
+
+        // D1 : Re-confiance apres echec
+        if (match) {
+            html += this._renderReFeed(match, team);
+        } else if (mode === 'year') {
+            // Annee : agreger depuis tous les matchs
+            var filtered = YearStatsView._lastFiltered || [];
+            var self = this;
+            var merged = {};
+            filtered.forEach(function(m) {
+                var data = self.computeReFeedAfterFailure(m, 'home');
+                Object.keys(data).forEach(function(name) {
+                    if (!merged[name]) merged[name] = { reFeed: 0, switch_: 0, reFeedSuccess: 0, switchSuccess: 0, total: 0 };
+                    var d = data[name], t = merged[name];
+                    t.reFeed += d.reFeed; t.switch_ += d.switch_;
+                    t.reFeedSuccess += d.reFeedSuccess; t.switchSuccess += d.switchSuccess;
+                    t.total += d.total;
+                });
+            });
+            html += this._renderReFeedTable(merged);
+        }
+
+        // D2 : Distribution sous pression
+        html += this._renderPressure(sequences);
+
+        html += '</div>';
+        return html;
+    },
+
+    _renderReFeed(match, team) {
+        var data = this.computeReFeedAfterFailure(match, team);
+        return this._renderReFeedTable(data);
+    },
+
+    _renderReFeedTable(data) {
+        var names = Object.keys(data);
+        if (names.length === 0) return '<div class="pa-empty">Pas assez de donn\u00e9es (re-confiance)</div>';
+
+        var html = '<div class="pa-mental-label">Apr\u00e8s \u00e9chec de l\'attaquant :</div>';
+        html += '<table class="pa-table pa-mental-table">';
+        html += '<thead><tr><th>Passeur</th><th>Re-feed</th><th>Switch</th><th>A+ re-feed</th><th>A+ switch</th></tr></thead>';
+        html += '<tbody>';
+
+        names.forEach(function(name) {
+            var d = data[name];
+            if (d.total === 0) return;
+            var reFeedPct = Math.round(d.reFeed / d.total * 100);
+            var switchPct = Math.round(d.switch_ / d.total * 100);
+            var reFeedSucc = d.reFeed > 0 ? Math.round(d.reFeedSuccess / d.reFeed * 100) : 0;
+            var switchSucc = d.switch_ > 0 ? Math.round(d.switchSuccess / d.switch_ * 100) : 0;
+
+            html += '<tr>';
+            html += '<td><div class="player-cell">' + SharedComponents.renderRoleDots(name) + '<strong>' + Utils.escapeHtml(name) + '</strong></div><span class="pa-stat-detail">' + d.total + ' situations</span></td>';
+            html += '<td>' + reFeedPct + '%<br><span class="pa-stat-detail">' + d.reFeed + '</span></td>';
+            html += '<td>' + switchPct + '%<br><span class="pa-stat-detail">' + d.switch_ + '</span></td>';
+            html += '<td class="' + (reFeedSucc >= 50 ? 'pa-positive' : '') + '">' + reFeedSucc + '%</td>';
+            html += '<td class="' + (switchSucc >= 50 ? 'pa-positive' : '') + '">' + switchSucc + '%</td>';
+            html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+        return html;
+    },
+
+    _renderPressure(sequences) {
+        var data = this.computePressureDistribution(sequences);
+        if (data.pressure.total === 0 && data.normal.total === 0) return '';
+
+        var self = this;
+        var html = '<div class="pa-mental-label" style="margin-top:12px">Distribution sous pression (men\u00e9 ou +3 max) vs confort :</div>';
+        html += '<table class="pa-table">';
+        var zones = Object.keys(self.ZONE_COLORS);
+        html += '<thead><tr><th></th>';
+        zones.forEach(function(z) {
+            html += '<th><span class="pa-zone-dot" style="background:' + self.ZONE_COLORS[z] + '"></span> ' + z + '</th>';
+        });
+        html += '</tr></thead><tbody>';
+
+        // Collecter les numeros de sets
+        var allSets = {};
+        Object.keys(data.pressureBySet).forEach(function(k) { allSets[k] = true; });
+        Object.keys(data.normalBySet).forEach(function(k) { allSets[k] = true; });
+        var setNums = Object.keys(allSets).map(Number).sort(function(a, b) { return a - b; });
+
+        // Ligne pression (header)
+        html += '<tr class="pa-zone-row"><td><strong>Serr\u00e9</strong> \ud83d\udd25</td>';
+        zones.forEach(function(z) {
+            var pct = data.pressure.total > 0 ? Math.round((data.pressure[z] || 0) / data.pressure.total * 100) : 0;
+            html += '<td>' + pct + '%</td>';
+        });
+        html += '</tr>';
+
+        // Sous-lignes par set (pression)
+        setNums.forEach(function(setNum) {
+            var setData = data.pressureBySet[setNum];
+            if (!setData || setData.total === 0) return;
+            html += '<tr class="pa-player-row"><td>\u2514 Set ' + (setNum + 1) + ' <span class="pa-stat-detail">(' + setData.total + ')</span></td>';
+            zones.forEach(function(z) {
+                var pct = setData.total > 0 ? Math.round((setData[z] || 0) / setData.total * 100) : 0;
+                html += '<td>' + pct + '%</td>';
+            });
+            html += '</tr>';
+        });
+
+        // Ligne confort (header)
+        html += '<tr class="pa-zone-row"><td><strong>Confort</strong> \ud83c\udf3f</td>';
+        zones.forEach(function(z) {
+            var pct = data.normal.total > 0 ? Math.round((data.normal[z] || 0) / data.normal.total * 100) : 0;
+            html += '<td>' + pct + '%</td>';
+        });
+        html += '</tr>';
+
+        // Sous-lignes par set (confort)
+        setNums.forEach(function(setNum) {
+            var setData = data.normalBySet[setNum];
+            if (!setData || setData.total === 0) return;
+            html += '<tr class="pa-player-row"><td>\u2514 Set ' + (setNum + 1) + ' <span class="pa-stat-detail">(' + setData.total + ')</span></td>';
+            zones.forEach(function(z) {
+                var pct = setData.total > 0 ? Math.round((setData[z] || 0) / setData.total * 100) : 0;
+                html += '<td>' + pct + '%</td>';
+            });
+            html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+        return html;
+    },
+
+    _renderDistributionChart(bySet, match) {
+        if (!bySet || bySet.length < 2) return '';
+
+        var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+        var distBySet = this.computeDistributionBySet(bySet);
+
+        // Dimensions SVG
+        var W = 340, H = 180;
+        var pL = 30, pR = 20, pT = 25, pB = 30;
+        var cW = W - pL - pR, cH = H - pT - pB;
+
+        // Max Y
+        var self = this;
+        var zones = Object.keys(self.ZONE_COLORS);
+        var maxVal = 0;
+        distBySet.forEach(function(d) {
+            zones.forEach(function(z) {
+                if (d[z] > maxVal) maxVal = d[z];
+            });
+        });
+        if (maxVal === 0) maxVal = 1;
+        maxVal = Math.ceil(maxVal / 5) * 5 || 5;
+
+        var n = distBySet.length;
+        var xStep = n > 1 ? cW / (n - 1) : 0;
+        var self = this;
+
+        var html = '<div class="pa-subsection">';
+        html += '<div class="pa-subtitle">Distribution par set</div>';
+        html += '<div class="pa-chart-wrap">';
+        html += '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">';
+
+        // Grille horizontale
+        for (var g = 0; g <= 4; g++) {
+            var gy = pT + cH - (g / 4) * cH;
+            var gVal = Math.round(maxVal * g / 4);
+            html += '<line x1="' + pL + '" y1="' + gy.toFixed(1) + '" x2="' + (W - pR) + '" y2="' + gy.toFixed(1) + '" stroke="#e2e8f0" stroke-width="1"/>';
+            html += '<text x="' + (pL - 4) + '" y="' + (gy + 3).toFixed(1) + '" font-size="9" fill="#94a3b8" text-anchor="end">' + gVal + '</text>';
+        }
+
+        // Axes X
+        for (var i = 0; i < n; i++) {
+            var x = pL + i * xStep;
+            var setObj = completedSets[i];
+            var isLost = setObj && (setObj.finalHomeScore || 0) < (setObj.finalAwayScore || 0);
+            var label = (i === 4) ? 'TB' : 'S' + (i + 1);
+            html += '<text x="' + x.toFixed(1) + '" y="' + (H - 5) + '" font-size="10" fill="' + (isLost ? '#ef4444' : '#64748b') + '" ' + (isLost ? 'font-weight="bold" ' : '') + 'text-anchor="middle">' + label + (isLost ? ' \u2716' : '') + '</text>';
+        }
+
+        // Polylines par zone
+        zones.forEach(function(zone) {
+            var color = self.ZONE_COLORS[zone];
+            var pts = [];
+            for (var i = 0; i < n; i++) {
+                var x = pL + i * xStep;
+                var val = distBySet[i][zone] || 0;
+                var y = pT + cH - (val / maxVal) * cH;
+                pts.push(x.toFixed(1) + ',' + y.toFixed(1));
+            }
+            html += '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
+
+            for (var i = 0; i < n; i++) {
+                var x = pL + i * xStep;
+                var val = distBySet[i][zone] || 0;
+                var y = pT + cH - (val / maxVal) * cH;
+                html += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3.5" fill="' + color + '"/>';
+                html += '<text x="' + x.toFixed(1) + '" y="' + (y - 7).toFixed(1) + '" font-size="9" font-weight="600" fill="' + color + '" text-anchor="middle">' + val + '</text>';
+            }
+        });
+
+        html += '</svg></div>';
+
+        // Legende
+        html += '<div class="pa-legend">';
+        zones.forEach(function(zone) {
+            html += '<div class="pa-legend-item"><span class="pa-legend-box" style="background:' + self.ZONE_COLORS[zone] + '"></span>' + zone + '</div>';
+        });
+        html += '</div></div>';
+        return html;
     }
 };
 
@@ -2723,6 +3927,9 @@ const BilanView = {
 
         // Section Impact +/-
         html += ImpactView.renderForMatch(match, 'home');
+
+        // Section Relation Passe/Attaque (V23)
+        html += PassAttackAnalyzer.renderForMatch(match, 'home');
 
         container.innerHTML = html;
     },
@@ -5697,6 +6904,10 @@ const YearStatsView = {
 
         // Side Out / Break Out agrege
         html += this.renderYearSideOut(filtered);
+
+        // Relation Passe/Attaque (V23)
+        YearStatsView._lastFiltered = filtered;
+        html += PassAttackAnalyzer.renderForYear(filtered, 'home');
 
         // Graphique momentum agrege
         html += this.renderYearMomentum(filtered);
