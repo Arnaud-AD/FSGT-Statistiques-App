@@ -2231,6 +2231,72 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
     vertical-align: top;
 }
 
+/* Funnel re-feed/switch cards */
+.pa-funnel-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin: 10px 0;
+}
+.pa-funnel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 6px;
+    margin-bottom: 6px;
+    border-bottom: 2px solid #e5e7eb;
+    font-size: 13px;
+}
+.pa-funnel-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    table-layout: fixed;
+}
+.pa-funnel-table th {
+    font-weight: 600;
+    color: #666;
+    padding: 4px 3px;
+    font-size: 8px;
+    text-transform: uppercase;
+    text-align: center;
+    letter-spacing: 0.3px;
+}
+.pa-funnel-table td {
+    text-align: center;
+    padding: 5px 3px;
+    vertical-align: top;
+}
+.pa-funnel-table td:first-child {
+    text-align: left;
+    width: 28px;
+}
+.pa-funnel-table tbody tr {
+    border-bottom: 1px solid #e9ecef;
+}
+.pa-funnel-table tbody tr:last-child {
+    border-bottom: none;
+}
+.pa-funnel-base {
+    background: #f0f2f5;
+    width: 44px;
+}
+.pa-funnel-sep {
+    border-left: 2px solid #e5e7eb;
+}
+.pa-tag {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 700;
+}
+.pa-tag-aplus { background: #d1fae5; color: #065f46; }
+.pa-tag-aminus { background: #6b7280; color: #fff; }
+.pa-tag-bp { background: #fee2e2; color: #991b1b; }
+.pa-tag-fa { background: #fce7f3; color: #9d174d; }
+
 /* Graphique SVG */
 .pa-chart-wrap {
     overflow-x: auto;

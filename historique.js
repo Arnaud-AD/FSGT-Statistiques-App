@@ -2344,29 +2344,20 @@ const PassAttackAnalyzer = {
         var html = '<div class="pa-subsection">';
         html += '<div class="pa-subtitle">Mental Passeur</div>';
 
-        // D1 : Re-confiance apres echec
-        if (match) {
-            html += this._renderReFeed(match, team);
-        } else if (mode === 'year') {
-            // Annee : agreger depuis tous les matchs
-            var filtered = YearStatsView._lastFiltered || [];
-            var self = this;
-            var merged = {};
-            filtered.forEach(function(m) {
-                var data = self.computeReFeedAfterFailure(m, 'home');
-                Object.keys(data).forEach(function(name) {
-                    if (!merged[name]) merged[name] = { reFeed: 0, switch_: 0, reFeedSuccess: 0, switchSuccess: 0, total: 0 };
-                    var d = data[name], t = merged[name];
-                    t.reFeed += d.reFeed; t.switch_ += d.switch_;
-                    t.reFeedSuccess += d.reFeedSuccess; t.switchSuccess += d.switchSuccess;
-                    t.total += d.total;
-                });
-            });
-            html += this._renderReFeedTable(merged);
-        }
-
-        // D2 : Distribution sous pression
+        // D1 : Distribution sous pression
         html += this._renderPressure(sequences);
+
+        // D2 : Funnel re-feed/switch par attaquant (chain-based)
+        var matches;
+        if (match) {
+            matches = [match];
+        } else if (mode === 'year') {
+            matches = YearStatsView._lastFiltered || [];
+        }
+        if (matches && matches.length > 0) {
+            var funnelData = this.computeMentalFunnel(matches, team);
+            html += this._renderMentalFunnel(funnelData);
+        }
 
         html += '</div>';
         return html;
@@ -2468,6 +2459,149 @@ const PassAttackAnalyzer = {
         });
 
         html += '</tbody></table>';
+        return html;
+    },
+
+    // --- Mental Passeur : Funnel re-feed/switch (chain-based) ---
+
+    computeMentalFunnel(matches, team) {
+        var self = this;
+        var data = {}; // keyed by attacker name
+
+        function initAttacker() {
+            return {
+                totalAtt: 0,
+                base: { aplus: 0, aminus: 0, bp: 0, fa: 0 },
+                situations: {
+                    aplus:  { total: 0, rf: 0, rfAplus: 0, sw: 0, swAplus: 0 },
+                    aminus: { total: 0, rf: 0, rfAplus: 0, sw: 0, swAplus: 0 },
+                    bp:     { total: 0, rf: 0, rfAplus: 0, sw: 0, swAplus: 0 },
+                    fa:     { total: 0, rf: 0, rfAplus: 0, sw: 0, swAplus: 0 }
+                }
+            };
+        }
+
+        matches.forEach(function(match) {
+            var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+            completedSets.forEach(function(set) {
+                var sequences = self.analyzeSet(set, team);
+
+                // Filtrer : passes du Passeur avec attaquant et categorie (pas relance)
+                var passeurSeqs = sequences.filter(function(s) {
+                    return s.passerRole === 'Passeur' && s.attacker && s.attackCat;
+                });
+
+                // Base stats
+                passeurSeqs.forEach(function(s) {
+                    if (!data[s.attacker]) data[s.attacker] = initAttacker();
+                    data[s.attacker].totalAtt++;
+                    data[s.attacker].base[s.attackCat]++;
+                });
+
+                // Chain : paires consecutives dans le set
+                for (var i = 0; i < passeurSeqs.length - 1; i++) {
+                    var current = passeurSeqs[i];
+                    var next = passeurSeqs[i + 1];
+                    var cat = current.attackCat;
+                    var attacker = current.attacker;
+
+                    if (!data[attacker]) data[attacker] = initAttacker();
+                    var sit = data[attacker].situations[cat];
+                    sit.total++;
+
+                    if (next.attacker === attacker) {
+                        sit.rf++;
+                        if (next.attackCat === 'aplus') sit.rfAplus++;
+                    } else {
+                        sit.sw++;
+                        if (next.attackCat === 'aplus') sit.swAplus++;
+                    }
+                }
+            });
+        });
+
+        return data;
+    },
+
+    _renderMentalFunnel(funnelData) {
+        var attackers = Object.keys(funnelData);
+        if (attackers.length === 0) return '';
+
+        // Trier par totalAtt decroissant
+        attackers.sort(function(a, b) { return funnelData[b].totalAtt - funnelData[a].totalAtt; });
+
+        // Filtrer : minimum 10 attaques
+        attackers = attackers.filter(function(a) { return funnelData[a].totalAtt >= 10; });
+        if (attackers.length === 0) return '';
+
+        var html = '';
+        var cats = ['aplus', 'aminus', 'bp', 'fa'];
+        var catLabels = { aplus: 'A+', aminus: 'A\u2212', bp: 'BP', fa: 'FA' };
+        var catTags = { aplus: 'pa-tag-aplus', aminus: 'pa-tag-aminus', bp: 'pa-tag-bp', fa: 'pa-tag-fa' };
+
+        attackers.forEach(function(name) {
+            var d = funnelData[name];
+            var totalSit = 0;
+            cats.forEach(function(c) { totalSit += d.situations[c].total; });
+
+            html += '<div class="pa-funnel-card">';
+            html += '<div class="pa-funnel-header">';
+            html += '<div>' + SharedComponents.renderRoleDots(name) + '<strong>' + Utils.escapeHtml(name) + '</strong></div>';
+            html += '<span class="pa-stat-detail">' + d.totalAtt + ' att \u00b7 ' + totalSit + ' situations</span>';
+            html += '</div>';
+
+            html += '<table class="pa-funnel-table">';
+            html += '<thead>';
+            html += '<tr>';
+            html += '<th rowspan="2" style="text-align:left"></th>';
+            html += '<th rowspan="2" class="pa-funnel-base">Base</th>';
+            html += '<th colspan="2" class="pa-funnel-sep">\ud83d\udd01 Re-feed</th>';
+            html += '<th colspan="2" class="pa-funnel-sep">\ud83d\udd00 Switch</th>';
+            html += '</tr>';
+            html += '<tr>';
+            html += '<th class="pa-funnel-sep">%</th><th>\u2192 A+</th>';
+            html += '<th class="pa-funnel-sep">%</th><th>\u2192 A+</th>';
+            html += '</tr>';
+            html += '</thead><tbody>';
+
+            cats.forEach(function(cat) {
+                var base = d.base[cat];
+                var basePct = d.totalAtt > 0 ? Math.round(base / d.totalAtt * 100) : 0;
+                var s = d.situations[cat];
+
+                html += '<tr>';
+                html += '<td><span class="pa-tag ' + catTags[cat] + '">' + catLabels[cat] + '</span></td>';
+
+                // Base
+                var baseHighlight = cat === 'aplus' ? ' pa-positive' : (cat === 'fa' && basePct >= 15 ? ' pa-negative' : '');
+                html += '<td class="pa-funnel-base"><span class="' + baseHighlight + '"><strong>' + basePct + '%</strong></span>';
+                html += '<br><span class="pa-stat-detail">' + base + '</span></td>';
+
+                if (s.total === 0) {
+                    html += '<td class="pa-funnel-sep" colspan="2">\u2014</td>';
+                    html += '<td class="pa-funnel-sep" colspan="2">\u2014</td>';
+                } else {
+                    var rfPct = Math.round(s.rf / s.total * 100);
+                    var rfAplusPct = s.rf > 0 ? Math.round(s.rfAplus / s.rf * 100) : 0;
+                    var swPct = Math.round(s.sw / s.total * 100);
+                    var swAplusPct = s.sw > 0 ? Math.round(s.swAplus / s.sw * 100) : 0;
+
+                    var rfBold = rfPct >= swPct ? ' style="font-weight:700"' : '';
+                    var swBold = swPct > rfPct ? ' style="font-weight:700"' : '';
+
+                    html += '<td class="pa-funnel-sep"' + rfBold + '>' + rfPct + '%<br><span class="pa-stat-detail">' + s.rf + '/' + s.total + '</span></td>';
+                    html += '<td>' + (rfAplusPct >= 50 ? '<span class="pa-positive">' : '') + rfAplusPct + '%' + (rfAplusPct >= 50 ? '</span>' : '') + '<br><span class="pa-stat-detail">' + s.rfAplus + '/' + s.rf + '</span></td>';
+
+                    html += '<td class="pa-funnel-sep"' + swBold + '>' + swPct + '%<br><span class="pa-stat-detail">' + s.sw + '/' + s.total + '</span></td>';
+                    html += '<td>' + (swAplusPct >= 50 ? '<span class="pa-positive">' : '') + swAplusPct + '%' + (swAplusPct >= 50 ? '</span>' : '') + '<br><span class="pa-stat-detail">' + s.swAplus + '/' + s.sw + '</span></td>';
+                }
+
+                html += '</tr>';
+            });
+
+            html += '</tbody></table></div>';
+        });
+
         return html;
     },
 
