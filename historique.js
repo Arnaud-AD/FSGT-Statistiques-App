@@ -2546,7 +2546,7 @@ const PassAttackAnalyzer = {
 
             html += '<div class="pa-funnel-card">';
             html += '<div class="pa-funnel-header">';
-            html += '<div>' + SharedComponents.renderRoleDots(name) + '<strong>' + Utils.escapeHtml(name) + '</strong></div>';
+            html += '<div class="player-cell">' + SharedComponents.renderRoleDots(name) + '<strong>' + Utils.escapeHtml(name) + '</strong></div>';
             html += '<span class="pa-stat-detail">' + d.totalAtt + ' att \u00b7 ' + totalSit + ' situations</span>';
             html += '</div>';
 
