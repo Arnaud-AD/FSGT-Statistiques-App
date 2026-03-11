@@ -1688,6 +1688,8 @@ const PassAttackAnalyzer = {
                     contextType: contextType,
                     contextPlayer: contextAction ? contextAction.player : null,
                     contextRole: contextAction ? (contextAction.role || null) : null,
+                    contextQuality: (contextType === 'reception' && contextAction)
+                        ? StatsRepair._recQualityToNote(contextAction.quality) : null,
                     receptionZone: receptionZone,
                     recReversalZone: recReversalZone,
                     passScore: passScore,
@@ -1765,10 +1767,21 @@ const PassAttackAnalyzer = {
     },
 
     computeSamePlayerRecAttack(sequences) {
-        // Filtrer : receptions faites par des attaquants (R4/Pointu) uniquement
-        var recSeqs = sequences.filter(function(s) {
+        // Filtrer : receptions R4/R3 uniquement (R2/R1/FR = pas de vrai choix du passeur)
+        // + faites par des attaquants (R4/Pointu) uniquement
+        var allRecSeqs = sequences.filter(function(s) {
             return s.contextType === 'reception' && s.attacker
                 && s.contextRole && s.contextRole !== 'Passeur' && s.contextRole !== 'Centre';
+        });
+        // DEBUG: vérifier les valeurs de contextQuality
+        var qualCounts = { null_: 0, q0: 0, q1: 0, q2: 0, q3: 0, q4: 0 };
+        allRecSeqs.forEach(function(s) {
+            if (s.contextQuality === null || s.contextQuality === undefined) qualCounts.null_++;
+            else qualCounts['q' + s.contextQuality]++;
+        });
+        console.log('[RecAtt] contextQuality distribution:', JSON.stringify(qualCounts), 'total:', allRecSeqs.length);
+        var recSeqs = allRecSeqs.filter(function(s) {
+            return s.contextQuality !== null && s.contextQuality >= 3;
         });
         var samePlayer = recSeqs.filter(function(s) { return s.samePlayerRecAttack; });
 
@@ -2031,14 +2044,14 @@ const PassAttackAnalyzer = {
         // A. Distribution Passeur (toggle integre dans le titre)
         html += this._renderDistribution(passeurSeqs, mode);
 
-        // B. Distribution Transition (sans toggle)
-        html += this._renderDistributionTransition(transitionSeqs);
+        // B. Distribution Transition
+        html += this._renderDistributionTransition(transitionSeqs, mode);
 
         // C. Enchainement recep/attaque (Passeur uniquement)
-        html += this._renderSamePlayerRecAttack(passeurSeqs);
+        html += this._renderSamePlayerRecAttack(passeurSeqs, mode);
 
         // D. Renversement (Passeur uniquement)
-        html += this._renderReversals(passeurSeqs);
+        html += this._renderReversals(passeurSeqs, mode);
 
         // E. Mental passeur (Passeur uniquement)
         html += this._renderMentalPasseur(match, team, passeurSeqs, mode);
@@ -2091,6 +2104,67 @@ const PassAttackAnalyzer = {
         }
     },
 
+    // Tri Distribution Passeur — état
+    _distSortCol: 'passes', // 'zone','passes','pct','aplus','aminus','fabp','pm'
+    _distSortAsc: false,
+
+    _distSortIcon(col) {
+        if (this._distSortCol === col) {
+            var arrow = this._distSortAsc ? '\u25B2' : '\u25BC';
+            return ' <span class="sort-arrow active">' + arrow + '</span>';
+        }
+        return ' <span class="sort-arrow">\u25BC</span>';
+    },
+
+    _getAttackerSortValue(a, col, distTotal) {
+        var fabp = (a.attackCats.fa || 0) + (a.attackCats.bp || 0);
+        switch (col) {
+            case 'passes': return a.total;
+            case 'pct': return distTotal > 0 ? a.total / distTotal : 0;
+            case 'aplus': return a.total > 0 ? (a.attackCats.aplus || 0) / a.total : 0;
+            case 'aminus': return a.total > 0 ? (a.attackCats.aminus || 0) / a.total : 0;
+            case 'fabp': return a.total > 0 ? fabp / a.total : 0;
+            case 'pm': return (a.attackCats.aplus || 0) - fabp;
+            default: return a.total;
+        }
+    },
+
+    _onDistSort(col, mode, table) {
+        var currentCol, currentAsc;
+        if (table === 'transition') {
+            currentCol = this._distTransSortCol; currentAsc = this._distTransSortAsc;
+        } else if (table === 'recatt') {
+            currentCol = this._recAttSortCol; currentAsc = this._recAttSortAsc;
+        } else if (table === 'reversal') {
+            currentCol = this._revSortCol; currentAsc = this._revSortAsc;
+        } else {
+            currentCol = this._distSortCol; currentAsc = this._distSortAsc;
+        }
+        var newAsc = (currentCol === col) ? !currentAsc : (col === 'zone' || col === 'player' || col === 'type');
+        if (table === 'transition') {
+            this._distTransSortCol = col; this._distTransSortAsc = newAsc;
+        } else if (table === 'recatt') {
+            this._recAttSortCol = col; this._recAttSortAsc = newAsc;
+        } else if (table === 'reversal') {
+            this._revSortCol = col; this._revSortAsc = newAsc;
+        } else {
+            this._distSortCol = col; this._distSortAsc = newAsc;
+        }
+        this._onToggle(this._contextFilter, mode);
+    },
+
+    // Tri Distribution Transition — état séparé
+    _distTransSortCol: 'passes',
+    _distTransSortAsc: false,
+
+    _distTransSortIcon(col) {
+        if (this._distTransSortCol === col) {
+            var arrow = this._distTransSortAsc ? '\u25B2' : '\u25BC';
+            return ' <span class="sort-arrow active">' + arrow + '</span>';
+        }
+        return ' <span class="sort-arrow">\u25BC</span>';
+    },
+
     _renderDistribution(sequences) {
         var mode = arguments[1] || 'match';
         var dist = this.computeDistribution(sequences, this._contextFilter);
@@ -2102,10 +2176,19 @@ const PassAttackAnalyzer = {
         html += '<span style="color:var(--cat-passe)">Distribution Passeur</span>';
         html += this._renderToggle(mode);
         html += '</div>';
-        html += '<table class="pa-table">';
-        html += '<thead><tr><th>Zone</th><th>Passes</th><th>%</th><th>A+</th><th>A\u2212</th><th>FA(BP)</th><th>+/\u2212</th></tr></thead>';
+        html += '<table class="pa-table pa-dist-table" data-pa-mode="' + mode + '">';
+        html += '<thead><tr>';
+        html += '<th class="pa-sortable" data-pa-sort="zone">Zone' + self._distSortIcon('zone') + '</th>';
+        html += '<th class="pa-sortable" data-pa-sort="passes">Passes' + self._distSortIcon('passes') + '</th>';
+        html += '<th class="pa-sortable" data-pa-sort="pct">%' + self._distSortIcon('pct') + '</th>';
+        html += '<th class="pa-sortable" data-pa-sort="aplus">A+' + self._distSortIcon('aplus') + '</th>';
+        html += '<th class="pa-sortable" data-pa-sort="aminus">A\u2212' + self._distSortIcon('aminus') + '</th>';
+        html += '<th class="pa-sortable" data-pa-sort="fabp">FA(BP)' + self._distSortIcon('fabp') + '</th>';
+        html += '<th class="pa-sortable" data-pa-sort="pm">+/\u2212' + self._distSortIcon('pm') + '</th>';
+        html += '</tr></thead>';
         html += '<tbody>';
 
+        var rolesMap = SharedComponents.playerRolesMap || {};
         Object.keys(self.ZONE_COLORS).forEach(function(zone) {
             var z = dist.zones[zone];
             var pct = dist.total > 0 ? Math.round(z.total / dist.total * 100) : 0;
@@ -2124,8 +2207,23 @@ const PassAttackAnalyzer = {
             html += '<td class="' + (plusMinus > 0 ? 'pa-positive' : plusMinus < 0 ? 'pa-negative' : '') + '">' + (plusMinus > 0 ? '+' : '') + plusMinus + '</td>';
             html += '</tr>';
 
-            // Sous-lignes par attaquant
+            // Sous-lignes par attaquant — tri par colonne ou par affinité rôle/zone
+            var sortCol = self._distSortCol;
+            var sortAsc = self._distSortAsc;
             var attackers = Object.keys(z.byAttacker).sort(function(a, b) {
+                if (sortCol === 'zone') {
+                    // Tri par affinité rôle/zone : pur → principal → secondaire
+                    var infoA = rolesMap[a] || {}, infoB = rolesMap[b] || {};
+                    var rolesA = Object.keys(infoA.roles || {}), rolesB = Object.keys(infoB.roles || {});
+                    var prioA = infoA.primaryRole === zone ? (rolesA.length === 1 ? 0 : 1) : 2;
+                    var prioB = infoB.primaryRole === zone ? (rolesB.length === 1 ? 0 : 1) : 2;
+                    if (prioA !== prioB) return sortAsc ? prioA - prioB : prioB - prioA;
+                    return z.byAttacker[b].total - z.byAttacker[a].total;
+                }
+                // Tri numérique par colonne
+                var va = self._getAttackerSortValue(z.byAttacker[a], sortCol, dist.total);
+                var vb = self._getAttackerSortValue(z.byAttacker[b], sortCol, dist.total);
+                if (va !== vb) return sortAsc ? va - vb : vb - va;
                 return z.byAttacker[b].total - z.byAttacker[a].total;
             });
             attackers.forEach(function(name) {
@@ -2152,7 +2250,8 @@ const PassAttackAnalyzer = {
         return html;
     },
 
-    _renderDistributionTransition(sequences) {
+    _renderDistributionTransition(sequences, mode) {
+        mode = mode || 'match';
         // Quand le Passeur attaque en transition, forcer zone Pointu
         var adjusted = sequences.map(function(s) {
             if (s.attackerRole === 'Passeur' && s.zone !== 'Pointu') {
@@ -2169,10 +2268,19 @@ const PassAttackAnalyzer = {
         var self = this;
         var html = '<div class="pa-subsection">';
         html += '<div class="pa-subtitle">Distribution Transition</div>';
-        html += '<table class="pa-table">';
-        html += '<thead><tr><th>Zone</th><th>Passes</th><th>%</th><th>A+</th><th>A\u2212</th><th>FA(BP)</th><th>+/\u2212</th></tr></thead>';
+        html += '<table class="pa-table pa-dist-table" data-pa-mode="' + mode + '" data-pa-table="transition">';
+        html += '<thead><tr>';
+        html += '<th class="pa-sortable" data-pa-sort="zone" data-pa-table="transition">Zone' + self._distTransSortIcon('zone') + '</th>';
+        html += '<th class="pa-sortable" data-pa-sort="passes" data-pa-table="transition">Passes' + self._distTransSortIcon('passes') + '</th>';
+        html += '<th class="pa-sortable" data-pa-sort="pct" data-pa-table="transition">%' + self._distTransSortIcon('pct') + '</th>';
+        html += '<th class="pa-sortable" data-pa-sort="aplus" data-pa-table="transition">A+' + self._distTransSortIcon('aplus') + '</th>';
+        html += '<th class="pa-sortable" data-pa-sort="aminus" data-pa-table="transition">A\u2212' + self._distTransSortIcon('aminus') + '</th>';
+        html += '<th class="pa-sortable" data-pa-sort="fabp" data-pa-table="transition">FA(BP)' + self._distTransSortIcon('fabp') + '</th>';
+        html += '<th class="pa-sortable" data-pa-sort="pm" data-pa-table="transition">+/\u2212' + self._distTransSortIcon('pm') + '</th>';
+        html += '</tr></thead>';
         html += '<tbody>';
 
+        var rolesMap = SharedComponents.playerRolesMap || {};
         Object.keys(self.ZONE_COLORS).forEach(function(zone) {
             var z = dist.zones[zone];
             var pct = dist.total > 0 ? Math.round(z.total / dist.total * 100) : 0;
@@ -2191,8 +2299,21 @@ const PassAttackAnalyzer = {
             html += '<td class="' + (plusMinus > 0 ? 'pa-positive' : plusMinus < 0 ? 'pa-negative' : '') + '">' + (plusMinus > 0 ? '+' : '') + plusMinus + '</td>';
             html += '</tr>';
 
-            // Sous-lignes par attaquant
+            // Sous-lignes par attaquant — tri par colonne ou par rôle
+            var sortCol = self._distTransSortCol;
+            var sortAsc = self._distTransSortAsc;
             var attackers = Object.keys(z.byAttacker).sort(function(a, b) {
+                if (sortCol === 'zone') {
+                    var infoA = rolesMap[a] || {}, infoB = rolesMap[b] || {};
+                    var rolesA = Object.keys(infoA.roles || {}), rolesB = Object.keys(infoB.roles || {});
+                    var prioA = infoA.primaryRole === zone ? (rolesA.length === 1 ? 0 : 1) : 2;
+                    var prioB = infoB.primaryRole === zone ? (rolesB.length === 1 ? 0 : 1) : 2;
+                    if (prioA !== prioB) return sortAsc ? prioA - prioB : prioB - prioA;
+                    return z.byAttacker[b].total - z.byAttacker[a].total;
+                }
+                var va = self._getAttackerSortValue(z.byAttacker[a], sortCol, dist.total);
+                var vb = self._getAttackerSortValue(z.byAttacker[b], sortCol, dist.total);
+                if (va !== vb) return sortAsc ? va - vb : vb - va;
                 return z.byAttacker[b].total - z.byAttacker[a].total;
             });
             attackers.forEach(function(name) {
@@ -2219,20 +2340,69 @@ const PassAttackAnalyzer = {
         return html;
     },
 
-    _renderSamePlayerRecAttack(sequences) {
+    // Tri Enchaînement Réception → Attaque — état
+    _recAttSortCol: 'recep',
+    _recAttSortAsc: false,
+
+    // Tri Renversement — état
+    _revSortCol: 'pct',
+    _revSortAsc: false,
+
+    _revSortIcon(col) {
+        if (this._revSortCol === col) {
+            var arrow = this._revSortAsc ? '\u25B2' : '\u25BC';
+            return ' <span class="sort-arrow active">' + arrow + '</span>';
+        }
+        return ' <span class="sort-arrow">\u25BC</span>';
+    },
+
+    _recAttSortIcon(col) {
+        if (this._recAttSortCol === col) {
+            var arrow = this._recAttSortAsc ? '\u25B2' : '\u25BC';
+            return ' <span class="sort-arrow active">' + arrow + '</span>';
+        }
+        return ' <span class="sort-arrow">\u25BC</span>';
+    },
+
+    _renderSamePlayerRecAttack(sequences, mode) {
+        mode = mode || 'match';
         var data = this.computeSamePlayerRecAttack(sequences);
         if (data.total === 0) return '';
 
+        var self = this;
         var html = '<div class="pa-subsection">';
         html += '<div class="pa-subtitle">Encha\u00eenement R\u00e9ception \u2192 Attaque</div>';
 
         // Tableau par joueur
-        html += '<table class="pa-table">';
-        html += '<thead><tr><th>Joueur</th><th>Recep</th><th>Encha\u00een\u00e9</th><th>%</th></tr></thead>';
+        html += '<table class="pa-table pa-dist-table" data-pa-mode="' + mode + '" data-pa-table="recatt">';
+        html += '<thead><tr>';
+        html += '<th class="pa-sortable" data-pa-sort="player" data-pa-table="recatt">Joueur' + self._recAttSortIcon('player') + '</th>';
+        html += '<th class="pa-sortable" data-pa-sort="recep" data-pa-table="recatt">Recep' + self._recAttSortIcon('recep') + '</th>';
+        html += '<th class="pa-sortable" data-pa-sort="chained" data-pa-table="recatt">Encha\u00een\u00e9' + self._recAttSortIcon('chained') + '</th>';
+        html += '<th class="pa-sortable" data-pa-sort="pct" data-pa-table="recatt">%' + self._recAttSortIcon('pct') + '</th>';
+        html += '</tr></thead>';
         html += '<tbody>';
 
-        // Trier par nombre de receptions decroissant
+        var sortCol = this._recAttSortCol;
+        var sortAsc = this._recAttSortAsc;
+        var rolesMap = SharedComponents.playerRolesMap || {};
         var players = Object.keys(data.byPlayer).sort(function(a, b) {
+            if (sortCol === 'player') {
+                // Tri par rôle
+                var infoA = rolesMap[a] || {}, infoB = rolesMap[b] || {};
+                var rolesA = Object.keys(infoA.roles || {}), rolesB = Object.keys(infoB.roles || {});
+                var prioA = infoA.primaryRole ? rolesA.length : 99;
+                var prioB = infoB.primaryRole ? rolesB.length : 99;
+                if (prioA !== prioB) return sortAsc ? prioA - prioB : prioB - prioA;
+                return data.byPlayer[b].total - data.byPlayer[a].total;
+            }
+            var va, vb;
+            var pa = data.byPlayer[a], pb = data.byPlayer[b];
+            if (sortCol === 'recep') { va = pa.total; vb = pb.total; }
+            else if (sortCol === 'chained') { va = pa.same; vb = pb.same; }
+            else if (sortCol === 'pct') { va = pa.total > 0 ? pa.same / pa.total : 0; vb = pb.total > 0 ? pb.same / pb.total : 0; }
+            else { va = pa.total; vb = pb.total; }
+            if (va !== vb) return sortAsc ? va - vb : vb - va;
             return data.byPlayer[b].total - data.byPlayer[a].total;
         });
         players.forEach(function(name) {
@@ -2258,7 +2428,9 @@ const PassAttackAnalyzer = {
         return html;
     },
 
-    _renderReversals(sequences) {
+    _renderReversals(sequences, mode) {
+        var self = this;
+        mode = mode || 'match';
         var data = this.computeReversals(sequences);
         if (data.eligible === 0) return '';
 
@@ -2280,51 +2452,69 @@ const PassAttackAnalyzer = {
             return row;
         }
 
+        // Sort value for a sub-row
+        function getSortValue(stats, col, zoneTot) {
+            switch (col) {
+                case 'type': return stats.total; // alphabetical not meaningful, sort by count
+                case 'pct': return zoneTot > 0 ? stats.total / zoneTot : 0;
+                case 'qual': return stats.quality !== null ? stats.quality : -1;
+                case 'aplus': return stats.total > 0 ? (stats.aplus || 0) / stats.total : 0;
+                case 'aminus': return stats.total > 0 ? (stats.aminus || 0) / stats.total : 0;
+                case 'fabp': return stats.total > 0 ? (stats.fabp || 0) / stats.total : 0;
+                default: return stats.total;
+            }
+        }
+
+        // Sort sub-rows within a zone
+        function sortSubRows(subRows, zoneTot) {
+            var sortCol = self._revSortCol;
+            var sortAsc = self._revSortAsc;
+            return subRows.filter(function(r) { return r.stats.total > 0; }).sort(function(a, b) {
+                var va = getSortValue(a.stats, sortCol, zoneTot);
+                var vb = getSortValue(b.stats, sortCol, zoneTot);
+                if (va !== vb) return sortAsc ? va - vb : vb - va;
+                return b.stats.total - a.stats.total;
+            });
+        }
+
         var html = '<div class="pa-subsection">';
         html += '<div class="pa-subtitle">Renversement</div>';
-        html += '<table class="pa-table">';
-        html += '<thead><tr><th>Type</th><th>%</th><th>Qual.Passe</th><th>A+</th><th>A\u2212</th><th>FA(BP)</th></tr></thead>';
+        html += '<table class="pa-table pa-dist-table" data-pa-mode="' + mode + '" data-pa-table="reversal">';
+        html += '<thead><tr>';
+        html += '<th class="pa-sortable" data-pa-sort="type" data-pa-table="reversal">Type' + self._revSortIcon('type') + '</th>';
+        html += '<th class="pa-sortable" data-pa-sort="pct" data-pa-table="reversal">%' + self._revSortIcon('pct') + '</th>';
+        html += '<th class="pa-sortable" data-pa-sort="qual" data-pa-table="reversal">Qual.Passe' + self._revSortIcon('qual') + '</th>';
+        html += '<th class="pa-sortable" data-pa-sort="aplus" data-pa-table="reversal">A+' + self._revSortIcon('aplus') + '</th>';
+        html += '<th class="pa-sortable" data-pa-sort="aminus" data-pa-table="reversal">A\u2212' + self._revSortIcon('aminus') + '</th>';
+        html += '<th class="pa-sortable" data-pa-sort="fabp" data-pa-table="reversal">FA(BP)' + self._revSortIcon('fabp') + '</th>';
+        html += '</tr></thead>';
         html += '<tbody>';
 
         // ← R4
+        var r4SubRows = [
+            { label: '\u2514 Grand c\u00f4t\u00e9 \ud83c\udf0a <span class="pa-stat-detail">(' + data.r4Grand.total + ')</span>', stats: data.r4Grand },
+            { label: '\u2514 Petit c\u00f4t\u00e9 <span class="pa-stat-detail">(' + data.r4Petit.total + ')</span>', stats: data.r4Petit },
+            { label: '\u2514 Classique <span class="pa-stat-detail">(' + data.r4Classique.total + ')</span>', stats: data.r4Classique }
+        ];
         html += renderRow('pa-zone-row',
             '<span class="pt-role-header-bar" style="background:' + this.ZONE_COLORS['R4'] + '"></span> <strong>\u2190 R4</strong> <strong>(' + data.r4.total + ')</strong>',
             data.r4, data.eligible);
-        if (data.r4Grand.total > 0) {
-            html += renderRow('pa-player-row',
-                '\u2514 Grand c\u00f4t\u00e9 \ud83c\udf0a <span class="pa-stat-detail">(' + data.r4Grand.total + ')</span>',
-                data.r4Grand, data.r4.total);
-        }
-        if (data.r4Petit.total > 0) {
-            html += renderRow('pa-player-row',
-                '\u2514 Petit c\u00f4t\u00e9 <span class="pa-stat-detail">(' + data.r4Petit.total + ')</span>',
-                data.r4Petit, data.r4.total);
-        }
-        if (data.r4Classique.total > 0) {
-            html += renderRow('pa-player-row',
-                '\u2514 Classique <span class="pa-stat-detail">(' + data.r4Classique.total + ')</span>',
-                data.r4Classique, data.r4.total);
-        }
+        sortSubRows(r4SubRows, data.r4.total).forEach(function(r) {
+            html += renderRow('pa-player-row', r.label, r.stats, data.r4.total);
+        });
 
         // → Pointu
+        var pointuSubRows = [
+            { label: '\u2514 Grand c\u00f4t\u00e9 \ud83c\udf0a <span class="pa-stat-detail">(' + data.pointuGrand.total + ')</span>', stats: data.pointuGrand },
+            { label: '\u2514 Petit c\u00f4t\u00e9 <span class="pa-stat-detail">(' + data.pointuPetit.total + ')</span>', stats: data.pointuPetit },
+            { label: '\u2514 Classique <span class="pa-stat-detail">(' + data.pointuClassique.total + ')</span>', stats: data.pointuClassique }
+        ];
         html += renderRow('pa-zone-row',
             '<span class="pt-role-header-bar" style="background:' + this.ZONE_COLORS['Pointu'] + '"></span> <strong>\u2192 Pointu</strong> <strong>(' + data.pointu.total + ')</strong>',
             data.pointu, data.eligible);
-        if (data.pointuGrand.total > 0) {
-            html += renderRow('pa-player-row',
-                '\u2514 Grand c\u00f4t\u00e9 \ud83c\udf0a <span class="pa-stat-detail">(' + data.pointuGrand.total + ')</span>',
-                data.pointuGrand, data.pointu.total);
-        }
-        if (data.pointuPetit.total > 0) {
-            html += renderRow('pa-player-row',
-                '\u2514 Petit c\u00f4t\u00e9 <span class="pa-stat-detail">(' + data.pointuPetit.total + ')</span>',
-                data.pointuPetit, data.pointu.total);
-        }
-        if (data.pointuClassique.total > 0) {
-            html += renderRow('pa-player-row',
-                '\u2514 Classique <span class="pa-stat-detail">(' + data.pointuClassique.total + ')</span>',
-                data.pointuClassique, data.pointu.total);
-        }
+        sortSubRows(pointuSubRows, data.pointu.total).forEach(function(r) {
+            html += renderRow('pa-player-row', r.label, r.stats, data.pointu.total);
+        });
 
         // Total
         html += '<tr class="pa-zone-row" style="border-top:2px solid var(--border-color)">';
@@ -2356,7 +2546,7 @@ const PassAttackAnalyzer = {
         }
         if (matches && matches.length > 0) {
             var funnelData = this.computeMentalFunnel(matches, team);
-            html += this._renderMentalFunnel(funnelData);
+            html += this._renderMentalFunnel(funnelData, mode);
         }
 
         html += '</div>';
@@ -2523,15 +2713,17 @@ const PassAttackAnalyzer = {
         return data;
     },
 
-    _renderMentalFunnel(funnelData) {
+    _renderMentalFunnel(funnelData, mode) {
         var attackers = Object.keys(funnelData);
         if (attackers.length === 0) return '';
 
         // Trier par totalAtt decroissant
         attackers.sort(function(a, b) { return funnelData[b].totalAtt - funnelData[a].totalAtt; });
 
-        // Filtrer : minimum 10 attaques
-        attackers = attackers.filter(function(a) { return funnelData[a].totalAtt >= 10; });
+        // Filtrer : minimum 10 attaques en mode Année uniquement
+        if (mode === 'year') {
+            attackers = attackers.filter(function(a) { return funnelData[a].totalAtt >= 10; });
+        }
         if (attackers.length === 0) return '';
 
         var html = '';
@@ -8608,6 +8800,17 @@ document.addEventListener('DOMContentLoaded', async function() {
         btn.addEventListener('click', function() {
             TabNav.switchTo(btn.dataset.tab);
         });
+    });
+
+    // Tri colonnes Distribution Passeur + Transition (delegation)
+    document.addEventListener('click', function(e) {
+        var th = e.target.closest('[data-pa-sort]');
+        if (!th) return;
+        var col = th.getAttribute('data-pa-sort');
+        var tableEl = th.closest('.pa-dist-table');
+        var mode = tableEl ? tableEl.getAttribute('data-pa-mode') : 'match';
+        var tableName = th.getAttribute('data-pa-table') || 'passeur';
+        PassAttackAnalyzer._onDistSort(col, mode, tableName);
     });
 
     // Toggle sections collapsibles (delegation) + animation ouverture/fermeture

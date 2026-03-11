@@ -2052,6 +2052,14 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
     padding: 0 4px;
 }
 
+.pa-sortable {
+    cursor: pointer;
+    user-select: none;
+}
+.pa-sortable:hover .sort-arrow:not(.active) {
+    opacity: 0.25;
+}
+
 .pa-subtitle {
     font-family: 'Google Sans', sans-serif;
     font-size: 12px;
