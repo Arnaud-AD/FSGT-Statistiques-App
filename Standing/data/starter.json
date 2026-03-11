@@ -5,10 +5,10 @@
     "name": "Starter",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/16",
-    "lastUpdated": "2026-02-21T00:42:33",
+    "lastUpdated": "2026-03-11T10:28:28",
     "teamCount": 8,
-    "matchesPlayed": 33,
-    "matchesUpcoming": 23
+    "matchesPlayed": 34,
+    "matchesUpcoming": 22
   },
   "teams": {
     "bach": {
@@ -79,7 +79,7 @@
       ],
       "formRetour": [
         "D",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -114,7 +114,7 @@
       "formRetour": [
         "W",
         "W",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -158,18 +158,18 @@
     {
       "rank": 4,
       "team": "gail",
-      "mj": 9,
-      "g": 6,
+      "mj": 10,
+      "g": 7,
       "p": 3,
-      "setPlus": 17,
-      "setMinus": 15,
+      "setPlus": 19,
+      "setMinus": 17,
       "ds": 2,
-      "coefSet": "1.13",
-      "ptsPlus": 719,
-      "ptsMinus": 666,
-      "dp": "+53",
+      "coefSet": "1.12",
+      "ptsPlus": 816,
+      "ptsMinus": 758,
+      "dp": "+58",
       "coefPts": "1.08",
-      "pts": 15,
+      "pts": 17,
       "formAller": [
         "W",
         "W",
@@ -181,7 +181,7 @@
       ],
       "formRetour": [
         "W",
-        "D",
+        "W",
         "W",
         "P",
         "P",
@@ -192,18 +192,18 @@
     {
       "rank": 5,
       "team": "daiq",
-      "mj": 8,
+      "mj": 9,
       "g": 3,
-      "p": 5,
-      "setPlus": 10,
-      "setMinus": 16,
+      "p": 6,
+      "setPlus": 12,
+      "setMinus": 18,
       "ds": -6,
-      "coefSet": "0.62",
-      "ptsPlus": 553,
-      "ptsMinus": 603,
-      "dp": "-50",
+      "coefSet": "0.67",
+      "ptsPlus": 645,
+      "ptsMinus": 700,
+      "dp": "-55",
       "coefPts": "0.92",
-      "pts": 11,
+      "pts": 12,
       "formAller": [
         "L",
         "L",
@@ -215,7 +215,7 @@
       ],
       "formRetour": [
         "L",
-        "D",
+        "L",
         "P",
         "P",
         "P",
@@ -250,7 +250,7 @@
       "formRetour": [
         "L",
         "D",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -318,7 +318,7 @@
       "formRetour": [
         "L",
         "D",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -335,6 +335,15 @@
       "scoreAway": 0,
       "homeWin": true,
       "status": "Terminé"
+    },
+    {
+      "date": "18/02/2026",
+      "home": "gail",
+      "away": "daiq",
+      "scoreHome": 2,
+      "scoreAway": 2,
+      "homeWin": true,
+      "status": "Les pts"
     },
     {
       "date": "16/02/2026",
@@ -633,27 +642,21 @@
       "status": "Reporté"
     },
     {
-      "date": "18/02/2026",
-      "home": "gail",
-      "away": "daiq",
-      "status": "Reporté"
-    },
-    {
       "date": "09/03/2026",
       "home": "caip",
       "away": "gvc",
-      "status": "Sem. 9"
-    },
-    {
-      "date": "09/03/2026",
-      "home": "daiq",
-      "away": "coco",
-      "status": "Sem. 10"
+      "status": "Reporté"
     },
     {
       "date": "11/03/2026",
       "home": "gold",
       "away": "bach",
+      "status": "Reporté"
+    },
+    {
+      "date": "16/03/2026",
+      "home": "daiq",
+      "away": "coco",
       "status": "Sem. 10"
     },
     {
@@ -789,11 +792,11 @@
     {
       "rank": 3,
       "team": "gail",
-      "elo": 1545.4,
-      "movement": 21.8,
-      "record": "6-3",
-      "power": 60.5,
-      "calendar": "V vs Gold",
+      "elo": 1559.3,
+      "movement": 13.8,
+      "record": "7-3",
+      "power": 63.7,
+      "calendar": "V x3",
       "diffClass": "diff-easy"
     },
     {
@@ -809,11 +812,11 @@
     {
       "rank": 5,
       "team": "daiq",
-      "elo": 1458.8,
-      "movement": -27.6,
-      "record": "3-5",
-      "power": 40.5,
-      "calendar": "D vs Bachateam",
+      "elo": 1444.9,
+      "movement": -13.8,
+      "record": "3-6",
+      "power": 37.3,
+      "calendar": "D vs Les",
       "diffClass": "diff-hard"
     },
     {
@@ -871,7 +874,8 @@
       1524.2,
       1499.1,
       1523.6,
-      1545.4
+      1545.4,
+      1559.3
     ],
     "gvc": [
       1500,
@@ -903,7 +907,8 @@
       1431.6,
       1457.0,
       1486.3,
-      1458.8
+      1458.8,
+      1444.9
     ],
     "bler": [
       1500,
@@ -968,7 +973,8 @@
           10,
           11,
           13,
-          15
+          15,
+          17
         ],
         "rank": 4
       },
@@ -1009,7 +1015,8 @@
           6,
           8,
           10,
-          11
+          11,
+          12
         ],
         "rank": 5
       },
