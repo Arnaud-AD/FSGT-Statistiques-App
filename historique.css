@@ -2666,3 +2666,206 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
         padding: 0 16px;
     }
 }
+
+/* ==================== PROGRESSION VIEW ==================== */
+
+.prog-section {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e8eaed;
+    padding: 14px;
+    margin-bottom: 12px;
+}
+
+.prog-section-title {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    color: #202124;
+}
+
+/* --- Cartes joueurs --- */
+.prog-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+}
+
+.prog-card {
+    background: #fff;
+    border: 2px solid #e8eaed;
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, opacity 0.15s;
+    position: relative;
+}
+
+.prog-card.selected {
+    border-color: var(--prog-player-color, #0056D2);
+    box-shadow: 0 0 0 1px var(--prog-player-color, #0056D2);
+}
+
+.prog-card.dimmed {
+    opacity: 0.4;
+}
+
+.prog-card-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.prog-card-name {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.prog-card-role {
+    font-size: 10px;
+    font-weight: 500;
+    padding: 1px 6px;
+    border-radius: 10px;
+    color: #fff;
+}
+
+.prog-card-ip {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1;
+    margin-bottom: 2px;
+}
+
+.prog-card-label {
+    font-size: 11px;
+    color: #5f6368;
+    margin-bottom: 4px;
+}
+
+.prog-card-trend {
+    font-size: 11px;
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+.prog-trend-up { color: #137333; }
+.prog-trend-down { color: #c5221f; }
+.prog-trend-stable { color: #5f6368; }
+
+.prog-sparkline {
+    width: 100%;
+    height: 28px;
+}
+
+/* --- Sélecteur métrique --- */
+.prog-metrics {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.prog-metric-btn {
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid #e8eaed;
+    background: #fff;
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+    color: #5f6368;
+    transition: all 0.15s;
+}
+
+.prog-metric-btn.active {
+    background: #0056D2;
+    color: #fff;
+    border-color: #0056D2;
+}
+
+/* --- Graphique principal --- */
+.prog-chart-wrap {
+    position: relative;
+    width: 100%;
+    height: 260px;
+}
+
+.prog-chart-wrap canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* --- Tableaux Forme / Progression --- */
+.prog-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.prog-table th {
+    text-align: left;
+    font-size: 11px;
+    color: #5f6368;
+    font-weight: 500;
+    padding: 6px 8px;
+    border-bottom: 1px solid #e8eaed;
+}
+
+.prog-table td {
+    padding: 8px;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.prog-table tr:hover td {
+    background: #f8f9fa;
+}
+
+.prog-table .prog-player-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.prog-table .prog-player-name {
+    font-weight: 500;
+}
+
+.prog-bar-cell {
+    width: 100px;
+}
+
+.prog-bar {
+    height: 6px;
+    border-radius: 3px;
+    min-width: 2px;
+}
+
+.prog-bar-positive { background: #34a853; }
+.prog-bar-negative { background: #ea4335; }
+
+.prog-diff-positive { color: #137333; font-weight: 500; }
+.prog-diff-negative { color: #c5221f; font-weight: 500; }
+
+/* --- Responsive --- */
+@media (max-width: 480px) {
+    .prog-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .prog-card-ip { font-size: 22px; }
+    .prog-chart-wrap { height: 220px; }
+    .prog-table { font-size: 12px; }
+}
+
+@media (min-width: 1024px) {
+    .prog-cards {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+    .prog-chart-wrap { height: 300px; }
+}

@@ -220,6 +220,7 @@ const SeasonSelector = {
         YearStatsView._rendered = false;
         SetsPlayedView._rendered = false;
         RankingView._rendered = false;
+        ProgressionView._rendered = false;
         ImpactView._seasonRoster = null; // invalider le cache roster
         ImpactView._seasonDirPerSet = null;
 
@@ -6526,6 +6527,600 @@ const RankingView = {
     }
 };
 
+// ==================== PROGRESSION VIEW (Data tab) ====================
+
+const ProgressionView = {
+    _rendered: false,
+    _data: null,
+    _selectedPlayers: {},   // { name: true/false }
+    _currentMetric: 'ip',
+
+    // Palette de couleurs uniques par joueur (fallback si pas de PLAYER_COLORS défini)
+    DEFAULT_PALETTE: [
+        '#0056D2', '#ea4335', '#34a853', '#8b5cf6', '#f59e0b',
+        '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#6366f1'
+    ],
+
+    // Couleurs joueurs — personnalisées par joueur
+    PLAYER_COLORS: {
+        'Alexandre': '#8b5cf6',  // Violet (Passeur)
+        'Arnaud':    '#48D0FA',  // Cyan
+        'Tom':       '#3b82f6',  // Bleu R4
+        'Mikael':    '#60a5fa',  // Bleu clair
+        'Lenny':     '#22c55e',  // Vert Pointu
+        'Antoine':   '#4ade80',  // Vert clair
+        'Jennifer':  '#ef4444',  // Rouge Centre
+        'Assum':     '#f87171',  // Rouge clair
+        'Olivier':   '#374151',  // Gris très foncé
+    },
+
+    METRICS: [
+        { key: 'ip', label: 'IP', unit: '', decimals: 0 },
+        { key: 'attEff', label: 'Eff. Att', unit: '%', decimals: 0, multiply: 100 },
+        { key: 'recMoy', label: 'Rec Moy', unit: '', decimals: 2 },
+        { key: 'passMoy', label: 'Passe Moy', unit: '', decimals: 2 },
+        { key: 'srvPression', label: 'Srv Pression', unit: '', decimals: 2 },
+        { key: 'defPlusRate', label: 'D+ Rate', unit: '%', decimals: 0, multiply: 100 }
+    ],
+
+    render() {
+        if (this._rendered) return;
+        var container = document.getElementById('content-visualStats');
+        if (!container) return;
+
+        this._data = this._computeAllData();
+        if (!this._data || this._data.players.length === 0) {
+            container.innerHTML = '<div class="empty-state"><h3 class="empty-state-title">Pas de données</h3><p class="empty-state-desc">Aucun match filmé trouvé pour cette saison.</p></div>';
+            this._rendered = true;
+            return;
+        }
+
+        // Sélectionner tous les joueurs par défaut
+        var self = this;
+        this._data.players.forEach(function(p) {
+            if (self._selectedPlayers[p.name] === undefined) self._selectedPlayers[p.name] = true;
+        });
+
+        this._renderAll(container);
+        this._rendered = true;
+    },
+
+    // ========== DATA COMPUTATION ==========
+
+    _parseMatchId(id) {
+        var parts = (id || '').split('_');
+        return parts.length >= 3 ? { season: parts[1], num: parseInt(parts[2]) || 0 } : { season: '0', num: 0 };
+    },
+
+    _computeAllData() {
+        var matches = SeasonSelector.getFilteredMatches().slice();
+        if (matches.length === 0) return null;
+
+        // Tri chronologique par ID
+        var self = this;
+        matches.sort(function(a, b) {
+            var pa = self._parseMatchId(a.id), pb = self._parseMatchId(b.id);
+            if (pa.season !== pb.season) return pa.season < pb.season ? -1 : 1;
+            return pa.num - pb.num;
+        });
+
+        var matchLabels = [];
+        var matchResults = [];
+        var playerMap = {}; // name → { role, color, matchData[] }
+
+        matches.forEach(function(match, mi) {
+            var label = match.opponent || '?';
+            if (label.length > 10) label = label.substring(0, 9) + '.';
+            matchLabels.push(label);
+            matchResults.push(match.result);
+
+            var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+            if (completedSets.length === 0) return;
+
+            var roles = BilanView.getPlayerRoles(match, 'home');
+            var matchStats = StatsAggregator.aggregateStats(completedSets, 'home');
+
+            Object.keys(matchStats).forEach(function(name) {
+                var pStats = matchStats[name];
+                var roleInfo = roles[name];
+                var role = roleInfo ? roleInfo.primaryRole : null;
+                if (!role) return;
+
+                if (!playerMap[name]) {
+                    playerMap[name] = { role: null, _roleCounts: {}, matchData: [] };
+                }
+                var pd = playerMap[name];
+
+                // Total actions
+                var totalAct = (pStats.service.tot || 0) + (pStats.reception.tot || 0) +
+                    (pStats.attack.tot || 0) + (pStats.defense.tot || 0) +
+                    (pStats.block.tot || 0) + (pStats.pass.tot || 0) + (pStats.relance.tot || 0);
+
+                if (totalAct < 3) {
+                    pd.matchData.push({ played: false, matchIndex: mi });
+                    return;
+                }
+
+                // Track role frequency
+                pd._roleCounts[role] = (pd._roleCounts[role] || 0) + 1;
+                var rc = pd._roleCounts;
+                pd.role = Object.keys(rc).sort(function(a, b) { return rc[b] - rc[a]; })[0];
+
+                // Compute IP
+                var axisScores = BilanView.computeAxisScores(pStats, role);
+                var ip = BilanView.computeIP(axisScores, role);
+
+                // Derived metrics
+                var metrics = self._computeDerived(pStats);
+
+                pd.matchData.push({
+                    played: true,
+                    matchIndex: mi,
+                    ip: ip,
+                    role: role,
+                    attEff: metrics.attEff,
+                    recMoy: metrics.recMoy,
+                    passMoy: metrics.passMoy,
+                    srvPression: metrics.srvPression,
+                    defPlusRate: metrics.defPlusRate
+                });
+            });
+
+            // Fill 'not played' for players not in this match
+            Object.keys(playerMap).forEach(function(name) {
+                var pd = playerMap[name];
+                if (pd.matchData.length <= mi) {
+                    pd.matchData.push({ played: false, matchIndex: mi });
+                }
+            });
+        });
+
+        // Build sorted players array (by most recent IP descending)
+        var players = [];
+        var colorIdx = 0;
+        Object.keys(playerMap).forEach(function(name) {
+            var pd = playerMap[name];
+            var playedMatches = pd.matchData.filter(function(d) { return d.played; });
+            if (playedMatches.length === 0) return;
+
+            var color = self.PLAYER_COLORS[name] || self.DEFAULT_PALETTE[colorIdx % self.DEFAULT_PALETTE.length];
+            colorIdx++;
+
+            var lastPlayed = playedMatches[playedMatches.length - 1];
+            players.push({
+                name: name,
+                role: pd.role,
+                color: color,
+                matchData: pd.matchData,
+                lastIP: lastPlayed.ip,
+                playedCount: playedMatches.length
+            });
+        });
+
+        players.sort(function(a, b) { return b.lastIP - a.lastIP; });
+
+        return { matches: matches, matchLabels: matchLabels, matchResults: matchResults, players: players, playerMap: playerMap };
+    },
+
+    _computeDerived(s) {
+        var m = {};
+        // Attack efficiency
+        if (s.attack.tot >= 3) {
+            m.attEff = (s.attack.attplus - s.attack.fatt - s.attack.bp) / s.attack.tot;
+        } else { m.attEff = null; }
+        // Reception avg
+        var rec = s.reception;
+        if (rec.tot > 0) {
+            m.recMoy = (rec.r4 * 4 + rec.r3 * 3 + rec.r2 * 2 + rec.r1 * 1) / rec.tot;
+        } else { m.recMoy = null; }
+        // Pass avg
+        var pas = s.pass;
+        if (pas && pas.tot > 0) {
+            m.passMoy = (pas.p4 * 4 + pas.p3 * 3 + pas.p2 * 2 + pas.p1 * 1) / pas.tot;
+        } else { m.passMoy = null; }
+        // Service pressure
+        var srv = s.service;
+        var recCount = (srv.recCountAdv || 0) + (srv.ace || 0);
+        if (recCount > 0) {
+            m.srvPression = 4 - (srv.recSumAdv / recCount);
+        } else { m.srvPression = null; }
+        // D+ rate
+        var def = s.defense;
+        if (def.tot > 0) {
+            m.defPlusRate = def.defplus / def.tot;
+        } else { m.defPlusRate = null; }
+        return m;
+    },
+
+    _getMetricValues(name, metricKey) {
+        var pd = this._data.playerMap[name];
+        if (!pd) return [];
+        return pd.matchData.map(function(d) { return d.played ? (d[metricKey] != null ? d[metricKey] : null) : null; });
+    },
+
+    // ========== RENDERING ==========
+
+    _renderAll(container) {
+        var html = '';
+        html += this._renderCardsHTML();
+        html += this._renderChartHTML();
+        html += this._renderFormeHTML();
+        html += this._renderProgressionHTML();
+        container.innerHTML = html;
+
+        this._bindEvents(container);
+        this._drawAllSparklines(container);
+        this._drawChart(container);
+    },
+
+    _renderCardsHTML() {
+        var self = this;
+        var html = '<div class="prog-section"><div class="prog-section-title">Joueurs</div><div class="prog-cards">';
+        this._data.players.forEach(function(p) {
+            var sel = self._selectedPlayers[p.name] !== false;
+            var roleColor = BilanView.ROLE_COLORS[p.role] || '#999';
+            html += '<div class="prog-card ' + (sel ? 'selected' : 'dimmed') + '" data-player="' + p.name + '" style="--prog-player-color: ' + p.color + '">';
+            html += '<div class="prog-card-header">';
+            html += '<span class="prog-card-name">' + p.name + '</span>';
+            html += '<span class="prog-card-role" style="background:' + roleColor + '">' + p.role + '</span>';
+            html += '</div>';
+            html += '<div class="prog-card-ip" style="color:' + p.color + '">' + (p.lastIP || '—') + '</div>';
+            html += '<div class="prog-card-label">IP dernier match</div>';
+
+            // Trend
+            var played = p.matchData.filter(function(d) { return d.played; });
+            var trend = self._computeTrend(played);
+            html += '<div class="prog-card-trend ' + trend.cls + '">' + trend.text + '</div>';
+
+            html += '<canvas class="prog-sparkline" data-player="' + p.name + '"></canvas>';
+            html += '</div>';
+        });
+        html += '</div></div>';
+        return html;
+    },
+
+    _computeTrend(played) {
+        if (played.length < 4) return { text: '→ stable', cls: 'prog-trend-stable' };
+        var last3 = played.slice(-3);
+        var prev = played.slice(0, -3);
+        var avg3 = last3.reduce(function(s, d) { return s + d.ip; }, 0) / last3.length;
+        var avgPrev = prev.reduce(function(s, d) { return s + d.ip; }, 0) / prev.length;
+        var diff = avgPrev > 0 ? ((avg3 - avgPrev) / avgPrev * 100) : 0;
+        if (diff > 8) return { text: '↑ +' + Math.round(diff) + '%', cls: 'prog-trend-up' };
+        if (diff < -8) return { text: '↓ ' + Math.round(diff) + '%', cls: 'prog-trend-down' };
+        return { text: '→ stable', cls: 'prog-trend-stable' };
+    },
+
+    _renderChartHTML() {
+        var self = this;
+        var html = '<div class="prog-section">';
+        html += '<div class="prog-section-title">Évolution match par match</div>';
+        html += '<div class="prog-metrics">';
+        this.METRICS.forEach(function(m) {
+            html += '<button class="prog-metric-btn' + (m.key === self._currentMetric ? ' active' : '') + '" data-metric="' + m.key + '">' + m.label + '</button>';
+        });
+        html += '</div>';
+        html += '<div class="prog-chart-wrap"><canvas id="progMainChart"></canvas></div>';
+        html += '</div>';
+        return html;
+    },
+
+    _renderFormeHTML() {
+        var self = this;
+        var metric = this.METRICS.find(function(m) { return m.key === self._currentMetric; });
+        var html = '<div class="prog-section">';
+        html += '<div class="prog-section-title">Forme récente (3 derniers matchs) vs Moyenne saison — ' + metric.label + '</div>';
+        html += '<table class="prog-table"><thead><tr>';
+        html += '<th>Joueur</th><th>Moy. saison</th><th>3 derniers</th><th>Écart</th><th>Forme</th>';
+        html += '</tr></thead><tbody>';
+
+        this._data.players.forEach(function(p) {
+            if (self._selectedPlayers[p.name] === false) return;
+            var vals = self._getMetricValues(p.name, self._currentMetric).filter(function(v) { return v !== null; });
+            if (vals.length < 2) return;
+
+            var mul = metric.multiply || 1;
+            var avg = vals.reduce(function(a, b) { return a + b; }, 0) / vals.length * mul;
+            var last3 = vals.slice(-3);
+            var rolling = last3.reduce(function(a, b) { return a + b; }, 0) / last3.length * mul;
+            var diff = avg !== 0 ? ((rolling - avg) / Math.abs(avg) * 100) : 0;
+
+            html += '<tr>';
+            html += '<td><span class="prog-player-dot" style="background:' + p.color + '"></span><span class="prog-player-name">' + p.name + '</span></td>';
+            html += '<td>' + avg.toFixed(metric.decimals) + (metric.unit || '') + '</td>';
+            html += '<td>' + rolling.toFixed(metric.decimals) + (metric.unit || '') + '</td>';
+            html += '<td class="' + (diff >= 0 ? 'prog-diff-positive' : 'prog-diff-negative') + '">' + (diff >= 0 ? '+' : '') + diff.toFixed(0) + '%</td>';
+            var barW = Math.min(Math.abs(diff) * 3, 100);
+            html += '<td class="prog-bar-cell"><div class="prog-bar ' + (diff >= 0 ? 'prog-bar-positive' : 'prog-bar-negative') + '" style="width:' + barW + 'px"></div></td>';
+            html += '</tr>';
+        });
+
+        html += '</tbody></table></div>';
+        return html;
+    },
+
+    _renderProgressionHTML() {
+        var self = this;
+        var metric = this.METRICS.find(function(m) { return m.key === self._currentMetric; });
+        var html = '<div class="prog-section">';
+        html += '<div class="prog-section-title">Progression 1ère moitié → 2ème moitié — ' + metric.label + '</div>';
+        html += '<table class="prog-table"><thead><tr>';
+        html += '<th>Joueur</th><th>1ère moitié</th><th>2ème moitié</th><th>Progression</th><th>Tendance</th>';
+        html += '</tr></thead><tbody>';
+
+        this._data.players.forEach(function(p) {
+            if (self._selectedPlayers[p.name] === false) return;
+            var allVals = self._getMetricValues(p.name, self._currentMetric);
+            var played = [];
+            allVals.forEach(function(v, i) { if (v !== null) played.push({ val: v, idx: i }); });
+            if (played.length < 4) return;
+
+            var mul = metric.multiply || 1;
+            var half = Math.ceil(played.length / 2);
+            var first = played.slice(0, half);
+            var second = played.slice(half);
+            var avg1 = first.reduce(function(s, d) { return s + d.val; }, 0) / first.length * mul;
+            var avg2 = second.reduce(function(s, d) { return s + d.val; }, 0) / second.length * mul;
+            var diff = avg1 !== 0 ? ((avg2 - avg1) / Math.abs(avg1) * 100) : 0;
+
+            html += '<tr>';
+            html += '<td><span class="prog-player-dot" style="background:' + p.color + '"></span><span class="prog-player-name">' + p.name + '</span></td>';
+            html += '<td>' + avg1.toFixed(metric.decimals) + (metric.unit || '') + '</td>';
+            html += '<td>' + avg2.toFixed(metric.decimals) + (metric.unit || '') + '</td>';
+            html += '<td class="' + (diff >= 0 ? 'prog-diff-positive' : 'prog-diff-negative') + '">' + (diff >= 0 ? '+' : '') + diff.toFixed(0) + '%</td>';
+            var barW = Math.min(Math.abs(diff) * 2, 100);
+            html += '<td class="prog-bar-cell"><div class="prog-bar ' + (diff >= 0 ? 'prog-bar-positive' : 'prog-bar-negative') + '" style="width:' + barW + 'px"></div></td>';
+            html += '</tr>';
+        });
+
+        html += '</tbody></table></div>';
+        return html;
+    },
+
+    // ========== CANVAS DRAWING ==========
+
+    _drawAllSparklines(container) {
+        var self = this;
+        requestAnimationFrame(function() {
+            self._data.players.forEach(function(p) {
+                var canvas = container.querySelector('canvas.prog-sparkline[data-player="' + p.name + '"]');
+                if (!canvas) return;
+                var played = p.matchData.filter(function(d) { return d.played; });
+                var vals = played.map(function(d) { return d.ip || 0; });
+                self._drawSparkline(canvas, vals, p.color);
+            });
+        });
+    },
+
+    _drawSparkline(canvas, values, color) {
+        if (values.length < 2) return;
+        var rect = canvas.getBoundingClientRect();
+        var w = rect.width || 140;
+        var h = rect.height || 28;
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        var ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+
+        var min = Math.min.apply(null, values);
+        var max = Math.max.apply(null, values);
+        if (max === min) { max = min + 1; }
+
+        var pad = 2;
+        var points = values.map(function(v, i) {
+            return {
+                x: values.length === 1 ? w / 2 : pad + (i / (values.length - 1)) * (w - pad * 2),
+                y: h - ((v - min) / (max - min)) * (h - 4) - 2
+            };
+        });
+
+        // Area fill
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, h);
+        points.forEach(function(pt) { ctx.lineTo(pt.x, pt.y); });
+        ctx.lineTo(points[points.length - 1].x, h);
+        ctx.closePath();
+        ctx.fillStyle = color + '15';
+        ctx.fill();
+
+        // Line
+        ctx.beginPath();
+        points.forEach(function(pt, i) { i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y); });
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+
+        // Last point dot
+        var last = points[points.length - 1];
+        ctx.beginPath();
+        ctx.arc(last.x, last.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+    },
+
+    _drawChart(container) {
+        var canvas = container.querySelector('#progMainChart');
+        if (!canvas) return;
+        var self = this;
+        var wrap = canvas.parentElement;
+        var w = wrap.offsetWidth;
+        var h = wrap.offsetHeight;
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        var ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+
+        var pad = { top: 20, right: 25, bottom: 45, left: 10 };
+        var chartW = w - pad.left - pad.right;
+        var chartH = h - pad.top - pad.bottom;
+        var numMatches = this._data.matchLabels.length;
+        if (numMatches === 0) return;
+
+        var metricKey = this._currentMetric;
+        var metricDef = this.METRICS.find(function(m) { return m.key === metricKey; });
+        var mul = metricDef.multiply || 1;
+
+        // Collect all visible values for Y range
+        var allVals = [];
+        this._data.players.forEach(function(p) {
+            if (self._selectedPlayers[p.name] === false) return;
+            self._getMetricValues(p.name, metricKey).forEach(function(v) {
+                if (v !== null) allVals.push(v * mul);
+            });
+        });
+        if (allVals.length === 0) return;
+
+        var dataMin = Math.min.apply(null, allVals);
+        var dataMax = Math.max.apply(null, allVals);
+        var range = dataMax - dataMin || 1;
+        var yMin = dataMin - range * 0.15;
+        var yMax = dataMax + range * 0.15;
+
+        function xPos(i) { return pad.left + (numMatches === 1 ? chartW / 2 : (i / (numMatches - 1)) * chartW); }
+        function yPos(v) { return pad.top + (1 - (v - yMin) / (yMax - yMin)) * chartH; }
+
+        // Grid
+        ctx.strokeStyle = '#e8eaed';
+        ctx.lineWidth = 0.5;
+        ctx.fillStyle = '#5f6368';
+        ctx.font = '11px Roboto, sans-serif';
+        ctx.textAlign = 'right';
+        for (var gi = 0; gi <= 4; gi++) {
+            var gv = yMin + (gi / 4) * (yMax - yMin);
+            var gy = yPos(gv);
+            ctx.beginPath();
+            ctx.moveTo(pad.left, gy);
+            ctx.lineTo(w - pad.right, gy);
+            ctx.stroke();
+            ctx.fillText(gv.toFixed(metricDef.decimals), w - 2, gy + 3);
+        }
+
+        // X-axis labels + result dots
+        ctx.textAlign = 'center';
+        ctx.font = '10px Roboto, sans-serif';
+        this._data.matchLabels.forEach(function(label, i) {
+            var x = xPos(i);
+            ctx.fillStyle = '#5f6368';
+            ctx.save();
+            ctx.translate(x, h - pad.bottom + 14);
+            ctx.rotate(-0.4);
+            ctx.fillText(label, 0, 0);
+            ctx.restore();
+
+            // Result dot
+            var res = self._data.matchResults[i];
+            ctx.beginPath();
+            ctx.arc(x, h - pad.bottom + 28, 3, 0, Math.PI * 2);
+            ctx.fillStyle = res === 'win' ? '#34a853' : res === 'loss' ? '#ea4335' : '#f59e0b';
+            ctx.fill();
+        });
+
+        // Player lines
+        this._data.players.forEach(function(p) {
+            if (self._selectedPlayers[p.name] === false) return;
+            var vals = self._getMetricValues(p.name, metricKey);
+
+            // Collect visible points
+            var pts = [];
+            vals.forEach(function(v, i) {
+                if (v !== null) pts.push({ x: xPos(i), y: yPos(v * mul), val: v * mul });
+            });
+            if (pts.length < 1) return;
+
+            // Area fill
+            ctx.beginPath();
+            ctx.moveTo(pts[0].x, pad.top + chartH);
+            pts.forEach(function(pt) { ctx.lineTo(pt.x, pt.y); });
+            ctx.lineTo(pts[pts.length - 1].x, pad.top + chartH);
+            ctx.closePath();
+            ctx.fillStyle = p.color + '08';
+            ctx.fill();
+
+            // Line
+            ctx.beginPath();
+            pts.forEach(function(pt, i) { i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y); });
+            ctx.strokeStyle = p.color;
+            ctx.lineWidth = 2.5;
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+
+            // Dots
+            pts.forEach(function(pt) {
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.fill();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+
+            // Season average dashed line
+            var nonNull = vals.filter(function(v) { return v !== null; });
+            if (nonNull.length > 1) {
+                var avg = nonNull.reduce(function(a, b) { return a + b; }, 0) / nonNull.length * mul;
+                var avgY = yPos(avg);
+                ctx.setLineDash([4, 4]);
+                ctx.strokeStyle = p.color + '50';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(pad.left, avgY);
+                ctx.lineTo(w - pad.right, avgY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+        });
+    },
+
+    // ========== EVENTS ==========
+
+    _bindEvents(container) {
+        var self = this;
+
+        // Card toggle
+        container.querySelectorAll('.prog-card').forEach(function(card) {
+            card.addEventListener('click', function() {
+                var name = card.dataset.player;
+                self._selectedPlayers[name] = !self._selectedPlayers[name];
+                card.classList.toggle('selected', self._selectedPlayers[name]);
+                card.classList.toggle('dimmed', !self._selectedPlayers[name]);
+                self._redrawDynamic(container);
+            });
+        });
+
+        // Metric buttons
+        container.querySelectorAll('.prog-metric-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                container.querySelectorAll('.prog-metric-btn').forEach(function(b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                self._currentMetric = btn.dataset.metric;
+                self._redrawDynamic(container);
+            });
+        });
+    },
+
+    _redrawDynamic(container) {
+        this._drawChart(container);
+        // Re-render tables (replace innerHTML of table sections)
+        var sections = container.querySelectorAll('.prog-section');
+        if (sections.length >= 3) {
+            // Forme = section[2], Progression = section[3]
+            var formeDiv = document.createElement('div');
+            formeDiv.innerHTML = this._renderFormeHTML();
+            sections[2].replaceWith(formeDiv.firstElementChild);
+
+            var progDiv = document.createElement('div');
+            progDiv.innerHTML = this._renderProgressionHTML();
+            sections[3].replaceWith(progDiv.firstElementChild);
+        }
+    }
+};
+
 // ==================== TAB NAVIGATION ====================
 const TabNav = {
     currentTab: 'yearStats',
@@ -6563,7 +7158,7 @@ const TabNav = {
             case 'matchStats': MatchStatsView.render(); break;
             case 'yearStats': YearStatsView.render(); break;
             case 'setsStats': SetsPlayedView.render(); break;
-            case 'visualStats': break; // placeholder
+            case 'visualStats': ProgressionView.render(); break;
             case 'ranking': RankingView.render(); break;
         }
     }
