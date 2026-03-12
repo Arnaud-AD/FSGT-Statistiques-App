@@ -191,6 +191,32 @@
             color: var(--text-primary);
         }
 
+        /* Sortable column headers */
+        th.standings-sortable {
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        th.standings-sortable:hover {
+            background: var(--bg-header);
+        }
+
+        th.standings-sortable:hover .sort-arrow:not(.active) {
+            opacity: 0.25;
+        }
+
+        .sort-arrow {
+            font-size: 8px;
+            opacity: 0;
+            margin-left: 1px;
+            transition: opacity 0.15s;
+        }
+
+        .sort-arrow.active {
+            opacity: 1;
+        }
+
         td.bold-val {
             font-weight: 600;
         }

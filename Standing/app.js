@@ -12,6 +12,13 @@ let GINETTE_DATA = null;  // Ginette cross-division data (parsed JSON)
 let CHAMPIONSHIPS = null; // Championship registry
 let currentSlug = null;   // Currently loaded championship slug
 
+// Standings column sort state
+// col = null → official rank order; otherwise data field name
+var standingsSort = { col: null, asc: true };
+
+// Columns where "less is better" → default sort is ascending
+var ASC_DEFAULT_COLS = { p: true, setMinus: true, ptsMinus: true };
+
 // ------------------------------------------------------------
 // 2. Initialization
 // ------------------------------------------------------------
@@ -57,6 +64,9 @@ async function loadChampionship(slug) {
             const url = new URL(window.location);
             url.searchParams.set('champ', slug);
             history.replaceState(null, '', url);
+
+            // Reset standings sort on championship change
+            standingsSort = { col: null, asc: true };
 
             document.title = 'FSGT94 Volley - ' + DATA.meta.name;
             updateDropdownSelection(slug);
@@ -248,6 +258,19 @@ function showGinetteSubTab(subTabId, btn) {
 // 6. Render functions
 // ------------------------------------------------------------
 
+function standingsSortIcon(col) {
+    if (standingsSort.col === col) {
+        var arrow = standingsSort.asc ? '\u25B2' : '\u25BC';
+        return ' <span class="sort-arrow active">' + arrow + '</span>';
+    }
+    return ' <span class="sort-arrow">\u25BC</span>';
+}
+
+function getStandingSortValue(s, col) {
+    if (col === 'coefSet' || col === 'coefPts') return parseFloat(s[col]) || 0;
+    return s[col];
+}
+
 function renderStandings() {
     const container = document.getElementById('classement-table-content');
     if (!container || !DATA) return;
@@ -262,8 +285,45 @@ function renderStandings() {
         }).join('');
     }
 
+    // Sort standings (or keep official rank order)
+    var sorted = DATA.standings.slice();
+    if (standingsSort.col) {
+        var col = standingsSort.col;
+        var asc = standingsSort.asc;
+        sorted.sort(function(a, b) {
+            var va = getStandingSortValue(a, col);
+            var vb = getStandingSortValue(b, col);
+            if (va !== vb) return asc ? va - vb : vb - va;
+            return a.rank - b.rank; // tie-break: official rank
+        });
+    }
+
+    // Sortable column definitions: [label, dataField, boldClass]
+    var sortableCols = [
+        ['MJ', 'mj', ''],
+        ['G', 'g', ''],
+        ['P', 'p', 'bold-col'],
+        ['Set+', 'setPlus', ''],
+        ['Set-', 'setMinus', ''],
+        ['DS', 'ds', 'bold-col'],
+        ['Coef Set', 'coefSet', ''],
+        ['Pts+', 'ptsPlus', ''],
+        ['Pts-', 'ptsMinus', ''],
+        ['DP', 'dp', 'bold-col'],
+        ['Coef Pts', 'coefPts', ''],
+        ['Pts', 'pts', '']
+    ];
+
+    var theadCols = '<th>Club</th>';
+    sortableCols.forEach(function(c) {
+        var classes = 'standings-sortable';
+        if (c[2]) classes += ' ' + c[2];
+        theadCols += '<th class="' + classes + '" data-sort-col="' + c[1] + '">' + c[0] + standingsSortIcon(c[1]) + '</th>';
+    });
+    theadCols += '<th>Forme</th>';
+
     let rows = '';
-    DATA.standings.forEach(function(s) {
+    sorted.forEach(function(s) {
         const team = DATA.teams[s.team];
         if (!team) return;
         const allerItems = buildFormItems(s.formAller);
@@ -305,12 +365,7 @@ function renderStandings() {
 
     container.innerHTML = '<div class="table-container">' +
         '<table>' +
-            '<thead><tr>' +
-                '<th>Club</th><th>MJ</th><th>G</th><th class="bold-col">P</th>' +
-                '<th>Set+</th><th>Set-</th><th class="bold-col">DS</th><th>Coef Set</th>' +
-                '<th>Pts+</th><th>Pts-</th><th class="bold-col">DP</th><th>Coef Pts</th>' +
-                '<th>Pts</th><th>Forme</th>' +
-            '</tr></thead>' +
+            '<thead><tr>' + theadCols + '</tr></thead>' +
             '<tbody>' + rows + '</tbody>' +
         '</table>' +
     '</div>';
@@ -1005,3 +1060,26 @@ function drawEvolutionChart() {
 }
 
 window.addEventListener('resize', drawEvolutionChart);
+
+// Delegated click handler for standings column sorting
+document.addEventListener('click', function(e) {
+    var th = e.target.closest('.standings-sortable');
+    if (!th) return;
+    var col = th.getAttribute('data-sort-col');
+    if (!col) return;
+
+    if (standingsSort.col === col) {
+        // Same column: toggle asc/desc, then reset on third click
+        if (standingsSort.asc === !ASC_DEFAULT_COLS[col]) {
+            // Was on non-default order → reset to official rank
+            standingsSort = { col: null, asc: true };
+        } else {
+            // Toggle direction
+            standingsSort.asc = !standingsSort.asc;
+        }
+    } else {
+        // New column: default direction (desc, or asc for "less is better")
+        standingsSort = { col: col, asc: !!ASC_DEFAULT_COLS[col] };
+    }
+    renderStandings();
+});
