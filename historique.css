@@ -2667,6 +2667,16 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
 }
 */
 
+/* ==================== DATA SUB-TABS ==================== */
+.data-sub-tabs {
+    margin: 0 0 10px;
+}
+.data-sub-btn.active {
+    background: var(--accent-blue);
+    color: white;
+    font-weight: 700;
+}
+
 /* ==================== PROGRESSION VIEW ==================== */
 
 .prog-section {

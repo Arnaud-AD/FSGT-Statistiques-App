@@ -6534,6 +6534,7 @@ const ProgressionView = {
     _data: null,
     _selectedPlayers: {},   // { name: true/false }
     _currentMetric: 'ip',
+    _currentSubTab: 'evolution', // 'evolution' | 'statsVisuelles'
 
     // Palette de couleurs uniques par joueur (fallback si pas de PLAYER_COLORS défini)
     DEFAULT_PALETTE: [
@@ -6569,9 +6570,58 @@ const ProgressionView = {
         if (!container) return;
 
         this._data = this._computeAllData();
+
+        // Sous-onglets Évolution / Stats Visuelles
+        var self = this;
+        var html = '<nav class="segmented-tabs data-sub-tabs">';
+        html += '<button class="seg-tab data-sub-btn' + (this._currentSubTab === 'evolution' ? ' active' : '') + '" data-subtab="evolution">Évolution</button>';
+        html += '<button class="seg-tab data-sub-btn' + (this._currentSubTab === 'statsVisuelles' ? ' active' : '') + '" data-subtab="statsVisuelles">Stats Visuelles</button>';
+        html += '</nav>';
+        html += '<div class="data-sub-content" id="data-sub-evolution"' + (this._currentSubTab !== 'evolution' ? ' style="display:none"' : '') + '></div>';
+        html += '<div class="data-sub-content" id="data-sub-statsVisuelles"' + (this._currentSubTab !== 'statsVisuelles' ? ' style="display:none"' : '') + '></div>';
+        container.innerHTML = html;
+
+        // Bind sous-onglets
+        container.querySelectorAll('.data-sub-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                self._switchSubTab(btn.dataset.subtab);
+            });
+        });
+
+        // Rendu du sous-onglet actif
+        this._renderSubTab();
+        this._rendered = true;
+    },
+
+    _switchSubTab(subtab) {
+        this._currentSubTab = subtab;
+        // Update boutons actifs
+        document.querySelectorAll('.data-sub-btn').forEach(function(btn) {
+            btn.classList.toggle('active', btn.dataset.subtab === subtab);
+        });
+        // Basculer visibilité
+        document.querySelectorAll('.data-sub-content').forEach(function(el) {
+            el.style.display = 'none';
+        });
+        var target = document.getElementById('data-sub-' + subtab);
+        if (target) target.style.display = '';
+        this._renderSubTab();
+    },
+
+    _renderSubTab() {
+        if (this._currentSubTab === 'evolution') {
+            this._renderEvolutionTab();
+        } else {
+            this._renderStatsVisuellesTab();
+        }
+    },
+
+    _renderEvolutionTab() {
+        var container = document.getElementById('data-sub-evolution');
+        if (!container || container.children.length > 0) return;
+
         if (!this._data || this._data.players.length === 0) {
             container.innerHTML = '<div class="empty-state"><h3 class="empty-state-title">Pas de données</h3><p class="empty-state-desc">Aucun match filmé trouvé pour cette saison.</p></div>';
-            this._rendered = true;
             return;
         }
 
@@ -6582,7 +6632,12 @@ const ProgressionView = {
         });
 
         this._renderAll(container);
-        this._rendered = true;
+    },
+
+    _renderStatsVisuellesTab() {
+        var container = document.getElementById('data-sub-statsVisuelles');
+        if (!container || container.children.length > 0) return;
+        container.innerHTML = '<div class="empty-state"><h3 class="empty-state-title">Stats Visuelles</h3><p class="empty-state-desc">À venir — Visualisation terrain avec flèches filtrables.</p></div>';
     },
 
     // ========== DATA COMPUTATION ==========
