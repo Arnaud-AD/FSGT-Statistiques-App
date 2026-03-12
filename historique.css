@@ -1953,10 +1953,11 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
     font-size: 11px;
 }
 
-/* ==================== RESPONSIVE: TABLET (>=768px) ==================== */
+/* ==================== RESPONSIVE: TABLET & DESKTOP (>=768px) ==================== */
+/* V24.1 — Vue tablette utilisée aussi sur desktop (desktop désactivé temporairement) */
 @media (min-width: 768px) {
     .app-container {
-        max-width: 700px;
+        max-width: 800px;
         margin: 0 auto;
         padding: 16px 24px;
     }
@@ -2342,6 +2343,7 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
 .pa-positive { color: #10b981; font-weight: 600; }
 .pa-negative { color: #ef4444; font-weight: 600; }
 
+/* V24.1 — Desktop désactivé, vue tablette utilisée partout
 @media (min-width: 1024px) {
     .pa-stat-row {
         gap: 12px;
@@ -2350,6 +2352,7 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
         font-size: 22px;
     }
 }
+*/
 
 /* ==================== RANKING TAB ==================== */
 
@@ -2598,6 +2601,8 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
 }
 
 /* ==================== RESPONSIVE: DESKTOP (>=1024px) ==================== */
+/* V24.1 — Desktop désactivé, vue tablette utilisée partout
+   À réactiver lors de V20.3 (refonte tableaux desktop)
 @media (min-width: 1024px) {
     .app-container {
         max-width: 960px;
@@ -2615,7 +2620,6 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
         font-size: 32px;
     }
 
-    /* Stats : masquer vue mobile, afficher vue desktop */
     .stats-category-tabs {
         display: none;
     }
@@ -2628,20 +2632,16 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
         display: block !important;
     }
 
-
-    /* Bilan : 4 colonnes sur desktop */
     .bilan-grid {
         grid-template-columns: repeat(4, 1fr);
         gap: 16px;
     }
 
-    /* Stats Annee : 3 colonnes (pas de H2H) */
     .bilan-grid-year {
         grid-template-columns: repeat(3, 1fr);
         gap: 16px;
     }
 
-    /* Year stats : bilan + classement cote a cote */
     .year-top-row {
         display: flex;
         gap: 16px;
@@ -2651,7 +2651,6 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
         flex: 1;
     }
 
-    /* Ranking: 3 colonnes sur desktop */
     .ranking-players-grid {
         grid-template-columns: repeat(3, 1fr);
         gap: 12px;
@@ -2666,6 +2665,7 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
         padding: 0 16px;
     }
 }
+*/
 
 /* ==================== PROGRESSION VIEW ==================== */
 
@@ -2863,9 +2863,11 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
     .prog-table { font-size: 12px; }
 }
 
+/* V24.1 — Desktop désactivé
 @media (min-width: 1024px) {
     .prog-cards {
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     }
     .prog-chart-wrap { height: 300px; }
 }
+*/
