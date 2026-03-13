@@ -221,6 +221,7 @@ const SeasonSelector = {
         SetsPlayedView._rendered = false;
         RankingView._rendered = false;
         ProgressionView._rendered = false;
+        StatsVisuellesView._container = null; // forcer re-render stats visuelles
         ImpactView._seasonRoster = null; // invalider le cache roster
         ImpactView._seasonDirPerSet = null;
 
@@ -6637,7 +6638,7 @@ const ProgressionView = {
     _renderStatsVisuellesTab() {
         var container = document.getElementById('data-sub-statsVisuelles');
         if (!container || container.children.length > 0) return;
-        container.innerHTML = '<div class="empty-state"><h3 class="empty-state-title">Stats Visuelles</h3><p class="empty-state-desc">À venir — Visualisation terrain avec flèches filtrables.</p></div>';
+        StatsVisuellesView.render(container);
     },
 
     // ========== DATA COMPUTATION ==========
@@ -7173,6 +7174,1109 @@ const ProgressionView = {
             progDiv.innerHTML = this._renderProgressionHTML();
             sections[3].replaceWith(progDiv.firstElementChild);
         }
+    }
+};
+
+// ==================== STATS VISUELLES VIEW ====================
+
+const StatsVisuellesView = {
+    // State
+    _rendered: false,
+    _container: null,
+    _selectedMatch: 'all',
+    _selectedCategories: { service: true, reception: false, pass: false, attack: true, relance: false, defense: false, block: false },
+    _selectedResult: 'all', // 'all'|'positive'|'neutral'|'negative'
+    _selectedPlayers: {},   // { name: true/false }
+    _selectedSet: 'all',    // 'all' | set index number
+    _heatmapMode: 'both',   // 'start' | 'end' | 'both'
+    _hmBoth:   { radius: 0.07, gamma: 0.45, alpha: 200, cutoff: 0.01 },
+    _hmSingle: { radius: 0.10, gamma: 0.65, alpha: 240, cutoff: 0.01 },
+    _trajectories: [],
+
+    _layout: null,    // measured element rects for coordinate mapping
+
+    RESULT_COLORS: {
+        positive: '#34a853',
+        negative: '#ea4335',
+        neutral: '#9e9e9e'
+    },
+
+    // Couleurs par type d'attaque (identiques à match-live)
+    ATTACK_TYPE_COLORS: {
+        'attack': null,           // utilise la couleur résultat par défaut
+        'attack-feinte': '#f97316',   // orange
+        'attack-relance': '#faef00',  // jaune
+        'attack-second': '#22d3ee',   // cyan
+        'block-touch': '#ff1493'      // rose
+    },
+
+    CATEGORY_LABELS: [
+        { key: 'service', label: 'Serv' },
+        { key: 'reception', label: 'Rec' },
+        { key: 'pass', label: 'Pas' },
+        { key: 'attack', label: 'Att' },
+        { key: 'relance', label: 'Rel' },
+        { key: 'defense', label: 'Def' },
+        { key: 'block', label: 'Blc' }
+    ],
+
+    render(container) {
+        this._container = container;
+        var matches = SeasonSelector.getFilteredMatches();
+        if (!matches || matches.length === 0) {
+            container.innerHTML = '<div class="empty-state"><h3 class="empty-state-title">Pas de données</h3><p class="empty-state-desc">Aucun match trouvé pour cette saison.</p></div>';
+            return;
+        }
+
+        // Init player selection
+        var players = this._getPlayersForScope(matches);
+        var self = this;
+        players.forEach(function(p) {
+            if (self._selectedPlayers[p.name] === undefined) self._selectedPlayers[p.name] = true;
+        });
+
+        container.innerHTML = this._buildHTML(matches, players);
+        this._bindEvents(container);
+        // Delay arrow update to ensure layout is computed (aspect-ratio needs layout pass)
+        var self = this;
+        requestAnimationFrame(function() { self._updateArrows(); });
+    },
+
+    // ========== HTML GENERATION ==========
+
+    _buildHTML(matches, players) {
+        var html = '<div class="sv-container">';
+
+        // Match selector
+        html += '<div class="sv-filters">';
+        html += this._buildMatchSelector(matches);
+
+        // Category pills
+        html += '<div class="sv-filter-group">';
+        html += '<div class="sv-cat-pills">';
+        var self = this;
+        this.CATEGORY_LABELS.forEach(function(c) {
+            var active = self._selectedCategories[c.key] ? ' active' : '';
+            html += '<button class="sv-cat-pill' + active + '" data-cat="' + c.key + '">' + c.label + '</button>';
+        });
+        html += '</div></div>';
+
+        // Result filter
+        html += '<div class="sv-filter-group">';
+        html += '<div class="sv-result-pills">';
+        var results = [
+            { key: 'all', label: 'Tout' },
+            { key: 'positive', label: '+', color: this.RESULT_COLORS.positive },
+            { key: 'neutral', label: '=', color: this.RESULT_COLORS.neutral },
+            { key: 'negative', label: '−', color: this.RESULT_COLORS.negative }
+        ];
+        results.forEach(function(r) {
+            var active = self._selectedResult === r.key ? ' active' : '';
+            var style = r.color && !active ? ' style="border-color:' + r.color + ';color:' + r.color + '"' : '';
+            var styleActive = r.color && active ? ' style="background:' + r.color + ';border-color:' + r.color + '"' : '';
+            html += '<button class="sv-result-pill' + active + '" data-result="' + r.key + '"' + (active ? styleActive : style) + '>' + r.label + '</button>';
+        });
+        html += '</div></div>';
+
+        // Player chips
+        html += '<div class="sv-filter-group">';
+        html += '<div class="sv-player-chips">';
+        players.forEach(function(p) {
+            var active = self._selectedPlayers[p.name] !== false ? ' active' : '';
+            html += '<button class="sv-player-chip' + active + '" data-player="' + p.name + '" style="--sv-player-color:' + p.color + '">';
+            html += '<span class="sv-role-dot" style="background:' + p.roleColor + '"></span>';
+            html += p.name;
+            html += '</button>';
+        });
+        html += '</div></div>';
+
+        // Set filter
+        html += this._buildSetFilter(matches);
+
+        // Heatmap mode toggle (for reception)
+        html += '<div class="sv-filter-group sv-heatmap-toggle" id="svHeatmapToggle">';
+        html += '<div class="sv-heatmap-pills">';
+        var hmModes = [
+            { key: 'both', label: 'Les deux' },
+            { key: 'start', label: 'Départ' },
+            { key: 'end', label: 'Arrivée' }
+        ];
+        hmModes.forEach(function(m) {
+            var active = self._heatmapMode === m.key ? ' active' : '';
+            html += '<button class="sv-heatmap-pill' + active + '" data-hm="' + m.key + '">' + m.label + '</button>';
+        });
+        html += '</div></div>';
+
+        // Heatmap tuner panel (visible with ?tuner in URL)
+        if (window.location.search.indexOf('tuner') !== -1) {
+            html += '<div class="sv-heatmap-tuner" id="svHeatmapTuner">';
+            html += '<div class="sv-tuner-title">Heatmap Tuner</div>';
+            html += '<div class="sv-tuner-columns">';
+            // Column 1: "Les deux"
+            html += '<div class="sv-tuner-col">';
+            html += '<div class="sv-tuner-subtitle">Les deux</div>';
+            html += '<div class="sv-tuner-row"><label>Taille <span id="hm-v-both_radius">' + (self._hmBoth.radius) + '</span></label><input type="range" id="hm-both_radius" min="0.03" max="0.18" step="0.01" value="' + self._hmBoth.radius + '"></div>';
+            html += '<div class="sv-tuner-row"><label>Contraste <span id="hm-v-both_gamma">' + (self._hmBoth.gamma) + '</span></label><input type="range" id="hm-both_gamma" min="0.2" max="0.9" step="0.05" value="' + self._hmBoth.gamma + '"></div>';
+            html += '<div class="sv-tuner-row"><label>Opacité <span id="hm-v-both_alpha">' + (self._hmBoth.alpha) + '</span></label><input type="range" id="hm-both_alpha" min="80" max="255" step="5" value="' + self._hmBoth.alpha + '"></div>';
+            html += '<div class="sv-tuner-row"><label>Seuil <span id="hm-v-both_cutoff">' + (self._hmBoth.cutoff) + '</span></label><input type="range" id="hm-both_cutoff" min="0" max="0.15" step="0.005" value="' + self._hmBoth.cutoff + '"></div>';
+            html += '</div>';
+            // Column 2: "Départ / Arrivée"
+            html += '<div class="sv-tuner-col">';
+            html += '<div class="sv-tuner-subtitle">Départ / Arrivée</div>';
+            html += '<div class="sv-tuner-row"><label>Taille <span id="hm-v-single_radius">' + (self._hmSingle.radius) + '</span></label><input type="range" id="hm-single_radius" min="0.03" max="0.18" step="0.01" value="' + self._hmSingle.radius + '"></div>';
+            html += '<div class="sv-tuner-row"><label>Contraste <span id="hm-v-single_gamma">' + (self._hmSingle.gamma) + '</span></label><input type="range" id="hm-single_gamma" min="0.2" max="0.9" step="0.05" value="' + self._hmSingle.gamma + '"></div>';
+            html += '<div class="sv-tuner-row"><label>Opacité <span id="hm-v-single_alpha">' + (self._hmSingle.alpha) + '</span></label><input type="range" id="hm-single_alpha" min="80" max="255" step="5" value="' + self._hmSingle.alpha + '"></div>';
+            html += '<div class="sv-tuner-row"><label>Seuil <span id="hm-v-single_cutoff">' + (self._hmSingle.cutoff) + '</span></label><input type="range" id="hm-single_cutoff" min="0" max="0.15" step="0.005" value="' + self._hmSingle.cutoff + '"></div>';
+            html += '</div>';
+            html += '</div></div>';
+        }
+
+        html += '</div>'; // end sv-filters
+
+        // Court (HTML/CSS like match-live + SVG overlay for arrows)
+        html += this._buildCourt();
+
+        // Arrow count
+        html += '<div class="sv-arrow-count" id="svArrowCount"></div>';
+
+        html += '</div>'; // end sv-container
+        return html;
+    },
+
+    _buildMatchSelector(matches) {
+        var html = '<div class="sv-filter-group">';
+        html += '<select class="sv-match-select" id="svMatchSelect">';
+        html += '<option value="all"' + (this._selectedMatch === 'all' ? ' selected' : '') + '>Tous les matchs</option>';
+        matches.forEach(function(m) {
+            var label = 'vs ' + (m.opponent || '?');
+            if (m.sets) label += ' (' + m.sets.length + ' sets)';
+            var sel = (this._selectedMatch === m.id) ? ' selected' : '';
+            html += '<option value="' + m.id + '"' + sel + '>' + label + '</option>';
+        }.bind(this));
+        html += '</select></div>';
+        return html;
+    },
+
+    _buildSetFilter(matches) {
+        // Determine max sets from scope
+        var maxSets = 0;
+        var scopeMatches = this._selectedMatch === 'all' ? matches : matches.filter(function(m) { return m.id === this._selectedMatch; }.bind(this));
+        scopeMatches.forEach(function(m) {
+            if (m.sets) maxSets = Math.max(maxSets, m.sets.length);
+        });
+
+        var html = '<div class="sv-filter-group"><div class="sv-set-pills">';
+        html += '<button class="sv-set-pill' + (this._selectedSet === 'all' ? ' active' : '') + '" data-set="all">Tout</button>';
+        for (var i = 0; i < maxSets; i++) {
+            html += '<button class="sv-set-pill' + (this._selectedSet === i ? ' active' : '') + '" data-set="' + i + '">S' + (i + 1) + '</button>';
+        }
+        html += '</div></div>';
+        return html;
+    },
+
+    _buildCourt() {
+        var self = this;
+        var html = '<div class="sv-court-wrapper">';
+        html += '<div class="sv-court" id="svCourt">';
+
+        // Service zone top
+        html += '<div class="sv-service-zone sv-top" id="svServiceTop">';
+        html += '<span class="sv-svc-label">Service</span>';
+        html += '</div>';
+
+        // Team label top
+        html += '<div class="sv-team-label">ADVERSE</div>';
+
+        // Court half top (adverse)
+        html += '<div class="sv-court-half sv-away" id="svCourtAway"></div>';
+
+        // Net
+        html += '<div class="sv-net" id="svNet"></div>';
+
+        // Court half bottom (Jen)
+        html += '<div class="sv-court-half sv-home" id="svCourtHome"></div>';
+
+        // Team label bottom
+        html += '<div class="sv-team-label">JEN</div>';
+
+        // Service zone bottom
+        html += '<div class="sv-service-zone sv-bottom" id="svServiceBot">';
+        html += '<span class="sv-svc-label">Service</span>';
+        html += '</div>';
+
+        // SVG overlay for arrows (positioned absolutely over the court)
+        html += '<svg class="sv-arrow-svg" id="svArrowSvg">';
+        html += '<defs>';
+        // Markers par résultat (pour service, réception, etc.)
+        ['positive', 'negative', 'neutral'].forEach(function(r) {
+            html += '<marker id="sv-arrow-' + r + '" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto" markerUnits="userSpaceOnUse">';
+            html += '<polygon points="0 0, 10 3.5, 0 7" fill="' + self.RESULT_COLORS[r] + '"/>';
+            html += '</marker>';
+        });
+        // Markers par type d'attaque (feinte, relance, 2e main, block-touch)
+        Object.keys(self.ATTACK_TYPE_COLORS).forEach(function(type) {
+            var c = self.ATTACK_TYPE_COLORS[type];
+            if (!c) return; // skip 'attack' (uses result color)
+            html += '<marker id="sv-arrow-' + type + '" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto" markerUnits="userSpaceOnUse">';
+            html += '<polygon points="0 0, 10 3.5, 0 7" fill="' + c + '"/>';
+            html += '</marker>';
+        });
+        html += '</defs>';
+        html += '<g id="svArrowGroup"></g>';
+        html += '</svg>';
+
+        // Canvas overlay for heatmap (reception)
+        html += '<canvas class="sv-heatmap-canvas" id="svHeatmapCanvas"></canvas>';
+
+        html += '</div>'; // sv-court
+        html += '</div>'; // sv-court-wrapper
+        return html;
+    },
+
+    // ========== DATA EXTRACTION ==========
+
+    _getPlayersForScope(matches) {
+        var scopeMatches = this._selectedMatch === 'all' ? matches : matches.filter(function(m) { return m.id === this._selectedMatch; }.bind(this));
+        var playerMap = {};
+        var self = this;
+
+        scopeMatches.forEach(function(match) {
+            if (!match.sets) return;
+            var roles = BilanView.getPlayerRoles ? BilanView.getPlayerRoles(match, 'home') : {};
+            match.sets.forEach(function(set) {
+                if (!set.homeLineup) return;
+                Object.keys(set.homeLineup).forEach(function(pos) {
+                    var name = set.homeLineup[pos];
+                    if (!name || playerMap[name]) return;
+                    var role = roles[name] ? roles[name].primaryRole : '';
+                    var roleColor = BilanView.ROLE_COLORS ? (BilanView.ROLE_COLORS[role] || '#999') : '#999';
+                    var color = (ProgressionView.PLAYER_COLORS && ProgressionView.PLAYER_COLORS[name]) || '#0056D2';
+                    playerMap[name] = { name: name, role: role, roleColor: roleColor, color: color };
+                });
+            });
+        });
+
+        var players = Object.values(playerMap);
+        players.sort(function(a, b) { return a.name.localeCompare(b.name); });
+        return players;
+    },
+
+    _extractTrajectories() {
+        var matches = SeasonSelector.getFilteredMatches();
+        if (!matches) return [];
+
+        var scopeMatches = this._selectedMatch === 'all' ? matches : matches.filter(function(m) { return m.id === this._selectedMatch; }.bind(this));
+        var trajectories = [];
+        var self = this;
+
+        scopeMatches.forEach(function(match) {
+            if (!match.sets) return;
+            match.sets.forEach(function(set, setIdx) {
+                // Set filter
+                if (self._selectedSet !== 'all' && self._selectedSet !== setIdx) return;
+                if (!set.points) return;
+
+                var cameraSide = set.cameraSide || 'home';
+
+                set.points.forEach(function(point) {
+                    if (!point.rally) return;
+                    point.rally.forEach(function(action, actionIdx) {
+                        // Only home team actions
+                        if (action.team !== 'home') return;
+
+                        // Distinguish relance from attack for category filtering
+                        var effectiveType = action.type;
+                        if (action.type === 'attack' && action.attackType === 'relance') {
+                            effectiveType = 'relance';
+                        }
+
+                        // Category filter (using effective type)
+                        if (!self._selectedCategories[effectiveType]) return;
+                        // Player filter
+                        if (action.player && self._selectedPlayers[action.player] === false) return;
+
+                        // Need at least endPos
+                        if (!action.endPos) return;
+
+                        var result = self._classifyResult(action);
+                        // Result filter
+                        if (self._selectedResult !== 'all' && result !== self._selectedResult) return;
+
+                        // Determine attack arrow type (feinte, relance, 2e main)
+                        var attackArrowType = null;
+                        if (effectiveType === 'attack' || effectiveType === 'relance') {
+                            if (action.attackType === 'feinte') attackArrowType = 'attack-feinte';
+                            else if (action.attackType === 'relance') attackArrowType = 'attack-relance';
+                            else if (action.attackType === 'deuxieme_main') attackArrowType = 'attack-second';
+                        }
+
+                        // Annoter les positions 'out' avec targetCourt pour le clampage
+                        // home team : startPos = terrain home, endPos dépend du type d'action
+                        var startPos = action.startPos ? Object.assign({}, action.startPos) : null;
+                        var endPos = Object.assign({}, action.endPos);
+                        if (startPos && startPos.courtSide === 'out') {
+                            startPos.targetCourt = 'home'; // Le joueur home est toujours sur son terrain
+                        }
+                        if (endPos.courtSide === 'out') {
+                            // Défense, réception, passe : endPos sur le terrain home
+                            // Attaque, service : endPos sur le terrain adverse (là où la balle atterrit)
+                            if (effectiveType === 'defense' || effectiveType === 'reception' || effectiveType === 'pass') {
+                                endPos.targetCourt = 'home';
+                            } else if (effectiveType === 'service' || effectiveType === 'attack' || effectiveType === 'relance') {
+                                endPos.targetCourt = 'away';
+                            }
+                        }
+
+                        var hasStart = startPos && startPos.courtSide;
+                        var startSvg = hasStart ? self._posToSvg(self._normalizePos(startPos, cameraSide)) : null;
+
+                        // Blocs : afficher au filet (pas à endPos qui est l'atterrissage)
+                        // On utilise startPos.x de l'attaque adverse (= position attaquant, en face du bloqueur)
+                        // On normalise d'abord la position de l'attaquant, puis on place le bloc au filet (y=0 de 'bottom')
+                        var endSvg;
+                        if (effectiveType === 'block') {
+                            var blockX = 50; // fallback centre
+                            for (var bi = actionIdx - 1; bi >= 0; bi--) {
+                                var prevA = point.rally[bi];
+                                if (prevA.type === 'attack' && prevA.startPos) {
+                                    var normAttacker = self._normalizePos(prevA.startPos, cameraSide);
+                                    blockX = normAttacker.x;
+                                    break;
+                                }
+                            }
+                            endSvg = self._posToSvg({ x: blockX, y: 0, courtSide: 'bottom' });
+                        } else {
+                            endSvg = self._posToSvg(self._normalizePos(endPos, cameraSide));
+                        }
+
+                        trajectories.push({
+                            type: effectiveType,
+                            player: action.player,
+                            result: result,
+                            attackArrowType: attackArrowType,
+                            startPos: startSvg,
+                            endPos: endSvg,
+                            hasArrow: hasStart
+                        });
+
+                        // Block-touch : si l'attaque touche le filet/bloc, chercher le bloc qui suit
+                        // pour tracer la continuation (filet → terrain adverse)
+                        if ((effectiveType === 'attack' || effectiveType === 'relance') &&
+                            action.endPos && action.endPos.courtSide === 'net') {
+                            // Chercher le block action suivant dans le rally
+                            for (var bi = actionIdx + 1; bi < point.rally.length; bi++) {
+                                var nextAction = point.rally[bi];
+                                if (nextAction.type === 'block' && nextAction.endPos) {
+                                    var blockEndSvg = self._posToSvg(self._normalizePos(nextAction.endPos, cameraSide));
+                                    trajectories.push({
+                                        type: 'block-touch',
+                                        player: action.player,
+                                        result: 'block-touch',
+                                        attackArrowType: 'block-touch',
+                                        startPos: endSvg,  // départ = position au filet
+                                        endPos: blockEndSvg,
+                                        hasArrow: true
+                                    });
+                                    break;
+                                }
+                                // Stop if we hit another attack or pass (new sequence)
+                                if (nextAction.type === 'attack' || nextAction.type === 'pass') break;
+                            }
+                        }
+                    });
+                });
+            });
+        });
+
+        return trajectories;
+    },
+
+    _normalizePos(pos, cameraSide) {
+        if (!pos) return pos;
+        // Si cameraSide === 'home', home=bottom et away=top (déjà canonique)
+        if (cameraSide === 'home') {
+            var r = { x: pos.x, y: pos.y, courtSide: pos.courtSide };
+            if (pos.targetCourt) r.targetCourt = pos.targetCourt;
+            return r;
+        }
+
+        // cameraSide === 'away': rotation 180° — home était en top, away en bottom
+        // On flip courtSide, X (gauche-droite inversé car caméra côté opposé) et Y
+        var flipMap = { 'top': 'bottom', 'bottom': 'top', 'service_top': 'service_bottom', 'service_bottom': 'service_top' };
+        var newSide = flipMap[pos.courtSide] || pos.courtSide;
+        // net et out sont en % du courtContainer → flip X et Y aussi
+        var result = {
+            x: 100 - pos.x,
+            y: 100 - pos.y,
+            courtSide: newSide
+        };
+        // Préserver targetCourt (logique, pas dépendant de la caméra)
+        if (pos.targetCourt) result.targetCourt = pos.targetCourt;
+        return result;
+    },
+
+    _posToSvg(pos) {
+        if (!pos || !this._layout) return { x: 0, y: 0 };
+        var L = this._layout;
+        var cR = L.court;
+
+        function mapTo(rect, px, py) {
+            return {
+                x: (rect.left - cR.left) + (px / 100) * rect.width,
+                y: (rect.top - cR.top) + (py / 100) * rect.height
+            };
+        }
+
+        switch (pos.courtSide) {
+            case 'bottom': return mapTo(L.home, pos.x, pos.y);
+            case 'top': return mapTo(L.away, pos.x, pos.y);
+            case 'service_bottom': return mapTo(L.svcBot, pos.x, pos.y);
+            case 'service_top': return mapTo(L.svcTop, pos.x, pos.y);
+            case 'net': {
+                // net x,y sont en % de courtContainer (= sv-court-wrapper)
+                // X : mapper via wrapper puis convertir en coords SVG (relatives à sv-court)
+                // Y : toujours le centre mesuré du filet (dans match-live, Y stocké = centre du filet)
+                var wR = L.wrapper;
+                return {
+                    x: (pos.x / 100) * wR.width + (wR.left - cR.left),
+                    y: (L.net.top - cR.top) + L.net.height / 2
+                };
+            }
+            case 'out': {
+                // out x,y sont en % de courtContainer (= sv-court-wrapper)
+                // Mapper via wrapper puis convertir en coords SVG, puis clamper vers le demi-terrain cible
+                var wR = L.wrapper;
+                var svgX = (pos.x / 100) * wR.width + (wR.left - cR.left);
+                var svgY = (pos.y / 100) * wR.height + (wR.top - cR.top);
+                var homeTop = L.home.top - cR.top;
+                var homeBot = homeTop + L.home.height;
+                var awayTop = L.away.top - cR.top;
+                var awayBot = awayTop + L.away.height;
+                var netY = (homeTop + awayBot) / 2;
+                var target = pos.targetCourt || (svgY <= netY ? 'away' : 'home');
+                if (target === 'home') {
+                    svgY = Math.max(homeTop, Math.min(homeBot, svgY));
+                } else {
+                    svgY = Math.max(awayTop, Math.min(awayBot, svgY));
+                }
+                var courtLeft = L.home.left - cR.left;
+                var courtRight = courtLeft + L.home.width;
+                svgX = Math.max(courtLeft, Math.min(courtRight, svgX));
+                return { x: svgX, y: svgY };
+            }
+            default:
+                return {
+                    x: (L.net.left - cR.left) + (pos.x / 100) * L.net.width,
+                    y: (L.net.top - cR.top) + L.net.height / 2
+                };
+        }
+    },
+
+    _classifyResult(action) {
+        switch (action.type) {
+            case 'service':
+                if (action.result === 'ace') return 'positive';
+                if (action.result && action.result.indexOf('fault') === 0) return 'negative';
+                return 'neutral';
+            case 'reception':
+                if (action.quality) {
+                    if (action.quality.score >= 3) return 'positive';
+                    if (action.quality.score <= 1) return 'negative';
+                }
+                return 'neutral';
+            case 'pass':
+                if (action.quality) {
+                    if (action.quality.score >= 3) return 'positive';
+                    if (action.quality.score <= 1) return 'negative';
+                }
+                return 'neutral';
+            case 'attack':
+                if (action.result === 'point' || action.result === 'bloc_out') return 'positive';
+                if (action.result === 'blocked' || action.result === 'out' || action.result === 'fault_net') return 'negative';
+                if (action.attackType === 'faute') return 'negative';
+                return 'neutral';
+            case 'defense':
+                if (action.defenseQuality === 'positive') return 'positive';
+                if (action.result === 'fault') return 'negative';
+                return 'neutral';
+            case 'block':
+                if (action.result === 'kill' || action.result === 'point') return 'positive';
+                if (action.result === 'bloc_out') return 'negative';
+                return 'neutral';
+            default:
+                return 'neutral';
+        }
+    },
+
+    // ========== HEATMAP RENDERING ==========
+
+    // Vibrant heatmap palette — football analytics style
+    _HEAT_PALETTE: [
+        [0, 0, 200],      // blue (low)
+        [0, 160, 255],    // cyan
+        [0, 220, 80],     // green
+        [255, 240, 0],    // yellow
+        [255, 120, 0],    // orange
+        [255, 0, 0]       // red (high)
+    ],
+
+    // Blue-toned palette for "Départ" layer in both mode
+    // Clair → Foncé : bleu clair = peu de réceptions, bleu foncé = beaucoup
+    _HEAT_PALETTE_BLUE: [
+        [140, 220, 255],  // bleu très clair (faible densité)
+        [80, 180, 255],   // bleu clair
+        [0, 140, 255],    // bleu moyen
+        [0, 90, 220],     // bleu vif
+        [10, 50, 170],    // bleu foncé
+        [5, 20, 120]      // bleu marine (forte densité)
+    ],
+
+    // Green-toned palette for "Arrivée" layer in both mode
+    // Clair → Foncé : vert clair = peu, vert foncé = beaucoup
+    _HEAT_PALETTE_GREEN: [
+        [140, 255, 160],  // vert très clair (faible densité)
+        [80, 230, 100],   // vert clair
+        [0, 200, 60],     // vert moyen
+        [0, 150, 40],     // vert vif
+        [0, 100, 25],     // vert foncé
+        [0, 60, 15]       // vert forêt (forte densité)
+    ],
+
+    _interpolatePalette(palette, t) {
+        // t in [0,1] → RGB
+        if (t <= 0) return palette[0];
+        if (t >= 1) return palette[palette.length - 1];
+        var scaled = t * (palette.length - 1);
+        var idx = Math.floor(scaled);
+        var frac = scaled - idx;
+        if (idx >= palette.length - 1) return palette[palette.length - 1];
+        var a = palette[idx], b = palette[idx + 1];
+        return [
+            a[0] + (b[0] - a[0]) * frac,
+            a[1] + (b[1] - a[1]) * frac,
+            a[2] + (b[2] - a[2]) * frac
+        ];
+    },
+
+    _drawHeatmap(receptionTrajs) {
+        var canvas = document.getElementById('svHeatmapCanvas');
+        var court = document.getElementById('svCourt');
+        if (!canvas || !court) return;
+
+        var rect = court.getBoundingClientRect();
+        var w = rect.width;
+        var h = rect.height;
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        var ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Clip to court area (service zones + court halves) to prevent overflow
+        var cR = rect; // court (svCourt) rect
+        var awayEl = document.getElementById('svCourtAway');
+        var homeEl = document.getElementById('svCourtHome');
+        var svcTopEl = document.getElementById('svServiceTop');
+        var svcBotEl = document.getElementById('svServiceBot');
+        if (awayEl && homeEl) {
+            var aR = awayEl.getBoundingClientRect();
+            var hR = homeEl.getBoundingClientRect();
+            // Clip from top of away court to bottom of home court (full playable area)
+            var clipTop = (svcTopEl ? svcTopEl.getBoundingClientRect().top : aR.top) - cR.top;
+            var clipBot = (svcBotEl ? svcBotEl.getBoundingClientRect().bottom : hR.bottom) - cR.top;
+            var clipLeft = aR.left - cR.left;
+            var clipRight = aR.right - cR.left;
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(clipLeft * dpr, clipTop * dpr, (clipRight - clipLeft) * dpr, (clipBot - clipTop) * dpr);
+            ctx.clip();
+        }
+
+        var mode = this._heatmapMode;
+
+        // Collect points in pixel coords (already SVG coords = court-relative pixels)
+        var startPts = [];
+        var endPts = [];
+        receptionTrajs.forEach(function(t) {
+            if (t.startPos && (mode === 'start' || mode === 'both')) {
+                startPts.push({ x: t.startPos.x * dpr, y: t.startPos.y * dpr });
+            }
+            if (t.endPos && (mode === 'end' || mode === 'both')) {
+                endPts.push({ x: t.endPos.x * dpr, y: t.endPos.y * dpr });
+            }
+        });
+
+        // Tunable params — separate for 'both' vs 'single' modes
+        var hmConf = (mode === 'both') ? this._hmBoth : this._hmSingle;
+        var radius = Math.round(w * hmConf.radius * dpr);
+
+        if (mode === 'both') {
+            // Two vibrant layers: green (arrivée) dessous, blue (départ) au-dessus
+            if (endPts.length > 0) {
+                var endLayer = this._renderHeatLayer(canvas.width, canvas.height, endPts, radius);
+                this._colorizeLayerHeat(endLayer, this._HEAT_PALETTE_GREEN, 0.95);
+                ctx.drawImage(endLayer.canvas, 0, 0);
+            }
+            if (startPts.length > 0) {
+                var startLayer = this._renderHeatLayer(canvas.width, canvas.height, startPts, radius);
+                this._colorizeLayerHeat(startLayer, this._HEAT_PALETTE_BLUE, 0.95);
+                ctx.drawImage(startLayer.canvas, 0, 0);
+            }
+        } else {
+            // Single layer: vibrant heatmap palette
+            var pts = mode === 'start' ? startPts : endPts;
+            if (pts.length > 0) {
+                var layer = this._renderHeatLayer(canvas.width, canvas.height, pts, radius);
+                this._colorizeLayerHeat(layer);
+                ctx.drawImage(layer.canvas, 0, 0);
+            }
+        }
+
+        ctx.restore();
+
+        // Draw legend
+        var svContainer = this._container;
+        if (svContainer) this._drawLegend(svContainer, mode);
+    },
+
+    // Render gaussian density on offscreen canvas (grayscale alpha)
+    _renderHeatLayer(w, h, points, radius) {
+        var offscreen = document.createElement('canvas');
+        offscreen.width = w;
+        offscreen.height = h;
+        var ctx = offscreen.getContext('2d');
+
+        // Accumulate density using alpha channel on a black canvas.
+        // Use a Float32 array to avoid 255 clamping, then normalize at the end.
+        var density = new Float32Array(w * h);
+
+        // Precompute gaussian kernel lookup (radius in pixels)
+        var r2 = radius * radius;
+
+        points.forEach(function(pt) {
+            var cx = Math.round(pt.x);
+            var cy = Math.round(pt.y);
+            var x0 = Math.max(0, cx - radius);
+            var x1 = Math.min(w - 1, cx + radius);
+            var y0 = Math.max(0, cy - radius);
+            var y1 = Math.min(h - 1, cy + radius);
+            for (var y = y0; y <= y1; y++) {
+                var dy = y - cy;
+                var dy2 = dy * dy;
+                for (var x = x0; x <= x1; x++) {
+                    var dx = x - cx;
+                    var dist2 = dx * dx + dy2;
+                    if (dist2 <= r2) {
+                        // Gaussian-ish falloff: 1 at center, 0 at edge
+                        var t = 1 - dist2 / r2;
+                        density[y * w + x] += t * t; // quadratic falloff (smoother than linear)
+                    }
+                }
+            }
+        });
+
+        // Find max density for normalization
+        var maxDensity = 0;
+        for (var i = 0; i < density.length; i++) {
+            if (density[i] > maxDensity) maxDensity = density[i];
+        }
+
+        // Write normalized density to canvas as grayscale
+        if (maxDensity > 0) {
+            var imgData = ctx.getImageData(0, 0, w, h);
+            var data = imgData.data;
+            for (var i = 0; i < density.length; i++) {
+                if (density[i] > 0) {
+                    var val = Math.round((density[i] / maxDensity) * 255);
+                    var pi = i * 4;
+                    data[pi] = val;
+                    data[pi + 1] = val;
+                    data[pi + 2] = val;
+                    data[pi + 3] = 255;
+                }
+            }
+            ctx.putImageData(imgData, 0, 0);
+        }
+
+        return { canvas: offscreen, ctx: ctx, maxDensity: maxDensity, density: density, w: w, h: h };
+    },
+
+    // Colorize grayscale layer with a single color + alpha mapping
+    _colorizeLayer(layer, colorArr, maxAlpha) {
+        var ctx = layer.ctx;
+        var w = layer.canvas.width;
+        var h = layer.canvas.height;
+        var imgData = ctx.getImageData(0, 0, w, h);
+        var data = imgData.data;
+        var r = colorArr[0][0], g = colorArr[0][1], b = colorArr[0][2];
+
+        // Find max value for normalization
+        var maxVal = 0;
+        for (var i = 0; i < data.length; i += 4) {
+            if (data[i] > maxVal) maxVal = data[i];
+        }
+        if (maxVal === 0) { ctx.putImageData(imgData, 0, 0); return; }
+
+        for (var i = 0; i < data.length; i += 4) {
+            var val = data[i]; // white channel = density
+            if (val === 0) {
+                data[i + 3] = 0;
+                continue;
+            }
+            var t = Math.pow(val / maxVal, 0.6); // gamma to spread mid-tones
+            data[i] = r;
+            data[i + 1] = g;
+            data[i + 2] = b;
+            data[i + 3] = Math.round(t * maxAlpha * 255);
+        }
+        ctx.putImageData(imgData, 0, 0);
+    },
+
+    // Colorize grayscale layer with heat palette (default: vibrant rainbow, or custom palette)
+    _colorizeLayerHeat(layer, palette, maxOpacity) {
+        palette = palette || this._HEAT_PALETTE;
+        maxOpacity = maxOpacity !== undefined ? maxOpacity : 1.0;
+        var ctx = layer.ctx;
+        var w = layer.canvas.width;
+        var h = layer.canvas.height;
+        var imgData = ctx.getImageData(0, 0, w, h);
+        var data = imgData.data;
+        var self = this;
+
+        // Find max value for normalization
+        var maxVal = 0;
+        for (var i = 0; i < data.length; i += 4) {
+            if (data[i] > maxVal) maxVal = data[i];
+        }
+        if (maxVal === 0) { ctx.putImageData(imgData, 0, 0); return; }
+
+        // Params from active heatmap config
+        var isBoth = self._heatmapMode === 'both';
+        var hmConf = isBoth ? self._hmBoth : self._hmSingle;
+        var hmGamma = hmConf.gamma;
+        var hmAlpha = hmConf.alpha;
+        var hmCutoff = hmConf.cutoff;
+        var cutoff = maxVal * hmCutoff;
+
+        for (var i = 0; i < data.length; i += 4) {
+            var val = data[i];
+            if (val === 0 || val < cutoff) {
+                data[i + 3] = 0;
+                continue;
+            }
+            var t = Math.pow(val / maxVal, hmGamma);
+            var rgb = self._interpolatePalette(palette, t);
+            data[i] = Math.round(rgb[0]);
+            data[i + 1] = Math.round(rgb[1]);
+            data[i + 2] = Math.round(rgb[2]);
+            var alpha = Math.min(1, t * 1.5);
+            data[i + 3] = Math.round(alpha * hmAlpha * maxOpacity);
+        }
+        ctx.putImageData(imgData, 0, 0);
+    },
+
+    // Draw iso-density contour lines on the main canvas
+    _drawContours(ctx, layer, nLevels, color) {
+        if (!layer.density || layer.maxDensity === 0) return;
+        var d = layer.density;
+        var w = layer.w;
+        var h = layer.h;
+        var max = layer.maxDensity;
+        color = color || 'rgba(255,255,255,0.6)';
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.2;
+        ctx.lineJoin = 'round';
+
+        // For each contour level, find boundary pixels and trace
+        for (var level = 1; level <= nLevels; level++) {
+            var threshold = (level / (nLevels + 1)) * max;
+            ctx.beginPath();
+            // Scan for boundary pixels (where density crosses the threshold)
+            // Step by 2 for performance
+            for (var y = 1; y < h - 1; y += 2) {
+                for (var x = 1; x < w - 1; x += 2) {
+                    var idx = y * w + x;
+                    var val = d[idx];
+                    if (val >= threshold) {
+                        // Check if any neighbor is below threshold (= boundary)
+                        var isEdge = (
+                            d[idx - 1] < threshold ||
+                            d[idx + 1] < threshold ||
+                            d[idx - w] < threshold ||
+                            d[idx + w] < threshold
+                        );
+                        if (isEdge) {
+                            ctx.moveTo(x, y);
+                            ctx.arc(x, y, 0.8, 0, Math.PI * 2);
+                        }
+                    }
+                }
+            }
+            ctx.stroke();
+        }
+    },
+
+    // Draw color legend bar under the court
+    _drawLegend(container, mode) {
+        var existing = container.querySelector('.sv-heatmap-legend');
+        if (existing) existing.remove();
+
+        var div = document.createElement('div');
+        div.className = 'sv-heatmap-legend';
+
+        // Adapt labels to active categories
+        var hasRec = this._selectedCategories['reception'];
+        var hasDef = this._selectedCategories['defense'];
+        var startLabel = hasRec && hasDef ? 'Départ (position du joueur)' :
+                         hasDef ? 'Départ (où on défend)' : 'Départ (où on réceptionne)';
+        var endLabel = 'Arrivée (où va la balle)';
+
+        if (mode === 'both') {
+            div.innerHTML =
+                '<div class="sv-legend-row">' +
+                '<span class="sv-legend-bar sv-legend-bar-blue" style="width:60px;height:10px;border-radius:5px;background:linear-gradient(to right, #8CDCFF, #008CFF, #0A32AA, #051478)"></span>' +
+                '<span class="sv-legend-label">' + startLabel + '</span>' +
+                '</div>' +
+                '<div class="sv-legend-row">' +
+                '<span class="sv-legend-bar sv-legend-bar-green" style="width:60px;height:10px;border-radius:5px;background:linear-gradient(to right, #8CFFA0, #00C83C, #006419, #003C0F)"></span>' +
+                '<span class="sv-legend-label">' + endLabel + '</span>' +
+                '</div>';
+        } else {
+            var startText = hasRec && hasDef ? 'Position du joueur' :
+                           hasDef ? 'Où on défend' : 'Où on réceptionne';
+            var label = mode === 'start' ? startText : 'Où va la balle';
+            div.innerHTML =
+                '<div class="sv-legend-bar-container">' +
+                '<div class="sv-legend-bar"></div>' +
+                '<div class="sv-legend-labels">' +
+                '<span>Faible</span><span>' + label + '</span><span>Forte</span>' +
+                '</div></div>';
+        }
+
+        // Insert after the court wrapper
+        var courtWrapper = container.querySelector('.sv-court-wrapper');
+        if (courtWrapper && courtWrapper.nextSibling) {
+            courtWrapper.parentNode.insertBefore(div, courtWrapper.nextSibling);
+        }
+    },
+
+    // ========== ARROW RENDERING ==========
+
+    _updateArrows() {
+        var svgEl = document.getElementById('svArrowSvg');
+        var group = document.getElementById('svArrowGroup');
+        var court = document.getElementById('svCourt');
+        if (!svgEl || !group || !court) return;
+
+        // Measure actual element positions for coordinate mapping
+        var courtRect = court.getBoundingClientRect();
+        var wrapperEl = document.querySelector('.sv-court-wrapper');
+        this._layout = {
+            court: courtRect,
+            wrapper: wrapperEl ? wrapperEl.getBoundingClientRect() : courtRect, // ≡ courtContainer dans match-live
+            away: document.getElementById('svCourtAway').getBoundingClientRect(),
+            home: document.getElementById('svCourtHome').getBoundingClientRect(),
+            net: document.getElementById('svNet').getBoundingClientRect(),
+            svcTop: document.getElementById('svServiceTop').getBoundingClientRect(),
+            svcBot: document.getElementById('svServiceBot').getBoundingClientRect()
+        };
+
+        // Set SVG viewBox to match court container dimensions
+        svgEl.setAttribute('viewBox', '0 0 ' + courtRect.width.toFixed(1) + ' ' + courtRect.height.toFixed(1));
+
+        this._trajectories = this._extractTrajectories();
+
+        // Split heatmap categories (reception, defense) from SVG categories
+        var heatmapTrajs = [];
+        var svgTrajs = [];
+        this._trajectories.forEach(function(t) {
+            if (t.type === 'reception' || t.type === 'defense') {
+                heatmapTrajs.push(t);
+            } else {
+                svgTrajs.push(t);
+            }
+        });
+
+        var canvasEl = document.getElementById('svHeatmapCanvas');
+        var hmToggle = document.getElementById('svHeatmapToggle');
+
+        // Heatmap for reception & defense
+        if (heatmapTrajs.length > 0) {
+            this._drawHeatmap(heatmapTrajs);
+            if (canvasEl) canvasEl.style.display = '';
+            if (hmToggle) hmToggle.style.display = '';
+        } else {
+            if (canvasEl) { canvasEl.style.display = 'none'; canvasEl.getContext('2d').clearRect(0, 0, canvasEl.width, canvasEl.height); }
+            if (hmToggle) hmToggle.style.display = 'none';
+        }
+
+        // SVG rendering for non-reception trajectories
+        var count = svgTrajs.length;
+        var totalCount = this._trajectories.length;
+
+        var opacity = count <= 100 ? 1 : count <= 250 ? 0.7 : count <= 500 ? 0.4 : 0.25;
+        var strokeW = count <= 100 ? 2 : 1.5;
+
+        var markerR = 5;
+        var markerSW = 1.5;
+
+        var svgCircles = '';
+        var svgLines = '';
+        var self = this;
+        svgTrajs.forEach(function(t) {
+            var attackColor = t.attackArrowType ? self.ATTACK_TYPE_COLORS[t.attackArrowType] : null;
+            var color = attackColor || self.RESULT_COLORS[t.result] || self.RESULT_COLORS.neutral;
+            var markerId = (t.attackArrowType && self.ATTACK_TYPE_COLORS[t.attackArrowType]) ? t.attackArrowType : t.result;
+
+            if (t.hasArrow && t.startPos) {
+                svgCircles += '<circle cx="' + t.startPos.x.toFixed(1) + '" cy="' + t.startPos.y.toFixed(1) +
+                    '" r="' + markerR + '" fill="' + color + '" stroke="white" stroke-width="' + markerSW + '" opacity="' + opacity + '"/>';
+                svgCircles += '<circle cx="' + t.endPos.x.toFixed(1) + '" cy="' + t.endPos.y.toFixed(1) +
+                    '" r="' + markerR + '" fill="' + color + '" stroke="white" stroke-width="' + markerSW + '" opacity="' + opacity + '"/>';
+                var dashAttr = (t.type === 'block-touch') ? ' stroke-dasharray="4,3"' : '';
+                svgLines += '<line x1="' + t.startPos.x.toFixed(1) + '" y1="' + t.startPos.y.toFixed(1) +
+                    '" x2="' + t.endPos.x.toFixed(1) + '" y2="' + t.endPos.y.toFixed(1) +
+                    '" stroke="' + color + '" stroke-width="' + strokeW + '" stroke-linecap="round"' +
+                    dashAttr + ' opacity="' + opacity + '" marker-end="url(#sv-arrow-' + markerId + ')"/>';
+            } else {
+                svgCircles += '<circle cx="' + t.endPos.x.toFixed(1) + '" cy="' + t.endPos.y.toFixed(1) +
+                    '" r="' + markerR + '" fill="' + color + '" stroke="white" stroke-width="' + markerSW + '" opacity="' + opacity + '"/>';
+            }
+        });
+
+        group.innerHTML = svgCircles + svgLines;
+
+        // Update count (total trajectories)
+        var countEl = document.getElementById('svArrowCount');
+        if (countEl) {
+            if (heatmapTrajs.length > 0 && svgTrajs.length === 0) {
+                // Label based on active heatmap categories
+                var hmHasRec = heatmapTrajs.some(function(t) { return t.type === 'reception'; });
+                var hmHasDef = heatmapTrajs.some(function(t) { return t.type === 'defense'; });
+                var hmLabel = hmHasRec && hmHasDef ? 'actions' :
+                              hmHasDef ? 'défense' + (heatmapTrajs.length > 1 ? 's' : '') :
+                              'réception' + (heatmapTrajs.length > 1 ? 's' : '');
+                countEl.textContent = heatmapTrajs.length + ' ' + hmLabel;
+            } else {
+                countEl.textContent = totalCount > 0 ? totalCount + ' trajectoire' + (totalCount > 1 ? 's' : '') : 'Aucune trajectoire';
+            }
+        }
+    },
+
+    // ========== EVENTS ==========
+
+    _bindEvents(container) {
+        var self = this;
+
+        // Match selector
+        var matchSelect = container.querySelector('#svMatchSelect');
+        if (matchSelect) {
+            matchSelect.addEventListener('change', function() {
+                self._selectedMatch = matchSelect.value;
+                self._selectedSet = 'all';
+                self._rebuildAndRender();
+            });
+        }
+
+        // Category pills
+        container.querySelectorAll('.sv-cat-pill').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var cat = btn.dataset.cat;
+                self._selectedCategories[cat] = !self._selectedCategories[cat];
+                btn.classList.toggle('active', self._selectedCategories[cat]);
+                self._updateArrows();
+            });
+        });
+
+        // Result pills
+        container.querySelectorAll('.sv-result-pill').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                self._selectedResult = btn.dataset.result;
+                container.querySelectorAll('.sv-result-pill').forEach(function(b) {
+                    var isActive = b.dataset.result === self._selectedResult;
+                    b.classList.toggle('active', isActive);
+                    var color = self.RESULT_COLORS[b.dataset.result];
+                    if (color) {
+                        b.style.background = isActive ? color : '#fff';
+                        b.style.borderColor = color;
+                        b.style.color = isActive ? '#fff' : color;
+                    } else {
+                        b.style.background = isActive ? 'var(--accent-blue)' : '#fff';
+                        b.style.borderColor = isActive ? 'var(--accent-blue)' : '#d1d5db';
+                        b.style.color = isActive ? '#fff' : '#6b7280';
+                    }
+                });
+                self._updateArrows();
+            });
+        });
+
+        // Player chips
+        container.querySelectorAll('.sv-player-chip').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var name = btn.dataset.player;
+                self._selectedPlayers[name] = !self._selectedPlayers[name];
+                btn.classList.toggle('active', self._selectedPlayers[name]);
+                self._updateArrows();
+            });
+        });
+
+        // Set pills
+        container.querySelectorAll('.sv-set-pill').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                self._selectedSet = btn.dataset.set === 'all' ? 'all' : parseInt(btn.dataset.set);
+                container.querySelectorAll('.sv-set-pill').forEach(function(b) {
+                    var val = b.dataset.set === 'all' ? 'all' : parseInt(b.dataset.set);
+                    b.classList.toggle('active', val === self._selectedSet);
+                });
+                self._updateArrows();
+            });
+        });
+
+        // Heatmap mode pills
+        container.querySelectorAll('.sv-heatmap-pill').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                self._heatmapMode = btn.dataset.hm;
+                container.querySelectorAll('.sv-heatmap-pill').forEach(function(b) {
+                    b.classList.toggle('active', b.dataset.hm === self._heatmapMode);
+                });
+                self._updateArrows();
+            });
+        });
+
+        // Heatmap tuner sliders (if ?tuner in URL)
+        var tunerKeys = ['both_radius','both_gamma','both_alpha','both_cutoff','single_radius','single_gamma','single_alpha','single_cutoff'];
+        tunerKeys.forEach(function(id) {
+            var slider = document.getElementById('hm-' + id);
+            if (!slider) return;
+            slider.addEventListener('input', function() {
+                var v = parseFloat(this.value);
+                var parts = id.split('_');
+                var mode = parts[0]; // 'both' or 'single'
+                var param = parts[1]; // 'radius', 'gamma', 'alpha', 'cutoff'
+                var conf = (mode === 'both') ? self._hmBoth : self._hmSingle;
+                conf[param] = v;
+                var label = document.getElementById('hm-v-' + id);
+                if (label) label.textContent = v;
+                self._updateArrows();
+            });
+        });
+    },
+
+    _rebuildAndRender() {
+        if (!this._container) return;
+        this._container.innerHTML = '';
+        var matches = SeasonSelector.getFilteredMatches();
+        var players = this._getPlayersForScope(matches);
+        var self = this;
+        players.forEach(function(p) {
+            if (self._selectedPlayers[p.name] === undefined) self._selectedPlayers[p.name] = true;
+        });
+        this._container.innerHTML = this._buildHTML(matches, players);
+        this._bindEvents(this._container);
+        this._updateArrows();
     }
 };
 

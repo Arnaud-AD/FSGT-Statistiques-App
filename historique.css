@@ -2677,6 +2677,405 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
     font-weight: 700;
 }
 
+/* ==================== STATS VISUELLES VIEW ==================== */
+
+.sv-container {
+    padding: 0 2px;
+}
+
+.sv-filters {
+    margin-bottom: 12px;
+}
+
+.sv-filter-group {
+    margin-bottom: 8px;
+}
+
+.sv-match-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    font-size: 13px;
+    background: #fff;
+    color: var(--text-primary);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+/* Category pills */
+.sv-cat-pills {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.sv-cat-pill {
+    padding: 5px 12px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 16px;
+    background: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.sv-cat-pill.active {
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: #fff;
+    font-weight: 600;
+}
+
+/* Result pills */
+.sv-result-pills {
+    display: flex;
+    gap: 4px;
+}
+
+.sv-result-pill {
+    padding: 5px 14px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 16px;
+    background: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.sv-result-pill.active {
+    color: #fff;
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+}
+
+/* Player chips */
+.sv-player-chips {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.sv-player-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 14px;
+    background: #fff;
+    font-size: 12px;
+    color: #9ca3af;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.sv-player-chip.active {
+    border-color: var(--sv-player-color, #0056D2);
+    color: var(--text-primary);
+    background: #fff;
+    box-shadow: 0 0 0 1px var(--sv-player-color, #0056D2);
+}
+
+.sv-role-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Set pills */
+.sv-set-pills {
+    display: flex;
+    gap: 4px;
+}
+
+.sv-set-pill {
+    padding: 4px 12px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 14px;
+    background: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.sv-set-pill.active {
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: #fff;
+}
+
+/* Court (HTML/CSS like match-live) */
+.sv-court-wrapper {
+    background: #2563eb;
+    border-radius: 10px;
+    padding: 15px 25px;
+    margin: 0 -2px;
+    overflow: visible;
+}
+
+.sv-court {
+    position: relative;
+    width: 100%;
+    max-width: 280px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.sv-team-label {
+    text-align: center;
+    color: white;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    padding: 2px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sv-court-half {
+    background: #f59e0b;
+    border: 2px solid white;
+    position: relative;
+    aspect-ratio: 1 / 1;
+}
+
+.sv-court-half.sv-away {
+    border-bottom: none;
+    border-radius: 3px 3px 0 0;
+}
+
+.sv-court-half.sv-home {
+    border-top: none;
+    border-radius: 0 0 3px 3px;
+}
+
+/* 3m lines */
+.sv-court-half::before,
+.sv-court-half::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(255,255,255,0.5);
+}
+.sv-court-half::before { top: 33.33%; }
+.sv-court-half::after { top: 66.66%; }
+
+/* Net */
+.sv-net {
+    height: 4px;
+    background: white;
+    position: relative;
+}
+
+.sv-net::before,
+.sv-net::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.sv-net::before { left: -4px; }
+.sv-net::after { right: -4px; }
+
+/* Service zones */
+.sv-service-zone {
+    height: 40px;
+    border: 2px dashed rgba(255,255,255,0.3);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sv-service-zone.sv-top {
+    border-radius: 3px 3px 0 0;
+    border-bottom: none;
+}
+
+.sv-service-zone.sv-bottom {
+    border-radius: 0 0 3px 3px;
+    border-top: none;
+}
+
+.sv-svc-label {
+    color: rgba(255,255,255,0.3);
+    font-size: 9px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* SVG overlay for arrows */
+.sv-arrow-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+}
+
+/* Canvas overlay for heatmap */
+.sv-heatmap-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* Heatmap toggle pills */
+.sv-heatmap-pills {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+}
+
+.sv-heatmap-pill {
+    padding: 5px 14px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 16px;
+    background: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.sv-heatmap-pill.active {
+    color: #fff;
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+}
+
+/* Heatmap legend */
+.sv-heatmap-legend {
+    padding: 8px 16px;
+    margin-top: 6px;
+}
+
+.sv-legend-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.sv-legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.sv-legend-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.sv-legend-bar-container {
+    text-align: center;
+}
+
+.sv-legend-bar {
+    height: 10px;
+    border-radius: 5px;
+    background: linear-gradient(to right, #0000C8, #00A0FF, #00DC50, #FFF000, #FF7800, #FF0000);
+    margin-bottom: 4px;
+}
+
+.sv-legend-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+/* Heatmap tuner (?tuner) */
+.sv-heatmap-tuner {
+    background: #1a1a2e;
+    color: #fff;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-top: 10px;
+}
+.sv-tuner-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #7dd3fc;
+    margin-bottom: 8px;
+}
+.sv-tuner-columns {
+    display: flex;
+    gap: 16px;
+}
+.sv-tuner-col {
+    flex: 1;
+    min-width: 0;
+}
+.sv-tuner-subtitle {
+    font-size: 12px;
+    font-weight: 600;
+    color: #fbbf24;
+    border-bottom: 1px solid #333;
+    padding-bottom: 4px;
+    margin-bottom: 6px;
+}
+.sv-tuner-row {
+    margin-bottom: 6px;
+}
+.sv-tuner-row label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 2px;
+}
+.sv-tuner-row label span {
+    color: #7dd3fc;
+    font-weight: 600;
+}
+.sv-tuner-row input[type=range] {
+    width: 100%;
+    accent-color: #3b82f6;
+    height: 16px;
+}
+
+/* Arrow count */
+.sv-arrow-count {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    padding-bottom: 12px;
+}
+
+/* Desktop: slightly wider court */
+@media (min-width: 768px) {
+    .sv-court {
+        max-width: 320px;
+    }
+}
+
 /* ==================== PROGRESSION VIEW ==================== */
 
 .prog-section {
