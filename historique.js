@@ -7184,7 +7184,7 @@ const StatsVisuellesView = {
     _rendered: false,
     _container: null,
     _selectedMatch: 'all',
-    _selectedCategories: { service: false, reception: true, pass: false, attack: false, relance: false, defense: false, block: false },
+    _selectedCategories: { service: false, reception: false, pass: false, attack: false, relance: false, defense: true, block: false },
     _selectedResult: 'all', // 'all'|'positive'|'neutral'|'negative'
     _selectedPlayers: {},   // { name: true/false }
     _selectedSet: 'all',    // 'all' | set index number
