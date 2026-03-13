@@ -7184,7 +7184,7 @@ const StatsVisuellesView = {
     _rendered: false,
     _container: null,
     _selectedMatch: 'all',
-    _selectedCategories: { service: true, reception: false, pass: false, attack: true, relance: false, defense: false, block: false },
+    _selectedCategories: { service: false, reception: true, pass: false, attack: false, relance: false, defense: false, block: false },
     _selectedResult: 'all', // 'all'|'positive'|'neutral'|'negative'
     _selectedPlayers: {},   // { name: true/false }
     _selectedSet: 'all',    // 'all' | set index number
@@ -7228,11 +7228,14 @@ const StatsVisuellesView = {
             return;
         }
 
-        // Init player selection
+        // Init player selection — first load: only first player selected
         var players = this._getPlayersForScope(matches);
         var self = this;
-        players.forEach(function(p) {
-            if (self._selectedPlayers[p.name] === undefined) self._selectedPlayers[p.name] = true;
+        var isFirstLoad = Object.keys(self._selectedPlayers).length === 0;
+        players.forEach(function(p, i) {
+            if (self._selectedPlayers[p.name] === undefined) {
+                self._selectedPlayers[p.name] = isFirstLoad ? (i === 0) : true;
+            }
         });
 
         container.innerHTML = this._buildHTML(matches, players);
