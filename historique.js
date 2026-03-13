@@ -7559,7 +7559,8 @@ const StatsVisuellesView = {
                             attackArrowType: attackArrowType,
                             startPos: startSvg,
                             endPos: endSvg,
-                            hasArrow: hasStart
+                            hasArrow: hasStart,
+                            startCourtSide: hasStart ? startPos.courtSide : null
                         });
 
                         // Block-touch : si l'attaque touche le filet/bloc, chercher le bloc qui suit
@@ -7803,7 +7804,7 @@ const StatsVisuellesView = {
         var startPts = [];
         var endPts = [];
         receptionTrajs.forEach(function(t) {
-            if (t.startPos && (mode === 'start' || mode === 'both')) {
+            if (t.startPos && (mode === 'start' || mode === 'both') && t.startCourtSide !== 'net') {
                 startPts.push({ x: t.startPos.x * dpr, y: t.startPos.y * dpr });
             }
             if (t.endPos && (mode === 'end' || mode === 'both')) {
