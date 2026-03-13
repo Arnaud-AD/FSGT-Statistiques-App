@@ -7829,20 +7829,26 @@ const StatsVisuellesView = {
                 ctx.drawImage(startLayer.canvas, 0, 0);
             }
         } else {
-            // Single layer: fond bleu/vert semi-transparent sur le demi-terrain home + heatmap vibrante
+            // Single layer: enveloppe dynamique + heatmap vibrante
             var pts = mode === 'start' ? startPts : endPts;
 
-            // Fond coloré sur le demi-terrain home
-            if (this._layout) {
-                var L = this._layout;
-                var cR = L.court;
-                var hR = L.home;
-                var bgX = (hR.left - cR.left) * dpr;
-                var bgY = (hR.top - cR.top) * dpr;
-                var bgW = hR.width * dpr;
-                var bgH = hR.height * dpr;
+            // Enveloppe englobante (convex hull + padding) remplie en couleur semi-transparente
+            if (pts.length >= 3) {
+                var hullPadding = radius * 1.2;
+                var hull = this._convexHull(pts);
+                // Expand hull outward by padding
+                var expanded = this._expandHull(hull, hullPadding);
+                ctx.save();
+                ctx.beginPath();
+                // Smooth path avec courbes de Bézier
+                this._drawSmoothHull(ctx, expanded);
                 ctx.fillStyle = mode === 'start' ? 'rgba(30, 100, 220, 0.18)' : 'rgba(30, 180, 80, 0.18)';
-                ctx.fillRect(bgX, bgY, bgW, bgH);
+                ctx.fill();
+                // Contour
+                ctx.strokeStyle = mode === 'start' ? 'rgba(30, 100, 220, 0.35)' : 'rgba(30, 180, 80, 0.35)';
+                ctx.lineWidth = 3 * dpr;
+                ctx.stroke();
+                ctx.restore();
             }
 
             if (pts.length > 0) {
@@ -7857,6 +7863,60 @@ const StatsVisuellesView = {
         // Draw legend
         var svContainer = this._container;
         if (svContainer) this._drawLegend(svContainer, mode);
+    },
+
+    // Convex hull (Andrew's monotone chain algorithm)
+    _convexHull(points) {
+        var pts = points.slice().sort(function(a, b) { return a.x - b.x || a.y - b.y; });
+        if (pts.length <= 2) return pts;
+        var cross = function(O, A, B) { return (A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x); };
+        var lower = [];
+        for (var i = 0; i < pts.length; i++) {
+            while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], pts[i]) <= 0) lower.pop();
+            lower.push(pts[i]);
+        }
+        var upper = [];
+        for (var i = pts.length - 1; i >= 0; i--) {
+            while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], pts[i]) <= 0) upper.pop();
+            upper.push(pts[i]);
+        }
+        upper.pop(); lower.pop();
+        return lower.concat(upper);
+    },
+
+    // Expand hull outward by padding distance
+    _expandHull(hull, padding) {
+        if (hull.length < 3) return hull;
+        // Compute centroid
+        var cx = 0, cy = 0;
+        for (var i = 0; i < hull.length; i++) { cx += hull[i].x; cy += hull[i].y; }
+        cx /= hull.length; cy /= hull.length;
+        // Push each point outward from centroid
+        return hull.map(function(p) {
+            var dx = p.x - cx, dy = p.y - cy;
+            var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            return { x: p.x + (dx / dist) * padding, y: p.y + (dy / dist) * padding };
+        });
+    },
+
+    // Draw smooth closed path through hull points (Catmull-Rom → cubic Bézier)
+    _drawSmoothHull(ctx, hull) {
+        if (hull.length < 3) return;
+        var n = hull.length;
+        var tension = 0.3;
+        ctx.moveTo(hull[0].x, hull[0].y);
+        for (var i = 0; i < n; i++) {
+            var p0 = hull[(i - 1 + n) % n];
+            var p1 = hull[i];
+            var p2 = hull[(i + 1) % n];
+            var p3 = hull[(i + 2) % n];
+            var cp1x = p1.x + (p2.x - p0.x) * tension;
+            var cp1y = p1.y + (p2.y - p0.y) * tension;
+            var cp2x = p2.x - (p3.x - p1.x) * tension;
+            var cp2y = p2.y - (p3.y - p1.y) * tension;
+            ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
+        }
+        ctx.closePath();
     },
 
     // Render gaussian density on offscreen canvas (grayscale alpha)
