@@ -7829,22 +7829,8 @@ const StatsVisuellesView = {
                 ctx.drawImage(startLayer.canvas, 0, 0);
             }
         } else {
-            // Single layer: fond bleu/vert semi-transparent sur le demi-terrain home + heatmap vibrante
+            // Single layer: vibrant heatmap palette
             var pts = mode === 'start' ? startPts : endPts;
-
-            // Fond coloré sur le demi-terrain home
-            if (this._layout) {
-                var L = this._layout;
-                var cR = L.court;
-                var hR = L.home;
-                var bgX = (hR.left - cR.left) * dpr;
-                var bgY = (hR.top - cR.top) * dpr;
-                var bgW = hR.width * dpr;
-                var bgH = hR.height * dpr;
-                ctx.fillStyle = mode === 'start' ? 'rgba(30, 100, 220, 0.18)' : 'rgba(30, 180, 80, 0.18)';
-                ctx.fillRect(bgX, bgY, bgW, bgH);
-            }
-
             if (pts.length > 0) {
                 var layer = this._renderHeatLayer(canvas.width, canvas.height, pts, radius);
                 this._colorizeLayerHeat(layer);
