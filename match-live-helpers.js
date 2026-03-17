@@ -178,7 +178,7 @@ function getPlayerByRole(team, role) {
     const lineup = team === 'home' ? currentSet.homeLineup : currentSet.awayLineup;
     const roles = POSITION_ROLES[team];
     for (const [pos, r] of Object.entries(roles)) {
-        if (r === role) return lineup[pos];
+        if (r === role) return lineup[pos] || null;
     }
     return null;
 }
@@ -202,7 +202,7 @@ function getLineupPlayers(team) {
             const pos = Object.keys(roles).find(k => roles[k] === role);
             return pos ? lineup[pos] : null;
         })
-        .filter(p => p !== null);
+        .filter(p => p != null);
 }
 
 function showPositionZones(team) {
@@ -679,7 +679,8 @@ function findNearestDefenseZonePlayer(event) {
 
     // Trouver le joueur assigné à cette zone
     const zoneEl = activeContainer.querySelector(`.defense-zone[data-zone="${targetZone}"]`);
-    return zoneEl ? zoneEl.dataset.player : null;
+    const p = zoneEl ? zoneEl.dataset.player : null;
+    return (p && p !== 'undefined') ? p : null;
 }
 
 // Parse un clip-path CSS polygon() en tableau de [x, y]

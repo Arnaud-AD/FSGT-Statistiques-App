@@ -1098,7 +1098,7 @@
                 currentSet.points.forEach(point => {
                     if (!point.rally) return;
                     point.rally.forEach(action => {
-                        if (action.team && action.player && !setStats[action.team][action.player]) {
+                        if (action.team && action.player && action.player !== 'undefined' && !setStats[action.team][action.player]) {
                             setStats[action.team][action.player] = initPlayerStats(action.player);
                         }
                     });
@@ -1117,7 +1117,7 @@
         function renderStatsTable(team, containerId) {
             const container = document.getElementById(containerId);
             const stats = setStats[team];
-            const players = Object.keys(stats);
+            const players = Object.keys(stats).filter(p => p && p !== 'undefined' && p !== 'null');
 
             if (players.length === 0) {
                 container.innerHTML = '';
@@ -3010,7 +3010,7 @@
         // V20.287 : accepter tout joueur qui a déjà des stats OU qui est dans un lineup (actuel/initial)
         // OU qui a des actions dans les rallies (substitués, joueurs manqués par initSetStats)
         function getPlayerStats(team, player) {
-            if (!team || !player) return null;
+            if (!team || !player || player === 'undefined') return null;
             // Si le joueur a déjà des stats pour cette équipe, OK
             if (setStats[team][player]) return setStats[team][player];
             // Vérifier lineup actuel OU initial
@@ -3112,7 +3112,7 @@
                 const team = action.team;
                 const player = action.player;
 
-                if (!team || !player) continue;
+                if (!team || !player || player === 'undefined') continue;
 
                 const stats = getPlayerStats(team, player);
                 if (!stats) continue;

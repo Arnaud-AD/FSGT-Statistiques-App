@@ -620,7 +620,7 @@ const StatsRepair = {
             var action = rally[i];
             var team = action.team;
             var player = action.player;
-            if (!team || !player) continue;
+            if (!team || !player || player === 'undefined') continue;
 
             var stats = setStats[team] && setStats[team][player];
             if (!stats) continue;
@@ -1139,7 +1139,7 @@ const PlusMinusCalculator = {
         var initialLineup = set[lineupKey] || set[fallbackKey] || {};
         var initialPlayers = Object.values(initialLineup).filter(function(p) { return p !== null && p !== undefined; });
 
-        var subs = (set.substitutions || []).filter(function(s) { return s.team === team; });
+        var subs = (set.substitutions || []).filter(function(s) { return s.team === team && s.playerIn && s.playerOut; });
         subs.sort(function(a, b) { return a.pointIndex - b.pointIndex; });
 
         var totalPoints = (set.points || []).length;
@@ -2924,6 +2924,15 @@ const StatsAggregator = {
     aggregateStats(setsData, teamKey, validPlayers) {
         // V20.287 : reparer les stats manquantes depuis les rallies avant aggregation
         setsData.forEach(function(s) {
+            // Nettoyer les entrées "undefined" dans les stats (bug dataset.player coercion)
+            if (s.stats) {
+                ['home', 'away'].forEach(function(t) {
+                    if (s.stats[t]) {
+                        delete s.stats[t]['undefined'];
+                        delete s.stats[t]['null'];
+                    }
+                });
+            }
             if (StatsRepair.needsRepair(s)) {
                 StatsRepair.repairSetStats(s);
             }
@@ -2955,6 +2964,7 @@ const StatsAggregator = {
             var totalPts = (s.points || []).length;
             var lineups = (totalPts >= 20) ? PlusMinusCalculator._getLineupAtEachPoint(s, teamKey) : null;
             for (const [name, data] of Object.entries(s.stats[teamKey])) {
+                if (!name || name === 'undefined' || name === 'null') continue;
                 // V20.26 : exclure les joueurs qui ne font pas partie du roster/lineups
                 if (allowed && (Array.isArray(allowed) ? allowed.indexOf(name) === -1 : !allowed[name])) continue;
                 if (!playerTotals[name]) {
@@ -3478,6 +3488,8 @@ const SharedComponents = {
      * @param {string} variant - 'match' ou 'aggregated'
      */
     renderCategoryTable(playerTotals, category, teamLabel, teamClass, variant) {
+        delete playerTotals['undefined'];
+        delete playerTotals['null'];
         const cats = this.getCategories(variant);
         const catDef = cats[category];
         if (!catDef) return '';
@@ -3627,6 +3639,10 @@ const SharedComponents = {
      * @param {string} variant - 'match' ou 'aggregated'
      */
     renderDesktopStatsTable(playerTotals, teamLabel, teamClass, variant) {
+        // Nettoyer les entrées fantômes
+        delete playerTotals['undefined'];
+        delete playerTotals['null'];
+
         const cats = this.getCategories(variant);
         const self = this;
 
@@ -10016,7 +10032,7 @@ const SetsPlayedView = {
                 var scoreAway = (set.awayScore || 0) || (set.finalAwayScore || 0);
                 var totalPointsReal = totalPoints > 0 ? totalPoints : (scoreHome + scoreAway);
                 if (totalPoints === 0) totalPoints = 1; // eviter division par 0 pour setsPlayed
-                var subs = set.substitutions || [];
+                var subs = (set.substitutions || []).filter(function(s) { return s.playerIn && s.playerOut && s.playerIn !== 'undefined' && s.playerOut !== 'undefined'; });
                 var homeSubs = subs.filter(function(s) { return s.team === 'home'; });
 
                 // Determiner le lineup initial du set

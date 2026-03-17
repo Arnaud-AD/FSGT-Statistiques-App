@@ -472,7 +472,7 @@ const WorkflowEngine = {
                 e.stopPropagation();
                 const player = e.currentTarget.dataset.player;
                 const role = e.currentTarget.dataset.role;
-                if (!player) return;
+                if (!player || player === 'undefined' || player === 'null') return;
 
                 const courtHalf = e.currentTarget.closest('.court-half');
                 const rect = courtHalf.getBoundingClientRect();
@@ -501,7 +501,7 @@ const WorkflowEngine = {
                 let clickedRole = null;
                 const zones = container.querySelectorAll('.defense-zone');
                 for (const zone of zones) {
-                    if (!zone.dataset.player) continue;
+                    if (!zone.dataset.player || zone.dataset.player === 'undefined') continue;
                     const clipPath = getComputedStyle(zone).clipPath;
                     if (!clipPath || clipPath === 'none') continue;
                     const polygon = parseClipPathPolygon(clipPath);
@@ -559,7 +559,7 @@ const WorkflowEngine = {
 // Helper : retourne le joueur autoBlocker seulement s'il appartient à blockingTeam
 function getValidAutoBlocker(blockingTeam) {
     const ab = gameState.context.autoBlocker;
-    if (!ab || !ab.player) return null;
+    if (!ab || !ab.player || ab.player === 'undefined') return null;
     if (!getLineupPlayers(blockingTeam).includes(ab.player)) return null;
     return ab;
 }
