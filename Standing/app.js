@@ -664,6 +664,8 @@ function renderGinetteClassement() {
     var tour2 = matches.filter(function(m) { return m.round === 'Tour 2'; });
     var principale = matches.filter(function(m) { return m.round === '1/8 Principale'; });
     var consolante = matches.filter(function(m) { return m.round === '1/8 Consolante'; });
+    var quartPrincipale = matches.filter(function(m) { return m.round === '1/4 Principale'; });
+    var quartConsolante = matches.filter(function(m) { return m.round === '1/4 Consolante'; });
 
     // Tour 1
     var tour1Container = document.getElementById('ginette-tour1');
@@ -719,6 +721,32 @@ function renderGinetteClassement() {
                 '</div>' +
                 '<div id="ginette-consolante-matches" class="section-collapsible">' +
                     renderGinetteMatchCards(consolante) +
+                '</div>' +
+            '</div>';
+    }
+
+    // 1/4 de finale
+    var quartContainer = document.getElementById('ginette-quart');
+    if (quartContainer) {
+        quartContainer.innerHTML =
+            '<div class="matches-section">' +
+                '<div class="section-header" onclick="toggleMatchSection(\'ginette-quart-principale-matches\')">' +
+                    '<h3 class="section-title">Principale</h3>' +
+                    '<span class="section-badge">' + quartPrincipale.length + ' matchs</span>' +
+                    '<span class="section-arrow">&#9660;</span>' +
+                '</div>' +
+                '<div id="ginette-quart-principale-matches" class="section-collapsible">' +
+                    renderGinetteMatchCards(quartPrincipale) +
+                '</div>' +
+            '</div>' +
+            '<div class="matches-section" style="margin-top: 16px;">' +
+                '<div class="section-header" onclick="toggleMatchSection(\'ginette-quart-consolante-matches\')">' +
+                    '<h3 class="section-title">Consolante</h3>' +
+                    '<span class="section-badge">' + quartConsolante.length + ' matchs</span>' +
+                    '<span class="section-arrow">&#9660;</span>' +
+                '</div>' +
+                '<div id="ginette-quart-consolante-matches" class="section-collapsible">' +
+                    renderGinetteMatchCards(quartConsolante) +
                 '</div>' +
             '</div>';
     }
