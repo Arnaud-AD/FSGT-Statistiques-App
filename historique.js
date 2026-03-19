@@ -254,8 +254,7 @@ const SeasonSelector = {
         RankingView._rendered = false;
         ProgressionView._rendered = false;
         StatsVisuellesView._container = null; // forcer re-render stats visuelles
-        ImpactView._seasonRoster = null; // invalider le cache roster
-        ImpactView._seasonDirPerSet = null;
+        ImpactView._seasonIP = null; // invalider le cache IP saison
 
         // Adapter les onglets selon la saison
         this._updateTabs();
@@ -5492,60 +5491,104 @@ const ImpactView = {
     _showToggle: false, // visible si multi-sets
     _lastData: null, // cache pour re-render toggle
     _lastPlayerRoles: null,
-    _seasonRoster: null, // cache du roster saisonnier
-    _seasonDirPerSet: null, // cache du Direct/set saisonnier (pour calcul roster match)
+    _seasonIP: null, // cache IP saison par joueur
     _sortCol: null, // null = tri par defaut (role + pm), sinon colKey
     _sortAsc: false, // desc par defaut pour valeurs numeriques
 
-    // Calcule et cache les donnees saisonnieres si pas encore fait
-    _ensureSeasonData(team) {
-        if (this._seasonRoster && this._seasonDirPerSet) return;
+    // Calcule et cache les IP saison pour chaque joueur
+    _ensureSeasonIP(team) {
+        if (this._seasonIP) return;
         var matches = SeasonSelector.getFilteredMatches();
         if (!matches || matches.length === 0) return;
-        var seasonData = PlusMinusCalculator.aggregateAcrossMatches(matches, team);
-        var seasonRoster = {};
-        var seasonDirPerSet = {};
-        Object.keys(seasonData).forEach(function(name) {
-            seasonRoster[name] = seasonData[name].roster;
-            var r = seasonData[name];
-            seasonDirPerSet[name] = r.proratedSets > 0 ? r.direct / r.proratedSets : 0;
+        var allSets = [];
+        matches.forEach(function(m) {
+            (m.sets || []).filter(function(s) { return s.completed; }).forEach(function(s) {
+                allSets.push(s);
+            });
         });
-        this._seasonRoster = seasonRoster;
-        this._seasonDirPerSet = seasonDirPerSet;
+        if (allSets.length === 0) return;
+        var playerStats = StatsAggregator.aggregateStats(allSets, team);
+        var playerRoles = BilanView.getPlayerRolesYear(matches, team);
+        var seasonIP = {};
+        Object.keys(playerStats).forEach(function(name) {
+            if (!playerRoles[name]) return;
+            var role = playerRoles[name].primaryRole;
+            var scores = BilanView.computeAxisScores(playerStats[name], role);
+            seasonIP[name] = BilanView.computeIP(scores, role);
+        });
+        this._seasonIP = seasonIP;
     },
 
-    // Calcule le roster specifique a un match (force des coequipiers presents)
-    // Utilise seasonDirPerSet comme reference de force, mais lineups du match
-    _computeMatchRoster(match, team, players) {
-        var seasonDirPerSet = this._seasonDirPerSet || {};
+    // Roster = IP saison moyen des 3 coequipiers qui jouent avec le joueur
+    // But : savoir si le joueur joue avec une equipe forte autour de lui ou non
+    // Un joueur avec un bon +/- mais un roster faible a plus de merite
+    // Un joueur avec un mauvais +/- mais un roster fort sous-performe
+    // Parcourt point par point pour tenir compte des substitutions
+    _computeRosterIP(match, team, players) {
+        var seasonIP = this._seasonIP || {};
         var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
-        var rosterSum = {};
-        var rosterWeight = {};
-        players.forEach(function(name) { rosterSum[name] = 0; rosterWeight[name] = 0; });
+        var ipSum = {};
+        var ipWeight = {};
+        players.forEach(function(name) { ipSum[name] = 0; ipWeight[name] = 0; });
 
         completedSets.forEach(function(set) {
-            if (!set.points || set.points.length < 20) return;
+            if (!set.points || set.points.length < 2) return;
             var lineups = PlusMinusCalculator._getLineupAtEachPoint(set, team);
             for (var pi = 0; pi < lineups.length; pi++) {
                 var onCourt = lineups[pi];
                 if (!onCourt || onCourt.length < 2) continue;
                 onCourt.forEach(function(name) {
-                    if (rosterSum[name] === undefined) return;
+                    if (ipSum[name] === undefined) return;
                     onCourt.forEach(function(coPlayer) {
-                        if (coPlayer !== name && seasonDirPerSet[coPlayer] !== undefined) {
-                            rosterSum[name] += seasonDirPerSet[coPlayer];
-                            rosterWeight[name]++;
+                        if (coPlayer !== name && seasonIP[coPlayer] !== undefined) {
+                            ipSum[name] += seasonIP[coPlayer];
+                            ipWeight[name]++;
                         }
                     });
                 });
             }
         });
 
-        var matchRoster = {};
+        var rosterIP = {};
         players.forEach(function(name) {
-            matchRoster[name] = rosterWeight[name] > 0 ? rosterSum[name] / rosterWeight[name] : 0;
+            rosterIP[name] = ipWeight[name] > 0 ? Math.round(ipSum[name] / ipWeight[name]) : 0;
         });
-        return matchRoster;
+        return rosterIP;
+    },
+
+    // Meme logique que _computeRosterIP mais agreges sur tous les matchs de la saison
+    _computeSeasonRosterIP(matches, team, players) {
+        var seasonIP = this._seasonIP || {};
+        var ipSum = {};
+        var ipWeight = {};
+        players.forEach(function(name) { ipSum[name] = 0; ipWeight[name] = 0; });
+
+        matches.forEach(function(match) {
+            var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+            completedSets.forEach(function(set) {
+                if (!set.points || set.points.length < 2) return;
+                var lineups = PlusMinusCalculator._getLineupAtEachPoint(set, team);
+                for (var pi = 0; pi < lineups.length; pi++) {
+                    var onCourt = lineups[pi];
+                    if (!onCourt || onCourt.length < 2) continue;
+                    onCourt.forEach(function(name) {
+                        if (ipSum[name] === undefined) return;
+                        onCourt.forEach(function(coPlayer) {
+                            if (coPlayer !== name && seasonIP[coPlayer] !== undefined) {
+                                ipSum[name] += seasonIP[coPlayer];
+                                ipWeight[name]++;
+                            }
+                        });
+                    });
+                }
+            });
+        });
+
+        var rosterIP = {};
+        players.forEach(function(name) {
+            rosterIP[name] = ipWeight[name] > 0 ? Math.round(ipSum[name] / ipWeight[name]) : 0;
+        });
+        return rosterIP;
     },
 
     renderForMatch(match, team) {
@@ -5555,12 +5598,12 @@ const ImpactView = {
         var data = PlusMinusCalculator.compute(completedSets, team);
         if (Object.keys(data).length === 0) return '';
 
-        // Calculer le roster specifique au match (coequipiers presents dans CE match)
-        this._ensureSeasonData(team);
+        // Calculer l'IP moyen des coequipiers (roster) pour chaque joueur
+        this._ensureSeasonIP(team);
         var players = Object.keys(data);
-        var matchRoster = this._computeMatchRoster(match, team, players);
+        var rosterIP = this._computeRosterIP(match, team, players);
         players.forEach(function(name) {
-            data[name].roster = matchRoster[name] || 0;
+            data[name].rosterIP = rosterIP[name] || 0;
         });
 
         var playerRoles = BilanView.getPlayerRoles(match, team);
@@ -5576,18 +5619,15 @@ const ImpactView = {
         var data = PlusMinusCalculator.aggregateAcrossMatches(matches, team);
         if (Object.keys(data).length === 0) return '';
 
-        // Cache du roster et dirPerSet saisonniers pour reutilisation en vue match
-        var seasonRoster = {};
-        var seasonDirPerSet = {};
-        Object.keys(data).forEach(function(name) {
-            seasonRoster[name] = data[name].roster;
-            var r = data[name];
-            seasonDirPerSet[name] = r.proratedSets > 0 ? r.direct / r.proratedSets : 0;
-        });
-        this._seasonRoster = seasonRoster;
-        this._seasonDirPerSet = seasonDirPerSet;
-
+        // Calculer l'IP saison + roster IP (IP moyen des coequipiers)
+        this._ensureSeasonIP(team);
         var playerRoles = BilanView.getPlayerRolesYear(matches, team);
+        var players = Object.keys(data);
+        var rosterIP = this._computeSeasonRosterIP(matches, team, players);
+        players.forEach(function(name) {
+            data[name].rosterIP = rosterIP[name] || 0;
+        });
+
         this._showToggle = true;
         this._lastData = data;
         this._lastPlayerRoles = playerRoles;
@@ -5632,13 +5672,7 @@ const ImpactView = {
             case 'pm': raw = r.plusMinus; break;
             case 'dir': raw = r.direct; break;
             case 'indirect': raw = r.indirect; break;
-            case 'roster': return r.roster || 0;
-            case 'mental': {
-                if (!this._lastData || !name) return 0;
-                var players = Object.keys(this._lastData).filter(function(n) { return this._lastData[n].ptsPlayed > 0; }.bind(this));
-                var avgR = this._computeAvgRoster(this._lastData, players);
-                return this._computeScore(r, this._lastPlayerRoles, name, avgR);
-            }
+            case 'rosterIP': return r.rosterIP || 0;
             case 'serv': raw = r.techServ; break;
             case 'rec': raw = r.techRec; break;
             case 'passe': raw = r.techPasse; break;
@@ -5700,7 +5734,7 @@ const ImpactView = {
         var fields = ['ptsPlayed', 'plusMinus', 'direct', 'indirect',
             'techServ', 'techRec', 'techPasse', 'techAtt', 'techRel', 'techDef', 'techBlc', 'techDefBlc',
             'servImpact', 'recImpact', 'pasImpact', 'attImpact', 'defImpact', 'blcImpact'];
-        var t = { setsPlayed: 0, proratedSets: 0, onOff: null, influence: null, roster: 0 };
+        var t = { setsPlayed: 0, proratedSets: 0, onOff: null, influence: null };
         fields.forEach(function(f) { t[f] = 0; });
         players.forEach(function(name) {
             var r = data[name];
@@ -5767,78 +5801,21 @@ const ImpactView = {
         return '<div class="player-cell">' + dot + Utils.escapeHtml(name) + '</div>';
     },
 
-    // Calcule Score a la volee pour un joueur
-    // roleAlign est TOUJOURS calcule depuis les valeurs brutes (Tot) pour eviter
-    // que le "+1" du denominateur ne change les ratios selon l'echelle Tot/Moy
-    _computeScore(r, playerRoles, name, avgRoster) {
-        if (!playerRoles || !playerRoles[name]) return 0;
-        var role = playerRoles[name].primaryRole;
-        var sp = r.proratedSets || r.setsPlayed || 1;
-        var isMoy = this._avgMode === 'moy';
-        // Seul pm change d'echelle en Moy — roleAlign reste structurel (valeurs brutes)
-        var pm = isMoy ? r.plusMinus / sp : r.plusMinus;
-        var dir = r.direct || 0;
-        var ind = r.indirect || 0;
-        var absDir = Math.abs(dir);
-        var absInd = Math.abs(ind);
-        var denom = absDir + absInd + 1;
-        var roleAlign;
-        if (role === 'R4' || role === 'Pointu') {
-            roleAlign = Math.max(0, dir) / denom;
-        } else if (role === 'Centre') {
-            roleAlign = Math.max(0, ind) / denom;
-        } else { // Passeur
-            roleAlign = (Math.max(0, dir) + Math.max(0, ind)) / (2 * denom);
-        }
-        var rosterCoeff = avgRoster > 0 ? 1 + 0.5 * (avgRoster - r.roster) / avgRoster : 1;
-        return pm * (1 + roleAlign) * rosterCoeff;
+    _fmtIP(val) {
+        if (!val || val <= 0) return '<span class="impact-zero">\u2212</span>';
+        var cls;
+        if (val >= 70) cls = 'impact-ip-high';
+        else if (val >= 50) cls = 'impact-ip-mid';
+        else cls = 'impact-ip-low';
+        return '<span class="' + cls + '">' + val + '</span>';
     },
 
-    // Calcule avgRoster (moyenne des rosters des joueurs avec >= 4 setsPlayed)
-    _computeAvgRoster(data, players) {
-        var sum = 0, count = 0;
-        players.forEach(function(name) {
-            var r = data[name];
-            if (r.setsPlayed >= 4 && r.roster !== 0) { sum += r.roster; count++; }
-        });
-        return count > 0 ? sum / count : 0;
-    },
-
-    _fmtRoster(val) {
-        if (val === 0 || val === null || val === undefined) return '<span class="impact-zero">\u2212</span>';
-        // Degrade bleu : 4 niveaux bases sur les quartiles min/max des joueurs
-        var min = this._rosterMin || 0;
-        var max = this._rosterMax || 4;
-        var range = max - min || 1;
-        var norm = (val - min) / range; // 0..1
-        var level;
-        if (norm <= 0.25) level = 1;
-        else if (norm <= 0.5) level = 2;
-        else if (norm <= 0.75) level = 3;
-        else level = 4;
-        return '<span class="impact-roster-' + level + '">' + val.toFixed(1) + '</span>';
-    },
-
-    _fmtScore(val, setsPlayed) {
-        // setsPlayed optionnel : pour la ligne Total en mode Moy, diviser la somme
-        var isMoy = this._avgMode === 'moy';
-        var v = (isMoy && setsPlayed && setsPlayed > 1) ? val / setsPlayed : val;
-        if (Math.abs(v) < 0.5) return '<span class="impact-zero">\u2212</span>';
-        var cls = v > 0 ? 'impact-score-pos' : 'impact-score-neg';
-        var rounded = Math.round(v);
-        return '<span class="' + cls + '">' + (rounded > 0 ? '+' : '') + rounded + '</span>';
-    },
 
     _renderClaudeTable(data, playerRoles) {
         var players = this._sortPlayers(data, playerRoles);
         if (players.length === 0) return '';
         var self = this;
         var isMoy = this._avgMode === 'moy';
-        var avgRoster = this._computeAvgRoster(data, players);
-        // Calculer min/max roster pour le degrade de couleur
-        var rosterVals = players.map(function(n) { return data[n].roster || 0; }).filter(function(v) { return v !== 0; });
-        this._rosterMin = rosterVals.length > 0 ? Math.min.apply(null, rosterVals) : 0;
-        this._rosterMax = rosterVals.length > 0 ? Math.max.apply(null, rosterVals) : 4;
 
         var html = '<div class="impact-table-wrapper">';
         html += '<div class="impact-table-label"><span>Impact Global</span>';
@@ -5850,54 +5827,45 @@ const ImpactView = {
         }
         html += '</div>';
         html += '<table class="stats-table impact-table">';
-        html += '<colgroup><col style="width:18%"><col style="width:10%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:12%"><col style="width:12%"></colgroup>';
+        html += '<colgroup><col style="width:20%"><col style="width:12%"><col style="width:14%"><col style="width:14%"><col style="width:14%"><col style="width:12%"></colgroup>';
         html += '<thead><tr>';
         html += '<th data-sort-col="player" class="impact-sortable">Joueur' + self._sortIcon('player') + '</th>';
         html += '<th data-sort-col="pts" class="impact-sortable">Pts Jou\u00e9s' + self._sortIcon('pts') + '</th>';
         html += '<th data-sort-col="pm" class="impact-col-main impact-sortable">+/\u2212' + self._sortIcon('pm') + '</th>';
         html += '<th data-sort-col="dir" class="impact-sortable">Direct' + self._sortIcon('dir') + '</th>';
         html += '<th data-sort-col="indirect" class="impact-sortable">Indirect' + self._sortIcon('indirect') + '</th>';
-        html += '<th data-sort-col="roster" class="impact-sortable">Roster' + self._sortIcon('roster') + '</th>';
-        html += '<th data-sort-col="mental" class="impact-sortable">Mental' + self._sortIcon('mental') + '</th>';
+        html += '<th data-sort-col="rosterIP" class="impact-sortable">Roster' + self._sortIcon('rosterIP') + '</th>';
         html += '</tr></thead><tbody>';
 
         players.forEach(function(name) {
             var r = data[name];
             var sp = r.proratedSets || r.setsPlayed || 1;
-            var score = self._computeScore(r, playerRoles, name, avgRoster);
             html += '<tr>';
             html += '<td>' + self._renderPlayerCell(name, playerRoles) + '</td>';
             html += '<td><span class="impact-dark">' + r.ptsPlayed + '</span></td>';
             html += '<td class="impact-col-main">' + self._fmtVal(r.plusMinus, sp, true, 'dark') + '</td>';
             html += '<td>' + self._fmtVal(r.direct, sp) + '</td>';
             html += '<td>' + self._fmtVal(r.indirect, sp) + '</td>';
-            html += '<td>' + self._fmtRoster(r.roster) + '</td>';
-            html += '<td>' + self._fmtScore(score) + '</td>';
+            html += '<td>' + self._fmtIP(r.rosterIP) + '</td>';
             html += '</tr>';
         });
 
         // Ligne Total equipe
         var t = this._teamTotals(data, players);
         var tsp = t.proratedSets || t.setsPlayed || 1;
-        // Roster total = moyenne des rosters individuels
+        // Roster total = moyenne des roster IP individuels
         var rosterSum = 0, rosterCount = 0;
         players.forEach(function(name) {
-            var rv = data[name].roster;
-            if (rv && rv !== 0) { rosterSum += rv; rosterCount++; }
+            var rip = data[name].rosterIP || 0;
+            if (rip > 0) { rosterSum += rip; rosterCount++; }
         });
-        var teamRoster = rosterCount > 0 ? rosterSum / rosterCount : 0;
-        // Mental total = somme des mental individuels
-        var teamMental = 0;
-        players.forEach(function(name) {
-            teamMental += self._computeScore(data[name], playerRoles, name, avgRoster);
-        });
+        var teamRosterIP = rosterCount > 0 ? Math.round(rosterSum / rosterCount) : 0;
         html += '<tr class="total-row"><td>Total</td>';
         html += '<td><span class="impact-dark">' + t.ptsPlayed + '</span></td>';
         html += '<td class="impact-col-main">' + self._fmtVal(t.plusMinus, tsp, true, 'dark') + '</td>';
         html += '<td>' + self._fmtVal(t.direct, tsp) + '</td>';
         html += '<td>' + self._fmtVal(t.indirect, tsp) + '</td>';
-        html += '<td>' + self._fmtRoster(teamRoster) + '</td>';
-        html += '<td>' + self._fmtScore(teamMental, tsp) + '</td>';
+        html += '<td>' + self._fmtIP(teamRosterIP) + '</td>';
         html += '</tr>';
 
         html += '</tbody></table>';

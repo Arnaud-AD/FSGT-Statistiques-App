@@ -2033,14 +2033,10 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
 /* Influence : violet / parme (legacy) */
 .impact-table .infl-pos { color: #7c3aed; font-weight: 600; }
 .impact-table .infl-neg { color: #a78bfa; font-weight: 600; }
-/* Roster : degrade de bleu (plus la valeur est haute, plus fonce) */
-.impact-table .impact-roster-1 { color: #93c5fd; font-weight: 600; }
-.impact-table .impact-roster-2 { color: #60a5fa; font-weight: 600; }
-.impact-table .impact-roster-3 { color: #3b82f6; font-weight: 600; }
-.impact-table .impact-roster-4 { color: #1d4ed8; font-weight: 700; }
-/* Score : violet fonce / violet clair */
-.impact-table .impact-score-pos { color: #7c3aed; font-weight: 700; }
-.impact-table .impact-score-neg { color: #a78bfa; font-weight: 600; }
+/* IP saison : degrade violet (fonce = fort, clair = faible) */
+.impact-table .impact-ip-high { color: #6d28d9; font-weight: 700; }
+.impact-table .impact-ip-mid { color: #8b5cf6; font-weight: 600; }
+.impact-table .impact-ip-low { color: #c4b5fd; font-weight: 600; }
 
 /* ==================== RELATION PASSE/ATTAQUE (V23) ==================== */
 
