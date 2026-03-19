@@ -5842,7 +5842,8 @@ const ImpactView = {
             var sp = r.proratedSets || r.setsPlayed || 1;
             html += '<tr>';
             html += '<td>' + self._renderPlayerCell(name, playerRoles) + '</td>';
-            html += '<td><span class="impact-dark">' + r.ptsPlayed + '</span></td>';
+            var ptsDisplay = isMoy && sp > 1 ? (r.ptsPlayed / sp).toFixed(1) : r.ptsPlayed;
+            html += '<td><span class="impact-dark">' + ptsDisplay + '</span></td>';
             html += '<td class="impact-col-main">' + self._fmtVal(r.plusMinus, sp, true, 'dark') + '</td>';
             html += '<td>' + self._fmtVal(r.direct, sp) + '</td>';
             html += '<td>' + self._fmtVal(r.indirect, sp) + '</td>';
@@ -5860,8 +5861,9 @@ const ImpactView = {
             if (rip > 0) { rosterSum += rip; rosterCount++; }
         });
         var teamRosterIP = rosterCount > 0 ? Math.round(rosterSum / rosterCount) : 0;
+        var totalPtsDisplay = isMoy && tsp > 1 ? (t.ptsPlayed / tsp).toFixed(1) : t.ptsPlayed;
         html += '<tr class="total-row"><td>Total</td>';
-        html += '<td><span class="impact-dark">' + t.ptsPlayed + '</span></td>';
+        html += '<td><span class="impact-dark">' + totalPtsDisplay + '</span></td>';
         html += '<td class="impact-col-main">' + self._fmtVal(t.plusMinus, tsp, true, 'dark') + '</td>';
         html += '<td>' + self._fmtVal(t.direct, tsp) + '</td>';
         html += '<td>' + self._fmtVal(t.indirect, tsp) + '</td>';
