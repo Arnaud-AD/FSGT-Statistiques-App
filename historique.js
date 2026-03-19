@@ -1030,8 +1030,8 @@ const PlusMinusCalculator = {
             // Set non filme mais avec lineup et score connus → attribuer +/- global aux joueurs du lineup
             if (!set.points || set.points.length === 0) {
                 var lu = (team === 'home') ? (set.homeLineup || set.initialHomeLineup) : (set.awayLineup || set.initialAwayLineup);
-                var hs = set.homeScore || 0;
-                var as = set.awayScore || 0;
+                var hs = Math.max(set.homeScore || 0, set.finalHomeScore || 0);
+                var as = Math.max(set.awayScore || 0, set.finalAwayScore || 0);
                 if (lu && (hs > 0 || as > 0)) {
                     var totalPts = hs + as;
                     var scored = (team === 'home') ? hs : as;
