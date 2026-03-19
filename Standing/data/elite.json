@@ -5,10 +5,10 @@
     "name": "Elite",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/1",
-    "lastUpdated": "2026-03-17T19:24:38",
+    "lastUpdated": "2026-03-19T20:42:10",
     "teamCount": 10,
-    "matchesPlayed": 56,
-    "matchesUpcoming": 34
+    "matchesPlayed": 57,
+    "matchesUpcoming": 33
   },
   "teams": {
     "jen": {
@@ -256,18 +256,18 @@
     {
       "rank": 6,
       "team": "rsc",
-      "mj": 10,
-      "g": 4,
+      "mj": 11,
+      "g": 5,
       "p": 6,
-      "setPlus": 19,
-      "setMinus": 23,
-      "ds": -4,
-      "coefSet": "0.83",
-      "ptsPlus": 881,
-      "ptsMinus": 894,
-      "dp": "-13",
-      "coefPts": "0.99",
-      "pts": 14,
+      "setPlus": 22,
+      "setMinus": 25,
+      "ds": -3,
+      "coefSet": "0.88",
+      "ptsPlus": 995,
+      "ptsMinus": 998,
+      "dp": "-3",
+      "coefPts": "1.00",
+      "pts": 16,
       "formAller": [
         "L",
         "L",
@@ -275,7 +275,7 @@
         "D",
         "L",
         "L",
-        "D",
+        "W",
         "W",
         "L"
       ],
@@ -332,18 +332,18 @@
     {
       "rank": 8,
       "team": "manu",
-      "mj": 9,
+      "mj": 10,
       "g": 2,
-      "p": 7,
-      "setPlus": 10,
-      "setMinus": 21,
-      "ds": -11,
-      "coefSet": "0.48",
-      "ptsPlus": 657,
-      "ptsMinus": 721,
-      "dp": "-64",
+      "p": 8,
+      "setPlus": 12,
+      "setMinus": 24,
+      "ds": -12,
+      "coefSet": "0.50",
+      "ptsPlus": 761,
+      "ptsMinus": 835,
+      "dp": "-74",
       "coefPts": "0.91",
-      "pts": 11,
+      "pts": 12,
       "formAller": [
         "L",
         "L",
@@ -351,7 +351,7 @@
         "D",
         "W",
         "L",
-        "D",
+        "L",
         "L",
         "W"
       ],
@@ -445,6 +445,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "18/03/2026",
+      "home": "rsc",
+      "away": "manu",
+      "scoreHome": 3,
+      "scoreAway": 2,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "16/03/2026",
       "home": "kiki",
@@ -952,18 +961,6 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "N/C",
-      "home": "rsc",
-      "away": "rhin",
-      "status": "Reporté"
-    },
-    {
-      "date": "18/03/2026",
-      "home": "rsc",
-      "away": "manu",
-      "status": "Reporté"
-    },
-    {
       "date": "23/03/2026",
       "home": "kiki",
       "away": "bier",
@@ -974,6 +971,12 @@
       "home": "rhin",
       "away": "rsc",
       "status": "Sem. 13"
+    },
+    {
+      "date": "25/03/2026",
+      "home": "rsc",
+      "away": "rhin",
+      "status": "Reporté"
     },
     {
       "date": "25/03/2026",
@@ -1210,11 +1213,11 @@
     {
       "rank": 6,
       "team": "rsc",
-      "elo": 1494.8,
-      "movement": 48.0,
-      "record": "4-6",
-      "power": 49.0,
-      "calendar": "V vs Kiki",
+      "elo": 1508.8,
+      "movement": 14.0,
+      "record": "5-6",
+      "power": 51.7,
+      "calendar": "V vs Manu",
       "diffClass": "diff-easy"
     },
     {
@@ -1230,11 +1233,11 @@
     {
       "rank": 8,
       "team": "manu",
-      "elo": 1399.4,
-      "movement": -12.1,
-      "record": "2-7",
-      "power": 30.9,
-      "calendar": "D x3",
+      "elo": 1385.4,
+      "movement": -14.0,
+      "record": "2-8",
+      "power": 28.3,
+      "calendar": "D x4",
       "diffClass": "diff-hard"
     },
     {
@@ -1842,7 +1845,8 @@
       1445.0,
       1473.1,
       1446.9,
-      1494.8
+      1494.8,
+      1508.8
     ],
     "manu": [
       1500,
@@ -1854,7 +1858,8 @@
       1452.1,
       1442.5,
       1411.4,
-      1399.4
+      1399.4,
+      1385.4
     ],
     "bier": [
       1500,
@@ -2003,7 +2008,8 @@
           9,
           11,
           12,
-          14
+          14,
+          16
         ],
         "rank": 6
       },
@@ -2018,7 +2024,8 @@
           8,
           9,
           10,
-          11
+          11,
+          12
         ],
         "rank": 8
       },

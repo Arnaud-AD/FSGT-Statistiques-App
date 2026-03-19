@@ -5,7 +5,7 @@
     "name": "Starter",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/16",
-    "lastUpdated": "2026-03-17T19:24:41",
+    "lastUpdated": "2026-03-19T20:42:13",
     "teamCount": 8,
     "matchesPlayed": 36,
     "matchesUpcoming": 20
@@ -127,13 +127,13 @@
       "mj": 9,
       "g": 6,
       "p": 3,
-      "setPlus": 17,
-      "setMinus": 12,
-      "ds": 5,
-      "coefSet": "1.42",
-      "ptsPlus": 645,
-      "ptsMinus": 617,
-      "dp": "+28",
+      "setPlus": 18,
+      "setMinus": 11,
+      "ds": 7,
+      "coefSet": "1.64",
+      "ptsPlus": 647,
+      "ptsMinus": 615,
+      "dp": "+32",
       "coefPts": "1.05",
       "pts": 15,
       "formAller": [
@@ -195,13 +195,13 @@
       "mj": 10,
       "g": 3,
       "p": 7,
-      "setPlus": 13,
-      "setMinus": 20,
-      "ds": -7,
-      "coefSet": "0.65",
-      "ptsPlus": 705,
-      "ptsMinus": 774,
-      "dp": "-69",
+      "setPlus": 12,
+      "setMinus": 21,
+      "ds": -9,
+      "coefSet": "0.57",
+      "ptsPlus": 703,
+      "ptsMinus": 776,
+      "dp": "-73",
       "coefPts": "0.91",
       "pts": 13,
       "formAller": [
@@ -331,8 +331,8 @@
       "date": "16/03/2026",
       "home": "daiq",
       "away": "coco",
-      "scoreHome": 1,
-      "scoreAway": 2,
+      "scoreHome": 0,
+      "scoreAway": 3,
       "homeWin": false,
       "status": "Terminé"
     },
@@ -798,10 +798,10 @@
     {
       "rank": 3,
       "team": "coco",
-      "elo": 1565.5,
-      "movement": 21.4,
+      "elo": 1575.6,
+      "movement": 31.4,
       "record": "6-3",
-      "power": 65.1,
+      "power": 67.4,
       "calendar": "V vs Daïquibri",
       "diffClass": "diff-easy"
     },
@@ -818,10 +818,10 @@
     {
       "rank": 5,
       "team": "daiq",
-      "elo": 1423.6,
-      "movement": -21.4,
+      "elo": 1413.5,
+      "movement": -31.4,
       "record": "3-7",
-      "power": 32.4,
+      "power": 30.1,
       "calendar": "D x3",
       "diffClass": "diff-hard"
     },
@@ -894,7 +894,7 @@
       1602.4,
       1571.9,
       1544.1,
-      1565.5
+      1575.6
     ],
     "gvc": [
       1500,
@@ -917,7 +917,7 @@
       1486.3,
       1458.8,
       1444.9,
-      1423.6
+      1413.5
     ],
     "gold": [
       1500,
