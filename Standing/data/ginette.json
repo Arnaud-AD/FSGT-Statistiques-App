@@ -3,10 +3,10 @@
     "slug": "ginette",
     "name": "Coupe Ginette",
     "format": "coupe",
-    "lastUpdated": "2026-03-19T09:36:52",
+    "lastUpdated": "2026-03-19T09:51:53",
     "teamCount": 58,
-    "matchCount": 76,
-    "forfeitCount": 9,
+    "matchCount": 81,
+    "forfeitCount": 10,
     "rounds": [
       "Tour 1",
       "Tour 2",
@@ -63,19 +63,64 @@
     },
     {
       "rank": 2,
-      "name": "Marvels 4",
-      "division": "Elite",
-      "divSlug": "elite",
-      "elo": 1830.5,
-      "delta": 30.5,
-      "record": "3-0",
-      "wins": 3,
+      "name": "Les Indécis",
+      "division": "Hard",
+      "divSlug": "hard",
+      "elo": 1815.4,
+      "delta": 115.4,
+      "record": "4-0",
+      "wins": 4,
       "losses": 0,
-      "power": 96.3,
+      "power": 94.3,
       "form": [
         "W",
         "W",
+        "W",
         "W"
+      ],
+      "matches": [
+        {
+          "opponent": "RSC Champigny 1",
+          "result": "W",
+          "score": "3-0",
+          "delta": 35.3
+        },
+        {
+          "opponent": "Red Hot Sucy Pépère",
+          "result": "W",
+          "score": "3-0",
+          "delta": 33.8
+        },
+        {
+          "opponent": "No s(o)ucy",
+          "result": "W",
+          "score": "3-0",
+          "delta": 22.1
+        },
+        {
+          "opponent": "Marvels 4",
+          "result": "W",
+          "score": "3-1",
+          "delta": 24.1
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "name": "Marvels 4",
+      "division": "Elite",
+      "divSlug": "elite",
+      "elo": 1806.4,
+      "delta": 6.4,
+      "record": "3-1",
+      "wins": 3,
+      "losses": 1,
+      "power": 93.2,
+      "form": [
+        "W",
+        "W",
+        "W",
+        "L"
       ],
       "matches": [
         {
@@ -95,24 +140,31 @@
           "result": "W",
           "score": "3-0",
           "delta": 11.0
+        },
+        {
+          "opponent": "Les Indécis",
+          "result": "L",
+          "score": "1-3",
+          "delta": -24.1
         }
       ]
     },
     {
-      "rank": 3,
+      "rank": 4,
       "name": "Bières et le loup",
       "division": "Elite",
       "divSlug": "elite",
-      "elo": 1824.4,
-      "delta": 24.4,
-      "record": "3-0",
+      "elo": 1803.2,
+      "delta": 3.2,
+      "record": "3-1",
       "wins": 3,
-      "losses": 0,
-      "power": 95.5,
+      "losses": 1,
+      "power": 92.7,
       "form": [
         "W",
         "W",
-        "W"
+        "W",
+        "L"
       ],
       "matches": [
         {
@@ -132,43 +184,12 @@
           "result": "W",
           "score": "3-1",
           "delta": 9.7
-        }
-      ]
-    },
-    {
-      "rank": 4,
-      "name": "Rhinos Féroces",
-      "division": "Elite",
-      "divSlug": "elite",
-      "elo": 1805.1,
-      "delta": 5.1,
-      "record": "2-1",
-      "wins": 2,
-      "losses": 1,
-      "power": 93.0,
-      "form": [
-        "L",
-        "W",
-        "W"
-      ],
-      "matches": [
+        },
         {
-          "opponent": "Team Glouglou",
+          "opponent": "Padnom",
           "result": "L",
-          "score": "1-3",
-          "delta": -34.8
-        },
-        {
-          "opponent": "Les Coconuts",
-          "result": "W",
-          "score": "3-0",
-          "delta": 6.2
-        },
-        {
-          "opponent": "StarPAFF",
-          "result": "W",
-          "score": "3-0",
-          "delta": 33.6
+          "score": "2-3",
+          "delta": -21.2
         }
       ]
     },
@@ -255,55 +276,19 @@
     },
     {
       "rank": 7,
-      "name": "Les Indécis",
-      "division": "Hard",
-      "divSlug": "hard",
-      "elo": 1791.3,
-      "delta": 91.3,
-      "record": "3-0",
-      "wins": 3,
-      "losses": 0,
-      "power": 91.2,
-      "form": [
-        "W",
-        "W",
-        "W"
-      ],
-      "matches": [
-        {
-          "opponent": "RSC Champigny 1",
-          "result": "W",
-          "score": "3-0",
-          "delta": 35.3
-        },
-        {
-          "opponent": "Red Hot Sucy Pépère",
-          "result": "W",
-          "score": "3-0",
-          "delta": 33.8
-        },
-        {
-          "opponent": "No s(o)ucy",
-          "result": "W",
-          "score": "3-0",
-          "delta": 22.1
-        }
-      ]
-    },
-    {
-      "rank": 8,
       "name": "Red Hot Sucy Pépère",
       "division": "Elite",
       "divSlug": "elite",
-      "elo": 1788.1,
-      "delta": -11.9,
-      "record": "2-1",
-      "wins": 2,
+      "elo": 1793.1,
+      "delta": -6.9,
+      "record": "3-1",
+      "wins": 3,
       "losses": 1,
-      "power": 90.8,
+      "power": 91.4,
       "form": [
         "W",
         "L",
+        "W",
         "W"
       ],
       "matches": [
@@ -324,11 +309,17 @@
           "result": "W",
           "score": "3-1",
           "delta": 16.9
+        },
+        {
+          "opponent": "Team Glouglou",
+          "result": "W",
+          "score": "3-0",
+          "delta": 5
         }
       ]
     },
     {
-      "rank": 9,
+      "rank": 8,
       "name": "StarPAFF",
       "division": "Elite",
       "divSlug": "elite",
@@ -361,6 +352,50 @@
           "result": "L",
           "score": "0-3",
           "delta": -33.6
+        }
+      ]
+    },
+    {
+      "rank": 9,
+      "name": "Rhinos Féroces",
+      "division": "Elite",
+      "divSlug": "elite",
+      "elo": 1770.8,
+      "delta": -29.2,
+      "record": "2-2",
+      "wins": 2,
+      "losses": 2,
+      "power": 88.6,
+      "form": [
+        "L",
+        "W",
+        "W",
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Team Glouglou",
+          "result": "L",
+          "score": "1-3",
+          "delta": -34.8
+        },
+        {
+          "opponent": "Les Coconuts",
+          "result": "W",
+          "score": "3-0",
+          "delta": 6.2
+        },
+        {
+          "opponent": "StarPAFF",
+          "result": "W",
+          "score": "3-0",
+          "delta": 33.6
+        },
+        {
+          "opponent": "Les Rhum'Antik",
+          "result": "L",
+          "score": "1-3",
+          "delta": -34.2
         }
       ]
     },
@@ -440,54 +475,18 @@
     },
     {
       "rank": 12,
-      "name": "SUCY N'EST PAS TROMPÉ",
-      "division": "Hard",
-      "divSlug": "hard",
-      "elo": 1721.5,
-      "delta": 21.5,
-      "record": "3-0",
-      "wins": 3,
-      "losses": 0,
-      "power": 82.2,
-      "form": [
-        "W",
-        "W",
-        "W"
-      ],
-      "matches": [
-        {
-          "opponent": "Yip Yip",
-          "result": "W",
-          "score": "3-0",
-          "delta": 5
-        },
-        {
-          "opponent": "Nekutā",
-          "result": "W",
-          "score": "3-1",
-          "delta": 12.2
-        },
-        {
-          "opponent": "Smashmallow",
-          "result": "W",
-          "score": "3-0",
-          "delta": 4.4
-        }
-      ]
-    },
-    {
-      "rank": 13,
       "name": "Padnom",
       "division": "Hard",
       "divSlug": "hard",
-      "elo": 1706.4,
-      "delta": 6.4,
-      "record": "2-1",
-      "wins": 2,
+      "elo": 1727.7,
+      "delta": 27.7,
+      "record": "3-1",
+      "wins": 3,
       "losses": 1,
-      "power": 80.3,
+      "power": 83.0,
       "form": [
         "L",
+        "W",
         "W",
         "W"
       ],
@@ -509,11 +508,17 @@
           "result": "W",
           "score": "3-1",
           "delta": 17.9
+        },
+        {
+          "opponent": "Bières et le loup",
+          "result": "W",
+          "score": "3-2",
+          "delta": 21.2
         }
       ]
     },
     {
-      "rank": 14,
+      "rank": 13,
       "name": "Les punchers",
       "division": "Hard",
       "divSlug": "hard",
@@ -550,7 +555,7 @@
       ]
     },
     {
-      "rank": 15,
+      "rank": 14,
       "name": "Yip Yip",
       "division": "Hard",
       "divSlug": "hard",
@@ -580,7 +585,95 @@
       ]
     },
     {
+      "rank": 15,
+      "name": "SUCY N'EST PAS TROMPÉ",
+      "division": "Hard",
+      "divSlug": "hard",
+      "elo": 1688.4,
+      "delta": -11.6,
+      "record": "3-1",
+      "wins": 3,
+      "losses": 1,
+      "power": 78.0,
+      "form": [
+        "W",
+        "W",
+        "W",
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Yip Yip",
+          "result": "W",
+          "score": "3-0",
+          "delta": 5
+        },
+        {
+          "opponent": "Nekutā",
+          "result": "W",
+          "score": "3-1",
+          "delta": 12.2
+        },
+        {
+          "opponent": "Smashmallow",
+          "result": "W",
+          "score": "3-0",
+          "delta": 4.4
+        },
+        {
+          "opponent": "Cochonou",
+          "result": "L",
+          "score": "0-3",
+          "delta": -33.1
+        }
+      ]
+    },
+    {
       "rank": 16,
+      "name": "Cochonou",
+      "division": "Medium",
+      "divSlug": "medium",
+      "elo": 1682.6,
+      "delta": 82.6,
+      "record": "4-0",
+      "wins": 4,
+      "losses": 0,
+      "power": 77.2,
+      "form": [
+        "W",
+        "W",
+        "W",
+        "W"
+      ],
+      "matches": [
+        {
+          "opponent": "Les Gaillards",
+          "result": "W",
+          "score": "3-0",
+          "delta": 15.1
+        },
+        {
+          "opponent": "Smash or Pass",
+          "result": "W",
+          "score": "3-0",
+          "delta": 12.5
+        },
+        {
+          "opponent": "Les punchers",
+          "result": "W",
+          "score": "3-2",
+          "delta": 21.9
+        },
+        {
+          "opponent": "SUCY N'EST PAS TROMPÉ",
+          "result": "W",
+          "score": "3-0",
+          "delta": 33.1
+        }
+      ]
+    },
+    {
+      "rank": 17,
       "name": "GO Team Apero",
       "division": "Hard",
       "divSlug": "hard",
@@ -610,7 +703,7 @@
       ]
     },
     {
-      "rank": 17,
+      "rank": 18,
       "name": "Marvels 6",
       "division": "Or 6x6",
       "divSlug": "or6x6",
@@ -647,7 +740,7 @@
       ]
     },
     {
-      "rank": 18,
+      "rank": 19,
       "name": "LES DÉMENTS",
       "division": "Hard",
       "divSlug": "hard",
@@ -684,7 +777,7 @@
       ]
     },
     {
-      "rank": 19,
+      "rank": 20,
       "name": "Moustache Team",
       "division": "Or 6x6",
       "divSlug": "or6x6",
@@ -714,7 +807,7 @@
       ]
     },
     {
-      "rank": 20,
+      "rank": 21,
       "name": "No s(o)ucy",
       "division": "Or 6x6",
       "divSlug": "or6x6",
@@ -751,7 +844,7 @@
       ]
     },
     {
-      "rank": 21,
+      "rank": 22,
       "name": "Cret'1",
       "division": "Or 6x6",
       "divSlug": "or6x6",
@@ -788,44 +881,51 @@
       ]
     },
     {
-      "rank": 22,
-      "name": "Cochonou",
+      "rank": 23,
+      "name": "Les Rhum'Antik",
       "division": "Medium",
       "divSlug": "medium",
-      "elo": 1649.5,
-      "delta": 49.5,
-      "record": "3-0",
+      "elo": 1652.5,
+      "delta": 52.5,
+      "record": "3-1",
       "wins": 3,
-      "losses": 0,
-      "power": 73.0,
+      "losses": 1,
+      "power": 73.4,
       "form": [
+        "L",
         "W",
         "W",
         "W"
       ],
       "matches": [
         {
-          "opponent": "Les Gaillards",
-          "result": "W",
-          "score": "3-0",
-          "delta": 15.1
+          "opponent": "Olympe BB volley",
+          "result": "L",
+          "score": "1-3",
+          "delta": -21.6
         },
         {
-          "opponent": "Smash or Pass",
+          "opponent": "Team Glouglou",
           "result": "W",
-          "score": "3-0",
-          "delta": 12.5
+          "score": "3-1",
+          "delta": 22.7
         },
         {
-          "opponent": "Les punchers",
+          "opponent": "Boîte de 4",
           "result": "W",
           "score": "3-2",
-          "delta": 21.9
+          "delta": 17.2
+        },
+        {
+          "opponent": "Rhinos Féroces",
+          "result": "W",
+          "score": "3-1",
+          "delta": 34.2
         }
       ]
     },
     {
-      "rank": 23,
+      "rank": 24,
       "name": "Coutiao SSLP",
       "division": "Or 6x6",
       "divSlug": "or6x6",
@@ -862,7 +962,7 @@
       ]
     },
     {
-      "rank": 24,
+      "rank": 25,
       "name": "Villyé-ball",
       "division": "Or 6x6",
       "divSlug": "or6x6",
@@ -892,7 +992,7 @@
       ]
     },
     {
-      "rank": 25,
+      "rank": 26,
       "name": "Ivry Body",
       "division": "Or 6x6",
       "divSlug": "or6x6",
@@ -929,7 +1029,7 @@
       ]
     },
     {
-      "rank": 26,
+      "rank": 27,
       "name": "Neuilly Sa Mère",
       "division": "Or 6x6",
       "divSlug": "or6x6",
@@ -966,7 +1066,7 @@
       ]
     },
     {
-      "rank": 27,
+      "rank": 28,
       "name": "Alambic",
       "division": "Hard",
       "divSlug": "hard",
@@ -996,7 +1096,7 @@
       ]
     },
     {
-      "rank": 28,
+      "rank": 29,
       "name": "Olympe BB volley",
       "division": "Medium",
       "divSlug": "medium",
@@ -1040,43 +1140,6 @@
       ]
     },
     {
-      "rank": 29,
-      "name": "Team Glouglou",
-      "division": "Medium",
-      "divSlug": "medium",
-      "elo": 1633.5,
-      "delta": 33.5,
-      "record": "2-1",
-      "wins": 2,
-      "losses": 1,
-      "power": 70.9,
-      "form": [
-        "W",
-        "L",
-        "W"
-      ],
-      "matches": [
-        {
-          "opponent": "Rhinos Féroces",
-          "result": "W",
-          "score": "3-1",
-          "delta": 34.8
-        },
-        {
-          "opponent": "Les Rhum'Antik",
-          "result": "L",
-          "score": "1-3",
-          "delta": -22.7
-        },
-        {
-          "opponent": "Les fous tuent",
-          "result": "W",
-          "score": "3-0",
-          "delta": 21.4
-        }
-      ]
-    },
-    {
       "rank": 30,
       "name": "Morts de Soif",
       "division": "Medium",
@@ -1115,38 +1178,45 @@
     },
     {
       "rank": 31,
-      "name": "Les Rhum'Antik",
+      "name": "Team Glouglou",
       "division": "Medium",
       "divSlug": "medium",
-      "elo": 1618.3,
-      "delta": 18.3,
-      "record": "2-1",
+      "elo": 1628.5,
+      "delta": 28.5,
+      "record": "2-2",
       "wins": 2,
-      "losses": 1,
-      "power": 69.0,
+      "losses": 2,
+      "power": 70.3,
       "form": [
+        "W",
         "L",
         "W",
-        "W"
+        "L"
       ],
       "matches": [
         {
-          "opponent": "Olympe BB volley",
-          "result": "L",
-          "score": "1-3",
-          "delta": -21.6
-        },
-        {
-          "opponent": "Team Glouglou",
+          "opponent": "Rhinos Féroces",
           "result": "W",
           "score": "3-1",
-          "delta": 22.7
+          "delta": 34.8
         },
         {
-          "opponent": "Boîte de 4",
+          "opponent": "Les Rhum'Antik",
+          "result": "L",
+          "score": "1-3",
+          "delta": -22.7
+        },
+        {
+          "opponent": "Les fous tuent",
           "result": "W",
-          "score": "3-2",
-          "delta": 17.2
+          "score": "3-0",
+          "delta": 21.4
+        },
+        {
+          "opponent": "Red Hot Sucy Pépère",
+          "result": "L",
+          "score": "0-3",
+          "delta": -5
         }
       ]
     },
@@ -1637,36 +1707,6 @@
     },
     {
       "rank": 47,
-      "name": "Daïquibri",
-      "division": "Starter",
-      "divSlug": "starter",
-      "elo": 1390,
-      "delta": -10,
-      "record": "0-2",
-      "wins": 0,
-      "losses": 2,
-      "power": 39.6,
-      "form": [
-        "L",
-        "L"
-      ],
-      "matches": [
-        {
-          "opponent": "Bières et le loup",
-          "result": "L",
-          "score": "0-3",
-          "delta": -5
-        },
-        {
-          "opponent": "Gold Digger",
-          "result": "L",
-          "score": "0-3",
-          "delta": -5
-        }
-      ]
-    },
-    {
-      "rank": 48,
       "name": "Bachateam",
       "division": "Starter",
       "divSlug": "starter",
@@ -1689,6 +1729,36 @@
         },
         {
           "opponent": "Smashmallow",
+          "result": "L",
+          "score": "0-3",
+          "delta": -5
+        }
+      ]
+    },
+    {
+      "rank": 48,
+      "name": "Daïquibri",
+      "division": "Starter",
+      "divSlug": "starter",
+      "elo": 1390,
+      "delta": -10,
+      "record": "0-2",
+      "wins": 0,
+      "losses": 2,
+      "power": 39.6,
+      "form": [
+        "L",
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Bières et le loup",
+          "result": "L",
+          "score": "0-3",
+          "delta": -5
+        },
+        {
+          "opponent": "Gold Digger",
           "result": "L",
           "score": "0-3",
           "delta": -5
@@ -2015,34 +2085,34 @@
       "slug": "elite",
       "name": "Elite",
       "teams": 9,
-      "avgElo": 1802.6,
+      "avgElo": 1794.4,
       "maxElo": 1859.6,
       "minElo": 1742.1,
-      "wins": 21,
-      "losses": 7,
-      "winPct": 75.0
+      "wins": 22,
+      "losses": 10,
+      "winPct": 68.8
     },
     {
       "slug": "hard",
       "name": "Hard",
       "teams": 9,
-      "avgElo": 1707.9,
-      "maxElo": 1791.3,
+      "avgElo": 1709.2,
+      "maxElo": 1815.4,
       "minElo": 1634.7,
-      "wins": 16,
-      "losses": 9,
-      "winPct": 64.0
+      "wins": 18,
+      "losses": 10,
+      "winPct": 64.3
     },
     {
       "slug": "medium",
       "name": "Medium",
       "teams": 9,
-      "avgElo": 1607.8,
-      "maxElo": 1649.5,
+      "avgElo": 1614.8,
+      "maxElo": 1682.6,
       "minElo": 1549.3,
-      "wins": 15,
-      "losses": 11,
-      "winPct": 57.7
+      "wins": 17,
+      "losses": 12,
+      "winPct": 58.6
     },
     {
       "slug": "or6x6",
@@ -3915,6 +3985,129 @@
       "forfeit": false,
       "deltaHome": -15.4,
       "deltaAway": 15.4
+    },
+    {
+      "round": "1/4 Principale",
+      "home": "Cochonou",
+      "away": "SUCY N'EST PAS TROMPÉ",
+      "homeSets": 3,
+      "awaySets": 0,
+      "homeScores": [
+        25,
+        25,
+        25
+      ],
+      "awayScores": [
+        16,
+        17,
+        13
+      ],
+      "homeDivision": "medium",
+      "awayDivision": "hard",
+      "winner": "Cochonou",
+      "forfeit": false,
+      "deltaHome": 33.1,
+      "deltaAway": -33.1
+    },
+    {
+      "round": "1/4 Principale",
+      "home": "Marvels 4",
+      "away": "Les Indécis",
+      "homeSets": 1,
+      "awaySets": 3,
+      "homeScores": [
+        25,
+        25,
+        18,
+        21
+      ],
+      "awayScores": [
+        27,
+        17,
+        25,
+        25
+      ],
+      "homeDivision": "elite",
+      "awayDivision": "hard",
+      "winner": "Les Indécis",
+      "forfeit": false,
+      "deltaHome": -24.1,
+      "deltaAway": 24.1
+    },
+    {
+      "round": "1/4 Consolante",
+      "home": "Red Hot Sucy Pépère",
+      "away": "Team Glouglou",
+      "homeSets": 3,
+      "awaySets": 0,
+      "homeScores": [
+        25,
+        25,
+        25
+      ],
+      "awayScores": [
+        0,
+        0,
+        0
+      ],
+      "homeDivision": "elite",
+      "awayDivision": "medium",
+      "winner": "Red Hot Sucy Pépère",
+      "forfeit": true,
+      "deltaHome": 5,
+      "deltaAway": -5
+    },
+    {
+      "round": "1/4 Consolante",
+      "home": "Les Rhum'Antik",
+      "away": "Rhinos Féroces",
+      "homeSets": 3,
+      "awaySets": 1,
+      "homeScores": [
+        23,
+        25,
+        25,
+        25
+      ],
+      "awayScores": [
+        25,
+        18,
+        12,
+        17
+      ],
+      "homeDivision": "medium",
+      "awayDivision": "elite",
+      "winner": "Les Rhum'Antik",
+      "forfeit": false,
+      "deltaHome": 34.2,
+      "deltaAway": -34.2
+    },
+    {
+      "round": "1/4 Consolante",
+      "home": "Padnom",
+      "away": "Bières et le loup",
+      "homeSets": 3,
+      "awaySets": 2,
+      "homeScores": [
+        22,
+        25,
+        20,
+        25,
+        23
+      ],
+      "awayScores": [
+        25,
+        21,
+        25,
+        17,
+        21
+      ],
+      "homeDivision": "hard",
+      "awayDivision": "elite",
+      "winner": "Padnom",
+      "forfeit": false,
+      "deltaHome": 21.2,
+      "deltaAway": -21.2
     }
   ],
   "upsets": [
@@ -3933,6 +4126,14 @@
       "loser": "Padnom",
       "loserDiv": "Hard",
       "score": "1-3"
+    },
+    {
+      "gap": 3,
+      "winner": "Les Rhum'Antik",
+      "winnerDiv": "Medium",
+      "loser": "Rhinos Féroces",
+      "loserDiv": "Elite",
+      "score": "3-1"
     },
     {
       "gap": 2,
@@ -3965,6 +4166,14 @@
       "loser": "Les punchers",
       "loserDiv": "Hard",
       "score": "2-3"
+    },
+    {
+      "gap": 2,
+      "winner": "Cochonou",
+      "winnerDiv": "Medium",
+      "loser": "SUCY N'EST PAS TROMPÉ",
+      "loserDiv": "Hard",
+      "score": "3-0"
     },
     {
       "gap": 1,
@@ -4021,22 +4230,6 @@
       "loser": "Red Hot Sucy Pépère",
       "loserDiv": "Elite",
       "score": "0-3"
-    },
-    {
-      "gap": 1,
-      "winner": "Padnom",
-      "winnerDiv": "Hard",
-      "loser": "RSC Champigny 1",
-      "loserDiv": "Elite",
-      "score": "2-3"
-    },
-    {
-      "gap": 1,
-      "winner": "Moustache Team",
-      "winnerDiv": "Or 6x6",
-      "loser": "LES DÉMENTS",
-      "loserDiv": "Hard",
-      "score": "3-1"
     }
   ]
 }
