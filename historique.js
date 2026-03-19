@@ -118,6 +118,38 @@ const Utils = {
     formatPercent(value, total) {
         if (!total || total === 0) return '-';
         return Math.round(value / total * 100) + '%';
+    },
+
+    /**
+     * Vérifie si un set a des données statistiques exploitables :
+     * soit des rallies (points[].length > 0), soit des stats manuelles injectées.
+     */
+    setHasStats(set) {
+        if (!set) return false;
+        if (set.points && set.points.length > 0) return true;
+        // Stats manuelles injectées (set non filmé avec stats remplies)
+        if (set.stats) {
+            var teams = ['home', 'away'];
+            for (var t = 0; t < teams.length; t++) {
+                var teamStats = set.stats[teams[t]];
+                if (!teamStats) continue;
+                var players = Object.keys(teamStats);
+                for (var p = 0; p < players.length; p++) {
+                    var ps = teamStats[players[p]];
+                    if (!ps) continue;
+                    if ((ps.service && ps.service.tot > 0) ||
+                        (ps.reception && ps.reception.tot > 0) ||
+                        (ps.pass && ps.pass.tot > 0) ||
+                        (ps.attack && ps.attack.tot > 0) ||
+                        (ps.defense && ps.defense.tot > 0) ||
+                        (ps.block && ps.block.tot > 0) ||
+                        (ps.relance && ps.relance.tot > 0)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 };
 
@@ -3972,7 +4004,7 @@ const SharedComponents = {
         }
 
         var completedSets = match.sets.filter(function(s) { return s.completed; });
-        if (completedSets.length === 0 || !completedSets.some(function(s) { return s.points && s.points.length > 0; })) {
+        if (completedSets.length === 0 || !completedSets.some(function(s) { return Utils.setHasStats(s); })) {
             if (section) section.style.display = 'none';
             return;
         }
@@ -3985,7 +4017,7 @@ const SharedComponents = {
             setsToShow = completedSets;
         }
 
-        if (setsToShow.length === 0 || !setsToShow.some(function(s) { return s.points && s.points.length > 0; })) {
+        if (setsToShow.length === 0 || !setsToShow.some(function(s) { return Utils.setHasStats(s); })) {
             if (section) section.style.display = 'none';
             return;
         }
@@ -4100,7 +4132,7 @@ const SharedComponents = {
         var setsToUse = setFilter === 'all' ? completedSets : [completedSets[setFilter]].filter(Boolean);
 
         // Verifier qu'il y a des points
-        var hasPoints = setsToUse.some(function(s) { return s.points && s.points.length > 0; });
+        var hasPoints = setsToUse.some(function(s) { return Utils.setHasStats(s); });
         if (!hasPoints) { container.innerHTML = ''; return; }
 
         var stats = SideOutAnalysis.aggregateSideOutStats(setsToUse);
@@ -5532,7 +5564,7 @@ const ImpactView = {
         });
 
         var playerRoles = BilanView.getPlayerRoles(match, team);
-        this._showToggle = completedSets.filter(function(s) { return s.points && s.points.length > 0; }).length > 1;
+        this._showToggle = completedSets.filter(function(s) { return Utils.setHasStats(s); }).length > 1;
         this._lastData = data;
         this._lastPlayerRoles = playerRoles;
         return this._renderSection(data, playerRoles);
