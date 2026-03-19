@@ -1007,6 +1007,11 @@ const PlusMinusCalculator = {
         sets.forEach(function(set) {
             if (!set.points || set.points.length === 0) {
                 lineupCache.push(null);
+                // Set non filme mais avec lineup connu : collecter les joueurs quand meme
+                var lu = (team === 'home') ? (set.homeLineup || set.initialHomeLineup) : (set.awayLineup || set.initialAwayLineup);
+                if (lu) {
+                    Object.values(lu).forEach(function(name) { if (name) allPlayersMap[name] = true; });
+                }
                 return;
             }
             var lineups = self._getLineupAtEachPoint(set, team);
@@ -1022,7 +1027,39 @@ const PlusMinusCalculator = {
         });
 
         sets.forEach(function(set, setIdx) {
-            if (!set.points || set.points.length === 0) return;
+            // Set non filme mais avec lineup et score connus → attribuer +/- global aux joueurs du lineup
+            if (!set.points || set.points.length === 0) {
+                var lu = (team === 'home') ? (set.homeLineup || set.initialHomeLineup) : (set.awayLineup || set.initialAwayLineup);
+                var hs = set.homeScore || 0;
+                var as = set.awayScore || 0;
+                if (lu && (hs > 0 || as > 0)) {
+                    var totalPts = hs + as;
+                    var scored = (team === 'home') ? hs : as;
+                    var conceded = (team === 'home') ? as : hs;
+                    Object.values(lu).forEach(function(name) {
+                        if (!name) return;
+                        if (!results[name]) results[name] = self._initRecord();
+                        var r = results[name];
+                        r.ptsPlayed += totalPts;
+                        r.teamScored += scored;
+                        r.teamConceded += conceded;
+                        r.setsPlayed++;
+                        r.proratedSets += 1;
+                    });
+                    // Off-court pour les autres joueurs du match
+                    allPlayerNames.forEach(function(name) {
+                        var inLineup = Object.values(lu).indexOf(name) >= 0;
+                        if (!inLineup) {
+                            if (!results[name]) results[name] = self._initRecord();
+                            var r = results[name];
+                            r.offPtsPlayed += totalPts;
+                            r.offTeamScored += scored;
+                            r.offTeamConceded += conceded;
+                        }
+                    });
+                }
+                return;
+            }
 
             var lineups = lineupCache[setIdx];
 
