@@ -2174,6 +2174,39 @@ const PassAttackAnalyzer = {
         }
     },
 
+    _renderRevToggle(mode) {
+        var f = this._revContextFilter;
+        var html = '<div class="pa-toggle-bar">';
+        html += '<button class="pa-toggle-btn' + (f === 'all' ? ' active' : '') + '" onclick="PassAttackAnalyzer._onRevToggle(\'all\',\'' + mode + '\')">Tot</button>';
+        html += '<button class="pa-toggle-btn' + (f === 'reception' ? ' active' : '') + '" onclick="PassAttackAnalyzer._onRevToggle(\'reception\',\'' + mode + '\')">Recep</button>';
+        html += '<button class="pa-toggle-btn' + (f === 'defense' ? ' active' : '') + '" onclick="PassAttackAnalyzer._onRevToggle(\'defense\',\'' + mode + '\')">D\u00e9f</button>';
+        html += '</div>';
+        return html;
+    },
+
+    _onRevToggle(filter, mode) {
+        this._revContextFilter = filter;
+        // Re-render la section entiere
+        var containerId = mode === 'match' ? 'pa-content-match' : 'pa-content-year';
+        var container = document.getElementById(containerId);
+        if (!container) return;
+        if (mode === 'match') {
+            var match = MatchStatsView.currentMatch;
+            if (!match) return;
+            var data = this.analyzeMatch(match, 'home');
+            container.innerHTML = this._renderContent(data, match, 'home', 'match');
+        } else {
+            var filtered = YearStatsView._lastFiltered || [];
+            var self = this;
+            var allSeqs = [];
+            filtered.forEach(function(m) {
+                var d = self.analyzeMatch(m, 'home');
+                allSeqs = allSeqs.concat(d.all);
+            });
+            container.innerHTML = this._renderContent({ all: allSeqs, bySet: null }, null, 'home', 'year');
+        }
+    },
+
     // Tri Distribution Passeur — état
     _distSortCol: 'passes', // 'zone','passes','pct','aplus','aminus','fabp','pm'
     _distSortAsc: false,
@@ -2418,6 +2451,9 @@ const PassAttackAnalyzer = {
     _revSortCol: 'pct',
     _revSortAsc: false,
 
+    // Filtre contexte Renversement (indépendant de Distribution Passeur)
+    _revContextFilter: 'all', // 'reception' | 'defense' | 'all'
+
     _revSortIcon(col) {
         if (this._revSortCol === col) {
             var arrow = this._revSortAsc ? '\u25B2' : '\u25BC';
@@ -2501,7 +2537,8 @@ const PassAttackAnalyzer = {
     _renderReversals(sequences, mode) {
         var self = this;
         mode = mode || 'match';
-        var data = this.computeReversals(sequences);
+        var filtered = this._filterByContext(sequences, this._revContextFilter);
+        var data = this.computeReversals(filtered);
         if (data.eligible === 0) return '';
 
         // Helpers
@@ -2548,7 +2585,10 @@ const PassAttackAnalyzer = {
         }
 
         var html = '<div class="pa-subsection">';
-        html += '<div class="pa-subtitle">Renversement</div>';
+        html += '<div class="pa-subtitle" style="display:flex;align-items:center;justify-content:space-between;">';
+        html += '<span style="color:var(--cat-passe)">Renversement</span>';
+        html += this._renderRevToggle(mode);
+        html += '</div>';
         html += '<table class="pa-table pa-dist-table" data-pa-mode="' + mode + '" data-pa-table="reversal">';
         html += '<thead><tr>';
         html += '<th class="pa-sortable" data-pa-sort="type" data-pa-table="reversal">Type' + self._revSortIcon('type') + '</th>';
@@ -4946,7 +4986,7 @@ const BilanView = {
             if (perMatchIPs.length > 0) {
                 results.push({
                     name: name,
-                    medianIP: self._median(perMatchIPs),
+                    medianIP: Math.round(self._median(perMatchIPs)),
                     matchCount: perMatchIPs.length
                 });
             }
@@ -4954,6 +4994,30 @@ const BilanView = {
 
         results.sort(function(a, b) { return b.medianIP - a.medianIP; });
         return results;
+    },
+
+    // --- IP mediane par match pour un joueur (team home ou away) ---
+    // Calcule l'IP sur chaque match individuellement, puis retourne la mediane
+    // Evite le biais de l'agregation (surestimation due aux non-linearites des formules)
+    computeMedianIPForPlayer(matches, name, team, role) {
+        var self = this;
+        var perMatchIPs = [];
+        matches.forEach(function(match) {
+            var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+            if (completedSets.length === 0) return;
+            var playerTotals = StatsAggregator.aggregateStats(completedSets, team);
+            var stats = playerTotals[name];
+            if (!stats) return;
+            var hasStats = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'].some(function(cat) {
+                return stats[cat] && stats[cat].tot > 0;
+            });
+            if (!hasStats) return;
+            var scores = self.computeAxisScores(stats, role);
+            var ip = self.computeIP(scores, role);
+            perMatchIPs.push(ip);
+        });
+        if (perMatchIPs.length === 0) return 0;
+        return Math.round(self._median(perMatchIPs));
     },
 
     // Score plancher par axe : evite les polygones ecrases pour les postes
@@ -5532,26 +5596,16 @@ const ImpactView = {
     _sortCol: null, // null = tri par defaut (role + pm), sinon colKey
     _sortAsc: false, // desc par defaut pour valeurs numeriques
 
-    // Calcule et cache les IP saison pour chaque joueur
+    // Calcule et cache les IP saison pour chaque joueur (mediane par match)
     _ensureSeasonIP(team) {
         if (this._seasonIP) return;
         var matches = SeasonSelector.getFilteredMatches();
         if (!matches || matches.length === 0) return;
-        var allSets = [];
-        matches.forEach(function(m) {
-            (m.sets || []).filter(function(s) { return s.completed; }).forEach(function(s) {
-                allSets.push(s);
-            });
-        });
-        if (allSets.length === 0) return;
-        var playerStats = StatsAggregator.aggregateStats(allSets, team);
         var playerRoles = BilanView.getPlayerRolesYear(matches, team);
         var seasonIP = {};
-        Object.keys(playerStats).forEach(function(name) {
-            if (!playerRoles[name]) return;
+        Object.keys(playerRoles).forEach(function(name) {
             var role = playerRoles[name].primaryRole;
-            var scores = BilanView.computeAxisScores(playerStats[name], role);
-            seasonIP[name] = BilanView.computeIP(scores, role);
+            seasonIP[name] = BilanView.computeMedianIPForPlayer(matches, name, team, role);
         });
         this._seasonIP = seasonIP;
     },
@@ -5982,7 +6036,9 @@ const TEAM_COLORS = {
     'Manu Andy-sport': '#e67e22',
     'Bières et le loup': '#f1c40f',
     'Rhinos Féroces': '#95a5a6',
-    'StarPAFF': '#34495e'
+    'StarPAFF': '#34495e',
+    'Olympe BB volley': '#e91e8c',
+    'Morts de Soif': '#16a085'
 };
 
 const RankingView = {
@@ -6113,8 +6169,7 @@ const RankingView = {
                      allPlayers: [], starters: [], ipAll: 0, ipStarters: 0 };
         }
 
-        // --- Approche Profils Radar Annee : agreger TOUTES les stats saison → IP unique ---
-        // (et non IP par match puis moyenne, qui donne des resultats differents car formules non-lineaires)
+        // --- Approche Profils Radar Annee : scores agreges pour le visuel, IP mediane par match ---
         var allPlayers = [];
 
         if (!isAway) {
@@ -6161,11 +6216,12 @@ const RankingView = {
                 if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.10) {
                     d.scores.service = 0;
                 }
-                d.ip = BilanView.computeIP(d.scores, d.effectiveRole);
+                // IP = mediane par match (pas agrege)
+                d.ip = BilanView.computeMedianIPForPlayer(matchesWithSets, d.name, 'home', d.effectiveRole);
             });
         } else {
-            // AWAY : agreger stats par joueur sur tous les matchs → IP unique
-            var mergedData = {}; // name → { stats, roles: {role: count}, matchCount }
+            // AWAY : agreger stats par joueur sur tous les matchs (scores agreges pour visuel, IP mediane)
+            var mergedData = {}; // name → { stats, roles: {role: count}, matchCount, perMatchIPs: [] }
 
             matchesWithSets.forEach(function(match) {
                 var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
@@ -6190,12 +6246,18 @@ const RankingView = {
                     if (!mergedData[name]) {
                         mergedData[name] = {
                             stats: StatsAggregator.initPlayerStats(),
-                            roles: {}, matchCount: 0
+                            roles: {}, matchCount: 0, perMatchIPs: []
                         };
                     }
                     BilanView._mergePlayerStats(mergedData[name].stats, stats);
                     mergedData[name].roles[primaryRole] = (mergedData[name].roles[primaryRole] || 0) + 1;
                     mergedData[name].matchCount++;
+
+                    // Calculer IP pour ce match
+                    var ipRole = (primaryFamily === 'Ailier') ? 'R4' : primaryFamily;
+                    var matchScores = BilanView.computeAxisScores(stats, ipRole);
+                    var matchIP = BilanView.computeIP(matchScores, ipRole);
+                    mergedData[name].perMatchIPs.push(matchIP);
                 });
             });
 
@@ -6220,7 +6282,8 @@ const RankingView = {
 
                 allPlayers.push({
                     name: name, role: primaryRole, roleColor: roleColor,
-                    scores: scores, ip: 0, effectiveRole: ipRole, matchCount: entry.matchCount
+                    scores: scores, ip: 0, effectiveRole: ipRole, matchCount: entry.matchCount,
+                    _perMatchIPs: entry.perMatchIPs
                 });
             });
 
@@ -6234,7 +6297,9 @@ const RankingView = {
                 if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.10) {
                     d.scores.service = 0;
                 }
-                d.ip = BilanView.computeIP(d.scores, d.effectiveRole);
+                // IP = mediane par match
+                d.ip = d._perMatchIPs && d._perMatchIPs.length > 0
+                    ? Math.round(BilanView._median(d._perMatchIPs)) : BilanView.computeIP(d.scores, d.effectiveRole);
             });
         }
 
@@ -9324,6 +9389,13 @@ const YearStatsView = {
         var SLOT_ORDER_YEAR = ['Passeur', 'R4', 'Pointu', 'Centre'];
         var allPlayerData = [];
 
+        // Pre-calculer IP mediane par match pour chaque joueur (lookup global)
+        var medianIPLookup = {};
+        BilanView.FAMILY_ORDER.forEach(function(fam) {
+            var ranking = BilanView.computeMedianIPForFamily(matches, playerFamiliesYear, fam);
+            ranking.forEach(function(r) { medianIPLookup[r.name] = r.medianIP; });
+        });
+
         BilanView.FAMILY_ORDER.forEach(function(family) {
             var familyAxes = BilanView.SPIDER_AXES;
             var familyIpRole = (family === 'Ailier') ? 'R4' : family;
@@ -9383,7 +9455,9 @@ const YearStatsView = {
             if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.10) {
                 d.scores.service = 0;
             }
-            d.ip = BilanView.computeIP(d.scores, d.effectiveRole);
+            // IP = mediane par match (pas agrege)
+            d.ip = (medianIPLookup[d.name] !== undefined) ? medianIPLookup[d.name]
+                : BilanView.computeIP(d.scores, d.effectiveRole);
         });
 
         // Trier par slot puis IP desc
