@@ -1900,6 +1900,60 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
     color: #5f6368;
 }
 
+.distinction-expandable {
+    cursor: pointer;
+}
+
+.distinction-expandable:hover {
+    background: #f8f9fa;
+}
+
+.distinction-expand-arrow {
+    font-size: 10px;
+    color: #9aa0a6;
+    margin-left: -2px;
+}
+
+.distinction-runners {
+    padding: 4px 0 2px 20px;
+    border-top: 1px dashed #e8eaed;
+    margin-top: 6px;
+}
+
+.distinction-runner {
+    padding: 4px 0;
+    font-family: 'Google Sans', sans-serif;
+}
+
+.distinction-runner + .distinction-runner {
+    border-top: 1px solid #f1f3f4;
+}
+
+.distinction-runner-header {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 2px;
+}
+
+.distinction-runner-rank {
+    font-weight: 700;
+    color: #9aa0a6;
+    font-size: 12px;
+    min-width: 18px;
+}
+
+.distinction-runner-name {
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.distinction-runner-stats {
+    font-size: 10px;
+    color: #5f6368;
+    padding-left: 23px;
+}
+
 /* ==================== REMPLACEMENTS ==================== */
 .remplacement-row {
     display: flex;

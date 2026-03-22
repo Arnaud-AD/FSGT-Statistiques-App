@@ -4512,7 +4512,7 @@ const BilanView = {
 
     // --- Distinctions : MVP + meilleurs joueurs par categorie ---
     // V20.26 : unifie sur computeAxisScores + IP_MIN_ACTIONS pour coherence avec spider charts
-    renderDistinctions(homeTotals, playerRoles, filteredPlayers) {
+    renderDistinctions(homeTotals, playerRoles, filteredPlayers, completedSets, matches) {
         var self = this;
         var players = filteredPlayers || Object.keys(homeTotals).filter(function(name) {
             return playerRoles[name];
@@ -4541,7 +4541,7 @@ const BilanView = {
                 totalActions += (tot || 0);
             });
 
-            var bestName = null, bestScore = -1;
+            var candidates = [];
             players.forEach(function(name) {
                 var d = playerData[name];
                 // Filtrer par role si specifie
@@ -4554,40 +4554,54 @@ const BilanView = {
                 if (tot !== undefined && minActions[axisKey] && tot < minActions[axisKey]) return;
                 // Seuil proportionnel : au moins 5% du total des actions de la categorie
                 if (totalActions > 0 && tot !== undefined && tot / totalActions < 0.05) return;
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestName = name;
-                }
+                candidates.push({ name: name, score: score });
             });
-            return bestName ? { name: bestName, score: bestScore } : null;
+            candidates.sort(function(a, b) { return b.score - a.score; });
+            return candidates.length > 0 ? candidates.slice(0, 3) : null;
         }
 
-        // --- Trouver le MVP (meilleur IP) ---
-        var mvpName = null, mvpIP = -1;
-        players.forEach(function(name) {
-            if (playerData[name].ip > mvpIP) {
-                mvpIP = playerData[name].ip;
-                mvpName = name;
-            }
-        });
+        // --- Trouver le top 3 IP pour MVP ---
+        var ipRanking = players.slice().sort(function(a, b) { return playerData[b].ip - playerData[a].ip; });
 
         var html = '<div class="bilan-distinctions">';
 
         // --- MVP ---
-        if (mvpName) {
+        if (ipRanking.length > 0) {
+            var mvpName = ipRanking[0];
             var mvp = playerData[mvpName];
-            var mvpColor = self.ROLE_COLORS[mvp.role] || '#5f6368';
-            html += '<div class="distinction-row distinction-mvp">';
+            var mvpRunners = ipRanking.slice(1, 3).map(function(name) {
+                var rd = playerData[name];
+                return { name: name, role: rd.role, highlight: 'IP ' + rd.ip, detail: self._mvpStats(rd.stats, rd.role) };
+            });
+            var mvpId = 'dist-expand-mvp';
+            var hasMvpRunners = mvpRunners.length > 0;
+            html += '<div class="distinction-row distinction-mvp' + (hasMvpRunners ? ' distinction-expandable' : '') + '"' +
+                     (hasMvpRunners ? ' onclick="var el=document.getElementById(\'' + mvpId + '\');el.style.display=el.style.display===\'none\'?\'block\':\'none\'"' : '') + '>';
             html += '<div class="distinction-header">';
             html += '<span class="distinction-emoji">👑</span>';
             html += '<span class="distinction-label">MVP</span>';
-            html += '<span class="bilan-role-dot" style="background:' + mvpColor + '"></span>';
+            if (hasMvpRunners) html += '<span class="distinction-expand-arrow">▾</span>';
+            html += '<span class="bilan-role-dot" style="background:' + (self.ROLE_COLORS[mvp.role] || '#5f6368') + '"></span>';
             html += '<span class="distinction-name">' + Utils.escapeHtml(mvpName) + '</span>';
             html += '</div>';
             html += '<div class="distinction-stats">';
-            html += '<span class="distinction-stat-highlight">IP ' + mvpIP + '</span>';
+            html += '<span class="distinction-stat-highlight">IP ' + mvp.ip + '</span>';
             html += '<span class="distinction-stat-detail">' + self._mvpStats(mvp.stats, mvp.role) + '</span>';
             html += '</div>';
+            if (hasMvpRunners) {
+                html += '<div id="' + mvpId + '" class="distinction-runners" style="display:none">';
+                mvpRunners.forEach(function(r, ri) {
+                    html += '<div class="distinction-runner">';
+                    html += '<div class="distinction-runner-header">';
+                    html += '<span class="distinction-runner-rank">' + (ri + 2) + '.</span>';
+                    html += '<span class="bilan-role-dot" style="background:' + (self.ROLE_COLORS[r.role] || '#5f6368') + '"></span>';
+                    html += '<span class="distinction-runner-name">' + Utils.escapeHtml(r.name) + '</span>';
+                    html += '</div>';
+                    html += '<div class="distinction-runner-stats">' + r.highlight + ' · ' + r.detail + '</div>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
             html += '</div>';
         }
 
@@ -4608,11 +4622,24 @@ const BilanView = {
                        ' · R1(FR) : ' + (r.r1 + r.frec) + ' (' + self._pct(r.r1 + r.frec, r.tot) + ')' +
                        ' · Moy : ' + moy.toFixed(1);
             }},
+            { axisKey: 'passe',     emoji: '🤲', label: 'Meilleur Passeur',       statsFn: function(s) {
+                var p = s.pass || {};
+                var moy = p.tot > 0 ? ((p.p4 || 0) * 4 + (p.p3 || 0) * 3 + (p.p2 || 0) * 2 + (p.p1 || 0) * 1) / p.tot : 0;
+                return 'P4 : ' + (p.p4 || 0) + ' (' + self._pct(p.p4 || 0, p.tot) + ')' +
+                       ' · P3 : ' + (p.p3 || 0) + ' (' + self._pct(p.p3 || 0, p.tot) + ')' +
+                       ' · FP : ' + (p.fp || 0) + ' · Moy : ' + moy.toFixed(1);
+            }},
             { axisKey: 'attaque',   emoji: '⚔️', label: 'Meilleur Attaquant',     statsFn: function(s) {
                 var a = s.attack;
                 return 'A+ : ' + a.attplus + ' (' + self._pct(a.attplus, a.tot) + ')' +
                        ' · A- : ' + a.attminus + ' (' + self._pct(a.attminus, a.tot) + ')' +
                        ' · FA(BP) : ' + a.fatt + '(' + a.bp + ') (' + self._pct(a.fatt + a.bp, a.tot) + ')';
+            }},
+            { axisKey: 'relance',   emoji: '🔄', label: 'Meilleur Relanceur',     statsFn: function(s) {
+                var rl = s.relance;
+                return 'R+ : ' + rl.relplus + ' (' + self._pct(rl.relplus, rl.tot) + ')' +
+                       ' · R- : ' + rl.relminus + ' (' + self._pct(rl.relminus, rl.tot) + ')' +
+                       ' · FR : ' + rl.frel + ' (' + self._pct(rl.frel, rl.tot) + ')';
             }},
             { axisKey: 'defense',   emoji: '🛡️', label: 'Meilleur Défenseur',     eligibleRoles: ['Passeur', 'Centre'], statsFn: function(s) {
                 var d = s.defense;
@@ -4641,27 +4668,453 @@ const BilanView = {
             }}
         ];
 
-        distinctions.forEach(function(dist) {
-            var best = findBestOnAxis(dist.axisKey, dist.eligibleRoles, dist.customScoreFn);
-            if (!best) return;
-            var d = playerData[best.name];
-            var color = self.ROLE_COLORS[d.role] || '#5f6368';
-            html += '<div class="distinction-row">';
+        // --- Helper pour rendre une distinction avec top 3 expandable ---
+        var distIdx = 0;
+        function renderDistinctionRow(emoji, label, winner, statHighlight, statDetail, runners) {
+            var id = 'dist-expand-' + (distIdx++);
+            var hasRunners = runners && runners.length > 0;
+            html += '<div class="distinction-row' + (hasRunners ? ' distinction-expandable' : '') + '"' +
+                     (hasRunners ? ' onclick="var el=document.getElementById(\'' + id + '\');el.style.display=el.style.display===\'none\'?\'block\':\'none\'"' : '') + '>';
             html += '<div class="distinction-header">';
-            html += '<span class="distinction-emoji">' + dist.emoji + '</span>';
-            html += '<span class="distinction-label">' + dist.label + '</span>';
-            html += '<span class="bilan-role-dot" style="background:' + color + '"></span>';
-            html += '<span class="distinction-name">' + Utils.escapeHtml(best.name) + '</span>';
+            html += '<span class="distinction-emoji">' + emoji + '</span>';
+            html += '<span class="distinction-label">' + label + '</span>';
+            if (hasRunners) html += '<span class="distinction-expand-arrow">▾</span>';
+            html += '<span class="bilan-role-dot" style="background:' + (self.ROLE_COLORS[winner.role] || '#5f6368') + '"></span>';
+            html += '<span class="distinction-name">' + Utils.escapeHtml(winner.name) + '</span>';
             html += '</div>';
             html += '<div class="distinction-stats">';
-            html += '<span class="distinction-stat-highlight">IP ' + d.ip + '</span>';
-            html += '<span class="distinction-stat-detail">' + dist.statsFn(d.stats) + '</span>';
+            html += '<span class="distinction-stat-highlight">' + statHighlight + '</span>';
+            html += '<span class="distinction-stat-detail">' + statDetail + '</span>';
             html += '</div>';
+            // Runners-up (hidden by default)
+            if (hasRunners) {
+                html += '<div id="' + id + '" class="distinction-runners" style="display:none">';
+                runners.forEach(function(r, ri) {
+                    html += '<div class="distinction-runner">';
+                    html += '<div class="distinction-runner-header">';
+                    html += '<span class="distinction-runner-rank">' + (ri + 2) + '.</span>';
+                    html += '<span class="bilan-role-dot" style="background:' + (self.ROLE_COLORS[r.role] || '#5f6368') + '"></span>';
+                    html += '<span class="distinction-runner-name">' + Utils.escapeHtml(r.name) + '</span>';
+                    html += '</div>';
+                    html += '<div class="distinction-runner-stats">' + r.highlight + ' · ' + r.detail + '</div>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
             html += '</div>';
+        }
+
+        distinctions.forEach(function(dist) {
+            var topN = findBestOnAxis(dist.axisKey, dist.eligibleRoles, dist.customScoreFn);
+            if (!topN) return;
+            var best = topN[0];
+            var d = playerData[best.name];
+            var runners = topN.slice(1).map(function(r) {
+                var rd = playerData[r.name];
+                return { name: r.name, role: rd.role, highlight: 'IP ' + rd.ip, detail: dist.statsFn(rd.stats) };
+            });
+            renderDistinctionRow(dist.emoji, dist.label,
+                { name: best.name, role: d.role },
+                'IP ' + d.ip, dist.statsFn(d.stats), runners);
         });
+
+        // --- Joueur Polyvalent : joueur avec le score minimum le plus haut sur tous les axes ---
+        var axisLabels = { service: 'Ser', reception: 'Rec', passe: 'Pas', attaque: 'Att', relance: 'Rel', defense: 'Def', bloc: 'Blc' };
+        var polyCandidates = [];
+        players.forEach(function(name) {
+            var d = playerData[name];
+            var axes = d.axes;
+            var axisKeys = ['service', 'reception', 'attaque', 'defense'];
+            if (d.role === 'Passeur') axisKeys.push('passe');
+            else axisKeys.push('relance');
+            var minScore = 999;
+            axisKeys.forEach(function(k) {
+                var v = axes[k] || 0;
+                if (v < minScore) minScore = v;
+            });
+            var axesWithData = 0;
+            axisKeys.forEach(function(k) {
+                var tot = axes._tots ? axes._tots[k] : 0;
+                if (tot >= 2) axesWithData++;
+            });
+            if (axesWithData < 3 || minScore <= 0) return;
+            var detail = axisKeys.map(function(k) { return axisLabels[k] + ' ' + Math.round(axes[k] || 0); }).join(' · ');
+            polyCandidates.push({ name: name, minScore: minScore, detail: detail });
+        });
+        polyCandidates.sort(function(a, b) { return b.minScore - a.minScore; });
+        if (polyCandidates.length > 0) {
+            var polyWinner = polyCandidates[0];
+            var pwd = playerData[polyWinner.name];
+            var polyRunners = polyCandidates.slice(1, 3).map(function(c) {
+                var rd = playerData[c.name];
+                return { name: c.name, role: rd.role, highlight: 'IP ' + rd.ip, detail: c.detail };
+            });
+            renderDistinctionRow('🎭', 'Joueur Polyvalent',
+                { name: polyWinner.name, role: pwd.role },
+                'IP ' + pwd.ip, polyWinner.detail, polyRunners);
+        }
+
+        // --- Distinctions basees sur les rallies (si completedSets fourni) ---
+        if (completedSets && completedSets.length > 0) {
+            var rallyDistinctions = self._computeRallyDistinctions(completedSets, players, playerData, matches);
+
+            // Plus longue serie au service
+            if (rallyDistinctions.streaks && rallyDistinctions.streaks.length > 0 && rallyDistinctions.streaks[0].count >= 3) {
+                var sk = rallyDistinctions.streaks[0];
+                var skRunners = rallyDistinctions.streaks.slice(1).filter(function(s) { return s.count >= 3; }).map(function(s) {
+                    var rd = playerData[s.name];
+                    return { name: s.name, role: rd ? rd.role : '', highlight: s.count + ' pts', detail: s.detail };
+                });
+                renderDistinctionRow('🔥', 'Plus longue série',
+                    { name: sk.name, role: (playerData[sk.name] || {}).role || '' },
+                    sk.count + ' pts', sk.detail, skRunners);
+            }
+
+            // Joueur Clutch
+            if (rallyDistinctions.clutchTop && rallyDistinctions.clutchTop.length > 0) {
+                var cl = rallyDistinctions.clutchTop[0];
+                var clRunners = rallyDistinctions.clutchTop.slice(1).map(function(c) {
+                    var rd = playerData[c.name];
+                    return { name: c.name, role: rd ? rd.role : '', highlight: c.pct + '%', detail: c.label };
+                });
+                renderDistinctionRow('💪', 'Joueur Clutch',
+                    { name: cl.name, role: (playerData[cl.name] || {}).role || '' },
+                    cl.pct + '%', cl.label, clRunners);
+            }
+
+            // Meilleur Side Out
+            if (rallyDistinctions.sideoutTop && rallyDistinctions.sideoutTop.length > 0) {
+                var so = rallyDistinctions.sideoutTop[0];
+                var soRunners = rallyDistinctions.sideoutTop.slice(1).map(function(s) {
+                    var rd = playerData[s.name];
+                    return { name: s.name, role: rd ? rd.role : '', highlight: s.pct + '% SO', detail: s.detail };
+                });
+                renderDistinctionRow('⚡', 'Meilleur Side Out',
+                    { name: so.name, role: (playerData[so.name] || {}).role || '' },
+                    so.pct + '% SO', so.detail, soRunners);
+            }
+
+            // Joueur Leader
+            if (rallyDistinctions.leaderTop && rallyDistinctions.leaderTop.length > 0) {
+                var ld = rallyDistinctions.leaderTop[0];
+                var ldRunners = rallyDistinctions.leaderTop.slice(1).map(function(l) {
+                    var rd = playerData[l.name];
+                    return { name: l.name, role: rd ? rd.role : '', highlight: l.ratio + '%', detail: l.label };
+                });
+                renderDistinctionRow('🧠', 'Joueur Leader',
+                    { name: ld.name, role: (playerData[ld.name] || {}).role || '' },
+                    ld.ratio + '%', ld.label, ldRunners);
+            }
+        }
 
         html += '</div>'; // bilan-distinctions
         return html;
+    },
+
+    // --- Helper : calcul des distinctions basees sur les rallies ---
+    _computeRallyDistinctions(completedSets, players, playerData, matches) {
+        var self = this;
+        var result = {};
+
+        // Construire un mapping set → { matchOpponent, setNumber } si matches fourni
+        var setInfo = {};
+        if (matches && matches.length > 0) {
+            completedSets.forEach(function(set, flatIdx) {
+                // Chercher le match et le numero de set
+                for (var mi = 0; mi < matches.length; mi++) {
+                    var m = matches[mi];
+                    var mSets = (m.sets || []).filter(function(s) { return s.completed; });
+                    for (var si = 0; si < mSets.length; si++) {
+                        if (mSets[si] === set) {
+                            setInfo[flatIdx] = { opponent: m.opponent || 'Adversaire', setNum: si + 1 };
+                            break;
+                        }
+                    }
+                    if (setInfo[flatIdx]) break;
+                }
+            });
+        }
+
+        // --- 1. Plus longue serie au service (top 3 par joueur) ---
+        var playerStreaks = {};
+        var isYearView = matches && matches.length > 1;
+        completedSets.forEach(function(set, setIdx) {
+            var points = set.points || [];
+            var currentServer = null;
+            var currentStreak = 0;
+            for (var i = 0; i < points.length; i++) {
+                var pt = points[i];
+                var prevPt = i > 0 ? points[i - 1] : null;
+                var prevHome = prevPt ? prevPt.homeScore : (set.initialHomeScore || 0);
+                var scorer = pt.homeScore > prevHome ? 'home' : 'away';
+                if (scorer === pt.servingTeam && pt.server) {
+                    if (pt.server === currentServer) currentStreak++;
+                    else { currentServer = pt.server; currentStreak = 1; }
+                    if (players.indexOf(pt.server) !== -1) {
+                        var prev = playerStreaks[pt.server];
+                        if (!prev || currentStreak > prev.count) {
+                            var info = setInfo[setIdx];
+                            var detail;
+                            if (isYearView && info) {
+                                detail = 'au service (S' + info.setNum + ' — vs ' + info.opponent + ')';
+                            } else {
+                                detail = 'au service (S' + (setIdx + 1) + ')';
+                            }
+                            playerStreaks[pt.server] = { name: pt.server, count: currentStreak, detail: detail };
+                        }
+                    }
+                } else { currentServer = null; currentStreak = 0; }
+            }
+        });
+        var streakList = Object.keys(playerStreaks).map(function(k) { return playerStreaks[k]; });
+        streakList.sort(function(a, b) { return b.count - a.count; });
+        result.streaks = streakList.slice(0, 3);
+
+        // --- 2. Joueur Clutch : % de conversion sous pression ---
+        // Pression = mene ou devant de 3 max. ×2 en debut (0-5) ou fin de set (20+, ecart ≤ 2)
+        var clutchScored = {};
+        var clutchOpps = {};
+        completedSets.forEach(function(set) {
+            var points = set.points || [];
+            for (var i = 0; i < points.length; i++) {
+                var pt = points[i];
+                var prevPt = i > 0 ? points[i - 1] : null;
+                var prevHome = prevPt ? prevPt.homeScore : (set.initialHomeScore || 0);
+                var prevAway = prevPt ? prevPt.awayScore : (set.initialAwayScore || 0);
+                var diff = prevHome - prevAway;
+                if (diff > 3) continue; // pas sous pression
+                var scorer = pt.homeScore > prevHome ? 'home' : 'away';
+                var absDiff = Math.abs(diff);
+                var isEndGame = prevHome >= 20 && prevAway >= 20 && absDiff <= 2;
+                var isEarlyGame = prevHome <= 5 && prevAway <= 5 && absDiff <= 2;
+                var weight = (isEndGame || isEarlyGame) ? 2 : 1;
+
+                // Attribuer au dernier attaquant home (gagnant ou non)
+                var attacker = self._findLastAttacker(pt.rally, 'home');
+                if (!attacker || players.indexOf(attacker) === -1) continue;
+                clutchOpps[attacker] = (clutchOpps[attacker] || 0) + weight;
+                if (scorer === 'home') {
+                    clutchScored[attacker] = (clutchScored[attacker] || 0) + weight;
+                }
+            }
+        });
+        var clutchList = [];
+        Object.keys(clutchOpps).forEach(function(name) {
+            var opps = clutchOpps[name];
+            var scored = clutchScored[name] || 0;
+            if (opps < 5) return; // minimum 5 opportunites
+            var pct = Math.round(scored / opps * 100);
+            clutchList.push({ name: name, scored: scored, opps: opps, pct: pct,
+                label: scored + '/' + opps + ' pts marqués sous pression' });
+        });
+        clutchList.sort(function(a, b) { return b.pct - a.pct || b.scored - a.scored; });
+        result.clutchTop = clutchList.slice(0, 3);
+
+        // --- 3. Meilleur Side Out individuel ---
+        var soScored = {};
+        var soOpportunities = {};
+        completedSets.forEach(function(set) {
+            var points = set.points || [];
+            for (var i = 0; i < points.length; i++) {
+                var pt = points[i];
+                var prevPt = i > 0 ? points[i - 1] : null;
+                var prevHome = prevPt ? prevPt.homeScore : (set.initialHomeScore || 0);
+                var scorer = pt.homeScore > prevHome ? 'home' : 'away';
+                if (pt.servingTeam !== 'away') continue;
+                var attacker = self._findLastAttacker(pt.rally, 'home');
+                if (!attacker || players.indexOf(attacker) === -1) continue;
+                soOpportunities[attacker] = (soOpportunities[attacker] || 0) + 1;
+                if (scorer === 'home') {
+                    soScored[attacker] = (soScored[attacker] || 0) + 1;
+                }
+            }
+        });
+        var teamSOStats = SideOutAnalysis.aggregateSideOutStats(completedSets);
+        var teamSOPct = teamSOStats.home.soPercent || 0;
+        var soList = [];
+        Object.keys(soOpportunities).forEach(function(name) {
+            var pd = playerData[name];
+            if (pd && pd.role === 'Passeur') return;
+            var total = soOpportunities[name];
+            var scored = soScored[name] || 0;
+            if (total < 5) return;
+            var pct = Math.round(scored / total * 100);
+            var diff = pct - teamSOPct;
+            var diffStr = diff >= 0 ? '+' + diff + '%' : diff + '%';
+            soList.push({ name: name, scored: scored, total: total, pct: pct, detail: scored + '/' + total + ' attaques converties (' + diffStr + ' vs équipe)' });
+        });
+        soList.sort(function(a, b) { return b.pct - a.pct || b.scored - a.scored; });
+        result.sideoutTop = soList.slice(0, 3);
+
+        // --- 4. Joueur Leader : Bilan momentum net ---
+        // Pour chaque joueur sur le terrain :
+        //   + longueur de chaque serie home de 2+ pts (ponderee par IP adverse)
+        //   - longueur de chaque serie adverse de 2+ pts (ponderee par IP adverse)
+        // Bonus = IP titulaires adverse / moyenne IP adverses (>1 = adversaire fort, <1 = faible)
+        var leaderPlus = {};
+        var leaderMinus = {};
+        var leaderRuns = {};
+        var leaderSets = {};
+
+        // Calculer IP titulaires de chaque adversaire
+        var matchesToScan = matches || [];
+        var oppIPs = {};
+        matchesToScan.forEach(function(match) {
+            var mSets = (match.sets || []).filter(function(s) { return s.completed; });
+            if (mSets.length === 0) return;
+            // Calculer IP titulaires adverse simplifie
+            var awayTotals = StatsAggregator.aggregateStats(mSets, 'away');
+            var awayRoles = BilanView.getPlayerRoles(match, 'away');
+            var POSITIONS = ['Passeur', 'R4', 'Centre', 'Pointu'];
+            var bestByPos = {};
+            Object.keys(awayTotals).forEach(function(name) {
+                if (!awayRoles[name]) return;
+                var role = awayRoles[name].primaryRole;
+                var axes = BilanView.computeAxisScores(awayTotals[name], role);
+                var ip = BilanView.computeIP(axes, role);
+                if (!bestByPos[role] || ip > bestByPos[role]) bestByPos[role] = ip;
+            });
+            var posValues = POSITIONS.map(function(pos) { return bestByPos[pos] || null; }).filter(function(v) { return v !== null; });
+            oppIPs[match.id] = posValues.length > 0
+                ? Math.round(posValues.reduce(function(s, v) { return s + v; }, 0) / posValues.length)
+                : 50; // default si pas assez de donnees
+        });
+        // Moyenne IP adverses pour normaliser
+        var oppIPValues = Object.values(oppIPs);
+        var avgOppIP = oppIPValues.length > 0
+            ? oppIPValues.reduce(function(s, v) { return s + v; }, 0) / oppIPValues.length
+            : 50;
+
+        matchesToScan.forEach(function(match) {
+            var mSets = (match.sets || []).filter(function(s) { return s.completed; });
+            if (mSets.length === 0) return;
+            // Bonus = IP adverse / moyenne IP adverses (>1 = gros match)
+            var oppIP = oppIPs[match.id] || 50;
+            var matchBonus = avgOppIP > 0 ? oppIP / avgOppIP : 1;
+
+            mSets.forEach(function(set) {
+                if (completedSets.indexOf(set) === -1) return;
+
+                var lineup = set.homeLineup || {};
+                var onCourt = {};
+                Object.keys(lineup).forEach(function(pos) {
+                    var name = lineup[pos];
+                    if (name && players.indexOf(name) !== -1) onCourt[name] = true;
+                });
+                var initLineup = set.initialHomeLineup || {};
+                Object.keys(initLineup).forEach(function(pos) {
+                    var name = initLineup[pos];
+                    if (name && players.indexOf(name) !== -1) onCourt[name] = true;
+                });
+                var courtPlayers = Object.keys(onCourt);
+                courtPlayers.forEach(function(name) {
+                    leaderSets[name] = (leaderSets[name] || 0) + 1;
+                });
+
+                var points = set.points || [];
+                var homeStreak = 0;
+                var awayStreak = 0;
+                for (var i = 0; i < points.length; i++) {
+                    var pt = points[i];
+                    var prevPt = i > 0 ? points[i - 1] : null;
+                    var prevHome = prevPt ? prevPt.homeScore : (set.initialHomeScore || 0);
+                    var scorer = pt.homeScore > prevHome ? 'home' : 'away';
+                    if (scorer === 'home') {
+                        if (awayStreak >= 2) {
+                            var val = awayStreak * matchBonus;
+                            courtPlayers.forEach(function(name) {
+                                leaderMinus[name] = (leaderMinus[name] || 0) + val;
+                                leaderRuns[name] = (leaderRuns[name] || 0) + 1;
+                            });
+                        }
+                        awayStreak = 0;
+                        homeStreak++;
+                    } else {
+                        if (homeStreak >= 2) {
+                            var val = homeStreak * matchBonus;
+                            courtPlayers.forEach(function(name) {
+                                leaderPlus[name] = (leaderPlus[name] || 0) + val;
+                                leaderRuns[name] = (leaderRuns[name] || 0) + 1;
+                            });
+                        }
+                        homeStreak = 0;
+                        awayStreak++;
+                    }
+                }
+                if (homeStreak >= 2) {
+                    var val = homeStreak * matchBonus;
+                    courtPlayers.forEach(function(name) {
+                        leaderPlus[name] = (leaderPlus[name] || 0) + val;
+                        leaderRuns[name] = (leaderRuns[name] || 0) + 1;
+                    });
+                }
+                if (awayStreak >= 2) {
+                    var val = awayStreak * matchBonus;
+                    courtPlayers.forEach(function(name) {
+                        leaderMinus[name] = (leaderMinus[name] || 0) + val;
+                        leaderRuns[name] = (leaderRuns[name] || 0) + 1;
+                    });
+                }
+            });
+        });
+        var leaderList = [];
+        Object.keys(leaderRuns).forEach(function(name) {
+            var plus = Math.round(leaderPlus[name] || 0);
+            var minus = Math.round(leaderMinus[name] || 0);
+            var total = plus + minus;
+            var runs = leaderRuns[name];
+            if (runs < 3 || total === 0) return;
+            var ratio = Math.round(plus / total * 100);
+            leaderList.push({ name: name, ratio: ratio, plus: plus, minus: minus, runs: runs,
+                label: '+' + plus + ' / −' + minus + ' pts en séries' });
+        });
+        // Ajouter sets joues par joueur
+        leaderList.forEach(function(p) { p.sets = leaderSets[p.name] || 0; });
+
+        // Tri Option B : ratio × sets (combine qualite + volume)
+        leaderList.sort(function(a, b) {
+            var sA = a.ratio * a.sets; var sB = b.ratio * b.sets;
+            return sB - sA || b.ratio - a.ratio;
+        });
+        // Enrichir le label avec le score et ratio
+        leaderList.forEach(function(p) {
+            p.score = p.ratio * p.sets;
+            p.label = p.ratio + '% momentum · ' + p.sets + ' sets';
+        });
+        result.leaderTop = leaderList.slice(0, 3);
+
+        return result;
+    },
+
+    // --- Helper : trouver le joueur decisif d'un rally pour une equipe ---
+    _findDecisivePlayer(rally, team) {
+        if (!rally || rally.length === 0) return null;
+        // Parcourir le rally en reverse pour trouver l'action decisive
+        for (var i = rally.length - 1; i >= 0; i--) {
+            var a = rally[i];
+            if (a.team !== team) continue;
+            // Attack point
+            if (a.type === 'attack' && (a.result === 'point' || a.result === 'bloc_out')) return a.player;
+            // Ace
+            if (a.type === 'service' && a.result === 'ace') return a.player;
+            // Block kill
+            if (a.type === 'block' && (a.result === 'kill' || a.result === 'point')) return a.player;
+            // Retour direct gagnant
+            if (a.isDirectReturnWinner) return a.player;
+        }
+        // Faute adverse — pas de joueur decisif cote home
+        return null;
+    },
+
+    // --- Helper : trouver le dernier attaquant d'un rally pour une equipe (gagnant ou non) ---
+    _findLastAttacker(rally, team) {
+        if (!rally || rally.length === 0) return null;
+        for (var i = rally.length - 1; i >= 0; i--) {
+            var a = rally[i];
+            if (a.team !== team) continue;
+            if (a.type === 'attack' && a.player) return a.player;
+        }
+        return null;
     },
 
     // --- Helper : trouver le meilleur joueur ---
@@ -8609,7 +9062,7 @@ const MatchStatsView = {
                 var p = homeTotals[name];
                 return statCategories.some(function(cat) { return p[cat] && p[cat].tot > 0; });
             });
-            var html = BilanView.renderDistinctions(homeTotals, homeRoles, homePlayers);
+            var html = BilanView.renderDistinctions(homeTotals, homeRoles, homePlayers, completedSets, [match]);
             DistinctionsModal.open(html, 'Distinctions \u2014 vs ' + (match.opponent || 'Adversaire'));
         });
     },
@@ -9607,7 +10060,7 @@ const YearStatsView = {
             return statCategories.some(function(cat) { return p[cat] && p[cat].tot > 0; });
         });
 
-        return BilanView.renderDistinctions(homeTotals, mergedRoles, players);
+        return BilanView.renderDistinctions(homeTotals, mergedRoles, players, allSets, matches);
     },
 
     renderYearSideOut(matches) {
