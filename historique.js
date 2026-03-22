@@ -4520,11 +4520,32 @@ const BilanView = {
         var minActions = self.IP_MIN_ACTIONS;
 
         // --- Calculer axes + IP de chaque joueur une seule fois ---
+        // IP = mediane par match (coherent avec spider charts) si matches fourni
+        var perMatchIPs = {};
+        if (matches && matches.length > 0) {
+            matches.forEach(function(match) {
+                var mSets = (match.sets || []).filter(function(s) { return s.completed; });
+                if (mSets.length === 0) return;
+                var matchTotals = StatsAggregator.aggregateStats(mSets, 'home');
+                var matchRoles = self.getPlayerRoles(match, 'home');
+                Object.keys(matchTotals).forEach(function(name) {
+                    if (!matchRoles[name]) return;
+                    var role = matchRoles[name].primaryRole;
+                    var axes = self.computeAxisScores(matchTotals[name], role);
+                    var ip = self.computeIP(axes, role);
+                    if (!perMatchIPs[name]) perMatchIPs[name] = [];
+                    perMatchIPs[name].push(ip);
+                });
+            });
+        }
         var playerData = {};
         players.forEach(function(name) {
             var role = playerRoles[name].primaryRole;
             var axes = self.computeAxisScores(homeTotals[name], role);
-            var ip = self.computeIP(axes, role);
+            // IP = mediane par match si dispo, sinon fallback sur agregation
+            var ip = perMatchIPs[name] && perMatchIPs[name].length > 0
+                ? Math.round(self._median(perMatchIPs[name]))
+                : self.computeIP(axes, role);
             playerData[name] = { role: role, axes: axes, ip: ip, stats: homeTotals[name] };
         });
 
@@ -4593,7 +4614,7 @@ const BilanView = {
                 mvpRunners.forEach(function(r, ri) {
                     html += '<div class="distinction-runner">';
                     html += '<div class="distinction-runner-header">';
-                    html += '<span class="distinction-runner-rank">' + (ri + 2) + '.</span>';
+                    html += '<span class="distinction-runner-rank">' + (ri === 0 ? '🥈' : '🥉') + '</span>';
                     html += '<span class="bilan-role-dot" style="background:' + (self.ROLE_COLORS[r.role] || '#5f6368') + '"></span>';
                     html += '<span class="distinction-runner-name">' + Utils.escapeHtml(r.name) + '</span>';
                     html += '</div>';
@@ -4665,7 +4686,7 @@ const BilanView = {
                 return 'B+ : ' + b.blcplus + ' (' + self._pct(b.blcplus, b.tot) + ')' +
                        ' · B- : ' + b.blcminus + ' (' + self._pct(b.blcminus, b.tot) + ')' +
                        ' · FB : ' + b.fblc + ' (' + self._pct(b.fblc, b.tot) + ')';
-            }}
+            }},
         ];
 
         // --- Helper pour rendre une distinction avec top 3 expandable ---
@@ -4692,7 +4713,7 @@ const BilanView = {
                 runners.forEach(function(r, ri) {
                     html += '<div class="distinction-runner">';
                     html += '<div class="distinction-runner-header">';
-                    html += '<span class="distinction-runner-rank">' + (ri + 2) + '.</span>';
+                    html += '<span class="distinction-runner-rank">' + (ri === 0 ? '🥈' : '🥉') + '</span>';
                     html += '<span class="bilan-role-dot" style="background:' + (self.ROLE_COLORS[r.role] || '#5f6368') + '"></span>';
                     html += '<span class="distinction-runner-name">' + Utils.escapeHtml(r.name) + '</span>';
                     html += '</div>';
@@ -4718,40 +4739,99 @@ const BilanView = {
                 'IP ' + d.ip, dist.statsFn(d.stats), runners);
         });
 
-        // --- Joueur Polyvalent : joueur avec le score minimum le plus haut sur tous les axes ---
-        var axisLabels = { service: 'Ser', reception: 'Rec', passe: 'Pas', attaque: 'Att', relance: 'Rel', defense: 'Def', bloc: 'Blc' };
-        var polyCandidates = [];
-        players.forEach(function(name) {
+        // --- Meilleur Libero : meilleur IP parmi les Centres ---
+        var liberoCandidates = players.filter(function(name) {
+            return playerData[name].role === 'Centre';
+        }).map(function(name) {
             var d = playerData[name];
-            var axes = d.axes;
-            var axisKeys = ['service', 'reception', 'attaque', 'defense'];
-            if (d.role === 'Passeur') axisKeys.push('passe');
-            else axisKeys.push('relance');
-            var minScore = 999;
-            axisKeys.forEach(function(k) {
-                var v = axes[k] || 0;
-                if (v < minScore) minScore = v;
+            var r = d.stats.reception;
+            var def = d.stats.defense;
+            var rl = d.stats.relance;
+            var moy = r.tot > 0 ? (r.r4 * 4 + r.r3 * 3 + r.r2 * 2 + r.r1 * 1) / r.tot : 0;
+            return {
+                name: name, ip: d.ip,
+                detail: 'Rec Moy : ' + moy.toFixed(1) +
+                    ' · D+ : ' + def.defplus + ' · D- : ' + def.defminus +
+                    ' · R+ : ' + rl.relplus + ' · R- : ' + rl.relminus
+            };
+        }).sort(function(a, b) { return b.ip - a.ip; });
+        if (liberoCandidates.length > 0) {
+            var libWinner = liberoCandidates[0];
+            var lwd = playerData[libWinner.name];
+            var libRunners = liberoCandidates.slice(1, 3).map(function(c) {
+                return { name: c.name, role: 'Centre', highlight: 'IP ' + c.ip, detail: c.detail };
             });
-            var axesWithData = 0;
-            axisKeys.forEach(function(k) {
-                var tot = axes._tots ? axes._tots[k] : 0;
-                if (tot >= 2) axesWithData++;
+            renderDistinctionRow('🏅', 'Meilleur Libéro',
+                { name: libWinner.name, role: 'Centre' },
+                'IP ' + libWinner.ip, libWinner.detail, libRunners);
+        }
+
+        // --- Joueur Polyvalent : temps de jeu le plus reparti entre plusieurs postes ---
+        var polyCandidates = [];
+        if (matches && matches.length > 0) {
+            var yearRoles = self.getPlayerRolesYear(matches, 'home');
+            players.forEach(function(name) {
+                var pr = yearRoles[name];
+                if (!pr || !pr.roles) return;
+                var roles = pr.roles;
+                var roleNames = Object.keys(roles);
+                if (roleNames.length < 2) return; // Au moins 2 postes
+                var totalSets = 0;
+                roleNames.forEach(function(r) { totalSets += roles[r]; });
+                if (totalSets < 5) return; // Min 5 sets
+                // Score de polyvalence : 1 - max_share (plus c'est haut, plus c'est reparti)
+                var maxShare = 0;
+                roleNames.forEach(function(r) {
+                    var share = roles[r] / totalSets;
+                    if (share > maxShare) maxShare = share;
+                });
+                var polyScore = Math.round((1 - maxShare) * 100);
+                // Detail : role1 X% · role2 Y%
+                var detail = roleNames.sort(function(a, b) { return roles[b] - roles[a]; })
+                    .map(function(r) { return r + ' ' + Math.round(roles[r] / totalSets * 100) + '%'; }).join(' · ');
+                polyCandidates.push({ name: name, polyScore: polyScore, detail: detail, totalSets: totalSets });
             });
-            if (axesWithData < 3 || minScore <= 0) return;
-            var detail = axisKeys.map(function(k) { return axisLabels[k] + ' ' + Math.round(axes[k] || 0); }).join(' · ');
-            polyCandidates.push({ name: name, minScore: minScore, detail: detail });
-        });
-        polyCandidates.sort(function(a, b) { return b.minScore - a.minScore; });
+        }
+        polyCandidates.sort(function(a, b) { return b.polyScore - a.polyScore || b.totalSets - a.totalSets; });
         if (polyCandidates.length > 0) {
             var polyWinner = polyCandidates[0];
-            var pwd = playerData[polyWinner.name];
+            var pwd = playerData[polyWinner.name] || {};
             var polyRunners = polyCandidates.slice(1, 3).map(function(c) {
-                var rd = playerData[c.name];
-                return { name: c.name, role: rd.role, highlight: 'IP ' + rd.ip, detail: c.detail };
+                var rd = playerData[c.name] || {};
+                return { name: c.name, role: rd.role || '', highlight: c.polyScore + '% réparti', detail: c.detail };
             });
             renderDistinctionRow('🎭', 'Joueur Polyvalent',
-                { name: polyWinner.name, role: pwd.role },
-                'IP ' + pwd.ip, polyWinner.detail, polyRunners);
+                { name: polyWinner.name, role: pwd.role || '' },
+                polyWinner.polyScore + '% réparti', polyWinner.detail, polyRunners);
+        }
+
+        // --- Revelation de la saison : meilleur IP parmi joueurs < 50% temps de jeu ---
+        if (matches && matches.length > 0) {
+            var totalSetsAll = completedSets ? completedSets.length : 0;
+            var seuilRev = Math.ceil(totalSetsAll * 0.5);
+            var yearRolesRev = self.getPlayerRolesYear(matches, 'home');
+            var revCandidates = [];
+            players.forEach(function(name) {
+                var d = playerData[name];
+                var pr = yearRolesRev[name];
+                if (!pr) return;
+                var totalSets = 0;
+                Object.keys(pr.roles).forEach(function(r) { totalSets += pr.roles[r]; });
+                if (totalSets >= seuilRev) return;
+                if (totalSets < 3) return;
+                revCandidates.push({ name: name, ip: d.ip, sets: totalSets, role: d.role });
+            });
+            revCandidates.sort(function(a, b) { return b.ip - a.ip; });
+            if (revCandidates.length > 0) {
+                var revWinner = revCandidates[0];
+                var rwd = playerData[revWinner.name];
+                var revRunners = revCandidates.slice(1, 3).map(function(c) {
+                    return { name: c.name, role: c.role, highlight: 'IP ' + c.ip, detail: c.sets + ' sets joués' };
+                });
+                renderDistinctionRow('🌟', 'Révélation',
+                    { name: revWinner.name, role: rwd.role },
+                    'IP ' + revWinner.ip, revWinner.sets + ' sets joués', revRunners);
+            }
         }
 
         // --- Distinctions basees sur les rallies (si completedSets fourni) ---
@@ -4803,7 +4883,7 @@ const BilanView = {
                 });
                 renderDistinctionRow('🧠', 'Joueur Leader',
                     { name: ld.name, role: (playerData[ld.name] || {}).role || '' },
-                    ld.ratio + '%', ld.label, ldRunners);
+                    ld.ratio + '%', 'Séries + et rupture séries −', ldRunners);
             }
         }
 

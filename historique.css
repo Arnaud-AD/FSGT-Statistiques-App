@@ -1872,6 +1872,14 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
     color: var(--text-primary);
 }
 
+.distinction-subtitle {
+    display: block;
+    font-size: 9px;
+    font-weight: 400;
+    color: #9aa0a6;
+    margin-top: -1px;
+}
+
 .distinction-name {
     font-family: 'Google Sans', sans-serif;
     font-size: 12px;
