@@ -5341,11 +5341,14 @@ const BilanView = {
             var lineup = set[initialKey] || set[lineupKey];
             addFromLineup(lineup);
             // V20.26 : inclure aussi les joueurs entrés en substitution
+            // V26.2 fix : checker contre le lineup initial du set, pas result global
             var finalLineup = set[lineupKey];
             if (finalLineup && finalLineup !== lineup) {
+                var initialNames = {};
+                Object.keys(lineup).forEach(function(p) { if (lineup[p]) initialNames[lineup[p]] = true; });
                 Object.keys(finalLineup).forEach(function(pos) {
                     var playerName = finalLineup[pos];
-                    if (!playerName || result[playerName]) return; // Déjà compté
+                    if (!playerName || initialNames[playerName]) return; // Deja dans le lineup initial
                     addFromLineup(finalLineup);
                 });
             }
@@ -5447,11 +5450,16 @@ const BilanView = {
                 if (!lineup) return;
                 Object.keys(lineup).forEach(function(pos) { addPlayer(pos, lineup[pos]); });
                 // V20.26 : inclure aussi les joueurs entrés en substitution
+                // V26.2 fix : ne pas checker result[playerName] globalement
+                // car un joueur vu dans un match precedent (ex: Centre) doit pouvoir
+                // etre ajoute dans une nouvelle famille (ex: Ailier) depuis un autre match
                 var finalLineup = set.homeLineup;
                 if (finalLineup && finalLineup !== lineup) {
+                    var initialNames = {};
+                    Object.keys(lineup).forEach(function(p) { if (lineup[p]) initialNames[lineup[p]] = true; });
                     Object.keys(finalLineup).forEach(function(pos) {
                         var playerName = finalLineup[pos];
-                        if (!playerName || result[playerName]) return; // Déjà compté
+                        if (!playerName || initialNames[playerName]) return; // Deja dans le lineup initial de ce set
                         addPlayer(pos, playerName);
                     });
                 }
@@ -5459,16 +5467,49 @@ const BilanView = {
         });
 
         // Determiner primaryFamily par joueur
+        // V26.2 fix : preferer les familles ou le joueur a des stats reelles
+        // Un joueur dans le lineup mais sans actions (0 stats) ne devrait pas
+        // imposer sa famille comme primaire
         var familyOrder = self.FAMILY_ORDER;
         Object.keys(result).forEach(function(name) {
             var families = result[name].families;
-            var best = null;
-            var bestCount = -1;
+
+            // Compter les sets avec stats reelles par famille
             Object.keys(families).forEach(function(fam) {
-                var count = families[fam].totalSets;
-                if (count > bestCount || (count === bestCount && familyOrder.indexOf(fam) < familyOrder.indexOf(best))) {
+                var setsWithStats = 0;
+                families[fam].matchSets.forEach(function(ms) {
+                    var match = matches[ms.matchIndex];
+                    if (!match) return;
+                    var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+                    ms.setIndices.forEach(function(si) {
+                        var set = completedSets[si];
+                        if (!set || !set.stats || !set.stats.home) return;
+                        var playerStats = set.stats.home[name];
+                        if (!playerStats) return;
+                        var hasStat = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'].some(function(cat) {
+                            return playerStats[cat] && playerStats[cat].tot > 0;
+                        });
+                        if (hasStat) setsWithStats++;
+                    });
+                });
+                families[fam].setsWithStats = setsWithStats;
+            });
+
+            var best = null;
+            var bestStatsCount = -1;
+            var bestTotalCount = -1;
+            Object.keys(families).forEach(function(fam) {
+                var statsCount = families[fam].setsWithStats || 0;
+                var totalCount = families[fam].totalSets;
+                // Priorite : famille avec plus de sets ayant des stats
+                // En cas d'egalite : plus de sets total
+                // En cas d'egalite : ordre FAMILY_ORDER
+                if (statsCount > bestStatsCount
+                    || (statsCount === bestStatsCount && totalCount > bestTotalCount)
+                    || (statsCount === bestStatsCount && totalCount === bestTotalCount && familyOrder.indexOf(fam) < familyOrder.indexOf(best))) {
                     best = fam;
-                    bestCount = count;
+                    bestStatsCount = statsCount;
+                    bestTotalCount = totalCount;
                 }
             });
             result[name].primaryFamily = best;
@@ -5512,6 +5553,11 @@ const BilanView = {
                 var playerTotals = StatsAggregator.aggregateStatsBySetIndices(completedSets, 'home', ms.setIndices);
                 var stats = playerTotals[name];
                 if (!stats) return;
+                // V26.2 fix : exclure les matchs/sets non filmes (toutes stats a zero)
+                var hasStats = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'].some(function(cat) {
+                    return stats[cat] && stats[cat].tot > 0;
+                });
+                if (!hasStats) return;
                 var scores = self.computeAxisScores(stats, familyIpRole);
                 var ip = self.computeIP(scores, familyIpRole);
                 perMatchIPs.push(ip);
