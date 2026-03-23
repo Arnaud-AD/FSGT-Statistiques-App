@@ -247,6 +247,117 @@
         .menu-btn-icon.stats { background: linear-gradient(135deg, #34a853, #4caf50); }
         .menu-btn-icon.standing { background: linear-gradient(135deg, #0056D2, #4285f4); }
         .menu-btn-icon.match { background: linear-gradient(135deg, #ff6b35, #f7931e); }
+        .menu-btn-icon.analytics { background: linear-gradient(135deg, #dc2626, #ef4444); }
+
+        /* Carte Analytique */
+        .analytics-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 0;
+        }
+        .analytics-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .analytics-header:hover {
+            background: #f8f9fa;
+        }
+        .analytics-arrow {
+            margin-left: auto;
+            color: var(--text-secondary);
+            font-size: 20px;
+            transition: transform 0.2s;
+        }
+        .analytics-card.open .analytics-arrow {
+            transform: rotate(90deg);
+        }
+        .analytics-body {
+            display: none;
+            padding: 0 24px 20px;
+            border-top: 1px solid var(--border-color);
+        }
+        .analytics-card.open .analytics-body {
+            display: block;
+        }
+        .analytics-loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .analytics-stat {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+        .analytics-stat-value {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .analytics-stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        .analytics-detail {
+            margin-top: 16px;
+        }
+        .analytics-detail-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        .analytics-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+        }
+        .analytics-row:last-child { border-bottom: none; }
+        .analytics-row-page { color: var(--text-primary); }
+        .analytics-row-count {
+            font-weight: 500;
+            color: var(--accent-blue);
+        }
+        .analytics-period {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .analytics-period-btn {
+            padding: 4px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            background: white;
+            font-size: 11px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.15s;
+        }
+        .analytics-period-btn.active {
+            background: var(--accent-blue);
+            color: white;
+            border-color: var(--accent-blue);
+        }
 
         .menu-btn-content {
             display: flex;
@@ -428,6 +539,32 @@
                 </div>
                 <span class="menu-btn-arrow">›</span>
             </a>
+
+            <!-- Carte Analytique (admin only) -->
+            <div class="analytics-card admin-only" style="display:none;" id="analyticsCard">
+                <div class="analytics-header" onclick="toggleAnalytics()">
+                    <div class="menu-btn-icon analytics">
+                        <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                            <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+                        </svg>
+                    </div>
+                    <div class="menu-btn-content">
+                        <span class="menu-btn-title">Analytique</span>
+                        <span class="menu-btn-desc">Visites des coéquipiers</span>
+                    </div>
+                    <span class="analytics-arrow">›</span>
+                </div>
+                <div class="analytics-body" id="analyticsBody">
+                    <div class="analytics-period">
+                        <button class="analytics-period-btn active" onclick="loadAnalytics(7)">7 jours</button>
+                        <button class="analytics-period-btn" onclick="loadAnalytics(30)">30 jours</button>
+                        <button class="analytics-period-btn" onclick="loadAnalytics(0)">Tout</button>
+                    </div>
+                    <div id="analyticsContent">
+                        <div class="analytics-loading">Chargement...</div>
+                    </div>
+                </div>
+            </div>
         </nav>
 
         <!-- Footer -->
@@ -443,6 +580,7 @@
     <script src="firebase-config.js"></script>
     <script src="admin-config.js"></script>
     <script src="firebase-sync.js"></script>
+    <script src="analytics.js"></script>
 
     <script src="storage.js"></script>
     <script>
@@ -460,6 +598,9 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Suivi anonymisé (exclut admin connecté)
+            if (typeof AppAnalytics !== 'undefined') AppAnalytics.trackPageView('accueil');
+
             // Init Firebase Auth UI (visible si ?admin pour permettre la connexion)
             if (typeof FirebaseAuthUI !== 'undefined') {
                 FirebaseAuthUI.init();
@@ -554,6 +695,112 @@
             // Activer le pointeur et rediriger vers la bonne page
             Storage.setCurrentMatchId(matchId);
             window.location.href = Storage.getResumeTarget(match);
+        }
+
+        // ==================== ANALYTIQUE ====================
+
+        let analyticsLoaded = false;
+        let analyticsCache = null;
+
+        function toggleAnalytics() {
+            const card = document.getElementById('analyticsCard');
+            card.classList.toggle('open');
+            if (card.classList.contains('open') && !analyticsLoaded) {
+                loadAnalytics(7);
+            }
+        }
+
+        async function loadAnalytics(days) {
+            // MAJ boutons période
+            document.querySelectorAll('.analytics-period-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.textContent) === days || (days === 0 && btn.textContent === 'Tout'));
+            });
+
+            const container = document.getElementById('analyticsContent');
+            container.innerHTML = '<div class="analytics-loading">Chargement...</div>';
+
+            try {
+                if (typeof db === 'undefined') {
+                    container.innerHTML = '<div class="analytics-loading">Firebase non disponible</div>';
+                    return;
+                }
+
+                // Requête Firestore
+                let query = db.collection('analytics').orderBy('timestamp', 'desc');
+                if (days > 0) {
+                    const since = new Date();
+                    since.setDate(since.getDate() - days);
+                    query = query.where('timestamp', '>=', since);
+                }
+                // Limiter à 500 documents
+                query = query.limit(500);
+
+                const snapshot = await query.get();
+                analyticsLoaded = true;
+
+                if (snapshot.empty) {
+                    container.innerHTML = '<div class="analytics-loading">Aucune visite enregistrée</div>';
+                    return;
+                }
+
+                // Agréger les données
+                const docs = snapshot.docs.map(d => d.data());
+                const pageViews = docs.filter(d => d.type === 'page_view');
+                const actions = docs.filter(d => d.type === 'action');
+                const visitors = new Set(docs.map(d => d.visitor).filter(Boolean));
+
+                // Comptage par page
+                const pageCounts = {};
+                pageViews.forEach(d => {
+                    pageCounts[d.page] = (pageCounts[d.page] || 0) + 1;
+                });
+
+                // Comptage par action
+                const actionCounts = {};
+                actions.forEach(d => {
+                    const label = d.action === 'match_select' ? ('Match : ' + (d.opponent || '?'))
+                        : d.action === 'tab_switch' ? ('Onglet : ' + (d.tab || '?'))
+                        : d.action === 'season_switch' ? ('Saison : ' + (d.season || '?'))
+                        : d.action;
+                    actionCounts[label] = (actionCounts[label] || 0) + 1;
+                });
+
+                // Rendu
+                const pageLabels = { accueil: 'Accueil', historique: 'Historique', 'match-live': 'Match live', equipe: 'Équipe' };
+                const pageRows = Object.entries(pageCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([page, count]) => `<div class="analytics-row"><span class="analytics-row-page">${pageLabels[page] || page}</span><span class="analytics-row-count">${count}</span></div>`)
+                    .join('');
+
+                const actionRows = Object.entries(actionCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 8)
+                    .map(([action, count]) => `<div class="analytics-row"><span class="analytics-row-page">${action}</span><span class="analytics-row-count">${count}</span></div>`)
+                    .join('');
+
+                container.innerHTML = `
+                    <div class="analytics-grid">
+                        <div class="analytics-stat">
+                            <div class="analytics-stat-value">${pageViews.length}</div>
+                            <div class="analytics-stat-label">Pages vues</div>
+                        </div>
+                        <div class="analytics-stat">
+                            <div class="analytics-stat-value">${visitors.size}</div>
+                            <div class="analytics-stat-label">Visiteurs uniques</div>
+                        </div>
+                    </div>
+                    <div class="analytics-detail">
+                        <div class="analytics-detail-title">Pages visitées</div>
+                        ${pageRows || '<div class="analytics-loading">Aucune</div>'}
+                    </div>
+                    ${actionRows ? `<div class="analytics-detail">
+                        <div class="analytics-detail-title">Actions</div>
+                        ${actionRows}
+                    </div>` : ''}
+                `;
+            } catch (e) {
+                container.innerHTML = '<div class="analytics-loading">Erreur : ' + e.message + '</div>';
+            }
         }
     </script>
 </body>

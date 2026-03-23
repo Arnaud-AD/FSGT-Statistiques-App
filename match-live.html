@@ -736,6 +736,7 @@
     <script src="firebase-config.js"></script>
     <script src="admin-config.js"></script>
     <script src="firebase-sync.js"></script>
+    <script src="analytics.js"></script>
     <script src="admin-guard.js"></script>
 
     <script src="storage.js"></script>
@@ -3467,6 +3468,9 @@
                 }
             }
         }
+
+        // Suivi anonymisé (exclut admin connecté)
+        if (typeof AppAnalytics !== 'undefined') AppAnalytics.trackPageView('match-live');
 
         // ==================== INIT ====================
         init();

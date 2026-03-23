@@ -243,6 +243,7 @@ const SeasonSelector = {
     switchTo(season) {
         this.current = season;
         sessionStorage.setItem('historique_season', season);
+        if (typeof AppAnalytics !== 'undefined') AppAnalytics.trackAction('season_switch', { season: season });
         this._updateButtons();
 
         // Force re-render de toutes les vues
@@ -8951,6 +8952,7 @@ const TabNav = {
     switchTo(tab) {
         this.currentTab = tab;
         sessionStorage.setItem('historique_tab', tab);
+        if (typeof AppAnalytics !== 'undefined') AppAnalytics.trackAction('tab_switch', { tab: tab });
 
         document.querySelectorAll('.main-tabs .tab-btn').forEach(function(btn) {
             btn.classList.toggle('active', btn.dataset.tab === tab);
@@ -9054,6 +9056,8 @@ const MatchStatsView = {
         var sorted = matchHistory.slice().sort(function(a, b) { return (b.matchDate || b.timestamp || 0) - (a.matchDate || a.timestamp || 0); });
         var match = sorted[index];
         if (!match) return;
+
+        if (typeof AppAnalytics !== 'undefined') AppAnalytics.trackAction('match_select', { opponent: match.opponent || '' });
 
         this.selectedMatchIndex = index;
         this.currentMatch = match;
@@ -11162,6 +11166,9 @@ const OpenSections = {
 
 // ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', async function() {
+    // Suivi anonymisé (exclut admin connecté)
+    if (typeof AppAnalytics !== 'undefined') AppAnalytics.trackPageView('historique');
+
     // Init Firebase Auth UI
     if (typeof FirebaseAuthUI !== 'undefined') {
         FirebaseAuthUI.init();
