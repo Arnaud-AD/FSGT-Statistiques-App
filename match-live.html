@@ -979,13 +979,16 @@
                 return;
             }
 
+            // Toujours bloquer Space pour éviter le clic accidentel sur le bouton focusé
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (ytPlayer && ytReady) ytTogglePlayPause();
+                return;
+            }
+
             if (!ytPlayer || !ytReady) return;
 
             switch (e.code) {
-                case 'Space':
-                    e.preventDefault();
-                    ytTogglePlayPause();
-                    break;
                 case 'ArrowLeft':
                     e.preventDefault();
                     ytRewind();

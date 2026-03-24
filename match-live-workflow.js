@@ -1210,6 +1210,9 @@ WorkflowEngine.registerPhase('reception_fault_trajectory', {
     },
 
     _finalize() {
+        // Guard contre double-exécution (Space + clic simultanés)
+        if (gameState.phase !== 'reception_fault_trajectory') return;
+
         const serviceAction = gameState.rally.find(a => a.type === 'service');
         if (serviceAction && serviceAction.endPos) {
             gameState.currentAction.endPos = serviceAction.endPos;
@@ -2589,6 +2592,9 @@ WorkflowEngine.registerPhase('bloc_out_trajectory', {
     },
 
     handleClick(clickData) {
+        // Guard contre double-exécution (Space + clic simultanés)
+        if (gameState.phase !== 'bloc_out_trajectory') return;
+
         WorkflowEngine.pushState('bloc_out_traj_click');
 
         const lastBlock = [...gameState.rally].reverse().find(a => a.type === 'block');
@@ -2618,6 +2624,9 @@ WorkflowEngine.registerPhase('bloc_out_trajectory', {
 
     handleButton(action) {
         if (action === 'skip') {
+            // Guard contre double-exécution
+            if (gameState.phase !== 'bloc_out_trajectory') return;
+
             WorkflowEngine.pushState('bloc_out_skip');
             document.getElementById('outArea').classList.remove('active');
             const pointWinner = gameState.context.blocOutAttackingTeam || gameState.attackingTeam;
@@ -3006,6 +3015,9 @@ WorkflowEngine.registerPhase('defense_fault_trajectory', {
     },
 
     _finalize() {
+        // Guard contre double-exécution (Space + clic simultanés)
+        if (gameState.phase !== 'defense_fault_trajectory') return;
+
         document.getElementById('outArea').classList.remove('active');
 
         const defendingTeam = gameState.attackingTeam;
@@ -3062,6 +3074,9 @@ WorkflowEngine.registerPhase('pass_fault_trajectory', {
     },
 
     _finalize() {
+        // Guard contre double-exécution (Space + clic simultanés)
+        if (gameState.phase !== 'pass_fault_trajectory') return;
+
         document.getElementById('outArea').classList.remove('active');
 
         const team = gameState.attackingTeam;

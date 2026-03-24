@@ -646,7 +646,27 @@ function saveCurrentSet() {
     currentSet.homeScore = gameState.homeScore;
     currentSet.awayScore = gameState.awayScore;
     currentMatch.sets[setIndex] = currentSet;
-    Storage.saveCurrentMatch(currentMatch);
+    try {
+        Storage.saveCurrentMatch(currentMatch);
+    } catch (e) {
+        if (e.name === 'QuotaExceededError') {
+            // Libérer de l'espace : supprimer tous les _undoStack des points
+            for (const set of currentMatch.sets) {
+                if (set && set.points) {
+                    for (const pt of set.points) {
+                        if (pt._undoStack) delete pt._undoStack;
+                    }
+                }
+            }
+            try {
+                Storage.saveCurrentMatch(currentMatch);
+            } catch (e2) {
+                console.error('localStorage plein même après nettoyage _undoStack', e2);
+            }
+        } else {
+            throw e;
+        }
+    }
 }
 
 // ==================== CHANGEMENT DE JOUEUR ====================
