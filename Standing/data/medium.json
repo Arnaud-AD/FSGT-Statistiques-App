@@ -5,7 +5,7 @@
     "name": "Medium",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/15",
-    "lastUpdated": "2026-03-24T11:46:06",
+    "lastUpdated": "2026-03-25T00:38:33",
     "teamCount": 9,
     "matchesPlayed": 46,
     "matchesUpcoming": 26
@@ -855,12 +855,6 @@
       "status": "Sem. 14"
     },
     {
-      "date": "10/04/2026",
-      "home": "team",
-      "away": "rhum",
-      "status": "Sem. 14"
-    },
-    {
       "date": "04/05/2026",
       "home": "olym",
       "away": "mort",
@@ -949,6 +943,12 @@
       "home": "olym",
       "away": "coch",
       "status": "Reporté"
+    },
+    {
+      "date": "05/06/2026",
+      "home": "team",
+      "away": "rhum",
+      "status": "Sem. 14"
     },
     {
       "date": "09/06/2026",

@@ -5,10 +5,10 @@
     "name": "Or 6x6",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/4",
-    "lastUpdated": "2026-03-24T11:46:08",
+    "lastUpdated": "2026-03-25T00:38:34",
     "teamCount": 10,
-    "matchesPlayed": 54,
-    "matchesUpcoming": 36
+    "matchesPlayed": 55,
+    "matchesUpcoming": 35
   },
   "teams": {
     "cout": {
@@ -66,18 +66,18 @@
     {
       "rank": 1,
       "team": "cout",
-      "mj": 11,
-      "g": 11,
+      "mj": 12,
+      "g": 12,
       "p": 0,
-      "setPlus": 32,
+      "setPlus": 35,
       "setMinus": 9,
-      "ds": 23,
-      "coefSet": "3.56",
-      "ptsPlus": 976,
-      "ptsMinus": 793,
-      "dp": "+183",
-      "coefPts": "1.23",
-      "pts": 22,
+      "ds": 26,
+      "coefSet": "3.89",
+      "ptsPlus": 1051,
+      "ptsMinus": 840,
+      "dp": "+211",
+      "coefPts": "1.25",
+      "pts": 24,
       "formAller": [
         "W",
         "W",
@@ -93,7 +93,7 @@
         "W",
         "W",
         "W",
-        "D",
+        "W",
         "P",
         "P",
         "P",
@@ -408,18 +408,18 @@
     {
       "rank": 10,
       "team": "vlan",
-      "mj": 12,
+      "mj": 13,
       "g": 0,
-      "p": 12,
+      "p": 13,
       "setPlus": 2,
-      "setMinus": 36,
-      "ds": -34,
-      "coefSet": "0.06",
-      "ptsPlus": 688,
-      "ptsMinus": 947,
-      "dp": "-259",
-      "coefPts": "0.73",
-      "pts": 12,
+      "setMinus": 39,
+      "ds": -37,
+      "coefSet": "0.05",
+      "ptsPlus": 735,
+      "ptsMinus": 1022,
+      "dp": "-287",
+      "coefPts": "0.72",
+      "pts": 13,
       "formAller": [
         "L",
         "L",
@@ -435,7 +435,7 @@
         "L",
         "L",
         "L",
-        "D",
+        "L",
         "P",
         "P",
         "P",
@@ -445,6 +445,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "24/03/2026",
+      "home": "vlan",
+      "away": "cout",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
     {
       "date": "23/03/2026",
       "home": "vill",
@@ -940,12 +949,6 @@
       "status": "Reporté"
     },
     {
-      "date": "24/03/2026",
-      "home": "vlan",
-      "away": "cout",
-      "status": "Reporté"
-    },
-    {
       "date": "30/03/2026",
       "home": "cout",
       "away": "ivry",
@@ -1154,11 +1157,11 @@
     {
       "rank": 1,
       "team": "cout",
-      "elo": 1719.4,
-      "movement": 7.7,
-      "record": "11-0",
-      "power": 92.5,
-      "calendar": "V x11",
+      "elo": 1725.2,
+      "movement": 5.9,
+      "record": "12-0",
+      "power": 92.7,
+      "calendar": "V x12",
       "diffClass": "diff-easy"
     },
     {
@@ -1167,7 +1170,7 @@
       "elo": 1602.0,
       "movement": -32.4,
       "record": "8-2",
-      "power": 69.8,
+      "power": 69.3,
       "calendar": "D vs Ivry",
       "diffClass": "diff-hard"
     },
@@ -1177,7 +1180,7 @@
       "elo": 1561.4,
       "movement": 32.9,
       "record": "6-3",
-      "power": 61.9,
+      "power": 61.6,
       "calendar": "V vs Cret'1",
       "diffClass": "diff-easy"
     },
@@ -1187,7 +1190,7 @@
       "elo": 1555.7,
       "movement": 48.8,
       "record": "5-5",
-      "power": 60.8,
+      "power": 60.6,
       "calendar": "V x3",
       "diffClass": "diff-easy"
     },
@@ -1197,7 +1200,7 @@
       "elo": 1523.3,
       "movement": 20.3,
       "record": "8-4",
-      "power": 54.5,
+      "power": 54.4,
       "calendar": "V vs Villyé-ball",
       "diffClass": "diff-easy"
     },
@@ -1227,7 +1230,7 @@
       "elo": 1479.9,
       "movement": -32.9,
       "record": "5-7",
-      "power": 46.1,
+      "power": 46.2,
       "calendar": "D vs La",
       "diffClass": "diff-hard"
     },
@@ -1237,18 +1240,18 @@
       "elo": 1317.7,
       "movement": -20.3,
       "record": "1-9",
-      "power": 14.7,
+      "power": 15.5,
       "calendar": "D x6",
       "diffClass": "diff-hard"
     },
     {
       "rank": 10,
       "team": "vlan",
-      "elo": 1242.0,
-      "movement": -8.3,
-      "record": "0-12",
+      "elo": 1236.1,
+      "movement": -5.9,
+      "record": "0-13",
       "power": 0.0,
-      "calendar": "D x12",
+      "calendar": "D x13",
       "diffClass": "diff-hard"
     }
   ],
@@ -1266,7 +1269,8 @@
       1666.4,
       1694.2,
       1711.7,
-      1719.4
+      1719.4,
+      1725.2
     ],
     "neui": [
       1500,
@@ -1377,7 +1381,8 @@
       1280.3,
       1268.7,
       1250.3,
-      1242.0
+      1242.0,
+      1236.1
     ],
     "vill": [
       1500,
@@ -1408,7 +1413,8 @@
           16,
           18,
           20,
-          22
+          22,
+          24
         ],
         "rank": 1
       },
@@ -1543,7 +1549,8 @@
           9,
           10,
           11,
-          12
+          12,
+          13
         ],
         "rank": 10
       },
