@@ -5,10 +5,10 @@
     "name": "Easy",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/3",
-    "lastUpdated": "2026-03-19T20:42:12",
+    "lastUpdated": "2026-03-24T11:46:07",
     "teamCount": 8,
-    "matchesPlayed": 35,
-    "matchesUpcoming": 21
+    "matchesPlayed": 37,
+    "matchesUpcoming": 19
   },
   "teams": {
     "pyth": {
@@ -16,24 +16,24 @@
       "short": "PC",
       "color": "#e74c3c"
     },
-    "neku": {
-      "name": "Nekutā",
-      "short": "NE",
-      "color": "#3498db"
-    },
-    "bats": {
-      "name": "Batstreet Back",
-      "short": "BB",
-      "color": "#2ecc71"
-    },
     "fous": {
       "name": "Les fous tuent",
       "short": "FT",
-      "color": "#f39c12"
+      "color": "#3498db"
+    },
+    "neku": {
+      "name": "Nekutā",
+      "short": "NE",
+      "color": "#2ecc71"
     },
     "touk": {
       "name": "TOUKC",
       "short": "TO",
+      "color": "#f39c12"
+    },
+    "bats": {
+      "name": "Batstreet Back",
+      "short": "BB",
       "color": "#9b59b6"
     },
     "punc": {
@@ -41,14 +41,14 @@
       "short": "PU",
       "color": "#1abc9c"
     },
-    "fata": {
-      "name": "FATALS FURETS",
-      "short": "FF",
-      "color": "#e67e22"
-    },
     "eagl": {
       "name": "Eagle 4",
       "short": "E4",
+      "color": "#e67e22"
+    },
+    "fata": {
+      "name": "FATALS FURETS",
+      "short": "FF",
       "color": "#f1c40f"
     }
   },
@@ -81,7 +81,7 @@
         "D",
         "W",
         "P",
-        "P",
+        "D",
         "P",
         "P",
         "P"
@@ -124,18 +124,18 @@
     {
       "rank": 3,
       "team": "touk",
-      "mj": 8,
-      "g": 5,
+      "mj": 9,
+      "g": 6,
       "p": 3,
-      "setPlus": 18,
+      "setPlus": 21,
       "setMinus": 12,
-      "ds": 6,
-      "coefSet": "1.50",
-      "ptsPlus": 642,
-      "ptsMinus": 633,
-      "dp": "+9",
-      "coefPts": "1.01",
-      "pts": 13,
+      "ds": 9,
+      "coefSet": "1.75",
+      "ptsPlus": 717,
+      "ptsMinus": 697,
+      "dp": "+20",
+      "coefPts": "1.03",
+      "pts": 15,
       "formAller": [
         "L",
         "L",
@@ -148,8 +148,8 @@
       "formRetour": [
         "D",
         "W",
-        "D",
         "P",
+        "W",
         "P",
         "P",
         "P"
@@ -158,18 +158,18 @@
     {
       "rank": 4,
       "team": "fous",
-      "mj": 9,
-      "g": 5,
+      "mj": 10,
+      "g": 6,
       "p": 4,
-      "setPlus": 18,
+      "setPlus": 21,
       "setMinus": 12,
-      "ds": 6,
-      "coefSet": "1.50",
-      "ptsPlus": 686,
-      "ptsMinus": 639,
-      "dp": "+47",
-      "coefPts": "1.07",
-      "pts": 14,
+      "ds": 9,
+      "coefSet": "1.75",
+      "ptsPlus": 761,
+      "ptsMinus": 679,
+      "dp": "+82",
+      "coefPts": "1.12",
+      "pts": 16,
       "formAller": [
         "W",
         "W",
@@ -183,7 +183,7 @@
         "W",
         "L",
         "L",
-        "P",
+        "W",
         "P",
         "P",
         "P"
@@ -217,7 +217,7 @@
         "W",
         "L",
         "W",
-        "P",
+        "D",
         "P",
         "P",
         "P"
@@ -250,7 +250,7 @@
       "formRetour": [
         "L",
         "W",
-        "D",
+        "P",
         "P",
         "P",
         "P",
@@ -260,18 +260,18 @@
     {
       "rank": 7,
       "team": "punc",
-      "mj": 9,
+      "mj": 10,
       "g": 2,
-      "p": 7,
+      "p": 8,
       "setPlus": 8,
-      "setMinus": 22,
-      "ds": -14,
-      "coefSet": "0.36",
-      "ptsPlus": 570,
-      "ptsMinus": 695,
-      "dp": "-125",
-      "coefPts": "0.82",
-      "pts": 11,
+      "setMinus": 25,
+      "ds": -17,
+      "coefSet": "0.32",
+      "ptsPlus": 610,
+      "ptsMinus": 770,
+      "dp": "-160",
+      "coefPts": "0.79",
+      "pts": 12,
       "formAller": [
         "L",
         "L",
@@ -285,7 +285,7 @@
         "L",
         "L",
         "D",
-        "P",
+        "L",
         "P",
         "P",
         "P"
@@ -294,18 +294,18 @@
     {
       "rank": 8,
       "team": "eagl",
-      "mj": 9,
+      "mj": 10,
       "g": 1,
-      "p": 8,
+      "p": 9,
       "setPlus": 6,
-      "setMinus": 23,
-      "ds": -17,
-      "coefSet": "0.26",
-      "ptsPlus": 531,
-      "ptsMinus": 689,
-      "dp": "-158",
-      "coefPts": "0.77",
-      "pts": 10,
+      "setMinus": 26,
+      "ds": -20,
+      "coefSet": "0.23",
+      "ptsPlus": 595,
+      "ptsMinus": 764,
+      "dp": "-169",
+      "coefPts": "0.78",
+      "pts": 11,
       "formAller": [
         "L",
         "W",
@@ -319,7 +319,7 @@
         "L",
         "L",
         "D",
-        "P",
+        "L",
         "P",
         "P",
         "P"
@@ -327,6 +327,24 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "23/03/2026",
+      "home": "punc",
+      "away": "fous",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "23/03/2026",
+      "home": "eagl",
+      "away": "touk",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
     {
       "date": "10/03/2026",
       "home": "bats",
@@ -374,19 +392,19 @@
     },
     {
       "date": "10/02/2026",
-      "home": "bats",
-      "away": "fata",
+      "home": "fous",
+      "away": "eagl",
       "scoreHome": 3,
-      "scoreAway": 2,
+      "scoreAway": 0,
       "homeWin": true,
       "status": "Terminé"
     },
     {
       "date": "10/02/2026",
-      "home": "fous",
-      "away": "eagl",
+      "home": "bats",
+      "away": "fata",
       "scoreHome": 3,
-      "scoreAway": 0,
+      "scoreAway": 2,
       "homeWin": true,
       "status": "Terminé"
     },
@@ -527,20 +545,20 @@
     },
     {
       "date": "25/11/2025",
-      "home": "bats",
-      "away": "neku",
-      "scoreHome": 2,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "25/11/2025",
       "home": "fous",
       "away": "punc",
       "scoreHome": 3,
       "scoreAway": 0,
       "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "25/11/2025",
+      "home": "bats",
+      "away": "neku",
+      "scoreHome": 2,
+      "scoreAway": 3,
+      "homeWin": false,
       "status": "Terminé"
     },
     {
@@ -657,28 +675,10 @@
       "status": "Reporté"
     },
     {
-      "date": "12/03/2026",
-      "home": "fata",
-      "away": "touk",
-      "status": "Reporté"
-    },
-    {
-      "date": "23/03/2026",
-      "home": "punc",
-      "away": "fous",
-      "status": "Sem. 11"
-    },
-    {
-      "date": "23/03/2026",
-      "home": "eagl",
-      "away": "touk",
-      "status": "Sem. 11"
-    },
-    {
       "date": "24/03/2026",
       "home": "bats",
       "away": "neku",
-      "status": "Sem. 11"
+      "status": "Reporté"
     },
     {
       "date": "26/03/2026",
@@ -694,14 +694,14 @@
     },
     {
       "date": "31/03/2026",
-      "home": "bats",
-      "away": "punc",
+      "home": "fous",
+      "away": "touk",
       "status": "Sem. 12"
     },
     {
       "date": "31/03/2026",
-      "home": "fous",
-      "away": "touk",
+      "home": "bats",
+      "away": "punc",
       "status": "Sem. 12"
     },
     {
@@ -709,12 +709,6 @@
       "home": "fata",
       "away": "neku",
       "status": "Sem. 12"
-    },
-    {
-      "date": "06/04/2026",
-      "home": "pyth",
-      "away": "touk",
-      "status": "Sem. 13"
     },
     {
       "date": "06/04/2026",
@@ -769,6 +763,18 @@
       "home": "fata",
       "away": "fous",
       "status": "Sem. 14"
+    },
+    {
+      "date": "21/05/2026",
+      "home": "fata",
+      "away": "touk",
+      "status": "Sem. 10"
+    },
+    {
+      "date": "08/06/2026",
+      "home": "pyth",
+      "away": "touk",
+      "status": "Sem. 13"
     }
   ],
   "prTeams": [
@@ -778,7 +784,7 @@
       "elo": 1659.0,
       "movement": 21.3,
       "record": "8-1",
-      "power": 96.8,
+      "power": 92.7,
       "calendar": "V x7",
       "diffClass": "diff-easy"
     },
@@ -788,68 +794,68 @@
       "elo": 1648.4,
       "movement": 21.1,
       "record": "7-1",
-      "power": 93.7,
+      "power": 89.8,
       "calendar": "V vs Punchline",
       "diffClass": "diff-easy"
     },
     {
       "rank": 3,
       "team": "touk",
-      "elo": 1575.3,
-      "movement": 35.8,
-      "record": "5-3",
-      "power": 72.2,
-      "calendar": "V vs Batstreet",
+      "elo": 1592.0,
+      "movement": 16.7,
+      "record": "6-3",
+      "power": 74.7,
+      "calendar": "V x3",
       "diffClass": "diff-easy"
     },
     {
       "rank": 4,
-      "team": "bats",
-      "elo": 1515.1,
-      "movement": 42.6,
-      "record": "5-5",
-      "power": 54.4,
-      "calendar": "V vs Les",
+      "team": "fous",
+      "elo": 1533.7,
+      "movement": 31.8,
+      "record": "6-4",
+      "power": 59.0,
+      "calendar": "V vs Punchline",
       "diffClass": "diff-easy"
     },
     {
       "rank": 5,
-      "team": "fous",
-      "elo": 1501.9,
-      "movement": -42.6,
-      "record": "5-4",
-      "power": 50.6,
-      "calendar": "D vs Batstreet",
-      "diffClass": "diff-hard"
+      "team": "bats",
+      "elo": 1515.1,
+      "movement": 42.6,
+      "record": "5-5",
+      "power": 54.1,
+      "calendar": "V vs Les",
+      "diffClass": "diff-easy"
     },
     {
       "rank": 6,
-      "team": "punc",
-      "elo": 1390.0,
-      "movement": -21.1,
-      "record": "2-7",
-      "power": 17.6,
-      "calendar": "D x3",
-      "diffClass": "diff-hard"
-    },
-    {
-      "rank": 7,
       "team": "fata",
       "elo": 1379.9,
       "movement": 30.4,
       "record": "2-6",
-      "power": 14.6,
+      "power": 17.8,
       "calendar": "V vs Eagle",
       "diffClass": "diff-easy"
     },
     {
+      "rank": 7,
+      "team": "punc",
+      "elo": 1358.2,
+      "movement": -31.8,
+      "record": "2-8",
+      "power": 12.0,
+      "calendar": "D x4",
+      "diffClass": "diff-hard"
+    },
+    {
       "rank": 8,
       "team": "eagl",
-      "elo": 1330.3,
-      "movement": -30.4,
-      "record": "1-8",
+      "elo": 1313.6,
+      "movement": -16.7,
+      "record": "1-9",
       "power": 1.0,
-      "calendar": "D vs FATALS",
+      "calendar": "D x3",
       "diffClass": "diff-hard"
     }
   ],
@@ -867,6 +873,19 @@
       1637.8,
       1659.0
     ],
+    "fous": [
+      1500,
+      1537.3,
+      1573.3,
+      1596.8,
+      1615.0,
+      1580.0,
+      1545.3,
+      1565.7,
+      1544.4,
+      1501.9,
+      1533.7
+    ],
     "neku": [
       1500,
       1519.0,
@@ -877,6 +896,18 @@
       1612.3,
       1627.3,
       1648.4
+    ],
+    "touk": [
+      1500,
+      1481.0,
+      1460.6,
+      1488.1,
+      1522.9,
+      1557.8,
+      1520.8,
+      1539.5,
+      1575.3,
+      1592.0
     ],
     "bats": [
       1500,
@@ -891,29 +922,6 @@
       1472.6,
       1515.1
     ],
-    "fous": [
-      1500,
-      1537.3,
-      1573.3,
-      1596.8,
-      1615.0,
-      1580.0,
-      1545.3,
-      1565.7,
-      1544.4,
-      1501.9
-    ],
-    "touk": [
-      1500,
-      1481.0,
-      1460.6,
-      1488.1,
-      1522.9,
-      1557.8,
-      1520.8,
-      1539.5,
-      1575.3
-    ],
     "punc": [
       1500,
       1476.4,
@@ -924,18 +932,8 @@
       1448.1,
       1429.3,
       1411.1,
-      1390.0
-    ],
-    "fata": [
-      1500,
-      1518.3,
-      1490.8,
-      1460.9,
-      1417.5,
-      1399.5,
-      1362.6,
-      1349.6,
-      1379.9
+      1390.0,
+      1358.2
     ],
     "eagl": [
       1500,
@@ -947,7 +945,19 @@
       1344.2,
       1381.0,
       1360.6,
-      1330.3
+      1330.3,
+      1313.6
+    ],
+    "fata": [
+      1500,
+      1518.3,
+      1490.8,
+      1460.9,
+      1417.5,
+      1399.5,
+      1362.6,
+      1349.6,
+      1379.9
     ]
   },
   "evolutionData": {
@@ -967,6 +977,22 @@
         ],
         "rank": 2
       },
+      "fous": {
+        "points": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          9,
+          10,
+          12,
+          13,
+          14,
+          16
+        ],
+        "rank": 4
+      },
       "neku": {
         "points": [
           0,
@@ -980,6 +1006,21 @@
           15
         ],
         "rank": 1
+      },
+      "touk": {
+        "points": [
+          0,
+          1,
+          2,
+          4,
+          6,
+          8,
+          9,
+          11,
+          13,
+          15
+        ],
+        "rank": 3
       },
       "bats": {
         "points": [
@@ -997,35 +1038,6 @@
         ],
         "rank": 5
       },
-      "fous": {
-        "points": [
-          0,
-          2,
-          4,
-          6,
-          8,
-          9,
-          10,
-          12,
-          13,
-          14
-        ],
-        "rank": 4
-      },
-      "touk": {
-        "points": [
-          0,
-          1,
-          2,
-          4,
-          6,
-          8,
-          9,
-          11,
-          13
-        ],
-        "rank": 3
-      },
       "punc": {
         "points": [
           0,
@@ -1037,9 +1049,26 @@
           8,
           9,
           10,
-          11
+          11,
+          12
         ],
         "rank": 7
+      },
+      "eagl": {
+        "points": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          8,
+          9,
+          10,
+          11
+        ],
+        "rank": 8
       },
       "fata": {
         "points": [
@@ -1054,21 +1083,6 @@
           10
         ],
         "rank": 6
-      },
-      "eagl": {
-        "points": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          8,
-          9,
-          10
-        ],
-        "rank": 8
       }
     }
   }

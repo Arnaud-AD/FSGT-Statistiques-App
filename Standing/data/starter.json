@@ -5,10 +5,10 @@
     "name": "Starter",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/16",
-    "lastUpdated": "2026-03-19T20:42:13",
+    "lastUpdated": "2026-03-24T11:46:07",
     "teamCount": 8,
-    "matchesPlayed": 36,
-    "matchesUpcoming": 20
+    "matchesPlayed": 37,
+    "matchesUpcoming": 19
   },
   "teams": {
     "bach": {
@@ -16,14 +16,14 @@
       "short": "BA",
       "color": "#e74c3c"
     },
-    "gail": {
-      "name": "Les Gaillards",
-      "short": "GA",
-      "color": "#3498db"
-    },
     "coco": {
       "name": "Les Coconuts",
       "short": "CO",
+      "color": "#3498db"
+    },
+    "gail": {
+      "name": "Les Gaillards",
+      "short": "GA",
       "color": "#2ecc71"
     },
     "gvc": {
@@ -115,7 +115,7 @@
         "W",
         "W",
         "W",
-        "P",
+        "D",
         "P",
         "P",
         "P"
@@ -124,18 +124,18 @@
     {
       "rank": 3,
       "team": "coco",
-      "mj": 9,
-      "g": 6,
+      "mj": 10,
+      "g": 7,
       "p": 3,
-      "setPlus": 18,
+      "setPlus": 21,
       "setMinus": 11,
-      "ds": 7,
-      "coefSet": "1.64",
-      "ptsPlus": 647,
-      "ptsMinus": 615,
-      "dp": "+32",
-      "coefPts": "1.05",
-      "pts": 15,
+      "ds": 10,
+      "coefSet": "1.91",
+      "ptsPlus": 722,
+      "ptsMinus": 674,
+      "dp": "+48",
+      "coefPts": "1.07",
+      "pts": 17,
       "formAller": [
         "W",
         "L",
@@ -146,7 +146,7 @@
         "W"
       ],
       "formRetour": [
-        "D",
+        "W",
         "L",
         "W",
         "P",
@@ -183,7 +183,7 @@
         "W",
         "W",
         "W",
-        "P",
+        "D",
         "P",
         "P",
         "P"
@@ -294,18 +294,18 @@
     {
       "rank": 8,
       "team": "caip",
-      "mj": 8,
+      "mj": 9,
       "g": 0,
-      "p": 8,
+      "p": 9,
       "setPlus": 2,
-      "setMinus": 24,
-      "ds": -22,
-      "coefSet": "0.08",
-      "ptsPlus": 441,
-      "ptsMinus": 639,
-      "dp": "-198",
-      "coefPts": "0.69",
-      "pts": 8,
+      "setMinus": 27,
+      "ds": -25,
+      "coefSet": "0.07",
+      "ptsPlus": 500,
+      "ptsMinus": 714,
+      "dp": "-214",
+      "coefPts": "0.70",
+      "pts": 9,
       "formAller": [
         "L",
         "L",
@@ -317,7 +317,7 @@
       ],
       "formRetour": [
         "L",
-        "D",
+        "L",
         "D",
         "P",
         "P",
@@ -327,6 +327,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "20/03/2026",
+      "home": "coco",
+      "away": "caip",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "16/03/2026",
       "home": "daiq",
@@ -666,12 +675,6 @@
       "status": "Reporté"
     },
     {
-      "date": "20/03/2026",
-      "home": "coco",
-      "away": "caip",
-      "status": "Reporté"
-    },
-    {
       "date": "23/03/2026",
       "home": "gvc",
       "away": "daiq",
@@ -681,7 +684,7 @@
       "date": "23/03/2026",
       "home": "bach",
       "away": "gail",
-      "status": "Sem. 11"
+      "status": "Reporté"
     },
     {
       "date": "25/03/2026",
@@ -781,7 +784,7 @@
       "elo": 1704.6,
       "movement": 16.2,
       "record": "9-1",
-      "power": 97.1,
+      "power": 95.0,
       "calendar": "V x5",
       "diffClass": "diff-easy"
     },
@@ -791,18 +794,18 @@
       "elo": 1681.5,
       "movement": 25.1,
       "record": "7-0",
-      "power": 91.8,
+      "power": 89.9,
       "calendar": "V x7",
       "diffClass": "diff-easy"
     },
     {
       "rank": 3,
       "team": "coco",
-      "elo": 1575.6,
-      "movement": 31.4,
-      "record": "6-3",
-      "power": 67.4,
-      "calendar": "V vs Daïquibri",
+      "elo": 1586.0,
+      "movement": 10.4,
+      "record": "7-3",
+      "power": 68.9,
+      "calendar": "V vs Caïpiranha",
       "diffClass": "diff-easy"
     },
     {
@@ -811,7 +814,7 @@
       "elo": 1559.3,
       "movement": 13.8,
       "record": "7-3",
-      "power": 63.7,
+      "power": 63.0,
       "calendar": "V x3",
       "diffClass": "diff-easy"
     },
@@ -821,7 +824,7 @@
       "elo": 1413.5,
       "movement": -31.4,
       "record": "3-7",
-      "power": 30.1,
+      "power": 31.0,
       "calendar": "D x3",
       "diffClass": "diff-hard"
     },
@@ -831,7 +834,7 @@
       "elo": 1396.6,
       "movement": -16.2,
       "record": "2-7",
-      "power": 26.2,
+      "power": 27.3,
       "calendar": "D x4",
       "diffClass": "diff-hard"
     },
@@ -841,18 +844,18 @@
       "elo": 1386.0,
       "movement": 42.9,
       "record": "2-7",
-      "power": 23.7,
+      "power": 24.9,
       "calendar": "V vs Caïpiranha",
       "diffClass": "diff-easy"
     },
     {
       "rank": 8,
       "team": "caip",
-      "elo": 1282.9,
-      "movement": -42.9,
-      "record": "0-8",
+      "elo": 1272.5,
+      "movement": -10.4,
+      "record": "0-9",
       "power": 0.0,
-      "calendar": "D x8",
+      "calendar": "D x9",
       "diffClass": "diff-hard"
     }
   ],
@@ -871,6 +874,19 @@
       1688.4,
       1704.6
     ],
+    "coco": [
+      1500,
+      1536.7,
+      1500.6,
+      1522.1,
+      1554.7,
+      1585.6,
+      1602.4,
+      1571.9,
+      1544.1,
+      1575.6,
+      1586.0
+    ],
     "gail": [
       1500,
       1531.3,
@@ -883,18 +899,6 @@
       1523.6,
       1545.4,
       1559.3
-    ],
-    "coco": [
-      1500,
-      1536.7,
-      1500.6,
-      1522.1,
-      1554.7,
-      1585.6,
-      1602.4,
-      1571.9,
-      1544.1,
-      1575.6
     ],
     "gvc": [
       1500,
@@ -952,7 +956,8 @@
       1362.3,
       1336.9,
       1325.9,
-      1282.9
+      1282.9,
+      1272.5
     ]
   },
   "evolutionData": {
@@ -973,6 +978,22 @@
         ],
         "rank": 2
       },
+      "coco": {
+        "points": [
+          0,
+          2,
+          3,
+          5,
+          7,
+          9,
+          11,
+          12,
+          13,
+          15,
+          17
+        ],
+        "rank": 3
+      },
       "gail": {
         "points": [
           0,
@@ -988,21 +1009,6 @@
           17
         ],
         "rank": 4
-      },
-      "coco": {
-        "points": [
-          0,
-          2,
-          3,
-          5,
-          7,
-          9,
-          11,
-          12,
-          13,
-          15
-        ],
-        "rank": 3
       },
       "gvc": {
         "points": [
@@ -1073,7 +1079,8 @@
           5,
           6,
           7,
-          8
+          8,
+          9
         ],
         "rank": 8
       }

@@ -3,9 +3,9 @@
     "slug": "ginette",
     "name": "Coupe Ginette",
     "format": "coupe",
-    "lastUpdated": "2026-03-19T20:42:20",
+    "lastUpdated": "2026-03-24T11:48:30",
     "teamCount": 58,
-    "matchCount": 81,
+    "matchCount": 82,
     "forfeitCount": 10,
     "rounds": [
       "Tour 1",
@@ -13,7 +13,9 @@
       "1/8 Principale",
       "1/8 Consolante",
       "1/4 Principale",
-      "1/4 Consolante"
+      "1/4 Consolante",
+      "1/2 Principale",
+      "1/2 Consolante"
     ]
   },
   "ranking": [
@@ -1030,43 +1032,6 @@
     },
     {
       "rank": 27,
-      "name": "Neuilly Sa Mère",
-      "division": "Or 6x6",
-      "divSlug": "or6x6",
-      "elo": 1637.8,
-      "delta": -12.2,
-      "record": "2-1",
-      "wins": 2,
-      "losses": 1,
-      "power": 71.5,
-      "form": [
-        "W",
-        "L",
-        "W"
-      ],
-      "matches": [
-        {
-          "opponent": "TOUKC",
-          "result": "W",
-          "score": "3-0",
-          "delta": 5
-        },
-        {
-          "opponent": "Les fous tuent",
-          "result": "L",
-          "score": "0-3",
-          "delta": -35.3
-        },
-        {
-          "opponent": "Ivry Body",
-          "result": "W",
-          "score": "2-2",
-          "delta": 18.0
-        }
-      ]
-    },
-    {
-      "rank": 28,
       "name": "Alambic",
       "division": "Hard",
       "divSlug": "hard",
@@ -1096,7 +1061,7 @@
       ]
     },
     {
-      "rank": 29,
+      "rank": 28,
       "name": "Olympe BB volley",
       "division": "Medium",
       "divSlug": "medium",
@@ -1140,7 +1105,7 @@
       ]
     },
     {
-      "rank": 30,
+      "rank": 29,
       "name": "Morts de Soif",
       "division": "Medium",
       "divSlug": "medium",
@@ -1177,7 +1142,7 @@
       ]
     },
     {
-      "rank": 31,
+      "rank": 30,
       "name": "Team Glouglou",
       "division": "Medium",
       "divSlug": "medium",
@@ -1217,6 +1182,50 @@
           "result": "L",
           "score": "0-3",
           "delta": -5
+        }
+      ]
+    },
+    {
+      "rank": 31,
+      "name": "Neuilly Sa Mère",
+      "division": "Or 6x6",
+      "divSlug": "or6x6",
+      "elo": 1619.1,
+      "delta": -30.9,
+      "record": "2-2",
+      "wins": 2,
+      "losses": 2,
+      "power": 69.1,
+      "form": [
+        "W",
+        "L",
+        "W",
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "TOUKC",
+          "result": "W",
+          "score": "3-0",
+          "delta": 5
+        },
+        {
+          "opponent": "Les fous tuent",
+          "result": "L",
+          "score": "0-3",
+          "delta": -35.3
+        },
+        {
+          "opponent": "Ivry Body",
+          "result": "W",
+          "score": "2-2",
+          "delta": 18.0
+        },
+        {
+          "opponent": "Nekutā",
+          "result": "L",
+          "score": "2-2",
+          "delta": -18.7
         }
       ]
     },
@@ -1356,6 +1365,50 @@
     },
     {
       "rank": 36,
+      "name": "Nekutā",
+      "division": "Easy",
+      "divSlug": "easy",
+      "elo": 1556.2,
+      "delta": 56.2,
+      "record": "3-1",
+      "wins": 3,
+      "losses": 1,
+      "power": 61.0,
+      "form": [
+        "W",
+        "L",
+        "W",
+        "W"
+      ],
+      "matches": [
+        {
+          "opponent": "RYŌIKI TENKAI",
+          "result": "W",
+          "score": "3-1",
+          "delta": 30.1
+        },
+        {
+          "opponent": "SUCY N'EST PAS TROMPÉ",
+          "result": "L",
+          "score": "1-3",
+          "delta": -12.2
+        },
+        {
+          "opponent": "Gold Digger",
+          "result": "W",
+          "score": "3-0",
+          "delta": 19.6
+        },
+        {
+          "opponent": "Neuilly Sa Mère",
+          "result": "W",
+          "score": "2-2",
+          "delta": 18.7
+        }
+      ]
+    },
+    {
+      "rank": 37,
       "name": "Ginto",
       "division": "Medium",
       "divSlug": "medium",
@@ -1385,7 +1438,7 @@
       ]
     },
     {
-      "rank": 37,
+      "rank": 38,
       "name": "Les fous tuent",
       "division": "Easy",
       "divSlug": "easy",
@@ -1422,7 +1475,7 @@
       ]
     },
     {
-      "rank": 38,
+      "rank": 39,
       "name": "Batstreet Back",
       "division": "Easy",
       "divSlug": "easy",
@@ -1455,43 +1508,6 @@
           "result": "L",
           "score": "0-3",
           "delta": -11.0
-        }
-      ]
-    },
-    {
-      "rank": 39,
-      "name": "Nekutā",
-      "division": "Easy",
-      "divSlug": "easy",
-      "elo": 1537.5,
-      "delta": 37.5,
-      "record": "2-1",
-      "wins": 2,
-      "losses": 1,
-      "power": 58.6,
-      "form": [
-        "W",
-        "L",
-        "W"
-      ],
-      "matches": [
-        {
-          "opponent": "RYŌIKI TENKAI",
-          "result": "W",
-          "score": "3-1",
-          "delta": 30.1
-        },
-        {
-          "opponent": "SUCY N'EST PAS TROMPÉ",
-          "result": "L",
-          "score": "1-3",
-          "delta": -12.2
-        },
-        {
-          "opponent": "Gold Digger",
-          "result": "W",
-          "score": "3-0",
-          "delta": 19.6
         }
       ]
     },
@@ -1707,36 +1723,6 @@
     },
     {
       "rank": 47,
-      "name": "Bachateam",
-      "division": "Starter",
-      "divSlug": "starter",
-      "elo": 1390,
-      "delta": -10,
-      "record": "0-2",
-      "wins": 0,
-      "losses": 2,
-      "power": 39.6,
-      "form": [
-        "L",
-        "L"
-      ],
-      "matches": [
-        {
-          "opponent": "Les punchers",
-          "result": "L",
-          "score": "0-3",
-          "delta": -5
-        },
-        {
-          "opponent": "Smashmallow",
-          "result": "L",
-          "score": "0-3",
-          "delta": -5
-        }
-      ]
-    },
-    {
-      "rank": 48,
       "name": "Daïquibri",
       "division": "Starter",
       "divSlug": "starter",
@@ -1759,6 +1745,36 @@
         },
         {
           "opponent": "Gold Digger",
+          "result": "L",
+          "score": "0-3",
+          "delta": -5
+        }
+      ]
+    },
+    {
+      "rank": 48,
+      "name": "Bachateam",
+      "division": "Starter",
+      "divSlug": "starter",
+      "elo": 1390,
+      "delta": -10,
+      "record": "0-2",
+      "wins": 0,
+      "losses": 2,
+      "power": 39.6,
+      "form": [
+        "L",
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Les punchers",
+          "result": "L",
+          "score": "0-3",
+          "delta": -5
+        },
+        {
+          "opponent": "Smashmallow",
           "result": "L",
           "score": "0-3",
           "delta": -5
@@ -2118,23 +2134,23 @@
       "slug": "or6x6",
       "name": "Or 6x6",
       "teams": 9,
-      "avgElo": 1644.8,
+      "avgElo": 1642.7,
       "maxElo": 1669.5,
       "minElo": 1604.6,
       "wins": 12,
-      "losses": 12,
-      "winPct": 50.0
+      "losses": 13,
+      "winPct": 48.0
     },
     {
       "slug": "easy",
       "name": "Easy",
       "teams": 8,
-      "avgElo": 1505.9,
-      "maxElo": 1547.9,
+      "avgElo": 1508.2,
+      "maxElo": 1556.2,
       "minElo": 1465.1,
-      "wins": 7,
+      "wins": 8,
       "losses": 12,
-      "winPct": 36.8
+      "winPct": 40.0
     },
     {
       "slug": "starter",
@@ -4036,6 +4052,31 @@
     },
     {
       "round": "1/4 Consolante",
+      "home": "Neuilly Sa Mère",
+      "away": "Nekutā",
+      "homeSets": 2,
+      "awaySets": 2,
+      "homeScores": [
+        23,
+        25,
+        25,
+        7
+      ],
+      "awayScores": [
+        25,
+        23,
+        22,
+        13
+      ],
+      "homeDivision": "or6x6",
+      "awayDivision": "easy",
+      "winner": "Nekutā",
+      "forfeit": false,
+      "deltaHome": -18.7,
+      "deltaAway": 18.7
+    },
+    {
+      "round": "1/4 Consolante",
       "home": "Red Hot Sucy Pépère",
       "away": "Team Glouglou",
       "homeSets": 3,
@@ -4176,6 +4217,14 @@
       "score": "3-0"
     },
     {
+      "gap": 2,
+      "winner": "Nekutā",
+      "winnerDiv": "Easy",
+      "loser": "Neuilly Sa Mère",
+      "loserDiv": "Or 6x6",
+      "score": "2-2"
+    },
+    {
       "gap": 1,
       "winner": "Nekutā",
       "winnerDiv": "Easy",
@@ -4222,14 +4271,6 @@
       "loser": "RSC Champigny 1",
       "loserDiv": "Elite",
       "score": "3-0"
-    },
-    {
-      "gap": 1,
-      "winner": "Les Indécis",
-      "winnerDiv": "Hard",
-      "loser": "Red Hot Sucy Pépère",
-      "loserDiv": "Elite",
-      "score": "0-3"
     }
   ]
 }
