@@ -132,8 +132,16 @@ const Storage = {
                 try {
                     localStorage.setItem(this.KEYS.MATCHES, JSON.stringify(matches));
                 } catch (e2) {
-                    console.error('localStorage plein même après nettoyage _undoStack', e2);
-                    alert('⚠️ Stockage plein ! Les données ne sont plus sauvegardées. Allez dans Historique pour supprimer d\'anciens matchs.');
+                    // V26.5 : Purge auto des matchs terminés (ils sont dans Firebase)
+                    const before = matches.length;
+                    matches = matches.filter(m => m.status !== 'completed');
+                    console.warn('[Storage] Purge auto: ' + (before - matches.length) + ' matchs terminés supprimés du localStorage');
+                    try {
+                        localStorage.setItem(this.KEYS.MATCHES, JSON.stringify(matches));
+                    } catch (e3) {
+                        console.error('localStorage plein même après purge complète', e3);
+                        alert('⚠️ Stockage plein ! Les données ne sont plus sauvegardées.');
+                    }
                 }
             } else {
                 throw e;

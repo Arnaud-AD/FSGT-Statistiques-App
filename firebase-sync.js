@@ -371,11 +371,13 @@ const FirebaseSync = {
             localStorage.setItem(Storage.KEYS.PLAYERS, JSON.stringify(roster));
         }
 
-        // Tous les matchs : merge Firebase + local
+        // Matchs : merge Firebase + local — V26.5 : ne garder que les matchs in_progress en local
         const remoteMatches = await this.getAllMatches();
         if (remoteMatches.length > 0) {
             const localMatches = Storage.getAllMatches();
-            const merged = this.mergeMatches(localMatches, remoteMatches);
+            // Ne merger que les matchs non-terminés (les completed restent uniquement dans Firebase)
+            const remoteInProgress = remoteMatches.filter(m => m.status !== 'completed');
+            const merged = this.mergeMatches(localMatches, remoteInProgress);
             localStorage.setItem(Storage.KEYS.MATCHES, JSON.stringify(merged));
         }
 
