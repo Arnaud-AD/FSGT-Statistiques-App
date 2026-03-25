@@ -1628,6 +1628,9 @@
                 gameState.currentServer = null;
                 updateScore();
                 recalculateAllStats();
+
+                // V26.4 : Vérifier si le set est déjà terminé (resume après refresh à 25-23 par ex.)
+                checkSetEnd();
             }
         }
 
@@ -2580,9 +2583,19 @@
             // Finaliser le match (change le statut en 'completed', calcule le résultat)
             Storage.finalizeMatch(currentMatch, 'normal');
 
-            // Upload vers Firebase en arrière-plan (non-bloquant)
+            // Upload vers Firebase puis purge des anciens matchs du localStorage
             if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured()) {
-                FirebaseSync.uploadMatch(currentMatch).catch(function(err) {
+                FirebaseSync.uploadMatch(currentMatch).then(function() {
+                    // V26.4 : Purge auto — ne garder que le match courant dans localStorage
+                    try {
+                        const allMatches = Storage.getAllMatches();
+                        const currentOnly = allMatches.filter(function(m) { return m.id === currentMatch.id; });
+                        localStorage.setItem(Storage.KEYS.MATCHES, JSON.stringify(currentOnly));
+                        console.log('[Purge] ' + (allMatches.length - currentOnly.length) + ' anciens matchs supprimés du localStorage (conservés dans Firebase)');
+                    } catch(e) {
+                        console.warn('[Purge] Erreur:', e.message);
+                    }
+                }).catch(function(err) {
                     console.warn('[Firebase] Upload échoué (sera rattrapé au chargement historique) :', err.message);
                 });
             }
@@ -2725,9 +2738,19 @@
             // Finaliser le match avec raison 'time'
             Storage.finalizeMatch(currentMatch, 'time');
 
-            // Upload vers Firebase en arrière-plan (non-bloquant)
+            // Upload vers Firebase puis purge des anciens matchs du localStorage
             if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured()) {
-                FirebaseSync.uploadMatch(currentMatch).catch(function(err) {
+                FirebaseSync.uploadMatch(currentMatch).then(function() {
+                    // V26.4 : Purge auto — ne garder que le match courant dans localStorage
+                    try {
+                        const allMatches = Storage.getAllMatches();
+                        const currentOnly = allMatches.filter(function(m) { return m.id === currentMatch.id; });
+                        localStorage.setItem(Storage.KEYS.MATCHES, JSON.stringify(currentOnly));
+                        console.log('[Purge] ' + (allMatches.length - currentOnly.length) + ' anciens matchs supprimés du localStorage (conservés dans Firebase)');
+                    } catch(e) {
+                        console.warn('[Purge] Erreur:', e.message);
+                    }
+                }).catch(function(err) {
                     console.warn('[Firebase] Upload échoué (sera rattrapé au chargement historique) :', err.message);
                 });
             }

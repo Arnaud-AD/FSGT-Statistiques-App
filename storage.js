@@ -113,7 +113,32 @@ const Storage = {
         } else {
             matches.push(match);
         }
-        localStorage.setItem(this.KEYS.MATCHES, JSON.stringify(matches));
+        try {
+            localStorage.setItem(this.KEYS.MATCHES, JSON.stringify(matches));
+        } catch (e) {
+            if (e.name === 'QuotaExceededError') {
+                // Libérer de l'espace : supprimer les _undoStack de tous les matchs
+                for (const m of matches) {
+                    if (m.sets) {
+                        for (const set of m.sets) {
+                            if (set && set.points) {
+                                for (const pt of set.points) {
+                                    if (pt._undoStack) delete pt._undoStack;
+                                }
+                            }
+                        }
+                    }
+                }
+                try {
+                    localStorage.setItem(this.KEYS.MATCHES, JSON.stringify(matches));
+                } catch (e2) {
+                    console.error('localStorage plein même après nettoyage _undoStack', e2);
+                    alert('⚠️ Stockage plein ! Les données ne sont plus sauvegardées. Allez dans Historique pour supprimer d\'anciens matchs.');
+                }
+            } else {
+                throw e;
+            }
+        }
         // Sync Firebase (non-bloquant)
         if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured() && FirebaseSync.isAdmin()) {
             FirebaseSync.saveMatchAny(match).catch(() => {});
