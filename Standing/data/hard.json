@@ -5,10 +5,10 @@
     "name": "Hard",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/2",
-    "lastUpdated": "2026-03-25T00:38:33",
+    "lastUpdated": "2026-03-25T23:17:40",
     "teamCount": 10,
-    "matchesPlayed": 54,
-    "matchesUpcoming": 36
+    "matchesPlayed": 55,
+    "matchesUpcoming": 35
   },
   "teams": {
     "inde": {
@@ -66,18 +66,18 @@
     {
       "rank": 1,
       "team": "inde",
-      "mj": 11,
-      "g": 11,
+      "mj": 12,
+      "g": 12,
       "p": 0,
-      "setPlus": 33,
+      "setPlus": 36,
       "setMinus": 8,
-      "ds": 25,
-      "coefSet": "4.12",
-      "ptsPlus": 978,
-      "ptsMinus": 752,
-      "dp": "+226",
-      "coefPts": "1.30",
-      "pts": 22,
+      "ds": 28,
+      "coefSet": "4.50",
+      "ptsPlus": 1053,
+      "ptsMinus": 796,
+      "dp": "+257",
+      "coefPts": "1.32",
+      "pts": 24,
       "formAller": [
         "W",
         "W",
@@ -93,7 +93,7 @@
         "W",
         "W",
         "W",
-        "D",
+        "W",
         "P",
         "P",
         "P",
@@ -331,44 +331,6 @@
     },
     {
       "rank": 8,
-      "team": "go",
-      "mj": 10,
-      "g": 2,
-      "p": 8,
-      "setPlus": 12,
-      "setMinus": 23,
-      "ds": -11,
-      "coefSet": "0.52",
-      "ptsPlus": 732,
-      "ptsMinus": 822,
-      "dp": "-90",
-      "coefPts": "0.89",
-      "pts": 12,
-      "formAller": [
-        "L",
-        "L",
-        "L",
-        "L",
-        "D",
-        "L",
-        "W",
-        "L",
-        "L"
-      ],
-      "formRetour": [
-        "W",
-        "D",
-        "L",
-        "D",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 9,
       "team": "nahc",
       "mj": 10,
       "g": 2,
@@ -398,6 +360,44 @@
         "D",
         "L",
         "D",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 9,
+      "team": "go",
+      "mj": 11,
+      "g": 2,
+      "p": 9,
+      "setPlus": 12,
+      "setMinus": 26,
+      "ds": -14,
+      "coefSet": "0.46",
+      "ptsPlus": 776,
+      "ptsMinus": 897,
+      "dp": "-121",
+      "coefPts": "0.87",
+      "pts": 13,
+      "formAller": [
+        "L",
+        "L",
+        "L",
+        "L",
+        "D",
+        "L",
+        "W",
+        "L",
+        "L"
+      ],
+      "formRetour": [
+        "W",
+        "D",
+        "L",
+        "L",
         "P",
         "P",
         "P",
@@ -445,6 +445,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "25/03/2026",
+      "home": "inde",
+      "away": "go",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "23/03/2026",
       "home": "deme",
@@ -946,12 +955,6 @@
       "status": "Reporté"
     },
     {
-      "date": "25/03/2026",
-      "home": "inde",
-      "away": "go",
-      "status": "Reporté"
-    },
-    {
       "date": "30/03/2026",
       "home": "punc",
       "away": "nahc",
@@ -1154,11 +1157,11 @@
     {
       "rank": 1,
       "team": "inde",
-      "elo": 1730.5,
-      "movement": 11.3,
-      "record": "11-0",
+      "elo": 1740.0,
+      "movement": 9.5,
+      "record": "12-0",
       "power": 100.0,
-      "calendar": "V x11",
+      "calendar": "V x12",
       "diffClass": "diff-easy"
     },
     {
@@ -1167,7 +1170,7 @@
       "elo": 1637.1,
       "movement": 9.7,
       "record": "8-2",
-      "power": 79.7,
+      "power": 78.6,
       "calendar": "V x4",
       "diffClass": "diff-easy"
     },
@@ -1177,7 +1180,7 @@
       "elo": 1569.3,
       "movement": 28.4,
       "record": "7-3",
-      "power": 65.0,
+      "power": 64.4,
       "calendar": "V vs SUCY",
       "diffClass": "diff-easy"
     },
@@ -1187,7 +1190,7 @@
       "elo": 1545.9,
       "movement": 46.8,
       "record": "6-5",
-      "power": 60.0,
+      "power": 59.6,
       "calendar": "V vs LES",
       "diffClass": "diff-easy"
     },
@@ -1197,7 +1200,7 @@
       "elo": 1512.4,
       "movement": -28.4,
       "record": "6-6",
-      "power": 52.7,
+      "power": 52.6,
       "calendar": "D vs Padnom",
       "diffClass": "diff-hard"
     },
@@ -1207,7 +1210,7 @@
       "elo": 1483.6,
       "movement": -46.8,
       "record": "6-6",
-      "power": 46.4,
+      "power": 46.6,
       "calendar": "D vs Les",
       "diffClass": "diff-hard"
     },
@@ -1217,18 +1220,18 @@
       "elo": 1440.0,
       "movement": 22.1,
       "record": "5-7",
-      "power": 37.0,
+      "power": 37.5,
       "calendar": "V vs Alambic",
       "diffClass": "diff-easy"
     },
     {
       "rank": 8,
       "team": "go",
-      "elo": 1404.7,
-      "movement": -18.5,
-      "record": "2-8",
-      "power": 29.3,
-      "calendar": "D vs Padnom",
+      "elo": 1395.2,
+      "movement": -9.5,
+      "record": "2-9",
+      "power": 28.2,
+      "calendar": "D vs Les",
       "diffClass": "diff-hard"
     },
     {
@@ -1237,7 +1240,7 @@
       "elo": 1356.7,
       "movement": -11.3,
       "record": "2-8",
-      "power": 18.9,
+      "power": 20.1,
       "calendar": "D x5",
       "diffClass": "diff-hard"
     },
@@ -1247,7 +1250,7 @@
       "elo": 1319.7,
       "movement": -22.1,
       "record": "1-9",
-      "power": 10.9,
+      "power": 12.4,
       "calendar": "D x5",
       "diffClass": "diff-hard"
     }
@@ -1266,7 +1269,8 @@
       1687.6,
       1703.5,
       1719.3,
-      1730.5
+      1730.5,
+      1740.0
     ],
     "yip": [
       1500,
@@ -1364,7 +1368,8 @@
       1332.7,
       1384.4,
       1423.2,
-      1404.7
+      1404.7,
+      1395.2
     ],
     "nahc": [
       1500,
@@ -1408,7 +1413,8 @@
           16,
           18,
           20,
-          22
+          22,
+          24
         ],
         "rank": 1
       },
@@ -1527,9 +1533,10 @@
           7,
           9,
           11,
-          12
+          12,
+          13
         ],
-        "rank": 8
+        "rank": 9
       },
       "nahc": {
         "points": [
@@ -1545,7 +1552,7 @@
           11,
           12
         ],
-        "rank": 9
+        "rank": 8
       },
       "alam": {
         "points": [

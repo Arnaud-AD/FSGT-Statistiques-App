@@ -5,10 +5,10 @@
     "name": "Starter",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/16",
-    "lastUpdated": "2026-03-25T00:38:34",
+    "lastUpdated": "2026-03-25T23:17:41",
     "teamCount": 8,
-    "matchesPlayed": 37,
-    "matchesUpcoming": 19
+    "matchesPlayed": 38,
+    "matchesUpcoming": 18
   },
   "teams": {
     "bach": {
@@ -16,14 +16,14 @@
       "short": "BA",
       "color": "#e74c3c"
     },
-    "coco": {
-      "name": "Les Coconuts",
-      "short": "CO",
-      "color": "#3498db"
-    },
     "gail": {
       "name": "Les Gaillards",
       "short": "GA",
+      "color": "#3498db"
+    },
+    "coco": {
+      "name": "Les Coconuts",
+      "short": "CO",
       "color": "#2ecc71"
     },
     "gvc": {
@@ -90,18 +90,18 @@
     {
       "rank": 2,
       "team": "bach",
-      "mj": 10,
-      "g": 9,
+      "mj": 11,
+      "g": 10,
       "p": 1,
-      "setPlus": 29,
+      "setPlus": 32,
       "setMinus": 3,
-      "ds": 26,
-      "coefSet": "9.67",
-      "ptsPlus": 782,
-      "ptsMinus": 544,
-      "dp": "+238",
-      "coefPts": "1.44",
-      "pts": 19,
+      "ds": 29,
+      "coefSet": "10.67",
+      "ptsPlus": 857,
+      "ptsMinus": 602,
+      "dp": "+255",
+      "coefPts": "1.42",
+      "pts": 21,
       "formAller": [
         "W",
         "W",
@@ -115,7 +115,7 @@
         "W",
         "W",
         "W",
-        "D",
+        "W",
         "P",
         "P",
         "P"
@@ -158,18 +158,18 @@
     {
       "rank": 4,
       "team": "gail",
-      "mj": 10,
+      "mj": 11,
       "g": 7,
-      "p": 3,
+      "p": 4,
       "setPlus": 19,
-      "setMinus": 17,
-      "ds": 2,
-      "coefSet": "1.12",
-      "ptsPlus": 816,
-      "ptsMinus": 758,
-      "dp": "+58",
-      "coefPts": "1.08",
-      "pts": 17,
+      "setMinus": 20,
+      "ds": -1,
+      "coefSet": "0.95",
+      "ptsPlus": 874,
+      "ptsMinus": 833,
+      "dp": "+41",
+      "coefPts": "1.05",
+      "pts": 18,
       "formAller": [
         "W",
         "W",
@@ -183,7 +183,7 @@
         "W",
         "W",
         "W",
-        "D",
+        "L",
         "P",
         "P",
         "P"
@@ -327,6 +327,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "25/03/2026",
+      "home": "bach",
+      "away": "gail",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "20/03/2026",
       "home": "coco",
@@ -681,12 +690,6 @@
       "status": "Reporté"
     },
     {
-      "date": "23/03/2026",
-      "home": "bach",
-      "away": "gail",
-      "status": "Reporté"
-    },
-    {
       "date": "25/03/2026",
       "home": "gold",
       "away": "caip",
@@ -781,11 +784,11 @@
     {
       "rank": 1,
       "team": "bach",
-      "elo": 1704.6,
-      "movement": 16.2,
-      "record": "9-1",
-      "power": 95.0,
-      "calendar": "V x5",
+      "elo": 1725.3,
+      "movement": 20.8,
+      "record": "10-1",
+      "power": 99.5,
+      "calendar": "V x6",
       "diffClass": "diff-easy"
     },
     {
@@ -811,12 +814,12 @@
     {
       "rank": 4,
       "team": "gail",
-      "elo": 1559.3,
-      "movement": 13.8,
-      "record": "7-3",
-      "power": 63.0,
-      "calendar": "V x3",
-      "diffClass": "diff-easy"
+      "elo": 1538.5,
+      "movement": -20.8,
+      "record": "7-4",
+      "power": 58.5,
+      "calendar": "D vs Bachateam",
+      "diffClass": "diff-hard"
     },
     {
       "rank": 5,
@@ -872,7 +875,22 @@
       1633.0,
       1660.6,
       1688.4,
-      1704.6
+      1704.6,
+      1725.3
+    ],
+    "gail": [
+      1500,
+      1531.3,
+      1560.8,
+      1573.6,
+      1535.4,
+      1555.2,
+      1524.2,
+      1499.1,
+      1523.6,
+      1545.4,
+      1559.3,
+      1538.5
     ],
     "coco": [
       1500,
@@ -886,19 +904,6 @@
       1544.1,
       1575.6,
       1586.0
-    ],
-    "gail": [
-      1500,
-      1531.3,
-      1560.8,
-      1573.6,
-      1535.4,
-      1555.2,
-      1524.2,
-      1499.1,
-      1523.6,
-      1545.4,
-      1559.3
     ],
     "gvc": [
       1500,
@@ -974,9 +979,27 @@
           13,
           15,
           17,
-          19
+          19,
+          21
         ],
         "rank": 2
+      },
+      "gail": {
+        "points": [
+          0,
+          2,
+          4,
+          6,
+          7,
+          9,
+          10,
+          11,
+          13,
+          15,
+          17,
+          18
+        ],
+        "rank": 4
       },
       "coco": {
         "points": [
@@ -993,22 +1016,6 @@
           17
         ],
         "rank": 3
-      },
-      "gail": {
-        "points": [
-          0,
-          2,
-          4,
-          6,
-          7,
-          9,
-          10,
-          11,
-          13,
-          15,
-          17
-        ],
-        "rank": 4
       },
       "gvc": {
         "points": [
