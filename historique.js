@@ -4287,10 +4287,19 @@ const BilanView = {
 
     // Ponderations IP par poste (V20.25)
     IP_WEIGHTS: {
-        'Passeur': { attaque: 0.00, bloc: 0.00, relance: 0.05, reception: 0.00, defense: 0.35, passe: 0.35, service: 0.25 },
-        'Centre':  { attaque: 0.10, bloc: 0.05, relance: 0.10, reception: 0.25, defense: 0.25, passe: 0.05, service: 0.20 },
-        'R4':      { attaque: 0.45, bloc: 0.10, relance: 0.05, reception: 0.30, defense: 0.05, passe: 0.00, service: 0.05 },
-        'Pointu':  { attaque: 0.45, bloc: 0.10, relance: 0.05, reception: 0.30, defense: 0.05, passe: 0.00, service: 0.05 }
+        'Passeur':    { attaque: 0.00, bloc: 0.00, relance: 0.05, reception: 0.00, defense: 0.35, passe: 0.35, service: 0.25 },
+        'Centre':     { attaque: 0.10, bloc: 0.05, relance: 0.10, reception: 0.25, defense: 0.25, passe: 0.05, service: 0.20 },
+        'CentreDef':  { attaque: 0.00, bloc: 0.00, relance: 0.15, reception: 0.30, defense: 0.30, passe: 0.05, service: 0.20 },
+        'R4':         { attaque: 0.45, bloc: 0.10, relance: 0.05, reception: 0.30, defense: 0.05, passe: 0.00, service: 0.05 },
+        'Pointu':     { attaque: 0.45, bloc: 0.10, relance: 0.05, reception: 0.30, defense: 0.05, passe: 0.00, service: 0.05 }
+    },
+
+    // Determine si un centre est offensif (attaque/bloque) ou defensif (pur recep/def)
+    // Retourne 'Centre' (offensif) ou 'CentreDef' (defensif) pour lookup IP_WEIGHTS
+    getCentreIpRole(stats) {
+        var hasAttack = stats.attack && stats.attack.tot >= 2;
+        var hasBlock = stats.block && stats.block.tot >= 1;
+        return (hasAttack || hasBlock) ? 'Centre' : 'CentreDef';
     },
 
     // 7 axes du spider chart (heptagone, ordre UNIQUE pour tous les postes)
@@ -4393,14 +4402,8 @@ const BilanView = {
                     var axes = familyAxes;
                     var ipRole = familyIpRole;
 
-                    if (side === 'away' && family === 'Centre') {
-                        var hasAttack = stats.attack && stats.attack.tot >= 2;
-                        var hasBlock = stats.block && stats.block.tot >= 1;
-                        if (hasAttack || hasBlock) {
-                            axes = self.SPIDER_AXES;
-                            ipRole = 'R4';
-                            effectiveRole = 'R4';
-                        }
+                    if (family === 'Centre') {
+                        ipRole = self.getCentreIpRole(stats);
                     }
 
                     var roleColors = Object.keys(roles).map(function(r) {
@@ -4532,6 +4535,7 @@ const BilanView = {
                 Object.keys(matchTotals).forEach(function(name) {
                     if (!matchRoles[name]) return;
                     var role = matchRoles[name].primaryRole;
+                    if (role === 'Centre') role = self.getCentreIpRole(matchTotals[name]);
                     var axes = self.computeAxisScores(matchTotals[name], role);
                     var ip = self.computeIP(axes, role);
                     if (!perMatchIPs[name]) perMatchIPs[name] = [];
@@ -4541,13 +4545,15 @@ const BilanView = {
         }
         var playerData = {};
         players.forEach(function(name) {
-            var role = playerRoles[name].primaryRole;
-            var axes = self.computeAxisScores(homeTotals[name], role);
+            var displayRole = playerRoles[name].primaryRole;
+            var ipRole = displayRole;
+            if (displayRole === 'Centre') ipRole = self.getCentreIpRole(homeTotals[name]);
+            var axes = self.computeAxisScores(homeTotals[name], ipRole);
             // IP = mediane par match si dispo, sinon fallback sur agregation
             var ip = perMatchIPs[name] && perMatchIPs[name].length > 0
                 ? Math.round(self._median(perMatchIPs[name]))
-                : self.computeIP(axes, role);
-            playerData[name] = { role: role, axes: axes, ip: ip, stats: homeTotals[name] };
+                : self.computeIP(axes, ipRole);
+            playerData[name] = { role: displayRole, axes: axes, ip: ip, stats: homeTotals[name] };
         });
 
         // --- Helper : trouver le meilleur joueur sur un axe ---
@@ -5050,10 +5056,12 @@ const BilanView = {
             var bestByPos = {};
             Object.keys(awayTotals).forEach(function(name) {
                 if (!awayRoles[name]) return;
-                var role = awayRoles[name].primaryRole;
-                var axes = BilanView.computeAxisScores(awayTotals[name], role);
-                var ip = BilanView.computeIP(axes, role);
-                if (!bestByPos[role] || ip > bestByPos[role]) bestByPos[role] = ip;
+                var displayRole = awayRoles[name].primaryRole;
+                var ipRole = displayRole;
+                if (displayRole === 'Centre') ipRole = BilanView.getCentreIpRole(awayTotals[name]);
+                var axes = BilanView.computeAxisScores(awayTotals[name], ipRole);
+                var ip = BilanView.computeIP(axes, ipRole);
+                if (!bestByPos[displayRole] || ip > bestByPos[displayRole]) bestByPos[displayRole] = ip;
             });
             var posValues = POSITIONS.map(function(pos) { return bestByPos[pos] || null; }).filter(function(v) { return v !== null; });
             oppIPs[match.id] = posValues.length > 0
@@ -5558,8 +5566,9 @@ const BilanView = {
                     return stats[cat] && stats[cat].tot > 0;
                 });
                 if (!hasStats) return;
-                var scores = self.computeAxisScores(stats, familyIpRole);
-                var ip = self.computeIP(scores, familyIpRole);
+                var matchIpRole = (familyIpRole === 'Centre') ? self.getCentreIpRole(stats) : familyIpRole;
+                var scores = self.computeAxisScores(stats, matchIpRole);
+                var ip = self.computeIP(scores, matchIpRole);
                 perMatchIPs.push(ip);
             });
 
@@ -5592,8 +5601,9 @@ const BilanView = {
                 return stats[cat] && stats[cat].tot > 0;
             });
             if (!hasStats) return;
-            var scores = self.computeAxisScores(stats, role);
-            var ip = self.computeIP(scores, role);
+            var effectiveRole = (role === 'Centre') ? self.getCentreIpRole(stats) : role;
+            var scores = self.computeAxisScores(stats, effectiveRole);
+            var ip = self.computeIP(scores, effectiveRole);
             perMatchIPs.push(ip);
         });
         if (perMatchIPs.length === 0) return 0;
@@ -6092,13 +6102,14 @@ const BilanView = {
                 var stats = playerTotals[name];
                 if (!stats) return;
 
-                var scores = self.computeAxisScores(stats, role);
+                var effectiveRole = (role === 'Centre') ? self.getCentreIpRole(stats) : role;
+                var scores = self.computeAxisScores(stats, effectiveRole);
                 var hasAny = ['service', 'reception', 'passe', 'attaque', 'bloc', 'relance', 'defense'].some(function(k) {
                     return (scores[k] || 0) > 0;
                 });
                 if (!hasAny) return;
 
-                var ip = self.computeIP(scores, role);
+                var ip = self.computeIP(scores, effectiveRole);
                 if (ip > bestIp) {
                     bestIp = ip;
                     bestScores = scores;
@@ -6772,7 +6783,8 @@ const RankingView = {
                     });
                     if (!hasStats) return;
 
-                    var scores = BilanView.computeAxisScores(stats, familyIpRole);
+                    var playerIpRole = (family === 'Centre') ? BilanView.getCentreIpRole(stats) : familyIpRole;
+                    var scores = BilanView.computeAxisScores(stats, playerIpRole);
 
                     var roleInfo = playerRolesYear[name];
                     var primaryRole = roleInfo ? roleInfo.primaryRole : family;
@@ -6835,6 +6847,7 @@ const RankingView = {
 
                     // Calculer IP pour ce match
                     var ipRole = (primaryFamily === 'Ailier') ? 'R4' : primaryFamily;
+                    if (ipRole === 'Centre') ipRole = BilanView.getCentreIpRole(stats);
                     var matchScores = BilanView.computeAxisScores(stats, ipRole);
                     var matchIP = BilanView.computeIP(matchScores, ipRole);
                     mergedData[name].perMatchIPs.push(matchIP);
@@ -6853,16 +6866,14 @@ const RankingView = {
                 var primaryRole = Object.keys(entry.roles).sort(function(a, b) { return entry.roles[b] - entry.roles[a]; })[0];
                 var primaryFamily = BilanView.ROLE_TO_FAMILY[primaryRole];
                 var ipRole = (primaryFamily === 'Ailier') ? 'R4' : primaryFamily;
-
-                // V22.05 : pas de detection centre offensif dans le Ranking
-                // Tous les centres sont evalues comme Centre (coherence home/away)
+                if (ipRole === 'Centre') ipRole = BilanView.getCentreIpRole(stats);
 
                 var scores = BilanView.computeAxisScores(stats, ipRole);
                 var roleColor = BilanView.ROLE_COLORS[primaryRole] || '#5f6368';
 
                 allPlayers.push({
                     name: name, role: primaryRole, roleColor: roleColor,
-                    scores: scores, ip: 0, effectiveRole: ipRole, matchCount: entry.matchCount,
+                    scores: scores, ip: 0, effectiveRole: (primaryFamily === 'Ailier') ? 'R4' : primaryFamily, matchCount: entry.matchCount,
                     _perMatchIPs: entry.perMatchIPs
                 });
             });
@@ -7403,8 +7414,9 @@ const ProgressionView = {
                 pd.role = Object.keys(rc).sort(function(a, b) { return rc[b] - rc[a]; })[0];
 
                 // Compute IP
-                var axisScores = BilanView.computeAxisScores(pStats, role);
-                var ip = BilanView.computeIP(axisScores, role);
+                var ipRole = (role === 'Centre') ? BilanView.getCentreIpRole(pStats) : role;
+                var axisScores = BilanView.computeAxisScores(pStats, ipRole);
+                var ip = BilanView.computeIP(axisScores, ipRole);
 
                 // Derived metrics
                 var metrics = self._computeDerived(pStats);
@@ -10000,7 +10012,8 @@ const YearStatsView = {
             playersInFamily.forEach(function(name) {
                 var famData = playerFamiliesYear[name].families[family];
                 var stats = BilanView.aggregateStatsForFamilyYear(matches, name, famData);
-                var scores = BilanView.computeAxisScores(stats, familyIpRole);
+                var playerIpRole = (family === 'Centre') ? BilanView.getCentreIpRole(stats) : familyIpRole;
+                var scores = BilanView.computeAxisScores(stats, playerIpRole);
 
                 var roleColors = Object.keys(famData.roles).map(function(r) {
                     return BilanView.ROLE_COLORS[r];
