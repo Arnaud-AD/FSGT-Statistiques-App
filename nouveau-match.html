@@ -616,12 +616,41 @@
         // ==================== RENDU 3 SECTIONS ====================
         function renderMatchesList() {
             const container = document.getElementById('matchesList');
+            // Rendu initial depuis localStorage (instantané)
             const allStored = Storage.getAllMatches();
+            _renderFromSources(container, allStored, []);
+            // Enrichissement async depuis Firebase (matchs completed manquants)
+            _enrichFromFirebase(container, allStored);
+        }
+
+        async function _enrichFromFirebase(container, localMatches) {
+            if (typeof FirebaseSync === 'undefined' || !FirebaseSync.isConfigured()) return;
+            try {
+                const remoteCompleted = await FirebaseSync.getCompletedMatches();
+                if (!remoteCompleted || remoteCompleted.length === 0) return;
+                // Ne garder que les matchs Firebase absents du localStorage
+                const localIds = new Set(localMatches.map(m => m.id));
+                const extraCompleted = remoteCompleted.filter(m => !localIds.has(m.id));
+                if (extraCompleted.length === 0) return;
+                // Re-rendre avec les matchs Firebase en plus
+                _renderFromSources(container, localMatches, extraCompleted);
+            } catch (e) {
+                console.warn('[nouveau-match] Firebase enrichment failed:', e);
+            }
+        }
+
+        function _renderFromSources(container, localMatches, firebaseCompleted) {
             const seasonMatches = SEASONS[currentSeason].matches;
 
             const inProgress = [];
             const toPlay = [];
             const completed = [];
+
+            // Combiner les sources : localStorage + Firebase completed
+            const allStored = [...localMatches];
+            firebaseCompleted.forEach(fm => {
+                if (!allStored.find(m => m.id === fm.id)) allStored.push(fm);
+            });
 
             seasonMatches.forEach((match, index) => {
                 const matchId = `champ_${currentSeason}_${index}`;
@@ -630,7 +659,7 @@
                 const stored = allStored.find(m => m.id === matchId || (legacyId && m.id === legacyId));
                 if (stored) {
                     if (stored.status === 'completed') {
-                        completed.push({ ...match, index, matchId, stored });
+                        completed.push({ ...match, index, matchId: stored.id, stored });
                     } else {
                         inProgress.push({ ...match, index, matchId, stored });
                     }
