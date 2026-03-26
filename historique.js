@@ -4524,35 +4524,14 @@ const BilanView = {
         var minActions = self.IP_MIN_ACTIONS;
 
         // --- Calculer axes + IP de chaque joueur une seule fois ---
-        // IP = mediane par match (coherent avec spider charts) si matches fourni
-        var perMatchIPs = {};
-        if (matches && matches.length > 0) {
-            matches.forEach(function(match) {
-                var mSets = (match.sets || []).filter(function(s) { return s.completed; });
-                if (mSets.length === 0) return;
-                var matchTotals = StatsAggregator.aggregateStats(mSets, 'home');
-                var matchRoles = self.getPlayerRoles(match, 'home');
-                Object.keys(matchTotals).forEach(function(name) {
-                    if (!matchRoles[name]) return;
-                    var role = matchRoles[name].primaryRole;
-                    if (role === 'Centre') role = self.getCentreIpRole(matchTotals[name]);
-                    var axes = self.computeAxisScores(matchTotals[name], role);
-                    var ip = self.computeIP(axes, role);
-                    if (!perMatchIPs[name]) perMatchIPs[name] = [];
-                    perMatchIPs[name].push(ip);
-                });
-            });
-        }
+        // IP = agregat sur stats cumulees (pondere naturellement par volume de jeu)
         var playerData = {};
         players.forEach(function(name) {
             var displayRole = playerRoles[name].primaryRole;
             var ipRole = displayRole;
             if (displayRole === 'Centre') ipRole = self.getCentreIpRole(homeTotals[name]);
             var axes = self.computeAxisScores(homeTotals[name], ipRole);
-            // IP = mediane par match si dispo, sinon fallback sur agregation
-            var ip = perMatchIPs[name] && perMatchIPs[name].length > 0
-                ? Math.round(self._median(perMatchIPs[name]))
-                : self.computeIP(axes, ipRole);
+            var ip = self.computeIP(axes, ipRole);
             playerData[name] = { role: displayRole, axes: axes, ip: ip, stats: homeTotals[name] };
         });
 
@@ -5542,7 +5521,8 @@ const BilanView = {
         return merged;
     },
 
-    computeMedianIPForFamily(matches, playerFamiliesYear, family) {
+    // IP agregat par famille : agrege les stats sur tous les matchs, calcule un seul IP
+    computeIPForFamily(matches, playerFamiliesYear, family) {
         var self = this;
         var familyIpRole = (family === 'Ailier') ? 'R4' : family;
         var results = [];
@@ -5553,44 +5533,35 @@ const BilanView = {
             var famData = pData.families[family];
             if (!famData) return;
 
-            var perMatchIPs = [];
-            famData.matchSets.forEach(function(ms) {
-                var match = matches[ms.matchIndex];
-                if (!match) return;
-                var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
-                var playerTotals = StatsAggregator.aggregateStatsBySetIndices(completedSets, 'home', ms.setIndices);
-                var stats = playerTotals[name];
-                if (!stats) return;
-                // V26.2 fix : exclure les matchs/sets non filmes (toutes stats a zero)
-                var hasStats = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'].some(function(cat) {
-                    return stats[cat] && stats[cat].tot > 0;
-                });
-                if (!hasStats) return;
-                var matchIpRole = (familyIpRole === 'Centre') ? self.getCentreIpRole(stats) : familyIpRole;
-                var scores = self.computeAxisScores(stats, matchIpRole);
-                var ip = self.computeIP(scores, matchIpRole);
-                perMatchIPs.push(ip);
+            // Agreger les stats sur tous les matchs de la famille
+            var stats = self.aggregateStatsForFamilyYear(matches, name, famData);
+            var hasStats = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'].some(function(cat) {
+                return stats[cat] && stats[cat].tot > 0;
             });
+            if (!hasStats) return;
 
-            if (perMatchIPs.length > 0) {
-                results.push({
-                    name: name,
-                    medianIP: Math.round(self._median(perMatchIPs)),
-                    matchCount: perMatchIPs.length
-                });
-            }
+            var ipRole = (familyIpRole === 'Centre') ? self.getCentreIpRole(stats) : familyIpRole;
+            var scores = self.computeAxisScores(stats, ipRole);
+            var ip = self.computeIP(scores, ipRole);
+
+            results.push({
+                name: name,
+                ip: ip,
+                matchCount: famData.matchSets.length
+            });
         });
 
-        results.sort(function(a, b) { return b.medianIP - a.medianIP; });
+        results.sort(function(a, b) { return b.ip - a.ip; });
         return results;
     },
 
-    // --- IP mediane par match pour un joueur (team home ou away) ---
-    // Calcule l'IP sur chaque match individuellement, puis retourne la mediane
-    // Evite le biais de l'agregation (surestimation due aux non-linearites des formules)
-    computeMedianIPForPlayer(matches, name, team, role) {
+    // --- IP agregat pour un joueur (team home ou away) ---
+    // Agrege les stats sur tous les matchs, calcule un seul IP
+    // Pondere naturellement par le volume de jeu (matchs longs pesent plus)
+    computeIPForPlayer(matches, name, team, role) {
         var self = this;
-        var perMatchIPs = [];
+        var merged = StatsAggregator.initPlayerStats();
+        var hasAnyMatch = false;
         matches.forEach(function(match) {
             var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
             if (completedSets.length === 0) return;
@@ -5601,13 +5572,13 @@ const BilanView = {
                 return stats[cat] && stats[cat].tot > 0;
             });
             if (!hasStats) return;
-            var effectiveRole = (role === 'Centre') ? self.getCentreIpRole(stats) : role;
-            var scores = self.computeAxisScores(stats, effectiveRole);
-            var ip = self.computeIP(scores, effectiveRole);
-            perMatchIPs.push(ip);
+            hasAnyMatch = true;
+            self._mergePlayerStats(merged, stats);
         });
-        if (perMatchIPs.length === 0) return 0;
-        return Math.round(self._median(perMatchIPs));
+        if (!hasAnyMatch) return 0;
+        var effectiveRole = (role === 'Centre') ? self.getCentreIpRole(merged) : role;
+        var scores = self.computeAxisScores(merged, effectiveRole);
+        return self.computeIP(scores, effectiveRole);
     },
 
     // Score plancher par axe : evite les polygones ecrases pour les postes
@@ -6196,7 +6167,7 @@ const ImpactView = {
         var seasonIP = {};
         Object.keys(playerRoles).forEach(function(name) {
             var role = playerRoles[name].primaryRole;
-            seasonIP[name] = BilanView.computeMedianIPForPlayer(matches, name, team, role);
+            seasonIP[name] = BilanView.computeIPForPlayer(matches, name, team, role);
         });
         this._seasonIP = seasonIP;
     },
@@ -6805,15 +6776,15 @@ const RankingView = {
             });
             allPlayers.forEach(function(d) {
                 var playerSrvTot = (d.scores._tots && d.scores._tots.service) || 0;
-                if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.10) {
+                if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.04) {
                     d.scores.service = 0;
                 }
-                // IP = mediane par match (pas agrege)
-                d.ip = BilanView.computeMedianIPForPlayer(matchesWithSets, d.name, 'home', d.effectiveRole);
+                // IP = agregat sur stats cumulees
+                d.ip = BilanView.computeIP(d.scores, d.effectiveRole);
             });
         } else {
-            // AWAY : agreger stats par joueur sur tous les matchs (scores agreges pour visuel, IP mediane)
-            var mergedData = {}; // name → { stats, roles: {role: count}, matchCount, perMatchIPs: [] }
+            // AWAY : agreger stats par joueur sur tous les matchs, IP agregat
+            var mergedData = {}; // name → { stats, roles: {role: count}, matchCount }
 
             matchesWithSets.forEach(function(match) {
                 var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
@@ -6838,19 +6809,12 @@ const RankingView = {
                     if (!mergedData[name]) {
                         mergedData[name] = {
                             stats: StatsAggregator.initPlayerStats(),
-                            roles: {}, matchCount: 0, perMatchIPs: []
+                            roles: {}, matchCount: 0
                         };
                     }
                     BilanView._mergePlayerStats(mergedData[name].stats, stats);
                     mergedData[name].roles[primaryRole] = (mergedData[name].roles[primaryRole] || 0) + 1;
                     mergedData[name].matchCount++;
-
-                    // Calculer IP pour ce match
-                    var ipRole = (primaryFamily === 'Ailier') ? 'R4' : primaryFamily;
-                    if (ipRole === 'Centre') ipRole = BilanView.getCentreIpRole(stats);
-                    var matchScores = BilanView.computeAxisScores(stats, ipRole);
-                    var matchIP = BilanView.computeIP(matchScores, ipRole);
-                    mergedData[name].perMatchIPs.push(matchIP);
                 });
             });
 
@@ -6873,8 +6837,7 @@ const RankingView = {
 
                 allPlayers.push({
                     name: name, role: primaryRole, roleColor: roleColor,
-                    scores: scores, ip: 0, effectiveRole: (primaryFamily === 'Ailier') ? 'R4' : primaryFamily, matchCount: entry.matchCount,
-                    _perMatchIPs: entry.perMatchIPs
+                    scores: scores, ip: 0, effectiveRole: (primaryFamily === 'Ailier') ? 'R4' : primaryFamily, matchCount: entry.matchCount
                 });
             });
 
@@ -6885,12 +6848,11 @@ const RankingView = {
             });
             allPlayers.forEach(function(d) {
                 var playerSrvTot = (d.scores._tots && d.scores._tots.service) || 0;
-                if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.10) {
+                if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.04) {
                     d.scores.service = 0;
                 }
-                // IP = mediane par match
-                d.ip = d._perMatchIPs && d._perMatchIPs.length > 0
-                    ? Math.round(BilanView._median(d._perMatchIPs)) : BilanView.computeIP(d.scores, d.effectiveRole);
+                // IP = agregat sur stats cumulees
+                d.ip = BilanView.computeIP(d.scores, d.effectiveRole);
             });
         }
 
@@ -9985,12 +9947,6 @@ const YearStatsView = {
         var allPlayerData = [];
 
         // Pre-calculer IP mediane par match pour chaque joueur (lookup global)
-        var medianIPLookup = {};
-        BilanView.FAMILY_ORDER.forEach(function(fam) {
-            var ranking = BilanView.computeMedianIPForFamily(matches, playerFamiliesYear, fam);
-            ranking.forEach(function(r) { medianIPLookup[r.name] = r.medianIP; });
-        });
-
         BilanView.FAMILY_ORDER.forEach(function(family) {
             var familyAxes = BilanView.SPIDER_AXES;
             var familyIpRole = (family === 'Ailier') ? 'R4' : family;
@@ -10003,9 +9959,9 @@ const YearStatsView = {
             });
             if (playersInFamily.length === 0) return;
 
-            // Overlay par famille
-            var medianRanking = BilanView.computeMedianIPForFamily(matches, playerFamiliesYear, family);
-            var eligible = medianRanking.filter(function(r) { return r.matchCount >= 1; });
+            // Overlay par famille (IP agregat)
+            var familyRanking = BilanView.computeIPForFamily(matches, playerFamiliesYear, family);
+            var eligible = familyRanking.filter(function(r) { return r.matchCount >= 1; });
             var bestName = eligible.length > 0 ? eligible[0].name : null;
             var secondBestName = eligible.length > 1 ? eligible[1].name : null;
 
@@ -10048,12 +10004,11 @@ const YearStatsView = {
         });
         allPlayerData.forEach(function(d) {
             var playerSrvTot = (d.scores._tots && d.scores._tots.service) || 0;
-            if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.10) {
+            if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.04) {
                 d.scores.service = 0;
             }
-            // IP = mediane par match (pas agrege)
-            d.ip = (medianIPLookup[d.name] !== undefined) ? medianIPLookup[d.name]
-                : BilanView.computeIP(d.scores, d.effectiveRole);
+            // IP = agregat sur stats cumulees
+            d.ip = BilanView.computeIP(d.scores, d.effectiveRole);
         });
 
         // Trier par slot puis IP desc
@@ -10780,16 +10735,22 @@ const SetsPlayedView = {
                         if (sub.pointIndex > prevIdx) {
                             intervals.push({ start: prevIdx, end: sub.pointIndex, players: currentOnCourt.slice(), roleMap: Object.assign({}, currentRoleMap) });
                         }
-                        // Appliquer la substitution — le remplacant herite du role
+                        // Appliquer la substitution
                         var idx = currentOnCourt.indexOf(sub.playerOut);
                         if (idx >= 0) {
                             currentOnCourt[idx] = sub.playerIn;
                         } else {
-                            // playerOut introuvable (nom different dans lineup) → trouver le slot libre
-                            // Chercher un joueur du currentOnCourt absent des rallies recents
                             currentOnCourt.push(sub.playerIn);
                         }
-                        if (currentRoleMap[sub.playerOut]) {
+                        // Recaler les roles depuis le homeLineup final (reflete les vrais postes apres rearrangement)
+                        // Fallback : le remplacant herite du role du sortant
+                        var finalLineup = set.homeLineup;
+                        if (finalLineup) {
+                            var finalRoleMap = buildRoleMap(finalLineup);
+                            currentOnCourt.forEach(function(name) {
+                                if (finalRoleMap[name]) currentRoleMap[name] = finalRoleMap[name];
+                            });
+                        } else if (currentRoleMap[sub.playerOut]) {
                             currentRoleMap[sub.playerIn] = currentRoleMap[sub.playerOut];
                         }
                         prevIdx = sub.pointIndex;
