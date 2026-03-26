@@ -4406,7 +4406,9 @@ const BilanView = {
                         ipRole = self.getCentreIpRole(stats);
                     }
 
-                    var roleColors = Object.keys(roles).map(function(r) {
+                    var roleColors = Object.keys(roles).sort(function(a, b) {
+                        return roles[b] - roles[a];
+                    }).map(function(r) {
                         return self.ROLE_COLORS[r];
                     });
                     var primaryRoleInFamily = Object.keys(roles).sort(function(a, b) {
@@ -9971,7 +9973,9 @@ const YearStatsView = {
                 var playerIpRole = (family === 'Centre') ? BilanView.getCentreIpRole(stats) : familyIpRole;
                 var scores = BilanView.computeAxisScores(stats, playerIpRole);
 
-                var roleColors = Object.keys(famData.roles).map(function(r) {
+                var roleColors = Object.keys(famData.roles).sort(function(a, b) {
+                    return famData.roles[b] - famData.roles[a];
+                }).map(function(r) {
                     return BilanView.ROLE_COLORS[r];
                 });
                 var primaryRoleInFamily = Object.keys(famData.roles).sort(function(a, b) {
