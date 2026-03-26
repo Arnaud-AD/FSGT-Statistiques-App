@@ -6599,11 +6599,98 @@ const TEAM_COLORS = {
     'RSC Champigny 1': '#1abc9c',
     'Manu Andy-sport': '#e67e22',
     'Bières et le loup': '#f1c40f',
-    'Rhinos Féroces': '#95a5a6',
-    'StarPAFF': '#34495e',
+    'Rhinos Féroces': '#607d8b',
+    'StarPAFF': '#455a64',
     'Olympe BB volley': '#e91e8c',
     'Morts de Soif': '#16a085'
 };
+
+// Génération de couleurs vives pour les équipes non référencées dans TEAM_COLORS
+// Les couleurs attribuées sont persistées dans localStorage pour stabilité
+const _STORAGE_KEY_TEAM_COLORS = 'volleyball_ranking_team_colors';
+const _teamColorCache = (function() {
+    try {
+        var saved = localStorage.getItem(_STORAGE_KEY_TEAM_COLORS);
+        return saved ? JSON.parse(saved) : {};
+    } catch(e) { return {}; }
+})();
+
+function _hslToHue(hslStr) {
+    var m = hslStr.match(/hsl\((\d+)/);
+    return m ? parseInt(m[1]) : -1;
+}
+
+function _hexToHue(hex) {
+    var r = parseInt(hex.slice(1, 3), 16) / 255;
+    var g = parseInt(hex.slice(3, 5), 16) / 255;
+    var b = parseInt(hex.slice(5, 7), 16) / 255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b);
+    if (max === min) return -1;
+    var d = max - min, h;
+    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+    else if (max === g) h = ((b - r) / d + 2) / 6;
+    else h = ((r - g) / d + 4) / 6;
+    return Math.round(h * 360);
+}
+
+// Collecter les teintes déjà prises (hardcodées + persistées)
+const _usedHues = (function() {
+    var hues = [];
+    for (var name in TEAM_COLORS) {
+        var h = _hexToHue(TEAM_COLORS[name]);
+        if (h >= 0) hues.push(h);
+    }
+    for (var name in _teamColorCache) {
+        var h = _hslToHue(_teamColorCache[name]);
+        if (h >= 0) hues.push(h);
+    }
+    return hues;
+})();
+
+function _saveTeamColors() {
+    try { localStorage.setItem(_STORAGE_KEY_TEAM_COLORS, JSON.stringify(_teamColorCache)); }
+    catch(e) {}
+}
+
+function getTeamColor(teamName) {
+    if (TEAM_COLORS[teamName]) return TEAM_COLORS[teamName];
+    if (_teamColorCache[teamName]) return _teamColorCache[teamName];
+
+    // Hash déterministe du nom → teinte de base
+    var hash = 0;
+    for (var i = 0; i < teamName.length; i++) {
+        hash = ((hash << 5) - hash + teamName.charCodeAt(i)) | 0;
+    }
+    hash = Math.abs(hash);
+
+    // Zones interdites : violet 260-310 (Jen), gris (saturation basse)
+    // Chercher une teinte libre (>30° de distance des teintes existantes)
+    var bestHue = -1, bestDist = 0;
+    for (var attempt = 0; attempt < 36; attempt++) {
+        var hue = (hash * 137 + attempt * 47) % 360;
+        if (hue >= 260 && hue <= 310) continue;
+        var minDist = 360;
+        for (var j = 0; j < _usedHues.length; j++) {
+            var d = Math.abs(hue - _usedHues[j]);
+            if (d > 180) d = 360 - d;
+            if (d < minDist) minDist = d;
+        }
+        if (minDist > bestDist) {
+            bestDist = minDist;
+            bestHue = hue;
+        }
+        if (bestDist >= 30) break;
+    }
+    if (bestHue < 0) bestHue = (hash * 137) % 360;
+
+    _usedHues.push(bestHue);
+    var sat = 55 + (hash % 21);
+    var lum = 40 + ((hash >> 8) % 16);
+    var color = 'hsl(' + bestHue + ',' + sat + '%,' + lum + '%)';
+    _teamColorCache[teamName] = color;
+    _saveTeamColors();
+    return color;
+}
 
 const RankingView = {
     _rendered: false,
@@ -6906,7 +6993,7 @@ const RankingView = {
         html += '<tbody>';
 
         sorted.forEach(function(team, idx) {
-            var teamColor = TEAM_COLORS[team.name] || '#999';
+            var teamColor = getTeamColor(team.name);
             html += '<tr class="ranking-row" data-team="' + team.name.replace(/"/g, '&quot;') + '">';
             html += '<td>' + (idx + 1) + '</td>';
             html += '<td class="ranking-team-name"><span class="ranking-team-badge" style="background:' + teamColor + '">' + team.name + '</span></td>';
@@ -6973,7 +7060,7 @@ const RankingView = {
 
                 var rank = 1; // # repart a 1 pour chaque poste
                 groups[fam].forEach(function(p) {
-                    var teamColor = TEAM_COLORS[p.teamName] || '#999';
+                    var teamColor = getTeamColor(p.teamName);
                     html += '<tr class="ranking-row ranking-player-row" data-player-name="' + p.name.replace(/"/g, '&quot;') + '" data-player-team="' + p.teamName.replace(/"/g, '&quot;') + '">';
                     html += '<td>' + rank + '</td>';
                     html += '<td><span class="bilan-role-dot" style="background:' + p.roleColor + '"></span> ' + p.name + '</td>';
@@ -6987,7 +7074,7 @@ const RankingView = {
             // Mode Tous : tri global
             var sorted = this._sortData(data.allPlayerCards, s.col, s.asc);
             sorted.forEach(function(p, idx) {
-                var teamColor = TEAM_COLORS[p.teamName] || '#999';
+                var teamColor = getTeamColor(p.teamName);
                 html += '<tr class="ranking-row ranking-player-row" data-player-name="' + p.name.replace(/"/g, '&quot;') + '" data-player-team="' + p.teamName.replace(/"/g, '&quot;') + '">';
                 html += '<td>' + (idx + 1) + '</td>';
                 html += '<td><span class="bilan-role-dot" style="background:' + p.roleColor + '"></span> ' + p.name + '</td>';
