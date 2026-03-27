@@ -7155,15 +7155,39 @@ const RankingView = {
             ? Math.round(allPlayers.reduce(function(s, p) { return s + p.ip; }, 0) / allPlayers.length)
             : 0;
 
-        // --- IP TITULAIRES = meilleur joueur par poste, IP moyen ---
+        // --- IP TITULAIRES = meilleur lineup 4 joueurs DISTINCTS, IP moyen ---
+        // V27.1 : backtracking pour eviter qu'un joueur multi-role occupe 2 postes
         var POSITIONS = ['Passeur', 'R4', 'Centre', 'Pointu'];
-        var bestByPos = {};
+        var candidatesByPos = {};
         POSITIONS.forEach(function(pos) {
-            var candidates = allPlayers.filter(function(p) { return p.role === pos; });
-            if (candidates.length === 0) return;
-            candidates.sort(function(a, b) { return b.ip - a.ip; });
-            bestByPos[pos] = candidates[0];
+            candidatesByPos[pos] = allPlayers
+                .filter(function(p) { return p.role === pos; })
+                .sort(function(a, b) { return b.ip - a.ip; });
         });
+
+        function findBestLineup(posIndex, usedNames) {
+            if (posIndex >= POSITIONS.length) return { total: 0, lineup: {} };
+            var pos = POSITIONS[posIndex];
+            var candidates = candidatesByPos[pos] || [];
+            var best = findBestLineup(posIndex + 1, usedNames); // skip si pas de candidat
+
+            for (var i = 0; i < candidates.length; i++) {
+                var c = candidates[i];
+                if (usedNames[c.name]) continue;
+                usedNames[c.name] = true;
+                var sub = findBestLineup(posIndex + 1, usedNames);
+                var total = c.ip + sub.total;
+                if (total > best.total) {
+                    best = { total: total, lineup: Object.assign({}, sub.lineup) };
+                    best.lineup[pos] = c;
+                }
+                delete usedNames[c.name];
+            }
+            return best;
+        }
+
+        var bestResult = findBestLineup(0, {});
+        var bestByPos = bestResult.lineup;
         var posValues = POSITIONS.map(function(pos) { return bestByPos[pos] ? bestByPos[pos].ip : null; }).filter(function(v) { return v !== null; });
         var ipStarters = posValues.length > 0
             ? Math.round(posValues.reduce(function(s, v) { return s + v; }, 0) / posValues.length)
