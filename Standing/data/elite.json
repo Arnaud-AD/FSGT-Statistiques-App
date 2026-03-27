@@ -5,10 +5,10 @@
     "name": "Elite",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/1",
-    "lastUpdated": "2026-03-25T23:17:39",
+    "lastUpdated": "2026-03-27T03:15:26",
     "teamCount": 10,
-    "matchesPlayed": 60,
-    "matchesUpcoming": 30
+    "matchesPlayed": 62,
+    "matchesUpcoming": 28
   },
   "teams": {
     "jen": {
@@ -66,18 +66,18 @@
     {
       "rank": 1,
       "team": "jen",
-      "mj": 12,
-      "g": 12,
+      "mj": 13,
+      "g": 13,
       "p": 0,
-      "setPlus": 36,
+      "setPlus": 39,
       "setMinus": 4,
-      "ds": 32,
-      "coefSet": "9.00",
-      "ptsPlus": 985,
-      "ptsMinus": 764,
-      "dp": "+221",
-      "coefPts": "1.29",
-      "pts": 24,
+      "ds": 35,
+      "coefSet": "9.75",
+      "ptsPlus": 1060,
+      "ptsMinus": 800,
+      "dp": "+260",
+      "coefPts": "1.32",
+      "pts": 26,
       "formAller": [
         "W",
         "W",
@@ -93,8 +93,8 @@
         "W",
         "W",
         "W",
-        "P",
-        "P",
+        "W",
+        "D",
         "P",
         "P",
         "P",
@@ -133,7 +133,7 @@
         "W",
         "W",
         "P",
-        "P",
+        "D",
         "P",
         "P",
         "P"
@@ -141,6 +141,44 @@
     },
     {
       "rank": 3,
+      "team": "marv",
+      "mj": 13,
+      "g": 9,
+      "p": 4,
+      "setPlus": 31,
+      "setMinus": 20,
+      "ds": 11,
+      "coefSet": "1.55",
+      "ptsPlus": 1129,
+      "ptsMinus": 1061,
+      "dp": "+68",
+      "coefPts": "1.06",
+      "pts": 22,
+      "formAller": [
+        "W",
+        "W",
+        "W",
+        "L",
+        "W",
+        "W",
+        "L",
+        "W",
+        "L"
+      ],
+      "formRetour": [
+        "L",
+        "W",
+        "W",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 4,
       "team": "kiki",
       "mj": 13,
       "g": 9,
@@ -170,45 +208,7 @@
         "W",
         "L",
         "W",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 4,
-      "team": "marv",
-      "mj": 12,
-      "g": 8,
-      "p": 4,
-      "setPlus": 28,
-      "setMinus": 20,
-      "ds": 8,
-      "coefSet": "1.40",
-      "ptsPlus": 1054,
-      "ptsMinus": 1000,
-      "dp": "+54",
-      "coefPts": "1.05",
-      "pts": 20,
-      "formAller": [
-        "W",
-        "W",
-        "W",
-        "L",
-        "W",
-        "W",
-        "L",
-        "W",
-        "L"
-      ],
-      "formRetour": [
-        "L",
-        "W",
-        "W",
-        "P",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -218,18 +218,18 @@
     {
       "rank": 5,
       "team": "rhsp",
-      "mj": 11,
+      "mj": 12,
       "g": 7,
-      "p": 4,
+      "p": 5,
       "setPlus": 23,
-      "setMinus": 18,
-      "ds": 5,
-      "coefSet": "1.28",
-      "ptsPlus": 888,
-      "ptsMinus": 841,
-      "dp": "+47",
-      "coefPts": "1.06",
-      "pts": 18,
+      "setMinus": 21,
+      "ds": 2,
+      "coefSet": "1.10",
+      "ptsPlus": 949,
+      "ptsMinus": 916,
+      "dp": "+33",
+      "coefPts": "1.04",
+      "pts": 19,
       "formAller": [
         "L",
         "W",
@@ -245,9 +245,9 @@
         "L",
         "W",
         "D",
+        "L",
         "P",
-        "P",
-        "P",
+        "D",
         "P",
         "P",
         "P"
@@ -360,7 +360,7 @@
         "L",
         "D",
         "L",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -408,18 +408,18 @@
     {
       "rank": 10,
       "team": "star",
-      "mj": 12,
+      "mj": 13,
       "g": 0,
-      "p": 12,
+      "p": 13,
       "setPlus": 2,
-      "setMinus": 36,
-      "ds": -34,
-      "coefSet": "0.06",
-      "ptsPlus": 609,
-      "ptsMinus": 944,
-      "dp": "-335",
-      "coefPts": "0.65",
-      "pts": 12,
+      "setMinus": 39,
+      "ds": -37,
+      "coefSet": "0.05",
+      "ptsPlus": 645,
+      "ptsMinus": 1019,
+      "dp": "-374",
+      "coefPts": "0.63",
+      "pts": 13,
       "formAller": [
         "L",
         "L",
@@ -435,8 +435,8 @@
         "L",
         "L",
         "L",
-        "P",
-        "P",
+        "L",
+        "D",
         "P",
         "P",
         "P",
@@ -445,6 +445,24 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "26/03/2026",
+      "home": "jen",
+      "away": "star",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "26/03/2026",
+      "home": "marv",
+      "away": "rhsp",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "25/03/2026",
       "home": "manu",
@@ -546,18 +564,18 @@
     },
     {
       "date": "16/02/2026",
-      "home": "rhin",
-      "away": "kiki",
-      "scoreHome": 2,
+      "home": "star",
+      "away": "marv",
+      "scoreHome": 0,
       "scoreAway": 3,
       "homeWin": false,
       "status": "Terminé"
     },
     {
       "date": "16/02/2026",
-      "home": "star",
-      "away": "marv",
-      "scoreHome": 0,
+      "home": "rhin",
+      "away": "kiki",
+      "scoreHome": 2,
       "scoreAway": 3,
       "homeWin": false,
       "status": "Terminé"
@@ -582,20 +600,20 @@
     },
     {
       "date": "11/02/2026",
-      "home": "star",
-      "away": "kiki",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "11/02/2026",
       "home": "rsc",
       "away": "marv",
       "scoreHome": 3,
       "scoreAway": 2,
       "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "11/02/2026",
+      "home": "star",
+      "away": "kiki",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
       "status": "Terminé"
     },
     {
@@ -994,22 +1012,10 @@
       "status": "Reporté"
     },
     {
-      "date": "26/03/2026",
-      "home": "jen",
-      "away": "star",
-      "status": "Sem. 13"
-    },
-    {
-      "date": "26/03/2026",
-      "home": "marv",
-      "away": "rhsp",
-      "status": "Sem. 13"
-    },
-    {
       "date": "27/03/2026",
       "home": "star",
       "away": "manu",
-      "status": "Sem. 14"
+      "status": "Reporté"
     },
     {
       "date": "30/03/2026",
@@ -1027,12 +1033,6 @@
       "date": "01/04/2026",
       "home": "rsc",
       "away": "rhsp",
-      "status": "Sem. 14"
-    },
-    {
-      "date": "02/04/2026",
-      "home": "jen",
-      "away": "kiki",
       "status": "Sem. 14"
     },
     {
@@ -1156,6 +1156,12 @@
       "status": "Reporté"
     },
     {
+      "date": "28/05/2026",
+      "home": "jen",
+      "away": "kiki",
+      "status": "Reporté"
+    },
+    {
       "date": "01/06/2026",
       "home": "resc",
       "away": "manu",
@@ -1165,18 +1171,18 @@
       "date": "08/06/2026",
       "home": "rhsp",
       "away": "resc",
-      "status": "Sem. 15"
+      "status": "Reporté"
     }
   ],
   "prTeams": [
     {
       "rank": 1,
       "team": "jen",
-      "elo": 1755.3,
-      "movement": 12.0,
-      "record": "12-0",
+      "elo": 1758.6,
+      "movement": 3.4,
+      "record": "13-0",
       "power": 98.4,
-      "calendar": "V x12",
+      "calendar": "V x13",
       "diffClass": "diff-easy"
     },
     {
@@ -1185,49 +1191,49 @@
       "elo": 1632.0,
       "movement": 15.2,
       "record": "9-3",
-      "power": 75.0,
+      "power": 74.7,
       "calendar": "V x5",
       "diffClass": "diff-easy"
     },
     {
       "rank": 3,
-      "team": "kiki",
-      "elo": 1564.5,
-      "movement": 21.6,
+      "team": "marv",
+      "elo": 1593.0,
+      "movement": 33.5,
       "record": "9-4",
-      "power": 62.2,
-      "calendar": "V vs Bières",
+      "power": 67.4,
+      "calendar": "V x3",
       "diffClass": "diff-easy"
     },
     {
       "rank": 4,
-      "team": "marv",
-      "elo": 1559.6,
-      "movement": 23.8,
-      "record": "8-4",
-      "power": 61.3,
-      "calendar": "V vs Rhinos",
-      "diffClass": "diff-easy"
-    },
-    {
-      "rank": 5,
-      "team": "rhsp",
-      "elo": 1547.5,
-      "movement": 27.8,
-      "record": "7-4",
-      "power": 59.0,
+      "team": "kiki",
+      "elo": 1564.5,
+      "movement": 21.6,
+      "record": "9-4",
+      "power": 62.1,
       "calendar": "V vs Bières",
       "diffClass": "diff-easy"
     },
     {
-      "rank": 6,
+      "rank": 5,
       "team": "rsc",
       "elo": 1528.5,
       "movement": 19.7,
       "record": "6-6",
-      "power": 55.4,
+      "power": 55.3,
       "calendar": "V x3",
       "diffClass": "diff-easy"
+    },
+    {
+      "rank": 6,
+      "team": "rhsp",
+      "elo": 1514.0,
+      "movement": -33.5,
+      "record": "7-5",
+      "power": 52.6,
+      "calendar": "D vs Marvels",
+      "diffClass": "diff-hard"
     },
     {
       "rank": 7,
@@ -1235,7 +1241,7 @@
       "elo": 1441.9,
       "movement": -21.6,
       "record": "5-8",
-      "power": 39.0,
+      "power": 39.1,
       "calendar": "D x3",
       "diffClass": "diff-hard"
     },
@@ -1245,7 +1251,7 @@
       "elo": 1370.2,
       "movement": -15.2,
       "record": "2-9",
-      "power": 25.4,
+      "power": 25.7,
       "calendar": "D x5",
       "diffClass": "diff-hard"
     },
@@ -1255,18 +1261,18 @@
       "elo": 1364.5,
       "movement": -19.7,
       "record": "2-10",
-      "power": 24.3,
+      "power": 24.6,
       "calendar": "D x4",
       "diffClass": "diff-hard"
     },
     {
       "rank": 10,
       "team": "star",
-      "elo": 1236.1,
-      "movement": -8.7,
-      "record": "0-12",
+      "elo": 1232.8,
+      "movement": -3.4,
+      "record": "0-13",
       "power": 0.0,
-      "calendar": "D x12",
+      "calendar": "D x13",
       "diffClass": "diff-hard"
     }
   ],
@@ -1783,7 +1789,8 @@
       1711.5,
       1731.2,
       1743.3,
-      1755.3
+      1755.3,
+      1758.6
     ],
     "kiki": [
       1500,
@@ -1813,7 +1820,8 @@
       1586.1,
       1539.4,
       1519.7,
-      1547.5
+      1547.5,
+      1514.0
     ],
     "resc": [
       1500,
@@ -1843,7 +1851,8 @@
       1546.1,
       1518.0,
       1535.8,
-      1559.6
+      1559.6,
+      1593.0
     ],
     "rsc": [
       1500,
@@ -1918,7 +1927,8 @@
       1276.8,
       1262.6,
       1244.9,
-      1236.1
+      1236.1,
+      1232.8
     ]
   },
   "evolutionData": {
@@ -1937,7 +1947,8 @@
           18,
           20,
           22,
-          24
+          24,
+          26
         ],
         "rank": 1
       },
@@ -1958,7 +1969,7 @@
           20,
           22
         ],
-        "rank": 3
+        "rank": 4
       },
       "rhsp": {
         "points": [
@@ -1973,7 +1984,8 @@
           14,
           15,
           16,
-          18
+          18,
+          19
         ],
         "rank": 5
       },
@@ -2009,9 +2021,10 @@
           15,
           16,
           18,
-          20
+          20,
+          22
         ],
-        "rank": 4
+        "rank": 3
       },
       "rsc": {
         "points": [
@@ -2099,7 +2112,8 @@
           9,
           10,
           11,
-          12
+          12,
+          13
         ],
         "rank": 10
       }

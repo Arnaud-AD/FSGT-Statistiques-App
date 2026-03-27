@@ -3173,6 +3173,125 @@ const StatsAggregator = {
         return this.aggregateStats(filtered, teamKey, validPlayers);
     },
 
+    // V27.0 : Agrege les stats d'UN joueur en ne traitant que les rallies dans les intervalles donnes
+    // pointIntervals: [{ setIndex, start, end, role }]
+    // Retourne : initPlayerStats() avec stats accumulees pour playerName
+    aggregateStatsByPointIntervals(match, teamKey, pointIntervals, playerName) {
+        var self = this;
+        var merged = self.initPlayerStats();
+        if (!pointIntervals || pointIntervals.length === 0) return merged;
+
+        var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+
+        // Grouper intervalles par setIndex
+        var bySet = {};
+        pointIntervals.forEach(function(iv) {
+            if (!bySet[iv.setIndex]) bySet[iv.setIndex] = [];
+            bySet[iv.setIndex].push(iv);
+        });
+
+        Object.keys(bySet).forEach(function(si) {
+            var setIndex = parseInt(si);
+            var set = completedSets[setIndex];
+            if (!set) return;
+
+            var intervals = bySet[setIndex];
+            var points = set.points || [];
+            var totalPoints = points.length;
+
+            // Optimisation : si intervalle couvre tout le set ET set.stats existe, lire directement
+            if (intervals.length === 1 && intervals[0].start === 0 && intervals[0].end >= totalPoints
+                && set.stats && set.stats[teamKey] && set.stats[teamKey][playerName]) {
+                // Reparer si necessaire (meme logique que aggregateStats)
+                if (StatsRepair.needsRepair(set)) StatsRepair.repairSetStats(set);
+                var directStats = set.stats[teamKey][playerName];
+                if (directStats) self._mergeStats(merged, directStats);
+                return;
+            }
+
+            // Pas de points : fallback set.stats complet (legacy)
+            if (totalPoints === 0 && set.stats && set.stats[teamKey] && set.stats[teamKey][playerName]) {
+                self._mergeStats(merged, set.stats[teamKey][playerName]);
+                return;
+            }
+
+            // Traitement rally par rally pour les intervalles partiels
+            for (var pi = 0; pi < totalPoints; pi++) {
+                // Verifier si ce point est dans l'un des intervalles
+                var inInterval = false;
+                for (var ii = 0; ii < intervals.length; ii++) {
+                    if (pi >= intervals[ii].start && pi < intervals[ii].end) {
+                        inInterval = true;
+                        break;
+                    }
+                }
+                if (!inInterval) continue;
+
+                var point = points[pi];
+                if (!point || !point.rally) continue;
+
+                // Construire un tempStats avec tous les joueurs du rally (necessaire pour analyse contextuelle)
+                var tempStats = { home: {}, away: {} };
+                point.rally.forEach(function(action) {
+                    if (action.team && action.player) {
+                        if (!tempStats[action.team][action.player]) {
+                            tempStats[action.team][action.player] = self.initPlayerStats();
+                        }
+                    }
+                });
+                // S'assurer que le joueur cible existe dans tempStats
+                if (!tempStats[teamKey][playerName]) {
+                    tempStats[teamKey][playerName] = self.initPlayerStats();
+                }
+
+                // Appeler _processRally existant
+                StatsRepair._processRally(point.rally, tempStats, set);
+
+                // Extraire uniquement les stats du joueur cible
+                var playerStats = tempStats[teamKey][playerName];
+                if (playerStats) self._mergeStats(merged, playerStats);
+            }
+        });
+
+        return merged;
+    },
+
+    // Helper : merge plat de stats (sans la ventilation passe complexe de _mergePlayerStats)
+    // Utilise le meme pattern recursif que _mergePlayerStats de BilanView
+    _mergeStats(target, source) {
+        var cats = ['service', 'reception', 'attack', 'relance', 'defense', 'block'];
+        cats.forEach(function(cat) {
+            if (!source[cat]) return;
+            Object.keys(source[cat]).forEach(function(k) {
+                if (typeof source[cat][k] === 'number') {
+                    target[cat][k] = (target[cat][k] || 0) + source[cat][k];
+                }
+            });
+        });
+        // Pass : structure imbriquee
+        if (source.pass) {
+            var tp = target.pass;
+            var sp = source.pass;
+            ['tot', 'p4', 'p3', 'p2', 'p1', 'fp'].forEach(function(k) {
+                tp[k] = (tp[k] || 0) + (sp[k] || 0);
+            });
+            ['passeur', 'autre'].forEach(function(pType) {
+                if (!sp[pType]) return;
+                ['tot', 'p4', 'p3', 'p2', 'p1', 'fp'].forEach(function(k) {
+                    tp[pType][k] = (tp[pType][k] || 0) + (sp[pType][k] || 0);
+                });
+                var contexts = pType === 'passeur' ? ['confort', 'contraint', 'transition'] : ['contraint', 'transition'];
+                contexts.forEach(function(ctx) {
+                    if (!sp[pType][ctx]) return;
+                    if (!tp[pType][ctx]) tp[pType][ctx] = { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0 };
+                    ['tot', 'p4', 'p3', 'p2', 'p1', 'fp'].forEach(function(k) {
+                        tp[pType][ctx][k] = (tp[pType][ctx][k] || 0) + (sp[pType][ctx][k] || 0);
+                    });
+                });
+            });
+        }
+    },
+
     /**
      * Fusionne les stats joueurs par poste (role).
      * Retourne { 'Passeur Adv.': stats, 'R4 Adv.': stats, 'Pointu Adv.': stats, 'Centre Adv.': stats }
@@ -4395,8 +4514,14 @@ const BilanView = {
                     var setIndices = famData.setIndices;
                     var roles = famData.roles;
 
-                    var playerTotals = StatsAggregator.aggregateStatsBySetIndices(completedSets, teamKey, setIndices);
-                    var stats = playerTotals[name] || StatsAggregator.initPlayerStats();
+                    // V27.0 : utiliser pointIntervals si disponibles
+                    var stats;
+                    if (famData.pointIntervals && famData.pointIntervals.length > 0) {
+                        stats = StatsAggregator.aggregateStatsByPointIntervals(match, teamKey, famData.pointIntervals, name);
+                    } else {
+                        var playerTotals = StatsAggregator.aggregateStatsBySetIndices(completedSets, teamKey, setIndices);
+                        stats = playerTotals[name] || StatsAggregator.initPlayerStats();
+                    }
 
                     var effectiveRole = family;
                     var axes = familyAxes;
@@ -5293,54 +5418,120 @@ const BilanView = {
         return result;
     },
 
-    // Retourne par joueur : familles jouees, indices des sets, roles specifiques
-    // Ex: { "Alex": { families: { "Ailier": { setIndices: [0,1], roles: { R4:1, Pointu:1 } } } } }
+    // --- V27.0 : Intervalles de points par role dans un set ---
+    // Retourne : { playerName: [{ start, end, role, family }], ... }
+    // Utilise les substitutions (pointIndex) pour determiner qui joue a quel poste a chaque point.
+    // Fallback : un seul intervalle [0, totalPoints] si pas de substitutions.
+    // Cache le resultat sur set._roleIntervals_home / set._roleIntervals_away.
+    buildRoleIntervals(set, team) {
+        var self = this;
+        var cacheKey = '_roleIntervals_' + team;
+        if (set[cacheKey]) return set[cacheKey];
+
+        var posRoles = (team === 'away') ? self.POSITION_ROLES_AWAY : self.POSITION_ROLES_HOME;
+        var initialKey = (team === 'away') ? 'initialAwayLineup' : 'initialHomeLineup';
+        var lineupKey = (team === 'away') ? 'awayLineup' : 'homeLineup';
+        var initialLineup = set[initialKey] || set[lineupKey];
+        var totalPoints = (set.points || []).length;
+
+        // Construire roleMap initial : { playerName: role }
+        var roleMap = {};
+        if (initialLineup) {
+            Object.keys(initialLineup).forEach(function(pos) {
+                var name = initialLineup[pos];
+                if (name) roleMap[name] = posRoles[pos] || 'Autre';
+            });
+        }
+
+        // Recuperer substitutions du team, triees par pointIndex
+        var subs = (set.substitutions || []).filter(function(s) {
+            return s.team === team;
+        }).sort(function(a, b) { return a.pointIndex - b.pointIndex; });
+
+        // Construire les intervalles globaux { start, end, roleMap }
+        var rawIntervals = [];
+        var currentRoleMap = Object.assign({}, roleMap);
+        var prevIdx = 0;
+
+        subs.forEach(function(sub) {
+            if (sub.pointIndex > prevIdx) {
+                rawIntervals.push({ start: prevIdx, end: sub.pointIndex, roleMap: Object.assign({}, currentRoleMap) });
+            }
+            if (sub.type === 'swap') {
+                // Swap : inverser les roles de player1 et player2
+                var r1 = sub.role2 || currentRoleMap[sub.player2];
+                var r2 = sub.role1 || currentRoleMap[sub.player1];
+                currentRoleMap[sub.player1] = r1;
+                currentRoleMap[sub.player2] = r2;
+            } else {
+                // Substitution normale : playerOut sort, playerIn entre a la meme position
+                var inheritedRole = posRoles[sub.position] || currentRoleMap[sub.playerOut] || 'Autre';
+                delete currentRoleMap[sub.playerOut];
+                if (sub.playerIn) currentRoleMap[sub.playerIn] = inheritedRole;
+            }
+            prevIdx = sub.pointIndex;
+        });
+        // Dernier intervalle
+        if (prevIdx < totalPoints) {
+            rawIntervals.push({ start: prevIdx, end: totalPoints, roleMap: Object.assign({}, currentRoleMap) });
+        }
+        // Si aucun intervalle (pas de points), en creer un fictif
+        if (rawIntervals.length === 0 && totalPoints === 0) {
+            rawIntervals.push({ start: 0, end: 0, roleMap: Object.assign({}, roleMap) });
+        }
+
+        // Convertir en structure par joueur : { playerName: [{ start, end, role, family }] }
+        var result = {};
+        rawIntervals.forEach(function(iv) {
+            Object.keys(iv.roleMap).forEach(function(name) {
+                var role = iv.roleMap[name];
+                var family = self.ROLE_TO_FAMILY[role] || 'Centre';
+                if (!result[name]) result[name] = [];
+                // Fusionner avec le dernier intervalle si meme role (evite fragmentation)
+                var last = result[name].length > 0 ? result[name][result[name].length - 1] : null;
+                if (last && last.role === role && last.end === iv.start) {
+                    last.end = iv.end;
+                } else {
+                    result[name].push({ start: iv.start, end: iv.end, role: role, family: family });
+                }
+            });
+        });
+
+        set[cacheKey] = result;
+        return result;
+    },
+
+    // V27.0 : Retourne par joueur : familles jouees, indices des sets, roles specifiques + pointIntervals
+    // Ex: { "Alex": { families: { "Ailier": { setIndices: [0,1], roles: { R4:1 }, pointIntervals: [...] } } } }
     getPlayerFamilies(match, team) {
         var self = this;
         var side = team || 'home';
-        var initialKey = (side === 'away') ? 'initialAwayLineup' : 'initialHomeLineup';
-        var lineupKey = (side === 'away') ? 'awayLineup' : 'homeLineup';
-        var positionRoles = (side === 'away') ? self.POSITION_ROLES_AWAY : self.POSITION_ROLES_HOME;
         var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
         var result = {};
 
         completedSets.forEach(function(set, setIndex) {
-            // V20.26 : helper pour ajouter un joueur depuis un lineup
-            function addFromLineup(lu) {
-                if (!lu) return;
-                Object.keys(lu).forEach(function(pos) {
-                    var playerName = lu[pos];
-                    if (!playerName) return;
-                    var role = positionRoles[pos];
-                    if (!role) return;
-                    var family = self.ROLE_TO_FAMILY[role];
+            // V27.0 : utiliser buildRoleIntervals pour obtenir les intervalles par joueur
+            var roleIntervals = self.buildRoleIntervals(set, side);
+
+            Object.keys(roleIntervals).forEach(function(playerName) {
+                var intervals = roleIntervals[playerName];
+                if (!result[playerName]) result[playerName] = { families: {} };
+
+                intervals.forEach(function(iv) {
+                    var family = iv.family;
                     if (!family) return;
 
-                    if (!result[playerName]) result[playerName] = { families: {} };
                     if (!result[playerName].families[family]) {
-                        result[playerName].families[family] = { setIndices: [], roles: {} };
+                        result[playerName].families[family] = { setIndices: [], roles: {}, pointIntervals: [] };
                     }
                     var fam = result[playerName].families[family];
                     if (fam.setIndices.indexOf(setIndex) === -1) {
                         fam.setIndices.push(setIndex);
                     }
-                    fam.roles[role] = (fam.roles[role] || 0) + 1;
+                    fam.roles[iv.role] = (fam.roles[iv.role] || 0) + 1;
+                    fam.pointIntervals.push({ setIndex: setIndex, start: iv.start, end: iv.end, role: iv.role });
                 });
-            }
-            var lineup = set[initialKey] || set[lineupKey];
-            addFromLineup(lineup);
-            // V20.26 : inclure aussi les joueurs entrés en substitution
-            // V26.2 fix : checker contre le lineup initial du set, pas result global
-            var finalLineup = set[lineupKey];
-            if (finalLineup && finalLineup !== lineup) {
-                var initialNames = {};
-                Object.keys(lineup).forEach(function(p) { if (lineup[p]) initialNames[lineup[p]] = true; });
-                Object.keys(finalLineup).forEach(function(pos) {
-                    var playerName = finalLineup[pos];
-                    if (!playerName || initialNames[playerName]) return; // Deja dans le lineup initial
-                    addFromLineup(finalLineup);
-                });
-            }
+            });
         });
 
         return result;
@@ -5403,62 +5594,49 @@ const BilanView = {
         return result;
     },
 
+    // V27.0 : utilise buildRoleIntervals pour obtenir pointIntervals par famille
     getPlayerFamiliesYear(matches) {
         var self = this;
         var result = {};
         matches.forEach(function(match, matchIndex) {
             var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
             completedSets.forEach(function(set, setIndex) {
-                // V20.26 : helper pour ajouter un joueur depuis un lineup
-                function addPlayer(pos, playerName) {
-                    if (!playerName) return;
-                    var role = self.POSITION_ROLES_HOME[pos];
-                    if (!role) return;
-                    var family = self.ROLE_TO_FAMILY[role];
-                    if (!family) return;
+                // V27.0 : utiliser buildRoleIntervals pour decomposer par role/points
+                var roleIntervals = self.buildRoleIntervals(set, 'home');
 
+                Object.keys(roleIntervals).forEach(function(playerName) {
+                    var intervals = roleIntervals[playerName];
                     if (!result[playerName]) result[playerName] = { primaryFamily: null, families: {} };
-                    if (!result[playerName].families[family]) {
-                        result[playerName].families[family] = { matchSets: [], roles: {}, totalSets: 0 };
-                    }
-                    var fam = result[playerName].families[family];
-                    fam.roles[role] = (fam.roles[role] || 0) + 1;
-                    fam.totalSets++;
 
-                    // Ajouter le setIndex au matchSets correspondant
-                    var ms = fam.matchSets.find(function(m) { return m.matchIndex === matchIndex; });
-                    if (!ms) {
-                        ms = { matchIndex: matchIndex, setIndices: [] };
-                        fam.matchSets.push(ms);
-                    }
-                    if (ms.setIndices.indexOf(setIndex) === -1) {
-                        ms.setIndices.push(setIndex);
-                    }
-                }
-                var lineup = set.initialHomeLineup || set.homeLineup;
-                if (!lineup) return;
-                Object.keys(lineup).forEach(function(pos) { addPlayer(pos, lineup[pos]); });
-                // V20.26 : inclure aussi les joueurs entrés en substitution
-                // V26.2 fix : ne pas checker result[playerName] globalement
-                // car un joueur vu dans un match precedent (ex: Centre) doit pouvoir
-                // etre ajoute dans une nouvelle famille (ex: Ailier) depuis un autre match
-                var finalLineup = set.homeLineup;
-                if (finalLineup && finalLineup !== lineup) {
-                    var initialNames = {};
-                    Object.keys(lineup).forEach(function(p) { if (lineup[p]) initialNames[lineup[p]] = true; });
-                    Object.keys(finalLineup).forEach(function(pos) {
-                        var playerName = finalLineup[pos];
-                        if (!playerName || initialNames[playerName]) return; // Deja dans le lineup initial de ce set
-                        addPlayer(pos, playerName);
+                    intervals.forEach(function(iv) {
+                        var family = iv.family;
+                        if (!family) return;
+
+                        if (!result[playerName].families[family]) {
+                            result[playerName].families[family] = { matchSets: [], roles: {}, totalSets: 0, totalPoints: 0 };
+                        }
+                        var fam = result[playerName].families[family];
+                        fam.roles[iv.role] = (fam.roles[iv.role] || 0) + 1;
+                        var pointsInInterval = iv.end - iv.start;
+                        fam.totalPoints = (fam.totalPoints || 0) + pointsInInterval;
+                        fam.totalSets++;
+
+                        // Ajouter le setIndex au matchSets correspondant + pointIntervals
+                        var ms = fam.matchSets.find(function(m) { return m.matchIndex === matchIndex; });
+                        if (!ms) {
+                            ms = { matchIndex: matchIndex, setIndices: [], pointIntervals: [] };
+                            fam.matchSets.push(ms);
+                        }
+                        if (ms.setIndices.indexOf(setIndex) === -1) {
+                            ms.setIndices.push(setIndex);
+                        }
+                        ms.pointIntervals.push({ setIndex: setIndex, start: iv.start, end: iv.end, role: iv.role });
                     });
-                }
+                });
             });
         });
 
-        // Determiner primaryFamily par joueur
-        // V26.2 fix : preferer les familles ou le joueur a des stats reelles
-        // Un joueur dans le lineup mais sans actions (0 stats) ne devrait pas
-        // imposer sa famille comme primaire
+        // Determiner primaryFamily par joueur (garde pour tri/couleur, plus utilise comme filtre exclusif)
         var familyOrder = self.FAMILY_ORDER;
         Object.keys(result).forEach(function(name) {
             var families = result[name].families;
@@ -5490,9 +5668,6 @@ const BilanView = {
             Object.keys(families).forEach(function(fam) {
                 var statsCount = families[fam].setsWithStats || 0;
                 var totalCount = families[fam].totalSets;
-                // Priorite : famille avec plus de sets ayant des stats
-                // En cas d'egalite : plus de sets total
-                // En cas d'egalite : ordre FAMILY_ORDER
                 if (statsCount > bestStatsCount
                     || (statsCount === bestStatsCount && totalCount > bestTotalCount)
                     || (statsCount === bestStatsCount && totalCount === bestTotalCount && familyOrder.indexOf(fam) < familyOrder.indexOf(best))) {
@@ -5507,23 +5682,35 @@ const BilanView = {
         return result;
     },
 
+    // V27.0 : utilise pointIntervals si disponibles, sinon fallback set-level
     aggregateStatsForFamilyYear(matches, playerName, familyData) {
         var self = this;
         var merged = StatsAggregator.initPlayerStats();
         familyData.matchSets.forEach(function(ms) {
             var match = matches[ms.matchIndex];
             if (!match) return;
-            var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
-            var playerTotals = StatsAggregator.aggregateStatsBySetIndices(completedSets, 'home', ms.setIndices);
-            var stats = playerTotals[playerName];
-            if (stats) {
-                self._mergePlayerStats(merged, stats);
+            if (ms.pointIntervals && ms.pointIntervals.length > 0) {
+                // V27.0 : filtrage point-level
+                var stats = StatsAggregator.aggregateStatsByPointIntervals(match, 'home', ms.pointIntervals, playerName);
+                if (stats) self._mergePlayerStats(merged, stats);
+            } else {
+                // Legacy fallback : set-level
+                var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+                var playerTotals = StatsAggregator.aggregateStatsBySetIndices(completedSets, 'home', ms.setIndices);
+                var stats = playerTotals[playerName];
+                if (stats) self._mergePlayerStats(merged, stats);
             }
         });
         return merged;
     },
 
+    // V27.0 : seuil minimum de points pour creer une carte dans une famille secondaire
+    // V27.0 : seuil pour creer une carte dans une famille secondaire
+    // 50 points ≈ 1.2 sets → exige au moins 2 demi-sets ou 1 set+ pour etre significatif
+    MIN_POINTS_FOR_FAMILY: 50,
+
     // IP agregat par famille : agrege les stats sur tous les matchs, calcule un seul IP
+    // V27.0 : itere TOUTES les familles d'un joueur (plus filtre par primaryFamily)
     computeIPForFamily(matches, playerFamiliesYear, family) {
         var self = this;
         var familyIpRole = (family === 'Ailier') ? 'R4' : family;
@@ -5531,9 +5718,11 @@ const BilanView = {
 
         Object.keys(playerFamiliesYear).forEach(function(name) {
             var pData = playerFamiliesYear[name];
-            if (pData.primaryFamily !== family) return;
+            // V27.0 : ne plus filtrer par primaryFamily — iterer toutes les familles
             var famData = pData.families[family];
             if (!famData) return;
+            // Seuil minimum de points pour famille secondaire
+            if (famData.totalPoints !== undefined && famData.totalPoints < self.MIN_POINTS_FOR_FAMILY) return;
 
             // Agreger les stats sur tous les matchs de la famille
             var stats = self.aggregateStatsForFamilyYear(matches, name, famData);
@@ -6069,10 +6258,16 @@ const BilanView = {
                     if (primaryRole !== role) return;
                 }
 
-                var playerTotals = StatsAggregator.aggregateStatsBySetIndices(
-                    completedSets, 'away', fam.setIndices
-                );
-                var stats = playerTotals[name];
+                // V27.0 : utiliser pointIntervals si disponibles
+                var stats;
+                if (fam.pointIntervals && fam.pointIntervals.length > 0) {
+                    stats = StatsAggregator.aggregateStatsByPointIntervals(match, 'away', fam.pointIntervals, name);
+                } else {
+                    var playerTotals = StatsAggregator.aggregateStatsBySetIndices(
+                        completedSets, 'away', fam.setIndices
+                    );
+                    stats = playerTotals[name];
+                }
                 if (!stats) return;
 
                 var effectiveRole = (role === 'Centre') ? self.getCentreIpRole(stats) : role;
@@ -6833,9 +7028,10 @@ const RankingView = {
                 var familyIpRole = (family === 'Ailier') ? 'R4' : family;
 
                 Object.keys(playerFamiliesYear).forEach(function(name) {
-                    if (playerFamiliesYear[name].primaryFamily !== family) return;
+                    // V27.0 : ne plus filtrer par primaryFamily — iterer toutes les familles
                     var famData = playerFamiliesYear[name].families[family];
                     if (!famData) return;
+                    if (famData.totalPoints !== undefined && famData.totalPoints < BilanView.MIN_POINTS_FOR_FAMILY) return;
 
                     var stats = BilanView.aggregateStatsForFamilyYear(matchesWithSets, name, famData);
                     var hasStats = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'].some(function(cat) {
@@ -6846,12 +7042,14 @@ const RankingView = {
                     var playerIpRole = (family === 'Centre') ? BilanView.getCentreIpRole(stats) : familyIpRole;
                     var scores = BilanView.computeAxisScores(stats, playerIpRole);
 
-                    var roleInfo = playerRolesYear[name];
-                    var primaryRole = roleInfo ? roleInfo.primaryRole : family;
-                    var roleColor = BilanView.ROLE_COLORS[primaryRole] || '#5f6368';
+                    // V27.0 : utiliser le role principal DANS CETTE FAMILLE, pas le role global
+                    var familyPrimaryRole = Object.keys(famData.roles).sort(function(a, b) {
+                        return (famData.roles[b] || 0) - (famData.roles[a] || 0);
+                    })[0] || family;
+                    var roleColor = BilanView.ROLE_COLORS[familyPrimaryRole] || '#5f6368';
 
                     allPlayers.push({
-                        name: name, role: primaryRole, roleColor: roleColor,
+                        name: name, role: familyPrimaryRole, roleColor: roleColor,
                         scores: scores, ip: 0, effectiveRole: familyIpRole,
                         matchCount: famData.matchSets.length
                     });
@@ -6872,43 +7070,50 @@ const RankingView = {
                 d.ip = BilanView.computeIP(d.scores, d.effectiveRole);
             });
         } else {
-            // AWAY : agreger stats par joueur sur tous les matchs, IP agregat
-            var mergedData = {}; // name → { stats, roles: {role: count}, matchCount }
+            // AWAY : V27.0 — agreger stats par joueur PAR FAMILLE sur tous les matchs, multi-cartes
+            var mergedData = {}; // "name|family" → { stats, roles, matchCount, family }
 
             matchesWithSets.forEach(function(match) {
                 var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
                 if (completedSets.length === 0) return;
 
                 var families = BilanView.getPlayerFamilies(match, 'away');
-                var roles = BilanView.getPlayerRoles(match, 'away');
 
                 Object.keys(families).forEach(function(name) {
-                    var roleInfo = roles[name];
-                    if (!roleInfo) return;
-                    var primaryRole = roleInfo.primaryRole;
-                    var primaryFamily = BilanView.ROLE_TO_FAMILY[primaryRole];
-                    if (!primaryFamily) return;
+                    var playerFams = families[name].families;
+                    Object.keys(playerFams).forEach(function(family) {
+                        var famData = playerFams[family];
+                        if (!famData) return;
 
-                    var famData = families[name].families[primaryFamily];
-                    if (!famData) return;
-                    var playerTotals = StatsAggregator.aggregateStatsBySetIndices(completedSets, 'away', famData.setIndices);
-                    var stats = playerTotals[name];
-                    if (!stats) return;
+                        // V27.0 : utiliser pointIntervals si disponibles
+                        var stats;
+                        if (famData.pointIntervals && famData.pointIntervals.length > 0) {
+                            stats = StatsAggregator.aggregateStatsByPointIntervals(match, 'away', famData.pointIntervals, name);
+                        } else {
+                            var playerTotals = StatsAggregator.aggregateStatsBySetIndices(completedSets, 'away', famData.setIndices);
+                            stats = playerTotals[name];
+                        }
+                        if (!stats) return;
 
-                    if (!mergedData[name]) {
-                        mergedData[name] = {
-                            stats: StatsAggregator.initPlayerStats(),
-                            roles: {}, matchCount: 0
-                        };
-                    }
-                    BilanView._mergePlayerStats(mergedData[name].stats, stats);
-                    mergedData[name].roles[primaryRole] = (mergedData[name].roles[primaryRole] || 0) + 1;
-                    mergedData[name].matchCount++;
+                        var key = name + '|' + family;
+                        if (!mergedData[key]) {
+                            mergedData[key] = {
+                                name: name, family: family,
+                                stats: StatsAggregator.initPlayerStats(),
+                                roles: {}, matchCount: 0
+                            };
+                        }
+                        BilanView._mergePlayerStats(mergedData[key].stats, stats);
+                        Object.keys(famData.roles).forEach(function(r) {
+                            mergedData[key].roles[r] = (mergedData[key].roles[r] || 0) + (famData.roles[r] || 0);
+                        });
+                        mergedData[key].matchCount++;
+                    });
                 });
             });
 
-            Object.keys(mergedData).forEach(function(name) {
-                var entry = mergedData[name];
+            Object.keys(mergedData).forEach(function(key) {
+                var entry = mergedData[key];
                 var stats = entry.stats;
 
                 var hasStats = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'].some(function(cat) {
@@ -6917,7 +7122,7 @@ const RankingView = {
                 if (!hasStats) return;
 
                 var primaryRole = Object.keys(entry.roles).sort(function(a, b) { return entry.roles[b] - entry.roles[a]; })[0];
-                var primaryFamily = BilanView.ROLE_TO_FAMILY[primaryRole];
+                var primaryFamily = entry.family;
                 var ipRole = (primaryFamily === 'Ailier') ? 'R4' : primaryFamily;
                 if (ipRole === 'Centre') ipRole = BilanView.getCentreIpRole(stats);
 
@@ -6925,7 +7130,7 @@ const RankingView = {
                 var roleColor = BilanView.ROLE_COLORS[primaryRole] || '#5f6368';
 
                 allPlayers.push({
-                    name: name, role: primaryRole, roleColor: roleColor,
+                    name: entry.name, role: primaryRole, roleColor: roleColor,
                     scores: scores, ip: 0, effectiveRole: (primaryFamily === 'Ailier') ? 'R4' : primaryFamily, matchCount: entry.matchCount
                 });
             });
@@ -7061,7 +7266,7 @@ const RankingView = {
                 var rank = 1; // # repart a 1 pour chaque poste
                 groups[fam].forEach(function(p) {
                     var teamColor = getTeamColor(p.teamName);
-                    html += '<tr class="ranking-row ranking-player-row" data-player-name="' + p.name.replace(/"/g, '&quot;') + '" data-player-team="' + p.teamName.replace(/"/g, '&quot;') + '">';
+                    html += '<tr class="ranking-row ranking-player-row" data-player-name="' + p.name.replace(/"/g, '&quot;') + '" data-player-team="' + p.teamName.replace(/"/g, '&quot;') + '" data-player-role="' + p.role + '">';
                     html += '<td>' + rank + '</td>';
                     html += '<td><span class="bilan-role-dot" style="background:' + p.roleColor + '"></span> ' + p.name + '</td>';
                     html += '<td class="ranking-matchcount"><span class="ranking-team-badge ranking-team-badge-sm" style="background:' + teamColor + '">' + p.teamName + '</span></td>';
@@ -7075,7 +7280,7 @@ const RankingView = {
             var sorted = this._sortData(data.allPlayerCards, s.col, s.asc);
             sorted.forEach(function(p, idx) {
                 var teamColor = getTeamColor(p.teamName);
-                html += '<tr class="ranking-row ranking-player-row" data-player-name="' + p.name.replace(/"/g, '&quot;') + '" data-player-team="' + p.teamName.replace(/"/g, '&quot;') + '">';
+                html += '<tr class="ranking-row ranking-player-row" data-player-name="' + p.name.replace(/"/g, '&quot;') + '" data-player-team="' + p.teamName.replace(/"/g, '&quot;') + '" data-player-role="' + p.role + '">';
                 html += '<td>' + (idx + 1) + '</td>';
                 html += '<td><span class="bilan-role-dot" style="background:' + p.roleColor + '"></span> ' + p.name + '</td>';
                 html += '<td class="ranking-matchcount"><span class="ranking-team-badge ranking-team-badge-sm" style="background:' + teamColor + '">' + p.teamName + '</span></td>';
@@ -7224,8 +7429,9 @@ const RankingView = {
                 row.addEventListener('click', function() {
                     var name = row.dataset.playerName;
                     var team = row.dataset.playerTeam;
+                    var role = row.dataset.playerRole;
                     var playerData = self._cachedData.allPlayerCards.find(function(p) {
-                        return p.name === name && p.teamName === team;
+                        return p.name === name && p.teamName === team && p.role === role;
                     });
                     if (!playerData) return;
                     RankingTeamModal.open(self.renderPlayerModal(playerData), playerData.name);
@@ -10042,9 +10248,11 @@ const YearStatsView = {
 
             var playersInFamily = [];
             Object.keys(playerFamiliesYear).forEach(function(name) {
-                if (playerFamiliesYear[name].primaryFamily === family) {
-                    playersInFamily.push(name);
-                }
+                // V27.0 : ne plus filtrer par primaryFamily — iterer toutes les familles
+                var famData = playerFamiliesYear[name].families[family];
+                if (!famData) return;
+                if (famData.totalPoints !== undefined && famData.totalPoints < BilanView.MIN_POINTS_FOR_FAMILY) return;
+                playersInFamily.push(name);
             });
             if (playersInFamily.length === 0) return;
 
@@ -10143,18 +10351,45 @@ const YearStatsView = {
             dataBySlot[d.slot].push(d);
         });
 
-        // Rendu cartes Jen par slot, case vide si nombre impair
+        // V27.0 : Pre-calculer les cartes adverses par role pour interleaving
+        var AWAY_ROLES = ['Passeur', 'R4', 'Pointu', 'Centre'];
+        var awayByRole = {};
+        AWAY_ROLES.forEach(function(role) {
+            var avg = BilanView.aggregateAwayRoleYear(matches, role);
+            if (avg) awayByRole[role] = avg;
+        });
+
+        // Meilleur Jen par role (pour overlay sur cartes adverses)
+        var bestJenByRole = {};
+        allPlayerData.forEach(function(d) {
+            var role = d.slot;
+            if (!bestJenByRole[role] || d.ip > bestJenByRole[role].ip) {
+                bestJenByRole[role] = { name: d.name, scores: d.scores, role: d.effectiveRole, ip: d.ip };
+            }
+        });
+
+        // V27.0 : Rendu par slot — Passeurs Adv. a droite du meilleur passeur, reste classique
+        // Carte Passeurs Adv. pre-calculee pour interleaving
+        var awayPasseurCardHtml = '';
+        if (awayByRole['Passeur']) {
+            var pAvg = awayByRole['Passeur'];
+            var pColor = BilanView._lightenColor(BilanView.ROLE_COLORS['Passeur'] || '#ea4335', 0.35);
+            var pOverlay = bestJenByRole['Passeur'] || null;
+            awayPasseurCardHtml = BilanView.renderSpiderChart(
+                pAvg.name, 'Passeur', pAvg.scores, pAvg.ip,
+                pColor, BilanView.SPIDER_AXES, true, pOverlay, null
+            );
+            awayPasseurCardHtml = awayPasseurCardHtml.replace('bilan-player-card"', 'bilan-player-card bilan-away-avg bilan-away-avg-lilas"');
+        }
+
         SLOT_ORDER_YEAR.forEach(function(slot) {
             var slotData = dataBySlot[slot] || [];
-            var totalCards = slotData.length;
+            if (slotData.length === 0) return;
 
-            // Pour le slot Passeur : ajouter la carte moyenne adverse lilas
-            var showAwayPasseurCard = (slot === 'Passeur' && awayPasseursAvg);
-            if (showAwayPasseurCard) totalCards++;
+            // Seul le slot Passeur a la carte Adv. integree a droite
+            var showAwayCard = (slot === 'Passeur' && awayPasseurCardHtml);
 
-            if (totalCards === 0) return;
-
-            slotData.forEach(function(d) {
+            slotData.forEach(function(d, idx) {
                 var fo = familyOverlays[d.family];
                 var overlay = null;
                 if (fo) {
@@ -10165,21 +10400,15 @@ const YearStatsView = {
                     }
                 }
                 html += BilanView.renderSpiderChart(d.name, d.effectiveRole, d.scores, d.ip, d.primaryColor, d.axes, false, overlay, d.roleColors);
+
+                // Passeurs Adv. a droite du meilleur passeur uniquement
+                if (showAwayCard && idx === 0) {
+                    html += awayPasseurCardHtml;
+                }
             });
 
-            // Carte moyenne passeurs adverses (lilas, avec overlay comparaison)
-            if (showAwayPasseurCard) {
-                var homePasseurOverlay = (passeurCount === 1 && familyOverlays['Passeur'] && familyOverlays['Passeur'].best)
-                    ? familyOverlays['Passeur'].best : null;
-                var awayCard = BilanView.renderSpiderChart(
-                    awayPasseursAvg.name,
-                    'Passeur', awayPasseursAvg.scores, awayPasseursAvg.ip,
-                    '#b4a0d6', BilanView.SPIDER_AXES, true,
-                    homePasseurOverlay, null
-                );
-                html += awayCard.replace('bilan-player-card"', 'bilan-player-card bilan-away-avg bilan-away-avg-lilas"');
-            }
-
+            // Parite : case vide si impair
+            var totalCards = slotData.length + (showAwayCard ? 1 : 0);
             if (totalCards % 2 !== 0) {
                 html += '<div class="bilan-player-card bilan-player-empty"></div>';
             }
@@ -10187,24 +10416,13 @@ const YearStatsView = {
 
         html += '</div>'; // bilan-grid-year
 
-        // --- Section Adversaire moyen (4 roles) ---
-        var AWAY_ROLES = ['Passeur', 'R4', 'Pointu', 'Centre'];
-        var awayCards = [];
-        AWAY_ROLES.forEach(function(role) {
-            var avg = BilanView.aggregateAwayRoleYear(matches, role);
-            if (avg) awayCards.push({ role: role, data: avg });
+        // --- Section Adversaire moyen (Passeur, R4, Pointu, Centre) ---
+        var awayCardsBottom = [];
+        ['Passeur', 'R4', 'Pointu', 'Centre'].forEach(function(role) {
+            if (awayByRole[role]) awayCardsBottom.push({ role: role, data: awayByRole[role] });
         });
 
-        if (awayCards.length > 0) {
-            // Pre-calculer meilleur Jen par role pour overlay
-            var bestJenByRole = {};
-            allPlayerData.forEach(function(d) {
-                var role = d.slot; // slot = role effectif (Passeur, R4, Pointu, Centre)
-                if (!bestJenByRole[role] || d.ip > bestJenByRole[role].ip) {
-                    bestJenByRole[role] = { name: d.name, scores: d.scores, role: d.effectiveRole, ip: d.ip };
-                }
-            });
-
+        if (awayCardsBottom.length > 0) {
             html += '<div class="bilan-h2h-header">';
             html += '<span class="bilan-h2h-team" style="color:#ea4335">Adversaire moyen</span>';
             html += '</div>';
@@ -10213,7 +10431,7 @@ const YearStatsView = {
             html += '<span class="bilan-compare-icon">\uD83D\uDC41</span> Comparer</button>';
             html += '</div>';
             html += '<div class="bilan-grid-year bilan-grid-year-away">';
-            awayCards.forEach(function(ac) {
+            awayCardsBottom.forEach(function(ac) {
                 var roleColor = BilanView.ROLE_COLORS[ac.role] || '#ea4335';
                 var mutedColor = BilanView._lightenColor(roleColor, 0.35);
                 var overlay = bestJenByRole[ac.role] || null;
@@ -10223,7 +10441,7 @@ const YearStatsView = {
                 );
                 html += awayCard.replace('bilan-player-card"', 'bilan-player-card bilan-away-avg bilan-away-avg-lilas"');
             });
-            if (awayCards.length % 2 !== 0) {
+            if (awayCardsBottom.length % 2 !== 0) {
                 html += '<div class="bilan-player-card bilan-player-empty"></div>';
             }
             html += '</div>'; // bilan-grid-year-away
