@@ -5,10 +5,10 @@
     "name": "Medium",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/15",
-    "lastUpdated": "2026-03-27T03:15:27",
+    "lastUpdated": "2026-03-31T00:08:40",
     "teamCount": 9,
-    "matchesPlayed": 47,
-    "matchesUpcoming": 25
+    "matchesPlayed": 48,
+    "matchesUpcoming": 24
   },
   "teams": {
     "coch": {
@@ -46,14 +46,14 @@
       "short": "MS",
       "color": "#e67e22"
     },
-    "ryoi": {
-      "name": "RYŌIKI TENKAI",
-      "short": "RT",
-      "color": "#f1c40f"
-    },
     "tigr": {
       "name": "Les Tigres & Gorilles",
       "short": "T&",
+      "color": "#f1c40f"
+    },
+    "ryoi": {
+      "name": "RYŌIKI TENKAI",
+      "short": "RT",
       "color": "#95a5a6"
     }
   },
@@ -88,7 +88,7 @@
         "D",
         "W",
         "D",
-        "P",
+        "D",
         "P",
         "P",
         "P"
@@ -97,18 +97,18 @@
     {
       "rank": 2,
       "team": "olym",
-      "mj": 9,
-      "g": 7,
+      "mj": 10,
+      "g": 8,
       "p": 2,
-      "setPlus": 23,
+      "setPlus": 26,
       "setMinus": 13,
-      "ds": 10,
-      "coefSet": "1.77",
-      "ptsPlus": 813,
-      "ptsMinus": 746,
-      "dp": "+67",
-      "coefPts": "1.09",
-      "pts": 16,
+      "ds": 13,
+      "coefSet": "2.00",
+      "ptsPlus": 888,
+      "ptsMinus": 800,
+      "dp": "+88",
+      "coefPts": "1.11",
+      "pts": 18,
       "formAller": [
         "W",
         "L",
@@ -123,7 +123,7 @@
         "W",
         "D",
         "W",
-        "P",
+        "W",
         "D",
         "P",
         "P",
@@ -232,7 +232,7 @@
         "D",
         "W",
         "D",
-        "P",
+        "D",
         "D",
         "D",
         "P"
@@ -268,7 +268,7 @@
         "L",
         "L",
         "D",
-        "P",
+        "D",
         "D",
         "P",
         "P"
@@ -303,7 +303,7 @@
         "L",
         "W",
         "L",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -349,18 +349,18 @@
     {
       "rank": 9,
       "team": "tigr",
-      "mj": 11,
+      "mj": 12,
       "g": 2,
-      "p": 9,
+      "p": 10,
       "setPlus": 11,
-      "setMinus": 29,
-      "ds": -18,
-      "coefSet": "0.38",
-      "ptsPlus": 806,
-      "ptsMinus": 907,
-      "dp": "-101",
-      "coefPts": "0.89",
-      "pts": 13,
+      "setMinus": 32,
+      "ds": -21,
+      "coefSet": "0.34",
+      "ptsPlus": 860,
+      "ptsMinus": 982,
+      "dp": "-122",
+      "coefPts": "0.88",
+      "pts": 14,
       "formAller": [
         "W",
         "L",
@@ -375,7 +375,7 @@
         "L",
         "L",
         "L",
-        "P",
+        "L",
         "D",
         "P",
         "P",
@@ -388,6 +388,15 @@
       "date": "14/04/2026",
       "home": "boit",
       "away": "rhum",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "30/03/2026",
+      "home": "olym",
+      "away": "tigr",
       "scoreHome": 3,
       "scoreAway": 0,
       "homeWin": true,
@@ -822,22 +831,16 @@
       "status": "Reporté"
     },
     {
-      "date": "30/03/2026",
-      "home": "olym",
-      "away": "tigr",
-      "status": "Sem. 12"
-    },
-    {
       "date": "31/03/2026",
       "home": "rhum",
       "away": "coch",
-      "status": "Sem. 13"
+      "status": "Reporté"
     },
     {
       "date": "31/03/2026",
       "home": "boit",
       "away": "team",
-      "status": "Sem. 13"
+      "status": "Reporté"
     },
     {
       "date": "01/04/2026",
@@ -974,11 +977,11 @@
     {
       "rank": 2,
       "team": "olym",
-      "elo": 1618.3,
-      "movement": 31.5,
-      "record": "7-2",
-      "power": 78.7,
-      "calendar": "V x3",
+      "elo": 1630.3,
+      "movement": 11.9,
+      "record": "8-2",
+      "power": 81.7,
+      "calendar": "V x4",
       "diffClass": "diff-easy"
     },
     {
@@ -1044,11 +1047,11 @@
     {
       "rank": 9,
       "team": "tigr",
-      "elo": 1345.3,
-      "movement": -23.0,
-      "record": "2-9",
-      "power": 12.4,
-      "calendar": "D x3",
+      "elo": 1333.3,
+      "movement": -11.9,
+      "record": "2-10",
+      "power": 9.5,
+      "calendar": "D x4",
       "diffClass": "diff-hard"
     }
   ],
@@ -1092,7 +1095,8 @@
       1549.6,
       1561.0,
       1586.8,
-      1618.3
+      1618.3,
+      1630.3
     ],
     "rhum": [
       1500,
@@ -1147,6 +1151,21 @@
       1521.2,
       1558.3
     ],
+    "tigr": [
+      1500,
+      1529.6,
+      1497.5,
+      1460.1,
+      1431.3,
+      1414.2,
+      1393.1,
+      1381.4,
+      1403.5,
+      1384.7,
+      1368.2,
+      1345.3,
+      1333.3
+    ],
     "ryoi": [
       1500,
       1480.8,
@@ -1160,20 +1179,6 @@
       1319.3,
       1371.4,
       1393.7
-    ],
-    "tigr": [
-      1500,
-      1529.6,
-      1497.5,
-      1460.1,
-      1431.3,
-      1414.2,
-      1393.1,
-      1381.4,
-      1403.5,
-      1384.7,
-      1368.2,
-      1345.3
     ]
   },
   "evolutionData": {
@@ -1223,7 +1228,8 @@
           10,
           12,
           14,
-          16
+          16,
+          18
         ],
         "rank": 2
       },
@@ -1292,6 +1298,24 @@
         ],
         "rank": 3
       },
+      "tigr": {
+        "points": [
+          0,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "rank": 9
+      },
       "ryoi": {
         "points": [
           0,
@@ -1308,23 +1332,6 @@
           13
         ],
         "rank": 8
-      },
-      "tigr": {
-        "points": [
-          0,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          10,
-          11,
-          12,
-          13
-        ],
-        "rank": 9
       }
     }
   }
