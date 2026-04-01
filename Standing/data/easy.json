@@ -5,10 +5,10 @@
     "name": "Easy",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/3",
-    "lastUpdated": "2026-03-31T00:08:41",
+    "lastUpdated": "2026-04-02T00:42:54",
     "teamCount": 8,
-    "matchesPlayed": 40,
-    "matchesUpcoming": 16
+    "matchesPlayed": 41,
+    "matchesUpcoming": 15
   },
   "teams": {
     "pyth": {
@@ -16,24 +16,24 @@
       "short": "PC",
       "color": "#e74c3c"
     },
-    "neku": {
-      "name": "Nekutā",
-      "short": "NE",
-      "color": "#3498db"
-    },
     "fous": {
       "name": "Les fous tuent",
       "short": "FT",
-      "color": "#2ecc71"
+      "color": "#3498db"
     },
-    "bats": {
-      "name": "Batstreet Back",
-      "short": "BB",
-      "color": "#f39c12"
+    "neku": {
+      "name": "Nekutā",
+      "short": "NE",
+      "color": "#2ecc71"
     },
     "touk": {
       "name": "TOUKC",
       "short": "TO",
+      "color": "#f39c12"
+    },
+    "bats": {
+      "name": "Batstreet Back",
+      "short": "BB",
       "color": "#9b59b6"
     },
     "punc": {
@@ -116,60 +116,26 @@
         "W",
         "D",
         "W",
-        "P",
+        "D",
         "P",
         "P"
       ]
     },
     {
       "rank": 3,
-      "team": "touk",
-      "mj": 9,
-      "g": 6,
-      "p": 3,
-      "setPlus": 21,
-      "setMinus": 12,
-      "ds": 9,
-      "coefSet": "1.75",
-      "ptsPlus": 717,
-      "ptsMinus": 697,
-      "dp": "+20",
-      "coefPts": "1.03",
-      "pts": 15,
-      "formAller": [
-        "L",
-        "L",
-        "W",
-        "W",
-        "W",
-        "L",
-        "W"
-      ],
-      "formRetour": [
-        "D",
-        "W",
-        "D",
-        "W",
-        "D",
-        "D",
-        "P"
-      ]
-    },
-    {
-      "rank": 4,
       "team": "fous",
-      "mj": 10,
-      "g": 6,
+      "mj": 11,
+      "g": 7,
       "p": 4,
-      "setPlus": 21,
-      "setMinus": 12,
-      "ds": 9,
-      "coefSet": "1.75",
-      "ptsPlus": 761,
-      "ptsMinus": 679,
-      "dp": "+82",
-      "coefPts": "1.12",
-      "pts": 16,
+      "setPlus": 24,
+      "setMinus": 13,
+      "ds": 11,
+      "coefSet": "1.85",
+      "ptsPlus": 858,
+      "ptsMinus": 756,
+      "dp": "+102",
+      "coefPts": "1.13",
+      "pts": 18,
       "formAller": [
         "W",
         "W",
@@ -184,8 +150,42 @@
         "L",
         "L",
         "W",
-        "D",
+        "W",
         "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 4,
+      "team": "touk",
+      "mj": 10,
+      "g": 6,
+      "p": 4,
+      "setPlus": 22,
+      "setMinus": 15,
+      "ds": 7,
+      "coefSet": "1.47",
+      "ptsPlus": 794,
+      "ptsMinus": 794,
+      "dp": "0",
+      "coefPts": "1.00",
+      "pts": 16,
+      "formAller": [
+        "L",
+        "L",
+        "W",
+        "W",
+        "W",
+        "L",
+        "W"
+      ],
+      "formRetour": [
+        "D",
+        "W",
+        "D",
+        "W",
+        "L",
+        "D",
         "P"
       ]
     },
@@ -252,7 +252,7 @@
         "W",
         "D",
         "L",
-        "P",
+        "D",
         "P",
         "P"
       ]
@@ -327,6 +327,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "31/03/2026",
+      "home": "fous",
+      "away": "touk",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "30/03/2026",
       "home": "pyth",
@@ -572,20 +581,20 @@
     },
     {
       "date": "25/11/2025",
-      "home": "bats",
-      "away": "neku",
-      "scoreHome": 2,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "25/11/2025",
       "home": "fous",
       "away": "punc",
       "scoreHome": 3,
       "scoreAway": 0,
       "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "25/11/2025",
+      "home": "bats",
+      "away": "neku",
+      "scoreHome": 2,
+      "scoreAway": 3,
+      "homeWin": false,
       "status": "Terminé"
     },
     {
@@ -708,16 +717,10 @@
       "status": "Reporté"
     },
     {
-      "date": "31/03/2026",
-      "home": "fous",
-      "away": "touk",
-      "status": "Reporté"
-    },
-    {
       "date": "02/04/2026",
       "home": "fata",
       "away": "neku",
-      "status": "Sem. 12"
+      "status": "Reporté"
     },
     {
       "date": "06/04/2026",
@@ -809,23 +812,23 @@
     },
     {
       "rank": 3,
-      "team": "touk",
-      "elo": 1592.0,
-      "movement": 16.7,
-      "record": "6-3",
-      "power": 73.8,
-      "calendar": "V x3",
+      "team": "fous",
+      "elo": 1569.1,
+      "movement": 35.4,
+      "record": "7-4",
+      "power": 67.9,
+      "calendar": "V vs TOUKC",
       "diffClass": "diff-easy"
     },
     {
       "rank": 4,
-      "team": "fous",
-      "elo": 1533.7,
-      "movement": 31.8,
+      "team": "touk",
+      "elo": 1556.7,
+      "movement": -35.4,
       "record": "6-4",
-      "power": 58.7,
-      "calendar": "V vs Punchline",
-      "diffClass": "diff-easy"
+      "power": 64.7,
+      "calendar": "D vs Les",
+      "diffClass": "diff-hard"
     },
     {
       "rank": 5,
@@ -884,6 +887,20 @@
       1674.5,
       1680.9
     ],
+    "fous": [
+      1500,
+      1537.3,
+      1573.3,
+      1596.8,
+      1615.0,
+      1580.0,
+      1545.3,
+      1565.7,
+      1544.4,
+      1501.9,
+      1533.7,
+      1569.1
+    ],
     "neku": [
       1500,
       1519.0,
@@ -896,18 +913,18 @@
       1648.4,
       1674.9
     ],
-    "fous": [
+    "touk": [
       1500,
-      1537.3,
-      1573.3,
-      1596.8,
-      1615.0,
-      1580.0,
-      1545.3,
-      1565.7,
-      1544.4,
-      1501.9,
-      1533.7
+      1481.0,
+      1460.6,
+      1488.1,
+      1522.9,
+      1557.8,
+      1520.8,
+      1539.5,
+      1575.3,
+      1592.0,
+      1556.7
     ],
     "bats": [
       1500,
@@ -922,18 +939,6 @@
       1472.6,
       1515.1,
       1488.7
-    ],
-    "touk": [
-      1500,
-      1481.0,
-      1460.6,
-      1488.1,
-      1522.9,
-      1557.8,
-      1520.8,
-      1539.5,
-      1575.3,
-      1592.0
     ],
     "punc": [
       1500,
@@ -994,6 +999,23 @@
         ],
         "rank": 1
       },
+      "fous": {
+        "points": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          9,
+          10,
+          12,
+          13,
+          14,
+          16,
+          18
+        ],
+        "rank": 3
+      },
       "neku": {
         "points": [
           0,
@@ -1009,18 +1031,18 @@
         ],
         "rank": 2
       },
-      "fous": {
+      "touk": {
         "points": [
           0,
+          1,
           2,
           4,
           6,
           8,
           9,
-          10,
-          12,
+          11,
           13,
-          14,
+          15,
           16
         ],
         "rank": 4
@@ -1041,21 +1063,6 @@
           16
         ],
         "rank": 5
-      },
-      "touk": {
-        "points": [
-          0,
-          1,
-          2,
-          4,
-          6,
-          8,
-          9,
-          11,
-          13,
-          15
-        ],
-        "rank": 3
       },
       "punc": {
         "points": [

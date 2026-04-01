@@ -5,10 +5,10 @@
     "name": "Hard",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/2",
-    "lastUpdated": "2026-03-31T00:08:40",
+    "lastUpdated": "2026-04-02T00:42:53",
     "teamCount": 10,
-    "matchesPlayed": 56,
-    "matchesUpcoming": 34
+    "matchesPlayed": 57,
+    "matchesUpcoming": 33
   },
   "teams": {
     "inde": {
@@ -16,34 +16,34 @@
       "short": "IN",
       "color": "#e74c3c"
     },
+    "padn": {
+      "name": "Padnom",
+      "short": "PA",
+      "color": "#3498db"
+    },
     "punc": {
       "name": "Les punchers",
       "short": "PU",
-      "color": "#3498db"
+      "color": "#2ecc71"
     },
     "yip": {
       "name": "Yip Yip",
       "short": "YY",
-      "color": "#2ecc71"
+      "color": "#f39c12"
     },
     "deme": {
       "name": "LES DÉMENTS",
       "short": "DÉ",
-      "color": "#f39c12"
+      "color": "#9b59b6"
     },
     "sucy": {
       "name": "SUCY N'EST PAS TROMPÉ",
       "short": "SN",
-      "color": "#9b59b6"
+      "color": "#1abc9c"
     },
     "loup": {
       "name": "Les Loups-Phoques",
       "short": "LO",
-      "color": "#1abc9c"
-    },
-    "padn": {
-      "name": "Padnom",
-      "short": "PA",
       "color": "#e67e22"
     },
     "go": {
@@ -66,18 +66,18 @@
     {
       "rank": 1,
       "team": "inde",
-      "mj": 12,
+      "mj": 13,
       "g": 12,
-      "p": 0,
-      "setPlus": 36,
-      "setMinus": 8,
-      "ds": 28,
-      "coefSet": "4.50",
-      "ptsPlus": 1053,
-      "ptsMinus": 796,
-      "dp": "+257",
-      "coefPts": "1.32",
-      "pts": 24,
+      "p": 1,
+      "setPlus": 37,
+      "setMinus": 11,
+      "ds": 26,
+      "coefSet": "3.36",
+      "ptsPlus": 1148,
+      "ptsMinus": 892,
+      "dp": "+256",
+      "coefPts": "1.29",
+      "pts": 25,
       "formAller": [
         "W",
         "W",
@@ -94,7 +94,7 @@
         "W",
         "W",
         "W",
-        "D",
+        "L",
         "P",
         "P",
         "P",
@@ -142,18 +142,18 @@
     {
       "rank": 3,
       "team": "padn",
-      "mj": 10,
-      "g": 7,
+      "mj": 11,
+      "g": 8,
       "p": 3,
-      "setPlus": 21,
-      "setMinus": 17,
-      "ds": 4,
-      "coefSet": "1.24",
-      "ptsPlus": 852,
-      "ptsMinus": 778,
-      "dp": "+74",
-      "coefPts": "1.10",
-      "pts": 17,
+      "setPlus": 24,
+      "setMinus": 18,
+      "ds": 6,
+      "coefSet": "1.33",
+      "ptsPlus": 948,
+      "ptsMinus": 873,
+      "dp": "+75",
+      "coefPts": "1.09",
+      "pts": 19,
       "formAller": [
         "W",
         "L",
@@ -170,7 +170,7 @@
         "L",
         "W",
         "W",
-        "D",
+        "W",
         "P",
         "P",
         "P",
@@ -208,7 +208,7 @@
         "D",
         "L",
         "W",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -322,7 +322,7 @@
         "L",
         "L",
         "W",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -398,7 +398,7 @@
         "D",
         "L",
         "D",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -436,7 +436,7 @@
         "D",
         "L",
         "L",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -445,6 +445,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "31/03/2026",
+      "home": "padn",
+      "away": "inde",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "30/03/2026",
       "home": "punc",
@@ -465,6 +474,15 @@
     },
     {
       "date": "23/03/2026",
+      "home": "sucy",
+      "away": "padn",
+      "scoreHome": 2,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "23/03/2026",
       "home": "punc",
       "away": "alam",
       "scoreHome": 3,
@@ -477,15 +495,6 @@
       "home": "deme",
       "away": "loup",
       "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "23/03/2026",
-      "home": "sucy",
-      "away": "padn",
-      "scoreHome": 2,
       "scoreAway": 3,
       "homeWin": false,
       "status": "Terminé"
@@ -510,6 +519,15 @@
     },
     {
       "date": "09/03/2026",
+      "home": "go",
+      "away": "padn",
+      "scoreHome": 2,
+      "scoreAway": 2,
+      "homeWin": false,
+      "status": "Padnom pts"
+    },
+    {
+      "date": "09/03/2026",
       "home": "deme",
       "away": "alam",
       "scoreHome": 3,
@@ -525,15 +543,6 @@
       "scoreAway": 1,
       "homeWin": true,
       "status": "Terminé"
-    },
-    {
-      "date": "09/03/2026",
-      "home": "go",
-      "away": "padn",
-      "scoreHome": 2,
-      "scoreAway": 2,
-      "homeWin": false,
-      "status": "Padnom pts"
     },
     {
       "date": "24/02/2026",
@@ -933,20 +942,20 @@
     },
     {
       "date": "13/10/2025",
-      "home": "punc",
-      "away": "go",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "13/10/2025",
       "home": "deme",
       "away": "padn",
       "scoreHome": 1,
       "scoreAway": 3,
       "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "13/10/2025",
+      "home": "punc",
+      "away": "go",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
       "status": "Terminé"
     }
   ],
@@ -970,22 +979,16 @@
       "status": "Reporté"
     },
     {
-      "date": "31/03/2026",
-      "home": "padn",
-      "away": "inde",
-      "status": "Reporté"
-    },
-    {
       "date": "01/04/2026",
       "home": "alam",
       "away": "nahc",
-      "status": "Sem. 14"
+      "status": "Reporté"
     },
     {
       "date": "02/04/2026",
       "home": "loup",
       "away": "punc",
-      "status": "Sem. 14"
+      "status": "Reporté"
     },
     {
       "date": "06/04/2026",
@@ -1037,14 +1040,14 @@
     },
     {
       "date": "05/05/2026",
-      "home": "yip",
-      "away": "sucy",
+      "home": "padn",
+      "away": "loup",
       "status": "Sem. 16"
     },
     {
       "date": "05/05/2026",
-      "home": "padn",
-      "away": "loup",
+      "home": "yip",
+      "away": "sucy",
       "status": "Sem. 16"
     },
     {
@@ -1103,14 +1106,14 @@
     },
     {
       "date": "19/05/2026",
-      "home": "yip",
-      "away": "deme",
+      "home": "padn",
+      "away": "nahc",
       "status": "Sem. 18"
     },
     {
       "date": "19/05/2026",
-      "home": "padn",
-      "away": "nahc",
+      "home": "yip",
+      "away": "deme",
       "status": "Sem. 18"
     },
     {
@@ -1160,12 +1163,12 @@
     {
       "rank": 1,
       "team": "inde",
-      "elo": 1740.0,
-      "movement": 9.5,
-      "record": "12-0",
+      "elo": 1700.0,
+      "movement": -40.0,
+      "record": "12-1",
       "power": 100.0,
-      "calendar": "V x12",
-      "diffClass": "diff-easy"
+      "calendar": "D vs Padnom",
+      "diffClass": "diff-hard"
     },
     {
       "rank": 2,
@@ -1173,18 +1176,18 @@
       "elo": 1637.1,
       "movement": 9.7,
       "record": "8-2",
-      "power": 78.6,
+      "power": 84.3,
       "calendar": "V x4",
       "diffClass": "diff-easy"
     },
     {
       "rank": 3,
       "team": "padn",
-      "elo": 1569.3,
-      "movement": 28.4,
-      "record": "7-3",
-      "power": 64.4,
-      "calendar": "V vs SUCY",
+      "elo": 1609.3,
+      "movement": 40.0,
+      "record": "8-3",
+      "power": 77.3,
+      "calendar": "V x3",
       "diffClass": "diff-easy"
     },
     {
@@ -1193,7 +1196,7 @@
       "elo": 1545.9,
       "movement": 46.8,
       "record": "6-5",
-      "power": 59.6,
+      "power": 61.5,
       "calendar": "V vs LES",
       "diffClass": "diff-easy"
     },
@@ -1203,7 +1206,7 @@
       "elo": 1512.4,
       "movement": -28.4,
       "record": "6-6",
-      "power": 52.6,
+      "power": 53.1,
       "calendar": "D vs Padnom",
       "diffClass": "diff-hard"
     },
@@ -1213,7 +1216,7 @@
       "elo": 1483.6,
       "movement": -46.8,
       "record": "6-6",
-      "power": 46.6,
+      "power": 45.9,
       "calendar": "D vs Les",
       "diffClass": "diff-hard"
     },
@@ -1223,7 +1226,7 @@
       "elo": 1454.6,
       "movement": 14.6,
       "record": "6-7",
-      "power": 40.5,
+      "power": 38.6,
       "calendar": "V vs Nahcac",
       "diffClass": "diff-easy"
     },
@@ -1233,7 +1236,7 @@
       "elo": 1395.2,
       "movement": -9.5,
       "record": "2-9",
-      "power": 28.2,
+      "power": 23.8,
       "calendar": "D vs Les",
       "diffClass": "diff-hard"
     },
@@ -1243,7 +1246,7 @@
       "elo": 1342.1,
       "movement": -14.6,
       "record": "2-9",
-      "power": 17.1,
+      "power": 10.5,
       "calendar": "D x6",
       "diffClass": "diff-hard"
     },
@@ -1253,7 +1256,7 @@
       "elo": 1319.7,
       "movement": -22.1,
       "record": "1-9",
-      "power": 12.4,
+      "power": 4.9,
       "calendar": "D x5",
       "diffClass": "diff-hard"
     }
@@ -1273,7 +1276,22 @@
       1703.5,
       1719.3,
       1730.5,
-      1740.0
+      1740.0,
+      1700.0
+    ],
+    "padn": [
+      1500,
+      1530.7,
+      1497.9,
+      1527.6,
+      1545.6,
+      1567.3,
+      1540.5,
+      1563.7,
+      1522.4,
+      1540.9,
+      1569.3,
+      1609.3
     ],
     "punc": [
       1500,
@@ -1348,19 +1366,6 @@
       1499.1,
       1545.9
     ],
-    "padn": [
-      1500,
-      1530.7,
-      1497.9,
-      1527.6,
-      1545.6,
-      1567.3,
-      1540.5,
-      1563.7,
-      1522.4,
-      1540.9,
-      1569.3
-    ],
     "go": [
       1500,
       1471.3,
@@ -1419,9 +1424,27 @@
           18,
           20,
           22,
-          24
+          24,
+          25
         ],
         "rank": 1
+      },
+      "padn": {
+        "points": [
+          0,
+          2,
+          3,
+          5,
+          7,
+          9,
+          10,
+          12,
+          13,
+          15,
+          17,
+          19
+        ],
+        "rank": 3
       },
       "punc": {
         "points": [
@@ -1510,22 +1533,6 @@
           17
         ],
         "rank": 4
-      },
-      "padn": {
-        "points": [
-          0,
-          2,
-          3,
-          5,
-          7,
-          9,
-          10,
-          12,
-          13,
-          15,
-          17
-        ],
-        "rank": 3
       },
       "go": {
         "points": [
