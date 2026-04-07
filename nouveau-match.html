@@ -3,6 +3,7 @@
 <head>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com; img-src 'self' data: https://*.googleusercontent.com; frame-src https://accounts.google.com https://*.firebaseapp.com;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nouveau Match - Jen et ses Saints</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
@@ -480,9 +481,9 @@
     <div class="context-menu" id="contextMenu" style="display:none;"></div>
 
     <!-- Firebase SDK (compat CDN) -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js" integrity="sha384-Qgqc/HETq5lqJnRDqWnV1AZGw3pgMYNUVaqLLN1W/55XuWK94epwbCQrOvdoh1Zo" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
     <script src="firebase-config.js"></script>
     <script src="admin-config.js"></script>
     <script src="firebase-sync.js"></script>
@@ -490,6 +491,8 @@
 
     <script src="storage.js"></script>
     <script>
+        function escapeHtml(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
         const SEASONS = {
             '2025-2026': {
                 label: 'Saison 2025-2026',
@@ -692,6 +695,20 @@
 
             if (!html) html = '<div class="empty-state"><p>Aucun match disponible</p></div>';
             container.innerHTML = html;
+
+            // Attach event listeners (replacing inline onclick with data-attributes)
+            container.querySelectorAll('[data-resume-id]').forEach(btn => {
+                btn.addEventListener('click', function(e) { e.stopPropagation(); resumeMatch(this.dataset.resumeId); });
+            });
+            container.querySelectorAll('[data-delete-id]').forEach(btn => {
+                btn.addEventListener('click', function(e) { e.stopPropagation(); confirmDelete(this.dataset.deleteId); });
+            });
+            container.querySelectorAll('[data-delete-completed-id]').forEach(btn => {
+                btn.addEventListener('click', function(e) { e.stopPropagation(); confirmDeleteMatch(this.dataset.deleteCompletedId, this.dataset.opponent, parseInt(this.dataset.setsWon), parseInt(this.dataset.setsLost)); });
+            });
+            container.querySelectorAll('[data-menu-id]').forEach(btn => {
+                btn.addEventListener('click', function(e) { openMenu(e, this.dataset.menuId, this.dataset.menuStatus); });
+            });
         }
 
         function sectionHeader(icon, label, css, count) {
@@ -713,13 +730,13 @@
             return `<div class="match-item in-progress">
                 <div class="match-number">${m.index >= 0 ? m.index+1 : '•'}</div>
                 <div class="match-info">
-                    <div class="match-opponent">${m.opponent}</div>
-                    <div class="match-location"><span class="location-badge ${locClass}">${locLabel}</span></div>
+                    <div class="match-opponent">${escapeHtml(m.opponent)}</div>
+                    <div class="match-location"><span class="location-badge ${locClass}">${escapeHtml(locLabel)}</span></div>
                     <div class="match-status">Set ${setNum} • Sets : <span class="set-score">${sc.homeWins}-${sc.awayWins}</span>${live}</div>
                 </div>
                 <div class="match-actions">
-                    <button class="match-action-btn resume" onclick="resumeMatch('${m.matchId}')">Reprendre</button>
-                    <button class="match-action-btn delete" onclick="event.stopPropagation();confirmDelete('${m.matchId}')" title="Supprimer">
+                    <button class="match-action-btn resume" data-resume-id="${m.matchId}">Reprendre</button>
+                    <button class="match-action-btn delete" data-delete-id="${m.matchId}" title="Supprimer">
                         <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
                     </button>
                 </div>
@@ -732,7 +749,7 @@
             return `<div class="match-item" onclick="selectMatch(${m.index})">
                 <div class="match-number">${m.index+1}</div>
                 <div class="match-info">
-                    <div class="match-opponent">${m.opponent}</div>
+                    <div class="match-opponent">${escapeHtml(m.opponent)}</div>
                     <div class="match-location"><span class="location-badge ${locClass}">${locLabel}</span></div>
                 </div>
                 <span class="match-arrow">›</span>
@@ -747,15 +764,15 @@
             return `<div class="match-item completed-match">
                 <div class="match-number">${m.index >= 0 ? m.index+1 : '•'}</div>
                 <div class="match-info">
-                    <div class="match-opponent">${m.opponent}</div>
+                    <div class="match-opponent">${escapeHtml(m.opponent)}</div>
                     <div class="match-location"><span class="match-result-badge ${rc}">${rl} ${ss}</span></div>
                     ${detail ? `<div class="match-sets-detail">${detail}</div>` : ''}
                 </div>
                 <div class="match-actions">
-                    <button class="match-action-btn delete" onclick="event.stopPropagation();confirmDeleteMatch('${m.matchId}','${m.opponent.replace(/'/g, "\\'")}',${m.stored.setsWon||0},${m.stored.setsLost||0})" title="Supprimer et rejouer">
+                    <button class="match-action-btn delete" data-delete-completed-id="${m.matchId}" data-opponent="${escapeHtml(m.opponent)}" data-sets-won="${m.stored.setsWon||0}" data-sets-lost="${m.stored.setsLost||0}" title="Supprimer et rejouer">
                         <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
                     </button>
-                    <button class="match-action-btn menu" onclick="openMenu(event,'${m.matchId}','completed')">⋮</button>
+                    <button class="match-action-btn menu" data-menu-id="${m.matchId}" data-menu-status="completed">⋮</button>
                 </div>
             </div>`;
         }
@@ -789,19 +806,25 @@
             let items = '';
             if (status === 'in_progress') {
                 items = `
-                    <button class="context-menu-item danger" onclick="confirmDelete('${matchId}')">
+                    <button class="context-menu-item danger" data-ctx-delete="${matchId}">
                         <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Supprimer
                     </button>`;
             } else {
                 items = `
-                    <button class="context-menu-item" onclick="viewMatchStats('${matchId}')">
+                    <button class="context-menu-item" data-ctx-stats="${matchId}">
                         <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg> Voir les stats
                     </button>
-                    <button class="context-menu-item danger" onclick="confirmDelete('${matchId}')">
+                    <button class="context-menu-item danger" data-ctx-delete="${matchId}">
                         <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Supprimer et rejouer
                     </button>`;
             }
             menu.innerHTML = items;
+            menu.querySelectorAll('[data-ctx-delete]').forEach(btn => {
+                btn.addEventListener('click', function() { confirmDelete(this.dataset.ctxDelete); });
+            });
+            menu.querySelectorAll('[data-ctx-stats]').forEach(btn => {
+                btn.addEventListener('click', function() { viewMatchStats(this.dataset.ctxStats); });
+            });
             menu.style.display = 'block';
             const rect = event.currentTarget.getBoundingClientRect();
             menu.style.top = (rect.bottom + 4) + 'px';

@@ -1,5 +1,14 @@
 // match-live-helpers.js - Position roles & helpers
 // ==================== HELPERS ====================
+
+// Échappe les caractères HTML pour prévenir les injections XSS
+function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
 // ==================== POSITION ROLES ====================
 const POSITION_ROLES = {
     home: { 1: 'Passeur', 2: 'R4', 3: 'Centre', 4: 'Pointu' },
@@ -243,7 +252,7 @@ function showPositionZones(team) {
     mapping.forEach((m, i) => {
         zoneElements[i].style.background = m.color + 'cc';
         zoneElements[i].style.borderColor = m.color + '80';
-        zoneElements[i].innerHTML = `<span class="zone-label">${m.role}<br>${m.player}</span>`;
+        zoneElements[i].innerHTML = `<span class="zone-label">${escapeHtml(m.role)}<br>${escapeHtml(m.player)}</span>`;
         zoneElements[i].dataset.player = m.player;
         zoneElements[i].dataset.role = m.role;
     });
@@ -325,7 +334,7 @@ function showAttackZones(team, excludePlayer, visualOnly) {
         // Mode 2 zones : fond semi-transparent (comportement d'origine)
         el.style.background = m.color + 'cc';
         el.style.borderColor = m.color + '80';
-        el.innerHTML = `<span class="zone-label">${m.role}<br>${m.player}</span>`;
+        el.innerHTML = `<span class="zone-label">${escapeHtml(m.role)}<br>${escapeHtml(m.player)}</span>`;
         el.dataset.player = m.player;
         el.dataset.role = m.role;
         if (m.disabled) {
@@ -346,7 +355,7 @@ function showAttackZones(team, excludePlayer, visualOnly) {
             floatingLabel.className = 'centre-floating-label';
             zones.appendChild(floatingLabel);
         }
-        floatingLabel.innerHTML = `${centerMapping.role}<br>${centerMapping.player}`;
+        floatingLabel.innerHTML = `${escapeHtml(centerMapping.role)}<br>${escapeHtml(centerMapping.player)}`;
         floatingLabel.style.color = centerMapping.disabled ? '#ffffff40' : '#fff';
         // Cacher le label interne de la zone centre (il serait croppé)
         const innerLabel = zones.querySelector('.attack-zone[data-zone="center"] .zone-label');
@@ -520,7 +529,7 @@ function showDefenseZones(defendingTeam, attackerRole) {
         const m = result.mapping[zoneType];
         if (m) {
             el.style.background = m.color + 'cc';
-            el.innerHTML = `<span class="zone-label">${m.role}<br>${m.player}</span>`;
+            el.innerHTML = `<span class="zone-label">${escapeHtml(m.role)}<br>${escapeHtml(m.player)}</span>`;
             el.dataset.player = m.player;
             el.dataset.role = m.role;
         }
@@ -965,8 +974,8 @@ function activateNetZone(splitMode) {
         rightZone.style.backgroundColor = ROLE_COLORS[rightBlocker.role] || 'rgba(255,255,255,0.2)';
 
         // Labels avec nom du joueur
-        leftZone.innerHTML = `<span class="zone-blocker-label">${leftBlocker.player || leftBlocker.role}</span>`;
-        rightZone.innerHTML = `<span class="zone-blocker-label">${rightBlocker.player || rightBlocker.role}</span>`;
+        leftZone.innerHTML = `<span class="zone-blocker-label">${escapeHtml(leftBlocker.player || leftBlocker.role)}</span>`;
+        rightZone.innerHTML = `<span class="zone-blocker-label">${escapeHtml(rightBlocker.player || rightBlocker.role)}</span>`;
     } else {
         // Mode non-split : nettoyer les sous-zones
         leftZone.style.width = '';
@@ -1023,9 +1032,9 @@ function updatePhaseIndicatorWithPlayer(playerName, role, actionLabel) {
     const phaseEl = document.getElementById('phaseIndicator');
     if (playerName) {
         const color = ROLE_COLORS[role] || '#8b5cf6';
-        phaseEl.innerHTML = `<span class="highlight">${actionLabel}</span> — <span class="phase-player-badge" style="background:${color}">${playerName}</span>`;
+        phaseEl.innerHTML = `<span class="highlight">${escapeHtml(actionLabel)}</span> — <span class="phase-player-badge" style="background:${color}">${escapeHtml(playerName)}</span>`;
     } else {
-        phaseEl.innerHTML = `<span class="highlight">${actionLabel}</span> — Sélectionnez le joueur`;
+        phaseEl.innerHTML = `<span class="highlight">${escapeHtml(actionLabel)}</span> — Sélectionnez le joueur`;
     }
 }
 
@@ -1065,17 +1074,16 @@ function renderOverrideTags(config) {
         const color = ROLE_COLORS[role] || '#8b5cf6';
         const isAuto = (mode === 'override' && playerName === autoPlayer);
         const selectedClass = isAuto ? ' selected' : '';
+        const escapedName = escapeHtml(playerName);
         if (mode === 'override') {
-            return `<button class="player-tag override-tag${selectedClass} ${team}" data-player="${playerName}"
-                        onclick="handleOverrideTag('${playerName}')"
+            return `<button class="player-tag override-tag${selectedClass} ${team}" data-player="${escapedName}" data-action="override"
                         style="--tag-role-color: ${color}; border-color: ${color}; color: ${color}">
-                        ${playerName}
+                        ${escapedName}
                     </button>`;
         } else {
-            return `<button class="player-tag override-tag ${team}" data-player="${playerName}"
-                        onclick="handlePlayerSelection('${playerName}')"
+            return `<button class="player-tag override-tag ${team}" data-player="${escapedName}" data-action="select"
                         style="--tag-role-color: ${color}; border-color: ${color}; color: ${color}">
-                        ${playerName}
+                        ${escapedName}
                     </button>`;
         }
     }).join('');
@@ -1087,6 +1095,14 @@ function renderOverrideTags(config) {
     }
 
     container.innerHTML = html;
+
+    // Event delegation pour les tags joueurs (évite les onclick inline avec interpolation)
+    container.querySelectorAll('[data-action="override"]').forEach(btn => {
+        btn.addEventListener('click', () => handleOverrideTag(btn.dataset.player));
+    });
+    container.querySelectorAll('[data-action="select"]').forEach(btn => {
+        btn.addEventListener('click', () => handlePlayerSelection(btn.dataset.player));
+    });
 
     // Ne PAS appeler showSection() pour éviter hideAllSections()
     document.getElementById('playerSelection').classList.remove('hidden');

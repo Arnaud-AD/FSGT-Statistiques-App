@@ -3,6 +3,7 @@
 <head>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com; img-src 'self' data: https://*.googleusercontent.com; frame-src https://accounts.google.com https://*.firebaseapp.com;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jen et ses Saints - Stats Volleyball</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
@@ -574,9 +575,9 @@
     </div>
 
     <!-- Firebase SDK (compat CDN) -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js" integrity="sha384-Qgqc/HETq5lqJnRDqWnV1AZGw3pgMYNUVaqLLN1W/55XuWK94epwbCQrOvdoh1Zo" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
     <script src="firebase-config.js"></script>
     <script src="admin-config.js"></script>
     <script src="firebase-sync.js"></script>
@@ -584,6 +585,8 @@
 
     <script src="storage.js"></script>
     <script>
+        function escapeHtml(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
         // Mode admin : vérifié par UID après connexion (+ ?admin pour afficher le bouton connexion)
         let isAdmin = false;
         const hasAdminParam = new URLSearchParams(window.location.search).has('admin');
@@ -642,7 +645,7 @@
 
             // Générer un bandeau par match
             container.innerHTML = inProgressMatches.map(match => {
-                const opponent = match.opponent || 'Adversaire';
+                const opponent = escapeHtml(match.opponent || 'Adversaire');
                 const setScore = Storage.getSetScore(match);
                 const setNum = match.sets ? match.sets.length : 0;
                 const lastSet = match.sets && match.sets.length > 0 ? match.sets[match.sets.length - 1] : null;
@@ -659,13 +662,21 @@
                         <div class="resume-status">Set ${setNum} • Sets : <span class="set-score">${setScore.homeWins}-${setScore.awayWins}</span>${live}</div>
                     </div>
                     <div class="resume-actions">
-                        <button class="resume-action-btn resume" onclick="resumeMatch('${match.id}')">Reprendre</button>
-                        <button class="resume-action-btn delete" onclick="deleteCurrentMatch(event, '${match.id}')" title="Supprimer">
+                        <button class="resume-action-btn resume" data-resume-id="${match.id}">Reprendre</button>
+                        <button class="resume-action-btn delete" data-delete-id="${match.id}" title="Supprimer">
                             <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
                         </button>
                     </div>
                 </div>`;
             }).join('');
+
+            // Attach event listeners for resume/delete buttons
+            container.querySelectorAll('[data-resume-id]').forEach(btn => {
+                btn.addEventListener('click', function() { resumeMatch(this.dataset.resumeId); });
+            });
+            container.querySelectorAll('[data-delete-id]').forEach(btn => {
+                btn.addEventListener('click', function(e) { deleteCurrentMatch(e, this.dataset.deleteId); });
+            });
 
             sectionHeader.style.display = 'flex';
         }
@@ -769,13 +780,13 @@
                 const pageLabels = { accueil: 'Accueil', historique: 'Historique', 'match-live': 'Match live', equipe: 'Équipe' };
                 const pageRows = Object.entries(pageCounts)
                     .sort((a, b) => b[1] - a[1])
-                    .map(([page, count]) => `<div class="analytics-row"><span class="analytics-row-page">${pageLabels[page] || page}</span><span class="analytics-row-count">${count}</span></div>`)
+                    .map(([page, count]) => `<div class="analytics-row"><span class="analytics-row-page">${escapeHtml(pageLabels[page] || page)}</span><span class="analytics-row-count">${count}</span></div>`)
                     .join('');
 
                 const actionRows = Object.entries(actionCounts)
                     .sort((a, b) => b[1] - a[1])
                     .slice(0, 8)
-                    .map(([action, count]) => `<div class="analytics-row"><span class="analytics-row-page">${action}</span><span class="analytics-row-count">${count}</span></div>`)
+                    .map(([action, count]) => `<div class="analytics-row"><span class="analytics-row-page">${escapeHtml(action)}</span><span class="analytics-row-count">${count}</span></div>`)
                     .join('');
 
                 container.innerHTML = `
@@ -799,7 +810,11 @@
                     </div>` : ''}
                 `;
             } catch (e) {
-                container.innerHTML = '<div class="analytics-loading">Erreur : ' + e.message + '</div>';
+                var errDiv = document.createElement('div');
+                errDiv.className = 'analytics-loading';
+                errDiv.textContent = 'Erreur : ' + e.message;
+                container.innerHTML = '';
+                container.appendChild(errDiv);
             }
         }
     </script>

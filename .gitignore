@@ -23,8 +23,16 @@ admin-config.js
 # Fichiers locaux
 plan.md
 start.command
+start-safari.command
 debug-stats.js
 simulation-*.html
+mockup-*.html
 Screenshot barême de passe/
 zones passe défaut/
+
+# Backups localStorage (contiennent Firebase UID + données matchs)
+localStorage_backup*.json
+
+# Fichiers stats HTML exportés
+Stats Passes*.html
 

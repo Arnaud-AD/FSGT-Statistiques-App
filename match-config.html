@@ -3,6 +3,7 @@
 <head>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com; img-src 'self' data: https://*.googleusercontent.com; frame-src https://accounts.google.com https://*.firebaseapp.com;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Composition - Jen et ses Saints</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
@@ -532,9 +533,9 @@
     </div>
 
     <!-- Firebase SDK (compat CDN) -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js" integrity="sha384-Qgqc/HETq5lqJnRDqWnV1AZGw3pgMYNUVaqLLN1W/55XuWK94epwbCQrOvdoh1Zo" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
     <script src="firebase-config.js"></script>
     <script src="admin-config.js"></script>
     <script src="firebase-sync.js"></script>
@@ -542,6 +543,8 @@
 
     <script src="storage.js"></script>
     <script>
+        function escapeHtml(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
         // Récupérer les données
         const currentMatch = Storage.getCurrentMatch();
         const players = Storage.getPlayers();
@@ -568,9 +571,9 @@
                     <div class="match-info-row">
                         <span class="match-info-icon">🏐</span>
                         <div class="match-info-details">
-                            <div class="match-opponent">vs ${currentMatch.opponent}</div>
+                            <div class="match-opponent">vs ${escapeHtml(currentMatch.opponent)}</div>
                             <div class="match-meta">
-                                Match ${currentMatch.matchNumber} • 
+                                Match ${currentMatch.matchNumber} •
                                 <span class="location-badge ${locationClass}">${locationLabel}</span>
                             </div>
                         </div>
@@ -581,10 +584,10 @@
                     <div class="match-info-row">
                         <span class="match-info-icon">🏆</span>
                         <div class="match-info-details">
-                            <div class="match-opponent">vs ${currentMatch.opponent}</div>
+                            <div class="match-opponent">vs ${escapeHtml(currentMatch.opponent)}</div>
                             <div class="match-meta">
-                                ${currentMatch.round}
-                                <span class="level-badge">${currentMatch.level}</span>
+                                ${escapeHtml(currentMatch.round)}
+                                <span class="level-badge">${escapeHtml(currentMatch.level)}</span>
                             </div>
                         </div>
                     </div>
@@ -625,15 +628,15 @@
 
             container.innerHTML = players.map((player, index) => {
                 const postes = Array.isArray(player.poste) ? player.poste : [player.poste];
-                const posteBadges = postes.map(p => 
-                    `<span class="poste-badge poste-${getPosteClass(p)}">${p}</span>`
+                const posteBadges = postes.map(p =>
+                    `<span class="poste-badge poste-${getPosteClass(p)}">${escapeHtml(p)}</span>`
                 ).join('');
                 const isPresent = presences[index];
-                
+
                 return `
                     <label class="player-item ${isPresent ? '' : 'absent'}">
                         <div class="player-info">
-                            <div class="player-name">${player.prenom}</div>
+                            <div class="player-name">${escapeHtml(player.prenom)}</div>
                             <div class="player-postes">${posteBadges}</div>
                         </div>
                         <input type="checkbox" 
@@ -684,13 +687,13 @@
             
             container.innerHTML = presentPlayers.map(player => {
                 const postes = Array.isArray(player.poste) ? player.poste : [player.poste];
-                const posteBadges = postes.map(p => 
-                    `<span class="poste-badge poste-${getPosteClass(p)}">${p}</span>`
+                const posteBadges = postes.map(p =>
+                    `<span class="poste-badge poste-${getPosteClass(p)}">${escapeHtml(p)}</span>`
                 ).join('');
-                
+
                 return `
                     <div class="modal-player">
-                        <span class="modal-player-name">${player.prenom}</span>
+                        <span class="modal-player-name">${escapeHtml(player.prenom)}</span>
                         <div class="modal-player-postes">${posteBadges}</div>
                     </div>
                 `;

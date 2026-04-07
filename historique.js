@@ -7540,11 +7540,11 @@ const ProgressionView = {
         'Alexandre': '#8b5cf6',  // Violet (Passeur)
         'Arnaud':    '#48D0FA',  // Cyan
         'Tom':       '#3b82f6',  // Bleu R4
-        'Mikael':    '#60a5fa',  // Bleu clair
-        'Lenny':     '#22c55e',  // Vert Pointu
+        'Mikael':    '#e6b800',  // Jaune
+        'Lenny':     '#e65c00',  // Orange foncé
         'Antoine':   '#4ade80',  // Vert clair
-        'Jennifer':  '#ef4444',  // Rouge Centre
-        'Assum':     '#f87171',  // Rouge clair
+        'Jennifer':  '#ff69b4',  // Rose barbie
+        'Assum':     '#ef4444',  // Rouge vif (Centre)
         'Olivier':   '#374151',  // Gris très foncé
     },
 
@@ -7644,12 +7644,10 @@ const ProgressionView = {
         var matches = SeasonSelector.getFilteredMatches().slice();
         if (matches.length === 0) return null;
 
-        // Tri chronologique par ID
+        // Tri chronologique par date réelle du match (ancien à gauche → récent à droite)
         var self = this;
         matches.sort(function(a, b) {
-            var pa = self._parseMatchId(a.id), pb = self._parseMatchId(b.id);
-            if (pa.season !== pb.season) return pa.season < pb.season ? -1 : 1;
-            return pa.num - pb.num;
+            return (a.matchDate || a.timestamp || 0) - (b.matchDate || b.timestamp || 0);
         });
 
         var matchLabels = [];
@@ -7757,25 +7755,25 @@ const ProgressionView = {
         if (s.attack.tot >= 3) {
             m.attEff = (s.attack.attplus - s.attack.fatt - s.attack.bp) / s.attack.tot;
         } else { m.attEff = null; }
-        // Reception avg
+        // Reception avg (min 3 pour éviter le bruit)
         var rec = s.reception;
-        if (rec.tot > 0) {
+        if (rec.tot >= 3) {
             m.recMoy = (rec.r4 * 4 + rec.r3 * 3 + rec.r2 * 2 + rec.r1 * 1) / rec.tot;
         } else { m.recMoy = null; }
-        // Pass avg
+        // Pass avg (min 3)
         var pas = s.pass;
-        if (pas && pas.tot > 0) {
+        if (pas && pas.tot >= 3) {
             m.passMoy = (pas.p4 * 4 + pas.p3 * 3 + pas.p2 * 2 + pas.p1 * 1) / pas.tot;
         } else { m.passMoy = null; }
-        // Service pressure
+        // Service pressure (min 3)
         var srv = s.service;
         var recCount = (srv.recCountAdv || 0) + (srv.ace || 0);
-        if (recCount > 0) {
+        if (recCount >= 3) {
             m.srvPression = 4 - (srv.recSumAdv / recCount);
         } else { m.srvPression = null; }
-        // D+ rate
+        // D+ rate (min 3)
         var def = s.defense;
-        if (def.tot > 0) {
+        if (def.tot >= 3) {
             m.defPlusRate = def.defplus / def.tot;
         } else { m.defPlusRate = null; }
         return m;
@@ -7849,7 +7847,7 @@ const ProgressionView = {
             html += '<button class="prog-metric-btn' + (m.key === self._currentMetric ? ' active' : '') + '" data-metric="' + m.key + '">' + m.label + '</button>';
         });
         html += '</div>';
-        html += '<div class="prog-chart-wrap"><canvas id="progMainChart"></canvas></div>';
+        html += '<div class="prog-chart-wrap"><canvas id="progMainChart"></canvas><div class="prog-tooltip" style="display:none"></div></div>';
         html += '</div>';
         return html;
     },
@@ -7897,19 +7895,26 @@ const ProgressionView = {
         html += '<th>Joueur</th><th>1ère moitié</th><th>2ème moitié</th><th>Progression</th><th>Tendance</th>';
         html += '</tr></thead><tbody>';
 
+        // Couper sur la base des matchs de l'équipe (pas par joueur)
+        var totalMatches = this._data.matchLabels.length;
+        var teamHalf = Math.ceil(totalMatches / 2);
+
         this._data.players.forEach(function(p) {
             if (self._selectedPlayers[p.name] === false) return;
             var allVals = self._getMetricValues(p.name, self._currentMetric);
-            var played = [];
-            allVals.forEach(function(v, i) { if (v !== null) played.push({ val: v, idx: i }); });
-            if (played.length < 4) return;
+
+            // Séparer par moitié d'équipe (index match < teamHalf vs >= teamHalf)
+            var first = [], second = [];
+            allVals.forEach(function(v, i) {
+                if (v === null) return;
+                if (i < teamHalf) first.push(v);
+                else second.push(v);
+            });
+            if (first.length < 2 || second.length < 2) return;
 
             var mul = metric.multiply || 1;
-            var half = Math.ceil(played.length / 2);
-            var first = played.slice(0, half);
-            var second = played.slice(half);
-            var avg1 = first.reduce(function(s, d) { return s + d.val; }, 0) / first.length * mul;
-            var avg2 = second.reduce(function(s, d) { return s + d.val; }, 0) / second.length * mul;
+            var avg1 = first.reduce(function(s, v) { return s + v; }, 0) / first.length * mul;
+            var avg2 = second.reduce(function(s, v) { return s + v; }, 0) / second.length * mul;
             var diff = avg1 !== 0 ? ((avg2 - avg1) / Math.abs(avg1) * 100) : 0;
 
             html += '<tr>';
@@ -8004,7 +8009,7 @@ const ProgressionView = {
         var ctx = canvas.getContext('2d');
         ctx.scale(dpr, dpr);
 
-        var pad = { top: 20, right: 25, bottom: 45, left: 10 };
+        var pad = { top: 20, right: 25, bottom: 12, left: 10 };
         var chartW = w - pad.left - pad.right;
         var chartH = h - pad.top - pad.bottom;
         var numMatches = this._data.matchLabels.length;
@@ -8049,25 +8054,9 @@ const ProgressionView = {
             ctx.fillText(gv.toFixed(metricDef.decimals), w - 2, gy + 3);
         }
 
-        // X-axis labels + result dots
-        ctx.textAlign = 'center';
-        ctx.font = '10px Roboto, sans-serif';
-        this._data.matchLabels.forEach(function(label, i) {
-            var x = xPos(i);
-            ctx.fillStyle = '#5f6368';
-            ctx.save();
-            ctx.translate(x, h - pad.bottom + 14);
-            ctx.rotate(-0.4);
-            ctx.fillText(label, 0, 0);
-            ctx.restore();
-
-            // Result dot
-            var res = self._data.matchResults[i];
-            ctx.beginPath();
-            ctx.arc(x, h - pad.bottom + 28, 3, 0, Math.PI * 2);
-            ctx.fillStyle = res === 'win' ? '#34a853' : res === 'loss' ? '#ea4335' : '#f59e0b';
-            ctx.fill();
-        });
+        // Store point positions for tooltip hit-testing
+        this._chartPoints = [];
+        this._chartMeta = { pad: pad, w: w, h: h, xPos: xPos, yPos: yPos, mul: mul, metricDef: metricDef };
 
         // Player lines
         this._data.players.forEach(function(p) {
@@ -8077,18 +8066,21 @@ const ProgressionView = {
             // Collect visible points
             var pts = [];
             vals.forEach(function(v, i) {
-                if (v !== null) pts.push({ x: xPos(i), y: yPos(v * mul), val: v * mul });
+                if (v !== null) pts.push({ x: xPos(i), y: yPos(v * mul), val: v * mul, idx: i });
             });
             if (pts.length < 1) return;
 
-            // Area fill
-            ctx.beginPath();
-            ctx.moveTo(pts[0].x, pad.top + chartH);
-            pts.forEach(function(pt) { ctx.lineTo(pt.x, pt.y); });
-            ctx.lineTo(pts[pts.length - 1].x, pad.top + chartH);
-            ctx.closePath();
-            ctx.fillStyle = p.color + '08';
-            ctx.fill();
+            // Area fill (only when single player visible)
+            var visibleCount = self._data.players.filter(function(pl) { return self._selectedPlayers[pl.name] !== false; }).length;
+            if (visibleCount === 1) {
+                ctx.beginPath();
+                ctx.moveTo(pts[0].x, pad.top + chartH);
+                pts.forEach(function(pt) { ctx.lineTo(pt.x, pt.y); });
+                ctx.lineTo(pts[pts.length - 1].x, pad.top + chartH);
+                ctx.closePath();
+                ctx.fillStyle = p.color + '12';
+                ctx.fill();
+            }
 
             // Line
             ctx.beginPath();
@@ -8098,7 +8090,7 @@ const ProgressionView = {
             ctx.lineJoin = 'round';
             ctx.stroke();
 
-            // Dots
+            // Dots + store for tooltip
             pts.forEach(function(pt) {
                 ctx.beginPath();
                 ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
@@ -8107,6 +8099,7 @@ const ProgressionView = {
                 ctx.strokeStyle = '#fff';
                 ctx.lineWidth = 2;
                 ctx.stroke();
+                self._chartPoints.push({ x: pt.x, y: pt.y, val: pt.val, matchIdx: pt.idx, player: p.name, color: p.color });
             });
 
             // Season average dashed line
@@ -8151,6 +8144,46 @@ const ProgressionView = {
                 self._redrawDynamic(container);
             });
         });
+
+        // Chart tooltip (mouse + touch)
+        var canvas = container.querySelector('#progMainChart');
+        var tooltip = container.querySelector('.prog-tooltip');
+        if (canvas && tooltip) {
+            var showTooltip = function(clientX, clientY) {
+                if (!self._chartPoints || self._chartPoints.length === 0) { tooltip.style.display = 'none'; return; }
+                var rect = canvas.getBoundingClientRect();
+                var mx = clientX - rect.left;
+                var my = clientY - rect.top;
+                // Find closest point within 20px
+                var best = null, bestDist = 20;
+                self._chartPoints.forEach(function(pt) {
+                    var d = Math.sqrt((pt.x - mx) * (pt.x - mx) + (pt.y - my) * (pt.y - my));
+                    if (d < bestDist) { bestDist = d; best = pt; }
+                });
+                if (!best) { tooltip.style.display = 'none'; return; }
+                var label = self._data.matchLabels[best.matchIdx];
+                var metricDef = self.METRICS.find(function(m) { return m.key === self._currentMetric; });
+                var decimals = metricDef ? metricDef.decimals : 0;
+                tooltip.innerHTML = '<span style="color:' + best.color + '">' + Utils.escapeHtml(best.player) + '</span> — ' + best.val.toFixed(decimals) + '<br><span class="prog-tooltip-match">' + Utils.escapeHtml(label) + '</span>';
+                tooltip.style.display = 'block';
+                // Position tooltip near the point
+                var tx = best.x, ty = best.y - 40;
+                if (tx + 70 > rect.width) tx = rect.width - 70;
+                if (tx < 10) tx = 10;
+                if (ty < 5) ty = best.y + 15;
+                tooltip.style.left = tx + 'px';
+                tooltip.style.top = ty + 'px';
+            };
+            canvas.addEventListener('mousemove', function(e) { showTooltip(e.clientX, e.clientY); });
+            canvas.addEventListener('mouseleave', function() { tooltip.style.display = 'none'; });
+            canvas.addEventListener('touchstart', function(e) {
+                var t = e.touches[0];
+                showTooltip(t.clientX, t.clientY);
+            }, { passive: true });
+            canvas.addEventListener('touchend', function() {
+                setTimeout(function() { tooltip.style.display = 'none'; }, 2000);
+            });
+        }
     },
 
     _redrawDynamic(container) {
@@ -9370,7 +9403,7 @@ const MatchStatsView = {
             var selected = self.selectedMatchIndex === index ? ' selected' : '';
 
             optionsHtml += '<option value="' + index + '"' + selected + '>' +
-                resultEmoji + ' ' + opponent + detail +
+                resultEmoji + ' ' + Utils.escapeHtml(opponent) + Utils.escapeHtml(detail) +
                 '</option>';
         });
         matchSelect.innerHTML = optionsHtml;
@@ -9523,7 +9556,7 @@ const MatchStatsView = {
             }
         });
 
-        if (urls.length > 0) {
+        if (urls.length > 0 && /^https:\/\//.test(urls[0])) {
             linkContainer.innerHTML = '<a class="detail-youtube-link" href="' + Utils.escapeHtml(urls[0]) + '" target="_blank">' +
                 '<svg class="yt-icon" viewBox="0 0 28 20" xmlns="http://www.w3.org/2000/svg">' +
                 '<rect width="28" height="20" rx="4" fill="#FF0000"/>' +

@@ -21,12 +21,12 @@ function showUndoPointModal() {
     const serviceAction = rally.find(a => a.type === 'service');
     const serverName = serviceAction ? serviceAction.player : '?';
     const serverTeam = serviceAction ? serviceAction.team : '?';
-    const serverTeamName = serverTeam === 'home' ? 'Jen et ses Saints' : (currentMatch.opponent || 'Adversaire');
-    
+    const serverTeamName = serverTeam === 'home' ? 'Jen et ses Saints' : escapeHtml(currentMatch.opponent || 'Adversaire');
+
     // Qui a marqué ?
     const whoScored = lastPoint.homeScore > scoreBeforeHome ? 'home' : 'away';
-    const whoScoredName = whoScored === 'home' ? 'Jen et ses Saints' : (currentMatch.opponent || 'Adversaire');
-    
+    const whoScoredName = whoScored === 'home' ? 'Jen et ses Saints' : escapeHtml(currentMatch.opponent || 'Adversaire');
+
     // Dernière action significative
     const lastAction = rally[rally.length - 1];
     let lastActionDesc = '';
@@ -40,25 +40,26 @@ function showUndoPointModal() {
             'defense': 'Défense'
         };
         const actionLabel = actionLabels[lastAction.type] || lastAction.type;
-        
+        const safePlayer = escapeHtml(lastAction.player);
+
         if (lastAction.type === 'service') {
-            if (lastAction.result === 'ace') lastActionDesc = `Ace de ${lastAction.player}`;
-            else if (lastAction.result === 'fault' || lastAction.result === 'fault_out' || lastAction.result === 'fault_net') lastActionDesc = `Faute au service de ${lastAction.player}`;
-            else lastActionDesc = `Service de ${lastAction.player}`;
+            if (lastAction.result === 'ace') lastActionDesc = `Ace de ${safePlayer}`;
+            else if (lastAction.result === 'fault' || lastAction.result === 'fault_out' || lastAction.result === 'fault_net') lastActionDesc = `Faute au service de ${safePlayer}`;
+            else lastActionDesc = `Service de ${safePlayer}`;
         } else if (lastAction.type === 'attack') {
-            if (lastAction.result === 'point') lastActionDesc = `Attaque gagnante de ${lastAction.player}`;
-            else if (lastAction.attackType === 'faute') lastActionDesc = `Faute d'attaque de ${lastAction.player}`;
-            else if (lastAction.result === 'out') lastActionDesc = `Attaque out de ${lastAction.player}`;
-            else lastActionDesc = `${actionLabel} de ${lastAction.player}`;
+            if (lastAction.result === 'point') lastActionDesc = `Attaque gagnante de ${safePlayer}`;
+            else if (lastAction.attackType === 'faute') lastActionDesc = `Faute d'attaque de ${safePlayer}`;
+            else if (lastAction.result === 'out') lastActionDesc = `Attaque out de ${safePlayer}`;
+            else lastActionDesc = `${actionLabel} de ${safePlayer}`;
         } else if (lastAction.type === 'reception') {
-            if (lastAction.isDirectReturnWinner) lastActionDesc = `Retour gagnant de ${lastAction.player}`;
-            else if (lastAction.quality?.label === 'Faute') lastActionDesc = `Faute réception de ${lastAction.player}`;
-            else lastActionDesc = `${actionLabel} de ${lastAction.player}`;
+            if (lastAction.isDirectReturnWinner) lastActionDesc = `Retour gagnant de ${safePlayer}`;
+            else if (lastAction.quality?.label === 'Faute') lastActionDesc = `Faute réception de ${safePlayer}`;
+            else lastActionDesc = `${actionLabel} de ${safePlayer}`;
         } else {
-            lastActionDesc = `${actionLabel}${lastAction.player ? ' de ' + lastAction.player : ''}`;
+            lastActionDesc = `${actionLabel}${lastAction.player ? ' de ' + safePlayer : ''}`;
         }
     }
-    
+
     // Construire le HTML
     const summaryEl = document.getElementById('undoPointSummary');
     summaryEl.innerHTML = `
@@ -68,7 +69,7 @@ function showUndoPointModal() {
             <span class="score-after">${scoreBeforeHome} - ${scoreBeforeAway}</span>
         </div>
         <div class="undo-point-detail">
-            <div><span class="label">🏐 Service :</span> ${serverName} (${serverTeamName})</div>
+            <div><span class="label">🏐 Service :</span> ${escapeHtml(serverName)} (${serverTeamName})</div>
             <div><span class="label">🏆 Point pour :</span> ${whoScoredName}</div>
             <div><span class="label">📋 Dernière action :</span> ${lastActionDesc}</div>
             <div style="margin-top:6px; font-size:11px; color:#9ca3af;">Point n°${points.length} • ${new Date(lastPoint.timestamp).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</div>
@@ -165,7 +166,7 @@ function showResumePointModal() {
     const serviceAction = rally.find(a => a.type === 'service');
     const serverName = serviceAction ? serviceAction.player : '?';
     const serverTeam = serviceAction ? serviceAction.team : '?';
-    const serverTeamName = serverTeam === 'home' ? 'Jen et ses Saints' : (currentMatch.opponent || 'Adversaire');
+    const serverTeamName = serverTeam === 'home' ? 'Jen et ses Saints' : escapeHtml(currentMatch.opponent || 'Adversaire');
 
     // Dernière action (celle qui a terminé le point)
     const lastAction = rally[rally.length - 1];
@@ -176,29 +177,30 @@ function showResumePointModal() {
             'attack': 'Attaque', 'block': 'Block', 'defense': 'Défense'
         };
         const actionLabel = actionLabels[lastAction.type] || lastAction.type;
+        const safePlayer = escapeHtml(lastAction.player);
 
         if (lastAction.type === 'service') {
-            if (lastAction.result === 'ace') lastActionDesc = `Ace de ${lastAction.player}`;
-            else if (lastAction.result === 'fault' || lastAction.result === 'fault_out' || lastAction.result === 'fault_net') lastActionDesc = `Faute au service de ${lastAction.player}`;
-            else lastActionDesc = `Service de ${lastAction.player}`;
+            if (lastAction.result === 'ace') lastActionDesc = `Ace de ${safePlayer}`;
+            else if (lastAction.result === 'fault' || lastAction.result === 'fault_out' || lastAction.result === 'fault_net') lastActionDesc = `Faute au service de ${safePlayer}`;
+            else lastActionDesc = `Service de ${safePlayer}`;
         } else if (lastAction.type === 'attack') {
-            if (lastAction.result === 'point') lastActionDesc = `Attaque gagnante de ${lastAction.player}`;
-            else if (lastAction.attackType === 'faute') lastActionDesc = `Faute d'attaque de ${lastAction.player}`;
-            else if (lastAction.result === 'out') lastActionDesc = `Attaque out de ${lastAction.player}`;
-            else if (lastAction.result === 'fault_net') lastActionDesc = `Attaque filet de ${lastAction.player}`;
-            else lastActionDesc = `${actionLabel} de ${lastAction.player}`;
+            if (lastAction.result === 'point') lastActionDesc = `Attaque gagnante de ${safePlayer}`;
+            else if (lastAction.attackType === 'faute') lastActionDesc = `Faute d'attaque de ${safePlayer}`;
+            else if (lastAction.result === 'out') lastActionDesc = `Attaque out de ${safePlayer}`;
+            else if (lastAction.result === 'fault_net') lastActionDesc = `Attaque filet de ${safePlayer}`;
+            else lastActionDesc = `${actionLabel} de ${safePlayer}`;
         } else if (lastAction.type === 'reception') {
-            if (lastAction.isDirectReturnWinner) lastActionDesc = `Retour gagnant de ${lastAction.player}`;
-            else if (lastAction.quality && lastAction.quality.label === 'Faute') lastActionDesc = `Faute réception de ${lastAction.player}`;
-            else lastActionDesc = `${actionLabel} de ${lastAction.player}`;
+            if (lastAction.isDirectReturnWinner) lastActionDesc = `Retour gagnant de ${safePlayer}`;
+            else if (lastAction.quality && lastAction.quality.label === 'Faute') lastActionDesc = `Faute réception de ${safePlayer}`;
+            else lastActionDesc = `${actionLabel} de ${safePlayer}`;
         } else if (lastAction.type === 'defense') {
-            if (lastAction.result === 'fault') lastActionDesc = `Faute défense de ${lastAction.player}`;
-            else lastActionDesc = `${actionLabel}${lastAction.player ? ' de ' + lastAction.player : ''}`;
+            if (lastAction.result === 'fault') lastActionDesc = `Faute défense de ${safePlayer}`;
+            else lastActionDesc = `${actionLabel}${lastAction.player ? ' de ' + safePlayer : ''}`;
         } else if (lastAction.type === 'pass') {
-            if (lastAction.result === 'out') lastActionDesc = `Passe out de ${lastAction.player}`;
-            else lastActionDesc = `${actionLabel}${lastAction.player ? ' de ' + lastAction.player : ''}`;
+            if (lastAction.result === 'out') lastActionDesc = `Passe out de ${safePlayer}`;
+            else lastActionDesc = `${actionLabel}${lastAction.player ? ' de ' + safePlayer : ''}`;
         } else {
-            lastActionDesc = `${actionLabel}${lastAction.player ? ' de ' + lastAction.player : ''}`;
+            lastActionDesc = `${actionLabel}${lastAction.player ? ' de ' + safePlayer : ''}`;
         }
     }
 
@@ -213,7 +215,7 @@ function showResumePointModal() {
             <span class="score-after">${scoreBeforeHome} - ${scoreBeforeAway}</span>
         </div>
         <div class="undo-point-detail">
-            <div><span class="label">🏐 Service :</span> ${serverName} (${serverTeamName})</div>
+            <div><span class="label">🏐 Service :</span> ${escapeHtml(serverName)} (${serverTeamName})</div>
             <div><span class="label">❌ Action à annuler :</span> ${lastActionDesc}</div>
             <div style="margin-top:6px; font-size:11px; color:#9ca3af;">Le rally (${nbActions} action${nbActions > 1 ? 's' : ''}) sera restauré juste avant cette action</div>
         </div>
@@ -742,8 +744,11 @@ function renderSubModal() {
     if (bench.length > 0) {
         benchGrid.innerHTML = bench.map(name => `
             <div class="sub-bench-player ${subState.selectedBench === name ? 'selected' : ''}"
-                 onclick="subBenchClick('${name}')">${name}</div>
+                 data-bench-player="${escapeHtml(name)}">${escapeHtml(name)}</div>
         `).join('');
+        benchGrid.querySelectorAll('[data-bench-player]').forEach(el => {
+            el.addEventListener('click', () => subBenchClick(el.dataset.benchPlayer));
+        });
     } else {
         benchGrid.innerHTML = '<span class="sub-no-player">Pas de remplaçant</span>';
     }
@@ -755,8 +760,11 @@ function renderSubModal() {
         : (currentSet.awayBlockerRight || 'Pointu');
     blockerRightToggle.innerHTML = ['Pointu', 'Passeur'].map(role => `
         <div class="sub-blocker-btn ${team} ${currentBlockerRight === role ? 'active' : ''}"
-             onclick="setSubBlockerRight('${role}')">${role}</div>
+             data-blocker-role="${role}">${role}</div>
     `).join('');
+    blockerRightToggle.querySelectorAll('[data-blocker-role]').forEach(el => {
+        el.addEventListener('click', () => setSubBlockerRight(el.dataset.blockerRole));
+    });
 
     // Primary blocker toggle (R4 / bloqueur droit)
     const primaryBlockerToggle = document.getElementById('subPrimaryBlockerToggle');
@@ -768,14 +776,17 @@ function renderSubModal() {
         { value: 'right', label: 'Pointu/Passeur' }
     ].map(opt => `
         <div class="sub-blocker-btn ${team} ${currentPrimary === opt.value ? 'active' : ''}"
-             onclick="setSubPrimaryBlocker('${opt.value}')">${opt.label}</div>
+             data-primary-blocker="${opt.value}">${opt.label}</div>
     `).join('');
+    primaryBlockerToggle.querySelectorAll('[data-primary-blocker]').forEach(el => {
+        el.addEventListener('click', () => setSubPrimaryBlocker(el.dataset.primaryBlocker));
+    });
 
     // Mixité — pré-remplir avec les valeurs actuelles
     document.getElementById('subMixiteHome').value = currentSet.mixiteHome || 0;
     document.getElementById('subMixiteAway').value = currentSet.mixiteAway || 0;
     document.getElementById('subMixiteAwayLabel').textContent =
-        (currentMatch.opponent || 'Adv').substring(0, 10);
+        (currentMatch.opponent || 'Adv').substring(0, 10); // textContent est safe (pas innerHTML)
 }
 
 function subSlotClick(role) {

@@ -100,7 +100,9 @@ const FirebaseSync = {
         console.log('[FirebaseSync] Match supprimé de Firestore :', matchId);
 
         // Nettoyer le tombstone local si présent (suppression Firebase réussie)
-        var tombstones = JSON.parse(localStorage.getItem('volleyball_deleted_matches') || '[]');
+        var tombstones;
+        try { tombstones = JSON.parse(localStorage.getItem('volleyball_deleted_matches') || '[]'); }
+        catch(e) { tombstones = []; }
         var idx = tombstones.indexOf(matchId);
         if (idx !== -1) {
             tombstones.splice(idx, 1);
@@ -119,7 +121,9 @@ const FirebaseSync = {
         const merged = new Map();
 
         // Exclure les matchs supprimés localement (tombstones)
-        const tombstones = JSON.parse(localStorage.getItem('volleyball_deleted_matches') || '[]');
+        let tombstones;
+        try { tombstones = JSON.parse(localStorage.getItem('volleyball_deleted_matches') || '[]'); }
+        catch(e) { tombstones = []; }
 
         // Ajouter les matchs locaux
         localMatches.forEach(m => merged.set(m.id, m));
@@ -341,7 +345,9 @@ const FirebaseSync = {
         // Pass grids — ne jamais ecraser Firebase avec des grilles vides/default
         const passGridsRaw = localStorage.getItem('volleyball_pass_grids');
         if (passGridsRaw) {
-            const parsed = JSON.parse(passGridsRaw);
+            let parsed;
+            try { parsed = JSON.parse(passGridsRaw); } catch(e) { parsed = null; }
+            if (!parsed) return;
             // Verifier qu'au moins une cellule est P3 ou P4 (vraie calibration)
             const hasCalibration = Object.values(parsed).some(zone =>
                 zone && Object.values(zone).some(ctx =>
@@ -389,7 +395,9 @@ const FirebaseSync = {
         // Cohérence : si le currentMatchId (local ou remote) pointe vers un match completed, nettoyer
         const effectiveId = localStorage.getItem(Storage.KEYS.CURRENT_ID);
         if (effectiveId) {
-            const matches = JSON.parse(localStorage.getItem(Storage.KEYS.MATCHES) || '[]');
+            let matches;
+            try { matches = JSON.parse(localStorage.getItem(Storage.KEYS.MATCHES) || '[]'); }
+            catch(e) { matches = []; }
             const match = matches.find(m => m.id === effectiveId);
             if (match && match.status === 'completed') {
                 localStorage.removeItem(Storage.KEYS.CURRENT_ID);
@@ -484,8 +492,9 @@ const FirebaseAuthUI = {
         if (user) {
             const photoURL = user.photoURL || '';
             const initial = (user.displayName || user.email || '?')[0].toUpperCase();
-            const avatarImg = photoURL
-                ? `<img src="${photoURL}" alt="" class="firebase-auth-avatar" referrerpolicy="no-referrer">`
+            const safePhotoURL = photoURL && /^https:\/\//.test(photoURL) ? photoURL : '';
+            const avatarImg = safePhotoURL
+                ? `<img src="${safePhotoURL}" alt="" class="firebase-auth-avatar" referrerpolicy="no-referrer">`
                 : `<div class="firebase-auth-avatar" style="display:flex;align-items:center;justify-content:center;background:#e8eaed;font-size:13px;font-weight:500;color:#5f6368;">${initial}</div>`;
             container.innerHTML = `
                 <div class="firebase-auth-bar">
