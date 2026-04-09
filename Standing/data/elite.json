@@ -5,10 +5,10 @@
     "name": "Elite",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/1",
-    "lastUpdated": "2026-04-02T00:42:52",
+    "lastUpdated": "2026-04-09T02:30:38",
     "teamCount": 10,
-    "matchesPlayed": 65,
-    "matchesUpcoming": 25
+    "matchesPlayed": 67,
+    "matchesUpcoming": 23
   },
   "teams": {
     "jen": {
@@ -66,18 +66,18 @@
     {
       "rank": 1,
       "team": "jen",
-      "mj": 13,
-      "g": 13,
+      "mj": 14,
+      "g": 14,
       "p": 0,
-      "setPlus": 39,
+      "setPlus": 42,
       "setMinus": 4,
-      "ds": 35,
-      "coefSet": "9.75",
-      "ptsPlus": 1060,
-      "ptsMinus": 800,
-      "dp": "+260",
-      "coefPts": "1.32",
-      "pts": 26,
+      "ds": 38,
+      "coefSet": "10.50",
+      "ptsPlus": 1135,
+      "ptsMinus": 853,
+      "dp": "+282",
+      "coefPts": "1.33",
+      "pts": 28,
       "formAller": [
         "W",
         "W",
@@ -95,7 +95,7 @@
         "W",
         "W",
         "D",
-        "P",
+        "W",
         "P",
         "P",
         "P"
@@ -180,18 +180,18 @@
     {
       "rank": 4,
       "team": "marv",
-      "mj": 14,
-      "g": 9,
+      "mj": 15,
+      "g": 10,
       "p": 5,
-      "setPlus": 31,
-      "setMinus": 23,
-      "ds": 8,
-      "coefSet": "1.35",
-      "ptsPlus": 1194,
-      "ptsMinus": 1139,
-      "dp": "+55",
+      "setPlus": 34,
+      "setMinus": 25,
+      "ds": 9,
+      "coefSet": "1.36",
+      "ptsPlus": 1307,
+      "ptsMinus": 1239,
+      "dp": "+68",
       "coefPts": "1.05",
-      "pts": 23,
+      "pts": 25,
       "formAller": [
         "W",
         "W",
@@ -209,7 +209,7 @@
         "W",
         "W",
         "L",
-        "P",
+        "W",
         "P",
         "P",
         "P"
@@ -256,18 +256,18 @@
     {
       "rank": 6,
       "team": "rsc",
-      "mj": 13,
+      "mj": 14,
       "g": 6,
-      "p": 7,
+      "p": 8,
       "setPlus": 25,
-      "setMinus": 28,
-      "ds": -3,
-      "coefSet": "0.89",
-      "ptsPlus": 1129,
-      "ptsMinus": 1131,
-      "dp": "-2",
-      "coefPts": "1.00",
-      "pts": 19,
+      "setMinus": 31,
+      "ds": -6,
+      "coefSet": "0.81",
+      "ptsPlus": 1182,
+      "ptsMinus": 1206,
+      "dp": "-24",
+      "coefPts": "0.98",
+      "pts": 20,
       "formAller": [
         "L",
         "L",
@@ -285,7 +285,7 @@
         "W",
         "D",
         "L",
-        "P",
+        "L",
         "P",
         "P",
         "P"
@@ -294,18 +294,18 @@
     {
       "rank": 7,
       "team": "bier",
-      "mj": 14,
+      "mj": 15,
       "g": 6,
-      "p": 8,
-      "setPlus": 24,
-      "setMinus": 28,
-      "ds": -4,
-      "coefSet": "0.86",
-      "ptsPlus": 1158,
-      "ptsMinus": 1085,
-      "dp": "+73",
-      "coefPts": "1.07",
-      "pts": 20,
+      "p": 9,
+      "setPlus": 26,
+      "setMinus": 31,
+      "ds": -5,
+      "coefSet": "0.84",
+      "ptsPlus": 1258,
+      "ptsMinus": 1198,
+      "dp": "+60",
+      "coefPts": "1.05",
+      "pts": 21,
       "formAller": [
         "W",
         "L",
@@ -323,8 +323,8 @@
         "L",
         "L",
         "W",
-        "P",
-        "P",
+        "L",
+        "D",
         "P",
         "P"
       ]
@@ -438,13 +438,31 @@
         "L",
         "D",
         "D",
-        "P",
+        "D",
         "P",
         "P"
       ]
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "08/04/2026",
+      "home": "rsc",
+      "away": "jen",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "07/04/2026",
+      "home": "bier",
+      "away": "marv",
+      "scoreHome": 2,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
     {
       "date": "01/04/2026",
       "home": "rsc",
@@ -1051,19 +1069,7 @@
       "status": "Reporté"
     },
     {
-      "date": "07/04/2026",
-      "home": "bier",
-      "away": "marv",
-      "status": "Sem. 15"
-    },
-    {
-      "date": "08/04/2026",
-      "home": "rsc",
-      "away": "jen",
-      "status": "Sem. 15"
-    },
-    {
-      "date": "08/04/2026",
+      "date": "15/04/2026",
       "home": "manu",
       "away": "kiki",
       "status": "Sem. 15"
@@ -1078,12 +1084,6 @@
       "date": "04/05/2026",
       "home": "rhsp",
       "away": "rhin",
-      "status": "Sem. 16"
-    },
-    {
-      "date": "04/05/2026",
-      "home": "star",
-      "away": "bier",
       "status": "Sem. 16"
     },
     {
@@ -1177,6 +1177,12 @@
       "status": "Reporté"
     },
     {
+      "date": "01/06/2026",
+      "home": "star",
+      "away": "bier",
+      "status": "Reporté"
+    },
+    {
       "date": "08/06/2026",
       "home": "rhsp",
       "away": "resc",
@@ -1187,11 +1193,11 @@
     {
       "rank": 1,
       "team": "jen",
-      "elo": 1758.6,
-      "movement": 3.4,
-      "record": "13-0",
-      "power": 98.4,
-      "calendar": "V x13",
+      "elo": 1774.6,
+      "movement": 16.0,
+      "record": "14-0",
+      "power": 100.0,
+      "calendar": "V x14",
       "diffClass": "diff-easy"
     },
     {
@@ -1200,29 +1206,29 @@
       "elo": 1662.2,
       "movement": 30.3,
       "record": "10-3",
-      "power": 80.4,
+      "power": 79.5,
       "calendar": "V x6",
       "diffClass": "diff-easy"
     },
     {
       "rank": 3,
-      "team": "kiki",
-      "elo": 1564.5,
-      "movement": 21.6,
-      "record": "9-4",
-      "power": 62.1,
+      "team": "marv",
+      "elo": 1583.1,
+      "movement": 20.3,
+      "record": "10-5",
+      "power": 65.1,
       "calendar": "V vs Bières",
       "diffClass": "diff-easy"
     },
     {
       "rank": 4,
-      "team": "marv",
-      "elo": 1562.8,
-      "movement": -30.3,
-      "record": "9-5",
-      "power": 61.8,
-      "calendar": "D vs Les",
-      "diffClass": "diff-hard"
+      "team": "kiki",
+      "elo": 1564.5,
+      "movement": 21.6,
+      "record": "9-4",
+      "power": 61.7,
+      "calendar": "V vs Bières",
+      "diffClass": "diff-easy"
     },
     {
       "rank": 5,
@@ -1230,29 +1236,29 @@
       "elo": 1557.6,
       "movement": 43.5,
       "record": "8-5",
-      "power": 60.8,
+      "power": 60.5,
       "calendar": "V vs RSC",
       "diffClass": "diff-easy"
     },
     {
       "rank": 6,
       "team": "rsc",
-      "elo": 1485.0,
-      "movement": -43.5,
-      "record": "6-7",
-      "power": 47.2,
-      "calendar": "D vs Red",
+      "elo": 1469.0,
+      "movement": -16.0,
+      "record": "6-8",
+      "power": 44.4,
+      "calendar": "D vs Jen",
       "diffClass": "diff-hard"
     },
     {
       "rank": 7,
       "team": "bier",
-      "elo": 1466.0,
-      "movement": 24.2,
-      "record": "6-8",
-      "power": 43.6,
-      "calendar": "V vs Rhinos",
-      "diffClass": "diff-easy"
+      "elo": 1445.7,
+      "movement": -20.3,
+      "record": "6-9",
+      "power": 40.1,
+      "calendar": "D vs Marvels",
+      "diffClass": "diff-hard"
     },
     {
       "rank": 8,
@@ -1260,7 +1266,7 @@
       "elo": 1370.2,
       "movement": -15.2,
       "record": "2-9",
-      "power": 25.7,
+      "power": 26.4,
       "calendar": "D x5",
       "diffClass": "diff-hard"
     },
@@ -1270,7 +1276,7 @@
       "elo": 1340.3,
       "movement": -24.2,
       "record": "2-11",
-      "power": 20.1,
+      "power": 20.9,
       "calendar": "D x5",
       "diffClass": "diff-hard"
     },
@@ -1799,7 +1805,8 @@
       1731.2,
       1743.3,
       1755.3,
-      1758.6
+      1758.6,
+      1774.6
     ],
     "kiki": [
       1500,
@@ -1864,7 +1871,8 @@
       1535.8,
       1559.6,
       1593.0,
-      1562.8
+      1562.8,
+      1583.1
     ],
     "rsc": [
       1500,
@@ -1880,7 +1888,8 @@
       1494.8,
       1508.8,
       1528.5,
-      1485.0
+      1485.0,
+      1469.0
     ],
     "manu": [
       1500,
@@ -1911,7 +1920,8 @@
       1475.5,
       1463.5,
       1441.9,
-      1466.0
+      1466.0,
+      1445.7
     ],
     "rhin": [
       1500,
@@ -1963,7 +1973,8 @@
           20,
           22,
           24,
-          26
+          26,
+          28
         ],
         "rank": 1
       },
@@ -2040,7 +2051,8 @@
           18,
           20,
           22,
-          23
+          23,
+          25
         ],
         "rank": 4
       },
@@ -2059,7 +2071,8 @@
           14,
           16,
           18,
-          19
+          19,
+          20
         ],
         "rank": 6
       },
@@ -2096,7 +2109,8 @@
           16,
           17,
           18,
-          20
+          20,
+          21
         ],
         "rank": 7
       },

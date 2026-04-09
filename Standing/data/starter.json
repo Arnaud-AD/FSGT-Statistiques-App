@@ -5,10 +5,10 @@
     "name": "Starter",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/16",
-    "lastUpdated": "2026-04-02T00:42:55",
+    "lastUpdated": "2026-04-09T02:30:42",
     "teamCount": 8,
-    "matchesPlayed": 41,
-    "matchesUpcoming": 15
+    "matchesPlayed": 44,
+    "matchesUpcoming": 12
   },
   "teams": {
     "bach": {
@@ -26,14 +26,14 @@
       "short": "GA",
       "color": "#2ecc71"
     },
-    "daiq": {
-      "name": "Daïquibri",
-      "short": "DA",
-      "color": "#f39c12"
-    },
     "gvc": {
       "name": "GVC",
       "short": "GV",
+      "color": "#f39c12"
+    },
+    "daiq": {
+      "name": "Daïquibri",
+      "short": "DA",
       "color": "#9b59b6"
     },
     "gold": {
@@ -56,18 +56,18 @@
     {
       "rank": 1,
       "team": "gvc",
-      "mj": 7,
-      "g": 7,
+      "mj": 9,
+      "g": 9,
       "p": 0,
-      "setPlus": 21,
-      "setMinus": 2,
-      "ds": 19,
-      "coefSet": "10.50",
-      "ptsPlus": 553,
-      "ptsMinus": 397,
-      "dp": "+156",
-      "coefPts": "1.39",
-      "pts": 14,
+      "setPlus": 27,
+      "setMinus": 3,
+      "ds": 24,
+      "coefSet": "9.00",
+      "ptsPlus": 720,
+      "ptsMinus": 541,
+      "dp": "+179",
+      "coefPts": "1.33",
+      "pts": 18,
       "formAller": [
         "W",
         "W",
@@ -78,11 +78,11 @@
         "W"
       ],
       "formRetour": [
+        "W",
+        "D",
+        "W",
         "D",
         "D",
-        "D",
-        "P",
-        "P",
         "P",
         "P"
       ]
@@ -117,25 +117,25 @@
         "W",
         "W",
         "D",
-        "P",
+        "D",
         "P"
       ]
     },
     {
       "rank": 3,
       "team": "coco",
-      "mj": 11,
-      "g": 8,
+      "mj": 12,
+      "g": 9,
       "p": 3,
-      "setPlus": 24,
-      "setMinus": 11,
-      "ds": 13,
-      "coefSet": "2.18",
-      "ptsPlus": 797,
-      "ptsMinus": 733,
-      "dp": "+64",
-      "coefPts": "1.09",
-      "pts": 19,
+      "setPlus": 27,
+      "setMinus": 12,
+      "ds": 15,
+      "coefSet": "2.25",
+      "ptsPlus": 899,
+      "ptsMinus": 814,
+      "dp": "+85",
+      "coefPts": "1.10",
+      "pts": 21,
       "formAller": [
         "W",
         "L",
@@ -150,26 +150,26 @@
         "L",
         "W",
         "W",
-        "P",
-        "P",
+        "D",
+        "W",
         "P"
       ]
     },
     {
       "rank": 4,
       "team": "gail",
-      "mj": 11,
+      "mj": 12,
       "g": 7,
-      "p": 4,
-      "setPlus": 19,
-      "setMinus": 20,
-      "ds": -1,
-      "coefSet": "0.95",
-      "ptsPlus": 874,
-      "ptsMinus": 833,
-      "dp": "+41",
-      "coefPts": "1.05",
-      "pts": 18,
+      "p": 5,
+      "setPlus": 20,
+      "setMinus": 23,
+      "ds": -3,
+      "coefSet": "0.87",
+      "ptsPlus": 955,
+      "ptsMinus": 935,
+      "dp": "+20",
+      "coefPts": "1.02",
+      "pts": 19,
       "formAller": [
         "W",
         "W",
@@ -185,25 +185,25 @@
         "W",
         "L",
         "D",
-        "P",
+        "L",
         "P"
       ]
     },
     {
       "rank": 5,
       "team": "daiq",
-      "mj": 11,
+      "mj": 12,
       "g": 4,
-      "p": 7,
+      "p": 8,
       "setPlus": 15,
-      "setMinus": 22,
-      "ds": -7,
-      "coefSet": "0.68",
-      "ptsPlus": 794,
-      "ptsMinus": 862,
-      "dp": "-68",
-      "coefPts": "0.92",
-      "pts": 15,
+      "setMinus": 25,
+      "ds": -10,
+      "coefSet": "0.60",
+      "ptsPlus": 855,
+      "ptsMinus": 938,
+      "dp": "-83",
+      "coefPts": "0.91",
+      "pts": 16,
       "formAller": [
         "L",
         "L",
@@ -217,48 +217,14 @@
         "L",
         "L",
         "L",
-        "D",
+        "L",
         "W",
-        "P",
+        "D",
         "P"
       ]
     },
     {
       "rank": 6,
-      "team": "gold",
-      "mj": 11,
-      "g": 3,
-      "p": 8,
-      "setPlus": 14,
-      "setMinus": 24,
-      "ds": -10,
-      "coefSet": "0.58",
-      "ptsPlus": 755,
-      "ptsMinus": 867,
-      "dp": "-112",
-      "coefPts": "0.87",
-      "pts": 14,
-      "formAller": [
-        "L",
-        "L",
-        "L",
-        "W",
-        "L",
-        "W",
-        "L"
-      ],
-      "formRetour": [
-        "L",
-        "D",
-        "L",
-        "W",
-        "L",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 7,
       "team": "bler",
       "mj": 10,
       "g": 2,
@@ -286,8 +252,42 @@
         "L",
         "L",
         "D",
+        "D",
         "P",
-        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 7,
+      "team": "gold",
+      "mj": 12,
+      "g": 3,
+      "p": 9,
+      "setPlus": 15,
+      "setMinus": 27,
+      "ds": -12,
+      "coefSet": "0.56",
+      "ptsPlus": 838,
+      "ptsMinus": 958,
+      "dp": "-120",
+      "coefPts": "0.87",
+      "pts": 15,
+      "formAller": [
+        "L",
+        "L",
+        "L",
+        "W",
+        "L",
+        "W",
+        "L"
+      ],
+      "formRetour": [
+        "L",
+        "L",
+        "L",
+        "W",
+        "L",
+        "D",
         "P"
       ]
     },
@@ -321,12 +321,21 @@
         "D",
         "L",
         "D",
-        "P",
+        "D",
         "P"
       ]
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "08/04/2026",
+      "home": "gail",
+      "away": "coco",
+      "scoreHome": 1,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
     {
       "date": "30/03/2026",
       "home": "daiq",
@@ -358,6 +367,15 @@
       "date": "25/03/2026",
       "home": "gold",
       "away": "caip",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "23/03/2026",
+      "home": "gvc",
+      "away": "daiq",
       "scoreHome": 3,
       "scoreAway": 0,
       "homeWin": true,
@@ -407,6 +425,15 @@
       "scoreAway": 2,
       "homeWin": true,
       "status": "Les pts"
+    },
+    {
+      "date": "16/02/2026",
+      "home": "gvc",
+      "away": "gold",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
     },
     {
       "date": "16/02/2026",
@@ -699,21 +726,9 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "16/02/2026",
-      "home": "gvc",
-      "away": "gold",
-      "status": "Reporté"
-    },
-    {
       "date": "09/03/2026",
       "home": "caip",
       "away": "gvc",
-      "status": "Reporté"
-    },
-    {
-      "date": "23/03/2026",
-      "home": "gvc",
-      "away": "daiq",
       "status": "Reporté"
     },
     {
@@ -732,31 +747,25 @@
       "date": "03/04/2026",
       "home": "coco",
       "away": "gvc",
-      "status": "Sem. 12"
+      "status": "Reporté"
     },
     {
       "date": "06/04/2026",
       "home": "bach",
       "away": "gvc",
-      "status": "Sem. 13"
+      "status": "Reporté"
     },
     {
       "date": "06/04/2026",
       "home": "caip",
       "away": "daiq",
-      "status": "Sem. 13"
+      "status": "Reporté"
     },
     {
       "date": "06/04/2026",
       "home": "bler",
       "away": "gold",
-      "status": "Sem. 13"
-    },
-    {
-      "date": "08/04/2026",
-      "home": "gail",
-      "away": "coco",
-      "status": "Sem. 13"
+      "status": "Reporté"
     },
     {
       "date": "04/05/2026",
@@ -793,60 +802,60 @@
     {
       "rank": 1,
       "team": "bach",
-      "elo": 1725.3,
-      "movement": 20.8,
+      "elo": 1724.7,
+      "movement": 20.9,
       "record": "10-1",
-      "power": 95.3,
+      "power": 95.1,
       "calendar": "V x6",
       "diffClass": "diff-easy"
     },
     {
       "rank": 2,
       "team": "gvc",
-      "elo": 1681.5,
-      "movement": 25.1,
-      "record": "7-0",
-      "power": 86.5,
-      "calendar": "V x7",
+      "elo": 1701.9,
+      "movement": 11.2,
+      "record": "9-0",
+      "power": 90.5,
+      "calendar": "V x9",
       "diffClass": "diff-easy"
     },
     {
       "rank": 3,
       "team": "coco",
-      "elo": 1602.2,
-      "movement": 16.2,
-      "record": "8-3",
-      "power": 70.6,
-      "calendar": "V x3",
+      "elo": 1631.8,
+      "movement": 29.5,
+      "record": "9-3",
+      "power": 76.4,
+      "calendar": "V x4",
       "diffClass": "diff-easy"
     },
     {
       "rank": 4,
       "team": "gail",
-      "elo": 1538.5,
-      "movement": -20.8,
-      "record": "7-4",
-      "power": 57.7,
-      "calendar": "D vs Bachateam",
+      "elo": 1508.9,
+      "movement": -29.5,
+      "record": "7-5",
+      "power": 51.8,
+      "calendar": "D vs Les",
       "diffClass": "diff-hard"
     },
     {
       "rank": 5,
       "team": "daiq",
-      "elo": 1441.0,
-      "movement": 27.5,
-      "record": "4-7",
-      "power": 38.1,
+      "elo": 1430.2,
+      "movement": 27.8,
+      "record": "4-8",
+      "power": 36.0,
       "calendar": "V vs Gold",
       "diffClass": "diff-easy"
     },
     {
       "rank": 6,
       "team": "gold",
-      "elo": 1390.2,
-      "movement": -27.5,
-      "record": "3-8",
-      "power": 27.9,
+      "elo": 1382.1,
+      "movement": -27.8,
+      "record": "3-9",
+      "power": 26.4,
       "calendar": "D vs Daïquibri",
       "diffClass": "diff-hard"
     },
@@ -856,15 +865,15 @@
       "elo": 1369.8,
       "movement": -16.2,
       "record": "2-8",
-      "power": 23.8,
+      "power": 23.9,
       "calendar": "D vs Les",
       "diffClass": "diff-hard"
     },
     {
       "rank": 8,
       "team": "caip",
-      "elo": 1251.4,
-      "movement": -21.1,
+      "elo": 1250.7,
+      "movement": -21.8,
       "record": "0-10",
       "power": 0.0,
       "calendar": "D x10",
@@ -884,8 +893,8 @@
       1633.0,
       1660.6,
       1688.4,
-      1704.6,
-      1725.3
+      1703.9,
+      1724.7
     ],
     "coco": [
       1500,
@@ -899,7 +908,8 @@
       1544.1,
       1575.6,
       1586.0,
-      1602.2
+      1602.2,
+      1631.8
     ],
     "gail": [
       1500,
@@ -913,7 +923,20 @@
       1523.6,
       1545.4,
       1559.3,
-      1538.5
+      1538.4,
+      1508.9
+    ],
+    "gvc": [
+      1500,
+      1532.9,
+      1565.4,
+      1586.1,
+      1606.7,
+      1625.9,
+      1656.4,
+      1681.5,
+      1690.7,
+      1701.9
     ],
     "daiq": [
       1500,
@@ -927,17 +950,8 @@
       1458.8,
       1444.9,
       1413.5,
-      1441.0
-    ],
-    "gvc": [
-      1500,
-      1532.9,
-      1565.4,
-      1586.1,
-      1606.7,
-      1625.9,
-      1656.4,
-      1681.5
+      1402.4,
+      1430.2
     ],
     "gold": [
       1500,
@@ -949,9 +963,10 @@
       1452.5,
       1434.6,
       1412.8,
-      1396.6,
-      1417.7,
-      1390.2
+      1403.6,
+      1388.1,
+      1409.9,
+      1382.1
     ],
     "bler": [
       1500,
@@ -977,7 +992,7 @@
       1325.9,
       1282.9,
       1272.5,
-      1251.4
+      1250.7
     ]
   },
   "evolutionData": {
@@ -1012,7 +1027,8 @@
           13,
           15,
           17,
-          19
+          19,
+          21
         ],
         "rank": 3
       },
@@ -1029,9 +1045,25 @@
           13,
           15,
           17,
-          18
+          18,
+          19
         ],
         "rank": 4
+      },
+      "gvc": {
+        "points": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          10,
+          12,
+          14,
+          16,
+          18
+        ],
+        "rank": 1
       },
       "daiq": {
         "points": [
@@ -1046,22 +1078,10 @@
           11,
           12,
           13,
-          15
+          14,
+          16
         ],
         "rank": 5
-      },
-      "gvc": {
-        "points": [
-          0,
-          2,
-          4,
-          6,
-          8,
-          10,
-          12,
-          14
-        ],
-        "rank": 1
       },
       "gold": {
         "points": [
@@ -1075,10 +1095,11 @@
           9,
           10,
           11,
-          13,
-          14
+          12,
+          14,
+          15
         ],
-        "rank": 6
+        "rank": 7
       },
       "bler": {
         "points": [
@@ -1094,7 +1115,7 @@
           11,
           12
         ],
-        "rank": 7
+        "rank": 6
       },
       "caip": {
         "points": [
