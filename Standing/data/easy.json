@@ -5,7 +5,7 @@
     "name": "Easy",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/3",
-    "lastUpdated": "2026-04-09T02:30:42",
+    "lastUpdated": "2026-04-10T15:53:09",
     "teamCount": 8,
     "matchesPlayed": 44,
     "matchesUpcoming": 12
@@ -738,12 +738,6 @@
       "status": "Reporté"
     },
     {
-      "date": "N/C",
-      "home": "bats",
-      "away": "punc",
-      "status": "Reporté"
-    },
-    {
       "date": "13/04/2026",
       "home": "pyth",
       "away": "neku",
@@ -789,6 +783,12 @@
       "date": "21/05/2026",
       "home": "fata",
       "away": "touk",
+      "status": "Reporté"
+    },
+    {
+      "date": "02/06/2026",
+      "home": "bats",
+      "away": "punc",
       "status": "Reporté"
     },
     {

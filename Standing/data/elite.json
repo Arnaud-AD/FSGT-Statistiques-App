@@ -5,7 +5,7 @@
     "name": "Elite",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/1",
-    "lastUpdated": "2026-04-09T02:30:38",
+    "lastUpdated": "2026-04-10T15:53:07",
     "teamCount": 10,
     "matchesPlayed": 67,
     "matchesUpcoming": 23
@@ -381,7 +381,7 @@
       "ptsMinus": 1120,
       "dp": "-194",
       "coefPts": "0.83",
-      "pts": 15,
+      "pts": 14,
       "formAller": [
         "L",
         "L",
@@ -479,7 +479,7 @@
       "scoreHome": 3,
       "scoreAway": 0,
       "homeWin": true,
-      "status": "Terminé"
+      "status": "Forfait"
     },
     {
       "date": "30/03/2026",
