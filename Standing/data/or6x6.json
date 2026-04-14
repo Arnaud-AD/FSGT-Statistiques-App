@@ -5,10 +5,10 @@
     "name": "Or 6x6",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/4",
-    "lastUpdated": "2026-04-13T14:08:29",
+    "lastUpdated": "2026-04-14T09:15:17",
     "teamCount": 10,
-    "matchesPlayed": 63,
-    "matchesUpcoming": 27
+    "matchesPlayed": 65,
+    "matchesUpcoming": 25
   },
   "teams": {
     "cout": {
@@ -26,24 +26,24 @@
       "short": "NS",
       "color": "#2ecc71"
     },
-    "raia": {
-      "name": "La Raïa",
-      "short": "RA",
-      "color": "#f39c12"
-    },
     "no": {
       "name": "No s(o)ucy",
       "short": "N2",
-      "color": "#9b59b6"
-    },
-    "mous": {
-      "name": "Moustache Team",
-      "short": "MT",
-      "color": "#1abc9c"
+      "color": "#f39c12"
     },
     "cret": {
       "name": "Cret'1",
       "short": "CR",
+      "color": "#9b59b6"
+    },
+    "raia": {
+      "name": "La Raïa",
+      "short": "RA",
+      "color": "#1abc9c"
+    },
+    "mous": {
+      "name": "Moustache Team",
+      "short": "MT",
       "color": "#e67e22"
     },
     "ivry": {
@@ -66,18 +66,18 @@
     {
       "rank": 1,
       "team": "cout",
-      "mj": 13,
-      "g": 13,
+      "mj": 14,
+      "g": 14,
       "p": 0,
-      "setPlus": 38,
-      "setMinus": 10,
-      "ds": 28,
-      "coefSet": "3.80",
-      "ptsPlus": 1146,
-      "ptsMinus": 933,
-      "dp": "+213",
-      "coefPts": "1.23",
-      "pts": 26,
+      "setPlus": 41,
+      "setMinus": 11,
+      "ds": 30,
+      "coefSet": "3.73",
+      "ptsPlus": 1242,
+      "ptsMinus": 1020,
+      "dp": "+222",
+      "coefPts": "1.22",
+      "pts": 28,
       "formAller": [
         "W",
         "W",
@@ -95,7 +95,7 @@
         "W",
         "W",
         "W",
-        "D",
+        "W",
         "P",
         "P",
         "P"
@@ -179,44 +179,6 @@
     },
     {
       "rank": 4,
-      "team": "no",
-      "mj": 12,
-      "g": 7,
-      "p": 5,
-      "setPlus": 28,
-      "setMinus": 20,
-      "ds": 8,
-      "coefSet": "1.40",
-      "ptsPlus": 1083,
-      "ptsMinus": 1011,
-      "dp": "+72",
-      "coefPts": "1.07",
-      "pts": 19,
-      "formAller": [
-        "L",
-        "L",
-        "W",
-        "W",
-        "L",
-        "L",
-        "D",
-        "L",
-        "W"
-      ],
-      "formRetour": [
-        "W",
-        "W",
-        "W",
-        "D",
-        "W",
-        "D",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 5,
       "team": "neui",
       "mj": 13,
       "g": 8,
@@ -248,6 +210,44 @@
         "W",
         "L",
         "D",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 5,
+      "team": "no",
+      "mj": 13,
+      "g": 7,
+      "p": 6,
+      "setPlus": 29,
+      "setMinus": 23,
+      "ds": 6,
+      "coefSet": "1.26",
+      "ptsPlus": 1170,
+      "ptsMinus": 1107,
+      "dp": "+63",
+      "coefPts": "1.06",
+      "pts": 20,
+      "formAller": [
+        "L",
+        "L",
+        "W",
+        "W",
+        "L",
+        "L",
+        "D",
+        "L",
+        "W"
+      ],
+      "formRetour": [
+        "W",
+        "W",
+        "W",
+        "D",
+        "W",
+        "L",
         "P",
         "P",
         "P"
@@ -293,57 +293,19 @@
     },
     {
       "rank": 7,
-      "team": "mous",
-      "mj": 13,
-      "g": 5,
-      "p": 8,
-      "setPlus": 25,
-      "setMinus": 27,
-      "ds": -2,
-      "coefSet": "0.93",
-      "ptsPlus": 1105,
-      "ptsMinus": 1168,
-      "dp": "-63",
-      "coefPts": "0.95",
-      "pts": 18,
-      "formAller": [
-        "W",
-        "L",
-        "L",
-        "L",
-        "L",
-        "L",
-        "W",
-        "W",
-        "L"
-      ],
-      "formRetour": [
-        "W",
-        "L",
-        "W",
-        "D",
-        "L",
-        "D",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 8,
       "team": "cret",
-      "mj": 13,
-      "g": 5,
+      "mj": 14,
+      "g": 6,
       "p": 8,
-      "setPlus": 21,
-      "setMinus": 26,
-      "ds": -5,
-      "coefSet": "0.81",
-      "ptsPlus": 1023,
-      "ptsMinus": 1086,
-      "dp": "-63",
-      "coefPts": "0.94",
-      "pts": 18,
+      "setPlus": 24,
+      "setMinus": 27,
+      "ds": -3,
+      "coefSet": "0.89",
+      "ptsPlus": 1118,
+      "ptsMinus": 1171,
+      "dp": "-53",
+      "coefPts": "0.95",
+      "pts": 20,
       "formAller": [
         "L",
         "L",
@@ -361,7 +323,45 @@
         "W",
         "L",
         "L",
+        "W",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 8,
+      "team": "mous",
+      "mj": 14,
+      "g": 5,
+      "p": 9,
+      "setPlus": 26,
+      "setMinus": 30,
+      "ds": -4,
+      "coefSet": "0.87",
+      "ptsPlus": 1190,
+      "ptsMinus": 1263,
+      "dp": "-73",
+      "coefPts": "0.94",
+      "pts": 19,
+      "formAller": [
+        "W",
+        "L",
+        "L",
+        "L",
+        "L",
+        "L",
+        "W",
+        "W",
+        "L"
+      ],
+      "formRetour": [
+        "W",
+        "L",
+        "W",
         "D",
+        "L",
+        "L",
         "P",
         "P",
         "P"
@@ -445,6 +445,24 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "13/04/2026",
+      "home": "cout",
+      "away": "no",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "13/04/2026",
+      "home": "mous",
+      "away": "cret",
+      "scoreHome": 1,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
     {
       "date": "10/04/2026",
       "home": "no",
@@ -915,20 +933,20 @@
     },
     {
       "date": "17/11/2025",
-      "home": "raia",
-      "away": "mous",
-      "scoreHome": 3,
-      "scoreAway": 2,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "17/11/2025",
       "home": "ivry",
       "away": "no",
       "scoreHome": 1,
       "scoreAway": 2,
       "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "17/11/2025",
+      "home": "raia",
+      "away": "mous",
+      "scoreHome": 3,
+      "scoreAway": 2,
+      "homeWin": true,
       "status": "Terminé"
     },
     {
@@ -996,19 +1014,19 @@
     },
     {
       "date": "13/10/2025",
-      "home": "mous",
-      "away": "vill",
+      "home": "ivry",
+      "away": "cret",
       "scoreHome": 3,
-      "scoreAway": 1,
+      "scoreAway": 0,
       "homeWin": true,
       "status": "Terminé"
     },
     {
       "date": "13/10/2025",
-      "home": "ivry",
-      "away": "cret",
+      "home": "mous",
+      "away": "vill",
       "scoreHome": 3,
-      "scoreAway": 0,
+      "scoreAway": 1,
       "homeWin": true,
       "status": "Terminé"
     }
@@ -1018,18 +1036,6 @@
       "date": "N/C",
       "home": "raia",
       "away": "vill",
-      "status": "Reporté"
-    },
-    {
-      "date": "13/04/2026",
-      "home": "cout",
-      "away": "no",
-      "status": "Reporté"
-    },
-    {
-      "date": "13/04/2026",
-      "home": "mous",
-      "away": "cret",
       "status": "Reporté"
     },
     {
@@ -1181,11 +1187,11 @@
     {
       "rank": 1,
       "team": "cout",
-      "elo": 1736.0,
-      "movement": 10.8,
-      "record": "13-0",
-      "power": 89.4,
-      "calendar": "V x13",
+      "elo": 1753.6,
+      "movement": 17.6,
+      "record": "14-0",
+      "power": 92.4,
+      "calendar": "V x14",
       "diffClass": "diff-easy"
     },
     {
@@ -1200,16 +1206,6 @@
     },
     {
       "rank": 3,
-      "team": "no",
-      "elo": 1609.9,
-      "movement": 20.1,
-      "record": "7-5",
-      "power": 68.4,
-      "calendar": "V x5",
-      "diffClass": "diff-easy"
-    },
-    {
-      "rank": 4,
       "team": "raia",
       "elo": 1601.7,
       "movement": 9.7,
@@ -1217,6 +1213,16 @@
       "power": 67.0,
       "calendar": "V x3",
       "diffClass": "diff-easy"
+    },
+    {
+      "rank": 4,
+      "team": "no",
+      "elo": 1592.3,
+      "movement": -17.6,
+      "record": "7-6",
+      "power": 65.4,
+      "calendar": "D vs Coutiao",
+      "diffClass": "diff-hard"
     },
     {
       "rank": 5,
@@ -1230,13 +1236,13 @@
     },
     {
       "rank": 6,
-      "team": "mous",
-      "elo": 1477.9,
-      "movement": -22.8,
-      "record": "5-8",
-      "power": 46.3,
-      "calendar": "D vs Marvels",
-      "diffClass": "diff-hard"
+      "team": "cret",
+      "elo": 1481.9,
+      "movement": 36.1,
+      "record": "6-8",
+      "power": 47.0,
+      "calendar": "V vs Moustache",
+      "diffClass": "diff-easy"
     },
     {
       "rank": 7,
@@ -1250,12 +1256,12 @@
     },
     {
       "rank": 8,
-      "team": "cret",
-      "elo": 1445.8,
-      "movement": -34.1,
-      "record": "5-8",
-      "power": 40.9,
-      "calendar": "D vs No",
+      "team": "mous",
+      "elo": 1441.9,
+      "movement": -36.1,
+      "record": "5-9",
+      "power": 40.3,
+      "calendar": "D vs Cret'1",
       "diffClass": "diff-hard"
     },
     {
@@ -1295,7 +1301,8 @@
       1711.7,
       1719.4,
       1725.2,
-      1736.0
+      1736.0,
+      1753.6
     ],
     "marv": [
       1500,
@@ -1328,20 +1335,6 @@
       1523.3,
       1492.6
     ],
-    "raia": [
-      1500,
-      1478.3,
-      1499.1,
-      1522.6,
-      1560.5,
-      1575.4,
-      1590.5,
-      1562.7,
-      1528.5,
-      1561.4,
-      1592.1,
-      1601.7
-    ],
     "no": [
       1500,
       1470.2,
@@ -1355,23 +1348,8 @@
       1506.9,
       1555.7,
       1589.8,
-      1609.9
-    ],
-    "mous": [
-      1500,
-      1523.9,
-      1498.9,
-      1478.1,
-      1449.2,
-      1435.4,
-      1419.6,
-      1466.0,
-      1438.5,
-      1457.0,
-      1484.0,
-      1466.6,
-      1500.7,
-      1477.9
+      1609.9,
+      1592.3
     ],
     "cret": [
       1500,
@@ -1387,7 +1365,39 @@
       1490.2,
       1512.8,
       1479.9,
-      1445.8
+      1445.8,
+      1481.9
+    ],
+    "raia": [
+      1500,
+      1478.3,
+      1499.1,
+      1522.6,
+      1560.5,
+      1575.4,
+      1590.5,
+      1562.7,
+      1528.5,
+      1561.4,
+      1592.1,
+      1601.7
+    ],
+    "mous": [
+      1500,
+      1523.9,
+      1498.9,
+      1478.1,
+      1449.2,
+      1435.4,
+      1419.6,
+      1466.0,
+      1438.5,
+      1457.0,
+      1484.0,
+      1466.6,
+      1500.7,
+      1477.9,
+      1441.9
     ],
     "ivry": [
       1500,
@@ -1455,7 +1465,8 @@
           20,
           22,
           24,
-          26
+          26,
+          28
         ],
         "rank": 1
       },
@@ -1494,7 +1505,46 @@
           20,
           21
         ],
+        "rank": 4
+      },
+      "no": {
+        "points": [
+          0,
+          1,
+          2,
+          4,
+          6,
+          7,
+          8,
+          9,
+          11,
+          13,
+          15,
+          17,
+          19,
+          20
+        ],
         "rank": 5
+      },
+      "cret": {
+        "points": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          6,
+          8,
+          9,
+          11,
+          13,
+          14,
+          16,
+          17,
+          18,
+          20
+        ],
+        "rank": 7
       },
       "raia": {
         "points": [
@@ -1513,24 +1563,6 @@
         ],
         "rank": 3
       },
-      "no": {
-        "points": [
-          0,
-          1,
-          2,
-          4,
-          6,
-          7,
-          8,
-          9,
-          11,
-          13,
-          15,
-          17,
-          19
-        ],
-        "rank": 4
-      },
       "mous": {
         "points": [
           0,
@@ -1546,26 +1578,8 @@
           14,
           15,
           17,
-          18
-        ],
-        "rank": 7
-      },
-      "cret": {
-        "points": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          6,
-          8,
-          9,
-          11,
-          13,
-          14,
-          16,
-          17,
-          18
+          18,
+          19
         ],
         "rank": 8
       },

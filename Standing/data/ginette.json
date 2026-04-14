@@ -3,9 +3,9 @@
     "slug": "ginette",
     "name": "Coupe Ginette",
     "format": "coupe",
-    "lastUpdated": "2026-03-24T11:48:30",
+    "lastUpdated": "2026-04-14T09:15:18",
     "teamCount": 58,
-    "matchCount": 82,
+    "matchCount": 83,
     "forfeitCount": 10,
     "rounds": [
       "Tour 1",
@@ -14,7 +14,6 @@
       "1/8 Consolante",
       "1/4 Principale",
       "1/4 Consolante",
-      "1/2 Principale",
       "1/2 Consolante"
     ]
   },
@@ -278,50 +277,6 @@
     },
     {
       "rank": 7,
-      "name": "Red Hot Sucy Pépère",
-      "division": "Elite",
-      "divSlug": "elite",
-      "elo": 1793.1,
-      "delta": -6.9,
-      "record": "3-1",
-      "wins": 3,
-      "losses": 1,
-      "power": 91.4,
-      "form": [
-        "W",
-        "L",
-        "W",
-        "W"
-      ],
-      "matches": [
-        {
-          "opponent": "Pythons Collés",
-          "result": "W",
-          "score": "3-0",
-          "delta": 5
-        },
-        {
-          "opponent": "Les Indécis",
-          "result": "L",
-          "score": "0-3",
-          "delta": -33.8
-        },
-        {
-          "opponent": "LES DÉMENTS",
-          "result": "W",
-          "score": "3-1",
-          "delta": 16.9
-        },
-        {
-          "opponent": "Team Glouglou",
-          "result": "W",
-          "score": "3-0",
-          "delta": 5
-        }
-      ]
-    },
-    {
-      "rank": 8,
       "name": "StarPAFF",
       "division": "Elite",
       "divSlug": "elite",
@@ -358,7 +313,7 @@
       ]
     },
     {
-      "rank": 9,
+      "rank": 8,
       "name": "Rhinos Féroces",
       "division": "Elite",
       "divSlug": "elite",
@@ -402,7 +357,7 @@
       ]
     },
     {
-      "rank": 10,
+      "rank": 9,
       "name": "Les Loups-Phoques",
       "division": "Hard",
       "divSlug": "hard",
@@ -446,48 +401,70 @@
       ]
     },
     {
-      "rank": 11,
-      "name": "RSC Champigny 1",
+      "rank": 10,
+      "name": "Red Hot Sucy Pépère",
       "division": "Elite",
       "divSlug": "elite",
-      "elo": 1742.1,
-      "delta": -57.9,
-      "record": "0-2",
-      "wins": 0,
+      "elo": 1767.2,
+      "delta": -32.8,
+      "record": "3-2",
+      "wins": 3,
       "losses": 2,
-      "power": 84.9,
+      "power": 88.1,
       "form": [
+        "W",
         "L",
+        "W",
+        "W",
         "L"
       ],
       "matches": [
         {
+          "opponent": "Pythons Collés",
+          "result": "W",
+          "score": "3-0",
+          "delta": 5
+        },
+        {
           "opponent": "Les Indécis",
           "result": "L",
           "score": "0-3",
-          "delta": -35.3
+          "delta": -33.8
+        },
+        {
+          "opponent": "LES DÉMENTS",
+          "result": "W",
+          "score": "3-1",
+          "delta": 16.9
+        },
+        {
+          "opponent": "Team Glouglou",
+          "result": "W",
+          "score": "3-0",
+          "delta": 5
         },
         {
           "opponent": "Padnom",
           "result": "L",
-          "score": "2-3",
-          "delta": -22.6
+          "score": "1-3",
+          "delta": -25.9
         }
       ]
     },
     {
-      "rank": 12,
+      "rank": 11,
       "name": "Padnom",
       "division": "Hard",
       "divSlug": "hard",
-      "elo": 1727.7,
-      "delta": 27.7,
-      "record": "3-1",
-      "wins": 3,
+      "elo": 1753.5,
+      "delta": 53.5,
+      "record": "4-1",
+      "wins": 4,
       "losses": 1,
-      "power": 83.0,
+      "power": 86.4,
       "form": [
         "L",
+        "W",
         "W",
         "W",
         "W"
@@ -516,6 +493,42 @@
           "result": "W",
           "score": "3-2",
           "delta": 21.2
+        },
+        {
+          "opponent": "Red Hot Sucy Pépère",
+          "result": "W",
+          "score": "3-1",
+          "delta": 25.9
+        }
+      ]
+    },
+    {
+      "rank": 12,
+      "name": "RSC Champigny 1",
+      "division": "Elite",
+      "divSlug": "elite",
+      "elo": 1742.1,
+      "delta": -57.9,
+      "record": "0-2",
+      "wins": 0,
+      "losses": 2,
+      "power": 84.9,
+      "form": [
+        "L",
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Les Indécis",
+          "result": "L",
+          "score": "0-3",
+          "delta": -35.3
+        },
+        {
+          "opponent": "Padnom",
+          "result": "L",
+          "score": "2-3",
+          "delta": -22.6
         }
       ]
     },
@@ -2101,23 +2114,23 @@
       "slug": "elite",
       "name": "Elite",
       "teams": 9,
-      "avgElo": 1794.4,
+      "avgElo": 1791.5,
       "maxElo": 1859.6,
       "minElo": 1742.1,
       "wins": 22,
-      "losses": 10,
-      "winPct": 68.8
+      "losses": 11,
+      "winPct": 66.7
     },
     {
       "slug": "hard",
       "name": "Hard",
       "teams": 9,
-      "avgElo": 1709.2,
+      "avgElo": 1712.1,
       "maxElo": 1815.4,
       "minElo": 1634.7,
-      "wins": 18,
+      "wins": 19,
       "losses": 10,
-      "winPct": 64.3
+      "winPct": 65.5
     },
     {
       "slug": "medium",
@@ -4149,6 +4162,31 @@
       "forfeit": false,
       "deltaHome": 21.2,
       "deltaAway": -21.2
+    },
+    {
+      "round": "1/2 Consolante",
+      "home": "Red Hot Sucy Pépère",
+      "away": "Padnom",
+      "homeSets": 1,
+      "awaySets": 3,
+      "homeScores": [
+        25,
+        20,
+        20,
+        18
+      ],
+      "awayScores": [
+        14,
+        25,
+        25,
+        25
+      ],
+      "homeDivision": "elite",
+      "awayDivision": "hard",
+      "winner": "Padnom",
+      "forfeit": false,
+      "deltaHome": -25.9,
+      "deltaAway": 25.9
     }
   ],
   "upsets": [
