@@ -3,9 +3,9 @@
     "slug": "ginette",
     "name": "Coupe Ginette",
     "format": "coupe",
-    "lastUpdated": "2026-04-14T09:15:18",
+    "lastUpdated": "2026-04-15T14:08:01",
     "teamCount": 58,
-    "matchCount": 83,
+    "matchCount": 84,
     "forfeitCount": 10,
     "rounds": [
       "Tour 1",
@@ -897,50 +897,6 @@
     },
     {
       "rank": 23,
-      "name": "Les Rhum'Antik",
-      "division": "Medium",
-      "divSlug": "medium",
-      "elo": 1652.5,
-      "delta": 52.5,
-      "record": "3-1",
-      "wins": 3,
-      "losses": 1,
-      "power": 73.4,
-      "form": [
-        "L",
-        "W",
-        "W",
-        "W"
-      ],
-      "matches": [
-        {
-          "opponent": "Olympe BB volley",
-          "result": "L",
-          "score": "1-3",
-          "delta": -21.6
-        },
-        {
-          "opponent": "Team Glouglou",
-          "result": "W",
-          "score": "3-1",
-          "delta": 22.7
-        },
-        {
-          "opponent": "Boîte de 4",
-          "result": "W",
-          "score": "3-2",
-          "delta": 17.2
-        },
-        {
-          "opponent": "Rhinos Féroces",
-          "result": "W",
-          "score": "3-1",
-          "delta": 34.2
-        }
-      ]
-    },
-    {
-      "rank": 24,
       "name": "Coutiao SSLP",
       "division": "Or 6x6",
       "divSlug": "or6x6",
@@ -977,7 +933,7 @@
       ]
     },
     {
-      "rank": 25,
+      "rank": 24,
       "name": "Villyé-ball",
       "division": "Or 6x6",
       "divSlug": "or6x6",
@@ -1007,7 +963,7 @@
       ]
     },
     {
-      "rank": 26,
+      "rank": 25,
       "name": "Ivry Body",
       "division": "Or 6x6",
       "divSlug": "or6x6",
@@ -1044,7 +1000,7 @@
       ]
     },
     {
-      "rank": 27,
+      "rank": 26,
       "name": "Alambic",
       "division": "Hard",
       "divSlug": "hard",
@@ -1074,7 +1030,7 @@
       ]
     },
     {
-      "rank": 28,
+      "rank": 27,
       "name": "Olympe BB volley",
       "division": "Medium",
       "divSlug": "medium",
@@ -1118,7 +1074,7 @@
       ]
     },
     {
-      "rank": 29,
+      "rank": 28,
       "name": "Morts de Soif",
       "division": "Medium",
       "divSlug": "medium",
@@ -1155,7 +1111,7 @@
       ]
     },
     {
-      "rank": 30,
+      "rank": 29,
       "name": "Team Glouglou",
       "division": "Medium",
       "divSlug": "medium",
@@ -1195,6 +1151,57 @@
           "result": "L",
           "score": "0-3",
           "delta": -5
+        }
+      ]
+    },
+    {
+      "rank": 30,
+      "name": "Les Rhum'Antik",
+      "division": "Medium",
+      "divSlug": "medium",
+      "elo": 1624.6,
+      "delta": 24.6,
+      "record": "3-2",
+      "wins": 3,
+      "losses": 2,
+      "power": 69.8,
+      "form": [
+        "L",
+        "W",
+        "W",
+        "W",
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Olympe BB volley",
+          "result": "L",
+          "score": "1-3",
+          "delta": -21.6
+        },
+        {
+          "opponent": "Team Glouglou",
+          "result": "W",
+          "score": "3-1",
+          "delta": 22.7
+        },
+        {
+          "opponent": "Boîte de 4",
+          "result": "W",
+          "score": "3-2",
+          "delta": 17.2
+        },
+        {
+          "opponent": "Rhinos Féroces",
+          "result": "W",
+          "score": "3-1",
+          "delta": 34.2
+        },
+        {
+          "opponent": "Nekutā",
+          "result": "L",
+          "score": "1-3",
+          "delta": -28.0
         }
       ]
     },
@@ -1348,48 +1355,19 @@
     },
     {
       "rank": 35,
-      "name": "RYŌIKI TENKAI",
-      "division": "Medium",
-      "divSlug": "medium",
-      "elo": 1577.2,
-      "delta": -22.8,
-      "record": "1-1",
-      "wins": 1,
-      "losses": 1,
-      "power": 63.7,
-      "form": [
-        "L",
-        "W"
-      ],
-      "matches": [
-        {
-          "opponent": "Nekutā",
-          "result": "L",
-          "score": "1-3",
-          "delta": -30.1
-        },
-        {
-          "opponent": "Les Pingouins Manchots",
-          "result": "W",
-          "score": "2-2",
-          "delta": 7.3
-        }
-      ]
-    },
-    {
-      "rank": 36,
       "name": "Nekutā",
       "division": "Easy",
       "divSlug": "easy",
-      "elo": 1556.2,
-      "delta": 56.2,
-      "record": "3-1",
-      "wins": 3,
+      "elo": 1584.2,
+      "delta": 84.2,
+      "record": "4-1",
+      "wins": 4,
       "losses": 1,
-      "power": 61.0,
+      "power": 64.6,
       "form": [
         "W",
         "L",
+        "W",
         "W",
         "W"
       ],
@@ -1417,6 +1395,42 @@
           "result": "W",
           "score": "2-2",
           "delta": 18.7
+        },
+        {
+          "opponent": "Les Rhum'Antik",
+          "result": "W",
+          "score": "3-1",
+          "delta": 28.0
+        }
+      ]
+    },
+    {
+      "rank": 36,
+      "name": "RYŌIKI TENKAI",
+      "division": "Medium",
+      "divSlug": "medium",
+      "elo": 1577.2,
+      "delta": -22.8,
+      "record": "1-1",
+      "wins": 1,
+      "losses": 1,
+      "power": 63.7,
+      "form": [
+        "L",
+        "W"
+      ],
+      "matches": [
+        {
+          "opponent": "Nekutā",
+          "result": "L",
+          "score": "1-3",
+          "delta": -30.1
+        },
+        {
+          "opponent": "Les Pingouins Manchots",
+          "result": "W",
+          "score": "2-2",
+          "delta": 7.3
         }
       ]
     },
@@ -2136,12 +2150,12 @@
       "slug": "medium",
       "name": "Medium",
       "teams": 9,
-      "avgElo": 1614.8,
+      "avgElo": 1611.7,
       "maxElo": 1682.6,
       "minElo": 1549.3,
       "wins": 17,
-      "losses": 12,
-      "winPct": 58.6
+      "losses": 13,
+      "winPct": 56.7
     },
     {
       "slug": "or6x6",
@@ -2158,12 +2172,12 @@
       "slug": "easy",
       "name": "Easy",
       "teams": 8,
-      "avgElo": 1508.2,
-      "maxElo": 1556.2,
+      "avgElo": 1511.7,
+      "maxElo": 1584.2,
       "minElo": 1465.1,
-      "wins": 8,
+      "wins": 9,
       "losses": 12,
-      "winPct": 40.0
+      "winPct": 42.9
     },
     {
       "slug": "starter",
@@ -4187,6 +4201,31 @@
       "forfeit": false,
       "deltaHome": -25.9,
       "deltaAway": 25.9
+    },
+    {
+      "round": "1/2 Consolante",
+      "home": "Les Rhum'Antik",
+      "away": "Nekutā",
+      "homeSets": 1,
+      "awaySets": 3,
+      "homeScores": [
+        25,
+        19,
+        25,
+        20
+      ],
+      "awayScores": [
+        27,
+        25,
+        21,
+        25
+      ],
+      "homeDivision": "medium",
+      "awayDivision": "easy",
+      "winner": "Nekutā",
+      "forfeit": false,
+      "deltaHome": -28.0,
+      "deltaAway": 28.0
     }
   ],
   "upsets": [

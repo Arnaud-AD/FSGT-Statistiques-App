@@ -5,10 +5,10 @@
     "name": "Easy",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/3",
-    "lastUpdated": "2026-04-14T09:15:16",
+    "lastUpdated": "2026-04-15T14:07:59",
     "teamCount": 8,
-    "matchesPlayed": 47,
-    "matchesUpcoming": 9
+    "matchesPlayed": 48,
+    "matchesUpcoming": 8
   },
   "teams": {
     "neku": {
@@ -124,18 +124,18 @@
     {
       "rank": 3,
       "team": "fous",
-      "mj": 12,
-      "g": 7,
+      "mj": 13,
+      "g": 8,
       "p": 5,
-      "setPlus": 24,
-      "setMinus": 16,
-      "ds": 8,
-      "coefSet": "1.50",
-      "ptsPlus": 913,
-      "ptsMinus": 834,
-      "dp": "+79",
-      "coefPts": "1.09",
-      "pts": 19,
+      "setPlus": 27,
+      "setMinus": 17,
+      "ds": 10,
+      "coefSet": "1.59",
+      "ptsPlus": 1012,
+      "ptsMinus": 905,
+      "dp": "+107",
+      "coefPts": "1.12",
+      "pts": 21,
       "formAller": [
         "W",
         "W",
@@ -143,7 +143,7 @@
         "W",
         "L",
         "L",
-        "D"
+        "W"
       ],
       "formRetour": [
         "W",
@@ -226,18 +226,18 @@
     {
       "rank": 6,
       "team": "fata",
-      "mj": 11,
+      "mj": 12,
       "g": 3,
-      "p": 8,
-      "setPlus": 13,
-      "setMinus": 27,
-      "ds": -14,
-      "coefSet": "0.48",
-      "ptsPlus": 784,
-      "ptsMinus": 893,
-      "dp": "-109",
-      "coefPts": "0.88",
-      "pts": 14,
+      "p": 9,
+      "setPlus": 14,
+      "setMinus": 30,
+      "ds": -16,
+      "coefSet": "0.47",
+      "ptsPlus": 855,
+      "ptsMinus": 992,
+      "dp": "-137",
+      "coefPts": "0.86",
+      "pts": 15,
       "formAller": [
         "W",
         "L",
@@ -245,7 +245,7 @@
         "L",
         "L",
         "L",
-        "D"
+        "L"
       ],
       "formRetour": [
         "L",
@@ -327,6 +327,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "14/04/2026",
+      "home": "fous",
+      "away": "fata",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "13/04/2026",
       "home": "pyth",
@@ -759,12 +768,6 @@
       "status": "Reporté"
     },
     {
-      "date": "14/04/2026",
-      "home": "fous",
-      "away": "fata",
-      "status": "Reporté"
-    },
-    {
       "date": "04/05/2026",
       "home": "pyth",
       "away": "bats",
@@ -830,22 +833,22 @@
     },
     {
       "rank": 3,
+      "team": "fous",
+      "elo": 1555.6,
+      "movement": 16.1,
+      "record": "8-5",
+      "power": 60.3,
+      "calendar": "V vs FATALS",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 4,
       "team": "touk",
       "elo": 1541.2,
       "movement": -33.7,
       "record": "6-5",
       "power": 57.7,
       "calendar": "D vs Les",
-      "diffClass": "diff-hard"
-    },
-    {
-      "rank": 4,
-      "team": "fous",
-      "elo": 1539.5,
-      "movement": -28.6,
-      "record": "7-5",
-      "power": 57.3,
-      "calendar": "D vs Nekutā",
       "diffClass": "diff-hard"
     },
     {
@@ -861,12 +864,12 @@
     {
       "rank": 6,
       "team": "fata",
-      "elo": 1396.1,
-      "movement": 43.2,
-      "record": "3-8",
-      "power": 30.7,
-      "calendar": "V vs Punchline",
-      "diffClass": "diff-easy"
+      "elo": 1379.9,
+      "movement": -16.1,
+      "record": "3-9",
+      "power": 27.7,
+      "calendar": "D vs Les",
+      "diffClass": "diff-hard"
     },
     {
       "rank": 7,
@@ -935,7 +938,8 @@
       1502.3,
       1534.3,
       1568.0,
-      1539.5
+      1539.5,
+      1555.6
     ],
     "bats": [
       1500,
@@ -978,7 +982,8 @@
       1380.6,
       1365.1,
       1352.8,
-      1396.1
+      1396.1,
+      1379.9
     ],
     "punc": [
       1500,
@@ -1063,7 +1068,8 @@
           14,
           16,
           18,
-          19
+          19,
+          21
         ],
         "rank": 3
       },
@@ -1115,7 +1121,8 @@
           10,
           11,
           12,
-          14
+          14,
+          15
         ],
         "rank": 6
       },
