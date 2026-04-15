@@ -7528,6 +7528,7 @@ const ProgressionView = {
     _selectedPlayers: {},   // { name: true/false }
     _currentMetric: 'ip',
     _currentSubTab: 'evolution', // 'evolution' | 'statsVisuelles'
+    _currentTeamMetric: 'ip',
 
     // Palette de couleurs uniques par joueur (fallback si pas de PLAYER_COLORS défini)
     DEFAULT_PALETTE: [
@@ -7556,6 +7557,24 @@ const ProgressionView = {
         { key: 'srvPression', label: 'Srv Pression', unit: '', decimals: 2 },
         { key: 'defPlusRate', label: 'D+ Rate', unit: '%', decimals: 0, multiply: 100 }
     ],
+
+    // Métriques pour le graphique équipe (inclut SO% et BO%)
+    TEAM_METRICS: [
+        { key: 'ip', label: 'IP Moy', unit: '', decimals: 0 },
+        { key: 'attEff', label: 'Eff. Att', unit: '%', decimals: 0, multiply: 100 },
+        { key: 'recSrv', label: 'Rec / Srv', unit: '', decimals: 2, combined: true },
+        { key: 'defPlusRate', label: 'D+ Rate', unit: '%', decimals: 0, multiply: 100 },
+        { key: 'soRate', label: 'SO%', unit: '%', decimals: 0, multiply: 100 },
+        { key: 'boRate', label: 'BO%', unit: '%', decimals: 0, multiply: 100 }
+    ],
+
+    // Couleurs pour le mode combiné Rec/Srv
+    TEAM_COMBINED_COLORS: {
+        homeRec: '#0056D2',      // Bleu
+        homeSrv: '#06b6d4',      // Cyan
+        awayRec: '#ea4335',      // Rouge
+        awaySrv: '#ec4899'       // Rose
+    },
 
     render() {
         if (this._rendered) return;
@@ -7653,6 +7672,8 @@ const ProgressionView = {
         var matchLabels = [];
         var matchResults = [];
         var playerMap = {}; // name → { role, color, matchData[] }
+        var teamData = [];  // Stats équipe Jen par match
+        var awayData = [];  // Stats adversaire par match
 
         matches.forEach(function(match, mi) {
             var label = match.opponent || '?';
@@ -7661,7 +7682,17 @@ const ProgressionView = {
             matchResults.push(match.result);
 
             var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
-            if (completedSets.length === 0) return;
+            if (completedSets.length === 0) {
+                teamData.push(null);
+                awayData.push(null);
+                return;
+            }
+
+            // Stats équipe (agrégation team-level)
+            var homeTeam = self._computeTeamMetrics(completedSets, 'home', match);
+            var awayTeam = self._computeTeamMetrics(completedSets, 'away', match);
+            teamData.push(homeTeam);
+            awayData.push(awayTeam);
 
             var roles = BilanView.getPlayerRoles(match, 'home');
             var matchStats = StatsAggregator.aggregateStats(completedSets, 'home');
@@ -7746,7 +7777,7 @@ const ProgressionView = {
 
         players.sort(function(a, b) { return b.lastIP - a.lastIP; });
 
-        return { matches: matches, matchLabels: matchLabels, matchResults: matchResults, players: players, playerMap: playerMap };
+        return { matches: matches, matchLabels: matchLabels, matchResults: matchResults, players: players, playerMap: playerMap, teamData: teamData, awayData: awayData };
     },
 
     _computeDerived(s) {
@@ -7779,6 +7810,55 @@ const ProgressionView = {
         return m;
     },
 
+    _computeTeamMetrics(completedSets, teamKey, match) {
+        var playerStats = StatsAggregator.aggregateStats(completedSets, teamKey);
+        // Agréger toutes les stats joueurs en totaux équipe
+        var totals = { service: { tot: 0, ace: 0, splus: 0, fser: 0, recSumAdv: 0, recCountAdv: 0 },
+            reception: { tot: 0, r4: 0, r3: 0, r2: 0, r1: 0, frec: 0 },
+            attack: { tot: 0, attplus: 0, attminus: 0, bp: 0, fatt: 0 },
+            defense: { tot: 0, defplus: 0, defminus: 0, fdef: 0 },
+            pass: { tot: 0, p4: 0, p3: 0, p2: 0, p1: 0, fp: 0 } };
+        Object.keys(playerStats).forEach(function(name) {
+            var s = playerStats[name];
+            ['tot', 'ace', 'splus', 'fser', 'recSumAdv', 'recCountAdv'].forEach(function(k) { totals.service[k] += (s.service[k] || 0); });
+            ['tot', 'r4', 'r3', 'r2', 'r1', 'frec'].forEach(function(k) { totals.reception[k] += (s.reception[k] || 0); });
+            ['tot', 'attplus', 'attminus', 'bp', 'fatt'].forEach(function(k) { totals.attack[k] += (s.attack[k] || 0); });
+            ['tot', 'defplus', 'defminus', 'fdef'].forEach(function(k) { totals.defense[k] += (s.defense[k] || 0); });
+            if (s.pass) { ['tot', 'p4', 'p3', 'p2', 'p1', 'fp'].forEach(function(k) { totals.pass[k] += (s.pass[k] || 0); }); }
+        });
+        var m = this._computeDerived(totals);
+
+        // IP équipe = moyenne du MEILLEUR joueur de chaque poste
+        // (évite de diluer avec les substitutions / joueurs peu utilisés)
+        var roles = BilanView.getPlayerRoles(match, teamKey);
+        var bestByRole = { 'Passeur': null, 'R4': null, 'Centre': null, 'Pointu': null };
+        Object.keys(playerStats).forEach(function(name) {
+            var s = playerStats[name];
+            var roleInfo = roles[name];
+            var role = roleInfo ? roleInfo.primaryRole : null;
+            if (!role || !(role in bestByRole)) return;
+            var totalAct = (s.service.tot || 0) + (s.reception.tot || 0) + (s.attack.tot || 0) +
+                (s.defense.tot || 0) + (s.block.tot || 0) + (s.pass.tot || 0) + ((s.relance && s.relance.tot) || 0);
+            if (totalAct < 3) return;
+            var ipRole = (role === 'Centre') ? BilanView.getCentreIpRole(s) : role;
+            var axisScores = BilanView.computeAxisScores(s, ipRole);
+            var ip = BilanView.computeIP(axisScores, ipRole);
+            if (bestByRole[role] === null || ip > bestByRole[role]) {
+                bestByRole[role] = ip;
+            }
+        });
+        var bestIps = Object.keys(bestByRole).map(function(r) { return bestByRole[r]; }).filter(function(v) { return v !== null; });
+        m.ip = bestIps.length > 0 ? Math.round(bestIps.reduce(function(a, b) { return a + b; }, 0) / bestIps.length) : null;
+
+        // SO% et BO%
+        var sobo = SideOutAnalysis.aggregateSideOutStats(completedSets);
+        var teamSobo = sobo[teamKey];
+        m.soRate = teamSobo.soTotal > 0 ? teamSobo.soWon / teamSobo.soTotal : null;
+        m.boRate = teamSobo.brkTotal > 0 ? teamSobo.brkWon / teamSobo.brkTotal : null;
+
+        return m;
+    },
+
     _getMetricValues(name, metricKey) {
         var pd = this._data.playerMap[name];
         if (!pd) return [];
@@ -7793,11 +7873,13 @@ const ProgressionView = {
         html += this._renderChartHTML();
         html += this._renderFormeHTML();
         html += this._renderProgressionHTML();
+        html += this._renderTeamEvolutionHTML();
         container.innerHTML = html;
 
         this._bindEvents(container);
         this._drawAllSparklines(container);
         this._drawChart(container);
+        this._drawTeamChart(container);
     },
 
     _renderCardsHTML() {
@@ -7929,6 +8011,184 @@ const ProgressionView = {
 
         html += '</tbody></table></div>';
         return html;
+    },
+
+    _renderTeamEvolutionHTML() {
+        var self = this;
+        var html = '<div class="prog-section" id="prog-team-section">';
+        html += '<div class="prog-section-title">Évolution de l\'équipe</div>';
+        // Boutons métriques équipe
+        html += '<div class="prog-metrics">';
+        this.TEAM_METRICS.forEach(function(m) {
+            html += '<button class="prog-metric-btn prog-team-metric-btn' + (m.key === self._currentTeamMetric ? ' active' : '') + '" data-team-metric="' + m.key + '">' + m.label + '</button>';
+        });
+        html += '</div>';
+        // Légende (dynamique selon métrique)
+        html += '<div id="prog-team-legend"></div>';
+        // Canvas
+        html += '<div class="prog-chart-wrap"><canvas id="progTeamChart"></canvas><div class="prog-team-tooltip" style="display:none;position:absolute;background:rgba(0,0,0,.85);color:#fff;padding:6px 10px;border-radius:6px;font-size:12px;pointer-events:none;z-index:10;white-space:nowrap"></div></div>';
+        html += '</div>';
+        return html;
+    },
+
+    _drawTeamChart(container) {
+        var canvas = container.querySelector('#progTeamChart');
+        if (!canvas) return;
+        var self = this;
+        var wrap = canvas.parentElement;
+        var w = wrap.offsetWidth;
+        var h = wrap.offsetHeight;
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        var ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+
+        var pad = { top: 20, right: 25, bottom: 28, left: 10 };
+        var chartW = w - pad.left - pad.right;
+        var chartH = h - pad.top - pad.bottom;
+        var numMatches = this._data.matchLabels.length;
+        if (numMatches === 0) return;
+
+        var metricKey = this._currentTeamMetric;
+        var metricDef = this.TEAM_METRICS.find(function(m) { return m.key === metricKey; });
+        var isCombined = metricDef.combined;
+        var mul = metricDef.multiply || 1;
+
+        // Collecter les valeurs — mode combiné = 4 séries, sinon 2
+        var series = [];
+        if (isCombined) {
+            var cc = this.TEAM_COMBINED_COLORS;
+            series = [
+                { vals: this._data.teamData.map(function(d) { return d && d.recMoy != null ? d.recMoy : null; }), color: cc.homeRec, team: 'homeRec', label: 'Jen Réc' },
+                { vals: this._data.teamData.map(function(d) { return d && d.srvPression != null ? d.srvPression : null; }), color: cc.homeSrv, team: 'homeSrv', label: 'Jen Srv' },
+                { vals: this._data.awayData.map(function(d) { return d && d.recMoy != null ? d.recMoy : null; }), color: cc.awayRec, team: 'awayRec', label: 'Adv Réc' },
+                { vals: this._data.awayData.map(function(d) { return d && d.srvPression != null ? d.srvPression : null; }), color: cc.awaySrv, team: 'awaySrv', label: 'Adv Srv' }
+            ];
+        } else {
+            series = [
+                { vals: this._data.teamData.map(function(d) { return d && d[metricKey] != null ? d[metricKey] * mul : null; }), color: '#0056D2', team: 'home', label: 'Jen' },
+                { vals: this._data.awayData.map(function(d) { return d && d[metricKey] != null ? d[metricKey] * mul : null; }), color: '#ea4335', team: 'away', label: 'Adversaire' }
+            ];
+        }
+
+        // Mise à jour légende
+        this._updateTeamLegend(series);
+
+        var allVals = [];
+        series.forEach(function(s) { s.vals.forEach(function(v) { if (v !== null) allVals.push(v); }); });
+        if (allVals.length === 0) return;
+
+        var dataMin = Math.min.apply(null, allVals);
+        var dataMax = Math.max.apply(null, allVals);
+        var range = dataMax - dataMin || 1;
+        var yMin = dataMin - range * 0.15;
+        var yMax = dataMax + range * 0.15;
+
+        var decimals = isCombined ? 2 : metricDef.decimals;
+        var unit = isCombined ? '' : (metricDef.unit || '');
+
+        function xPos(i) { return pad.left + (numMatches === 1 ? chartW / 2 : (i / (numMatches - 1)) * chartW); }
+        function yPos(v) { return pad.top + (1 - (v - yMin) / (yMax - yMin)) * chartH; }
+
+        // Grille Y
+        ctx.strokeStyle = '#e8eaed';
+        ctx.lineWidth = 0.5;
+        ctx.fillStyle = '#5f6368';
+        ctx.font = '11px Roboto, sans-serif';
+        ctx.textAlign = 'right';
+        for (var gi = 0; gi <= 4; gi++) {
+            var gv = yMin + (gi / 4) * (yMax - yMin);
+            var gy = yPos(gv);
+            ctx.beginPath();
+            ctx.moveTo(pad.left, gy);
+            ctx.lineTo(w - pad.right, gy);
+            ctx.stroke();
+            ctx.fillText(gv.toFixed(decimals) + unit, w - 2, gy + 3);
+        }
+
+        // Labels adversaires en bas
+        ctx.fillStyle = '#5f6368';
+        ctx.font = '10px Roboto, sans-serif';
+        ctx.textAlign = 'center';
+        for (var li = 0; li < numMatches; li++) {
+            var lx = xPos(li);
+            ctx.fillText(this._data.matchLabels[li], lx, h - 2);
+            var res = this._data.matchResults[li];
+            if (res) {
+                ctx.beginPath();
+                ctx.arc(lx, h - 18, 3, 0, Math.PI * 2);
+                ctx.fillStyle = res === 'win' ? '#34a853' : res === 'loss' ? '#ea4335' : '#f59e0b';
+                ctx.fill();
+                ctx.fillStyle = '#5f6368';
+            }
+        }
+
+        // Store points for tooltip
+        this._teamChartPoints = [];
+
+        // Dessiner toutes les séries
+        var self2 = this;
+        series.forEach(function(s) {
+            self2._drawTeamLine(ctx, s.vals, s.color, xPos, yPos, pad, chartH, w, s.team);
+        });
+    },
+
+    _updateTeamLegend(series) {
+        var el = document.getElementById('prog-team-legend');
+        if (!el) return;
+        var html = '<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:8px 0 4px;font-size:12px;color:var(--text-secondary)">';
+        series.forEach(function(s) {
+            html += '<span><span style="display:inline-block;width:12px;height:3px;background:' + s.color + ';vertical-align:middle;margin-right:4px;border-radius:2px"></span>' + s.label + '</span>';
+        });
+        html += '</div>';
+        el.innerHTML = html;
+    },
+
+    _drawTeamLine(ctx, vals, color, xPos, yPos, pad, chartH, w, team) {
+        var pts = [];
+        var self = this;
+        vals.forEach(function(v, i) {
+            if (v !== null) pts.push({ x: xPos(i), y: yPos(v), val: v, idx: i });
+        });
+        if (pts.length < 1) return;
+
+        // Ligne
+        ctx.beginPath();
+        pts.forEach(function(pt, i) { i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y); });
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.5;
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+
+        // Points
+        pts.forEach(function(pt) {
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            self._teamChartPoints.push({ x: pt.x, y: pt.y, val: pt.val, matchIdx: pt.idx, team: team, color: color });
+        });
+
+        // Moyenne saison (pointillé)
+        var nonNull = vals.filter(function(v) { return v !== null; });
+        if (nonNull.length > 1) {
+            var avg = nonNull.reduce(function(a, b) { return a + b; }, 0) / nonNull.length;
+            var avgY = yPos(avg);
+            ctx.setLineDash([4, 4]);
+            ctx.strokeStyle = color + '50';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(pad.left, avgY);
+            ctx.lineTo(w - pad.right, avgY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
     },
 
     // ========== CANVAS DRAWING ==========
@@ -8135,13 +8395,23 @@ const ProgressionView = {
             });
         });
 
-        // Metric buttons
-        container.querySelectorAll('.prog-metric-btn').forEach(function(btn) {
+        // Metric buttons (joueurs — exclure les boutons team)
+        container.querySelectorAll('.prog-metric-btn:not(.prog-team-metric-btn)').forEach(function(btn) {
             btn.addEventListener('click', function() {
-                container.querySelectorAll('.prog-metric-btn').forEach(function(b) { b.classList.remove('active'); });
+                container.querySelectorAll('.prog-metric-btn:not(.prog-team-metric-btn)').forEach(function(b) { b.classList.remove('active'); });
                 btn.classList.add('active');
                 self._currentMetric = btn.dataset.metric;
                 self._redrawDynamic(container);
+            });
+        });
+
+        // Metric buttons (équipe)
+        container.querySelectorAll('.prog-team-metric-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                container.querySelectorAll('.prog-team-metric-btn').forEach(function(b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                self._currentTeamMetric = btn.dataset.teamMetric;
+                self._drawTeamChart(container);
             });
         });
 
@@ -8183,6 +8453,43 @@ const ProgressionView = {
             canvas.addEventListener('touchend', function() {
                 setTimeout(function() { tooltip.style.display = 'none'; }, 2000);
             });
+        }
+
+        // Team chart tooltip
+        var teamCanvas = container.querySelector('#progTeamChart');
+        var teamTooltip = container.querySelector('.prog-team-tooltip');
+        if (teamCanvas && teamTooltip) {
+            var showTeamTooltip = function(clientX, clientY) {
+                if (!self._teamChartPoints || self._teamChartPoints.length === 0) { teamTooltip.style.display = 'none'; return; }
+                var rect = teamCanvas.getBoundingClientRect();
+                var mx = clientX - rect.left;
+                var my = clientY - rect.top;
+                var best = null, bestDist = 25;
+                self._teamChartPoints.forEach(function(pt) {
+                    var d = Math.sqrt((pt.x - mx) * (pt.x - mx) + (pt.y - my) * (pt.y - my));
+                    if (d < bestDist) { bestDist = d; best = pt; }
+                });
+                if (!best) { teamTooltip.style.display = 'none'; return; }
+                var label = self._data.matchLabels[best.matchIdx];
+                var metricDef = self.TEAM_METRICS.find(function(m) { return m.key === self._currentTeamMetric; });
+                var isCombined = metricDef && metricDef.combined;
+                var decimals = isCombined ? 2 : (metricDef ? metricDef.decimals : 0);
+                var unit = isCombined ? '' : (metricDef ? metricDef.unit || '' : '');
+                var teamLabels = { home: 'Jen', away: label, homeRec: 'Jen Réc', homeSrv: 'Jen Srv', awayRec: 'Adv Réc', awaySrv: 'Adv Srv' };
+                var teamLabel = teamLabels[best.team] || best.team;
+                teamTooltip.innerHTML = '<span style="color:' + best.color + '">' + teamLabel + '</span> — ' + best.val.toFixed(decimals) + unit + '<br><span style="opacity:.7;font-size:11px">' + Utils.escapeHtml(self._data.matches[best.matchIdx].opponent || '') + '</span>';
+                teamTooltip.style.display = 'block';
+                var tx = best.x, ty = best.y - 45;
+                if (tx + 80 > rect.width) tx = rect.width - 80;
+                if (tx < 10) tx = 10;
+                if (ty < 5) ty = best.y + 15;
+                teamTooltip.style.left = tx + 'px';
+                teamTooltip.style.top = ty + 'px';
+            };
+            teamCanvas.addEventListener('mousemove', function(e) { showTeamTooltip(e.clientX, e.clientY); });
+            teamCanvas.addEventListener('mouseleave', function() { teamTooltip.style.display = 'none'; });
+            teamCanvas.addEventListener('touchstart', function(e) { showTeamTooltip(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+            teamCanvas.addEventListener('touchend', function() { setTimeout(function() { teamTooltip.style.display = 'none'; }, 2000); });
         }
     },
 
