@@ -5,10 +5,10 @@
     "name": "Starter",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/16",
-    "lastUpdated": "2026-04-15T14:07:59",
+    "lastUpdated": "2026-04-15T23:06:15",
     "teamCount": 8,
-    "matchesPlayed": 44,
-    "matchesUpcoming": 12
+    "matchesPlayed": 45,
+    "matchesUpcoming": 11
   },
   "teams": {
     "bach": {
@@ -158,18 +158,18 @@
     {
       "rank": 4,
       "team": "gail",
-      "mj": 12,
-      "g": 7,
+      "mj": 13,
+      "g": 8,
       "p": 5,
-      "setPlus": 20,
+      "setPlus": 23,
       "setMinus": 23,
-      "ds": -3,
-      "coefSet": "0.87",
-      "ptsPlus": 955,
-      "ptsMinus": 935,
-      "dp": "+20",
-      "coefPts": "1.02",
-      "pts": 19,
+      "ds": 0,
+      "coefSet": "1.00",
+      "ptsPlus": 1030,
+      "ptsMinus": 1004,
+      "dp": "+26",
+      "coefPts": "1.03",
+      "pts": 21,
       "formAller": [
         "W",
         "W",
@@ -184,7 +184,7 @@
         "W",
         "W",
         "L",
-        "D",
+        "W",
         "L",
         "P"
       ]
@@ -294,18 +294,18 @@
     {
       "rank": 8,
       "team": "caip",
-      "mj": 10,
+      "mj": 11,
       "g": 0,
-      "p": 10,
+      "p": 11,
       "setPlus": 2,
-      "setMinus": 30,
-      "ds": -28,
-      "coefSet": "0.07",
-      "ptsPlus": 569,
-      "ptsMinus": 790,
-      "dp": "-221",
-      "coefPts": "0.72",
-      "pts": 10,
+      "setMinus": 33,
+      "ds": -31,
+      "coefSet": "0.06",
+      "ptsPlus": 638,
+      "ptsMinus": 865,
+      "dp": "-227",
+      "coefPts": "0.74",
+      "pts": 11,
       "formAller": [
         "L",
         "L",
@@ -320,13 +320,22 @@
         "L",
         "D",
         "L",
-        "D",
+        "L",
         "D",
         "P"
       ]
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "15/04/2026",
+      "home": "gail",
+      "away": "caip",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "08/04/2026",
       "home": "gail",
@@ -726,12 +735,6 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "N/C",
-      "home": "gail",
-      "away": "caip",
-      "status": "Reporté"
-    },
-    {
       "date": "09/03/2026",
       "home": "caip",
       "away": "gvc",
@@ -805,7 +808,7 @@
       "elo": 1724.7,
       "movement": 20.9,
       "record": "10-1",
-      "power": 95.1,
+      "power": 93.1,
       "calendar": "V x6",
       "diffClass": "diff-easy"
     },
@@ -815,7 +818,7 @@
       "elo": 1701.9,
       "movement": 11.2,
       "record": "9-0",
-      "power": 90.5,
+      "power": 88.7,
       "calendar": "V x9",
       "diffClass": "diff-easy"
     },
@@ -825,19 +828,19 @@
       "elo": 1631.8,
       "movement": 29.5,
       "record": "9-3",
-      "power": 76.4,
+      "power": 75.3,
       "calendar": "V x4",
       "diffClass": "diff-easy"
     },
     {
       "rank": 4,
       "team": "gail",
-      "elo": 1508.9,
-      "movement": -29.5,
-      "record": "7-5",
-      "power": 51.8,
-      "calendar": "D vs Les",
-      "diffClass": "diff-hard"
+      "elo": 1520.4,
+      "movement": 11.5,
+      "record": "8-5",
+      "power": 53.9,
+      "calendar": "V vs Caïpiranha",
+      "diffClass": "diff-easy"
     },
     {
       "rank": 5,
@@ -845,7 +848,7 @@
       "elo": 1430.2,
       "movement": 27.8,
       "record": "4-8",
-      "power": 36.0,
+      "power": 36.6,
       "calendar": "V vs Gold",
       "diffClass": "diff-easy"
     },
@@ -855,7 +858,7 @@
       "elo": 1382.1,
       "movement": -27.8,
       "record": "3-9",
-      "power": 26.4,
+      "power": 27.4,
       "calendar": "D vs Daïquibri",
       "diffClass": "diff-hard"
     },
@@ -865,18 +868,18 @@
       "elo": 1369.8,
       "movement": -16.2,
       "record": "2-8",
-      "power": 23.9,
+      "power": 25.0,
       "calendar": "D vs Les",
       "diffClass": "diff-hard"
     },
     {
       "rank": 8,
       "team": "caip",
-      "elo": 1250.7,
-      "movement": -21.8,
-      "record": "0-10",
+      "elo": 1239.2,
+      "movement": -11.5,
+      "record": "0-11",
       "power": 0.0,
-      "calendar": "D x10",
+      "calendar": "D x11",
       "diffClass": "diff-hard"
     }
   ],
@@ -924,7 +927,8 @@
       1545.4,
       1559.3,
       1538.4,
-      1508.9
+      1508.9,
+      1520.4
     ],
     "gvc": [
       1500,
@@ -992,7 +996,8 @@
       1325.9,
       1282.9,
       1272.5,
-      1250.7
+      1250.7,
+      1239.2
     ]
   },
   "evolutionData": {
@@ -1046,7 +1051,8 @@
           15,
           17,
           18,
-          19
+          19,
+          21
         ],
         "rank": 4
       },
@@ -1129,7 +1135,8 @@
           7,
           8,
           9,
-          10
+          10,
+          11
         ],
         "rank": 8
       }

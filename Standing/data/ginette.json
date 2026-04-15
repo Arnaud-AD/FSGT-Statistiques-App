@@ -3,9 +3,9 @@
     "slug": "ginette",
     "name": "Coupe Ginette",
     "format": "coupe",
-    "lastUpdated": "2026-04-15T14:08:01",
+    "lastUpdated": "2026-04-15T23:06:16",
     "teamCount": 58,
-    "matchCount": 84,
+    "matchCount": 85,
     "forfeitCount": 10,
     "rounds": [
       "Tour 1",
@@ -14,6 +14,7 @@
       "1/8 Consolante",
       "1/4 Principale",
       "1/4 Consolante",
+      "1/2 Principale",
       "1/2 Consolante"
     ]
   },
@@ -67,13 +68,14 @@
       "name": "Les Indécis",
       "division": "Hard",
       "divSlug": "hard",
-      "elo": 1815.4,
-      "delta": 115.4,
-      "record": "4-0",
-      "wins": 4,
+      "elo": 1831.9,
+      "delta": 131.9,
+      "record": "5-0",
+      "wins": 5,
       "losses": 0,
-      "power": 94.3,
+      "power": 96.4,
       "form": [
+        "W",
         "W",
         "W",
         "W",
@@ -103,6 +105,12 @@
           "result": "W",
           "score": "3-1",
           "delta": 24.1
+        },
+        {
+          "opponent": "Cochonou",
+          "result": "W",
+          "score": "3-0",
+          "delta": 16.5
         }
       ]
     },
@@ -645,50 +653,6 @@
     },
     {
       "rank": 16,
-      "name": "Cochonou",
-      "division": "Medium",
-      "divSlug": "medium",
-      "elo": 1682.6,
-      "delta": 82.6,
-      "record": "4-0",
-      "wins": 4,
-      "losses": 0,
-      "power": 77.2,
-      "form": [
-        "W",
-        "W",
-        "W",
-        "W"
-      ],
-      "matches": [
-        {
-          "opponent": "Les Gaillards",
-          "result": "W",
-          "score": "3-0",
-          "delta": 15.1
-        },
-        {
-          "opponent": "Smash or Pass",
-          "result": "W",
-          "score": "3-0",
-          "delta": 12.5
-        },
-        {
-          "opponent": "Les punchers",
-          "result": "W",
-          "score": "3-2",
-          "delta": 21.9
-        },
-        {
-          "opponent": "SUCY N'EST PAS TROMPÉ",
-          "result": "W",
-          "score": "3-0",
-          "delta": 33.1
-        }
-      ]
-    },
-    {
-      "rank": 17,
       "name": "GO Team Apero",
       "division": "Hard",
       "divSlug": "hard",
@@ -718,7 +682,7 @@
       ]
     },
     {
-      "rank": 18,
+      "rank": 17,
       "name": "Marvels 6",
       "division": "Or 6x6",
       "divSlug": "or6x6",
@@ -755,7 +719,7 @@
       ]
     },
     {
-      "rank": 19,
+      "rank": 18,
       "name": "LES DÉMENTS",
       "division": "Hard",
       "divSlug": "hard",
@@ -788,6 +752,57 @@
           "result": "L",
           "score": "1-3",
           "delta": -16.9
+        }
+      ]
+    },
+    {
+      "rank": 19,
+      "name": "Cochonou",
+      "division": "Medium",
+      "divSlug": "medium",
+      "elo": 1666.1,
+      "delta": 66.1,
+      "record": "4-1",
+      "wins": 4,
+      "losses": 1,
+      "power": 75.1,
+      "form": [
+        "W",
+        "W",
+        "W",
+        "W",
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Les Gaillards",
+          "result": "W",
+          "score": "3-0",
+          "delta": 15.1
+        },
+        {
+          "opponent": "Smash or Pass",
+          "result": "W",
+          "score": "3-0",
+          "delta": 12.5
+        },
+        {
+          "opponent": "Les punchers",
+          "result": "W",
+          "score": "3-2",
+          "delta": 21.9
+        },
+        {
+          "opponent": "SUCY N'EST PAS TROMPÉ",
+          "result": "W",
+          "score": "3-0",
+          "delta": 33.1
+        },
+        {
+          "opponent": "Les Indécis",
+          "result": "L",
+          "score": "0-3",
+          "delta": -16.5
         }
       ]
     },
@@ -2139,23 +2154,23 @@
       "slug": "hard",
       "name": "Hard",
       "teams": 9,
-      "avgElo": 1712.1,
-      "maxElo": 1815.4,
+      "avgElo": 1713.9,
+      "maxElo": 1831.9,
       "minElo": 1634.7,
-      "wins": 19,
+      "wins": 20,
       "losses": 10,
-      "winPct": 65.5
+      "winPct": 66.7
     },
     {
       "slug": "medium",
       "name": "Medium",
       "teams": 9,
-      "avgElo": 1611.7,
-      "maxElo": 1682.6,
+      "avgElo": 1609.8,
+      "maxElo": 1666.1,
       "minElo": 1549.3,
       "wins": 17,
-      "losses": 13,
-      "winPct": 56.7
+      "losses": 14,
+      "winPct": 54.8
     },
     {
       "slug": "or6x6",
@@ -4176,6 +4191,29 @@
       "forfeit": false,
       "deltaHome": 21.2,
       "deltaAway": -21.2
+    },
+    {
+      "round": "1/2 Principale",
+      "home": "Les Indécis",
+      "away": "Cochonou",
+      "homeSets": 3,
+      "awaySets": 0,
+      "homeScores": [
+        25,
+        25,
+        25
+      ],
+      "awayScores": [
+        20,
+        11,
+        22
+      ],
+      "homeDivision": "hard",
+      "awayDivision": "medium",
+      "winner": "Les Indécis",
+      "forfeit": false,
+      "deltaHome": 16.5,
+      "deltaAway": -16.5
     },
     {
       "round": "1/2 Consolante",
