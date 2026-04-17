@@ -3,9 +3,9 @@
     "slug": "ginette",
     "name": "Coupe Ginette",
     "format": "coupe",
-    "lastUpdated": "2026-04-15T23:06:16",
+    "lastUpdated": "2026-04-17T20:13:27",
     "teamCount": 58,
-    "matchCount": 85,
+    "matchCount": 86,
     "forfeitCount": 10,
     "rounds": [
       "Tour 1",
@@ -24,13 +24,14 @@
       "name": "Jen et ses Saints",
       "division": "Elite",
       "divSlug": "elite",
-      "elo": 1859.6,
-      "delta": 59.6,
-      "record": "4-0",
-      "wins": 4,
+      "elo": 1871.9,
+      "delta": 71.9,
+      "record": "5-0",
+      "wins": 5,
       "losses": 0,
       "power": 100.0,
       "form": [
+        "W",
         "W",
         "W",
         "W",
@@ -60,6 +61,12 @@
           "result": "W",
           "score": "3-0",
           "delta": 15.4
+        },
+        {
+          "opponent": "Les Loups-Phoques",
+          "result": "W",
+          "score": "3-2",
+          "delta": 12.4
         }
       ]
     },
@@ -73,7 +80,7 @@
       "record": "5-0",
       "wins": 5,
       "losses": 0,
-      "power": 96.4,
+      "power": 94.9,
       "form": [
         "W",
         "W",
@@ -124,7 +131,7 @@
       "record": "3-1",
       "wins": 3,
       "losses": 1,
-      "power": 93.2,
+      "power": 91.7,
       "form": [
         "W",
         "W",
@@ -168,7 +175,7 @@
       "record": "3-1",
       "wins": 3,
       "losses": 1,
-      "power": 92.7,
+      "power": 91.3,
       "form": [
         "W",
         "W",
@@ -212,7 +219,7 @@
       "record": "2-1",
       "wins": 2,
       "losses": 1,
-      "power": 92.4,
+      "power": 90.9,
       "form": [
         "W",
         "W",
@@ -249,7 +256,7 @@
       "record": "3-1",
       "wins": 3,
       "losses": 1,
-      "power": 92.0,
+      "power": 90.5,
       "form": [
         "W",
         "W",
@@ -293,7 +300,7 @@
       "record": "2-1",
       "wins": 2,
       "losses": 1,
-      "power": 89.3,
+      "power": 87.9,
       "form": [
         "W",
         "W",
@@ -330,7 +337,7 @@
       "record": "2-2",
       "wins": 2,
       "losses": 2,
-      "power": 88.6,
+      "power": 87.2,
       "form": [
         "L",
         "W",
@@ -366,50 +373,6 @@
     },
     {
       "rank": 9,
-      "name": "Les Loups-Phoques",
-      "division": "Hard",
-      "divSlug": "hard",
-      "elo": 1769.5,
-      "delta": 69.5,
-      "record": "4-0",
-      "wins": 4,
-      "losses": 0,
-      "power": 88.4,
-      "form": [
-        "W",
-        "W",
-        "W",
-        "W"
-      ],
-      "matches": [
-        {
-          "opponent": "Ivry One",
-          "result": "W",
-          "score": "3-0",
-          "delta": 7.4
-        },
-        {
-          "opponent": "GO Team Apero",
-          "result": "W",
-          "score": "3-0",
-          "delta": 5
-        },
-        {
-          "opponent": "Cret'1",
-          "result": "W",
-          "score": "3-0",
-          "delta": 22.0
-        },
-        {
-          "opponent": "Manu Andy-sport",
-          "result": "W",
-          "score": "3-0",
-          "delta": 35.1
-        }
-      ]
-    },
-    {
-      "rank": 10,
       "name": "Red Hot Sucy Pépère",
       "division": "Elite",
       "divSlug": "elite",
@@ -418,7 +381,7 @@
       "record": "3-2",
       "wins": 3,
       "losses": 2,
-      "power": 88.1,
+      "power": 86.7,
       "form": [
         "W",
         "L",
@@ -460,6 +423,57 @@
       ]
     },
     {
+      "rank": 10,
+      "name": "Les Loups-Phoques",
+      "division": "Hard",
+      "divSlug": "hard",
+      "elo": 1757.2,
+      "delta": 57.2,
+      "record": "4-1",
+      "wins": 4,
+      "losses": 1,
+      "power": 85.5,
+      "form": [
+        "W",
+        "W",
+        "W",
+        "W",
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Ivry One",
+          "result": "W",
+          "score": "3-0",
+          "delta": 7.4
+        },
+        {
+          "opponent": "GO Team Apero",
+          "result": "W",
+          "score": "3-0",
+          "delta": 5
+        },
+        {
+          "opponent": "Cret'1",
+          "result": "W",
+          "score": "3-0",
+          "delta": 22.0
+        },
+        {
+          "opponent": "Manu Andy-sport",
+          "result": "W",
+          "score": "3-0",
+          "delta": 35.1
+        },
+        {
+          "opponent": "Jen et ses Saints",
+          "result": "L",
+          "score": "2-3",
+          "delta": -12.4
+        }
+      ]
+    },
+    {
       "rank": 11,
       "name": "Padnom",
       "division": "Hard",
@@ -469,7 +483,7 @@
       "record": "4-1",
       "wins": 4,
       "losses": 1,
-      "power": 86.4,
+      "power": 85.0,
       "form": [
         "L",
         "W",
@@ -520,7 +534,7 @@
       "record": "0-2",
       "wins": 0,
       "losses": 2,
-      "power": 84.9,
+      "power": 83.6,
       "form": [
         "L",
         "L"
@@ -550,7 +564,7 @@
       "record": "2-1",
       "wins": 2,
       "losses": 1,
-      "power": 80.2,
+      "power": 78.9,
       "form": [
         "W",
         "W",
@@ -587,7 +601,7 @@
       "record": "1-1",
       "wins": 1,
       "losses": 1,
-      "power": 80.1,
+      "power": 78.8,
       "form": [
         "L",
         "W"
@@ -617,7 +631,7 @@
       "record": "3-1",
       "wins": 3,
       "losses": 1,
-      "power": 78.0,
+      "power": 76.8,
       "form": [
         "W",
         "W",
@@ -661,7 +675,7 @@
       "record": "0-2",
       "wins": 0,
       "losses": 2,
-      "power": 75.7,
+      "power": 74.5,
       "form": [
         "L",
         "L"
@@ -691,7 +705,7 @@
       "record": "2-1",
       "wins": 2,
       "losses": 1,
-      "power": 75.6,
+      "power": 74.4,
       "form": [
         "W",
         "W",
@@ -728,7 +742,7 @@
       "record": "1-2",
       "wins": 1,
       "losses": 2,
-      "power": 75.3,
+      "power": 74.1,
       "form": [
         "W",
         "L",
@@ -765,7 +779,7 @@
       "record": "4-1",
       "wins": 4,
       "losses": 1,
-      "power": 75.1,
+      "power": 73.9,
       "form": [
         "W",
         "W",
@@ -816,7 +830,7 @@
       "record": "1-1",
       "wins": 1,
       "losses": 1,
-      "power": 74.2,
+      "power": 73.0,
       "form": [
         "L",
         "W"
@@ -846,7 +860,7 @@
       "record": "2-1",
       "wins": 2,
       "losses": 1,
-      "power": 73.6,
+      "power": 72.4,
       "form": [
         "W",
         "W",
@@ -883,7 +897,7 @@
       "record": "2-1",
       "wins": 2,
       "losses": 1,
-      "power": 73.4,
+      "power": 72.3,
       "form": [
         "W",
         "W",
@@ -920,7 +934,7 @@
       "record": "1-2",
       "wins": 1,
       "losses": 2,
-      "power": 72.5,
+      "power": 71.4,
       "form": [
         "W",
         "L",
@@ -957,7 +971,7 @@
       "record": "1-1",
       "wins": 1,
       "losses": 1,
-      "power": 71.8,
+      "power": 70.7,
       "form": [
         "W",
         "L"
@@ -987,7 +1001,7 @@
       "record": "1-2",
       "wins": 1,
       "losses": 2,
-      "power": 71.8,
+      "power": 70.6,
       "form": [
         "W",
         "L",
@@ -1024,7 +1038,7 @@
       "record": "0-2",
       "wins": 0,
       "losses": 2,
-      "power": 71.1,
+      "power": 70.0,
       "form": [
         "L",
         "L"
@@ -1054,7 +1068,7 @@
       "record": "3-1",
       "wins": 3,
       "losses": 1,
-      "power": 71.0,
+      "power": 69.9,
       "form": [
         "W",
         "W",
@@ -1098,7 +1112,7 @@
       "record": "2-1",
       "wins": 2,
       "losses": 1,
-      "power": 70.5,
+      "power": 69.4,
       "form": [
         "W",
         "W",
@@ -1135,7 +1149,7 @@
       "record": "2-2",
       "wins": 2,
       "losses": 2,
-      "power": 70.3,
+      "power": 69.2,
       "form": [
         "W",
         "L",
@@ -1179,7 +1193,7 @@
       "record": "3-2",
       "wins": 3,
       "losses": 2,
-      "power": 69.8,
+      "power": 68.7,
       "form": [
         "L",
         "W",
@@ -1230,7 +1244,7 @@
       "record": "2-2",
       "wins": 2,
       "losses": 2,
-      "power": 69.1,
+      "power": 68.0,
       "form": [
         "W",
         "L",
@@ -1274,7 +1288,7 @@
       "record": "0-2",
       "wins": 0,
       "losses": 2,
-      "power": 67.2,
+      "power": 66.2,
       "form": [
         "L",
         "L"
@@ -1304,7 +1318,7 @@
       "record": "1-2",
       "wins": 1,
       "losses": 2,
-      "power": 65.7,
+      "power": 64.7,
       "form": [
         "L",
         "W",
@@ -1341,7 +1355,7 @@
       "record": "1-2",
       "wins": 1,
       "losses": 2,
-      "power": 64.8,
+      "power": 63.8,
       "form": [
         "L",
         "W",
@@ -1378,7 +1392,7 @@
       "record": "4-1",
       "wins": 4,
       "losses": 1,
-      "power": 64.6,
+      "power": 63.6,
       "form": [
         "W",
         "L",
@@ -1429,7 +1443,7 @@
       "record": "1-1",
       "wins": 1,
       "losses": 1,
-      "power": 63.7,
+      "power": 62.7,
       "form": [
         "L",
         "W"
@@ -1459,7 +1473,7 @@
       "record": "0-2",
       "wins": 0,
       "losses": 2,
-      "power": 60.1,
+      "power": 59.2,
       "form": [
         "L",
         "L"
@@ -1489,7 +1503,7 @@
       "record": "2-1",
       "wins": 2,
       "losses": 1,
-      "power": 59.9,
+      "power": 59.0,
       "form": [
         "W",
         "W",
@@ -1526,7 +1540,7 @@
       "record": "2-1",
       "wins": 2,
       "losses": 1,
-      "power": 59.6,
+      "power": 58.7,
       "form": [
         "W",
         "W",
@@ -1563,7 +1577,7 @@
       "record": "1-1",
       "wins": 1,
       "losses": 1,
-      "power": 55.9,
+      "power": 55.0,
       "form": [
         "L",
         "W"
@@ -1593,7 +1607,7 @@
       "record": "0-2",
       "wins": 0,
       "losses": 2,
-      "power": 52.0,
+      "power": 51.2,
       "form": [
         "L",
         "L"
@@ -1623,7 +1637,7 @@
       "record": "0-2",
       "wins": 0,
       "losses": 2,
-      "power": 51.5,
+      "power": 50.7,
       "form": [
         "L",
         "L"
@@ -1653,7 +1667,7 @@
       "record": "0-2",
       "wins": 0,
       "losses": 2,
-      "power": 49.4,
+      "power": 48.6,
       "form": [
         "L",
         "L"
@@ -1683,7 +1697,7 @@
       "record": "0-2",
       "wins": 0,
       "losses": 2,
-      "power": 49.3,
+      "power": 48.5,
       "form": [
         "L",
         "L"
@@ -1713,7 +1727,7 @@
       "record": "1-1",
       "wins": 1,
       "losses": 1,
-      "power": 42.6,
+      "power": 41.9,
       "form": [
         "W",
         "L"
@@ -1743,7 +1757,7 @@
       "record": "1-1",
       "wins": 1,
       "losses": 1,
-      "power": 41.4,
+      "power": 40.8,
       "form": [
         "W",
         "L"
@@ -1765,36 +1779,6 @@
     },
     {
       "rank": 47,
-      "name": "Daïquibri",
-      "division": "Starter",
-      "divSlug": "starter",
-      "elo": 1390,
-      "delta": -10,
-      "record": "0-2",
-      "wins": 0,
-      "losses": 2,
-      "power": 39.6,
-      "form": [
-        "L",
-        "L"
-      ],
-      "matches": [
-        {
-          "opponent": "Bières et le loup",
-          "result": "L",
-          "score": "0-3",
-          "delta": -5
-        },
-        {
-          "opponent": "Gold Digger",
-          "result": "L",
-          "score": "0-3",
-          "delta": -5
-        }
-      ]
-    },
-    {
-      "rank": 48,
       "name": "Bachateam",
       "division": "Starter",
       "divSlug": "starter",
@@ -1803,7 +1787,7 @@
       "record": "0-2",
       "wins": 0,
       "losses": 2,
-      "power": 39.6,
+      "power": 39.0,
       "form": [
         "L",
         "L"
@@ -1824,6 +1808,36 @@
       ]
     },
     {
+      "rank": 48,
+      "name": "Daïquibri",
+      "division": "Starter",
+      "divSlug": "starter",
+      "elo": 1390,
+      "delta": -10,
+      "record": "0-2",
+      "wins": 0,
+      "losses": 2,
+      "power": 39.0,
+      "form": [
+        "L",
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Bières et le loup",
+          "result": "L",
+          "score": "0-3",
+          "delta": -5
+        },
+        {
+          "opponent": "Gold Digger",
+          "result": "L",
+          "score": "0-3",
+          "delta": -5
+        }
+      ]
+    },
+    {
       "rank": 49,
       "name": "Les Gaillards",
       "division": "Starter",
@@ -1833,7 +1847,7 @@
       "record": "0-2",
       "wins": 0,
       "losses": 2,
-      "power": 38.5,
+      "power": 37.9,
       "form": [
         "L",
         "L"
@@ -1863,7 +1877,7 @@
       "record": "1-2",
       "wins": 1,
       "losses": 2,
-      "power": 37.8,
+      "power": 37.2,
       "form": [
         "L",
         "W",
@@ -1900,7 +1914,7 @@
       "record": "0-2",
       "wins": 0,
       "losses": 2,
-      "power": 37.7,
+      "power": 37.1,
       "form": [
         "L",
         "L"
@@ -1930,7 +1944,7 @@
       "record": "0-2",
       "wins": 0,
       "losses": 2,
-      "power": 36.5,
+      "power": 35.9,
       "form": [
         "L",
         "L"
@@ -1960,7 +1974,7 @@
       "record": "0-2",
       "wins": 0,
       "losses": 2,
-      "power": 35.6,
+      "power": 35.1,
       "form": [
         "L",
         "L"
@@ -1990,7 +2004,7 @@
       "record": "0-2",
       "wins": 0,
       "losses": 2,
-      "power": 35.5,
+      "power": 34.9,
       "form": [
         "L",
         "L"
@@ -2020,7 +2034,7 @@
       "record": "0-2",
       "wins": 0,
       "losses": 2,
-      "power": 33.1,
+      "power": 32.6,
       "form": [
         "L",
         "L"
@@ -2050,7 +2064,7 @@
       "record": "0-2",
       "wins": 0,
       "losses": 2,
-      "power": 29.3,
+      "power": 28.8,
       "form": [
         "L",
         "L"
@@ -2080,7 +2094,7 @@
       "record": "2-1",
       "wins": 2,
       "losses": 1,
-      "power": 28.6,
+      "power": 28.1,
       "form": [
         "W",
         "W",
@@ -2143,23 +2157,23 @@
       "slug": "elite",
       "name": "Elite",
       "teams": 9,
-      "avgElo": 1791.5,
-      "maxElo": 1859.6,
+      "avgElo": 1792.9,
+      "maxElo": 1871.9,
       "minElo": 1742.1,
-      "wins": 22,
+      "wins": 23,
       "losses": 11,
-      "winPct": 66.7
+      "winPct": 67.6
     },
     {
       "slug": "hard",
       "name": "Hard",
       "teams": 9,
-      "avgElo": 1713.9,
+      "avgElo": 1712.6,
       "maxElo": 1831.9,
       "minElo": 1634.7,
       "wins": 20,
-      "losses": 10,
-      "winPct": 66.7
+      "losses": 11,
+      "winPct": 64.5
     },
     {
       "slug": "medium",
@@ -4191,6 +4205,33 @@
       "forfeit": false,
       "deltaHome": 21.2,
       "deltaAway": -21.2
+    },
+    {
+      "round": "1/2 Principale",
+      "home": "Jen et ses Saints",
+      "away": "Les Loups-Phoques",
+      "homeSets": 3,
+      "awaySets": 2,
+      "homeScores": [
+        25,
+        21,
+        25,
+        27,
+        15
+      ],
+      "awayScores": [
+        15,
+        25,
+        20,
+        29,
+        8
+      ],
+      "homeDivision": "elite",
+      "awayDivision": "hard",
+      "winner": "Jen et ses Saints",
+      "forfeit": false,
+      "deltaHome": 12.4,
+      "deltaAway": -12.4
     },
     {
       "round": "1/2 Principale",
