@@ -99,6 +99,16 @@ function confirmUndoLastPoint() {
     gameState.homeScore = prevPoint ? prevPoint.homeScore : initialHome;
     gameState.awayScore = prevPoint ? prevPoint.awayScore : initialAway;
 
+    // Switch tie-break : si on rembobine avant l'index, annuler le switch
+    if (currentSet.cameraSwitchAtPointIndex !== undefined
+        && points.length < currentSet.cameraSwitchAtPointIndex) {
+        delete currentSet.cameraSwitchAtPointIndex;
+        if (typeof refreshCameraSideFromState === 'function') {
+            refreshCameraSideFromState();
+        }
+        if (typeof updateLabels === 'function') updateLabels();
+    }
+
     // V20.27 : Restaurer l'équipe au service ET le serveur intelligemment
     const serviceAction = removedPoint.rally.find(a => a.type === 'service');
     if (serviceAction) {
@@ -243,6 +253,16 @@ function confirmResumeLastPoint() {
     const initialAway = currentSet.initialAwayScore || 0;
     gameState.homeScore = prevPoint ? prevPoint.homeScore : initialHome;
     gameState.awayScore = prevPoint ? prevPoint.awayScore : initialAway;
+
+    // Switch tie-break : si on rembobine avant l'index, annuler le switch
+    if (currentSet.cameraSwitchAtPointIndex !== undefined
+        && points.length < currentSet.cameraSwitchAtPointIndex) {
+        delete currentSet.cameraSwitchAtPointIndex;
+        if (typeof refreshCameraSideFromState === 'function') {
+            refreshCameraSideFromState();
+        }
+        if (typeof updateLabels === 'function') updateLabels();
+    }
 
     // 3. Restaurer l'équipe au service
     const serviceAction = removedPoint.rally.find(a => a.type === 'service');

@@ -291,6 +291,27 @@
             color: white;
         }
 
+        .header-ctrl-btn.switch-side {
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #38bdf8;
+        }
+
+        .header-ctrl-btn.switch-side:hover {
+            background: #38bdf8;
+            color: white;
+        }
+
+        .header-ctrl-btn.switch-side.active {
+            background: #0369a1;
+            color: white;
+            border-color: #0369a1;
+        }
+
+        .header-ctrl-btn.switch-side.active:hover {
+            background: #075985;
+        }
+
         .yt-url-overlay {
             display: none;
             position: fixed;

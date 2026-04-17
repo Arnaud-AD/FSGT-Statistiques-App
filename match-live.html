@@ -50,6 +50,12 @@
                         </svg>
                         Fin du Set
                     </button>
+                    <button class="header-ctrl-btn switch-side" id="btnSwitchSide" onclick="onSwitchSideClick()" title="Changement de c\u00f4t\u00e9 (tie-break)" style="display: none;">
+                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/>
+                        </svg>
+                        <span id="btnSwitchSideLabel">Switch</span>
+                    </button>
                 </div>
                 <div class="header-controls-center">
                     <button class="header-ctrl-btn youtube-link" id="btnYoutubeLink" onclick="openYoutubeModal()" title="Lien YouTube">
@@ -1467,6 +1473,73 @@
         // Configuration caméra (qui est en bas)
         let cameraSide = 'home'; // 'home' = Jen en bas, 'away' = adversaire en bas
 
+        // ==================== SWITCH DE COTE (TIE-BREAK) ====================
+        // Renvoie le cameraSide effectif selon l'\u00e9tat du switch de tie-break.
+        // currentSet.cameraSide = valeur d'origine du set (jamais modifi\u00e9e apr\u00e8s d\u00e9but).
+        // currentSet.cameraSwitchAtPointIndex = nombre de points jou\u00e9s au moment du switch.
+        function getEffectiveCameraSide() {
+            const original = (currentSet && currentSet.cameraSide) || 'home';
+            if (!currentSet || currentSet.cameraSwitchAtPointIndex === undefined) return original;
+            const played = currentSet.points ? currentSet.points.length : 0;
+            if (played >= currentSet.cameraSwitchAtPointIndex) {
+                return original === 'home' ? 'away' : 'home';
+            }
+            return original;
+        }
+
+        function refreshCameraSideFromState() {
+            cameraSide = getEffectiveCameraSide();
+        }
+
+        function updateSwitchButton() {
+            const btn = document.getElementById('btnSwitchSide');
+            const label = document.getElementById('btnSwitchSideLabel');
+            if (!btn) return;
+            const isTieBreak = currentMatch && Storage.isTieBreak(currentMatch);
+            const inBetweenPoints = gameState.phase === 'server_selection' || gameState.phase === 'serve_start';
+            if (!isTieBreak || !inBetweenPoints) {
+                btn.style.display = 'none';
+                return;
+            }
+            btn.style.display = 'flex';
+            const switched = currentSet && currentSet.cameraSwitchAtPointIndex !== undefined;
+            if (switched) {
+                btn.classList.add('active');
+                if (label) label.textContent = 'Switched';
+                btn.title = 'Annuler le changement de c\u00f4t\u00e9';
+            } else {
+                btn.classList.remove('active');
+                if (label) label.textContent = 'Switch';
+                btn.title = 'Changement de c\u00f4t\u00e9 (tie-break)';
+            }
+        }
+
+        function onSwitchSideClick() {
+            // S\u00e9curit\u00e9 : uniquement en tie-break, entre deux points
+            if (!currentMatch || !Storage.isTieBreak(currentMatch)) return;
+            if (gameState.phase !== 'server_selection' && gameState.phase !== 'serve_start') return;
+
+            const alreadySwitched = currentSet.cameraSwitchAtPointIndex !== undefined;
+            if (alreadySwitched) {
+                if (!confirm('Annuler le changement de c\u00f4t\u00e9 ?')) return;
+                delete currentSet.cameraSwitchAtPointIndex;
+            } else {
+                currentSet.cameraSwitchAtPointIndex = currentSet.points ? currentSet.points.length : 0;
+            }
+            refreshCameraSideFromState();
+
+            // Re-render affichage terrain
+            updateLabels();
+            updateSwitchButton();
+            // Re-afficher zone de service si on est en serve_start (elle d\u00e9pend du c\u00f4t\u00e9)
+            if (gameState.phase === 'serve_start') {
+                hideServiceZones();
+                showServiceZone();
+            }
+
+            saveCurrentSet();
+        }
+
         // ==================== V18.0 BRIDGE FUNCTIONS ====================
         // Undo = WorkflowEngine.popState()
         function undoLastAction() {
@@ -1585,7 +1658,7 @@
                 // On ne démarre PAS le workflow — on attend confirmPreMatch()
             } else {
                 // Configuration déjà définie (reprise ou confirmée)
-                cameraSide = currentSet.cameraSide || 'home';
+                refreshCameraSideFromState();
                 gameState.servingTeam = currentSet.servingTeam || 'away';
                 startMatch();
             }
@@ -1827,6 +1900,9 @@
             if (btnEnd) {
                 btnEnd.style.display = (gameState.phase === 'server_selection' || gameState.phase === 'serve_start') ? 'flex' : 'none';
             }
+
+            // Bouton Switch (tie-break uniquement, entre points)
+            updateSwitchButton();
         }
 
         // ==================== SÉLECTION SERVEUR ====================

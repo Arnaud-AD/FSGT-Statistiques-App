@@ -1528,6 +1528,17 @@ const PassAttackAnalyzer = {
 
     // --- Helpers portes depuis match-live-helpers.js ---
 
+    // Switch tie-break : cameraSide effectif pour un index de point donne
+    // pointIndex = index dans set.points ; switch actif si pointIndex >= cameraSwitchAtPointIndex
+    _effectiveCameraSide(set, pointIndex) {
+        var original = (set && set.cameraSide) || 'home';
+        if (!set || set.cameraSwitchAtPointIndex === undefined) return original;
+        if (pointIndex >= set.cameraSwitchAtPointIndex) {
+            return original === 'home' ? 'away' : 'home';
+        }
+        return original;
+    },
+
     _getCourtSide(team, cameraSide) {
         if (cameraSide === 'home') {
             return team === 'home' ? 'bottom' : 'top';
@@ -1651,13 +1662,13 @@ const PassAttackAnalyzer = {
 
     analyzeSet(set, team) {
         var self = this;
-        var cameraSide = set.cameraSide || 'home';
         var points = set.points || [];
         var sequences = [];
 
         points.forEach(function(point, pointIndex) {
             var rally = point.rally;
             if (!rally || rally.length === 0) return;
+            var cameraSide = self._effectiveCameraSide(set, pointIndex);
 
             for (var i = 0; i < rally.length; i++) {
                 var action = rally[i];
@@ -8812,10 +8823,9 @@ const StatsVisuellesView = {
                 if (self._selectedSet !== 'all' && self._selectedSet !== setIdx) return;
                 if (!set.points) return;
 
-                var cameraSide = set.cameraSide || 'home';
-
-                set.points.forEach(function(point) {
+                set.points.forEach(function(point, pointIndex) {
                     if (!point.rally) return;
+                    var cameraSide = self._effectiveCameraSide(set, pointIndex);
                     point.rally.forEach(function(action, actionIdx) {
                         // Only home team actions
                         if (action.team !== 'home') return;
