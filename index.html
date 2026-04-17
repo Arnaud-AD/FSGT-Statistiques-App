@@ -3,7 +3,7 @@
 <head>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com; img-src 'self' data: https://*.googleusercontent.com; frame-src https://accounts.google.com https://*.firebaseapp.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://api.ipify.org; img-src 'self' data: https://*.googleusercontent.com; frame-src https://accounts.google.com https://*.firebaseapp.com;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jen et ses Saints - Stats Volleyball</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
@@ -360,6 +360,91 @@
             border-color: var(--accent-blue);
         }
 
+        /* Personas (liste visiteurs + timeline) */
+        .persona-block {
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .persona-block:last-child { border-bottom: none; }
+        .persona-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            cursor: pointer;
+            font-size: 13px;
+            gap: 8px;
+        }
+        .persona-header:hover { background: #fafafa; }
+        .persona-name {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .persona-label {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        .persona-label:not(.persona-unknown):hover {
+            color: var(--accent-blue);
+            text-decoration: underline;
+        }
+        .persona-unknown {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        .persona-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        .persona-count {
+            font-weight: 600;
+            color: var(--accent-blue);
+            font-size: 13px;
+        }
+        .persona-last {
+            white-space: nowrap;
+        }
+        .persona-expand {
+            font-size: 14px;
+            color: var(--text-secondary);
+            transition: transform 0.2s;
+            display: inline-block;
+        }
+        .persona-block.open .persona-expand { transform: rotate(180deg); }
+        .persona-timeline {
+            padding: 6px 8px 10px 8px;
+            background: #fafbfc;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+        .timeline-row {
+            display: flex;
+            gap: 10px;
+            padding: 3px 0;
+            font-size: 12px;
+            border-bottom: 1px dashed #ececec;
+        }
+        .timeline-row:last-child { border-bottom: none; }
+        .timeline-when {
+            color: var(--text-secondary);
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+            flex-shrink: 0;
+            min-width: 78px;
+        }
+        .timeline-what {
+            color: var(--text-primary);
+            flex: 1;
+            min-width: 0;
+            word-break: break-word;
+        }
+
         .menu-btn-content {
             display: flex;
             flex-direction: column;
@@ -711,7 +796,9 @@
         // ==================== ANALYTIQUE ====================
 
         let analyticsLoaded = false;
-        let analyticsCache = null;
+        let _analyticsPersonas = {};  // cache { id -> persona (avec events) } pour les expand/rename
+
+        const ANALYTICS_PAGE_LABELS = { accueil: 'Accueil', historique: 'Historique', 'match-live': 'Match live', equipe: 'Équipe' };
 
         function toggleAnalytics() {
             const card = document.getElementById('analyticsCard');
@@ -719,6 +806,47 @@
             if (card.classList.contains('open') && !analyticsLoaded) {
                 loadAnalytics(7);
             }
+        }
+
+        function _currentAnalyticsPeriod() {
+            const active = document.querySelector('.analytics-period-btn.active');
+            if (!active) return 7;
+            return active.textContent === 'Tout' ? 0 : parseInt(active.textContent);
+        }
+
+        function _formatRelativeTime(ts) {
+            if (!ts) return '';
+            const d = ts.toDate ? ts.toDate() : new Date(ts);
+            const diff = Date.now() - d.getTime();
+            const mins = Math.floor(diff / 60000);
+            if (mins < 1) return "à l'instant";
+            if (mins < 60) return 'il y a ' + mins + ' min';
+            const hrs = Math.floor(mins / 60);
+            if (hrs < 24) return 'il y a ' + hrs + ' h';
+            const days = Math.floor(hrs / 24);
+            if (days < 30) return 'il y a ' + days + ' j';
+            return d.toLocaleDateString('fr-FR');
+        }
+
+        function _formatDateTime(ts) {
+            if (!ts) return '';
+            const d = ts.toDate ? ts.toDate() : new Date(ts);
+            const now = new Date();
+            if (d.toDateString() === now.toDateString()) {
+                return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            }
+            return d.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function _formatEventLabel(ev) {
+            if (ev.type === 'page_view') return ANALYTICS_PAGE_LABELS[ev.page] || ev.page || '(page)';
+            if (ev.type === 'action') {
+                if (ev.action === 'match_select') return 'Match : ' + (ev.opponent || '?');
+                if (ev.action === 'tab_switch') return 'Onglet : ' + (ev.tab || '?');
+                if (ev.action === 'season_switch') return 'Saison : ' + (ev.season || '?');
+                return ev.action || '(action)';
+            }
+            return ev.type || '(event)';
         }
 
         async function loadAnalytics(days) {
@@ -736,86 +864,150 @@
                     return;
                 }
 
-                // Requête Firestore
-                let query = db.collection('analytics').orderBy('timestamp', 'desc');
+                // Requête events dans la période + personas (en parallèle)
+                let eventsQuery = db.collection('analytics').orderBy('timestamp', 'desc');
                 if (days > 0) {
                     const since = new Date();
                     since.setDate(since.getDate() - days);
-                    query = query.where('timestamp', '>=', since);
+                    eventsQuery = eventsQuery.where('timestamp', '>=', since);
                 }
-                // Limiter à 500 documents
-                query = query.limit(500);
+                eventsQuery = eventsQuery.limit(2000);
 
-                const snapshot = await query.get();
+                const [eventsSnap, personasSnap] = await Promise.all([
+                    eventsQuery.get(),
+                    db.collection('analytics_personas').get()
+                ]);
+
                 analyticsLoaded = true;
 
-                if (snapshot.empty) {
+                // Indexer personas + mapping visitorId → personaId (pour rattacher les events legacy)
+                const personas = {};
+                const uuidToPersona = {};
+                personasSnap.forEach(d => {
+                    const data = d.data();
+                    personas[d.id] = {
+                        id: d.id,
+                        label: data.label || 'Visiteur ?',
+                        number: data.number || 0,
+                        linkedVisitorIds: data.linkedVisitorIds || [],
+                        events: []
+                    };
+                    (data.linkedVisitorIds || []).forEach(uuid => { uuidToPersona[uuid] = d.id; });
+                });
+                personas['__unknown__'] = { id: '__unknown__', label: 'Visiteur non identifié', number: 99999, linkedVisitorIds: [], events: [] };
+
+                // Distribuer les events
+                let totalPageViews = 0;
+                eventsSnap.forEach(d => {
+                    const ev = { id: d.id, ...d.data() };
+                    if (ev.type === 'page_view') totalPageViews++;
+                    const pid = ev.persona && personas[ev.persona]
+                        ? ev.persona
+                        : (uuidToPersona[ev.visitor] || '__unknown__');
+                    personas[pid].events.push(ev);
+                });
+
+                _analyticsPersonas = personas;
+
+                if (eventsSnap.empty) {
                     container.innerHTML = '<div class="analytics-loading">Aucune visite enregistrée</div>';
                     return;
                 }
 
-                // Agréger les données
-                const docs = snapshot.docs.map(d => d.data());
-                const pageViews = docs.filter(d => d.type === 'page_view');
-                const actions = docs.filter(d => d.type === 'action');
-                const visitors = new Set(docs.map(d => d.visitor).filter(Boolean));
+                // Liste triée par dernière activité (event le plus récent en tête)
+                const personaList = Object.values(personas)
+                    .filter(p => p.events.length > 0)
+                    .sort((a, b) => {
+                        const ta = a.events[0]?.timestamp?.toMillis?.() || 0;
+                        const tb = b.events[0]?.timestamp?.toMillis?.() || 0;
+                        return tb - ta;
+                    });
 
-                // Comptage par page
-                const pageCounts = {};
-                pageViews.forEach(d => {
-                    pageCounts[d.page] = (pageCounts[d.page] || 0) + 1;
+                const identifiedCount = personaList.filter(p => p.id !== '__unknown__').length;
+
+                const personaRows = personaList.map(p => {
+                    const count = p.events.length;
+                    const last = p.events[0];
+                    const lastSeen = _formatRelativeTime(last && last.timestamp);
+                    const isRename = p.id !== '__unknown__';
+                    const labelCls = isRename ? 'persona-label' : 'persona-label persona-unknown';
+                    const labelTitle = isRename ? 'title="Cliquer pour renommer"' : '';
+                    return '<div class="persona-block" data-persona-id="' + p.id + '">'
+                        + '<div class="persona-header" data-persona-toggle="' + p.id + '">'
+                        + '<div class="persona-name"><span class="' + labelCls + '" data-rename-id="' + p.id + '" ' + labelTitle + '>' + escapeHtml(p.label) + '</span></div>'
+                        + '<div class="persona-meta">'
+                        + '<span class="persona-count">' + count + '</span>'
+                        + '<span class="persona-last">' + escapeHtml(lastSeen) + '</span>'
+                        + '<span class="persona-expand">▾</span>'
+                        + '</div>'
+                        + '</div>'
+                        + '<div class="persona-timeline" id="timeline-' + p.id + '" style="display:none;"></div>'
+                        + '</div>';
+                }).join('');
+
+                container.innerHTML = ''
+                    + '<div class="analytics-grid">'
+                    + '<div class="analytics-stat"><div class="analytics-stat-value">' + totalPageViews + '</div><div class="analytics-stat-label">Pages vues</div></div>'
+                    + '<div class="analytics-stat"><div class="analytics-stat-value">' + identifiedCount + '</div><div class="analytics-stat-label">Personnes identifiées</div></div>'
+                    + '</div>'
+                    + '<div class="analytics-detail">'
+                    + '<div class="analytics-detail-title">Visiteurs (clic sur un nom pour renommer, sur la ligne pour dérouler)</div>'
+                    + (personaRows || '<div class="analytics-loading">Aucun</div>')
+                    + '</div>';
+
+                // Handlers : toggle timeline + rename
+                container.querySelectorAll('[data-persona-toggle]').forEach(header => {
+                    header.addEventListener('click', (e) => {
+                        if (e.target.closest('[data-rename-id]') && !e.target.closest('[data-rename-id]').classList.contains('persona-unknown')) return;
+                        _togglePersonaTimeline(header.dataset.personaToggle);
+                    });
                 });
-
-                // Comptage par action
-                const actionCounts = {};
-                actions.forEach(d => {
-                    const label = d.action === 'match_select' ? ('Match : ' + (d.opponent || '?'))
-                        : d.action === 'tab_switch' ? ('Onglet : ' + (d.tab || '?'))
-                        : d.action === 'season_switch' ? ('Saison : ' + (d.season || '?'))
-                        : d.action;
-                    actionCounts[label] = (actionCounts[label] || 0) + 1;
+                container.querySelectorAll('[data-rename-id]').forEach(span => {
+                    if (span.classList.contains('persona-unknown')) return;
+                    span.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        _renamePersona(span.dataset.renameId, span.textContent);
+                    });
                 });
-
-                // Rendu
-                const pageLabels = { accueil: 'Accueil', historique: 'Historique', 'match-live': 'Match live', equipe: 'Équipe' };
-                const pageRows = Object.entries(pageCounts)
-                    .sort((a, b) => b[1] - a[1])
-                    .map(([page, count]) => `<div class="analytics-row"><span class="analytics-row-page">${escapeHtml(pageLabels[page] || page)}</span><span class="analytics-row-count">${count}</span></div>`)
-                    .join('');
-
-                const actionRows = Object.entries(actionCounts)
-                    .sort((a, b) => b[1] - a[1])
-                    .slice(0, 8)
-                    .map(([action, count]) => `<div class="analytics-row"><span class="analytics-row-page">${escapeHtml(action)}</span><span class="analytics-row-count">${count}</span></div>`)
-                    .join('');
-
-                container.innerHTML = `
-                    <div class="analytics-grid">
-                        <div class="analytics-stat">
-                            <div class="analytics-stat-value">${pageViews.length}</div>
-                            <div class="analytics-stat-label">Pages vues</div>
-                        </div>
-                        <div class="analytics-stat">
-                            <div class="analytics-stat-value">${visitors.size}</div>
-                            <div class="analytics-stat-label">Visiteurs uniques</div>
-                        </div>
-                    </div>
-                    <div class="analytics-detail">
-                        <div class="analytics-detail-title">Pages visitées</div>
-                        ${pageRows || '<div class="analytics-loading">Aucune</div>'}
-                    </div>
-                    ${actionRows ? `<div class="analytics-detail">
-                        <div class="analytics-detail-title">Actions</div>
-                        ${actionRows}
-                    </div>` : ''}
-                `;
             } catch (e) {
-                var errDiv = document.createElement('div');
+                const errDiv = document.createElement('div');
                 errDiv.className = 'analytics-loading';
                 errDiv.textContent = 'Erreur : ' + e.message;
                 container.innerHTML = '';
                 container.appendChild(errDiv);
             }
+        }
+
+        function _togglePersonaTimeline(personaId) {
+            const persona = _analyticsPersonas[personaId];
+            const tl = document.getElementById('timeline-' + personaId);
+            const block = document.querySelector('.persona-block[data-persona-id="' + personaId + '"]');
+            if (!tl || !persona) return;
+            if (tl.style.display === 'none') {
+                const rows = persona.events.map(ev => {
+                    return '<div class="timeline-row">'
+                        + '<span class="timeline-when">' + escapeHtml(_formatDateTime(ev.timestamp)) + '</span>'
+                        + '<span class="timeline-what">' + escapeHtml(_formatEventLabel(ev)) + '</span>'
+                        + '</div>';
+                }).join('');
+                tl.innerHTML = rows || '<div class="analytics-loading">Aucun événement</div>';
+                tl.style.display = 'block';
+                if (block) block.classList.add('open');
+            } else {
+                tl.style.display = 'none';
+                if (block) block.classList.remove('open');
+            }
+        }
+
+        function _renamePersona(personaId, currentLabel) {
+            if (!personaId || personaId === '__unknown__') return;
+            const input = prompt('Renommer ce visiteur :', currentLabel);
+            if (input === null) return;
+            const trimmed = input.trim().substring(0, 50);
+            if (!trimmed || trimmed === currentLabel) return;
+            db.collection('analytics_personas').doc(personaId).update({ label: trimmed })
+                .then(() => loadAnalytics(_currentAnalyticsPeriod()))
+                .catch(err => alert('Erreur : ' + err.message));
         }
     </script>
 </body>
