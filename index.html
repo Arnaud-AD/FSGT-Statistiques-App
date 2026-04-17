@@ -393,6 +393,19 @@
             color: var(--text-secondary);
             font-style: italic;
         }
+        .persona-anon {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        .persona-anon:hover {
+            color: var(--accent-blue);
+            text-decoration: underline;
+        }
+        .analytics-stat-sub {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
         .persona-meta {
             display: flex;
             align-items: center;
@@ -890,20 +903,40 @@
                         label: data.label || 'Visiteur ?',
                         number: data.number || 0,
                         linkedVisitorIds: data.linkedVisitorIds || [],
-                        events: []
+                        events: [],
+                        isAnonymous: false
                     };
                     (data.linkedVisitorIds || []).forEach(uuid => { uuidToPersona[uuid] = d.id; });
                 });
-                personas['__unknown__'] = { id: '__unknown__', label: 'Visiteur non identifié', number: 99999, linkedVisitorIds: [], events: [] };
 
-                // Distribuer les events
+                // Distribuer les events : chaque UUID orphelin devient un bucket "Anonyme #N" propre
                 let totalPageViews = 0;
+                let anonymousIndex = 0;
+                const visitorToAnon = {};
                 eventsSnap.forEach(d => {
                     const ev = { id: d.id, ...d.data() };
                     if (ev.type === 'page_view') totalPageViews++;
-                    const pid = ev.persona && personas[ev.persona]
+                    let pid = ev.persona && personas[ev.persona]
                         ? ev.persona
-                        : (uuidToPersona[ev.visitor] || '__unknown__');
+                        : uuidToPersona[ev.visitor];
+                    if (!pid) {
+                        const uuid = ev.visitor || '(no-uuid)';
+                        if (!visitorToAnon[uuid]) {
+                            anonymousIndex++;
+                            const anonId = '__anon_' + uuid;
+                            visitorToAnon[uuid] = anonId;
+                            personas[anonId] = {
+                                id: anonId,
+                                label: 'Anonyme #' + anonymousIndex,
+                                number: 90000 + anonymousIndex,
+                                linkedVisitorIds: [uuid],
+                                events: [],
+                                isAnonymous: true,
+                                visitorId: uuid
+                            };
+                        }
+                        pid = visitorToAnon[uuid];
+                    }
                     personas[pid].events.push(ev);
                 });
 
@@ -923,18 +956,19 @@
                         return tb - ta;
                     });
 
-                const identifiedCount = personaList.filter(p => p.id !== '__unknown__').length;
+                const identifiedCount = personaList.filter(p => !p.isAnonymous).length;
+                const anonymousCount = personaList.filter(p => p.isAnonymous).length;
+                const totalVisitors = identifiedCount + anonymousCount;
 
                 const personaRows = personaList.map(p => {
                     const count = p.events.length;
                     const last = p.events[0];
                     const lastSeen = _formatRelativeTime(last && last.timestamp);
-                    const isRename = p.id !== '__unknown__';
-                    const labelCls = isRename ? 'persona-label' : 'persona-label persona-unknown';
-                    const labelTitle = isRename ? 'title="Cliquer pour renommer"' : '';
+                    const labelCls = p.isAnonymous ? 'persona-label persona-anon' : 'persona-label';
+                    const title = p.isAnonymous ? 'title="Cliquer pour identifier ce visiteur"' : 'title="Cliquer pour renommer"';
                     return '<div class="persona-block" data-persona-id="' + p.id + '">'
                         + '<div class="persona-header" data-persona-toggle="' + p.id + '">'
-                        + '<div class="persona-name"><span class="' + labelCls + '" data-rename-id="' + p.id + '" ' + labelTitle + '>' + escapeHtml(p.label) + '</span></div>'
+                        + '<div class="persona-name"><span class="' + labelCls + '" data-rename-id="' + p.id + '" ' + title + '>' + escapeHtml(p.label) + '</span></div>'
                         + '<div class="persona-meta">'
                         + '<span class="persona-count">' + count + '</span>'
                         + '<span class="persona-last">' + escapeHtml(lastSeen) + '</span>'
@@ -945,10 +979,16 @@
                         + '</div>';
                 }).join('');
 
+                const subtitle = identifiedCount > 0 || anonymousCount > 0
+                    ? (identifiedCount + ' identifié' + (identifiedCount > 1 ? 's' : '') + ' · ' + anonymousCount + ' anonyme' + (anonymousCount > 1 ? 's' : ''))
+                    : '';
+
                 container.innerHTML = ''
                     + '<div class="analytics-grid">'
                     + '<div class="analytics-stat"><div class="analytics-stat-value">' + totalPageViews + '</div><div class="analytics-stat-label">Pages vues</div></div>'
-                    + '<div class="analytics-stat"><div class="analytics-stat-value">' + identifiedCount + '</div><div class="analytics-stat-label">Personnes identifiées</div></div>'
+                    + '<div class="analytics-stat"><div class="analytics-stat-value">' + totalVisitors + '</div><div class="analytics-stat-label">Visiteurs uniques</div>'
+                    + (subtitle ? '<div class="analytics-stat-sub">' + subtitle + '</div>' : '')
+                    + '</div>'
                     + '</div>'
                     + '<div class="analytics-detail">'
                     + '<div class="analytics-detail-title">Visiteurs (clic sur un nom pour renommer, sur la ligne pour dérouler)</div>'
@@ -958,12 +998,11 @@
                 // Handlers : toggle timeline + rename
                 container.querySelectorAll('[data-persona-toggle]').forEach(header => {
                     header.addEventListener('click', (e) => {
-                        if (e.target.closest('[data-rename-id]') && !e.target.closest('[data-rename-id]').classList.contains('persona-unknown')) return;
+                        if (e.target.closest('[data-rename-id]')) return;  // le clic label gère le rename
                         _togglePersonaTimeline(header.dataset.personaToggle);
                     });
                 });
                 container.querySelectorAll('[data-rename-id]').forEach(span => {
-                    if (span.classList.contains('persona-unknown')) return;
                     span.addEventListener('click', (e) => {
                         e.stopPropagation();
                         _renamePersona(span.dataset.renameId, span.textContent);
@@ -999,15 +1038,45 @@
             }
         }
 
-        function _renamePersona(personaId, currentLabel) {
-            if (!personaId || personaId === '__unknown__') return;
-            const input = prompt('Renommer ce visiteur :', currentLabel);
+        async function _renamePersona(personaId, currentLabel) {
+            if (!personaId) return;
+            const persona = _analyticsPersonas[personaId];
+            if (!persona) return;
+
+            const promptMsg = persona.isAnonymous
+                ? 'Nommer ce visiteur (ex : Paul) :'
+                : 'Renommer ce visiteur :';
+            const input = prompt(promptMsg, persona.isAnonymous ? '' : currentLabel);
             if (input === null) return;
             const trimmed = input.trim().substring(0, 50);
             if (!trimmed || trimmed === currentLabel) return;
-            db.collection('analytics_personas').doc(personaId).update({ label: trimmed })
-                .then(() => loadAnalytics(_currentAnalyticsPeriod()))
-                .catch(err => alert('Erreur : ' + err.message));
+
+            try {
+                if (persona.isAnonymous) {
+                    // Créer un vrai persona Firestore et lier le UUID orphelin
+                    const counterRef = db.collection('analytics_meta').doc('persona_counter');
+                    const newNumber = await db.runTransaction(async tx => {
+                        const snap = await tx.get(counterRef);
+                        const curr = snap.exists ? (snap.data().count || 0) : 0;
+                        const next = curr + 1;
+                        tx.set(counterRef, { count: next });
+                        return next;
+                    });
+                    await db.collection('analytics_personas').add({
+                        ipHash: null,
+                        label: trimmed,
+                        number: newNumber,
+                        firstSeen: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+                        linkedVisitorIds: [persona.visitorId]
+                    });
+                } else {
+                    await db.collection('analytics_personas').doc(personaId).update({ label: trimmed });
+                }
+                loadAnalytics(_currentAnalyticsPeriod());
+            } catch (err) {
+                alert('Erreur : ' + err.message);
+            }
         }
     </script>
 </body>
