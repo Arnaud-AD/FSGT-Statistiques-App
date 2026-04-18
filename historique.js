@@ -8825,7 +8825,7 @@ const StatsVisuellesView = {
 
                 set.points.forEach(function(point, pointIndex) {
                     if (!point.rally) return;
-                    var cameraSide = self._effectiveCameraSide(set, pointIndex);
+                    var cameraSide = PassAttackAnalyzer._effectiveCameraSide(set, pointIndex);
                     point.rally.forEach(function(action, actionIdx) {
                         // Only home team actions
                         if (action.team !== 'home') return;
@@ -9374,11 +9374,12 @@ const StatsVisuellesView = {
         var div = document.createElement('div');
         div.className = 'sv-heatmap-legend';
 
-        // Adapt labels to active categories
-        var hasRec = this._selectedCategories['reception'];
-        var hasDef = this._selectedCategories['defense'];
-        var startLabel = hasRec && hasDef ? 'Départ (position du joueur)' :
-                         hasDef ? 'Départ (où on défend)' : 'Départ (où on réceptionne)';
+        // Adapt labels to active heatmap categories
+        var sel = this._selectedCategories;
+        var heatCats = ['reception', 'defense', 'attack'].filter(function(c) { return sel[c]; });
+        var startTextFor = { reception: 'où on réceptionne', defense: 'où on défend', attack: 'où on attaque' };
+        var startInner = heatCats.length > 1 ? 'position du joueur' : (startTextFor[heatCats[0]] || 'position du joueur');
+        var startLabel = 'Départ (' + startInner + ')';
         var endLabel = 'Arrivée (où va la balle)';
 
         if (mode === 'both') {
@@ -9392,8 +9393,8 @@ const StatsVisuellesView = {
                 '<span class="sv-legend-label">' + endLabel + '</span>' +
                 '</div>';
         } else {
-            var startText = hasRec && hasDef ? 'Position du joueur' :
-                           hasDef ? 'Où on défend' : 'Où on réceptionne';
+            var startTextSingle = { reception: 'Où on réceptionne', defense: 'Où on défend', attack: 'Où on attaque' };
+            var startText = heatCats.length > 1 ? 'Position du joueur' : (startTextSingle[heatCats[0]] || 'Position du joueur');
             var label = mode === 'start' ? startText : 'Où va la balle';
             div.innerHTML =
                 '<div class="sv-legend-bar-container">' +
@@ -9436,11 +9437,11 @@ const StatsVisuellesView = {
 
         this._trajectories = this._extractTrajectories();
 
-        // Split heatmap categories (reception, defense) from SVG categories
+        // Split heatmap categories (reception, defense, attack) from SVG categories
         var heatmapTrajs = [];
         var svgTrajs = [];
         this._trajectories.forEach(function(t) {
-            if (t.type === 'reception' || t.type === 'defense') {
+            if (t.type === 'reception' || t.type === 'defense' || t.type === 'attack') {
                 heatmapTrajs.push(t);
             } else {
                 svgTrajs.push(t);
