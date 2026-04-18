@@ -8903,7 +8903,8 @@ const StatsVisuellesView = {
                             startPos: startSvg,
                             endPos: endSvg,
                             hasArrow: hasStart,
-                            startCourtSide: hasStart ? startPos.courtSide : null
+                            startCourtSide: hasStart ? startPos.courtSide : null,
+                            endCourtSide: (effectiveType === 'block') ? 'bottom' : endPos.courtSide
                         });
 
                         // Block-touch : si l'attaque touche le filet/bloc, chercher le bloc qui suit
@@ -9150,7 +9151,7 @@ const StatsVisuellesView = {
             if (t.startPos && (mode === 'start' || mode === 'both') && t.startCourtSide !== 'net') {
                 startPts.push({ x: t.startPos.x * dpr, y: t.startPos.y * dpr });
             }
-            if (t.endPos && (mode === 'end' || mode === 'both')) {
+            if (t.endPos && (mode === 'end' || mode === 'both') && t.endCourtSide !== 'net') {
                 endPts.push({ x: t.endPos.x * dpr, y: t.endPos.y * dpr });
             }
         });
@@ -9440,9 +9441,13 @@ const StatsVisuellesView = {
         // Split heatmap categories (reception, defense, attack) from SVG categories
         var heatmapTrajs = [];
         var svgTrajs = [];
+        var attackHeatmapActive = this._selectedCategories['attack'];
         this._trajectories.forEach(function(t) {
             if (t.type === 'reception' || t.type === 'defense' || t.type === 'attack') {
                 heatmapTrajs.push(t);
+            } else if (t.type === 'block-touch' && attackHeatmapActive) {
+                // Suppress block-touch SVG arrows when attack heatmap is on (avoid overlay noise)
+                return;
             } else {
                 svgTrajs.push(t);
             }
