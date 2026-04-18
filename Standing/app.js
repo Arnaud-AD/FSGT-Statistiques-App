@@ -619,6 +619,7 @@ function renderGinetteMatchCards(matches) {
         var awayDivLabel = DIV_LABELS_JS[m.awayDivision] || m.awayDivision;
         var homeWin = m.winner === m.home;
         var forfeit = m.forfeit;
+        var upcoming = m.upcoming === true || (m.winner == null && (m.homeSets == null || m.awaySets == null));
 
         var scoreDetail = '';
         if (m.homeScores && m.homeScores.length > 0 && !forfeit) {
@@ -631,6 +632,17 @@ function renderGinetteMatchCards(matches) {
 
         var cardClass = 'match-card ginette-match-card';
         if (forfeit) cardClass += ' ginette-match-forfeit';
+        if (upcoming) cardClass += ' ginette-match-upcoming';
+
+        var scoreHtml;
+        if (upcoming) {
+            scoreHtml = '<span class="ginette-vs">VS</span>';
+        } else {
+            scoreHtml =
+                '<span class="' + (homeWin ? 'winner' : 'loser') + '">' + m.homeSets + '</span>' +
+                '<span class="separator">-</span>' +
+                '<span class="' + (homeWin ? 'loser' : 'winner') + '">' + m.awaySets + '</span>';
+        }
 
         html += '<div class="' + cardClass + '">' +
             '<div class="match-teams">' +
@@ -638,11 +650,7 @@ function renderGinetteMatchCards(matches) {
                     '<span class="division-badge division-badge-sm" style="background: ' + homeColor + ';">' + homeDivLabel + '</span>' +
                     '<span class="team-name">' + m.home + '</span>' +
                 '</div>' +
-                '<div class="match-score">' +
-                    '<span class="' + (homeWin ? 'winner' : 'loser') + '">' + m.homeSets + '</span>' +
-                    '<span class="separator">-</span>' +
-                    '<span class="' + (homeWin ? 'loser' : 'winner') + '">' + m.awaySets + '</span>' +
-                '</div>' +
+                '<div class="match-score">' + scoreHtml + '</div>' +
                 '<div class="match-team away">' +
                     '<span class="team-name">' + m.away + '</span>' +
                     '<span class="division-badge division-badge-sm" style="background: ' + awayColor + ';">' + awayDivLabel + '</span>' +
@@ -650,6 +658,7 @@ function renderGinetteMatchCards(matches) {
             '</div>' +
             '<div class="ginette-match-detail">' + scoreDetail +
                 (forfeit ? '<span class="ginette-forfeit-badge">Forfait</span>' : '') +
+                (upcoming ? '<span class="ginette-upcoming-badge">À venir</span>' : '') +
             '</div>' +
         '</div>';
     });
@@ -668,6 +677,8 @@ function renderGinetteClassement() {
     var quartConsolante = matches.filter(function(m) { return m.round === '1/4 Consolante'; });
     var demiPrincipale = matches.filter(function(m) { return m.round === '1/2 Principale'; });
     var demiConsolante = matches.filter(function(m) { return m.round === '1/2 Consolante'; });
+    var finalePrincipale = matches.filter(function(m) { return m.round === 'Finale Principale'; });
+    var finaleConsolante = matches.filter(function(m) { return m.round === 'Finale Consolante'; });
 
     // Tour 1
     var tour1Container = document.getElementById('ginette-tour1');
@@ -775,6 +786,32 @@ function renderGinetteClassement() {
                 '</div>' +
                 '<div id="ginette-demi-consolante-matches" class="section-collapsible">' +
                     renderGinetteMatchCards(demiConsolante) +
+                '</div>' +
+            '</div>';
+    }
+
+    // Finale
+    var finaleContainer = document.getElementById('ginette-finale');
+    if (finaleContainer) {
+        finaleContainer.innerHTML =
+            '<div class="matches-section">' +
+                '<div class="section-header" onclick="toggleMatchSection(\'ginette-finale-principale-matches\')">' +
+                    '<h3 class="section-title">Principale</h3>' +
+                    '<span class="section-badge">' + finalePrincipale.length + ' match' + (finalePrincipale.length > 1 ? 's' : '') + '</span>' +
+                    '<span class="section-arrow">&#9660;</span>' +
+                '</div>' +
+                '<div id="ginette-finale-principale-matches" class="section-collapsible">' +
+                    renderGinetteMatchCards(finalePrincipale) +
+                '</div>' +
+            '</div>' +
+            '<div class="matches-section" style="margin-top: 16px;">' +
+                '<div class="section-header" onclick="toggleMatchSection(\'ginette-finale-consolante-matches\')">' +
+                    '<h3 class="section-title">Consolante</h3>' +
+                    '<span class="section-badge">' + finaleConsolante.length + ' match' + (finaleConsolante.length > 1 ? 's' : '') + '</span>' +
+                    '<span class="section-arrow">&#9660;</span>' +
+                '</div>' +
+                '<div id="ginette-finale-consolante-matches" class="section-collapsible">' +
+                    renderGinetteMatchCards(finaleConsolante) +
                 '</div>' +
             '</div>';
     }

@@ -15,7 +15,9 @@
       "1/4 Principale",
       "1/4 Consolante",
       "1/2 Principale",
-      "1/2 Consolante"
+      "1/2 Consolante",
+      "Finale Principale",
+      "Finale Consolante"
     ]
   },
   "ranking": [
@@ -4305,6 +4307,38 @@
       "forfeit": false,
       "deltaHome": -28.0,
       "deltaAway": 28.0
+    },
+    {
+      "round": "Finale Principale",
+      "home": "Jen et ses Saints",
+      "away": "Les Indécis",
+      "homeSets": null,
+      "awaySets": null,
+      "homeScores": [],
+      "awayScores": [],
+      "homeDivision": "elite",
+      "awayDivision": "hard",
+      "winner": null,
+      "forfeit": false,
+      "deltaHome": 0,
+      "deltaAway": 0,
+      "upcoming": true
+    },
+    {
+      "round": "Finale Consolante",
+      "home": "Padnom",
+      "away": "Nekutā",
+      "homeSets": null,
+      "awaySets": null,
+      "homeScores": [],
+      "awayScores": [],
+      "homeDivision": "hard",
+      "awayDivision": "easy",
+      "winner": null,
+      "forfeit": false,
+      "deltaHome": 0,
+      "deltaAway": 0,
+      "upcoming": true
     }
   ],
   "upsets": [
