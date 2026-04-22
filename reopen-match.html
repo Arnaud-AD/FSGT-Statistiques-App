@@ -115,6 +115,11 @@
                     byId.set(m.id, { ...m, _source: 'local' });
                 });
                 log(`  💾 localStorage : ${localMatches.length} match(s)`);
+                localMatches.forEach(m => {
+                    const sets = (m.sets || []).length;
+                    const comp = m.completedAt ? new Date(m.completedAt).toISOString() : '(aucun)';
+                    log(`     • ID=${m.id} | opp=${m.opponent || '?'} | status=${m.status || '?'} | sets=${sets} | completedAt=${comp} | endReason=${m.endReason || '-'}`);
+                });
             } catch (e) {
                 log(`  ⚠️ Erreur localStorage: ${e.message}`);
             }
@@ -160,7 +165,7 @@
                 el.innerHTML = '<p><small>Aucun match trouvé (ni Firebase ni localStorage).</small></p>';
                 return;
             }
-            el.innerHTML = allMatches.slice(0, 30).map(m => {
+            el.innerHTML = allMatches.map(m => {
                 const opp = escapeHtml(m.opponent || 'Adversaire');
                 const date = formatDate(m.completedAt || m.createdAt);
                 const sets = (m.sets || []).map((s, i) => {
