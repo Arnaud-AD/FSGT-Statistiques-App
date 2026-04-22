@@ -50,8 +50,8 @@
     <div id="authStatus" class="auth-status ko">⚠️ Non connecté</div>
 
     <h2>2. Sélection du match</h2>
-    <button onclick="loadMatches()">☁️ Charger les matchs depuis Firebase</button>
-    <p><small>Seuls les matchs <span class="badge completed">completed</span> sont listés (les plus récents en premier).</small></p>
+    <button onclick="loadMatches()">☁️ Charger depuis Firebase + localStorage</button>
+    <p><small>Tous les matchs sont listés (Firebase + localStorage), quel que soit leur statut. Source indiquée à droite de chaque match.</small></p>
     <div id="matchList"></div>
 
     <div id="preview"></div>
@@ -73,7 +73,7 @@
         function log(msg) { logEl.textContent += msg + '\n'; logEl.scrollTop = logEl.scrollHeight; }
         function escapeHtml(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-        let firebaseMatches = [];
+        let allMatches = []; // merged: { ...match, _source: 'firebase'|'local'|'both' }
         let selectedMatchId = null;
         let isAuthenticated = false;
 
@@ -103,26 +103,49 @@
 
         // ==================== LOAD MATCHES ====================
         async function loadMatches() {
-            log('☁️ Chargement des matchs depuis Firebase...');
+            logEl.textContent = '';
+            log('🔄 Chargement Firebase + localStorage...');
+            const byId = new Map();
+
+            // 1. localStorage
             try {
-                const snapshot = await db.collection('matches')
-                    .where('status', '==', 'completed')
-                    .get();
-                firebaseMatches = [];
-                snapshot.forEach(doc => {
-                    firebaseMatches.push(JSON.parse(JSON.stringify(doc.data())));
+                const raw = localStorage.getItem('volleyball_matches');
+                const localMatches = raw ? JSON.parse(raw) : [];
+                localMatches.forEach(m => {
+                    byId.set(m.id, { ...m, _source: 'local' });
                 });
-                // Tri par date décroissante (completedAt, sinon createdAt, sinon id)
-                firebaseMatches.sort((a, b) => {
-                    const ta = a.completedAt || a.createdAt || 0;
-                    const tb = b.completedAt || b.createdAt || 0;
-                    return tb - ta;
-                });
-                log(`✅ ${firebaseMatches.length} match(s) completed chargé(s)`);
-                renderMatchList();
+                log(`  💾 localStorage : ${localMatches.length} match(s)`);
             } catch (e) {
-                log(`❌ Erreur Firebase: ${e.message}`);
+                log(`  ⚠️ Erreur localStorage: ${e.message}`);
             }
+
+            // 2. Firebase (tous statuts, pas de filtre)
+            try {
+                const snapshot = await db.collection('matches').get();
+                let fbCount = 0;
+                snapshot.forEach(doc => {
+                    const data = JSON.parse(JSON.stringify(doc.data()));
+                    fbCount++;
+                    if (byId.has(data.id)) {
+                        byId.set(data.id, { ...data, _source: 'both' });
+                    } else {
+                        byId.set(data.id, { ...data, _source: 'firebase' });
+                    }
+                });
+                log(`  ☁️ Firebase : ${fbCount} match(s)`);
+            } catch (e) {
+                log(`  ⚠️ Erreur Firebase: ${e.message}`);
+            }
+
+            allMatches = Array.from(byId.values());
+            // Tri par date décroissante
+            allMatches.sort((a, b) => {
+                const ta = a.completedAt || a.createdAt || 0;
+                const tb = b.completedAt || b.createdAt || 0;
+                return tb - ta;
+            });
+            log(`✅ Total : ${allMatches.length} match(s) unique(s)`);
+            renderMatchList();
         }
 
         function formatDate(ts) {
@@ -133,11 +156,11 @@
 
         function renderMatchList() {
             const el = document.getElementById('matchList');
-            if (firebaseMatches.length === 0) {
-                el.innerHTML = '<p><small>Aucun match completed trouvé.</small></p>';
+            if (allMatches.length === 0) {
+                el.innerHTML = '<p><small>Aucun match trouvé (ni Firebase ni localStorage).</small></p>';
                 return;
             }
-            el.innerHTML = firebaseMatches.slice(0, 20).map(m => {
+            el.innerHTML = allMatches.slice(0, 30).map(m => {
                 const opp = escapeHtml(m.opponent || 'Adversaire');
                 const date = formatDate(m.completedAt || m.createdAt);
                 const sets = (m.sets || []).map((s, i) => {
@@ -147,9 +170,13 @@
                     return `S${i+1}: ${h}-${a} (${pts} pts)`;
                 }).join(' · ');
                 const endBadge = m.endReason === 'time' ? '<span class="badge time">fin du créneau</span>' : '';
+                const statusBadge = m.status ? `<span class="badge ${m.status}">${m.status}</span>` : '';
+                const srcLabel = m._source === 'both' ? '☁️💾 Firebase+local'
+                              : m._source === 'firebase' ? '☁️ Firebase'
+                              : '💾 localStorage seul';
                 return `<div class="match-card" data-match-id="${escapeHtml(m.id)}">
-                    <div class="opp">Jen vs ${opp}${endBadge}</div>
-                    <div class="meta">${date} · ${escapeHtml(m.location || '')} · ID: ${escapeHtml(m.id)}</div>
+                    <div class="opp">Jen vs ${opp}${statusBadge}${endBadge}</div>
+                    <div class="meta">${date} · ${escapeHtml(m.location || '')} · <span style="color:#fbbf24">${srcLabel}</span> · ID: ${escapeHtml(m.id)}</div>
                     <div class="sets">${sets}</div>
                 </div>`;
             }).join('');
@@ -169,7 +196,7 @@
 
         // ==================== PREVIEW ====================
         function renderPreview() {
-            const match = firebaseMatches.find(m => m.id === selectedMatchId);
+            const match = allMatches.find(m => m.id === selectedMatchId);
             if (!match) return;
             const preview = document.getElementById('preview');
             const sets = match.sets || [];
@@ -200,7 +227,7 @@
                 log('❌ Connecte-toi Google d\'abord !');
                 return;
             }
-            const match = firebaseMatches.find(m => m.id === selectedMatchId);
+            const match = allMatches.find(m => m.id === selectedMatchId);
             if (!match) { log('❌ Match non trouvé'); return; }
 
             logEl.textContent = '';
@@ -286,10 +313,11 @@
             log('\nVa sur index.html : la bannière "⚡ EN COURS" doit apparaître.');
             log('Clique "Reprendre" → tu arriveras sur la compo du set 2.');
 
-            // Refresh the match list (will now exclude the reopened match since status changed)
+            // Refresh the match list
             document.getElementById('btnApply').disabled = true;
             document.getElementById('preview').classList.remove('visible');
-            firebaseMatches = firebaseMatches.filter(m => m.id !== updated.id);
+            const idx = allMatches.findIndex(m => m.id === updated.id);
+            if (idx !== -1) allMatches[idx] = { ...updated, _source: 'both' };
             renderMatchList();
         }
     </script>
