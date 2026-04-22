@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com; img-src 'self' data: https://*.googleusercontent.com; frame-src https://accounts.google.com https://*.firebaseapp.com;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rouvrir un match clôturé</title>
+    <style>
+        body { font-family: 'Google Sans', Roboto, sans-serif; max-width: 900px; margin: 20px auto; padding: 0 15px; background: #1a1a2e; color: #e0e0e0; }
+        h1 { color: #4fc3f7; margin-bottom: 10px; }
+        h2 { color: #81d4fa; margin-top: 25px; font-size: 18px; }
+        p { line-height: 1.5; }
+        small { color: #9ca3af; }
+        button { background: #0056D2; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 14px; margin: 4px 4px 4px 0; font-weight: 600; }
+        button:hover:not(:disabled) { background: #0070f3; }
+        button.danger { background: #ea4335; }
+        button.danger:hover:not(:disabled) { background: #ff5a4e; }
+        button.success { background: #22c55e; }
+        button.success:hover:not(:disabled) { background: #36d972; }
+        button:disabled { background: #555; cursor: not-allowed; opacity: 0.6; }
+        .match-card { background: #16213e; border-radius: 8px; padding: 12px 14px; margin: 8px 0; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
+        .match-card:hover { background: #1e3a5f; }
+        .match-card.selected { border-color: #4fc3f7; background: #1e3a5f; }
+        .match-card .opp { font-weight: 600; font-size: 15px; color: #ffffff; }
+        .match-card .meta { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+        .match-card .sets { font-size: 12px; margin-top: 6px; color: #cbd5e1; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; margin-left: 6px; }
+        .badge.time { background: #78350f; color: #fbbf24; }
+        .badge.completed { background: #14532d; color: #86efac; }
+        .badge.in_progress { background: #1e3a8a; color: #93c5fd; }
+        #preview { background: #16213e; padding: 14px; border-radius: 8px; margin-top: 12px; display: none; }
+        #preview.visible { display: block; }
+        #preview h3 { color: #aed581; font-size: 14px; margin-bottom: 8px; }
+        #preview ul { margin-left: 18px; font-size: 13px; line-height: 1.6; }
+        #preview .highlight { color: #4fc3f7; font-weight: 600; }
+        #preview .warn { color: #fbbf24; }
+        #log { background: #0d1117; padding: 12px; border-radius: 6px; max-height: 300px; overflow-y: auto; font-size: 12px; font-family: monospace; white-space: pre-wrap; margin-top: 12px; line-height: 1.5; }
+        .auth-status { padding: 8px 12px; border-radius: 6px; font-size: 13px; margin: 8px 0; }
+        .auth-status.ok { background: rgba(34,197,94,0.15); color: #86efac; }
+        .auth-status.ko { background: rgba(234,67,53,0.15); color: #fca5a5; }
+    </style>
+</head>
+<body>
+    <h1>🔓 Rouvrir un match clôturé</h1>
+    <p>Remet un match en <span style="color:#93c5fd;font-weight:600">in_progress</span> et réinitialise le dernier set (supprimé s'il est vierge, sinon dé-finalisé). Le match réapparaît dans la bannière "EN COURS" sur <a href="index.html" style="color:#4fc3f7">index.html</a>.</p>
+
+    <h2>1. Connexion admin</h2>
+    <button id="btnAuth" onclick="doAuth()">🔑 Connexion Google</button>
+    <div id="authStatus" class="auth-status ko">⚠️ Non connecté</div>
+
+    <h2>2. Sélection du match</h2>
+    <button onclick="loadMatches()">☁️ Charger les matchs depuis Firebase</button>
+    <p><small>Seuls les matchs <span class="badge completed">completed</span> sont listés (les plus récents en premier).</small></p>
+    <div id="matchList"></div>
+
+    <div id="preview"></div>
+
+    <h2>3. Appliquer</h2>
+    <button id="btnApply" class="danger" onclick="applyReopen()" disabled>⚡ Rouvrir le match</button>
+    <p><small>Écrit dans Firebase <strong>et</strong> localStorage. Recharge <a href="index.html" style="color:#4fc3f7">index.html</a> après pour voir la bannière.</small></p>
+
+    <div id="log"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js" integrity="sha384-Qgqc/HETq5lqJnRDqWnV1AZGw3pgMYNUVaqLLN1W/55XuWK94epwbCQrOvdoh1Zo" crossorigin="anonymous"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        const logEl = document.getElementById('log');
+        function log(msg) { logEl.textContent += msg + '\n'; logEl.scrollTop = logEl.scrollHeight; }
+        function escapeHtml(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+        let firebaseMatches = [];
+        let selectedMatchId = null;
+        let isAuthenticated = false;
+
+        // ==================== AUTH ====================
+        async function doAuth() {
+            try {
+                log('🔑 Connexion Google...');
+                const provider = new firebase.auth.GoogleAuthProvider();
+                await auth.signInWithPopup(provider);
+            } catch (e) {
+                log(`❌ Erreur auth: ${e.message}`);
+            }
+        }
+
+        auth.onAuthStateChanged(user => {
+            const el = document.getElementById('authStatus');
+            if (user) {
+                isAuthenticated = true;
+                el.className = 'auth-status ok';
+                el.textContent = `✅ Connecté (${user.email})`;
+            } else {
+                isAuthenticated = false;
+                el.className = 'auth-status ko';
+                el.textContent = '⚠️ Non connecté';
+            }
+        });
+
+        // ==================== LOAD MATCHES ====================
+        async function loadMatches() {
+            log('☁️ Chargement des matchs depuis Firebase...');
+            try {
+                const snapshot = await db.collection('matches')
+                    .where('status', '==', 'completed')
+                    .get();
+                firebaseMatches = [];
+                snapshot.forEach(doc => {
+                    firebaseMatches.push(JSON.parse(JSON.stringify(doc.data())));
+                });
+                // Tri par date décroissante (completedAt, sinon createdAt, sinon id)
+                firebaseMatches.sort((a, b) => {
+                    const ta = a.completedAt || a.createdAt || 0;
+                    const tb = b.completedAt || b.createdAt || 0;
+                    return tb - ta;
+                });
+                log(`✅ ${firebaseMatches.length} match(s) completed chargé(s)`);
+                renderMatchList();
+            } catch (e) {
+                log(`❌ Erreur Firebase: ${e.message}`);
+            }
+        }
+
+        function formatDate(ts) {
+            if (!ts) return '?';
+            const d = new Date(ts);
+            return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function renderMatchList() {
+            const el = document.getElementById('matchList');
+            if (firebaseMatches.length === 0) {
+                el.innerHTML = '<p><small>Aucun match completed trouvé.</small></p>';
+                return;
+            }
+            el.innerHTML = firebaseMatches.slice(0, 20).map(m => {
+                const opp = escapeHtml(m.opponent || 'Adversaire');
+                const date = formatDate(m.completedAt || m.createdAt);
+                const sets = (m.sets || []).map((s, i) => {
+                    const h = s.finalHomeScore ?? s.homeScore ?? 0;
+                    const a = s.finalAwayScore ?? s.awayScore ?? 0;
+                    const pts = (s.points || []).length;
+                    return `S${i+1}: ${h}-${a} (${pts} pts)`;
+                }).join(' · ');
+                const endBadge = m.endReason === 'time' ? '<span class="badge time">fin du créneau</span>' : '';
+                return `<div class="match-card" data-match-id="${escapeHtml(m.id)}">
+                    <div class="opp">Jen vs ${opp}${endBadge}</div>
+                    <div class="meta">${date} · ${escapeHtml(m.location || '')} · ID: ${escapeHtml(m.id)}</div>
+                    <div class="sets">${sets}</div>
+                </div>`;
+            }).join('');
+            el.querySelectorAll('[data-match-id]').forEach(card => {
+                card.addEventListener('click', () => selectMatch(card.dataset.matchId));
+            });
+        }
+
+        function selectMatch(id) {
+            selectedMatchId = id;
+            document.querySelectorAll('.match-card').forEach(c => c.classList.remove('selected'));
+            const card = document.querySelector(`[data-match-id="${CSS.escape(id)}"]`);
+            if (card) card.classList.add('selected');
+            renderPreview();
+            document.getElementById('btnApply').disabled = false;
+        }
+
+        // ==================== PREVIEW ====================
+        function renderPreview() {
+            const match = firebaseMatches.find(m => m.id === selectedMatchId);
+            if (!match) return;
+            const preview = document.getElementById('preview');
+            const sets = match.sets || [];
+            const lastIdx = sets.length - 1;
+            const lastSet = sets[lastIdx];
+            const lastPts = (lastSet && lastSet.points) ? lastSet.points.length : 0;
+            const strategy = (lastPts === 0) ? 'delete' : 'unmark';
+            const target = (strategy === 'delete') ? 'match-set-composition.html' : 'match-live.html';
+
+            let html = `<h3>Aperçu des modifications</h3>`;
+            html += `<p><strong>Match :</strong> Jen vs ${escapeHtml(match.opponent || '?')} — ${sets.length} set(s) enregistré(s)</p>`;
+            html += `<ul>`;
+            html += `<li>Top-level : <span class="highlight">status → "in_progress"</span> ; suppression de <code>completedAt</code>, <code>endReason</code>, <code>setsWon</code>, <code>setsLost</code>, <code>result</code>.</li>`;
+            if (strategy === 'delete') {
+                html += `<li>Set ${lastIdx + 1} (0 points joués) : <span class="warn">SUPPRIMÉ entièrement</span> → reprise à <code>${target}</code> (refaire compo + config).</li>`;
+            } else {
+                html += `<li>Set ${lastIdx + 1} (${lastPts} points joués) : <span class="warn">dé-finalisé</span> (on conserve les points). Suppression de <code>completed</code>, <code>finalHomeScore</code>, <code>finalAwayScore</code>, <code>winner</code>, <code>statsHomeScore</code>, <code>statsAwayScore</code>, <code>endReason</code> → reprise à <code>${target}</code>.</li>`;
+            }
+            html += `<li>Sets précédents (1 à ${lastIdx}) : <strong>inchangés</strong> — stats préservées.</li>`;
+            html += `</ul>`;
+            preview.innerHTML = html;
+            preview.classList.add('visible');
+        }
+
+        // ==================== APPLY ====================
+        async function applyReopen() {
+            if (!isAuthenticated) {
+                log('❌ Connecte-toi Google d\'abord !');
+                return;
+            }
+            const match = firebaseMatches.find(m => m.id === selectedMatchId);
+            if (!match) { log('❌ Match non trouvé'); return; }
+
+            logEl.textContent = '';
+            log(`=== RÉOUVERTURE: Jen vs ${match.opponent} (${match.id}) ===`);
+
+            // Deep clone pour ne pas muter l'original
+            const updated = JSON.parse(JSON.stringify(match));
+
+            // 1. Top-level reset
+            updated.status = 'in_progress';
+            delete updated.completedAt;
+            delete updated.endReason;
+            delete updated.setsWon;
+            delete updated.setsLost;
+            delete updated.result;
+            log('  ✅ status → in_progress, champs completedAt/endReason/setsWon/setsLost/result supprimés');
+
+            // 2. Last set handling
+            const sets = updated.sets || [];
+            if (sets.length === 0) {
+                log('❌ Aucun set dans ce match — rien à réouvrir');
+                return;
+            }
+            const lastIdx = sets.length - 1;
+            const lastSet = sets[lastIdx];
+            const lastPts = (lastSet.points || []).length;
+
+            if (lastPts === 0) {
+                sets.splice(lastIdx, 1);
+                log(`  ✅ Set ${lastIdx + 1} supprimé (0 points joués)`);
+            } else {
+                delete lastSet.completed;
+                delete lastSet.finalHomeScore;
+                delete lastSet.finalAwayScore;
+                delete lastSet.winner;
+                delete lastSet.statsHomeScore;
+                delete lastSet.statsAwayScore;
+                delete lastSet.endReason;
+                log(`  ✅ Set ${lastIdx + 1} dé-finalisé (${lastPts} points conservés)`);
+            }
+
+            // 3. Write to Firebase
+            try {
+                log('\n☁️ Écriture Firebase...');
+                await db.collection('matches').doc(updated.id).set(updated);
+                log('  ✅ Match mis à jour dans Firestore');
+            } catch (e) {
+                log(`  ❌ Erreur Firebase: ${e.message}`);
+                return;
+            }
+
+            // 4. Update localStorage to make banner appear immediately
+            try {
+                const KEY_MATCHES = 'volleyball_matches';
+                const KEY_CURRENT = 'volleyball_current_match_id';
+                let localMatches = [];
+                try { localMatches = JSON.parse(localStorage.getItem(KEY_MATCHES) || '[]'); } catch(e) { localMatches = []; }
+                const idx = localMatches.findIndex(m => m.id === updated.id);
+                if (idx !== -1) {
+                    localMatches[idx] = updated;
+                } else {
+                    localMatches.push(updated);
+                }
+                localStorage.setItem(KEY_MATCHES, JSON.stringify(localMatches));
+                localStorage.setItem(KEY_CURRENT, updated.id);
+                log('  ✅ localStorage mis à jour (volleyball_matches + volleyball_current_match_id)');
+            } catch (e) {
+                log(`  ⚠️ Erreur localStorage: ${e.message} (Firebase OK — le match sera rechargé au prochain pullAll)`);
+            }
+
+            // 5. Sync Firebase currentMatchId aussi
+            try {
+                await db.collection('config').doc('state').set({
+                    currentMatchId: updated.id,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                log('  ✅ currentMatchId synchronisé dans Firebase');
+            } catch (e) {
+                log(`  ⚠️ Erreur sync currentMatchId: ${e.message}`);
+            }
+
+            log('\n=== ✅ TERMINÉ ===');
+            log('\nVa sur index.html : la bannière "⚡ EN COURS" doit apparaître.');
+            log('Clique "Reprendre" → tu arriveras sur la compo du set 2.');
+
+            // Refresh the match list (will now exclude the reopened match since status changed)
+            document.getElementById('btnApply').disabled = true;
+            document.getElementById('preview').classList.remove('visible');
+            firebaseMatches = firebaseMatches.filter(m => m.id !== updated.id);
+            renderMatchList();
+        }
+    </script>
+</body>
+</html>
