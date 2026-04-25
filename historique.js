@@ -1855,13 +1855,6 @@ const PassAttackAnalyzer = {
             return s.contextType === 'reception' && s.attacker
                 && s.contextRole && s.contextRole !== 'Passeur' && s.contextRole !== 'Centre';
         });
-        // DEBUG: vérifier les valeurs de contextQuality
-        var qualCounts = { null_: 0, q0: 0, q1: 0, q2: 0, q3: 0, q4: 0 };
-        allRecSeqs.forEach(function(s) {
-            if (s.contextQuality === null || s.contextQuality === undefined) qualCounts.null_++;
-            else qualCounts['q' + s.contextQuality]++;
-        });
-        console.log('[RecAtt] contextQuality distribution:', JSON.stringify(qualCounts), 'total:', allRecSeqs.length);
         var recSeqs = allRecSeqs.filter(function(s) {
             return s.contextQuality !== null && s.contextQuality >= 3;
         });
