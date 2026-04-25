@@ -3,7 +3,7 @@
 <head>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com; img-src 'self' data: https://*.googleusercontent.com; frame-src https://accounts.google.com https://*.firebaseapp.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://www.gstatic.com; img-src 'self' data: https://*.googleusercontent.com; frame-src https://accounts.google.com https://*.firebaseapp.com;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nouveau Match - Jen et ses Saints</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
@@ -735,8 +735,8 @@
                     <div class="match-status">Set ${setNum} • Sets : <span class="set-score">${sc.homeWins}-${sc.awayWins}</span>${live}</div>
                 </div>
                 <div class="match-actions">
-                    <button class="match-action-btn resume" data-resume-id="${m.matchId}">Reprendre</button>
-                    <button class="match-action-btn delete" data-delete-id="${m.matchId}" title="Supprimer">
+                    <button class="match-action-btn resume" data-resume-id="${escapeHtml(m.matchId)}">Reprendre</button>
+                    <button class="match-action-btn delete" data-delete-id="${escapeHtml(m.matchId)}" title="Supprimer">
                         <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
                     </button>
                 </div>
@@ -769,10 +769,10 @@
                     ${detail ? `<div class="match-sets-detail">${detail}</div>` : ''}
                 </div>
                 <div class="match-actions">
-                    <button class="match-action-btn delete" data-delete-completed-id="${m.matchId}" data-opponent="${escapeHtml(m.opponent)}" data-sets-won="${m.stored.setsWon||0}" data-sets-lost="${m.stored.setsLost||0}" title="Supprimer et rejouer">
+                    <button class="match-action-btn delete" data-delete-completed-id="${escapeHtml(m.matchId)}" data-opponent="${escapeHtml(m.opponent)}" data-sets-won="${m.stored.setsWon||0}" data-sets-lost="${m.stored.setsLost||0}" title="Supprimer et rejouer">
                         <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
                     </button>
-                    <button class="match-action-btn menu" data-menu-id="${m.matchId}" data-menu-status="completed">⋮</button>
+                    <button class="match-action-btn menu" data-menu-id="${escapeHtml(m.matchId)}" data-menu-status="completed">⋮</button>
                 </div>
             </div>`;
         }

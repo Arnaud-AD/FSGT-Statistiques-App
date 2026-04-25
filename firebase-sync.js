@@ -550,3 +550,74 @@ const FirebaseAuthUI = {
         }
     }
 };
+
+// ============================================================
+// SyncToast : feedback utilisateur sur les erreurs de sync cloud
+// Notification non-bloquante (les données restent en local).
+// ============================================================
+window.SyncToast = {
+    _styleInjected: false,
+    _injectStyle() {
+        if (this._styleInjected) return;
+        const style = document.createElement('style');
+        style.textContent = `
+            #sync-toast-container {
+                position: fixed; top: 16px; right: 16px;
+                z-index: 9999; pointer-events: none;
+                display: flex; flex-direction: column; gap: 8px;
+                font-family: 'Roboto', 'Google Sans', sans-serif;
+            }
+            .sync-toast {
+                background: #fef3c7; color: #78350f;
+                border-left: 4px solid #d97706;
+                padding: 12px 16px; border-radius: 6px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                font-size: 14px; line-height: 1.4; max-width: 360px;
+                opacity: 0; transform: translateX(20px);
+                transition: opacity .25s ease, transform .25s ease;
+                pointer-events: auto; cursor: pointer;
+            }
+            .sync-toast.visible { opacity: 1; transform: translateX(0); }
+            .sync-toast.error { background: #fee2e2; color: #991b1b; border-left-color: #dc2626; }
+        `;
+        document.head.appendChild(style);
+        this._styleInjected = true;
+    },
+    _ensureContainer() {
+        let c = document.getElementById('sync-toast-container');
+        if (!c) {
+            c = document.createElement('div');
+            c.id = 'sync-toast-container';
+            document.body.appendChild(c);
+        }
+        return c;
+    },
+    show(message, type) {
+        try {
+            if (typeof document === 'undefined' || !document.body) return;
+            this._injectStyle();
+            const container = this._ensureContainer();
+            const toast = document.createElement('div');
+            toast.className = 'sync-toast' + (type === 'error' ? ' error' : '');
+            toast.textContent = message;
+            toast.addEventListener('click', () => toast.remove());
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.add('visible'));
+            setTimeout(() => {
+                toast.classList.remove('visible');
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        } catch (e) {
+            console.error('[SyncToast] échec affichage toast', e);
+        }
+    },
+    // Préfabriqués : message uniforme pour les erreurs Firebase courantes
+    syncFailed(operation) {
+        const messages = {
+            saveMatch:  'Match sauvegardé localement — sync cloud échouée. Réessayez en ligne.',
+            deleteMatch:'Suppression locale OK — sync cloud échouée. Réessayez en ligne.',
+            saveRoster: 'Roster sauvegardé localement — sync cloud échouée. Réessayez en ligne.'
+        };
+        this.show(messages[operation] || 'Sync cloud échouée — données conservées en local.', 'warn');
+    }
+};

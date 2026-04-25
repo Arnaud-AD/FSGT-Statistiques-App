@@ -3,7 +3,7 @@
 <head>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://api.ipify.org; img-src 'self' data: https://*.googleusercontent.com; frame-src https://accounts.google.com https://*.firebaseapp.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://api.ipify.org https://www.gstatic.com; img-src 'self' data: https://*.googleusercontent.com; frame-src https://accounts.google.com https://*.firebaseapp.com;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jen et ses Saints - Stats Volleyball</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
@@ -753,15 +753,16 @@
                 const locLabel = location === 'domicile' ? 'Domicile' : (location === 'extérieur' ? 'Extérieur' : '');
                 const locHtml = locLabel ? `<span class="location-badge ${locClass}">${locLabel}</span>` : '';
 
-                return `<div class="resume-banner visible" data-match-id="${match.id}">
+                const safeId = escapeHtml(match.id);
+                return `<div class="resume-banner visible" data-match-id="${safeId}">
                     <div class="resume-content">
                         <div class="resume-opponent">${opponent}</div>
                         <div class="resume-location">${locHtml}</div>
                         <div class="resume-status">Set ${setNum} • Sets : <span class="set-score">${setScore.homeWins}-${setScore.awayWins}</span>${live}</div>
                     </div>
                     <div class="resume-actions">
-                        <button class="resume-action-btn resume" data-resume-id="${match.id}">Reprendre</button>
-                        <button class="resume-action-btn delete" data-delete-id="${match.id}" title="Supprimer">
+                        <button class="resume-action-btn resume" data-resume-id="${safeId}">Reprendre</button>
+                        <button class="resume-action-btn delete" data-delete-id="${safeId}" title="Supprimer">
                             <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
                         </button>
                     </div>

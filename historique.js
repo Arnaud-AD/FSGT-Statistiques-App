@@ -877,7 +877,7 @@ const StatsRepair = {
                             } else {
                                 if (action.defenseQuality === 'positive') stats.defense.defplus++;
                                 else if (action.defenseQuality === 'negative') stats.defense.defneutral++;
-                                else stats.defense.defplus++;
+                                else stats.defense.defneutral++;
                             }
                         }
                     }
