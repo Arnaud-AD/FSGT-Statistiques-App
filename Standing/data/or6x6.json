@@ -5,10 +5,10 @@
     "name": "Or 6x6",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/4",
-    "lastUpdated": "2026-04-17T20:13:27",
+    "lastUpdated": "2026-04-30T00:41:22",
     "teamCount": 10,
-    "matchesPlayed": 66,
-    "matchesUpcoming": 24
+    "matchesPlayed": 67,
+    "matchesUpcoming": 23
   },
   "teams": {
     "cout": {
@@ -21,14 +21,14 @@
       "short": "M6",
       "color": "#3498db"
     },
-    "raia": {
-      "name": "La Raïa",
-      "short": "RA",
-      "color": "#2ecc71"
-    },
     "neui": {
       "name": "Neuilly Sa Mère",
       "short": "NS",
+      "color": "#2ecc71"
+    },
+    "raia": {
+      "name": "La Raïa",
+      "short": "RA",
       "color": "#f39c12"
     },
     "no": {
@@ -180,18 +180,18 @@
     {
       "rank": 4,
       "team": "neui",
-      "mj": 13,
-      "g": 8,
+      "mj": 14,
+      "g": 9,
       "p": 5,
-      "setPlus": 26,
-      "setMinus": 21,
+      "setPlus": 28,
+      "setMinus": 23,
       "ds": 5,
-      "coefSet": "1.24",
-      "ptsPlus": 1036,
-      "ptsMinus": 994,
-      "dp": "+42",
+      "coefSet": "1.22",
+      "ptsPlus": 1131,
+      "ptsMinus": 1086,
+      "dp": "+45",
       "coefPts": "1.04",
-      "pts": 21,
+      "pts": 23,
       "formAller": [
         "W",
         "W",
@@ -209,7 +209,7 @@
         "L",
         "W",
         "L",
-        "D",
+        "W",
         "P",
         "P",
         "P"
@@ -248,51 +248,13 @@
         "D",
         "W",
         "L",
-        "P",
+        "D",
         "P",
         "P"
       ]
     },
     {
       "rank": 6,
-      "team": "ivry",
-      "mj": 12,
-      "g": 5,
-      "p": 7,
-      "setPlus": 19,
-      "setMinus": 22,
-      "ds": -3,
-      "coefSet": "0.86",
-      "ptsPlus": 873,
-      "ptsMinus": 901,
-      "dp": "-28",
-      "coefPts": "0.97",
-      "pts": 17,
-      "formAller": [
-        "W",
-        "W",
-        "L",
-        "L",
-        "L",
-        "L",
-        "L",
-        "W",
-        "D"
-      ],
-      "formRetour": [
-        "D",
-        "W",
-        "L",
-        "W",
-        "L",
-        "D",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 7,
       "team": "cret",
       "mj": 14,
       "g": 6,
@@ -324,6 +286,44 @@
         "L",
         "L",
         "W",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 7,
+      "team": "ivry",
+      "mj": 13,
+      "g": 5,
+      "p": 8,
+      "setPlus": 21,
+      "setMinus": 24,
+      "ds": -3,
+      "coefSet": "0.88",
+      "ptsPlus": 965,
+      "ptsMinus": 996,
+      "dp": "-31",
+      "coefPts": "0.97",
+      "pts": 18,
+      "formAller": [
+        "W",
+        "W",
+        "L",
+        "L",
+        "L",
+        "L",
+        "L",
+        "W",
+        "D"
+      ],
+      "formRetour": [
+        "D",
+        "W",
+        "L",
+        "W",
+        "L",
+        "L",
         "P",
         "P",
         "P"
@@ -400,7 +400,7 @@
         "L",
         "W",
         "L",
-        "P",
+        "D",
         "P",
         "P"
       ]
@@ -445,6 +445,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "20/04/2026",
+      "home": "ivry",
+      "away": "neui",
+      "scoreHome": 2,
+      "scoreAway": 2,
+      "homeWin": false,
+      "status": "Neuilly pts"
+    },
     {
       "date": "16/04/2026",
       "home": "marv",
@@ -564,20 +573,20 @@
     },
     {
       "date": "23/03/2026",
-      "home": "raia",
-      "away": "cret",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "23/03/2026",
       "home": "vill",
       "away": "neui",
       "scoreHome": 1,
       "scoreAway": 3,
       "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "23/03/2026",
+      "home": "raia",
+      "away": "cret",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
       "status": "Terminé"
     },
     {
@@ -1042,12 +1051,6 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "20/04/2026",
-      "home": "ivry",
-      "away": "neui",
-      "status": "Reporté"
-    },
-    {
       "date": "04/05/2026",
       "home": "raia",
       "away": "marv",
@@ -1069,12 +1072,6 @@
       "date": "07/05/2026",
       "home": "neui",
       "away": "cout",
-      "status": "Sem. 16"
-    },
-    {
-      "date": "08/05/2026",
-      "home": "no",
-      "away": "vill",
       "status": "Sem. 16"
     },
     {
@@ -1174,6 +1171,12 @@
       "status": "Sem. 18"
     },
     {
+      "date": "05/06/2026",
+      "home": "no",
+      "away": "vill",
+      "status": "Reporté"
+    },
+    {
       "date": "08/06/2026",
       "home": "vill",
       "away": "raia",
@@ -1230,12 +1233,12 @@
     {
       "rank": 5,
       "team": "neui",
-      "elo": 1492.6,
-      "movement": -30.7,
-      "record": "8-5",
-      "power": 48.8,
-      "calendar": "D vs La",
-      "diffClass": "diff-hard"
+      "elo": 1512.9,
+      "movement": 20.4,
+      "record": "9-5",
+      "power": 52.2,
+      "calendar": "V vs Ivry",
+      "diffClass": "diff-easy"
     },
     {
       "rank": 6,
@@ -1250,11 +1253,11 @@
     {
       "rank": 7,
       "team": "ivry",
-      "elo": 1467.1,
-      "movement": -20.1,
-      "record": "5-7",
-      "power": 44.5,
-      "calendar": "D vs No",
+      "elo": 1446.7,
+      "movement": -20.4,
+      "record": "5-8",
+      "power": 41.1,
+      "calendar": "D x3",
       "diffClass": "diff-hard"
     },
     {
@@ -1323,21 +1326,6 @@
       1635.0,
       1602.8
     ],
-    "raia": [
-      1500,
-      1478.3,
-      1499.1,
-      1522.6,
-      1560.5,
-      1575.4,
-      1590.5,
-      1562.7,
-      1528.5,
-      1561.4,
-      1592.1,
-      1601.7,
-      1633.9
-    ],
     "neui": [
       1500,
       1534.9,
@@ -1352,7 +1340,23 @@
       1525.6,
       1503.0,
       1523.3,
-      1492.6
+      1492.6,
+      1512.9
+    ],
+    "raia": [
+      1500,
+      1478.3,
+      1499.1,
+      1522.6,
+      1560.5,
+      1575.4,
+      1590.5,
+      1562.7,
+      1528.5,
+      1561.4,
+      1592.1,
+      1601.7,
+      1633.9
     ],
     "no": [
       1500,
@@ -1417,7 +1421,8 @@
       1465.5,
       1498.0,
       1487.2,
-      1467.1
+      1467.1,
+      1446.7
     ],
     "vlan": [
       1500,
@@ -1494,6 +1499,26 @@
         ],
         "rank": 2
       },
+      "neui": {
+        "points": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          9,
+          11,
+          13,
+          14,
+          16,
+          17,
+          18,
+          20,
+          21,
+          23
+        ],
+        "rank": 4
+      },
       "raia": {
         "points": [
           0,
@@ -1511,25 +1536,6 @@
           21
         ],
         "rank": 3
-      },
-      "neui": {
-        "points": [
-          0,
-          2,
-          4,
-          6,
-          8,
-          9,
-          11,
-          13,
-          14,
-          16,
-          17,
-          18,
-          20,
-          21
-        ],
-        "rank": 4
       },
       "no": {
         "points": [
@@ -1568,7 +1574,7 @@
           18,
           20
         ],
-        "rank": 7
+        "rank": 6
       },
       "mous": {
         "points": [
@@ -1604,9 +1610,10 @@
           13,
           15,
           16,
-          17
+          17,
+          18
         ],
-        "rank": 6
+        "rank": 7
       },
       "vlan": {
         "points": [

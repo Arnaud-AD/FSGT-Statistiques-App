@@ -3,7 +3,7 @@
     "slug": "ginette",
     "name": "Coupe Ginette",
     "format": "coupe",
-    "lastUpdated": "2026-04-17T20:13:27",
+    "lastUpdated": "2026-04-30T00:41:22",
     "teamCount": 58,
     "matchCount": 86,
     "forfeitCount": 10,
@@ -1781,36 +1781,6 @@
     },
     {
       "rank": 47,
-      "name": "Bachateam",
-      "division": "Starter",
-      "divSlug": "starter",
-      "elo": 1390,
-      "delta": -10,
-      "record": "0-2",
-      "wins": 0,
-      "losses": 2,
-      "power": 39.0,
-      "form": [
-        "L",
-        "L"
-      ],
-      "matches": [
-        {
-          "opponent": "Les punchers",
-          "result": "L",
-          "score": "0-3",
-          "delta": -5
-        },
-        {
-          "opponent": "Smashmallow",
-          "result": "L",
-          "score": "0-3",
-          "delta": -5
-        }
-      ]
-    },
-    {
-      "rank": 48,
       "name": "Daïquibri",
       "division": "Starter",
       "divSlug": "starter",
@@ -1833,6 +1803,36 @@
         },
         {
           "opponent": "Gold Digger",
+          "result": "L",
+          "score": "0-3",
+          "delta": -5
+        }
+      ]
+    },
+    {
+      "rank": 48,
+      "name": "Bachateam",
+      "division": "Starter",
+      "divSlug": "starter",
+      "elo": 1390,
+      "delta": -10,
+      "record": "0-2",
+      "wins": 0,
+      "losses": 2,
+      "power": 39.0,
+      "form": [
+        "L",
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Les punchers",
+          "result": "L",
+          "score": "0-3",
+          "delta": -5
+        },
+        {
+          "opponent": "Smashmallow",
           "result": "L",
           "score": "0-3",
           "delta": -5
@@ -4322,23 +4322,33 @@
       "forfeit": false,
       "deltaHome": 0,
       "deltaAway": 0,
-      "upcoming": true
+      "upcoming": true,
+      "date": "19/06/2026",
+      "time": "20:30",
+      "venue": "Gymnase Delaune",
+      "address": "38 Rue Paul Doumer, 91260 Juvisy-sur-Orge",
+      "notes": "Entrée à côté de l'église, début du match 21h"
     },
     {
       "round": "Finale Consolante",
-      "home": "Padnom",
-      "away": "Nekutā",
+      "home": "Nekutā",
+      "away": "Padnom",
       "homeSets": null,
       "awaySets": null,
       "homeScores": [],
       "awayScores": [],
-      "homeDivision": "hard",
-      "awayDivision": "easy",
+      "homeDivision": "easy",
+      "awayDivision": "hard",
       "winner": null,
       "forfeit": false,
       "deltaHome": 0,
       "deltaAway": 0,
-      "upcoming": true
+      "upcoming": true,
+      "date": "19/06/2026",
+      "time": "20:30",
+      "venue": "Gymnase Delaune",
+      "address": "38 Rue Paul Doumer, 91260 Juvisy-sur-Orge",
+      "notes": "Entrée à côté de l'église, début du match 21h"
     }
   ],
   "upsets": [

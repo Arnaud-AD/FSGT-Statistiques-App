@@ -644,6 +644,21 @@ function renderGinetteMatchCards(matches) {
                 '<span class="' + (homeWin ? 'loser' : 'winner') + '">' + m.awaySets + '</span>';
         }
 
+        // Infos date/lieu pour les matchs à venir
+        var venueHtml = '';
+        if (upcoming && (m.date || m.venue)) {
+            var dateLine = '';
+            if (m.date) {
+                dateLine = '<span class="ginette-finale-date">📅 ' + m.date + (m.time ? ' à ' + m.time : '') + '</span>';
+            }
+            var venueLine = '';
+            if (m.venue) {
+                venueLine = '<span class="ginette-finale-venue">📍 ' + m.venue + (m.address ? ' — ' + m.address : '') + '</span>';
+            }
+            var notesLine = m.notes ? '<span class="ginette-finale-notes">' + m.notes + '</span>' : '';
+            venueHtml = '<div class="ginette-finale-info">' + dateLine + venueLine + notesLine + '</div>';
+        }
+
         html += '<div class="' + cardClass + '">' +
             '<div class="match-teams">' +
                 '<div class="match-team home">' +
@@ -660,6 +675,7 @@ function renderGinetteMatchCards(matches) {
                 (forfeit ? '<span class="ginette-forfeit-badge">Forfait</span>' : '') +
                 (upcoming ? '<span class="ginette-upcoming-badge">À venir</span>' : '') +
             '</div>' +
+            venueHtml +
         '</div>';
     });
     return html;
