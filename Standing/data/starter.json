@@ -5,7 +5,7 @@
     "name": "Starter",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/16",
-    "lastUpdated": "2026-04-30T00:41:21",
+    "lastUpdated": "2026-05-04T16:19:43",
     "teamCount": 8,
     "matchesPlayed": 45,
     "matchesUpcoming": 11
@@ -83,7 +83,7 @@
         "W",
         "D",
         "D",
-        "P",
+        "D",
         "P"
       ]
     },
@@ -118,7 +118,7 @@
         "W",
         "D",
         "D",
-        "P"
+        "D"
       ]
     },
     {
@@ -186,7 +186,7 @@
         "L",
         "W",
         "L",
-        "P"
+        "D"
       ]
     },
     {
@@ -220,7 +220,7 @@
         "L",
         "W",
         "D",
-        "P"
+        "D"
       ]
     },
     {
@@ -253,7 +253,7 @@
         "L",
         "D",
         "D",
-        "P",
+        "D",
         "P"
       ]
     },
@@ -322,7 +322,7 @@
         "L",
         "L",
         "D",
-        "P"
+        "D"
       ]
     }
   ],
@@ -774,19 +774,19 @@
       "date": "04/05/2026",
       "home": "caip",
       "away": "bach",
-      "status": "Sem. 14"
+      "status": "Reporté"
     },
     {
       "date": "04/05/2026",
       "home": "gvc",
       "away": "gail",
-      "status": "Sem. 14"
+      "status": "Reporté"
     },
     {
       "date": "04/05/2026",
       "home": "daiq",
       "away": "bler",
-      "status": "Sem. 14"
+      "status": "Reporté"
     },
     {
       "date": "06/05/2026",

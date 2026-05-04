@@ -5,7 +5,7 @@
     "name": "Or 6x6",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/4",
-    "lastUpdated": "2026-04-30T00:41:22",
+    "lastUpdated": "2026-05-04T16:19:44",
     "teamCount": 10,
     "matchesPlayed": 67,
     "matchesUpcoming": 23
@@ -134,7 +134,7 @@
         "L",
         "W",
         "W",
-        "P",
+        "D",
         "P",
         "P"
       ]
@@ -172,7 +172,7 @@
         "W",
         "W",
         "W",
-        "P",
+        "D",
         "P",
         "P"
       ]
@@ -324,7 +324,7 @@
         "W",
         "L",
         "L",
-        "P",
+        "D",
         "P",
         "P"
       ]
@@ -362,7 +362,7 @@
         "D",
         "L",
         "L",
-        "P",
+        "D",
         "P",
         "P"
       ]
@@ -1054,13 +1054,13 @@
       "date": "04/05/2026",
       "home": "raia",
       "away": "marv",
-      "status": "Sem. 16"
+      "status": "Reporté"
     },
     {
       "date": "04/05/2026",
       "home": "mous",
       "away": "ivry",
-      "status": "Sem. 16"
+      "status": "Reporté"
     },
     {
       "date": "06/05/2026",
