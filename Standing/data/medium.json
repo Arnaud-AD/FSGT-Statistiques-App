@@ -5,10 +5,10 @@
     "name": "Medium",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/15",
-    "lastUpdated": "2026-05-04T16:19:41",
+    "lastUpdated": "2026-05-05T09:22:08",
     "teamCount": 9,
-    "matchesPlayed": 53,
-    "matchesUpcoming": 19
+    "matchesPlayed": 54,
+    "matchesUpcoming": 18
   },
   "teams": {
     "coch": {
@@ -16,19 +16,19 @@
       "short": "CO",
       "color": "#e74c3c"
     },
+    "olym": {
+      "name": "Olympe BB volley",
+      "short": "OB",
+      "color": "#3498db"
+    },
     "gint": {
       "name": "Ginto",
       "short": "GI",
-      "color": "#3498db"
+      "color": "#2ecc71"
     },
     "boit": {
       "name": "Boîte de 4",
       "short": "B4",
-      "color": "#2ecc71"
-    },
-    "olym": {
-      "name": "Olympe BB volley",
-      "short": "OB",
       "color": "#f39c12"
     },
     "mort": {
@@ -97,18 +97,18 @@
     {
       "rank": 2,
       "team": "olym",
-      "mj": 10,
-      "g": 8,
+      "mj": 11,
+      "g": 9,
       "p": 2,
-      "setPlus": 26,
+      "setPlus": 29,
       "setMinus": 13,
-      "ds": 13,
-      "coefSet": "2.00",
-      "ptsPlus": 888,
-      "ptsMinus": 800,
-      "dp": "+88",
-      "coefPts": "1.11",
-      "pts": 18,
+      "ds": 16,
+      "coefSet": "2.23",
+      "ptsPlus": 965,
+      "ptsMinus": 862,
+      "dp": "+103",
+      "coefPts": "1.12",
+      "pts": 20,
       "formAller": [
         "W",
         "L",
@@ -125,49 +125,13 @@
         "W",
         "W",
         "D",
-        "D",
+        "W",
         "P",
         "P"
       ]
     },
     {
       "rank": 3,
-      "team": "mort",
-      "mj": 11,
-      "g": 6,
-      "p": 5,
-      "setPlus": 21,
-      "setMinus": 20,
-      "ds": 1,
-      "coefSet": "1.05",
-      "ptsPlus": 870,
-      "ptsMinus": 865,
-      "dp": "+5",
-      "coefPts": "1.01",
-      "pts": 17,
-      "formAller": [
-        "L",
-        "W",
-        "L",
-        "W",
-        "L",
-        "D",
-        "W",
-        "L"
-      ],
-      "formRetour": [
-        "W",
-        "D",
-        "W",
-        "W",
-        "L",
-        "D",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 4,
       "team": "gint",
       "mj": 13,
       "g": 7,
@@ -184,8 +148,8 @@
       "formAller": [
         "L",
         "W",
-        "W",
         "L",
+        "W",
         "W",
         "L",
         "W",
@@ -198,6 +162,42 @@
         "L",
         "L",
         "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 4,
+      "team": "mort",
+      "mj": 12,
+      "g": 6,
+      "p": 6,
+      "setPlus": 21,
+      "setMinus": 23,
+      "ds": -2,
+      "coefSet": "0.91",
+      "ptsPlus": 932,
+      "ptsMinus": 942,
+      "dp": "-10",
+      "coefPts": "0.99",
+      "pts": 18,
+      "formAller": [
+        "L",
+        "W",
+        "L",
+        "W",
+        "L",
+        "D",
+        "W",
+        "L"
+      ],
+      "formRetour": [
+        "W",
+        "D",
+        "W",
+        "W",
+        "L",
+        "L",
         "P",
         "P"
       ]
@@ -269,7 +269,7 @@
         "L",
         "W",
         "W",
-        "P",
+        "D",
         "P",
         "P"
       ]
@@ -377,13 +377,22 @@
         "L",
         "L",
         "D",
-        "P",
+        "D",
         "P",
         "P"
       ]
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "04/05/2026",
+      "home": "olym",
+      "away": "mort",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "14/04/2026",
       "home": "boit",
@@ -638,20 +647,20 @@
     },
     {
       "date": "12/01/2026",
-      "home": "ryoi",
-      "away": "gint",
-      "scoreHome": 1,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "12/01/2026",
       "home": "olym",
       "away": "boit",
       "scoreHome": 3,
       "scoreAway": 2,
       "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "12/01/2026",
+      "home": "ryoi",
+      "away": "gint",
+      "scoreHome": 1,
+      "scoreAway": 3,
+      "homeWin": false,
       "status": "Terminé"
     },
     {
@@ -773,19 +782,19 @@
     },
     {
       "date": "17/11/2025",
-      "home": "gint",
-      "away": "mort",
+      "home": "olym",
+      "away": "rhum",
       "scoreHome": 3,
-      "scoreAway": 1,
+      "scoreAway": 0,
       "homeWin": true,
       "status": "Terminé"
     },
     {
       "date": "17/11/2025",
-      "home": "olym",
-      "away": "rhum",
+      "home": "gint",
+      "away": "mort",
       "scoreHome": 3,
-      "scoreAway": 0,
+      "scoreAway": 1,
       "homeWin": true,
       "status": "Terminé"
     },
@@ -864,16 +873,10 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "04/05/2026",
-      "home": "olym",
-      "away": "mort",
-      "status": "Reporté"
-    },
-    {
       "date": "05/05/2026",
       "home": "tigr",
       "away": "boit",
-      "status": "Sem. 14"
+      "status": "Reporté"
     },
     {
       "date": "06/05/2026",
@@ -992,25 +995,15 @@
     {
       "rank": 2,
       "team": "olym",
-      "elo": 1630.3,
-      "movement": 11.9,
-      "record": "8-2",
-      "power": 76.5,
-      "calendar": "V x4",
+      "elo": 1656.0,
+      "movement": 25.7,
+      "record": "9-2",
+      "power": 81.7,
+      "calendar": "V x5",
       "diffClass": "diff-easy"
     },
     {
       "rank": 3,
-      "team": "mort",
-      "elo": 1542.2,
-      "movement": -26.5,
-      "record": "6-5",
-      "power": 58.6,
-      "calendar": "D vs Cochonou",
-      "diffClass": "diff-hard"
-    },
-    {
-      "rank": 4,
       "team": "boit",
       "elo": 1529.6,
       "movement": 32.0,
@@ -1018,6 +1011,16 @@
       "power": 56.0,
       "calendar": "V x3",
       "diffClass": "diff-easy"
+    },
+    {
+      "rank": 4,
+      "team": "mort",
+      "elo": 1516.5,
+      "movement": -25.7,
+      "record": "6-6",
+      "power": 53.3,
+      "calendar": "D vs Olympe",
+      "diffClass": "diff-hard"
     },
     {
       "rank": 5,
@@ -1087,6 +1090,20 @@
       1719.8,
       1746.3
     ],
+    "olym": [
+      1500,
+      1472.7,
+      1508.8,
+      1540.5,
+      1557.6,
+      1571.5,
+      1549.6,
+      1561.0,
+      1586.8,
+      1618.3,
+      1630.3,
+      1656.0
+    ],
     "gint": [
       1500,
       1532.1,
@@ -1119,19 +1136,6 @@
       1497.6,
       1529.6
     ],
-    "olym": [
-      1500,
-      1472.7,
-      1508.8,
-      1540.5,
-      1557.6,
-      1571.5,
-      1549.6,
-      1561.0,
-      1586.8,
-      1618.3,
-      1630.3
-    ],
     "mort": [
       1500,
       1470.4,
@@ -1144,7 +1148,8 @@
       1521.2,
       1558.3,
       1568.6,
-      1542.2
+      1542.2,
+      1516.5
     ],
     "rhum": [
       1500,
@@ -1226,6 +1231,23 @@
         ],
         "rank": 1
       },
+      "olym": {
+        "points": [
+          0,
+          1,
+          3,
+          5,
+          7,
+          9,
+          10,
+          12,
+          14,
+          16,
+          18,
+          20
+        ],
+        "rank": 2
+      },
       "gint": {
         "points": [
           0,
@@ -1243,7 +1265,7 @@
           19,
           20
         ],
-        "rank": 4
+        "rank": 3
       },
       "boit": {
         "points": [
@@ -1264,22 +1286,6 @@
         ],
         "rank": 6
       },
-      "olym": {
-        "points": [
-          0,
-          1,
-          3,
-          5,
-          7,
-          9,
-          10,
-          12,
-          14,
-          16,
-          18
-        ],
-        "rank": 2
-      },
       "mort": {
         "points": [
           0,
@@ -1293,9 +1299,10 @@
           12,
           14,
           16,
-          17
+          17,
+          18
         ],
-        "rank": 3
+        "rank": 4
       },
       "rhum": {
         "points": [

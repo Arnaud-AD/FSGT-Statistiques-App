@@ -5,10 +5,10 @@
     "name": "Hard",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/2",
-    "lastUpdated": "2026-05-04T16:19:41",
+    "lastUpdated": "2026-05-05T09:22:07",
     "teamCount": 10,
-    "matchesPlayed": 65,
-    "matchesUpcoming": 25
+    "matchesPlayed": 66,
+    "matchesUpcoming": 24
   },
   "teams": {
     "inde": {
@@ -31,14 +31,14 @@
       "short": "PA",
       "color": "#f39c12"
     },
-    "punc": {
-      "name": "Les punchers",
-      "short": "PU",
-      "color": "#9b59b6"
-    },
     "deme": {
       "name": "LES DÉMENTS",
       "short": "DÉ",
+      "color": "#9b59b6"
+    },
+    "punc": {
+      "name": "Les punchers",
+      "short": "PU",
       "color": "#1abc9c"
     },
     "sucy": {
@@ -46,14 +46,14 @@
       "short": "SN",
       "color": "#e67e22"
     },
-    "nahc": {
-      "name": "Nahcac",
-      "short": "NA",
-      "color": "#f1c40f"
-    },
     "go": {
       "name": "GO Team Apero",
       "short": "GT",
+      "color": "#f1c40f"
+    },
+    "nahc": {
+      "name": "Nahcac",
+      "short": "NA",
       "color": "#95a5a6"
     },
     "alam": {
@@ -134,7 +134,7 @@
         "W",
         "D",
         "L",
-        "P",
+        "D",
         "P",
         "P"
       ]
@@ -172,7 +172,7 @@
         "W",
         "W",
         "D",
-        "P",
+        "D",
         "P",
         "P"
       ]
@@ -210,51 +210,13 @@
         "W",
         "W",
         "W",
-        "P",
+        "D",
         "P",
         "P"
       ]
     },
     {
       "rank": 5,
-      "team": "deme",
-      "mj": 13,
-      "g": 6,
-      "p": 7,
-      "setPlus": 22,
-      "setMinus": 21,
-      "ds": 1,
-      "coefSet": "1.05",
-      "ptsPlus": 945,
-      "ptsMinus": 965,
-      "dp": "-20",
-      "coefPts": "0.98",
-      "pts": 19,
-      "formAller": [
-        "L",
-        "W",
-        "W",
-        "L",
-        "L",
-        "L",
-        "L",
-        "W",
-        "W"
-      ],
-      "formRetour": [
-        "L",
-        "W",
-        "W",
-        "L",
-        "D",
-        "D",
-        "D",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 6,
       "team": "sucy",
       "mj": 13,
       "g": 6,
@@ -286,7 +248,45 @@
         "L",
         "D",
         "L",
+        "D",
         "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 6,
+      "team": "deme",
+      "mj": 14,
+      "g": 6,
+      "p": 8,
+      "setPlus": 24,
+      "setMinus": 23,
+      "ds": 1,
+      "coefSet": "1.04",
+      "ptsPlus": 1031,
+      "ptsMinus": 1058,
+      "dp": "-27",
+      "coefPts": "0.97",
+      "pts": 20,
+      "formAller": [
+        "L",
+        "W",
+        "W",
+        "L",
+        "L",
+        "L",
+        "L",
+        "W",
+        "W"
+      ],
+      "formRetour": [
+        "L",
+        "W",
+        "W",
+        "L",
+        "D",
+        "D",
+        "L",
         "P",
         "P"
       ]
@@ -332,18 +332,18 @@
     {
       "rank": 8,
       "team": "go",
-      "mj": 13,
-      "g": 3,
+      "mj": 14,
+      "g": 4,
       "p": 10,
-      "setPlus": 15,
-      "setMinus": 29,
+      "setPlus": 17,
+      "setMinus": 31,
       "ds": -14,
-      "coefSet": "0.52",
-      "ptsPlus": 921,
-      "ptsMinus": 1028,
-      "dp": "-107",
-      "coefPts": "0.90",
-      "pts": 16,
+      "coefSet": "0.55",
+      "ptsPlus": 1014,
+      "ptsMinus": 1114,
+      "dp": "-100",
+      "coefPts": "0.91",
+      "pts": 18,
       "formAller": [
         "L",
         "L",
@@ -362,7 +362,7 @@
         "L",
         "D",
         "L",
-        "D",
+        "W",
         "P",
         "P"
       ]
@@ -445,6 +445,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "04/05/2026",
+      "home": "go",
+      "away": "deme",
+      "scoreHome": 2,
+      "scoreAway": 2,
+      "homeWin": true,
+      "status": "GO pts"
+    },
     {
       "date": "15/04/2026",
       "home": "alam",
@@ -1033,6 +1042,12 @@
   ],
   "matchesUpcoming": [
     {
+      "date": "18/02/2026",
+      "home": "nahc",
+      "away": "loup",
+      "status": "Reporté"
+    },
+    {
       "date": "30/03/2026",
       "home": "sucy",
       "away": "deme",
@@ -1051,22 +1066,16 @@
       "status": "Reporté"
     },
     {
-      "date": "04/05/2026",
-      "home": "go",
-      "away": "deme",
-      "status": "Reporté"
-    },
-    {
       "date": "05/05/2026",
       "home": "yip",
       "away": "sucy",
-      "status": "Sem. 16"
+      "status": "Reporté"
     },
     {
       "date": "05/05/2026",
       "home": "padn",
       "away": "loup",
-      "status": "Sem. 16"
+      "status": "Reporté"
     },
     {
       "date": "06/05/2026",
@@ -1088,14 +1097,14 @@
     },
     {
       "date": "11/05/2026",
-      "home": "sucy",
-      "away": "punc",
+      "home": "deme",
+      "away": "nahc",
       "status": "Sem. 17"
     },
     {
       "date": "11/05/2026",
-      "home": "deme",
-      "away": "nahc",
+      "home": "sucy",
+      "away": "punc",
       "status": "Sem. 17"
     },
     {
@@ -1175,12 +1184,6 @@
       "home": "go",
       "away": "yip",
       "status": "Reporté"
-    },
-    {
-      "date": "10/06/2026",
-      "home": "nahc",
-      "away": "loup",
-      "status": "Reporté"
     }
   ],
   "prTeams": [
@@ -1237,11 +1240,11 @@
     {
       "rank": 6,
       "team": "deme",
-      "elo": 1473.8,
-      "movement": -45.5,
-      "record": "6-7",
-      "power": 43.5,
-      "calendar": "D vs Les",
+      "elo": 1450.4,
+      "movement": -23.5,
+      "record": "6-8",
+      "power": 37.6,
+      "calendar": "D vs GO",
       "diffClass": "diff-hard"
     },
     {
@@ -1257,11 +1260,11 @@
     {
       "rank": 8,
       "team": "go",
-      "elo": 1401.2,
-      "movement": 48.1,
-      "record": "3-10",
-      "power": 25.4,
-      "calendar": "V vs Alambic",
+      "elo": 1424.6,
+      "movement": 23.5,
+      "record": "4-10",
+      "power": 31.2,
+      "calendar": "V vs LES",
       "diffClass": "diff-easy"
     },
     {
@@ -1349,6 +1352,23 @@
       1579.6,
       1618.9
     ],
+    "deme": [
+      1500,
+      1469.3,
+      1507.7,
+      1543.2,
+      1518.3,
+      1473.5,
+      1451.8,
+      1493.3,
+      1522.8,
+      1471.1,
+      1457.7,
+      1498.4,
+      1519.3,
+      1473.8,
+      1450.4
+    ],
     "punc": [
       1500,
       1528.7,
@@ -1366,22 +1386,6 @@
       1453.4,
       1436.2
     ],
-    "deme": [
-      1500,
-      1469.3,
-      1507.7,
-      1543.2,
-      1518.3,
-      1473.5,
-      1451.8,
-      1493.3,
-      1522.8,
-      1471.1,
-      1457.7,
-      1498.4,
-      1519.3,
-      1473.8
-    ],
     "sucy": [
       1500,
       1474.7,
@@ -1397,6 +1401,23 @@
       1540.8,
       1513.3,
       1481.9
+    ],
+    "go": [
+      1500,
+      1471.3,
+      1441.5,
+      1419.6,
+      1390.2,
+      1367.8,
+      1353.7,
+      1332.7,
+      1384.4,
+      1423.2,
+      1405.4,
+      1396.0,
+      1353.1,
+      1401.2,
+      1424.6
     ],
     "nahc": [
       1500,
@@ -1414,22 +1435,6 @@
       1305.3,
       1348.2,
       1335.5
-    ],
-    "go": [
-      1500,
-      1471.3,
-      1441.5,
-      1419.6,
-      1390.2,
-      1367.8,
-      1353.7,
-      1332.7,
-      1384.4,
-      1423.2,
-      1405.4,
-      1396.0,
-      1353.1,
-      1401.2
     ],
     "alam": [
       1500,
@@ -1524,6 +1529,26 @@
         ],
         "rank": 3
       },
+      "deme": {
+        "points": [
+          0,
+          1,
+          3,
+          5,
+          6,
+          7,
+          8,
+          10,
+          12,
+          13,
+          14,
+          16,
+          18,
+          19,
+          20
+        ],
+        "rank": 6
+      },
       "punc": {
         "points": [
           0,
@@ -1544,25 +1569,6 @@
         ],
         "rank": 7
       },
-      "deme": {
-        "points": [
-          0,
-          1,
-          3,
-          5,
-          6,
-          7,
-          8,
-          10,
-          12,
-          13,
-          14,
-          16,
-          18,
-          19
-        ],
-        "rank": 5
-      },
       "sucy": {
         "points": [
           0,
@@ -1580,7 +1586,27 @@
           18,
           19
         ],
-        "rank": 6
+        "rank": 5
+      },
+      "go": {
+        "points": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          9,
+          11,
+          12,
+          13,
+          14,
+          16,
+          18
+        ],
+        "rank": 8
       },
       "nahc": {
         "points": [
@@ -1601,25 +1627,6 @@
           17
         ],
         "rank": 10
-      },
-      "go": {
-        "points": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          9,
-          11,
-          12,
-          13,
-          14,
-          16
-        ],
-        "rank": 8
       },
       "alam": {
         "points": [

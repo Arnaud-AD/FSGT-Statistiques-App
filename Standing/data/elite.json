@@ -5,10 +5,10 @@
     "name": "Elite",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/1",
-    "lastUpdated": "2026-05-04T16:19:40",
+    "lastUpdated": "2026-05-05T09:22:07",
     "teamCount": 10,
-    "matchesPlayed": 69,
-    "matchesUpcoming": 21
+    "matchesPlayed": 70,
+    "matchesUpcoming": 20
   },
   "teams": {
     "jen": {
@@ -218,18 +218,18 @@
     {
       "rank": 5,
       "team": "rhsp",
-      "mj": 13,
-      "g": 8,
+      "mj": 14,
+      "g": 9,
       "p": 5,
-      "setPlus": 26,
-      "setMinus": 21,
-      "ds": 5,
-      "coefSet": "1.24",
-      "ptsPlus": 1024,
-      "ptsMinus": 975,
-      "dp": "+49",
-      "coefPts": "1.05",
-      "pts": 21,
+      "setPlus": 29,
+      "setMinus": 23,
+      "ds": 6,
+      "coefSet": "1.26",
+      "ptsPlus": 1136,
+      "ptsMinus": 1068,
+      "dp": "+68",
+      "coefPts": "1.06",
+      "pts": 23,
       "formAller": [
         "L",
         "W",
@@ -248,7 +248,7 @@
         "L",
         "W",
         "D",
-        "D",
+        "W",
         "P",
         "P"
       ]
@@ -370,18 +370,18 @@
     {
       "rank": 9,
       "team": "rhin",
-      "mj": 13,
+      "mj": 14,
       "g": 2,
-      "p": 11,
-      "setPlus": 16,
-      "setMinus": 33,
-      "ds": -17,
-      "coefSet": "0.48",
-      "ptsPlus": 926,
-      "ptsMinus": 1120,
-      "dp": "-194",
+      "p": 12,
+      "setPlus": 18,
+      "setMinus": 36,
+      "ds": -18,
+      "coefSet": "0.50",
+      "ptsPlus": 1019,
+      "ptsMinus": 1232,
+      "dp": "-213",
       "coefPts": "0.83",
-      "pts": 14,
+      "pts": 15,
       "formAller": [
         "L",
         "L",
@@ -400,7 +400,7 @@
         "D",
         "L",
         "D",
-        "D",
+        "L",
         "D",
         "P"
       ]
@@ -445,6 +445,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "04/05/2026",
+      "home": "rhsp",
+      "away": "rhin",
+      "scoreHome": 3,
+      "scoreAway": 2,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "15/04/2026",
       "home": "manu",
@@ -1087,12 +1096,6 @@
       "status": "Reporté"
     },
     {
-      "date": "04/05/2026",
-      "home": "rhsp",
-      "away": "rhin",
-      "status": "Reporté"
-    },
-    {
       "date": "06/05/2026",
       "home": "manu",
       "away": "rsc",
@@ -1229,11 +1232,11 @@
     {
       "rank": 4,
       "team": "rhsp",
-      "elo": 1557.6,
-      "movement": 43.5,
-      "record": "8-5",
-      "power": 59.7,
-      "calendar": "V vs RSC",
+      "elo": 1567.7,
+      "movement": 10.2,
+      "record": "9-5",
+      "power": 61.4,
+      "calendar": "V vs Rhinos",
       "diffClass": "diff-easy"
     },
     {
@@ -1279,11 +1282,11 @@
     {
       "rank": 9,
       "team": "rhin",
-      "elo": 1340.3,
-      "movement": -24.2,
-      "record": "2-11",
-      "power": 23.0,
-      "calendar": "D x5",
+      "elo": 1330.2,
+      "movement": -10.2,
+      "record": "2-12",
+      "power": 21.3,
+      "calendar": "D x6",
       "diffClass": "diff-hard"
     },
     {
@@ -1845,7 +1848,8 @@
       1519.7,
       1547.5,
       1514.0,
-      1557.6
+      1557.6,
+      1567.7
     ],
     "resc": [
       1500,
@@ -1946,7 +1950,8 @@
       1408.0,
       1384.2,
       1364.5,
-      1340.3
+      1340.3,
+      1330.2
     ],
     "star": [
       1500,
@@ -2023,7 +2028,8 @@
           16,
           18,
           19,
-          21
+          21,
+          23
         ],
         "rank": 5
       },
@@ -2142,7 +2148,8 @@
           12,
           13,
           14,
-          15
+          15,
+          16
         ],
         "rank": 9
       },

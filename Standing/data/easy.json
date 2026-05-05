@@ -5,10 +5,10 @@
     "name": "Easy",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/3",
-    "lastUpdated": "2026-05-04T16:19:42",
+    "lastUpdated": "2026-05-05T09:22:09",
     "teamCount": 8,
-    "matchesPlayed": 48,
-    "matchesUpcoming": 8
+    "matchesPlayed": 50,
+    "matchesUpcoming": 6
   },
   "teams": {
     "neku": {
@@ -90,18 +90,18 @@
     {
       "rank": 2,
       "team": "pyth",
-      "mj": 12,
+      "mj": 13,
       "g": 10,
-      "p": 2,
-      "setPlus": 30,
-      "setMinus": 14,
+      "p": 3,
+      "setPlus": 32,
+      "setMinus": 16,
       "ds": 16,
-      "coefSet": "2.14",
-      "ptsPlus": 998,
-      "ptsMinus": 843,
-      "dp": "+155",
-      "coefPts": "1.18",
-      "pts": 22,
+      "coefSet": "2.00",
+      "ptsPlus": 1095,
+      "ptsMinus": 946,
+      "dp": "+149",
+      "coefPts": "1.16",
+      "pts": 23,
       "formAller": [
         "W",
         "L",
@@ -118,7 +118,7 @@
         "W",
         "W",
         "D",
-        "D"
+        "L"
       ]
     },
     {
@@ -158,18 +158,18 @@
     {
       "rank": 4,
       "team": "touk",
-      "mj": 11,
-      "g": 6,
+      "mj": 12,
+      "g": 7,
       "p": 5,
-      "setPlus": 22,
+      "setPlus": 25,
       "setMinus": 18,
-      "ds": 4,
-      "coefSet": "1.22",
-      "ptsPlus": 838,
-      "ptsMinus": 869,
-      "dp": "-31",
-      "coefPts": "0.96",
-      "pts": 17,
+      "ds": 7,
+      "coefSet": "1.39",
+      "ptsPlus": 916,
+      "ptsMinus": 939,
+      "dp": "-23",
+      "coefPts": "0.98",
+      "pts": 19,
       "formAller": [
         "L",
         "L",
@@ -186,24 +186,24 @@
         "W",
         "L",
         "D",
-        "D"
+        "W"
       ]
     },
     {
       "rank": 5,
       "team": "bats",
-      "mj": 12,
-      "g": 6,
+      "mj": 13,
+      "g": 7,
       "p": 6,
-      "setPlus": 23,
-      "setMinus": 22,
+      "setPlus": 25,
+      "setMinus": 24,
       "ds": 1,
-      "coefSet": "1.05",
-      "ptsPlus": 989,
-      "ptsMinus": 917,
-      "dp": "+72",
+      "coefSet": "1.04",
+      "ptsPlus": 1092,
+      "ptsMinus": 1014,
+      "dp": "+78",
       "coefPts": "1.08",
-      "pts": 18,
+      "pts": 20,
       "formAller": [
         "L",
         "W",
@@ -220,7 +220,7 @@
         "L",
         "D",
         "W",
-        "D"
+        "W"
       ]
     },
     {
@@ -260,18 +260,18 @@
     {
       "rank": 7,
       "team": "punc",
-      "mj": 11,
+      "mj": 12,
       "g": 2,
-      "p": 9,
+      "p": 10,
       "setPlus": 8,
-      "setMinus": 28,
-      "ds": -20,
-      "coefSet": "0.29",
-      "ptsPlus": 673,
-      "ptsMinus": 852,
-      "dp": "-179",
-      "coefPts": "0.79",
-      "pts": 13,
+      "setMinus": 31,
+      "ds": -23,
+      "coefSet": "0.26",
+      "ptsPlus": 743,
+      "ptsMinus": 930,
+      "dp": "-187",
+      "coefPts": "0.80",
+      "pts": 14,
       "formAller": [
         "L",
         "L",
@@ -288,7 +288,7 @@
         "L",
         "D",
         "L",
-        "D"
+        "L"
       ]
     },
     {
@@ -327,6 +327,24 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "04/05/2026",
+      "home": "pyth",
+      "away": "bats",
+      "scoreHome": 2,
+      "scoreAway": 2,
+      "homeWin": false,
+      "status": "Batstreet pts"
+    },
+    {
+      "date": "04/05/2026",
+      "home": "punc",
+      "away": "touk",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
     {
       "date": "14/04/2026",
       "home": "fous",
@@ -762,24 +780,6 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "N/C",
-      "home": "eagl",
-      "away": "punc",
-      "status": "Reporté"
-    },
-    {
-      "date": "04/05/2026",
-      "home": "pyth",
-      "away": "bats",
-      "status": "Reporté"
-    },
-    {
-      "date": "04/05/2026",
-      "home": "punc",
-      "away": "touk",
-      "status": "Reporté"
-    },
-    {
       "date": "07/05/2026",
       "home": "fata",
       "away": "fous",
@@ -790,6 +790,12 @@
       "home": "eagl",
       "away": "neku",
       "status": "Sem. 14"
+    },
+    {
+      "date": "20/05/2026",
+      "home": "eagl",
+      "away": "punc",
+      "status": "Reporté"
     },
     {
       "date": "21/05/2026",
@@ -824,15 +830,25 @@
     {
       "rank": 2,
       "team": "pyth",
-      "elo": 1642.9,
-      "movement": -37.3,
-      "record": "10-2",
-      "power": 76.6,
-      "calendar": "D vs Nekutā",
+      "elo": 1613.4,
+      "movement": -29.5,
+      "record": "10-3",
+      "power": 71.1,
+      "calendar": "D vs Batstreet",
       "diffClass": "diff-hard"
     },
     {
       "rank": 3,
+      "team": "touk",
+      "elo": 1559.1,
+      "movement": 17.9,
+      "record": "7-5",
+      "power": 61.0,
+      "calendar": "V vs Punchline",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 4,
       "team": "fous",
       "elo": 1555.6,
       "movement": 16.1,
@@ -842,23 +858,13 @@
       "diffClass": "diff-easy"
     },
     {
-      "rank": 4,
-      "team": "touk",
-      "elo": 1541.2,
-      "movement": -33.7,
-      "record": "6-5",
-      "power": 57.7,
-      "calendar": "D vs Les",
-      "diffClass": "diff-hard"
-    },
-    {
       "rank": 5,
       "team": "bats",
-      "elo": 1512.6,
-      "movement": 23.8,
-      "record": "6-6",
-      "power": 52.3,
-      "calendar": "V vs Eagle",
+      "elo": 1542.1,
+      "movement": 29.5,
+      "record": "7-6",
+      "power": 57.8,
+      "calendar": "V vs Pythons",
       "diffClass": "diff-easy"
     },
     {
@@ -874,11 +880,11 @@
     {
       "rank": 7,
       "team": "punc",
-      "elo": 1317.2,
-      "movement": -43.2,
-      "record": "2-9",
-      "power": 16.0,
-      "calendar": "D x5",
+      "elo": 1299.2,
+      "movement": -17.9,
+      "record": "2-10",
+      "power": 12.7,
+      "calendar": "D x6",
       "diffClass": "diff-hard"
     },
     {
@@ -923,7 +929,8 @@
       1658.2,
       1673.8,
       1680.2,
-      1642.9
+      1642.9,
+      1613.4
     ],
     "fous": [
       1500,
@@ -954,7 +961,8 @@
       1470.4,
       1513.3,
       1488.8,
-      1512.6
+      1512.6,
+      1542.1
     ],
     "touk": [
       1500,
@@ -968,7 +976,8 @@
       1518.9,
       1556.8,
       1574.9,
-      1541.2
+      1541.2,
+      1559.1
     ],
     "fata": [
       1500,
@@ -997,7 +1006,8 @@
       1411.9,
       1392.5,
       1360.4,
-      1317.2
+      1317.2,
+      1299.2
     ],
     "eagl": [
       1500,
@@ -1050,7 +1060,8 @@
           17,
           19,
           21,
-          22
+          22,
+          23
         ],
         "rank": 2
       },
@@ -1087,7 +1098,8 @@
           13,
           15,
           16,
-          18
+          18,
+          20
         ],
         "rank": 5
       },
@@ -1104,7 +1116,8 @@
           12,
           14,
           16,
-          17
+          17,
+          19
         ],
         "rank": 4
       },
@@ -1139,7 +1152,8 @@
           10,
           11,
           12,
-          13
+          13,
+          14
         ],
         "rank": 7
       },

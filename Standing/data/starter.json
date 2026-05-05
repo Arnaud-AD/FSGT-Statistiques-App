@@ -5,10 +5,10 @@
     "name": "Starter",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/16",
-    "lastUpdated": "2026-05-04T16:19:43",
+    "lastUpdated": "2026-05-05T09:22:09",
     "teamCount": 8,
-    "matchesPlayed": 45,
-    "matchesUpcoming": 11
+    "matchesPlayed": 46,
+    "matchesUpcoming": 10
   },
   "teams": {
     "bach": {
@@ -192,18 +192,18 @@
     {
       "rank": 5,
       "team": "daiq",
-      "mj": 12,
-      "g": 4,
+      "mj": 13,
+      "g": 5,
       "p": 8,
-      "setPlus": 15,
+      "setPlus": 18,
       "setMinus": 25,
-      "ds": -10,
-      "coefSet": "0.60",
-      "ptsPlus": 855,
-      "ptsMinus": 938,
-      "dp": "-83",
-      "coefPts": "0.91",
-      "pts": 16,
+      "ds": -7,
+      "coefSet": "0.72",
+      "ptsPlus": 930,
+      "ptsMinus": 995,
+      "dp": "-65",
+      "coefPts": "0.93",
+      "pts": 18,
       "formAller": [
         "L",
         "L",
@@ -220,45 +220,11 @@
         "L",
         "W",
         "D",
-        "D"
+        "W"
       ]
     },
     {
       "rank": 6,
-      "team": "bler",
-      "mj": 10,
-      "g": 2,
-      "p": 8,
-      "setPlus": 9,
-      "setMinus": 24,
-      "ds": -15,
-      "coefSet": "0.38",
-      "ptsPlus": 651,
-      "ptsMinus": 766,
-      "dp": "-115",
-      "coefPts": "0.85",
-      "pts": 12,
-      "formAller": [
-        "W",
-        "L",
-        "L",
-        "L",
-        "L",
-        "L",
-        "L"
-      ],
-      "formRetour": [
-        "W",
-        "L",
-        "L",
-        "D",
-        "D",
-        "D",
-        "P"
-      ]
-    },
-    {
-      "rank": 7,
       "team": "gold",
       "mj": 12,
       "g": 3,
@@ -288,6 +254,40 @@
         "W",
         "L",
         "D",
+        "P"
+      ]
+    },
+    {
+      "rank": 7,
+      "team": "bler",
+      "mj": 11,
+      "g": 2,
+      "p": 9,
+      "setPlus": 9,
+      "setMinus": 27,
+      "ds": -18,
+      "coefSet": "0.33",
+      "ptsPlus": 708,
+      "ptsMinus": 841,
+      "dp": "-133",
+      "coefPts": "0.84",
+      "pts": 13,
+      "formAller": [
+        "W",
+        "L",
+        "L",
+        "L",
+        "L",
+        "L",
+        "L"
+      ],
+      "formRetour": [
+        "W",
+        "L",
+        "L",
+        "D",
+        "D",
+        "L",
         "P"
       ]
     },
@@ -327,6 +327,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "04/05/2026",
+      "home": "daiq",
+      "away": "bler",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "15/04/2026",
       "home": "gail",
@@ -783,12 +792,6 @@
       "status": "Reporté"
     },
     {
-      "date": "04/05/2026",
-      "home": "daiq",
-      "away": "bler",
-      "status": "Reporté"
-    },
-    {
       "date": "06/05/2026",
       "home": "gold",
       "away": "coco",
@@ -845,11 +848,11 @@
     {
       "rank": 5,
       "team": "daiq",
-      "elo": 1430.2,
-      "movement": 27.8,
-      "record": "4-8",
-      "power": 36.6,
-      "calendar": "V vs Gold",
+      "elo": 1459.4,
+      "movement": 29.2,
+      "record": "5-8",
+      "power": 42.2,
+      "calendar": "V vs Les",
       "diffClass": "diff-easy"
     },
     {
@@ -865,11 +868,11 @@
     {
       "rank": 7,
       "team": "bler",
-      "elo": 1369.8,
-      "movement": -16.2,
-      "record": "2-8",
-      "power": 25.0,
-      "calendar": "D vs Les",
+      "elo": 1340.5,
+      "movement": -29.2,
+      "record": "2-9",
+      "power": 19.4,
+      "calendar": "D vs Daïquibri",
       "diffClass": "diff-hard"
     },
     {
@@ -955,7 +958,8 @@
       1444.9,
       1413.5,
       1402.4,
-      1430.2
+      1430.2,
+      1459.4
     ],
     "gold": [
       1500,
@@ -983,7 +987,8 @@
       1367.6,
       1343.1,
       1386.0,
-      1369.8
+      1369.8,
+      1340.5
     ],
     "caip": [
       1500,
@@ -1085,7 +1090,8 @@
           12,
           13,
           14,
-          16
+          16,
+          18
         ],
         "rank": 5
       },
@@ -1105,7 +1111,7 @@
           14,
           15
         ],
-        "rank": 7
+        "rank": 6
       },
       "bler": {
         "points": [
@@ -1119,9 +1125,10 @@
           8,
           9,
           11,
-          12
+          12,
+          13
         ],
-        "rank": 6
+        "rank": 7
       },
       "caip": {
         "points": [
