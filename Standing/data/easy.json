@@ -5,7 +5,7 @@
     "name": "Easy",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/3",
-    "lastUpdated": "2026-05-06T23:35:07",
+    "lastUpdated": "2026-05-07T18:23:18",
     "teamCount": 8,
     "matchesPlayed": 50,
     "matchesUpcoming": 6
@@ -152,7 +152,7 @@
         "W",
         "W",
         "L",
-        "P"
+        "D"
       ]
     },
     {
@@ -254,7 +254,7 @@
         "L",
         "L",
         "W",
-        "P"
+        "D"
       ]
     },
     {
@@ -783,7 +783,7 @@
       "date": "07/05/2026",
       "home": "fata",
       "away": "fous",
-      "status": "Sem. 14"
+      "status": "Reporté"
     },
     {
       "date": "11/05/2026",

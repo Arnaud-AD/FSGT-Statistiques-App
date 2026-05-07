@@ -5,10 +5,10 @@
     "name": "Elite",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/1",
-    "lastUpdated": "2026-05-06T23:35:06",
+    "lastUpdated": "2026-05-07T18:23:17",
     "teamCount": 10,
-    "matchesPlayed": 71,
-    "matchesUpcoming": 19
+    "matchesPlayed": 72,
+    "matchesUpcoming": 18
   },
   "teams": {
     "jen": {
@@ -255,44 +255,6 @@
     },
     {
       "rank": 6,
-      "team": "rsc",
-      "mj": 14,
-      "g": 6,
-      "p": 8,
-      "setPlus": 25,
-      "setMinus": 31,
-      "ds": -6,
-      "coefSet": "0.81",
-      "ptsPlus": 1182,
-      "ptsMinus": 1206,
-      "dp": "-24",
-      "coefPts": "0.98",
-      "pts": 20,
-      "formAller": [
-        "L",
-        "L",
-        "W",
-        "W",
-        "L",
-        "L",
-        "W",
-        "W",
-        "L"
-      ],
-      "formRetour": [
-        "W",
-        "L",
-        "W",
-        "D",
-        "L",
-        "L",
-        "D",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 7,
       "team": "bier",
       "mj": 15,
       "g": 6,
@@ -330,20 +292,20 @@
       ]
     },
     {
-      "rank": 8,
+      "rank": 7,
       "team": "manu",
-      "mj": 13,
-      "g": 4,
+      "mj": 14,
+      "g": 5,
       "p": 9,
-      "setPlus": 19,
-      "setMinus": 28,
-      "ds": -9,
-      "coefSet": "0.68",
-      "ptsPlus": 1014,
-      "ptsMinus": 1077,
-      "dp": "-63",
-      "coefPts": "0.94",
-      "pts": 17,
+      "setPlus": 22,
+      "setMinus": 29,
+      "ds": -7,
+      "coefSet": "0.76",
+      "ptsPlus": 1111,
+      "ptsMinus": 1153,
+      "dp": "-42",
+      "coefPts": "0.96",
+      "pts": 19,
       "formAller": [
         "L",
         "L",
@@ -362,7 +324,45 @@
         "L",
         "W",
         "W",
+        "W",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 8,
+      "team": "rsc",
+      "mj": 15,
+      "g": 6,
+      "p": 9,
+      "setPlus": 26,
+      "setMinus": 34,
+      "ds": -8,
+      "coefSet": "0.76",
+      "ptsPlus": 1258,
+      "ptsMinus": 1303,
+      "dp": "-45",
+      "coefPts": "0.97",
+      "pts": 21,
+      "formAller": [
+        "L",
+        "L",
+        "W",
+        "W",
+        "L",
+        "L",
+        "W",
+        "W",
+        "L"
+      ],
+      "formRetour": [
+        "W",
+        "L",
+        "W",
         "D",
+        "L",
+        "L",
+        "L",
         "P",
         "P"
       ]
@@ -445,6 +445,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "06/05/2026",
+      "home": "manu",
+      "away": "rsc",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "04/05/2026",
       "home": "resc",
@@ -1099,12 +1108,6 @@
       "status": "Reporté"
     },
     {
-      "date": "06/05/2026",
-      "home": "manu",
-      "away": "rsc",
-      "status": "Reporté"
-    },
-    {
       "date": "11/05/2026",
       "home": "resc",
       "away": "bier",
@@ -1254,13 +1257,13 @@
     },
     {
       "rank": 6,
-      "team": "rsc",
-      "elo": 1469.0,
-      "movement": -16.0,
-      "record": "6-8",
-      "power": 44.8,
-      "calendar": "D vs Jen",
-      "diffClass": "diff-hard"
+      "team": "manu",
+      "elo": 1472.0,
+      "movement": 32.9,
+      "record": "5-9",
+      "power": 45.3,
+      "calendar": "V x3",
+      "diffClass": "diff-easy"
     },
     {
       "rank": 7,
@@ -1274,13 +1277,13 @@
     },
     {
       "rank": 8,
-      "team": "manu",
-      "elo": 1439.1,
-      "movement": 40.2,
-      "record": "4-9",
-      "power": 39.7,
-      "calendar": "V vs Kiki",
-      "diffClass": "diff-easy"
+      "team": "rsc",
+      "elo": 1436.1,
+      "movement": -32.9,
+      "record": "6-9",
+      "power": 39.2,
+      "calendar": "D x3",
+      "diffClass": "diff-hard"
     },
     {
       "rank": 9,
@@ -1905,7 +1908,8 @@
       1508.8,
       1528.5,
       1485.0,
-      1469.0
+      1469.0,
+      1436.1
     ],
     "manu": [
       1500,
@@ -1921,7 +1925,8 @@
       1385.4,
       1370.2,
       1398.9,
-      1439.1
+      1439.1,
+      1472.0
     ],
     "bier": [
       1500,
@@ -2096,9 +2101,10 @@
           16,
           18,
           19,
-          20
+          20,
+          21
         ],
-        "rank": 6
+        "rank": 8
       },
       "manu": {
         "points": [
@@ -2115,9 +2121,10 @@
           12,
           13,
           15,
-          17
+          17,
+          19
         ],
-        "rank": 8
+        "rank": 7
       },
       "bier": {
         "points": [
@@ -2138,7 +2145,7 @@
           20,
           21
         ],
-        "rank": 7
+        "rank": 6
       },
       "rhin": {
         "points": [
