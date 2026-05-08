@@ -5,10 +5,10 @@
     "name": "Easy",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/3",
-    "lastUpdated": "2026-05-07T18:23:18",
+    "lastUpdated": "2026-05-08T23:33:38",
     "teamCount": 8,
-    "matchesPlayed": 50,
-    "matchesUpcoming": 6
+    "matchesPlayed": 51,
+    "matchesUpcoming": 5
   },
   "teams": {
     "neku": {
@@ -84,7 +84,7 @@
         "W",
         "W",
         "W",
-        "P"
+        "D"
       ]
     },
     {
@@ -124,18 +124,18 @@
     {
       "rank": 3,
       "team": "fous",
-      "mj": 13,
-      "g": 8,
+      "mj": 14,
+      "g": 9,
       "p": 5,
-      "setPlus": 27,
-      "setMinus": 17,
-      "ds": 10,
-      "coefSet": "1.59",
-      "ptsPlus": 1012,
-      "ptsMinus": 905,
-      "dp": "+107",
-      "coefPts": "1.12",
-      "pts": 21,
+      "setPlus": 30,
+      "setMinus": 18,
+      "ds": 12,
+      "coefSet": "1.67",
+      "ptsPlus": 1105,
+      "ptsMinus": 969,
+      "dp": "+136",
+      "coefPts": "1.14",
+      "pts": 23,
       "formAller": [
         "W",
         "W",
@@ -152,7 +152,7 @@
         "W",
         "W",
         "L",
-        "D"
+        "W"
       ]
     },
     {
@@ -226,18 +226,18 @@
     {
       "rank": 6,
       "team": "fata",
-      "mj": 12,
+      "mj": 13,
       "g": 3,
-      "p": 9,
-      "setPlus": 14,
-      "setMinus": 30,
-      "ds": -16,
-      "coefSet": "0.47",
-      "ptsPlus": 855,
-      "ptsMinus": 992,
-      "dp": "-137",
-      "coefPts": "0.86",
-      "pts": 15,
+      "p": 10,
+      "setPlus": 15,
+      "setMinus": 33,
+      "ds": -18,
+      "coefSet": "0.45",
+      "ptsPlus": 919,
+      "ptsMinus": 1085,
+      "dp": "-166",
+      "coefPts": "0.85",
+      "pts": 16,
       "formAller": [
         "W",
         "L",
@@ -254,7 +254,7 @@
         "L",
         "L",
         "W",
-        "D"
+        "L"
       ]
     },
     {
@@ -322,11 +322,20 @@
         "L",
         "L",
         "L",
-        "P"
+        "D"
       ]
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "07/05/2026",
+      "home": "fata",
+      "away": "fous",
+      "scoreHome": 1,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
     {
       "date": "04/05/2026",
       "home": "pyth",
@@ -780,16 +789,10 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "07/05/2026",
-      "home": "fata",
-      "away": "fous",
-      "status": "Reporté"
-    },
-    {
       "date": "11/05/2026",
       "home": "eagl",
       "away": "neku",
-      "status": "Sem. 14"
+      "status": "Reporté"
     },
     {
       "date": "20/05/2026",
@@ -839,22 +842,22 @@
     },
     {
       "rank": 3,
+      "team": "fous",
+      "elo": 1576.8,
+      "movement": 21.2,
+      "record": "9-5",
+      "power": 64.3,
+      "calendar": "V vs FATALS",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 4,
       "team": "touk",
       "elo": 1559.1,
       "movement": 17.9,
       "record": "7-5",
       "power": 61.0,
       "calendar": "V vs Punchline",
-      "diffClass": "diff-easy"
-    },
-    {
-      "rank": 4,
-      "team": "fous",
-      "elo": 1555.6,
-      "movement": 16.1,
-      "record": "8-5",
-      "power": 60.3,
-      "calendar": "V vs FATALS",
       "diffClass": "diff-easy"
     },
     {
@@ -870,10 +873,10 @@
     {
       "rank": 6,
       "team": "fata",
-      "elo": 1379.9,
-      "movement": -16.1,
-      "record": "3-9",
-      "power": 27.7,
+      "elo": 1358.7,
+      "movement": -21.2,
+      "record": "3-10",
+      "power": 23.7,
       "calendar": "D vs Les",
       "diffClass": "diff-hard"
     },
@@ -946,7 +949,8 @@
       1534.3,
       1568.0,
       1539.5,
-      1555.6
+      1555.6,
+      1576.8
     ],
     "bats": [
       1500,
@@ -992,7 +996,8 @@
       1365.1,
       1352.8,
       1396.1,
-      1379.9
+      1379.9,
+      1358.7
     ],
     "punc": [
       1500,
@@ -1080,7 +1085,8 @@
           16,
           18,
           19,
-          21
+          21,
+          23
         ],
         "rank": 3
       },
@@ -1135,7 +1141,8 @@
           11,
           12,
           14,
-          15
+          15,
+          16
         ],
         "rank": 6
       },
