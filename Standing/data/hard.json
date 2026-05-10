@@ -5,7 +5,7 @@
     "name": "Hard",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/2",
-    "lastUpdated": "2026-05-08T23:33:38",
+    "lastUpdated": "2026-05-10T23:17:13",
     "teamCount": 10,
     "matchesPlayed": 70,
     "matchesUpcoming": 20
@@ -211,7 +211,7 @@
         "W",
         "W",
         "W",
-        "P",
+        "D",
         "P"
       ]
     },
@@ -363,7 +363,7 @@
         "D",
         "L",
         "W",
-        "P",
+        "D",
         "P"
       ]
     },
@@ -1091,12 +1091,6 @@
     },
     {
       "date": "11/05/2026",
-      "home": "go",
-      "away": "loup",
-      "status": "Sem. 17"
-    },
-    {
-      "date": "11/05/2026",
       "home": "sucy",
       "away": "punc",
       "status": "Sem. 17"
@@ -1195,6 +1189,12 @@
       "date": "08/06/2026",
       "home": "punc",
       "away": "padn",
+      "status": "Reporté"
+    },
+    {
+      "date": "10/06/2026",
+      "home": "go",
+      "away": "loup",
       "status": "Reporté"
     }
   ],
