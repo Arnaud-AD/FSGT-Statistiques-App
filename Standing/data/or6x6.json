@@ -5,10 +5,10 @@
     "name": "Or 6x6",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/4",
-    "lastUpdated": "2026-05-08T23:33:39",
+    "lastUpdated": "2026-05-12T07:43:30",
     "teamCount": 10,
-    "matchesPlayed": 70,
-    "matchesUpcoming": 20
+    "matchesPlayed": 72,
+    "matchesUpcoming": 18
   },
   "teams": {
     "cout": {
@@ -16,49 +16,49 @@
       "short": "CS",
       "color": "#e74c3c"
     },
+    "raia": {
+      "name": "La Raïa",
+      "short": "RA",
+      "color": "#3498db"
+    },
     "marv": {
       "name": "Marvels 6",
       "short": "M6",
-      "color": "#3498db"
+      "color": "#2ecc71"
     },
     "neui": {
       "name": "Neuilly Sa Mère",
       "short": "NS",
-      "color": "#2ecc71"
-    },
-    "raia": {
-      "name": "La Raïa",
-      "short": "RA",
       "color": "#f39c12"
-    },
-    "mous": {
-      "name": "Moustache Team",
-      "short": "MT",
-      "color": "#9b59b6"
     },
     "no": {
       "name": "No s(o)ucy",
       "short": "N2",
-      "color": "#1abc9c"
-    },
-    "cret": {
-      "name": "Cret'1",
-      "short": "CR",
-      "color": "#e67e22"
+      "color": "#9b59b6"
     },
     "ivry": {
       "name": "Ivry Body",
       "short": "IB",
-      "color": "#f1c40f"
+      "color": "#1abc9c"
     },
-    "vlan": {
-      "name": "Et Vlan",
-      "short": "VL",
-      "color": "#95a5a6"
+    "mous": {
+      "name": "Moustache Team",
+      "short": "MT",
+      "color": "#e67e22"
+    },
+    "cret": {
+      "name": "Cret'1",
+      "short": "CR",
+      "color": "#f1c40f"
     },
     "vill": {
       "name": "Villyé-ball",
       "short": "VI",
+      "color": "#95a5a6"
+    },
+    "vlan": {
+      "name": "Et Vlan",
+      "short": "VL",
       "color": "#34495e"
     }
   },
@@ -104,18 +104,18 @@
     {
       "rank": 2,
       "team": "raia",
-      "mj": 13,
-      "g": 10,
+      "mj": 14,
+      "g": 11,
       "p": 3,
-      "setPlus": 33,
-      "setMinus": 16,
-      "ds": 17,
-      "coefSet": "2.06",
-      "ptsPlus": 1147,
-      "ptsMinus": 1009,
-      "dp": "+138",
-      "coefPts": "1.14",
-      "pts": 23,
+      "setPlus": 36,
+      "setMinus": 17,
+      "ds": 19,
+      "coefSet": "2.12",
+      "ptsPlus": 1245,
+      "ptsMinus": 1087,
+      "dp": "+158",
+      "coefPts": "1.15",
+      "pts": 25,
       "formAller": [
         "L",
         "D",
@@ -135,7 +135,7 @@
         "W",
         "W",
         "W",
-        "P",
+        "W",
         "P"
       ]
     },
@@ -179,44 +179,6 @@
     },
     {
       "rank": 4,
-      "team": "no",
-      "mj": 13,
-      "g": 7,
-      "p": 6,
-      "setPlus": 29,
-      "setMinus": 23,
-      "ds": 6,
-      "coefSet": "1.26",
-      "ptsPlus": 1170,
-      "ptsMinus": 1107,
-      "dp": "+63",
-      "coefPts": "1.06",
-      "pts": 20,
-      "formAller": [
-        "L",
-        "L",
-        "W",
-        "W",
-        "L",
-        "L",
-        "D",
-        "L",
-        "W"
-      ],
-      "formRetour": [
-        "W",
-        "W",
-        "W",
-        "D",
-        "W",
-        "L",
-        "D",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 5,
       "team": "neui",
       "mj": 15,
       "g": 9,
@@ -250,6 +212,44 @@
         "W",
         "L",
         "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 5,
+      "team": "no",
+      "mj": 14,
+      "g": 7,
+      "p": 7,
+      "setPlus": 30,
+      "setMinus": 26,
+      "ds": 4,
+      "coefSet": "1.15",
+      "ptsPlus": 1248,
+      "ptsMinus": 1205,
+      "dp": "+43",
+      "coefPts": "1.04",
+      "pts": 21,
+      "formAller": [
+        "L",
+        "L",
+        "W",
+        "W",
+        "L",
+        "L",
+        "D",
+        "L",
+        "W"
+      ],
+      "formRetour": [
+        "W",
+        "W",
+        "W",
+        "D",
+        "W",
+        "L",
+        "D",
+        "L",
         "P"
       ]
     },
@@ -293,6 +293,44 @@
     },
     {
       "rank": 7,
+      "team": "ivry",
+      "mj": 15,
+      "g": 6,
+      "p": 9,
+      "setPlus": 26,
+      "setMinus": 28,
+      "ds": -2,
+      "coefSet": "0.93",
+      "ptsPlus": 1154,
+      "ptsMinus": 1172,
+      "dp": "-18",
+      "coefPts": "0.98",
+      "pts": 21,
+      "formAller": [
+        "W",
+        "W",
+        "L",
+        "L",
+        "L",
+        "L",
+        "L",
+        "W",
+        "D"
+      ],
+      "formRetour": [
+        "D",
+        "W",
+        "L",
+        "W",
+        "L",
+        "L",
+        "L",
+        "W",
+        "P"
+      ]
+    },
+    {
+      "rank": 8,
       "team": "mous",
       "mj": 15,
       "g": 6,
@@ -325,63 +363,25 @@
         "L",
         "L",
         "W",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 8,
-      "team": "ivry",
-      "mj": 14,
-      "g": 5,
-      "p": 9,
-      "setPlus": 23,
-      "setMinus": 27,
-      "ds": -4,
-      "coefSet": "0.85",
-      "ptsPlus": 1058,
-      "ptsMinus": 1105,
-      "dp": "-47",
-      "coefPts": "0.96",
-      "pts": 19,
-      "formAller": [
-        "W",
-        "W",
-        "L",
-        "L",
-        "L",
-        "L",
-        "L",
-        "W",
-        "D"
-      ],
-      "formRetour": [
         "D",
-        "W",
-        "L",
-        "W",
-        "L",
-        "L",
-        "L",
-        "P",
         "P"
       ]
     },
     {
       "rank": 9,
       "team": "vill",
-      "mj": 12,
+      "mj": 13,
       "g": 2,
-      "p": 10,
-      "setPlus": 10,
-      "setMinus": 30,
-      "ds": -20,
+      "p": 11,
+      "setPlus": 11,
+      "setMinus": 33,
+      "ds": -22,
       "coefSet": "0.33",
-      "ptsPlus": 768,
-      "ptsMinus": 966,
-      "dp": "-198",
-      "coefPts": "0.80",
-      "pts": 14,
+      "ptsPlus": 835,
+      "ptsMinus": 1062,
+      "dp": "-227",
+      "coefPts": "0.79",
+      "pts": 15,
       "formAller": [
         "L",
         "D",
@@ -401,7 +401,7 @@
         "W",
         "L",
         "D",
-        "P",
+        "L",
         "P"
       ]
     },
@@ -439,12 +439,30 @@
         "L",
         "L",
         "D",
-        "P",
+        "D",
         "P"
       ]
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "11/05/2026",
+      "home": "raia",
+      "away": "no",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "11/05/2026",
+      "home": "ivry",
+      "away": "vill",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "07/05/2026",
       "home": "neui",
@@ -537,20 +555,20 @@
     },
     {
       "date": "02/04/2026",
-      "home": "marv",
-      "away": "mous",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "02/04/2026",
       "home": "neui",
       "away": "raia",
       "scoreHome": 1,
       "scoreAway": 3,
       "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "02/04/2026",
+      "home": "marv",
+      "away": "mous",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
       "status": "Terminé"
     },
     {
@@ -591,6 +609,15 @@
     },
     {
       "date": "23/03/2026",
+      "home": "raia",
+      "away": "cret",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "23/03/2026",
       "home": "ivry",
       "away": "marv",
       "scoreHome": 3,
@@ -605,15 +632,6 @@
       "scoreHome": 1,
       "scoreAway": 3,
       "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "23/03/2026",
-      "home": "raia",
-      "away": "cret",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
       "status": "Terminé"
     },
     {
@@ -843,20 +861,20 @@
     },
     {
       "date": "08/12/2025",
-      "home": "vill",
-      "away": "marv",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "08/12/2025",
       "home": "raia",
       "away": "vlan",
       "scoreHome": 3,
       "scoreAway": 0,
       "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "08/12/2025",
+      "home": "vill",
+      "away": "marv",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
       "status": "Terminé"
     },
     {
@@ -888,20 +906,20 @@
     },
     {
       "date": "01/12/2025",
-      "home": "mous",
-      "away": "marv",
-      "scoreHome": 2,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "01/12/2025",
       "home": "raia",
       "away": "neui",
       "scoreHome": 3,
       "scoreAway": 0,
       "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "01/12/2025",
+      "home": "mous",
+      "away": "marv",
+      "scoreHome": 2,
+      "scoreAway": 3,
+      "homeWin": false,
       "status": "Terminé"
     },
     {
@@ -1059,41 +1077,29 @@
     },
     {
       "date": "13/10/2025",
-      "home": "mous",
-      "away": "vill",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "13/10/2025",
       "home": "ivry",
       "away": "cret",
       "scoreHome": 3,
       "scoreAway": 0,
       "homeWin": true,
       "status": "Terminé"
+    },
+    {
+      "date": "13/10/2025",
+      "home": "mous",
+      "away": "vill",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
     }
   ],
   "matchesUpcoming": [
     {
-      "date": "11/05/2026",
-      "home": "raia",
-      "away": "no",
-      "status": "Sem. 17"
-    },
-    {
-      "date": "11/05/2026",
-      "home": "ivry",
-      "away": "vill",
-      "status": "Sem. 17"
-    },
-    {
       "date": "12/05/2026",
       "home": "vlan",
       "away": "mous",
-      "status": "Sem. 17"
+      "status": "Reporté"
     },
     {
       "date": "13/05/2026",
@@ -1212,30 +1218,30 @@
     {
       "rank": 2,
       "team": "raia",
-      "elo": 1664.1,
-      "movement": 30.3,
-      "record": "10-3",
-      "power": 77.4,
-      "calendar": "V x5",
+      "elo": 1687.5,
+      "movement": 23.4,
+      "record": "11-3",
+      "power": 81.3,
+      "calendar": "V x6",
       "diffClass": "diff-easy"
     },
     {
       "rank": 3,
-      "team": "no",
-      "elo": 1592.3,
-      "movement": -17.6,
-      "record": "7-6",
-      "power": 65.4,
-      "calendar": "D vs Coutiao",
-      "diffClass": "diff-hard"
-    },
-    {
-      "rank": 4,
       "team": "marv",
       "elo": 1572.6,
       "movement": -30.3,
       "record": "10-4",
       "power": 62.1,
+      "calendar": "D vs La",
+      "diffClass": "diff-hard"
+    },
+    {
+      "rank": 4,
+      "team": "no",
+      "elo": 1568.9,
+      "movement": -23.4,
+      "record": "7-7",
+      "power": 61.5,
       "calendar": "D vs La",
       "diffClass": "diff-hard"
     },
@@ -1272,21 +1278,21 @@
     {
       "rank": 8,
       "team": "ivry",
-      "elo": 1422.8,
-      "movement": -23.9,
-      "record": "5-9",
-      "power": 37.1,
-      "calendar": "D x4",
-      "diffClass": "diff-hard"
+      "elo": 1446.1,
+      "movement": 23.3,
+      "record": "6-9",
+      "power": 41.0,
+      "calendar": "V vs Villyé-ball",
+      "diffClass": "diff-easy"
     },
     {
       "rank": 9,
       "team": "vill",
-      "elo": 1333.2,
-      "movement": -10.2,
-      "record": "2-10",
-      "power": 22.1,
-      "calendar": "D vs Marvels",
+      "elo": 1309.8,
+      "movement": -23.3,
+      "record": "2-11",
+      "power": 18.2,
+      "calendar": "D vs Ivry",
       "diffClass": "diff-hard"
     },
     {
@@ -1319,6 +1325,23 @@
       1736.0,
       1753.6,
       1770.8
+    ],
+    "raia": [
+      1500,
+      1478.3,
+      1499.1,
+      1522.6,
+      1560.5,
+      1575.4,
+      1590.5,
+      1562.7,
+      1528.5,
+      1561.4,
+      1592.1,
+      1601.7,
+      1633.9,
+      1664.1,
+      1687.5
     ],
     "marv": [
       1500,
@@ -1355,21 +1378,40 @@
       1512.9,
       1495.8
     ],
-    "raia": [
+    "no": [
       1500,
-      1478.3,
-      1499.1,
-      1522.6,
-      1560.5,
-      1575.4,
-      1590.5,
-      1562.7,
-      1528.5,
-      1561.4,
-      1592.1,
-      1601.7,
-      1633.9,
-      1664.1
+      1470.2,
+      1452.2,
+      1481.1,
+      1510.0,
+      1473.6,
+      1459.3,
+      1444.2,
+      1471.2,
+      1506.9,
+      1555.7,
+      1589.8,
+      1609.9,
+      1592.3,
+      1568.9
+    ],
+    "ivry": [
+      1500,
+      1532.9,
+      1563.8,
+      1534.8,
+      1506.5,
+      1482.4,
+      1457.6,
+      1493.6,
+      1447.2,
+      1465.5,
+      1498.0,
+      1487.2,
+      1467.1,
+      1446.7,
+      1422.8,
+      1446.1
     ],
     "mous": [
       1500,
@@ -1389,22 +1431,6 @@
       1441.9,
       1465.7
     ],
-    "no": [
-      1500,
-      1470.2,
-      1452.2,
-      1481.1,
-      1510.0,
-      1473.6,
-      1459.3,
-      1444.2,
-      1471.2,
-      1506.9,
-      1555.7,
-      1589.8,
-      1609.9,
-      1592.3
-    ],
     "cret": [
       1500,
       1467.1,
@@ -1422,22 +1448,21 @@
       1445.8,
       1481.9
     ],
-    "ivry": [
+    "vill": [
       1500,
-      1532.9,
-      1563.8,
-      1534.8,
-      1506.5,
-      1482.4,
-      1457.6,
-      1493.6,
-      1447.2,
-      1465.5,
-      1498.0,
-      1487.2,
-      1467.1,
-      1446.7,
-      1422.8
+      1476.1,
+      1447.7,
+      1426.1,
+      1458.6,
+      1435.8,
+      1399.8,
+      1372.6,
+      1345.6,
+      1337.9,
+      1317.7,
+      1343.3,
+      1333.2,
+      1309.8
     ],
     "vlan": [
       1500,
@@ -1456,21 +1481,6 @@
       1236.1,
       1210.4,
       1200.8
-    ],
-    "vill": [
-      1500,
-      1476.1,
-      1447.7,
-      1426.1,
-      1458.6,
-      1435.8,
-      1399.8,
-      1372.6,
-      1345.6,
-      1337.9,
-      1317.7,
-      1343.3,
-      1333.2
     ]
   },
   "evolutionData": {
@@ -1495,6 +1505,26 @@
           30
         ],
         "rank": 1
+      },
+      "raia": {
+        "points": [
+          0,
+          1,
+          3,
+          5,
+          7,
+          9,
+          11,
+          12,
+          13,
+          15,
+          17,
+          19,
+          21,
+          23,
+          25
+        ],
+        "rank": 2
       },
       "marv": {
         "points": [
@@ -1535,26 +1565,48 @@
           23,
           24
         ],
-        "rank": 5
+        "rank": 4
       },
-      "raia": {
+      "no": {
         "points": [
           0,
           1,
-          3,
-          5,
+          2,
+          4,
+          6,
           7,
+          8,
           9,
           11,
-          12,
           13,
           15,
           17,
           19,
-          21,
-          23
+          20,
+          21
         ],
-        "rank": 2
+        "rank": 5
+      },
+      "ivry": {
+        "points": [
+          0,
+          2,
+          4,
+          5,
+          6,
+          7,
+          8,
+          10,
+          11,
+          13,
+          15,
+          16,
+          17,
+          18,
+          19,
+          21
+        ],
+        "rank": 7
       },
       "mous": {
         "points": [
@@ -1575,26 +1627,7 @@
           19,
           21
         ],
-        "rank": 7
-      },
-      "no": {
-        "points": [
-          0,
-          1,
-          2,
-          4,
-          6,
-          7,
-          8,
-          9,
-          11,
-          13,
-          15,
-          17,
-          19,
-          20
-        ],
-        "rank": 4
+        "rank": 8
       },
       "cret": {
         "points": [
@@ -1616,25 +1649,24 @@
         ],
         "rank": 6
       },
-      "ivry": {
+      "vill": {
         "points": [
           0,
+          1,
           2,
-          4,
+          3,
           5,
           6,
           7,
           8,
+          9,
           10,
           11,
           13,
-          15,
-          16,
-          17,
-          18,
-          19
+          14,
+          15
         ],
-        "rank": 8
+        "rank": 9
       },
       "vlan": {
         "points": [
@@ -1656,24 +1688,6 @@
           15
         ],
         "rank": 10
-      },
-      "vill": {
-        "points": [
-          0,
-          1,
-          2,
-          3,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          13,
-          14
-        ],
-        "rank": 9
       }
     }
   }

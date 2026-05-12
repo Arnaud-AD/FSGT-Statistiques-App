@@ -5,10 +5,10 @@
     "name": "Easy",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/3",
-    "lastUpdated": "2026-05-08T23:33:38",
+    "lastUpdated": "2026-05-12T07:43:29",
     "teamCount": 8,
-    "matchesPlayed": 51,
-    "matchesUpcoming": 5
+    "matchesPlayed": 52,
+    "matchesUpcoming": 4
   },
   "teams": {
     "neku": {
@@ -56,18 +56,18 @@
     {
       "rank": 1,
       "team": "neku",
-      "mj": 13,
-      "g": 12,
+      "mj": 14,
+      "g": 13,
       "p": 1,
-      "setPlus": 37,
+      "setPlus": 40,
       "setMinus": 7,
-      "ds": 30,
-      "coefSet": "5.29",
-      "ptsPlus": 1062,
-      "ptsMinus": 832,
-      "dp": "+230",
-      "coefPts": "1.28",
-      "pts": 25,
+      "ds": 33,
+      "coefSet": "5.71",
+      "ptsPlus": 1137,
+      "ptsMinus": 867,
+      "dp": "+270",
+      "coefPts": "1.31",
+      "pts": 27,
       "formAller": [
         "W",
         "W",
@@ -84,7 +84,7 @@
         "W",
         "W",
         "W",
-        "D"
+        "W"
       ]
     },
     {
@@ -294,18 +294,18 @@
     {
       "rank": 8,
       "team": "eagl",
-      "mj": 12,
+      "mj": 13,
       "g": 1,
-      "p": 11,
+      "p": 12,
       "setPlus": 7,
-      "setMinus": 32,
-      "ds": -25,
-      "coefSet": "0.22",
-      "ptsPlus": 718,
-      "ptsMinus": 935,
-      "dp": "-217",
-      "coefPts": "0.77",
-      "pts": 13,
+      "setMinus": 35,
+      "ds": -28,
+      "coefSet": "0.20",
+      "ptsPlus": 753,
+      "ptsMinus": 1010,
+      "dp": "-257",
+      "coefPts": "0.75",
+      "pts": 14,
       "formAller": [
         "L",
         "W",
@@ -322,11 +322,20 @@
         "L",
         "L",
         "L",
-        "D"
+        "L"
       ]
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "11/05/2026",
+      "home": "eagl",
+      "away": "neku",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
     {
       "date": "07/05/2026",
       "home": "fata",
@@ -789,12 +798,6 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "11/05/2026",
-      "home": "eagl",
-      "away": "neku",
-      "status": "Reporté"
-    },
-    {
       "date": "20/05/2026",
       "home": "eagl",
       "away": "punc",
@@ -823,11 +826,11 @@
     {
       "rank": 1,
       "team": "neku",
-      "elo": 1769.1,
-      "movement": 37.3,
-      "record": "12-1",
+      "elo": 1774.7,
+      "movement": 5.5,
+      "record": "13-1",
       "power": 100.0,
-      "calendar": "V x6",
+      "calendar": "V x7",
       "diffClass": "diff-easy"
     },
     {
@@ -836,7 +839,7 @@
       "elo": 1613.4,
       "movement": -29.5,
       "record": "10-3",
-      "power": 71.1,
+      "power": 70.6,
       "calendar": "D vs Batstreet",
       "diffClass": "diff-hard"
     },
@@ -846,7 +849,7 @@
       "elo": 1576.8,
       "movement": 21.2,
       "record": "9-5",
-      "power": 64.3,
+      "power": 64.0,
       "calendar": "V vs FATALS",
       "diffClass": "diff-easy"
     },
@@ -856,7 +859,7 @@
       "elo": 1559.1,
       "movement": 17.9,
       "record": "7-5",
-      "power": 61.0,
+      "power": 60.8,
       "calendar": "V vs Punchline",
       "diffClass": "diff-easy"
     },
@@ -866,7 +869,7 @@
       "elo": 1542.1,
       "movement": 29.5,
       "record": "7-6",
-      "power": 57.8,
+      "power": 57.7,
       "calendar": "V vs Pythons",
       "diffClass": "diff-easy"
     },
@@ -876,7 +879,7 @@
       "elo": 1358.7,
       "movement": -21.2,
       "record": "3-10",
-      "power": 23.7,
+      "power": 24.3,
       "calendar": "D vs Les",
       "diffClass": "diff-hard"
     },
@@ -886,18 +889,18 @@
       "elo": 1299.2,
       "movement": -17.9,
       "record": "2-10",
-      "power": 12.7,
+      "power": 13.5,
       "calendar": "D x6",
       "diffClass": "diff-hard"
     },
     {
       "rank": 8,
       "team": "eagl",
-      "elo": 1281.5,
-      "movement": -23.8,
-      "record": "1-11",
-      "power": 9.4,
-      "calendar": "D x5",
+      "elo": 1276.0,
+      "movement": -5.5,
+      "record": "1-12",
+      "power": 9.2,
+      "calendar": "D x6",
       "diffClass": "diff-hard"
     }
   ],
@@ -917,7 +920,8 @@
       1691.0,
       1703.2,
       1731.8,
-      1769.1
+      1769.1,
+      1774.7
     ],
     "pyth": [
       1500,
@@ -1027,7 +1031,8 @@
       1329.9,
       1311.8,
       1305.3,
-      1281.5
+      1281.5,
+      1276.0
     ]
   },
   "evolutionData": {
@@ -1047,7 +1052,8 @@
           19,
           21,
           23,
-          25
+          25,
+          27
         ],
         "rank": 1
       },
@@ -1178,7 +1184,8 @@
           10,
           11,
           12,
-          13
+          13,
+          14
         ],
         "rank": 8
       }
