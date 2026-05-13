@@ -5,10 +5,10 @@
     "name": "Medium",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/15",
-    "lastUpdated": "2026-05-12T07:43:28",
+    "lastUpdated": "2026-05-13T17:27:46",
     "teamCount": 9,
-    "matchesPlayed": 57,
-    "matchesUpcoming": 15
+    "matchesPlayed": 59,
+    "matchesUpcoming": 13
   },
   "teams": {
     "coch": {
@@ -46,14 +46,14 @@
       "short": "TG",
       "color": "#e67e22"
     },
-    "ryoi": {
-      "name": "RYŌIKI TENKAI",
-      "short": "RT",
-      "color": "#f1c40f"
-    },
     "tigr": {
       "name": "Les Tigres & Gorilles",
       "short": "T&",
+      "color": "#f1c40f"
+    },
+    "ryoi": {
+      "name": "RYŌIKI TENKAI",
+      "short": "RT",
       "color": "#95a5a6"
     }
   },
@@ -61,18 +61,18 @@
     {
       "rank": 1,
       "team": "coch",
-      "mj": 13,
-      "g": 13,
+      "mj": 14,
+      "g": 14,
       "p": 0,
-      "setPlus": 38,
+      "setPlus": 41,
       "setMinus": 6,
-      "ds": 32,
-      "coefSet": "6.33",
-      "ptsPlus": 1084,
-      "ptsMinus": 842,
-      "dp": "+242",
-      "coefPts": "1.29",
-      "pts": 26,
+      "ds": 35,
+      "coefSet": "6.83",
+      "ptsPlus": 1161,
+      "ptsMinus": 908,
+      "dp": "+253",
+      "coefPts": "1.28",
+      "pts": 28,
       "formAller": [
         "W",
         "W",
@@ -91,7 +91,7 @@
         "W",
         "W",
         "W",
-        "D"
+        "W"
       ]
     },
     {
@@ -133,18 +133,18 @@
     {
       "rank": 3,
       "team": "mort",
-      "mj": 12,
-      "g": 6,
+      "mj": 13,
+      "g": 7,
       "p": 6,
-      "setPlus": 21,
-      "setMinus": 23,
-      "ds": -2,
-      "coefSet": "0.91",
-      "ptsPlus": 932,
-      "ptsMinus": 942,
-      "dp": "-10",
-      "coefPts": "0.99",
-      "pts": 18,
+      "setPlus": 24,
+      "setMinus": 25,
+      "ds": -1,
+      "coefSet": "0.96",
+      "ptsPlus": 1040,
+      "ptsMinus": 1043,
+      "dp": "-3",
+      "coefPts": "1.00",
+      "pts": 20,
       "formAller": [
         "L",
         "W",
@@ -162,7 +162,7 @@
         "W",
         "L",
         "L",
-        "D",
+        "W",
         "P"
       ]
     },
@@ -277,18 +277,18 @@
     {
       "rank": 7,
       "team": "rhum",
-      "mj": 12,
+      "mj": 13,
       "g": 5,
-      "p": 7,
-      "setPlus": 18,
-      "setMinus": 28,
-      "ds": -10,
-      "coefSet": "0.64",
-      "ptsPlus": 996,
-      "ptsMinus": 1024,
-      "dp": "-28",
+      "p": 8,
+      "setPlus": 20,
+      "setMinus": 31,
+      "ds": -11,
+      "coefSet": "0.65",
+      "ptsPlus": 1097,
+      "ptsMinus": 1132,
+      "dp": "-35",
       "coefPts": "0.97",
-      "pts": 17,
+      "pts": 18,
       "formAller": [
         "W",
         "L",
@@ -306,7 +306,7 @@
         "D",
         "L",
         "D",
-        "D",
+        "L",
         "P"
       ]
     },
@@ -349,18 +349,18 @@
     {
       "rank": 9,
       "team": "tigr",
-      "mj": 13,
+      "mj": 14,
       "g": 2,
-      "p": 11,
+      "p": 12,
       "setPlus": 13,
-      "setMinus": 35,
-      "ds": -22,
-      "coefSet": "0.37",
-      "ptsPlus": 959,
-      "ptsMinus": 1089,
-      "dp": "-130",
+      "setMinus": 38,
+      "ds": -25,
+      "coefSet": "0.34",
+      "ptsPlus": 1025,
+      "ptsMinus": 1166,
+      "dp": "-141",
       "coefPts": "0.88",
-      "pts": 15,
+      "pts": 16,
       "formAller": [
         "W",
         "L",
@@ -378,12 +378,30 @@
         "L",
         "D",
         "L",
-        "D",
+        "L",
         "P"
       ]
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "12/05/2026",
+      "home": "tigr",
+      "away": "coch",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "12/05/2026",
+      "home": "rhum",
+      "away": "mort",
+      "scoreHome": 2,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
     {
       "date": "11/05/2026",
       "home": "gint",
@@ -900,18 +918,6 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "12/05/2026",
-      "home": "rhum",
-      "away": "mort",
-      "status": "Reporté"
-    },
-    {
-      "date": "12/05/2026",
-      "home": "tigr",
-      "away": "coch",
-      "status": "Reporté"
-    },
-    {
       "date": "18/05/2026",
       "home": "olym",
       "away": "team",
@@ -994,11 +1000,11 @@
     {
       "rank": 1,
       "team": "coch",
-      "elo": 1756.6,
-      "movement": 10.3,
-      "record": "13-0",
+      "elo": 1763.1,
+      "movement": 6.5,
+      "record": "14-0",
       "power": 100.0,
-      "calendar": "V x13",
+      "calendar": "V x14",
       "diffClass": "diff-easy"
     },
     {
@@ -1007,7 +1013,7 @@
       "elo": 1656.0,
       "movement": 25.7,
       "record": "9-2",
-      "power": 80.4,
+      "power": 79.6,
       "calendar": "V x5",
       "diffClass": "diff-easy"
     },
@@ -1017,19 +1023,19 @@
       "elo": 1543.1,
       "movement": 13.5,
       "record": "7-7",
-      "power": 58.4,
+      "power": 58.2,
       "calendar": "V x4",
       "diffClass": "diff-easy"
     },
     {
       "rank": 4,
       "team": "mort",
-      "elo": 1516.5,
-      "movement": -25.7,
-      "record": "6-6",
-      "power": 53.2,
-      "calendar": "D vs Olympe",
-      "diffClass": "diff-hard"
+      "elo": 1535.7,
+      "movement": 19.3,
+      "record": "7-6",
+      "power": 56.8,
+      "calendar": "V vs Les",
+      "diffClass": "diff-easy"
     },
     {
       "rank": 5,
@@ -1047,18 +1053,18 @@
       "elo": 1436.8,
       "movement": -33.0,
       "record": "5-6",
-      "power": 37.7,
+      "power": 38.0,
       "calendar": "D vs Boîte",
       "diffClass": "diff-hard"
     },
     {
       "rank": 7,
       "team": "rhum",
-      "elo": 1415.2,
-      "movement": -32.0,
-      "record": "5-7",
-      "power": 33.5,
-      "calendar": "D x3",
+      "elo": 1395.9,
+      "movement": -19.3,
+      "record": "5-8",
+      "power": 30.2,
+      "calendar": "D x4",
       "diffClass": "diff-hard"
     },
     {
@@ -1067,18 +1073,18 @@
       "elo": 1369.5,
       "movement": -14.0,
       "record": "2-11",
-      "power": 24.6,
+      "power": 25.2,
       "calendar": "D vs Ginto",
       "diffClass": "diff-hard"
     },
     {
       "rank": 9,
       "team": "tigr",
-      "elo": 1319.8,
-      "movement": -13.5,
-      "record": "2-11",
-      "power": 14.9,
-      "calendar": "D x5",
+      "elo": 1313.3,
+      "movement": -6.5,
+      "record": "2-12",
+      "power": 14.5,
+      "calendar": "D x6",
       "diffClass": "diff-hard"
     }
   ],
@@ -1098,7 +1104,8 @@
       1705.8,
       1719.8,
       1746.3,
-      1756.6
+      1756.6,
+      1763.1
     ],
     "gint": [
       1500,
@@ -1162,7 +1169,8 @@
       1558.3,
       1568.6,
       1542.2,
-      1516.5
+      1516.5,
+      1535.7
     ],
     "rhum": [
       1500,
@@ -1177,7 +1185,8 @@
       1487.1,
       1461.3,
       1447.2,
-      1415.2
+      1415.2,
+      1395.9
     ],
     "team": [
       1500,
@@ -1192,6 +1201,23 @@
       1521.9,
       1469.7,
       1436.8
+    ],
+    "tigr": [
+      1500,
+      1529.6,
+      1497.5,
+      1460.1,
+      1431.3,
+      1414.2,
+      1393.1,
+      1381.4,
+      1403.5,
+      1384.7,
+      1368.2,
+      1345.3,
+      1333.3,
+      1319.8,
+      1313.3
     ],
     "ryoi": [
       1500,
@@ -1208,22 +1234,6 @@
       1393.7,
       1383.4,
       1369.5
-    ],
-    "tigr": [
-      1500,
-      1529.6,
-      1497.5,
-      1460.1,
-      1431.3,
-      1414.2,
-      1393.1,
-      1381.4,
-      1403.5,
-      1384.7,
-      1368.2,
-      1345.3,
-      1333.3,
-      1319.8
     ]
   },
   "evolutionData": {
@@ -1243,7 +1253,8 @@
           20,
           22,
           24,
-          26
+          26,
+          28
         ],
         "rank": 1
       },
@@ -1319,7 +1330,8 @@
           14,
           16,
           17,
-          18
+          18,
+          20
         ],
         "rank": 3
       },
@@ -1337,7 +1349,8 @@
           14,
           15,
           16,
-          17
+          17,
+          18
         ],
         "rank": 7
       },
@@ -1358,6 +1371,26 @@
         ],
         "rank": 4
       },
+      "tigr": {
+        "points": [
+          0,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        "rank": 9
+      },
       "ryoi": {
         "points": [
           0,
@@ -1376,25 +1409,6 @@
           15
         ],
         "rank": 8
-      },
-      "tigr": {
-        "points": [
-          0,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          10,
-          11,
-          12,
-          13,
-          14,
-          15
-        ],
-        "rank": 9
       }
     }
   }
