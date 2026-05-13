@@ -5,10 +5,10 @@
     "name": "Or 6x6",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/4",
-    "lastUpdated": "2026-05-13T17:27:48",
+    "lastUpdated": "2026-05-14T00:22:39",
     "teamCount": 10,
-    "matchesPlayed": 73,
-    "matchesUpcoming": 17
+    "matchesPlayed": 74,
+    "matchesUpcoming": 16
   },
   "teams": {
     "cout": {
@@ -66,18 +66,18 @@
     {
       "rank": 1,
       "team": "cout",
-      "mj": 15,
-      "g": 15,
+      "mj": 16,
+      "g": 16,
       "p": 0,
-      "setPlus": 44,
-      "setMinus": 11,
-      "ds": 33,
-      "coefSet": "4.00",
-      "ptsPlus": 1317,
-      "ptsMinus": 1083,
-      "dp": "+234",
-      "coefPts": "1.22",
-      "pts": 30,
+      "setPlus": 47,
+      "setMinus": 12,
+      "ds": 35,
+      "coefSet": "3.92",
+      "ptsPlus": 1406,
+      "ptsMinus": 1162,
+      "dp": "+244",
+      "coefPts": "1.21",
+      "pts": 32,
       "formAller": [
         "W",
         "W",
@@ -97,7 +97,7 @@
         "W",
         "W",
         "W",
-        "D",
+        "W",
         "P"
       ]
     },
@@ -255,44 +255,6 @@
     },
     {
       "rank": 6,
-      "team": "cret",
-      "mj": 14,
-      "g": 6,
-      "p": 8,
-      "setPlus": 24,
-      "setMinus": 27,
-      "ds": -3,
-      "coefSet": "0.89",
-      "ptsPlus": 1118,
-      "ptsMinus": 1171,
-      "dp": "-53",
-      "coefPts": "0.95",
-      "pts": 20,
-      "formAller": [
-        "L",
-        "L",
-        "L",
-        "L",
-        "W",
-        "W",
-        "W",
-        "L",
-        "W"
-      ],
-      "formRetour": [
-        "D",
-        "L",
-        "W",
-        "L",
-        "L",
-        "W",
-        "D",
-        "D",
-        "P"
-      ]
-    },
-    {
-      "rank": 7,
       "team": "mous",
       "mj": 16,
       "g": 7,
@@ -330,7 +292,7 @@
       ]
     },
     {
-      "rank": 8,
+      "rank": 7,
       "team": "ivry",
       "mj": 15,
       "g": 6,
@@ -364,6 +326,44 @@
         "L",
         "L",
         "W",
+        "P"
+      ]
+    },
+    {
+      "rank": 8,
+      "team": "cret",
+      "mj": 15,
+      "g": 6,
+      "p": 9,
+      "setPlus": 25,
+      "setMinus": 30,
+      "ds": -5,
+      "coefSet": "0.83",
+      "ptsPlus": 1197,
+      "ptsMinus": 1260,
+      "dp": "-63",
+      "coefPts": "0.95",
+      "pts": 21,
+      "formAller": [
+        "L",
+        "L",
+        "L",
+        "L",
+        "W",
+        "W",
+        "W",
+        "L",
+        "W"
+      ],
+      "formRetour": [
+        "D",
+        "L",
+        "W",
+        "L",
+        "L",
+        "W",
+        "D",
+        "L",
         "P"
       ]
     },
@@ -445,6 +445,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "13/05/2026",
+      "home": "cret",
+      "away": "cout",
+      "scoreHome": 1,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
     {
       "date": "12/05/2026",
       "home": "vlan",
@@ -1105,12 +1114,6 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "13/05/2026",
-      "home": "cret",
-      "away": "cout",
-      "status": "Reporté"
-    },
-    {
       "date": "18/05/2026",
       "home": "raia",
       "away": "ivry",
@@ -1211,11 +1214,11 @@
     {
       "rank": 1,
       "team": "cout",
-      "elo": 1770.8,
-      "movement": 17.2,
-      "record": "15-0",
-      "power": 92.8,
-      "calendar": "V x15",
+      "elo": 1782.2,
+      "movement": 11.3,
+      "record": "16-0",
+      "power": 94.6,
+      "calendar": "V x16",
       "diffClass": "diff-easy"
     },
     {
@@ -1271,12 +1274,12 @@
     {
       "rank": 7,
       "team": "cret",
-      "elo": 1481.9,
-      "movement": 36.1,
-      "record": "6-8",
-      "power": 47.1,
-      "calendar": "V vs Moustache",
-      "diffClass": "diff-easy"
+      "elo": 1470.6,
+      "movement": -11.3,
+      "record": "6-9",
+      "power": 45.4,
+      "calendar": "D vs Coutiao",
+      "diffClass": "diff-hard"
     },
     {
       "rank": 8,
@@ -1327,7 +1330,8 @@
       1725.2,
       1736.0,
       1753.6,
-      1770.8
+      1770.8,
+      1782.2
     ],
     "raia": [
       1500,
@@ -1450,7 +1454,8 @@
       1512.8,
       1479.9,
       1445.8,
-      1481.9
+      1481.9,
+      1470.6
     ],
     "vlan": [
       1500,
@@ -1507,7 +1512,8 @@
           24,
           26,
           28,
-          30
+          30,
+          32
         ],
         "rank": 1
       },
@@ -1592,7 +1598,7 @@
           21,
           23
         ],
-        "rank": 7
+        "rank": 6
       },
       "no": {
         "points": [
@@ -1633,7 +1639,7 @@
           19,
           21
         ],
-        "rank": 8
+        "rank": 7
       },
       "cret": {
         "points": [
@@ -1651,9 +1657,10 @@
           16,
           17,
           18,
-          20
+          20,
+          21
         ],
-        "rank": 6
+        "rank": 8
       },
       "vlan": {
         "points": [
