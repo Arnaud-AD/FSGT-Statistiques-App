@@ -5,10 +5,10 @@
     "name": "Elite",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/1",
-    "lastUpdated": "2026-05-19T19:42:46",
+    "lastUpdated": "2026-05-20T01:47:01",
     "teamCount": 10,
-    "matchesPlayed": 79,
-    "matchesUpcoming": 11
+    "matchesPlayed": 80,
+    "matchesUpcoming": 10
   },
   "teams": {
     "jen": {
@@ -255,40 +255,40 @@
     },
     {
       "rank": 6,
-      "team": "rsc",
-      "mj": 16,
+      "team": "bier",
+      "mj": 17,
       "g": 7,
-      "p": 9,
+      "p": 10,
       "setPlus": 29,
       "setMinus": 34,
       "ds": -5,
       "coefSet": "0.85",
-      "ptsPlus": 1333,
-      "ptsMinus": 1352,
-      "dp": "-19",
-      "coefPts": "0.99",
-      "pts": 23,
+      "ptsPlus": 1392,
+      "ptsMinus": 1330,
+      "dp": "+62",
+      "coefPts": "1.05",
+      "pts": 24,
       "formAller": [
-        "L",
-        "L",
-        "W",
         "W",
         "L",
         "L",
+        "L",
         "W",
+        "L",
         "W",
-        "L"
+        "L",
+        "W"
       ],
       "formRetour": [
         "W",
         "L",
+        "L",
+        "L",
         "W",
+        "L",
         "D",
         "L",
-        "L",
-        "L",
-        "W",
-        "D"
+        "W"
       ]
     },
     {
@@ -331,40 +331,40 @@
     },
     {
       "rank": 8,
-      "team": "bier",
-      "mj": 16,
-      "g": 6,
+      "team": "rsc",
+      "mj": 17,
+      "g": 7,
       "p": 10,
-      "setPlus": 26,
-      "setMinus": 34,
+      "setPlus": 29,
+      "setMinus": 37,
       "ds": -8,
-      "coefSet": "0.76",
-      "ptsPlus": 1317,
-      "ptsMinus": 1273,
-      "dp": "+44",
-      "coefPts": "1.03",
-      "pts": 22,
+      "coefSet": "0.78",
+      "ptsPlus": 1390,
+      "ptsMinus": 1427,
+      "dp": "-37",
+      "coefPts": "0.97",
+      "pts": 24,
       "formAller": [
-        "W",
-        "L",
         "L",
         "L",
         "W",
-        "L",
         "W",
         "L",
-        "W"
+        "L",
+        "W",
+        "W",
+        "L"
       ],
       "formRetour": [
         "W",
         "L",
+        "W",
+        "D",
+        "L",
         "L",
         "L",
         "W",
-        "L",
-        "D",
-        "L",
-        "D"
+        "L"
       ]
     },
     {
@@ -453,6 +453,15 @@
       "scoreAway": 0,
       "homeWin": true,
       "status": "Forfait"
+    },
+    {
+      "date": "19/05/2026",
+      "home": "bier",
+      "away": "rsc",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
     },
     {
       "date": "18/05/2026",
@@ -1158,12 +1167,6 @@
     }
   ],
   "matchesUpcoming": [
-    {
-      "date": "19/05/2026",
-      "home": "bier",
-      "away": "rsc",
-      "status": "Reporté"
-    },
     {
       "date": "21/05/2026",
       "home": "marv",
