@@ -11890,6 +11890,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         YearStatsView._rendered = false;
         SetsPlayedView._rendered = false;
         RankingView._rendered = false;
+        ProgressionView._rendered = false;
+        StatsVisuellesView._container = null;
+        ImpactView._seasonIP = null;
         TabNav.switchTo(TabNav.currentTab);
     }
 
