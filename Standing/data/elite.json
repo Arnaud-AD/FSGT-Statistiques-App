@@ -5,10 +5,10 @@
     "name": "Elite",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/1",
-    "lastUpdated": "2026-05-19T01:09:06",
+    "lastUpdated": "2026-05-19T19:42:46",
     "teamCount": 10,
-    "matchesPlayed": 78,
-    "matchesUpcoming": 12
+    "matchesPlayed": 79,
+    "matchesUpcoming": 11
   },
   "teams": {
     "jen": {
@@ -66,18 +66,18 @@
     {
       "rank": 1,
       "team": "jen",
-      "mj": 15,
-      "g": 15,
+      "mj": 16,
+      "g": 16,
       "p": 0,
-      "setPlus": 45,
+      "setPlus": 48,
       "setMinus": 4,
-      "ds": 41,
-      "coefSet": "11.25",
-      "ptsPlus": 1210,
+      "ds": 44,
+      "coefSet": "12.00",
+      "ptsPlus": 1285,
       "ptsMinus": 898,
-      "dp": "+312",
-      "coefPts": "1.35",
-      "pts": 30,
+      "dp": "+387",
+      "coefPts": "1.43",
+      "pts": 32,
       "formAller": [
         "W",
         "W",
@@ -97,7 +97,7 @@
         "D",
         "W",
         "D",
-        "D",
+        "W",
         "W"
       ]
     },
@@ -370,17 +370,17 @@
     {
       "rank": 9,
       "team": "rhin",
-      "mj": 15,
+      "mj": 16,
       "g": 3,
-      "p": 12,
+      "p": 13,
       "setPlus": 21,
-      "setMinus": 37,
-      "ds": -16,
-      "coefSet": "0.57",
+      "setMinus": 40,
+      "ds": -19,
+      "coefSet": "0.53",
       "ptsPlus": 1114,
-      "ptsMinus": 1295,
-      "dp": "-181",
-      "coefPts": "0.86",
+      "ptsMinus": 1370,
+      "dp": "-256",
+      "coefPts": "0.81",
       "pts": 17,
       "formAller": [
         "L",
@@ -401,7 +401,7 @@
         "L",
         "W",
         "L",
-        "D",
+        "L",
         "P"
       ]
     },
@@ -445,6 +445,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "11/06/2026",
+      "home": "jen",
+      "away": "rhin",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Forfait"
+    },
     {
       "date": "18/05/2026",
       "home": "resc",
@@ -1214,23 +1223,17 @@
       "home": "rhsp",
       "away": "resc",
       "status": "Reporté"
-    },
-    {
-      "date": "11/06/2026",
-      "home": "jen",
-      "away": "rhin",
-      "status": "Reporté"
     }
   ],
   "prTeams": [
     {
       "rank": 1,
       "team": "jen",
-      "elo": 1810.3,
-      "movement": 35.7,
-      "record": "15-0",
-      "power": 97.0,
-      "calendar": "V x15",
+      "elo": 1814.2,
+      "movement": 3.9,
+      "record": "16-0",
+      "power": 97.5,
+      "calendar": "V x16",
       "diffClass": "diff-easy"
     },
     {
@@ -1306,12 +1309,12 @@
     {
       "rank": 9,
       "team": "rhin",
-      "elo": 1349.5,
-      "movement": 19.4,
-      "record": "3-12",
-      "power": 27.2,
-      "calendar": "V vs StarPAFF",
-      "diffClass": "diff-easy"
+      "elo": 1345.7,
+      "movement": -3.9,
+      "record": "3-13",
+      "power": 26.6,
+      "calendar": "D vs Jen",
+      "diffClass": "diff-hard"
     },
     {
       "rank": 10,
@@ -1840,7 +1843,8 @@
       1755.3,
       1758.6,
       1774.6,
-      1810.3
+      1810.3,
+      1814.2
     ],
     "kiki": [
       1500,
@@ -1989,7 +1993,8 @@
       1364.5,
       1340.3,
       1330.2,
-      1349.5
+      1349.5,
+      1345.7
     ],
     "star": [
       1500,
@@ -2030,7 +2035,8 @@
           24,
           26,
           28,
-          30
+          30,
+          32
         ],
         "rank": 1
       },
@@ -2203,7 +2209,8 @@
           14,
           15,
           16,
-          18
+          18,
+          19
         ],
         "rank": 9
       },
