@@ -6353,8 +6353,7 @@ const ImpactView = {
 
     _avgMode: 'tot', // 'tot' ou 'moy'
     _showToggle: false, // visible si multi-sets
-    _lastData: null, // cache pour re-render toggle
-    _lastPlayerRoles: null,
+    _caches: {}, // cache re-render par contexte : { match: {...}, year: {...} }
     _seasonIP: null, // cache IP saison par joueur
     _sortCol: null, // null = tri par defaut (role + pm), sinon colKey
     _sortAsc: false, // desc par defaut pour valeurs numeriques
@@ -6462,9 +6461,7 @@ const ImpactView = {
 
         var playerRoles = BilanView.getPlayerRoles(match, team);
         this._showToggle = completedSets.filter(function(s) { return Utils.setHasStats(s); }).length > 1;
-        this._lastData = data;
-        this._lastPlayerRoles = playerRoles;
-        return this._renderSection(data, playerRoles);
+        return this._renderSection(data, playerRoles, 'match');
     },
 
     renderForYear(matches, team) {
@@ -6483,14 +6480,12 @@ const ImpactView = {
         });
 
         this._showToggle = true;
-        this._lastData = data;
-        this._lastPlayerRoles = playerRoles;
-        return this._renderSection(data, playerRoles);
+        return this._renderSection(data, playerRoles, 'year');
     },
 
-    _renderSection(data, playerRoles) {
-        var isMoy = this._avgMode === 'moy';
-        var html = '<div class="hist-section impact-section collapsed">';
+    _renderSection(data, playerRoles, ctx) {
+        this._caches[ctx] = { data: data, playerRoles: playerRoles, showToggle: this._showToggle };
+        var html = '<div class="hist-section impact-section collapsed" data-impact-ctx="' + ctx + '">';
         html += '<div class="hist-section-title">Impact +/\u2212</div>';
         html += this._renderClaudeTable(data, playerRoles);
         html += this._renderArnaudTable(data, playerRoles);
@@ -12036,9 +12031,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (!btn) return;
         ImpactView.toggleAvgMode();
         var section = btn.closest('.impact-section');
-        if (section && ImpactView._lastData) {
+        if (!section) return;
+        var cache = ImpactView._caches[section.dataset.impactCtx];
+        if (cache) {
+            ImpactView._showToggle = cache.showToggle;
             var wasOpen = !section.classList.contains('collapsed');
-            var html = ImpactView._renderSection(ImpactView._lastData, ImpactView._lastPlayerRoles);
+            var html = ImpactView._renderSection(cache.data, cache.playerRoles, section.dataset.impactCtx);
             var temp = document.createElement('div');
             temp.innerHTML = html;
             var newSection = temp.firstChild;
@@ -12066,9 +12064,12 @@ document.addEventListener('DOMContentLoaded', async function() {
             ImpactView._sortAsc = false;
         }
         var section = th.closest('.impact-section');
-        if (section && ImpactView._lastData) {
+        if (!section) return;
+        var cache = ImpactView._caches[section.dataset.impactCtx];
+        if (cache) {
+            ImpactView._showToggle = cache.showToggle;
             var wasOpen = !section.classList.contains('collapsed');
-            var html = ImpactView._renderSection(ImpactView._lastData, ImpactView._lastPlayerRoles);
+            var html = ImpactView._renderSection(cache.data, cache.playerRoles, section.dataset.impactCtx);
             var temp = document.createElement('div');
             temp.innerHTML = html;
             var newSection = temp.firstChild;
