@@ -5,7 +5,7 @@
     "name": "Medium",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/15",
-    "lastUpdated": "2026-05-19T01:09:07",
+    "lastUpdated": "2026-05-20T08:04:19",
     "teamCount": 9,
     "matchesPlayed": 60,
     "matchesUpcoming": 12
@@ -163,7 +163,7 @@
         "L",
         "L",
         "W",
-        "P"
+        "D"
       ]
     },
     {
@@ -199,7 +199,7 @@
         "W",
         "W",
         "D",
-        "P"
+        "D"
       ]
     },
     {
@@ -343,7 +343,7 @@
         "D",
         "L",
         "D",
-        "P"
+        "D"
       ]
     },
     {
@@ -379,7 +379,7 @@
         "D",
         "L",
         "L",
-        "P"
+        "D"
       ]
     }
   ],
@@ -930,13 +930,13 @@
       "date": "20/05/2026",
       "home": "mort",
       "away": "boit",
-      "status": "Sem. 16"
+      "status": "Reporté"
     },
     {
       "date": "20/05/2026",
       "home": "ryoi",
       "away": "tigr",
-      "status": "Sem. 16"
+      "status": "Reporté"
     },
     {
       "date": "22/05/2026",
