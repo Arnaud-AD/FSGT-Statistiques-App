@@ -5,10 +5,10 @@
     "name": "Or 6x6",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/4",
-    "lastUpdated": "2026-05-21T11:24:51",
+    "lastUpdated": "2026-05-22T01:44:26",
     "teamCount": 10,
-    "matchesPlayed": 77,
-    "matchesUpcoming": 13
+    "matchesPlayed": 78,
+    "matchesUpcoming": 12
   },
   "teams": {
     "cout": {
@@ -26,14 +26,14 @@
       "short": "M6",
       "color": "#2ecc71"
     },
-    "neui": {
-      "name": "Neuilly Sa Mère",
-      "short": "NS",
-      "color": "#f39c12"
-    },
     "mous": {
       "name": "Moustache Team",
       "short": "MT",
+      "color": "#f39c12"
+    },
+    "neui": {
+      "name": "Neuilly Sa Mère",
+      "short": "NS",
       "color": "#9b59b6"
     },
     "cret": {
@@ -136,7 +136,7 @@
         "W",
         "W",
         "W",
-        "P"
+        "D"
       ]
     },
     {
@@ -179,44 +179,6 @@
     },
     {
       "rank": 4,
-      "team": "neui",
-      "mj": 15,
-      "g": 9,
-      "p": 6,
-      "setPlus": 28,
-      "setMinus": 26,
-      "ds": 2,
-      "coefSet": "1.08",
-      "ptsPlus": 1194,
-      "ptsMinus": 1161,
-      "dp": "+33",
-      "coefPts": "1.03",
-      "pts": 24,
-      "formAller": [
-        "W",
-        "W",
-        "W",
-        "W",
-        "L",
-        "W",
-        "L",
-        "D",
-        "W"
-      ],
-      "formRetour": [
-        "W",
-        "L",
-        "L",
-        "W",
-        "L",
-        "W",
-        "L",
-        "D",
-        "D"
-      ]
-    },
-    {
-      "rank": 5,
       "team": "no",
       "mj": 14,
       "g": 7,
@@ -250,24 +212,62 @@
         "L",
         "D",
         "L",
-        "P"
+        "D"
+      ]
+    },
+    {
+      "rank": 5,
+      "team": "neui",
+      "mj": 16,
+      "g": 9,
+      "p": 7,
+      "setPlus": 28,
+      "setMinus": 29,
+      "ds": -1,
+      "coefSet": "0.97",
+      "ptsPlus": 1250,
+      "ptsMinus": 1236,
+      "dp": "+14",
+      "coefPts": "1.01",
+      "pts": 25,
+      "formAller": [
+        "W",
+        "W",
+        "W",
+        "W",
+        "L",
+        "W",
+        "L",
+        "D",
+        "W"
+      ],
+      "formRetour": [
+        "W",
+        "L",
+        "L",
+        "W",
+        "L",
+        "W",
+        "L",
+        "D",
+        "L"
       ]
     },
     {
       "rank": 6,
       "team": "mous",
-      "mj": 16,
-      "g": 7,
+      "mj": 17,
+      "g": 8,
       "p": 9,
-      "setPlus": 32,
+      "setPlus": 35,
       "setMinus": 32,
-      "ds": 0,
-      "coefSet": "1.00",
-      "ptsPlus": 1374,
-      "ptsMinus": 1395,
-      "dp": "-21",
-      "coefPts": "0.98",
-      "pts": 23,
+      "ds": 3,
+      "coefSet": "1.09",
+      "ptsPlus": 1449,
+      "ptsMinus": 1451,
+      "dp": "-2",
+      "coefPts": "1.00",
+      "pts": 25,
       "formAller": [
         "W",
         "L",
@@ -288,7 +288,7 @@
         "L",
         "W",
         "W",
-        "D"
+        "W"
       ]
     },
     {
@@ -364,7 +364,7 @@
         "L",
         "L",
         "W",
-        "P"
+        "D"
       ]
     },
     {
@@ -440,11 +440,20 @@
         "L",
         "D",
         "L",
-        "P"
+        "D"
       ]
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "21/05/2026",
+      "home": "neui",
+      "away": "mous",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
     {
       "date": "18/05/2026",
       "home": "cout",
@@ -1141,16 +1150,10 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "21/05/2026",
-      "home": "neui",
-      "away": "mous",
-      "status": "Reporté"
-    },
-    {
       "date": "22/05/2026",
       "home": "no",
       "away": "vlan",
-      "status": "Sem. 18"
+      "status": "Reporté"
     },
     {
       "date": "26/05/2026",
@@ -1192,7 +1195,7 @@
       "date": "03/06/2026",
       "home": "ivry",
       "away": "raia",
-      "status": "Sem. 18"
+      "status": "Reporté"
     },
     {
       "date": "04/06/2026",
@@ -1262,6 +1265,16 @@
     },
     {
       "rank": 5,
+      "team": "mous",
+      "elo": 1522.5,
+      "movement": 44.9,
+      "record": "8-9",
+      "power": 53.6,
+      "calendar": "V vs Neuilly",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 6,
       "team": "cret",
       "elo": 1495.7,
       "movement": 23.5,
@@ -1271,24 +1284,14 @@
       "diffClass": "diff-easy"
     },
     {
-      "rank": 6,
-      "team": "neui",
-      "elo": 1495.0,
-      "movement": -17.1,
-      "record": "9-6",
-      "power": 49.2,
-      "calendar": "D vs Coutiao",
-      "diffClass": "diff-hard"
-    },
-    {
       "rank": 7,
-      "team": "mous",
-      "elo": 1477.6,
-      "movement": 22.8,
-      "record": "7-9",
-      "power": 46.4,
-      "calendar": "V vs Ivry",
-      "diffClass": "diff-easy"
+      "team": "neui",
+      "elo": 1450.1,
+      "movement": -44.9,
+      "record": "9-7",
+      "power": 42.0,
+      "calendar": "D vs Moustache",
+      "diffClass": "diff-hard"
     },
     {
       "rank": 8,
@@ -1379,24 +1382,6 @@
       1572.7,
       1556.2
     ],
-    "neui": [
-      1500,
-      1530.7,
-      1549.0,
-      1560.7,
-      1583.0,
-      1545.6,
-      1570.2,
-      1588.2,
-      1562.3,
-      1572.9,
-      1524.2,
-      1501.7,
-      1522.2,
-      1491.7,
-      1512.1,
-      1495.0
-    ],
     "mous": [
       1500,
       1545.0,
@@ -1414,7 +1399,27 @@
       1516.4,
       1492.0,
       1454.8,
-      1477.6
+      1477.6,
+      1522.5
+    ],
+    "neui": [
+      1500,
+      1530.7,
+      1549.0,
+      1560.7,
+      1583.0,
+      1545.6,
+      1570.2,
+      1588.2,
+      1562.3,
+      1572.9,
+      1524.2,
+      1501.7,
+      1522.2,
+      1491.7,
+      1512.1,
+      1495.0,
+      1450.1
     ],
     "cret": [
       1500,
@@ -1575,27 +1580,6 @@
         ],
         "rank": 3
       },
-      "neui": {
-        "points": [
-          0,
-          2,
-          4,
-          6,
-          8,
-          9,
-          11,
-          13,
-          14,
-          16,
-          17,
-          18,
-          20,
-          21,
-          23,
-          24
-        ],
-        "rank": 4
-      },
       "mous": {
         "points": [
           0,
@@ -1614,9 +1598,32 @@
           19,
           20,
           21,
-          23
+          23,
+          25
         ],
         "rank": 6
+      },
+      "neui": {
+        "points": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          9,
+          11,
+          13,
+          14,
+          16,
+          17,
+          18,
+          20,
+          21,
+          23,
+          24,
+          25
+        ],
+        "rank": 5
       },
       "cret": {
         "points": [
@@ -1680,7 +1687,7 @@
           20,
           21
         ],
-        "rank": 5
+        "rank": 4
       },
       "vill": {
         "points": [
