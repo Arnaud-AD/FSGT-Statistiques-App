@@ -5,10 +5,10 @@
     "name": "Easy",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/3",
-    "lastUpdated": "2026-05-20T08:04:20",
+    "lastUpdated": "2026-05-21T11:24:50",
     "teamCount": 8,
-    "matchesPlayed": 52,
-    "matchesUpcoming": 4
+    "matchesPlayed": 53,
+    "matchesUpcoming": 3
   },
   "teams": {
     "neku": {
@@ -41,14 +41,14 @@
       "short": "FF",
       "color": "#1abc9c"
     },
-    "punc": {
-      "name": "Punchline",
-      "short": "PU",
-      "color": "#e67e22"
-    },
     "eagl": {
       "name": "Eagle 4",
       "short": "E4",
+      "color": "#e67e22"
+    },
+    "punc": {
+      "name": "Punchline",
+      "short": "PU",
       "color": "#f1c40f"
     }
   },
@@ -260,18 +260,18 @@
     {
       "rank": 7,
       "team": "punc",
-      "mj": 12,
+      "mj": 13,
       "g": 2,
-      "p": 10,
-      "setPlus": 8,
-      "setMinus": 31,
-      "ds": -23,
-      "coefSet": "0.26",
-      "ptsPlus": 743,
-      "ptsMinus": 930,
-      "dp": "-187",
-      "coefPts": "0.80",
-      "pts": 14,
+      "p": 11,
+      "setPlus": 9,
+      "setMinus": 33,
+      "ds": -24,
+      "coefSet": "0.27",
+      "ptsPlus": 825,
+      "ptsMinus": 1013,
+      "dp": "-188",
+      "coefPts": "0.81",
+      "pts": 15,
       "formAller": [
         "L",
         "L",
@@ -284,7 +284,7 @@
       "formRetour": [
         "L",
         "L",
-        "D",
+        "L",
         "L",
         "D",
         "L",
@@ -294,18 +294,18 @@
     {
       "rank": 8,
       "team": "eagl",
-      "mj": 13,
-      "g": 1,
+      "mj": 14,
+      "g": 2,
       "p": 12,
-      "setPlus": 7,
-      "setMinus": 35,
-      "ds": -28,
-      "coefSet": "0.20",
-      "ptsPlus": 753,
-      "ptsMinus": 1010,
-      "dp": "-257",
-      "coefPts": "0.75",
-      "pts": 14,
+      "setPlus": 9,
+      "setMinus": 36,
+      "ds": -27,
+      "coefSet": "0.25",
+      "ptsPlus": 836,
+      "ptsMinus": 1092,
+      "dp": "-256",
+      "coefPts": "0.77",
+      "pts": 16,
       "formAller": [
         "L",
         "W",
@@ -318,7 +318,7 @@
       "formRetour": [
         "L",
         "L",
-        "D",
+        "W",
         "L",
         "L",
         "L",
@@ -327,6 +327,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "20/05/2026",
+      "home": "eagl",
+      "away": "punc",
+      "scoreHome": 2,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "11/05/2026",
       "home": "eagl",
@@ -798,12 +807,6 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "20/05/2026",
-      "home": "eagl",
-      "away": "punc",
-      "status": "Reporté"
-    },
-    {
       "date": "21/05/2026",
       "home": "fata",
       "away": "touk",
@@ -885,22 +888,22 @@
     },
     {
       "rank": 7,
-      "team": "punc",
-      "elo": 1299.2,
-      "movement": -17.9,
-      "record": "2-10",
-      "power": 13.5,
-      "calendar": "D x6",
-      "diffClass": "diff-hard"
+      "team": "eagl",
+      "elo": 1298.7,
+      "movement": 22.8,
+      "record": "2-12",
+      "power": 13.4,
+      "calendar": "V vs Punchline",
+      "diffClass": "diff-easy"
     },
     {
       "rank": 8,
-      "team": "eagl",
-      "elo": 1276.0,
-      "movement": -5.5,
-      "record": "1-12",
-      "power": 9.2,
-      "calendar": "D x6",
+      "team": "punc",
+      "elo": 1276.5,
+      "movement": -22.8,
+      "record": "2-11",
+      "power": 9.3,
+      "calendar": "D x7",
       "diffClass": "diff-hard"
     }
   ],
@@ -1003,21 +1006,6 @@
       1379.9,
       1358.7
     ],
-    "punc": [
-      1500,
-      1476.4,
-      1446.6,
-      1463.2,
-      1444.8,
-      1407.3,
-      1450.5,
-      1430.3,
-      1411.9,
-      1392.5,
-      1360.4,
-      1317.2,
-      1299.2
-    ],
     "eagl": [
       1500,
       1462.7,
@@ -1032,7 +1020,24 @@
       1311.8,
       1305.3,
       1281.5,
-      1276.0
+      1276.0,
+      1298.7
+    ],
+    "punc": [
+      1500,
+      1476.4,
+      1446.6,
+      1463.2,
+      1444.8,
+      1407.3,
+      1450.5,
+      1430.3,
+      1411.9,
+      1392.5,
+      1360.4,
+      1317.2,
+      1299.2,
+      1276.5
     ]
   },
   "evolutionData": {
@@ -1152,24 +1157,6 @@
         ],
         "rank": 6
       },
-      "punc": {
-        "points": [
-          0,
-          1,
-          2,
-          4,
-          5,
-          6,
-          8,
-          9,
-          10,
-          11,
-          12,
-          13,
-          14
-        ],
-        "rank": 7
-      },
       "eagl": {
         "points": [
           0,
@@ -1185,9 +1172,29 @@
           11,
           12,
           13,
-          14
+          14,
+          16
         ],
         "rank": 8
+      },
+      "punc": {
+        "points": [
+          0,
+          1,
+          2,
+          4,
+          5,
+          6,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "rank": 7
       }
     }
   }
