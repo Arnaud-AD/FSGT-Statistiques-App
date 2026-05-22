@@ -1039,14 +1039,15 @@ body {
     letter-spacing: 0.4px;
     text-align: center;
     padding: 6px 5px;
+    color: white;
 }
-.stats-table-full .cat-group.service   { background: var(--cat-service-bg);   color: var(--cat-service); }
-.stats-table-full .cat-group.reception { background: var(--cat-reception-bg); color: var(--cat-reception); }
-.stats-table-full .cat-group.passe     { background: var(--cat-passe-bg);     color: var(--cat-passe); }
-.stats-table-full .cat-group.attack    { background: var(--cat-attack-bg);    color: var(--cat-attack); }
-.stats-table-full .cat-group.relance   { background: var(--cat-relance-bg);   color: var(--cat-relance); }
-.stats-table-full .cat-group.defense   { background: var(--cat-defense-bg);   color: var(--cat-defense); }
-.stats-table-full .cat-group.block     { background: var(--cat-block-bg);     color: var(--cat-block); }
+.stats-table-full .cat-group.service   { background: var(--cat-service); }
+.stats-table-full .cat-group.reception { background: var(--cat-reception); }
+.stats-table-full .cat-group.passe     { background: var(--cat-passe); }
+.stats-table-full .cat-group.attack    { background: var(--cat-attack); }
+.stats-table-full .cat-group.relance   { background: var(--cat-relance); }
+.stats-table-full .cat-group.defense   { background: var(--cat-defense); }
+.stats-table-full .cat-group.block     { background: var(--cat-block); }
 
 /* Deuxième ligne d'en-tête : colonnes (centrées, override du first-child gauche) */
 .stats-table-full .cat-col-row th {
