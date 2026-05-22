@@ -5,10 +5,10 @@
     "name": "Or 6x6",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/4",
-    "lastUpdated": "2026-05-22T01:44:26",
+    "lastUpdated": "2026-05-22T23:04:53",
     "teamCount": 10,
-    "matchesPlayed": 78,
-    "matchesUpcoming": 12
+    "matchesPlayed": 79,
+    "matchesUpcoming": 11
   },
   "teams": {
     "cout": {
@@ -36,29 +36,29 @@
       "short": "NS",
       "color": "#9b59b6"
     },
+    "no": {
+      "name": "No s(o)ucy",
+      "short": "N2",
+      "color": "#1abc9c"
+    },
     "cret": {
       "name": "Cret'1",
       "short": "CR",
-      "color": "#1abc9c"
+      "color": "#e67e22"
     },
     "ivry": {
       "name": "Ivry Body",
       "short": "IB",
-      "color": "#e67e22"
-    },
-    "no": {
-      "name": "No s(o)ucy",
-      "short": "N2",
       "color": "#f1c40f"
-    },
-    "vill": {
-      "name": "Villyé-ball",
-      "short": "VI",
-      "color": "#95a5a6"
     },
     "vlan": {
       "name": "Et Vlan",
       "short": "VL",
+      "color": "#95a5a6"
+    },
+    "vill": {
+      "name": "Villyé-ball",
+      "short": "VI",
       "color": "#34495e"
     }
   },
@@ -180,18 +180,18 @@
     {
       "rank": 4,
       "team": "no",
-      "mj": 14,
-      "g": 7,
+      "mj": 15,
+      "g": 8,
       "p": 7,
-      "setPlus": 30,
-      "setMinus": 26,
-      "ds": 4,
-      "coefSet": "1.15",
-      "ptsPlus": 1248,
-      "ptsMinus": 1205,
-      "dp": "+43",
-      "coefPts": "1.04",
-      "pts": 21,
+      "setPlus": 33,
+      "setMinus": 27,
+      "ds": 6,
+      "coefSet": "1.22",
+      "ptsPlus": 1345,
+      "ptsMinus": 1275,
+      "dp": "+70",
+      "coefPts": "1.05",
+      "pts": 23,
       "formAller": [
         "L",
         "L",
@@ -212,7 +212,7 @@
         "L",
         "D",
         "L",
-        "D"
+        "W"
       ]
     },
     {
@@ -408,18 +408,18 @@
     {
       "rank": 10,
       "team": "vlan",
-      "mj": 16,
+      "mj": 17,
       "g": 0,
-      "p": 16,
-      "setPlus": 2,
-      "setMinus": 48,
-      "ds": -46,
-      "coefSet": "0.04",
-      "ptsPlus": 869,
-      "ptsMinus": 1247,
-      "dp": "-378",
+      "p": 17,
+      "setPlus": 3,
+      "setMinus": 51,
+      "ds": -48,
+      "coefSet": "0.06",
+      "ptsPlus": 939,
+      "ptsMinus": 1344,
+      "dp": "-405",
       "coefPts": "0.70",
-      "pts": 16,
+      "pts": 17,
       "formAller": [
         "L",
         "L",
@@ -440,11 +440,20 @@
         "L",
         "D",
         "L",
-        "D"
+        "L"
       ]
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "22/05/2026",
+      "home": "no",
+      "away": "vlan",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "21/05/2026",
       "home": "neui",
@@ -1150,12 +1159,6 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "22/05/2026",
-      "home": "no",
-      "away": "vlan",
-      "status": "Reporté"
-    },
-    {
       "date": "26/05/2026",
       "home": "marv",
       "away": "cout",
@@ -1229,7 +1232,7 @@
       "elo": 1799.3,
       "movement": 16.5,
       "record": "17-0",
-      "power": 98.0,
+      "power": 97.1,
       "calendar": "V x17",
       "diffClass": "diff-easy"
     },
@@ -1239,19 +1242,19 @@
       "elo": 1695.6,
       "movement": 7.8,
       "record": "12-3",
-      "power": 81.4,
+      "power": 80.8,
       "calendar": "V x7",
       "diffClass": "diff-easy"
     },
     {
       "rank": 3,
       "team": "no",
-      "elo": 1568.6,
-      "movement": -23.3,
-      "record": "7-7",
-      "power": 61.0,
-      "calendar": "D vs La",
-      "diffClass": "diff-hard"
+      "elo": 1574.5,
+      "movement": 5.9,
+      "record": "8-7",
+      "power": 61.7,
+      "calendar": "V vs Et",
+      "diffClass": "diff-easy"
     },
     {
       "rank": 4,
@@ -1259,7 +1262,7 @@
       "elo": 1556.2,
       "movement": -16.5,
       "record": "10-5",
-      "power": 59.0,
+      "power": 58.8,
       "calendar": "D x3",
       "diffClass": "diff-hard"
     },
@@ -1269,7 +1272,7 @@
       "elo": 1522.5,
       "movement": 44.9,
       "record": "8-9",
-      "power": 53.6,
+      "power": 53.5,
       "calendar": "V vs Neuilly",
       "diffClass": "diff-easy"
     },
@@ -1289,7 +1292,7 @@
       "elo": 1450.1,
       "movement": -44.9,
       "record": "9-7",
-      "power": 42.0,
+      "power": 42.1,
       "calendar": "D vs Moustache",
       "diffClass": "diff-hard"
     },
@@ -1299,7 +1302,7 @@
       "elo": 1438.2,
       "movement": -7.8,
       "record": "6-10",
-      "power": 40.1,
+      "power": 40.3,
       "calendar": "D vs La",
       "diffClass": "diff-hard"
     },
@@ -1309,18 +1312,18 @@
       "elo": 1285.8,
       "movement": -23.5,
       "record": "2-12",
-      "power": 15.7,
+      "power": 16.3,
       "calendar": "D x3",
       "diffClass": "diff-hard"
     },
     {
       "rank": 10,
       "team": "vlan",
-      "elo": 1188.1,
-      "movement": -9.0,
-      "record": "0-16",
+      "elo": 1182.2,
+      "movement": -5.9,
+      "record": "0-17",
       "power": 0.0,
-      "calendar": "D x16",
+      "calendar": "D x17",
       "diffClass": "diff-hard"
     }
   ],
@@ -1421,6 +1424,24 @@
       1495.0,
       1450.1
     ],
+    "no": [
+      1500,
+      1470.2,
+      1451.9,
+      1480.7,
+      1512.3,
+      1475.8,
+      1461.4,
+      1446.2,
+      1470.7,
+      1506.3,
+      1555.1,
+      1589.3,
+      1609.4,
+      1591.8,
+      1568.6,
+      1574.5
+    ],
     "cret": [
       1500,
       1467.1,
@@ -1459,40 +1480,6 @@
       1446.0,
       1438.2
     ],
-    "no": [
-      1500,
-      1470.2,
-      1451.9,
-      1480.7,
-      1512.3,
-      1475.8,
-      1461.4,
-      1446.2,
-      1470.7,
-      1506.3,
-      1555.1,
-      1589.3,
-      1609.4,
-      1591.8,
-      1568.6
-    ],
-    "vill": [
-      1500,
-      1479.4,
-      1451.0,
-      1428.7,
-      1458.1,
-      1435.3,
-      1399.0,
-      1371.8,
-      1346.6,
-      1338.9,
-      1318.5,
-      1342.7,
-      1332.5,
-      1309.2,
-      1285.8
-    ],
     "vlan": [
       1500,
       1455.0,
@@ -1510,7 +1497,25 @@
       1226.6,
       1221.2,
       1197.1,
-      1188.1
+      1188.1,
+      1182.2
+    ],
+    "vill": [
+      1500,
+      1479.4,
+      1451.0,
+      1428.7,
+      1458.1,
+      1435.3,
+      1399.0,
+      1371.8,
+      1346.6,
+      1338.9,
+      1318.5,
+      1342.7,
+      1332.5,
+      1309.2,
+      1285.8
     ]
   },
   "evolutionData": {
@@ -1625,6 +1630,27 @@
         ],
         "rank": 5
       },
+      "no": {
+        "points": [
+          0,
+          1,
+          2,
+          4,
+          6,
+          7,
+          8,
+          9,
+          11,
+          13,
+          15,
+          17,
+          19,
+          20,
+          21,
+          23
+        ],
+        "rank": 4
+      },
       "cret": {
         "points": [
           0,
@@ -1669,25 +1695,28 @@
         ],
         "rank": 8
       },
-      "no": {
+      "vlan": {
         "points": [
           0,
           1,
           2,
+          3,
           4,
+          5,
           6,
           7,
           8,
           9,
+          10,
           11,
+          12,
           13,
+          14,
           15,
-          17,
-          19,
-          20,
-          21
+          16,
+          17
         ],
-        "rank": 4
+        "rank": 10
       },
       "vill": {
         "points": [
@@ -1708,28 +1737,6 @@
           16
         ],
         "rank": 9
-      },
-      "vlan": {
-        "points": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12,
-          13,
-          14,
-          15,
-          16
-        ],
-        "rank": 10
       }
     }
   }
