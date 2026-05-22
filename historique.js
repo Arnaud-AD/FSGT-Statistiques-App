@@ -10083,7 +10083,7 @@ const MatchStatsView = {
         // Afficher et rendre le bilan
         var bilanContainer = document.getElementById('bilanContainer');
         if (bilanContainer) {
-            bilanContainer.style.display = 'block';
+            bilanContainer.classList.remove('bilan-hidden');
             BilanView.render(match, bilanContainer);
             OpenSections.restore(bilanContainer);
         }
@@ -10091,7 +10091,7 @@ const MatchStatsView = {
 
     hideBilanView() {
         var bilanContainer = document.getElementById('bilanContainer');
-        if (bilanContainer) bilanContainer.style.display = 'none';
+        if (bilanContainer) bilanContainer.classList.add('bilan-hidden');
 
         // Restaurer les sections normales
         var statsSection = document.getElementById('statsSection');

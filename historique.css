@@ -2015,6 +2015,12 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
     font-size: 11px;
 }
 
+/* Masquage du sous-onglet Bilan via classe (laisse le CSS responsive piloter
+   le display quand visible — cf. grille dashboard desktop V29.1) */
+#bilanContainer.bilan-hidden {
+    display: none !important;
+}
+
 /* ==================== RESPONSIVE: TABLETTE (>=768px) ==================== */
 /* V29.0 — Refonte responsive : palier tablette (768-1279px), mobile-first cascade */
 @media (min-width: 768px) {
@@ -2726,6 +2732,41 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
     }
     .ranking-table-wrap {
         padding: 0 16px;
+    }
+
+    /* En-tête match : bandeau horizontal au lieu d'une pile centrée */
+    .detail-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 6px 28px;
+        padding: 20px 56px;
+    }
+    .detail-header > .detail-result-icon,
+    .detail-header > .detail-result-label,
+    .detail-header > .detail-opponent,
+    .detail-header > .detail-meta {
+        margin-bottom: 0;
+    }
+
+    /* Sections Bilan : grille dashboard 2 colonnes.
+       Les enfants non-section (filtres, carte bilan, sélecteurs) et le tableau
+       stats large restent pleine largeur. */
+    #bilanContainer,
+    .detail-section,
+    #content-yearStats.active {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 28px;
+        align-items: start;
+    }
+    #bilanContainer > :not(.hist-section),
+    .detail-section > :not(.hist-section),
+    #content-yearStats > :not(.hist-section),
+    .hist-section:has(.stats-tables-container),
+    .hist-section:has(.stats-desktop) {
+        grid-column: 1 / -1;
     }
 }
 
