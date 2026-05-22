@@ -3893,61 +3893,70 @@ const SharedComponents = {
         if (players.length === 0) return '';
 
         const totals = StatsAggregator.computeTotals(playerTotals);
-        let html = '';
+        const catKeys = ['service', 'reception', 'passe', 'attack', 'relance', 'defense', 'block'];
 
+        let html = '<div class="stats-team-block">';
         html += '<div class="stats-team-title ' + teamClass + '">';
         html += '<span>' + Utils.escapeHtml(teamLabel) + '</span>';
         html += SharedComponents.renderAvgModeToggle();
         html += SharedComponents.renderDisplayModeToggle();
         html += '</div>';
-        html += '<div class="stats-tables-container">';
 
-        // Colonne noms joueurs (sticky)
-        html += '<div class="stats-players-col">';
-        html += '<div class="player-header" data-sort-col="player">Joueur' + self._sortIcon('player', null) + '</div>';
-        html += '<div class="player-subheader"></div>';
-        players.forEach(function(name) {
-            html += '<div class="player-name">' + Utils.escapeHtml(name) + '</div>';
-        });
-        html += '<div class="player-name total-row">Total</div>';
-        html += '</div>';
+        html += '<div class="stats-table-full-wrap">';
+        html += '<table class="stats-table stats-table-full"><thead>';
 
-        // Cartes par categorie
-        var catKeys = ['service', 'reception', 'passe', 'attack', 'relance', 'defense', 'block'];
+        // Ligne 1 : groupes de categories (en-tetes colores)
+        html += '<tr class="cat-group-row">';
+        html += '<th class="player-group" rowspan="2" data-sort-col="player" data-sort-cat="' + catKeys[0] + '">Joueur' + self._sortIcon('player', catKeys[0]) + '</th>';
         catKeys.forEach(function(catKey) {
             var catDef = cats[catKey];
-            html += '<div class="stat-table-card">';
-            html += '<div class="stat-table-header ' + catKey + '">' + catDef.label + '</div>';
-            html += '<table class="detail-stats-table"><thead><tr>';
-            catDef.columns.forEach(function(col) {
+            html += '<th class="cat-group cat-start ' + catKey + '" colspan="' + catDef.columns.length + '">' + catDef.label + '</th>';
+        });
+        html += '</tr>';
+
+        // Ligne 2 : colonnes de chaque categorie
+        html += '<tr class="cat-col-row">';
+        catKeys.forEach(function(catKey) {
+            cats[catKey].columns.forEach(function(col, idx) {
                 var sortKey = col.computed || col.key;
-                html += '<th data-sort-col="' + sortKey + '" data-sort-cat="' + catKey + '">' + col.label + self._sortIcon(sortKey, catKey) + '</th>';
+                var startCls = (idx === 0) ? ' cat-start' : '';
+                html += '<th class="' + catKey + startCls + '" data-sort-col="' + sortKey + '" data-sort-cat="' + catKey + '">' + col.label + self._sortIcon(sortKey, catKey) + '</th>';
             });
-            html += '</tr></thead><tbody>';
+        });
+        html += '</tr></thead><tbody>';
 
-            players.forEach(function(name) {
-                var p = playerTotals[name];
-                html += '<tr>';
-                catDef.columns.forEach(function(col) {
-                    html += SharedComponents.renderCell(p, catKey, col);
+        // Lignes joueurs
+        players.forEach(function(name) {
+            var p = playerTotals[name];
+            html += '<tr><td><div class="player-cell">';
+            html += SharedComponents.renderRoleDots(name);
+            html += Utils.escapeHtml(name);
+            html += '</div></td>';
+            catKeys.forEach(function(catKey) {
+                cats[catKey].columns.forEach(function(col, idx) {
+                    var cell = SharedComponents.renderCell(p, catKey, col);
+                    if (idx === 0) cell = cell.replace('<td class="', '<td class="cat-start ');
+                    html += cell;
                 });
-                html += '</tr>';
-            });
-
-            // Total
-            // V19.1 fix : la cle UI 'passe' correspond a la cle data 'pass'
-            var totDataK = (catKey === 'passe') ? 'pass' : catKey;
-            html += '<tr class="total-row">';
-            var totRowStats = { [totDataK]: totals[totDataK], service: totals.service, _setsPlayed: SharedComponents._totalSets };
-            catDef.columns.forEach(function(col) {
-                html += SharedComponents.renderCell(totRowStats, catKey, col);
             });
             html += '</tr>';
-
-            html += '</tbody></table></div>';
         });
 
-        html += '</div>';
+        // Ligne total
+        // V19.1 fix : la cle UI 'passe' correspond a la cle data 'pass'
+        html += '<tr class="total-row"><td>Total</td>';
+        catKeys.forEach(function(catKey) {
+            var totDataK = (catKey === 'passe') ? 'pass' : catKey;
+            var totRowStats = { [totDataK]: totals[totDataK], service: totals.service, _setsPlayed: SharedComponents._totalSets };
+            cats[catKey].columns.forEach(function(col, idx) {
+                var cell = SharedComponents.renderCell(totRowStats, catKey, col);
+                if (idx === 0) cell = cell.replace('<td class="', '<td class="cat-start ');
+                html += cell;
+            });
+        });
+        html += '</tr>';
+
+        html += '</tbody></table></div></div>';
         return html;
     },
 

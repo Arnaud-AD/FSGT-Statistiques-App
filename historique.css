@@ -994,6 +994,78 @@ body {
 .stats-table .stat-pct { font-size: 10px; color: var(--text-secondary); font-weight: 400; }
 .stats-table .stat-secondary { font-size: 10px; color: var(--text-secondary); font-weight: 400; }
 
+/* ==================== TABLE STATS DESKTOP COMPLÈTE (V29.2) ====================
+   Une seule table propre (esthétique mobile) avec toutes les catégories visibles,
+   en-têtes de groupe colorés et séparateurs verticaux entre catégories. */
+.stats-table-full-wrap {
+    overflow-x: auto;
+}
+
+.stats-table-full {
+    font-size: 12px;
+}
+
+.stats-table-full th,
+.stats-table-full td {
+    padding: 7px 4px;
+    white-space: nowrap;
+}
+
+.stats-table-full td {
+    font-size: 12px;
+}
+
+.stats-table-full td:first-child,
+.stats-table-full th.player-group {
+    padding-left: 10px;
+    text-align: left;
+    min-width: 104px;
+}
+
+/* % et valeur secondaire compactés sur leur propre ligne pour gagner en largeur */
+.stats-table-full .stat-pct,
+.stats-table-full .stat-secondary {
+    display: block;
+    font-size: 9px;
+    line-height: 1.1;
+}
+
+/* Première ligne d'en-tête : groupes de catégories colorés */
+.stats-table-full .cat-group {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    text-align: center;
+    padding: 6px 5px;
+}
+.stats-table-full .cat-group.service   { background: var(--cat-service-bg);   color: var(--cat-service); }
+.stats-table-full .cat-group.reception { background: var(--cat-reception-bg); color: var(--cat-reception); }
+.stats-table-full .cat-group.passe     { background: var(--cat-passe-bg);     color: var(--cat-passe); }
+.stats-table-full .cat-group.attack    { background: var(--cat-attack-bg);    color: var(--cat-attack); }
+.stats-table-full .cat-group.relance   { background: var(--cat-relance-bg);   color: var(--cat-relance); }
+.stats-table-full .cat-group.defense   { background: var(--cat-defense-bg);   color: var(--cat-defense); }
+.stats-table-full .cat-group.block     { background: var(--cat-block-bg);     color: var(--cat-block); }
+
+/* Deuxième ligne d'en-tête : colonnes (centrées, override du first-child gauche) */
+.stats-table-full .cat-col-row th {
+    text-align: center;
+    padding-left: 5px;
+}
+
+/* Séparateurs verticaux entre catégories */
+.stats-table-full .cat-start {
+    border-left: 1px solid var(--border-color);
+}
+
+/* Cellules joueur : pastilles de rôle + nom */
+.stats-table-full .player-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 /* Player cell with role dot */
 .player-cell {
     display: flex;
