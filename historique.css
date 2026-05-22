@@ -1060,14 +1060,7 @@ body {
     border-left: 1px solid var(--border-color);
 }
 
-/* Cellules joueur : pastilles de rôle + nom */
-.stats-table-full .player-cell {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-/* Player cell with role dot */
+/* Player cell with role dot (mobile + table desktop .stats-table-full) */
 .player-cell {
     display: flex;
     align-items: center;
@@ -1096,150 +1089,19 @@ body {
 }
 
 
-/* ==================== STATS: DESKTOP MULTI-CARD ==================== */
+/* ==================== STATS: CONTENEUR VUE DESKTOP ==================== */
+/* Affiché (display:block) en desktop ≥1280px ; contient la table .stats-table-full */
 .stats-desktop {
     display: none;
 }
 
-.stats-tables-container {
-    display: flex;
-    gap: 0;
-    overflow-x: auto;
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
-}
-
-/* Player names column (sticky) */
-.stats-players-col {
-    flex-shrink: 0;
-    border-right: 2px solid var(--border-color);
-    background: white;
-    position: sticky;
-    left: 0;
-    z-index: 2;
-}
-
-.stats-players-col .player-header {
-    padding: 4px 8px;
-    font-family: 'Google Sans', sans-serif;
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    background: var(--bg-header);
-    height: 24px;
-    display: flex;
-    align-items: center;
-}
-
-.stats-players-col .player-subheader {
-    padding: 3px 8px;
-    font-size: 8px;
-    background: var(--bg-header);
-    border-bottom: 1px solid var(--border-color);
-    height: auto;
-    min-height: 14px;
-}
-
-.stats-players-col .player-name {
-    padding: 5px 8px;
-    font-size: 10px;
-    font-weight: 500;
-    white-space: nowrap;
-    border-bottom: 1px solid #f1f3f4;
-}
-
-.stats-players-col .player-name.total-row {
-    font-weight: 600;
-    background: var(--bg-header);
-    border-top: 1px solid var(--border-color);
-}
-
-/* Individual stat table card */
-.stat-table-card {
-    flex: 1;
-    min-width: 0;
-    border-left: 1px solid var(--border-color);
-}
-
-.stat-table-card:first-of-type {
-    border-left: none;
-}
-
-.stat-table-header {
-    padding: 4px 6px;
-    font-family: 'Google Sans', sans-serif;
-    font-size: 9px;
-    font-weight: 600;
-    text-align: center;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.stat-table-header.service { background: var(--cat-service-bg); color: var(--cat-service); }
-.stat-table-header.reception { background: var(--cat-reception-bg); color: var(--cat-reception); }
-.stat-table-header.passe { background: var(--cat-passe-bg); color: var(--cat-passe); }
-.stat-table-header.attack { background: var(--cat-attack-bg); color: var(--cat-attack); }
-.stat-table-header.relance { background: var(--cat-relance-bg); color: var(--cat-relance); }
-.stat-table-header.defense { background: var(--cat-defense-bg); color: var(--cat-defense); }
-.stat-table-header.block { background: var(--cat-block-bg); color: var(--cat-block); }
-
-/* Desktop detail stats table */
-.detail-stats-table {
-    border-collapse: collapse;
-    font-size: 10px;
-    width: 100%;
-}
-
-.detail-stats-table thead th {
-    font-family: 'Google Sans', sans-serif;
-    font-weight: 600;
-    color: var(--text-secondary);
-    padding: 3px 4px;
-    text-align: center;
-    font-size: 8px;
-    white-space: nowrap;
-    background: var(--bg-header);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.detail-stats-table tbody td {
-    padding: 5px 4px;
-    text-align: center;
-    border-bottom: 1px solid #f1f3f4;
-    font-size: 10px;
-    min-width: 24px;
-}
-
-.detail-stats-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.detail-stats-table .total-row td {
-    font-weight: 600;
-    border-top: 1px solid var(--border-color);
-    background: var(--bg-header);
-}
-
-.detail-stats-table .positive { color: var(--win-color); font-weight: 600; }
-.detail-stats-table .negative { color: var(--loss-color); font-weight: 600; }
-.detail-stats-table .warning { color: #D48800; font-weight: 600; }
-.detail-stats-table .neutral { color: var(--text-secondary); }
-.detail-stats-table .stat-pct { font-size: 8px; color: var(--text-secondary); font-weight: 400; }
-.detail-stats-table .stat-secondary { font-size: 8px; color: var(--text-secondary); font-weight: 400; }
-
 /* ==================== V20.27 SORTABLE TABLE HEADERS ==================== */
-.stats-table th[data-sort-col],
-.detail-stats-table th[data-sort-col],
-.player-header[data-sort-col] {
+.stats-table th[data-sort-col] {
     cursor: pointer;
     user-select: none;
     transition: color 0.15s;
 }
-.stats-table th[data-sort-col]:hover,
-.detail-stats-table th[data-sort-col]:hover,
-.player-header[data-sort-col]:hover {
+.stats-table th[data-sort-col]:hover {
     color: var(--text-primary);
 }
 .sort-arrow {
@@ -1249,12 +1111,10 @@ body {
     transition: opacity 0.15s;
 }
 /* Sort arrow: positioned absolute so it doesn't push column text */
-.stats-table th,
-.detail-stats-table thead th {
+.stats-table th {
     position: relative;
 }
-.stats-table th .sort-arrow,
-.detail-stats-table thead th .sort-arrow {
+.stats-table th .sort-arrow {
     position: absolute;
     margin-left: 0;
     right: 1px;
@@ -1264,8 +1124,7 @@ body {
 .sort-arrow.active {
     opacity: 0.6;
 }
-th[data-sort-col]:hover .sort-arrow:not(.active),
-.player-header[data-sort-col]:hover .sort-arrow:not(.active) {
+th[data-sort-col]:hover .sort-arrow:not(.active) {
     opacity: 0.25;
 }
 
@@ -2837,7 +2696,6 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
     #bilanContainer > :not(.hist-section),
     .detail-section > :not(.hist-section),
     #content-yearStats > :not(.hist-section),
-    .hist-section:has(.stats-tables-container),
     .hist-section:has(.stats-desktop) {
         grid-column: 1 / -1;
     }
