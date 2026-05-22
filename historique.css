@@ -2015,25 +2015,33 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
     font-size: 11px;
 }
 
-/* ==================== RESPONSIVE: TABLET & DESKTOP (>=768px) ==================== */
-/* V24.1 — Vue tablette utilisée aussi sur desktop (desktop désactivé temporairement) */
+/* ==================== RESPONSIVE: TABLETTE (>=768px) ==================== */
+/* V29.0 — Refonte responsive : palier tablette (768-1279px), mobile-first cascade */
 @media (min-width: 768px) {
     .app-container {
-        max-width: 800px;
+        max-width: 960px;
         margin: 0 auto;
-        padding: 16px 24px;
+        padding: 20px 28px;
     }
 
-    .tab-btn {
-        font-size: 13px;
+    .main-tabs .tab-btn {
+        font-size: 14px;
+        padding: 10px 14px;
     }
 
-    /* Bilan : espacement tablette */
+    /* Bilan : 3 colonnes + espacement confortable */
     .bilan-grid,
     .bilan-grid-year {
+        grid-template-columns: repeat(3, 1fr);
         gap: 12px;
     }
 
+    /* Ranking joueurs : 3 colonnes */
+    .ranking-players-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        padding: 0 12px;
+    }
 }
 
 /* ==================== IMPACT +/- ==================== */
@@ -2658,72 +2666,68 @@ th[data-sort-col]:hover .sort-arrow:not(.active),
     gap: 8px;
 }
 
-/* ==================== RESPONSIVE: DESKTOP (>=1024px) ==================== */
-/* V24.1 — Desktop désactivé, vue tablette utilisée partout
-   À réactiver lors de V20.3 (refonte tableaux desktop)
-@media (min-width: 1024px) {
+/* ==================== RESPONSIVE: DESKTOP (>=1280px) ==================== */
+/* V29.0 — Top tabs conservés en haut + contenu multi-colonnes */
+@media (min-width: 1280px) {
     .app-container {
-        max-width: 960px;
+        max-width: 1200px;
+        padding: 24px 32px;
     }
 
+    /* Header détail match agrandi */
     .detail-header-team-score {
         font-size: 28px;
     }
-
     .detail-result-label {
         font-size: 18px;
     }
-
     .detail-result-icon {
         font-size: 32px;
     }
 
+    /* Stats : on masque onglets catégorie + vue mobile, on montre le tableau large */
     .stats-category-tabs {
         display: none;
     }
-
     .stats-mobile {
         display: none !important;
     }
-
     .stats-desktop {
         display: block !important;
     }
 
+    /* Bilan : 4 colonnes */
     .bilan-grid {
         grid-template-columns: repeat(4, 1fr);
         gap: 16px;
     }
-
     .bilan-grid-year {
         grid-template-columns: repeat(3, 1fr);
         gap: 16px;
     }
 
+    /* Année : blocs du haut côte à côte */
     .year-top-row {
         display: flex;
         gap: 16px;
     }
-
     .year-top-row > * {
         flex: 1;
     }
 
+    /* Ranking joueurs : 3 colonnes large */
     .ranking-players-grid {
         grid-template-columns: repeat(3, 1fr);
         gap: 12px;
         padding: 0 16px;
     }
-
     .ranking-table {
         font-size: 14px;
     }
-
     .ranking-table-wrap {
         padding: 0 16px;
     }
 }
-*/
 
 /* ==================== DATA SUB-TABS ==================== */
 .data-sub-tabs {
