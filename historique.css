@@ -1003,16 +1003,23 @@ body {
 
 .stats-table-full {
     font-size: 12px;
+    /* Largeur naturelle (min 100%) : la table grandit avec son contenu et le
+       wrap scrolle si besoin — évite que .stats-table (overflow:hidden) rogne
+       la dernière colonne quand le contenu dépasse. */
+    width: auto;
+    min-width: 100%;
 }
 
 .stats-table-full th,
 .stats-table-full td {
-    padding: 7px 4px;
+    padding: 7px 3px;
     white-space: nowrap;
 }
 
 .stats-table-full td {
     font-size: 12px;
+    /* Chiffre principal aligné en haut, % rendu en dessous (pas centré) */
+    vertical-align: top;
 }
 
 .stats-table-full td:first-child,
