@@ -5,10 +5,10 @@
     "name": "Or 6x6",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/4",
-    "lastUpdated": "2026-05-28T11:32:40",
+    "lastUpdated": "2026-05-29T01:34:17",
     "teamCount": 10,
-    "matchesPlayed": 81,
-    "matchesUpcoming": 9
+    "matchesPlayed": 82,
+    "matchesUpcoming": 8
   },
   "teams": {
     "cout": {
@@ -26,19 +26,19 @@
       "short": "M6",
       "color": "#2ecc71"
     },
+    "neui": {
+      "name": "Neuilly Sa Mère",
+      "short": "NS",
+      "color": "#f39c12"
+    },
     "mous": {
       "name": "Moustache Team",
       "short": "MT",
-      "color": "#f39c12"
+      "color": "#9b59b6"
     },
     "cret": {
       "name": "Cret'1",
       "short": "CR",
-      "color": "#9b59b6"
-    },
-    "neui": {
-      "name": "Neuilly Sa Mère",
-      "short": "NS",
       "color": "#1abc9c"
     },
     "no": {
@@ -142,17 +142,17 @@
     {
       "rank": 3,
       "team": "marv",
-      "mj": 16,
+      "mj": 17,
       "g": 11,
-      "p": 5,
+      "p": 6,
       "setPlus": 38,
-      "setMinus": 25,
-      "ds": 13,
-      "coefSet": "1.52",
+      "setMinus": 28,
+      "ds": 10,
+      "coefSet": "1.36",
       "ptsPlus": 1417,
-      "ptsMinus": 1206,
-      "dp": "+211",
-      "coefPts": "1.17",
+      "ptsMinus": 1281,
+      "dp": "+136",
+      "coefPts": "1.11",
       "pts": 27,
       "formAller": [
         "W",
@@ -162,7 +162,7 @@
         "W",
         "W",
         "L",
-        "D",
+        "L",
         "W"
       ],
       "formRetour": [
@@ -218,18 +218,18 @@
     {
       "rank": 5,
       "team": "neui",
-      "mj": 16,
-      "g": 9,
+      "mj": 17,
+      "g": 10,
       "p": 7,
-      "setPlus": 28,
+      "setPlus": 31,
       "setMinus": 29,
-      "ds": -1,
-      "coefSet": "0.97",
-      "ptsPlus": 1250,
+      "ds": 2,
+      "coefSet": "1.07",
+      "ptsPlus": 1325,
       "ptsMinus": 1236,
-      "dp": "+14",
-      "coefPts": "1.01",
-      "pts": 25,
+      "dp": "+89",
+      "coefPts": "1.07",
+      "pts": 27,
       "formAller": [
         "W",
         "W",
@@ -238,7 +238,7 @@
         "L",
         "W",
         "L",
-        "D",
+        "W",
         "W"
       ],
       "formRetour": [
@@ -445,6 +445,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "28/05/2026",
+      "home": "neui",
+      "away": "marv",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Forfait"
+    },
     {
       "date": "27/05/2026",
       "home": "cret",
@@ -1177,12 +1186,6 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "28/05/2026",
-      "home": "neui",
-      "away": "marv",
-      "status": "Reporté"
-    },
-    {
       "date": "29/05/2026",
       "home": "no",
       "away": "mous",
@@ -1254,16 +1257,6 @@
     },
     {
       "rank": 3,
-      "team": "marv",
-      "elo": 1588.4,
-      "movement": 32.2,
-      "record": "11-5",
-      "power": 63.9,
-      "calendar": "V vs Coutiao",
-      "diffClass": "diff-easy"
-    },
-    {
-      "rank": 4,
       "team": "no",
       "elo": 1574.5,
       "movement": 5.9,
@@ -1271,6 +1264,16 @@
       "power": 61.7,
       "calendar": "V vs Et",
       "diffClass": "diff-easy"
+    },
+    {
+      "rank": 4,
+      "team": "marv",
+      "elo": 1549.4,
+      "movement": -39.1,
+      "record": "11-6",
+      "power": 57.8,
+      "calendar": "D vs Neuilly",
+      "diffClass": "diff-hard"
     },
     {
       "rank": 5,
@@ -1295,12 +1298,12 @@
     {
       "rank": 7,
       "team": "neui",
-      "elo": 1450.1,
-      "movement": -44.9,
-      "record": "9-7",
-      "power": 42.1,
-      "calendar": "D vs Moustache",
-      "diffClass": "diff-hard"
+      "elo": 1489.2,
+      "movement": 39.1,
+      "record": "10-7",
+      "power": 48.3,
+      "calendar": "V vs Marvels",
+      "diffClass": "diff-easy"
     },
     {
       "rank": 8,
@@ -1391,7 +1394,28 @@
       1602.9,
       1572.7,
       1556.2,
-      1588.4
+      1588.4,
+      1549.4
+    ],
+    "neui": [
+      1500,
+      1530.7,
+      1549.0,
+      1560.7,
+      1583.0,
+      1545.6,
+      1570.2,
+      1588.2,
+      1562.3,
+      1572.9,
+      1524.2,
+      1501.7,
+      1522.2,
+      1491.7,
+      1512.1,
+      1495.0,
+      1450.1,
+      1489.2
     ],
     "mous": [
       1500,
@@ -1432,25 +1456,6 @@
       1472.2,
       1495.7,
       1518.6
-    ],
-    "neui": [
-      1500,
-      1530.7,
-      1549.0,
-      1560.7,
-      1583.0,
-      1545.6,
-      1570.2,
-      1588.2,
-      1562.3,
-      1572.9,
-      1524.2,
-      1501.7,
-      1522.2,
-      1491.7,
-      1512.1,
-      1495.0,
-      1450.1
     ],
     "no": [
       1500,
@@ -1593,9 +1598,33 @@
           23,
           24,
           25,
-          27
+          27,
+          28
         ],
         "rank": 3
+      },
+      "neui": {
+        "points": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          9,
+          11,
+          13,
+          14,
+          16,
+          17,
+          18,
+          20,
+          21,
+          23,
+          24,
+          25,
+          27
+        ],
+        "rank": 5
       },
       "mous": {
         "points": [
@@ -1642,28 +1671,6 @@
           25
         ],
         "rank": 7
-      },
-      "neui": {
-        "points": [
-          0,
-          2,
-          4,
-          6,
-          8,
-          9,
-          11,
-          13,
-          14,
-          16,
-          17,
-          18,
-          20,
-          21,
-          23,
-          24,
-          25
-        ],
-        "rank": 5
       },
       "no": {
         "points": [
