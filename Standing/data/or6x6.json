@@ -5,10 +5,10 @@
     "name": "Or 6x6",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/4",
-    "lastUpdated": "2026-05-29T01:34:17",
+    "lastUpdated": "2026-05-30T04:08:20",
     "teamCount": 10,
-    "matchesPlayed": 82,
-    "matchesUpcoming": 8
+    "matchesPlayed": 83,
+    "matchesUpcoming": 7
   },
   "teams": {
     "cout": {
@@ -36,14 +36,14 @@
       "short": "MT",
       "color": "#9b59b6"
     },
-    "cret": {
-      "name": "Cret'1",
-      "short": "CR",
-      "color": "#1abc9c"
-    },
     "no": {
       "name": "No s(o)ucy",
       "short": "N2",
+      "color": "#1abc9c"
+    },
+    "cret": {
+      "name": "Cret'1",
+      "short": "CR",
       "color": "#e67e22"
     },
     "ivry": {
@@ -180,18 +180,18 @@
     {
       "rank": 4,
       "team": "no",
-      "mj": 15,
-      "g": 8,
+      "mj": 16,
+      "g": 9,
       "p": 7,
-      "setPlus": 33,
+      "setPlus": 36,
       "setMinus": 27,
-      "ds": 6,
-      "coefSet": "1.22",
-      "ptsPlus": 1345,
-      "ptsMinus": 1275,
-      "dp": "+70",
-      "coefPts": "1.05",
-      "pts": 23,
+      "ds": 9,
+      "coefSet": "1.33",
+      "ptsPlus": 1420,
+      "ptsMinus": 1331,
+      "dp": "+89",
+      "coefPts": "1.07",
+      "pts": 25,
       "formAller": [
         "L",
         "L",
@@ -207,7 +207,7 @@
         "W",
         "W",
         "W",
-        "D",
+        "W",
         "W",
         "L",
         "D",
@@ -255,44 +255,6 @@
     },
     {
       "rank": 6,
-      "team": "mous",
-      "mj": 17,
-      "g": 8,
-      "p": 9,
-      "setPlus": 35,
-      "setMinus": 32,
-      "ds": 3,
-      "coefSet": "1.09",
-      "ptsPlus": 1449,
-      "ptsMinus": 1451,
-      "dp": "-2",
-      "coefPts": "1.00",
-      "pts": 25,
-      "formAller": [
-        "W",
-        "L",
-        "L",
-        "L",
-        "L",
-        "L",
-        "W",
-        "W",
-        "L"
-      ],
-      "formRetour": [
-        "W",
-        "L",
-        "W",
-        "D",
-        "L",
-        "L",
-        "W",
-        "W",
-        "W"
-      ]
-    },
-    {
-      "rank": 7,
       "team": "cret",
       "mj": 17,
       "g": 8,
@@ -326,6 +288,44 @@
         "W",
         "D",
         "L",
+        "W"
+      ]
+    },
+    {
+      "rank": 7,
+      "team": "mous",
+      "mj": 18,
+      "g": 8,
+      "p": 10,
+      "setPlus": 35,
+      "setMinus": 35,
+      "ds": 0,
+      "coefSet": "1.00",
+      "ptsPlus": 1505,
+      "ptsMinus": 1526,
+      "dp": "-21",
+      "coefPts": "0.99",
+      "pts": 26,
+      "formAller": [
+        "W",
+        "L",
+        "L",
+        "L",
+        "L",
+        "L",
+        "W",
+        "W",
+        "L"
+      ],
+      "formRetour": [
+        "W",
+        "L",
+        "W",
+        "L",
+        "L",
+        "L",
+        "W",
+        "W",
         "W"
       ]
     },
@@ -445,6 +445,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "29/05/2026",
+      "home": "no",
+      "away": "mous",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "28/05/2026",
       "home": "neui",
@@ -1186,12 +1195,6 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "29/05/2026",
-      "home": "no",
-      "away": "mous",
-      "status": "Reporté"
-    },
-    {
       "date": "01/06/2026",
       "home": "vill",
       "away": "no",
@@ -1258,11 +1261,11 @@
     {
       "rank": 3,
       "team": "no",
-      "elo": 1574.5,
-      "movement": 5.9,
-      "record": "8-7",
-      "power": 61.7,
-      "calendar": "V vs Et",
+      "elo": 1604.8,
+      "movement": 30.4,
+      "record": "9-7",
+      "power": 66.5,
+      "calendar": "V vs Moustache",
       "diffClass": "diff-easy"
     },
     {
@@ -1277,16 +1280,6 @@
     },
     {
       "rank": 5,
-      "team": "mous",
-      "elo": 1522.5,
-      "movement": 44.9,
-      "record": "8-9",
-      "power": 53.5,
-      "calendar": "V vs Neuilly",
-      "diffClass": "diff-easy"
-    },
-    {
-      "rank": 6,
       "team": "cret",
       "elo": 1518.6,
       "movement": 22.9,
@@ -1294,6 +1287,16 @@
       "power": 52.9,
       "calendar": "V vs Ivry",
       "diffClass": "diff-easy"
+    },
+    {
+      "rank": 6,
+      "team": "mous",
+      "elo": 1492.1,
+      "movement": -30.4,
+      "record": "8-10",
+      "power": 48.8,
+      "calendar": "D vs No",
+      "diffClass": "diff-hard"
     },
     {
       "rank": 7,
@@ -1435,7 +1438,27 @@
       1492.0,
       1454.8,
       1477.6,
-      1522.5
+      1522.5,
+      1492.1
+    ],
+    "no": [
+      1500,
+      1470.2,
+      1451.9,
+      1480.7,
+      1512.3,
+      1475.8,
+      1461.4,
+      1446.2,
+      1470.7,
+      1506.3,
+      1555.1,
+      1589.3,
+      1609.4,
+      1591.8,
+      1568.6,
+      1574.5,
+      1604.8
     ],
     "cret": [
       1500,
@@ -1456,24 +1479,6 @@
       1472.2,
       1495.7,
       1518.6
-    ],
-    "no": [
-      1500,
-      1470.2,
-      1451.9,
-      1480.7,
-      1512.3,
-      1475.8,
-      1461.4,
-      1446.2,
-      1470.7,
-      1506.3,
-      1555.1,
-      1589.3,
-      1609.4,
-      1591.8,
-      1568.6,
-      1574.5
     ],
     "ivry": [
       1500,
@@ -1645,9 +1650,32 @@
           20,
           21,
           23,
+          25,
+          26
+        ],
+        "rank": 7
+      },
+      "no": {
+        "points": [
+          0,
+          1,
+          2,
+          4,
+          6,
+          7,
+          8,
+          9,
+          11,
+          13,
+          15,
+          17,
+          19,
+          20,
+          21,
+          23,
           25
         ],
-        "rank": 6
+        "rank": 4
       },
       "cret": {
         "points": [
@@ -1670,28 +1698,7 @@
           23,
           25
         ],
-        "rank": 7
-      },
-      "no": {
-        "points": [
-          0,
-          1,
-          2,
-          4,
-          6,
-          7,
-          8,
-          9,
-          11,
-          13,
-          15,
-          17,
-          19,
-          20,
-          21,
-          23
-        ],
-        "rank": 4
+        "rank": 6
       },
       "ivry": {
         "points": [
