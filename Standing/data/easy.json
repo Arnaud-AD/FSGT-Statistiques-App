@@ -5,10 +5,10 @@
     "name": "Easy",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/3",
-    "lastUpdated": "2026-06-02T10:26:18",
+    "lastUpdated": "2026-06-03T09:09:22",
     "teamCount": 8,
-    "matchesPlayed": 54,
-    "matchesUpcoming": 2
+    "matchesPlayed": 55,
+    "matchesUpcoming": 1
   },
   "teams": {
     "neku": {
@@ -26,14 +26,14 @@
       "short": "FT",
       "color": "#2ecc71"
     },
-    "touk": {
-      "name": "TOUKC",
-      "short": "TO",
-      "color": "#f39c12"
-    },
     "bats": {
       "name": "Batstreet Back",
       "short": "BB",
+      "color": "#f39c12"
+    },
+    "touk": {
+      "name": "TOUKC",
+      "short": "TO",
       "color": "#9b59b6"
     },
     "fata": {
@@ -192,18 +192,18 @@
     {
       "rank": 5,
       "team": "bats",
-      "mj": 13,
-      "g": 7,
+      "mj": 14,
+      "g": 8,
       "p": 6,
-      "setPlus": 25,
+      "setPlus": 28,
       "setMinus": 24,
-      "ds": 1,
-      "coefSet": "1.04",
-      "ptsPlus": 1092,
-      "ptsMinus": 1014,
-      "dp": "+78",
-      "coefPts": "1.08",
-      "pts": 20,
+      "ds": 4,
+      "coefSet": "1.17",
+      "ptsPlus": 1167,
+      "ptsMinus": 1051,
+      "dp": "+116",
+      "coefPts": "1.11",
+      "pts": 22,
       "formAller": [
         "L",
         "W",
@@ -218,7 +218,7 @@
         "L",
         "W",
         "L",
-        "D",
+        "W",
         "W",
         "W"
       ]
@@ -260,18 +260,18 @@
     {
       "rank": 7,
       "team": "punc",
-      "mj": 13,
+      "mj": 14,
       "g": 2,
-      "p": 11,
+      "p": 12,
       "setPlus": 9,
-      "setMinus": 33,
-      "ds": -24,
-      "coefSet": "0.27",
-      "ptsPlus": 825,
-      "ptsMinus": 1013,
-      "dp": "-188",
-      "coefPts": "0.81",
-      "pts": 15,
+      "setMinus": 36,
+      "ds": -27,
+      "coefSet": "0.25",
+      "ptsPlus": 862,
+      "ptsMinus": 1088,
+      "dp": "-226",
+      "coefPts": "0.79",
+      "pts": 16,
       "formAller": [
         "L",
         "L",
@@ -286,7 +286,7 @@
         "L",
         "L",
         "L",
-        "D",
+        "L",
         "L",
         "L"
       ]
@@ -327,6 +327,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "02/06/2026",
+      "home": "bats",
+      "away": "punc",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "21/05/2026",
       "home": "fata",
@@ -816,12 +825,6 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "02/06/2026",
-      "home": "bats",
-      "away": "punc",
-      "status": "Reporté"
-    },
-    {
       "date": "08/06/2026",
       "home": "pyth",
       "away": "touk",
@@ -862,11 +865,11 @@
     {
       "rank": 4,
       "team": "bats",
-      "elo": 1542.1,
-      "movement": 29.5,
-      "record": "7-6",
-      "power": 57.7,
-      "calendar": "V vs Pythons",
+      "elo": 1554.8,
+      "movement": 12.8,
+      "record": "8-6",
+      "power": 60.0,
+      "calendar": "V x3",
       "diffClass": "diff-easy"
     },
     {
@@ -902,11 +905,11 @@
     {
       "rank": 8,
       "team": "punc",
-      "elo": 1276.5,
-      "movement": -22.8,
-      "record": "2-11",
-      "power": 9.3,
-      "calendar": "D x7",
+      "elo": 1263.7,
+      "movement": -12.8,
+      "record": "2-12",
+      "power": 7.0,
+      "calendar": "D x8",
       "diffClass": "diff-hard"
     }
   ],
@@ -962,6 +965,23 @@
       1555.6,
       1576.8
     ],
+    "bats": [
+      1500,
+      1481.7,
+      1500.0,
+      1476.6,
+      1459.8,
+      1497.3,
+      1518.8,
+      1495.3,
+      1508.4,
+      1470.4,
+      1513.3,
+      1488.8,
+      1512.6,
+      1542.1,
+      1554.8
+    ],
     "touk": [
       1500,
       1481.0,
@@ -977,22 +997,6 @@
       1541.2,
       1559.1,
       1517.3
-    ],
-    "bats": [
-      1500,
-      1481.7,
-      1500.0,
-      1476.6,
-      1459.8,
-      1497.3,
-      1518.8,
-      1495.3,
-      1508.4,
-      1470.4,
-      1513.3,
-      1488.8,
-      1512.6,
-      1542.1
     ],
     "fata": [
       1500,
@@ -1042,7 +1046,8 @@
       1360.4,
       1317.2,
       1299.2,
-      1276.5
+      1276.5,
+      1263.7
     ]
   },
   "evolutionData": {
@@ -1106,6 +1111,26 @@
         ],
         "rank": 3
       },
+      "bats": {
+        "points": [
+          0,
+          1,
+          3,
+          4,
+          5,
+          7,
+          9,
+          10,
+          12,
+          13,
+          15,
+          16,
+          18,
+          20,
+          22
+        ],
+        "rank": 5
+      },
       "touk": {
         "points": [
           0,
@@ -1124,25 +1149,6 @@
           20
         ],
         "rank": 4
-      },
-      "bats": {
-        "points": [
-          0,
-          1,
-          3,
-          4,
-          5,
-          7,
-          9,
-          10,
-          12,
-          13,
-          15,
-          16,
-          18,
-          20
-        ],
-        "rank": 5
       },
       "fata": {
         "points": [
@@ -1199,7 +1205,8 @@
           12,
           13,
           14,
-          15
+          15,
+          16
         ],
         "rank": 7
       }

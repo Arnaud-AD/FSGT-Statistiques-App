@@ -5,10 +5,10 @@
     "name": "Starter",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/16",
-    "lastUpdated": "2026-06-02T10:26:19",
+    "lastUpdated": "2026-06-03T09:09:22",
     "teamCount": 8,
-    "matchesPlayed": 52,
-    "matchesUpcoming": 4
+    "matchesPlayed": 53,
+    "matchesUpcoming": 3
   },
   "teams": {
     "bach": {
@@ -21,14 +21,14 @@
       "short": "CO",
       "color": "#3498db"
     },
-    "gail": {
-      "name": "Les Gaillards",
-      "short": "GA",
-      "color": "#2ecc71"
-    },
     "gvc": {
       "name": "GVC",
       "short": "GV",
+      "color": "#2ecc71"
+    },
+    "gail": {
+      "name": "Les Gaillards",
+      "short": "GA",
       "color": "#f39c12"
     },
     "daiq": {
@@ -90,18 +90,18 @@
     {
       "rank": 2,
       "team": "gvc",
-      "mj": 11,
-      "g": 10,
+      "mj": 12,
+      "g": 11,
       "p": 1,
-      "setPlus": 30,
+      "setPlus": 33,
       "setMinus": 8,
-      "ds": 22,
-      "coefSet": "3.75",
-      "ptsPlus": 817,
-      "ptsMinus": 721,
-      "dp": "+96",
-      "coefPts": "1.13",
-      "pts": 20,
+      "ds": 25,
+      "coefSet": "4.12",
+      "ptsPlus": 892,
+      "ptsMinus": 769,
+      "dp": "+123",
+      "coefPts": "1.16",
+      "pts": 22,
       "formAller": [
         "W",
         "W",
@@ -118,7 +118,7 @@
         "W",
         "D",
         "D",
-        "D"
+        "W"
       ]
     },
     {
@@ -225,40 +225,6 @@
     },
     {
       "rank": 6,
-      "team": "bler",
-      "mj": 13,
-      "g": 3,
-      "p": 10,
-      "setPlus": 12,
-      "setMinus": 32,
-      "ds": -20,
-      "coefSet": "0.38",
-      "ptsPlus": 855,
-      "ptsMinus": 1017,
-      "dp": "-162",
-      "coefPts": "0.84",
-      "pts": 16,
-      "formAller": [
-        "W",
-        "L",
-        "L",
-        "L",
-        "L",
-        "L",
-        "L"
-      ],
-      "formRetour": [
-        "W",
-        "L",
-        "L",
-        "L",
-        "W",
-        "L",
-        "D"
-      ]
-    },
-    {
-      "rank": 7,
       "team": "gold",
       "mj": 14,
       "g": 3,
@@ -287,6 +253,40 @@
         "L",
         "W",
         "L",
+        "L",
+        "L"
+      ]
+    },
+    {
+      "rank": 7,
+      "team": "bler",
+      "mj": 14,
+      "g": 3,
+      "p": 11,
+      "setPlus": 12,
+      "setMinus": 35,
+      "ds": -23,
+      "coefSet": "0.34",
+      "ptsPlus": 903,
+      "ptsMinus": 1092,
+      "dp": "-189",
+      "coefPts": "0.83",
+      "pts": 17,
+      "formAller": [
+        "W",
+        "L",
+        "L",
+        "L",
+        "L",
+        "L",
+        "L"
+      ],
+      "formRetour": [
+        "W",
+        "L",
+        "L",
+        "L",
+        "W",
         "L",
         "L"
       ]
@@ -327,6 +327,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "18/05/2026",
+      "home": "bler",
+      "away": "gvc",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
     {
       "date": "11/05/2026",
       "home": "caip",
@@ -814,12 +823,6 @@
       "home": "gvc",
       "away": "gail",
       "status": "Reporté"
-    },
-    {
-      "date": "18/05/2026",
-      "home": "bler",
-      "away": "gvc",
-      "status": "Reporté"
     }
   ],
   "prTeams": [
@@ -836,11 +839,11 @@
     {
       "rank": 2,
       "team": "gvc",
-      "elo": 1652.7,
-      "movement": 14.4,
-      "record": "10-1",
-      "power": 81.2,
-      "calendar": "V vs Daïquibri",
+      "elo": 1666.7,
+      "movement": 14.1,
+      "record": "11-1",
+      "power": 84.1,
+      "calendar": "V vs Les",
       "diffClass": "diff-easy"
     },
     {
@@ -886,11 +889,11 @@
     {
       "rank": 7,
       "team": "bler",
-      "elo": 1347.1,
-      "movement": -30.2,
-      "record": "3-10",
-      "power": 18.8,
-      "calendar": "D vs Daïquibri",
+      "elo": 1333.0,
+      "movement": -14.1,
+      "record": "3-11",
+      "power": 15.9,
+      "calendar": "D vs GVC",
       "diffClass": "diff-hard"
     },
     {
@@ -939,6 +942,21 @@
       1628.2,
       1641.2
     ],
+    "gvc": [
+      1500,
+      1525.0,
+      1551.1,
+      1581.7,
+      1600.7,
+      1620.3,
+      1640.2,
+      1667.9,
+      1691.9,
+      1700.7,
+      1638.2,
+      1652.7,
+      1666.7
+    ],
     "gail": [
       1500,
       1531.3,
@@ -954,20 +972,6 @@
       1539.1,
       1509.1,
       1523.7
-    ],
-    "gvc": [
-      1500,
-      1525.0,
-      1551.1,
-      1581.7,
-      1600.7,
-      1620.3,
-      1640.2,
-      1667.9,
-      1691.9,
-      1700.7,
-      1638.2,
-      1652.7
     ],
     "daiq": [
       1500,
@@ -1016,7 +1020,8 @@
       1369.3,
       1354.0,
       1377.3,
-      1347.1
+      1347.1,
+      1333.0
     ],
     "caip": [
       1500,
@@ -1076,6 +1081,24 @@
         ],
         "rank": 3
       },
+      "gvc": {
+        "points": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          10,
+          12,
+          14,
+          16,
+          18,
+          19,
+          21,
+          23
+        ],
+        "rank": 2
+      },
       "gail": {
         "points": [
           0,
@@ -1094,23 +1117,6 @@
           21
         ],
         "rank": 4
-      },
-      "gvc": {
-        "points": [
-          0,
-          2,
-          4,
-          6,
-          8,
-          10,
-          12,
-          14,
-          16,
-          18,
-          19,
-          21
-        ],
-        "rank": 2
       },
       "daiq": {
         "points": [
@@ -1149,7 +1155,7 @@
           16,
           17
         ],
-        "rank": 7
+        "rank": 6
       },
       "bler": {
         "points": [
@@ -1166,9 +1172,10 @@
           12,
           13,
           15,
-          16
+          16,
+          17
         ],
-        "rank": 6
+        "rank": 7
       },
       "caip": {
         "points": [
