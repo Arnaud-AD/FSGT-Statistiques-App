@@ -5,10 +5,10 @@
     "name": "Starter",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/16",
-    "lastUpdated": "2026-06-03T09:09:22",
+    "lastUpdated": "2026-06-05T02:17:43",
     "teamCount": 8,
-    "matchesPlayed": 53,
-    "matchesUpcoming": 3
+    "matchesPlayed": 54,
+    "matchesUpcoming": 2
   },
   "teams": {
     "bach": {
@@ -16,14 +16,14 @@
       "short": "BA",
       "color": "#e74c3c"
     },
-    "coco": {
-      "name": "Les Coconuts",
-      "short": "CO",
-      "color": "#3498db"
-    },
     "gvc": {
       "name": "GVC",
       "short": "GV",
+      "color": "#3498db"
+    },
+    "coco": {
+      "name": "Les Coconuts",
+      "short": "CO",
       "color": "#2ecc71"
     },
     "gail": {
@@ -90,18 +90,18 @@
     {
       "rank": 2,
       "team": "gvc",
-      "mj": 12,
-      "g": 11,
+      "mj": 13,
+      "g": 12,
       "p": 1,
-      "setPlus": 33,
+      "setPlus": 36,
       "setMinus": 8,
-      "ds": 25,
-      "coefSet": "4.12",
-      "ptsPlus": 892,
-      "ptsMinus": 769,
-      "dp": "+123",
-      "coefPts": "1.16",
-      "pts": 22,
+      "ds": 28,
+      "coefSet": "4.50",
+      "ptsPlus": 967,
+      "ptsMinus": 822,
+      "dp": "+145",
+      "coefPts": "1.18",
+      "pts": 24,
       "formAller": [
         "W",
         "W",
@@ -116,7 +116,7 @@
         "L",
         "W",
         "W",
-        "D",
+        "W",
         "D",
         "W"
       ]
@@ -140,8 +140,8 @@
         "W",
         "L",
         "W",
-        "W",
         "L",
+        "W",
         "W",
         "W"
       ],
@@ -158,18 +158,18 @@
     {
       "rank": 4,
       "team": "gail",
-      "mj": 13,
+      "mj": 14,
       "g": 8,
-      "p": 5,
+      "p": 6,
       "setPlus": 23,
-      "setMinus": 23,
-      "ds": 0,
-      "coefSet": "1.00",
-      "ptsPlus": 1030,
-      "ptsMinus": 1004,
-      "dp": "+26",
-      "coefPts": "1.03",
-      "pts": 21,
+      "setMinus": 26,
+      "ds": -3,
+      "coefSet": "0.88",
+      "ptsPlus": 1083,
+      "ptsMinus": 1079,
+      "dp": "+4",
+      "coefPts": "1.00",
+      "pts": 22,
       "formAller": [
         "W",
         "W",
@@ -186,7 +186,7 @@
         "L",
         "W",
         "L",
-        "D"
+        "L"
       ]
     },
     {
@@ -352,6 +352,15 @@
       "scoreHome": 1,
       "scoreAway": 3,
       "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "04/05/2026",
+      "home": "gvc",
+      "away": "gail",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
       "status": "Terminé"
     },
     {
@@ -817,12 +826,6 @@
       "home": "caip",
       "away": "daiq",
       "status": "Reporté"
-    },
-    {
-      "date": "04/05/2026",
-      "home": "gvc",
-      "away": "gail",
-      "status": "Reporté"
     }
   ],
   "prTeams": [
@@ -839,11 +842,11 @@
     {
       "rank": 2,
       "team": "gvc",
-      "elo": 1666.7,
-      "movement": 14.1,
-      "record": "11-1",
-      "power": 84.1,
-      "calendar": "V vs Les",
+      "elo": 1688.4,
+      "movement": 12.6,
+      "record": "12-1",
+      "power": 88.5,
+      "calendar": "V x3",
       "diffClass": "diff-easy"
     },
     {
@@ -859,12 +862,12 @@
     {
       "rank": 4,
       "team": "gail",
-      "elo": 1523.7,
-      "movement": 14.6,
-      "record": "8-5",
-      "power": 54.8,
-      "calendar": "V vs Caïpiranha",
-      "diffClass": "diff-easy"
+      "elo": 1500.6,
+      "movement": -23.1,
+      "record": "8-6",
+      "power": 50.1,
+      "calendar": "D vs GVC",
+      "diffClass": "diff-hard"
     },
     {
       "rank": 5,
@@ -889,10 +892,10 @@
     {
       "rank": 7,
       "team": "bler",
-      "elo": 1333.0,
-      "movement": -14.1,
+      "elo": 1334.5,
+      "movement": -12.6,
       "record": "3-11",
-      "power": 15.9,
+      "power": 16.2,
       "calendar": "D vs GVC",
       "diffClass": "diff-hard"
     },
@@ -925,6 +928,22 @@
       1738.3,
       1744.7
     ],
+    "gvc": [
+      1500,
+      1525.0,
+      1551.1,
+      1581.7,
+      1600.7,
+      1620.3,
+      1640.2,
+      1667.9,
+      1691.9,
+      1700.7,
+      1638.2,
+      1652.7,
+      1675.8,
+      1688.4
+    ],
     "coco": [
       1500,
       1475.0,
@@ -942,21 +961,6 @@
       1628.2,
       1641.2
     ],
-    "gvc": [
-      1500,
-      1525.0,
-      1551.1,
-      1581.7,
-      1600.7,
-      1620.3,
-      1640.2,
-      1667.9,
-      1691.9,
-      1700.7,
-      1638.2,
-      1652.7,
-      1666.7
-    ],
     "gail": [
       1500,
       1531.3,
@@ -971,7 +975,8 @@
       1558.6,
       1539.1,
       1509.1,
-      1523.7
+      1523.7,
+      1500.6
     ],
     "daiq": [
       1500,
@@ -1021,7 +1026,7 @@
       1354.0,
       1377.3,
       1347.1,
-      1333.0
+      1334.5
     ],
     "caip": [
       1500,
@@ -1061,6 +1066,25 @@
         ],
         "rank": 1
       },
+      "gvc": {
+        "points": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          10,
+          12,
+          14,
+          16,
+          18,
+          19,
+          21,
+          23,
+          25
+        ],
+        "rank": 2
+      },
       "coco": {
         "points": [
           0,
@@ -1081,24 +1105,6 @@
         ],
         "rank": 3
       },
-      "gvc": {
-        "points": [
-          0,
-          2,
-          4,
-          6,
-          8,
-          10,
-          12,
-          14,
-          16,
-          18,
-          19,
-          21,
-          23
-        ],
-        "rank": 2
-      },
       "gail": {
         "points": [
           0,
@@ -1114,7 +1120,8 @@
           17,
           18,
           19,
-          21
+          21,
+          22
         ],
         "rank": 4
       },

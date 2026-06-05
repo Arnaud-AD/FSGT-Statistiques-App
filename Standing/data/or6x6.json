@@ -5,10 +5,10 @@
     "name": "Or 6x6",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/4",
-    "lastUpdated": "2026-06-02T10:26:20",
+    "lastUpdated": "2026-06-05T02:17:43",
     "teamCount": 10,
-    "matchesPlayed": 85,
-    "matchesUpcoming": 5
+    "matchesPlayed": 88,
+    "matchesUpcoming": 2
   },
   "teams": {
     "cout": {
@@ -21,8 +21,8 @@
       "short": "RA",
       "color": "#3498db"
     },
-    "no": {
-      "name": "No s(o)ucy",
+    "neui": {
+      "name": "Neuilly Sa Mère",
       "short": "NS",
       "color": "#2ecc71"
     },
@@ -31,19 +31,19 @@
       "short": "M6",
       "color": "#f39c12"
     },
-    "neui": {
-      "name": "Neuilly Sa Mère",
+    "no": {
+      "name": "No s(o)ucy",
       "short": "N2",
       "color": "#9b59b6"
-    },
-    "mous": {
-      "name": "Moustache Team",
-      "short": "MT",
-      "color": "#1abc9c"
     },
     "cret": {
       "name": "Cret'1",
       "short": "CR",
+      "color": "#1abc9c"
+    },
+    "mous": {
+      "name": "Moustache Team",
+      "short": "MT",
       "color": "#e67e22"
     },
     "ivry": {
@@ -104,18 +104,18 @@
     {
       "rank": 2,
       "team": "raia",
-      "mj": 16,
-      "g": 13,
+      "mj": 17,
+      "g": 14,
       "p": 3,
-      "setPlus": 42,
+      "setPlus": 45,
       "setMinus": 19,
-      "ds": 23,
-      "coefSet": "2.21",
-      "ptsPlus": 1436,
-      "ptsMinus": 1222,
-      "dp": "+214",
-      "coefPts": "1.18",
-      "pts": 29,
+      "ds": 26,
+      "coefSet": "2.37",
+      "ptsPlus": 1513,
+      "ptsMinus": 1290,
+      "dp": "+223",
+      "coefPts": "1.17",
+      "pts": 31,
       "formAller": [
         "L",
         "D",
@@ -136,49 +136,11 @@
         "W",
         "W",
         "W",
-        "D"
+        "W"
       ]
     },
     {
       "rank": 3,
-      "team": "marv",
-      "mj": 17,
-      "g": 11,
-      "p": 6,
-      "setPlus": 38,
-      "setMinus": 28,
-      "ds": 10,
-      "coefSet": "1.36",
-      "ptsPlus": 1417,
-      "ptsMinus": 1281,
-      "dp": "+136",
-      "coefPts": "1.11",
-      "pts": 27,
-      "formAller": [
-        "W",
-        "W",
-        "W",
-        "W",
-        "W",
-        "W",
-        "L",
-        "L",
-        "W"
-      ],
-      "formRetour": [
-        "L",
-        "W",
-        "W",
-        "L",
-        "W",
-        "W",
-        "L",
-        "D",
-        "L"
-      ]
-    },
-    {
-      "rank": 4,
       "team": "no",
       "mj": 17,
       "g": 10,
@@ -216,20 +178,58 @@
       ]
     },
     {
+      "rank": 4,
+      "team": "marv",
+      "mj": 18,
+      "g": 11,
+      "p": 7,
+      "setPlus": 39,
+      "setMinus": 31,
+      "ds": 8,
+      "coefSet": "1.26",
+      "ptsPlus": 1498,
+      "ptsMinus": 1376,
+      "dp": "+122",
+      "coefPts": "1.09",
+      "pts": 28,
+      "formAller": [
+        "W",
+        "W",
+        "W",
+        "W",
+        "W",
+        "W",
+        "L",
+        "L",
+        "W"
+      ],
+      "formRetour": [
+        "L",
+        "W",
+        "W",
+        "L",
+        "W",
+        "W",
+        "L",
+        "L",
+        "L"
+      ]
+    },
+    {
       "rank": 5,
       "team": "neui",
-      "mj": 17,
-      "g": 10,
+      "mj": 18,
+      "g": 11,
       "p": 7,
-      "setPlus": 31,
-      "setMinus": 29,
-      "ds": 2,
-      "coefSet": "1.07",
-      "ptsPlus": 1325,
-      "ptsMinus": 1236,
-      "dp": "+89",
-      "coefPts": "1.07",
-      "pts": 27,
+      "setPlus": 34,
+      "setMinus": 30,
+      "ds": 4,
+      "coefSet": "1.13",
+      "ptsPlus": 1420,
+      "ptsMinus": 1317,
+      "dp": "+103",
+      "coefPts": "1.08",
+      "pts": 29,
       "formAller": [
         "W",
         "W",
@@ -249,25 +249,25 @@
         "L",
         "W",
         "L",
-        "D",
+        "W",
         "L"
       ]
     },
     {
       "rank": 6,
       "team": "cret",
-      "mj": 17,
-      "g": 8,
+      "mj": 18,
+      "g": 9,
       "p": 9,
-      "setPlus": 31,
-      "setMinus": 31,
-      "ds": 0,
-      "coefSet": "1.00",
-      "ptsPlus": 1359,
-      "ptsMinus": 1404,
-      "dp": "-45",
-      "coefPts": "0.97",
-      "pts": 25,
+      "setPlus": 34,
+      "setMinus": 32,
+      "ds": 2,
+      "coefSet": "1.06",
+      "ptsPlus": 1452,
+      "ptsMinus": 1476,
+      "dp": "-24",
+      "coefPts": "0.98",
+      "pts": 27,
       "formAller": [
         "L",
         "L",
@@ -286,7 +286,7 @@
         "L",
         "L",
         "W",
-        "D",
+        "W",
         "L",
         "W"
       ]
@@ -332,18 +332,18 @@
     {
       "rank": 8,
       "team": "ivry",
-      "mj": 17,
+      "mj": 18,
       "g": 6,
-      "p": 11,
+      "p": 12,
       "setPlus": 29,
-      "setMinus": 34,
-      "ds": -5,
-      "coefSet": "0.85",
-      "ptsPlus": 1330,
-      "ptsMinus": 1375,
-      "dp": "-45",
-      "coefPts": "0.97",
-      "pts": 23,
+      "setMinus": 37,
+      "ds": -8,
+      "coefSet": "0.78",
+      "ptsPlus": 1398,
+      "ptsMinus": 1452,
+      "dp": "-54",
+      "coefPts": "0.96",
+      "pts": 24,
       "formAller": [
         "W",
         "W",
@@ -364,7 +364,7 @@
         "L",
         "L",
         "W",
-        "D"
+        "L"
       ]
     },
     {
@@ -408,18 +408,18 @@
     {
       "rank": 10,
       "team": "vlan",
-      "mj": 17,
+      "mj": 18,
       "g": 0,
-      "p": 17,
-      "setPlus": 3,
-      "setMinus": 51,
-      "ds": -48,
-      "coefSet": "0.06",
-      "ptsPlus": 939,
-      "ptsMinus": 1344,
-      "dp": "-405",
+      "p": 18,
+      "setPlus": 4,
+      "setMinus": 54,
+      "ds": -50,
+      "coefSet": "0.07",
+      "ptsPlus": 1011,
+      "ptsMinus": 1437,
+      "dp": "-426",
       "coefPts": "0.70",
-      "pts": 17,
+      "pts": 18,
       "formAller": [
         "L",
         "L",
@@ -438,13 +438,40 @@
         "L",
         "L",
         "L",
-        "D",
+        "L",
         "L",
         "L"
       ]
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "04/06/2026",
+      "home": "marv",
+      "away": "neui",
+      "scoreHome": 1,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "03/06/2026",
+      "home": "ivry",
+      "away": "raia",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "03/06/2026",
+      "home": "cret",
+      "away": "vlan",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "01/06/2026",
       "home": "vill",
@@ -726,20 +753,20 @@
     },
     {
       "date": "23/03/2026",
-      "home": "ivry",
-      "away": "marv",
-      "scoreHome": 3,
-      "scoreAway": 2,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "23/03/2026",
       "home": "vill",
       "away": "neui",
       "scoreHome": 1,
       "scoreAway": 3,
       "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "23/03/2026",
+      "home": "ivry",
+      "away": "marv",
+      "scoreHome": 3,
+      "scoreAway": 2,
+      "homeWin": true,
       "status": "Terminé"
     },
     {
@@ -816,20 +843,20 @@
     },
     {
       "date": "12/02/2026",
-      "home": "marv",
-      "away": "no",
-      "scoreHome": 2,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "12/02/2026",
       "home": "neui",
       "away": "vlan",
       "scoreHome": 3,
       "scoreAway": 0,
       "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "12/02/2026",
+      "home": "marv",
+      "away": "no",
+      "scoreHome": 2,
+      "scoreAway": 3,
+      "homeWin": false,
       "status": "Terminé"
     },
     {
@@ -1032,8 +1059,8 @@
     },
     {
       "date": "27/11/2025",
-      "home": "marv",
-      "away": "ivry",
+      "home": "neui",
+      "away": "vill",
       "scoreHome": 3,
       "scoreAway": 0,
       "homeWin": true,
@@ -1041,8 +1068,8 @@
     },
     {
       "date": "27/11/2025",
-      "home": "neui",
-      "away": "vill",
+      "home": "marv",
+      "away": "ivry",
       "scoreHome": 3,
       "scoreAway": 0,
       "homeWin": true,
@@ -1077,21 +1104,21 @@
     },
     {
       "date": "20/11/2025",
-      "home": "marv",
-      "away": "vlan",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "20/11/2025",
       "home": "neui",
       "away": "cret",
       "scoreHome": 2,
       "scoreAway": 2,
       "homeWin": true,
       "status": "Neuilly pts"
+    },
+    {
+      "date": "20/11/2025",
+      "home": "marv",
+      "away": "vlan",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
     },
     {
       "date": "17/11/2025",
@@ -1185,19 +1212,19 @@
     },
     {
       "date": "13/10/2025",
-      "home": "mous",
-      "away": "vill",
+      "home": "ivry",
+      "away": "cret",
       "scoreHome": 3,
-      "scoreAway": 1,
+      "scoreAway": 0,
       "homeWin": true,
       "status": "Terminé"
     },
     {
       "date": "13/10/2025",
-      "home": "ivry",
-      "away": "cret",
+      "home": "mous",
+      "away": "vill",
       "scoreHome": 3,
-      "scoreAway": 0,
+      "scoreAway": 1,
       "homeWin": true,
       "status": "Terminé"
     },
@@ -1212,24 +1239,6 @@
     }
   ],
   "matchesUpcoming": [
-    {
-      "date": "03/06/2026",
-      "home": "cret",
-      "away": "vlan",
-      "status": "Reporté"
-    },
-    {
-      "date": "03/06/2026",
-      "home": "ivry",
-      "away": "raia",
-      "status": "Reporté"
-    },
-    {
-      "date": "04/06/2026",
-      "home": "marv",
-      "away": "neui",
-      "status": "Reporté"
-    },
     {
       "date": "05/06/2026",
       "home": "no",
@@ -1250,18 +1259,18 @@
       "elo": 1767.1,
       "movement": -32.2,
       "record": "17-1",
-      "power": 92.0,
+      "power": 91.1,
       "calendar": "D vs Marvels",
       "diffClass": "diff-hard"
     },
     {
       "rank": 2,
       "team": "raia",
-      "elo": 1701.7,
-      "movement": 6.1,
-      "record": "13-3",
-      "power": 81.7,
-      "calendar": "V x8",
+      "elo": 1715.3,
+      "movement": 13.6,
+      "record": "14-3",
+      "power": 83.1,
+      "calendar": "V x9",
       "diffClass": "diff-easy"
     },
     {
@@ -1270,32 +1279,42 @@
       "elo": 1614.4,
       "movement": 9.6,
       "record": "10-7",
-      "power": 68.0,
+      "power": 67.6,
       "calendar": "V x3",
       "diffClass": "diff-easy"
     },
     {
       "rank": 4,
-      "team": "marv",
-      "elo": 1549.4,
-      "movement": -39.1,
-      "record": "11-6",
-      "power": 57.8,
-      "calendar": "D vs Neuilly",
-      "diffClass": "diff-hard"
+      "team": "neui",
+      "elo": 1528.7,
+      "movement": 39.5,
+      "record": "11-7",
+      "power": 54.4,
+      "calendar": "V vs Marvels",
+      "diffClass": "diff-easy"
     },
     {
       "rank": 5,
       "team": "cret",
-      "elo": 1518.6,
-      "movement": 22.9,
-      "record": "8-9",
-      "power": 52.9,
-      "calendar": "V vs Ivry",
+      "elo": 1525.8,
+      "movement": 7.2,
+      "record": "9-9",
+      "power": 54.0,
+      "calendar": "V x3",
       "diffClass": "diff-easy"
     },
     {
       "rank": 6,
+      "team": "marv",
+      "elo": 1509.9,
+      "movement": -39.5,
+      "record": "11-7",
+      "power": 51.5,
+      "calendar": "D vs Neuilly",
+      "diffClass": "diff-hard"
+    },
+    {
+      "rank": 7,
       "team": "mous",
       "elo": 1492.1,
       "movement": -30.4,
@@ -1305,23 +1324,13 @@
       "diffClass": "diff-hard"
     },
     {
-      "rank": 7,
-      "team": "neui",
-      "elo": 1489.2,
-      "movement": 39.1,
-      "record": "10-7",
-      "power": 48.3,
-      "calendar": "V vs Marvels",
-      "diffClass": "diff-easy"
-    },
-    {
       "rank": 8,
       "team": "ivry",
-      "elo": 1415.3,
-      "movement": -22.9,
-      "record": "6-11",
-      "power": 36.7,
-      "calendar": "D vs Cret'1",
+      "elo": 1401.6,
+      "movement": -13.6,
+      "record": "6-12",
+      "power": 34.9,
+      "calendar": "D x3",
       "diffClass": "diff-hard"
     },
     {
@@ -1330,18 +1339,18 @@
       "elo": 1270.1,
       "movement": -9.6,
       "record": "2-14",
-      "power": 13.8,
+      "power": 14.6,
       "calendar": "D x5",
       "diffClass": "diff-hard"
     },
     {
       "rank": 10,
       "team": "vlan",
-      "elo": 1182.2,
-      "movement": -5.9,
-      "record": "0-17",
+      "elo": 1175.0,
+      "movement": -7.2,
+      "record": "0-18",
       "power": 0.0,
-      "calendar": "D x17",
+      "calendar": "D x18",
       "diffClass": "diff-hard"
     }
   ],
@@ -1385,7 +1394,50 @@
       1664.4,
       1687.7,
       1695.6,
-      1701.7
+      1701.7,
+      1715.3
+    ],
+    "neui": [
+      1500,
+      1530.7,
+      1549.0,
+      1560.7,
+      1583.0,
+      1545.6,
+      1570.2,
+      1588.2,
+      1562.3,
+      1572.9,
+      1524.2,
+      1501.7,
+      1522.2,
+      1491.7,
+      1512.1,
+      1495.0,
+      1450.1,
+      1489.2,
+      1528.7
+    ],
+    "marv": [
+      1500,
+      1529.8,
+      1558.9,
+      1576.9,
+      1605.2,
+      1620.9,
+      1643.8,
+      1608.1,
+      1625.2,
+      1633.0,
+      1600.5,
+      1624.9,
+      1635.0,
+      1602.9,
+      1572.7,
+      1556.2,
+      1588.4,
+      1549.4,
+      1509.9
     ],
     "no": [
       1500,
@@ -1407,45 +1459,26 @@
       1604.8,
       1614.4
     ],
-    "marv": [
+    "cret": [
       1500,
-      1529.8,
-      1558.9,
-      1576.9,
-      1605.2,
-      1620.9,
-      1643.8,
-      1608.1,
-      1625.2,
-      1633.0,
-      1600.5,
-      1624.9,
-      1635.0,
-      1602.9,
-      1572.7,
-      1556.2,
-      1588.4,
-      1549.4
-    ],
-    "neui": [
-      1500,
-      1530.7,
-      1549.0,
-      1560.7,
-      1583.0,
-      1545.6,
-      1570.2,
-      1588.2,
-      1562.3,
-      1572.9,
-      1524.2,
-      1501.7,
-      1522.2,
-      1491.7,
-      1512.1,
-      1495.0,
-      1450.1,
-      1489.2
+      1467.1,
+      1438.0,
+      1426.2,
+      1402.9,
+      1439.4,
+      1459.7,
+      1450.8,
+      1478.0,
+      1508.0,
+      1490.9,
+      1513.4,
+      1480.6,
+      1446.4,
+      1483.6,
+      1472.2,
+      1495.7,
+      1518.6,
+      1525.8
     ],
     "mous": [
       1500,
@@ -1468,26 +1501,6 @@
       1522.5,
       1492.1
     ],
-    "cret": [
-      1500,
-      1467.1,
-      1438.0,
-      1426.2,
-      1402.9,
-      1439.4,
-      1459.7,
-      1450.8,
-      1478.0,
-      1508.0,
-      1490.9,
-      1513.4,
-      1480.6,
-      1446.4,
-      1483.6,
-      1472.2,
-      1495.7,
-      1518.6
-    ],
     "ivry": [
       1500,
       1532.9,
@@ -1506,7 +1519,8 @@
       1422.8,
       1446.0,
       1438.2,
-      1415.3
+      1415.3,
+      1401.6
     ],
     "vill": [
       1500,
@@ -1545,7 +1559,8 @@
       1221.2,
       1197.1,
       1188.1,
-      1182.2
+      1182.2,
+      1175.0
     ]
   },
   "evolutionData": {
@@ -1592,9 +1607,58 @@
           23,
           25,
           27,
-          29
+          29,
+          31
         ],
         "rank": 2
+      },
+      "neui": {
+        "points": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          9,
+          11,
+          13,
+          14,
+          16,
+          17,
+          18,
+          20,
+          21,
+          23,
+          24,
+          25,
+          27,
+          29
+        ],
+        "rank": 5
+      },
+      "marv": {
+        "points": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          10,
+          12,
+          13,
+          15,
+          17,
+          18,
+          20,
+          22,
+          23,
+          24,
+          25,
+          27,
+          28,
+          29
+        ],
+        "rank": 4
       },
       "no": {
         "points": [
@@ -1617,35 +1681,14 @@
           25,
           27
         ],
-        "rank": 4
-      },
-      "marv": {
-        "points": [
-          0,
-          2,
-          4,
-          6,
-          8,
-          10,
-          12,
-          13,
-          15,
-          17,
-          18,
-          20,
-          22,
-          23,
-          24,
-          25,
-          27,
-          28
-        ],
         "rank": 3
       },
-      "neui": {
+      "cret": {
         "points": [
           0,
+          1,
           2,
+          3,
           4,
           6,
           8,
@@ -1659,11 +1702,10 @@
           20,
           21,
           23,
-          24,
           25,
           27
         ],
-        "rank": 5
+        "rank": 6
       },
       "mous": {
         "points": [
@@ -1689,29 +1731,6 @@
         ],
         "rank": 7
       },
-      "cret": {
-        "points": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          6,
-          8,
-          9,
-          11,
-          13,
-          14,
-          16,
-          17,
-          18,
-          20,
-          21,
-          23,
-          25
-        ],
-        "rank": 6
-      },
       "ivry": {
         "points": [
           0,
@@ -1731,7 +1750,8 @@
           19,
           21,
           22,
-          23
+          23,
+          24
         ],
         "rank": 8
       },
@@ -1776,7 +1796,8 @@
           14,
           15,
           16,
-          17
+          17,
+          18
         ],
         "rank": 10
       }

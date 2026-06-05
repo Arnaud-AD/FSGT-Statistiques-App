@@ -5,10 +5,10 @@
     "name": "Hard",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/2",
-    "lastUpdated": "2026-06-03T09:09:21",
+    "lastUpdated": "2026-06-05T02:17:41",
     "teamCount": 10,
-    "matchesPlayed": 84,
-    "matchesUpcoming": 6
+    "matchesPlayed": 85,
+    "matchesUpcoming": 5
   },
   "teams": {
     "inde": {
@@ -21,14 +21,14 @@
       "short": "LO",
       "color": "#3498db"
     },
-    "padn": {
-      "name": "Padnom",
-      "short": "PA",
-      "color": "#2ecc71"
-    },
     "yip": {
       "name": "Yip Yip",
       "short": "YY",
+      "color": "#2ecc71"
+    },
+    "padn": {
+      "name": "Padnom",
+      "short": "PA",
       "color": "#f39c12"
     },
     "sucy": {
@@ -142,24 +142,24 @@
     {
       "rank": 3,
       "team": "yip",
-      "mj": 16,
-      "g": 11,
+      "mj": 17,
+      "g": 12,
       "p": 5,
-      "setPlus": 36,
+      "setPlus": 39,
       "setMinus": 22,
-      "ds": 14,
-      "coefSet": "1.64",
-      "ptsPlus": 1341,
-      "ptsMinus": 1208,
-      "dp": "+133",
-      "coefPts": "1.11",
-      "pts": 27,
+      "ds": 17,
+      "coefSet": "1.77",
+      "ptsPlus": 1416,
+      "ptsMinus": 1262,
+      "dp": "+154",
+      "coefPts": "1.12",
+      "pts": 29,
       "formAller": [
         "W",
         "W",
         "W",
         "W",
-        "D",
+        "W",
         "W",
         "L",
         "L",
@@ -332,24 +332,24 @@
     {
       "rank": 8,
       "team": "go",
-      "mj": 15,
+      "mj": 16,
       "g": 4,
-      "p": 11,
+      "p": 12,
       "setPlus": 17,
-      "setMinus": 34,
-      "ds": -17,
-      "coefSet": "0.50",
-      "ptsPlus": 1090,
-      "ptsMinus": 1200,
-      "dp": "-110",
-      "coefPts": "0.91",
-      "pts": 19,
+      "setMinus": 37,
+      "ds": -20,
+      "coefSet": "0.46",
+      "ptsPlus": 1144,
+      "ptsMinus": 1275,
+      "dp": "-131",
+      "coefPts": "0.90",
+      "pts": 20,
       "formAller": [
         "L",
         "L",
         "L",
         "L",
-        "D",
+        "L",
         "L",
         "W",
         "L",
@@ -447,6 +447,15 @@
   "matchesPlayed": [
     {
       "date": "02/06/2026",
+      "home": "yip",
+      "away": "go",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "02/06/2026",
       "home": "padn",
       "away": "alam",
       "scoreHome": 3,
@@ -501,19 +510,19 @@
     },
     {
       "date": "19/05/2026",
-      "home": "padn",
-      "away": "nahc",
+      "home": "yip",
+      "away": "deme",
       "scoreHome": 3,
-      "scoreAway": 1,
+      "scoreAway": 0,
       "homeWin": true,
       "status": "Terminé"
     },
     {
       "date": "19/05/2026",
-      "home": "yip",
-      "away": "deme",
+      "home": "padn",
+      "away": "nahc",
       "scoreHome": 3,
-      "scoreAway": 0,
+      "scoreAway": 1,
       "homeWin": true,
       "status": "Terminé"
     },
@@ -1216,12 +1225,6 @@
       "status": "Reporté"
     },
     {
-      "date": "02/06/2026",
-      "home": "yip",
-      "away": "go",
-      "status": "Reporté"
-    },
-    {
       "date": "08/06/2026",
       "home": "go",
       "away": "yip",
@@ -1264,12 +1267,12 @@
     {
       "rank": 3,
       "team": "yip",
-      "elo": 1584.7,
-      "movement": -36.9,
-      "record": "11-5",
-      "power": 69.5,
-      "calendar": "D vs SUCY",
-      "diffClass": "diff-hard"
+      "elo": 1600.4,
+      "movement": 15.6,
+      "record": "12-5",
+      "power": 73.1,
+      "calendar": "V vs GO",
+      "diffClass": "diff-easy"
     },
     {
       "rank": 4,
@@ -1304,11 +1307,11 @@
     {
       "rank": 7,
       "team": "go",
-      "elo": 1399.0,
-      "movement": -25.6,
-      "record": "4-11",
-      "power": 26.7,
-      "calendar": "D vs SUCY",
+      "elo": 1383.4,
+      "movement": -15.6,
+      "record": "4-12",
+      "power": 23.1,
+      "calendar": "D vs Yip",
       "diffClass": "diff-hard"
     },
     {
@@ -1384,6 +1387,26 @@
       1656.8,
       1669.9
     ],
+    "yip": [
+      1500,
+      1532.9,
+      1560.1,
+      1581.3,
+      1605.3,
+      1575.9,
+      1546.4,
+      1562.7,
+      1586.2,
+      1629.0,
+      1638.6,
+      1604.3,
+      1617.1,
+      1634.2,
+      1606.0,
+      1621.6,
+      1584.7,
+      1600.4
+    ],
     "padn": [
       1500,
       1530.7,
@@ -1403,25 +1426,6 @@
       1562.1,
       1542.0,
       1551.8
-    ],
-    "yip": [
-      1500,
-      1532.9,
-      1560.1,
-      1581.3,
-      1605.3,
-      1575.9,
-      1546.4,
-      1562.7,
-      1586.2,
-      1629.0,
-      1638.6,
-      1604.3,
-      1617.1,
-      1634.2,
-      1606.0,
-      1621.6,
-      1584.7
     ],
     "sucy": [
       1500,
@@ -1540,7 +1544,8 @@
       1353.1,
       1401.2,
       1424.6,
-      1399.0
+      1399.0,
+      1383.4
     ]
   },
   "evolutionData": {
@@ -1591,6 +1596,29 @@
         ],
         "rank": 2
       },
+      "yip": {
+        "points": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          9,
+          10,
+          12,
+          14,
+          16,
+          18,
+          19,
+          21,
+          23,
+          24,
+          26,
+          27,
+          29
+        ],
+        "rank": 3
+      },
       "padn": {
         "points": [
           0,
@@ -1613,28 +1641,6 @@
           28
         ],
         "rank": 4
-      },
-      "yip": {
-        "points": [
-          0,
-          2,
-          4,
-          6,
-          8,
-          9,
-          10,
-          12,
-          14,
-          16,
-          18,
-          19,
-          21,
-          23,
-          24,
-          26,
-          27
-        ],
-        "rank": 3
       },
       "sucy": {
         "points": [
@@ -1769,7 +1775,8 @@
           14,
           16,
           18,
-          19
+          19,
+          20
         ],
         "rank": 8
       }
