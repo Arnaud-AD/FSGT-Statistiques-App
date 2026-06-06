@@ -1300,7 +1300,7 @@
       "elo": 1464.4,
       "movement": 39.7,
       "record": "8-9",
-      "power": 41.8,
+      "power": 39.4,
       "calendar": "V vs Les",
       "diffClass": "diff-easy"
     },
@@ -1310,7 +1310,7 @@
       "elo": 1383.4,
       "movement": -15.6,
       "record": "4-12",
-      "power": 23.1,
+      "power": 15.3,
       "calendar": "D vs Yip",
       "diffClass": "diff-hard"
     },
@@ -1320,7 +1320,7 @@
       "elo": 1374.5,
       "movement": -15.5,
       "record": "6-10",
-      "power": 21.1,
+      "power": 12.6,
       "calendar": "D x4",
       "diffClass": "diff-hard"
     },
@@ -1330,7 +1330,7 @@
       "elo": 1341.6,
       "movement": -13.0,
       "record": "4-14",
-      "power": 13.5,
+      "power": 2.8,
       "calendar": "D vs Les",
       "diffClass": "diff-hard"
     },
@@ -1340,7 +1340,7 @@
       "elo": 1332.1,
       "movement": -9.9,
       "record": "4-14",
-      "power": 11.3,
+      "power": 1.0,
       "calendar": "D x3",
       "diffClass": "diff-hard"
     }

@@ -1262,7 +1262,7 @@
       "elo": 1767.1,
       "movement": -32.2,
       "record": "17-1",
-      "power": 91.1,
+      "power": 100.0,
       "calendar": "D vs Marvels",
       "diffClass": "diff-hard"
     },
@@ -1272,7 +1272,7 @@
       "elo": 1715.3,
       "movement": 13.6,
       "record": "14-3",
-      "power": 83.1,
+      "power": 90.3,
       "calendar": "V x9",
       "diffClass": "diff-easy"
     },
@@ -1282,7 +1282,7 @@
       "elo": 1623.0,
       "movement": 8.6,
       "record": "11-7",
-      "power": 68.9,
+      "power": 73.0,
       "calendar": "V x4",
       "diffClass": "diff-easy"
     },
@@ -1292,7 +1292,7 @@
       "elo": 1528.7,
       "movement": 39.5,
       "record": "11-7",
-      "power": 54.4,
+      "power": 55.4,
       "calendar": "V vs Marvels",
       "diffClass": "diff-easy"
     },
@@ -1302,7 +1302,7 @@
       "elo": 1525.8,
       "movement": 7.2,
       "record": "9-9",
-      "power": 54.0,
+      "power": 54.8,
       "calendar": "V x3",
       "diffClass": "diff-easy"
     },
@@ -1312,7 +1312,7 @@
       "elo": 1509.9,
       "movement": -39.5,
       "record": "11-7",
-      "power": 51.5,
+      "power": 51.9,
       "calendar": "D vs Neuilly",
       "diffClass": "diff-hard"
     },

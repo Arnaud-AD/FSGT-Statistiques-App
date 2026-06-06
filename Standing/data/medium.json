@@ -1070,7 +1070,7 @@
       "elo": 1486.9,
       "movement": -17.5,
       "record": "8-8",
-      "power": 47.2,
+      "power": 46.9,
       "calendar": "D vs Olympe",
       "diffClass": "diff-hard"
     },
@@ -1080,7 +1080,7 @@
       "elo": 1486.5,
       "movement": 14.0,
       "record": "8-7",
-      "power": 47.1,
+      "power": 46.8,
       "calendar": "V vs RYŌIKI",
       "diffClass": "diff-easy"
     },
@@ -1090,7 +1090,7 @@
       "elo": 1377.4,
       "movement": -18.6,
       "record": "5-9",
-      "power": 23.5,
+      "power": 20.9,
       "calendar": "D x5",
       "diffClass": "diff-hard"
     },
@@ -1100,7 +1100,7 @@
       "elo": 1365.7,
       "movement": -27.4,
       "record": "3-12",
-      "power": 21.0,
+      "power": 18.1,
       "calendar": "D vs Team",
       "diffClass": "diff-hard"
     },
@@ -1110,7 +1110,7 @@
       "elo": 1289.7,
       "movement": -23.6,
       "record": "2-13",
-      "power": 4.6,
+      "power": 1.0,
       "calendar": "D x7",
       "diffClass": "diff-hard"
     }

@@ -1264,7 +1264,7 @@
       "elo": 1843.4,
       "movement": 2.5,
       "record": "18-0",
-      "power": 98.2,
+      "power": 100.0,
       "calendar": "V x18",
       "diffClass": "diff-easy"
     },
@@ -1274,7 +1274,7 @@
       "elo": 1644.1,
       "movement": -31.8,
       "record": "13-5",
-      "power": 70.2,
+      "power": 71.0,
       "calendar": "D vs Red",
       "diffClass": "diff-hard"
     },
@@ -1284,7 +1284,7 @@
       "elo": 1595.5,
       "movement": -20.0,
       "record": "12-6",
-      "power": 63.4,
+      "power": 63.9,
       "calendar": "D vs Jen",
       "diffClass": "diff-hard"
     },
@@ -1294,7 +1294,7 @@
       "elo": 1548.5,
       "movement": 31.8,
       "record": "11-7",
-      "power": 56.8,
+      "power": 57.1,
       "calendar": "V vs Les",
       "diffClass": "diff-easy"
     },
@@ -1304,7 +1304,7 @@
       "elo": 1511.6,
       "movement": -15.2,
       "record": "7-11",
-      "power": 51.6,
+      "power": 51.7,
       "calendar": "D vs Les",
       "diffClass": "diff-hard"
     },

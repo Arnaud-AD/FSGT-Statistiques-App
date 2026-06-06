@@ -888,7 +888,7 @@
       "elo": 1400.5,
       "movement": 41.8,
       "record": "4-10",
-      "power": 31.9,
+      "power": 28.9,
       "calendar": "V vs TOUKC",
       "diffClass": "diff-easy"
     },
@@ -898,7 +898,7 @@
       "elo": 1298.7,
       "movement": 22.8,
       "record": "2-12",
-      "power": 13.4,
+      "power": 7.4,
       "calendar": "V vs Punchline",
       "diffClass": "diff-easy"
     },
@@ -908,7 +908,7 @@
       "elo": 1263.7,
       "movement": -12.8,
       "record": "2-12",
-      "power": 7.0,
+      "power": 1.0,
       "calendar": "D x8",
       "diffClass": "diff-hard"
     }
