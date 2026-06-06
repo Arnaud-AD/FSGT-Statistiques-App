@@ -8,6 +8,7 @@ __pycache__/
 
 # Scripts (scraping, ELO, lancement local)
 scrape_fsgt.py
+scrape_ginette.py
 ginette_elo.py
 start.command
 
