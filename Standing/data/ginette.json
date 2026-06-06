@@ -3,7 +3,7 @@
     "slug": "ginette",
     "name": "Coupe Ginette",
     "format": "coupe",
-    "lastUpdated": "2026-04-30T00:41:22",
+    "lastUpdated": "2026-06-06T19:30:35",
     "teamCount": 58,
     "matchCount": 86,
     "forfeitCount": 10,
@@ -2211,17 +2211,6 @@
       "winPct": 42.9
     },
     {
-      "slug": "starter",
-      "name": "Starter",
-      "teams": 7,
-      "avgElo": 1384.3,
-      "maxElo": 1413.0,
-      "minElo": 1365.7,
-      "wins": 2,
-      "losses": 13,
-      "winPct": 13.3
-    },
-    {
       "slug": "argent",
       "name": "Argent",
       "teams": 7,
@@ -2231,6 +2220,17 @@
       "wins": 3,
       "losses": 12,
       "winPct": 20.0
+    },
+    {
+      "slug": "starter",
+      "name": "Starter",
+      "teams": 7,
+      "avgElo": 1384.3,
+      "maxElo": 1413.0,
+      "minElo": 1365.7,
+      "wins": 2,
+      "losses": 13,
+      "winPct": 13.3
     }
   ],
   "matches": [
@@ -4471,6 +4471,78 @@
       "loser": "RSC Champigny 1",
       "loserDiv": "Elite",
       "score": "3-0"
+    },
+    {
+      "gap": 1,
+      "winner": "Les Indécis",
+      "winnerDiv": "Hard",
+      "loser": "Red Hot Sucy Pépère",
+      "loserDiv": "Elite",
+      "score": "0-3"
+    },
+    {
+      "gap": 1,
+      "winner": "Padnom",
+      "winnerDiv": "Hard",
+      "loser": "RSC Champigny 1",
+      "loserDiv": "Elite",
+      "score": "2-3"
+    },
+    {
+      "gap": 1,
+      "winner": "Moustache Team",
+      "winnerDiv": "Or 6x6",
+      "loser": "LES DÉMENTS",
+      "loserDiv": "Hard",
+      "score": "3-1"
+    },
+    {
+      "gap": 1,
+      "winner": "Olympe BB volley",
+      "winnerDiv": "Medium",
+      "loser": "Marvels 6",
+      "loserDiv": "Or 6x6",
+      "score": "2-3"
+    },
+    {
+      "gap": 1,
+      "winner": "Les Loups-Phoques",
+      "winnerDiv": "Hard",
+      "loser": "Manu Andy-sport",
+      "loserDiv": "Elite",
+      "score": "0-3"
+    },
+    {
+      "gap": 1,
+      "winner": "Les Indécis",
+      "winnerDiv": "Hard",
+      "loser": "Marvels 4",
+      "loserDiv": "Elite",
+      "score": "1-3"
+    },
+    {
+      "gap": 1,
+      "winner": "Padnom",
+      "winnerDiv": "Hard",
+      "loser": "Bières et le loup",
+      "loserDiv": "Elite",
+      "score": "3-2"
+    },
+    {
+      "gap": 1,
+      "winner": "Padnom",
+      "winnerDiv": "Hard",
+      "loser": "Red Hot Sucy Pépère",
+      "loserDiv": "Elite",
+      "score": "1-3"
+    },
+    {
+      "gap": 1,
+      "winner": "Nekutā",
+      "winnerDiv": "Easy",
+      "loser": "Les Rhum'Antik",
+      "loserDiv": "Medium",
+      "score": "1-3"
     }
   ]
 }
