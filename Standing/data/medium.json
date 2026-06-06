@@ -5,10 +5,10 @@
     "name": "Medium",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/15",
-    "lastUpdated": "2026-06-02T10:26:17",
+    "lastUpdated": "2026-06-06T19:14:08",
     "teamCount": 9,
-    "matchesPlayed": 67,
-    "matchesUpcoming": 5
+    "matchesPlayed": 68,
+    "matchesUpcoming": 4
   },
   "teams": {
     "coch": {
@@ -21,24 +21,24 @@
       "short": "OB",
       "color": "#3498db"
     },
+    "team": {
+      "name": "Team Glouglou",
+      "short": "TG",
+      "color": "#2ecc71"
+    },
     "mort": {
       "name": "Morts de Soif",
       "short": "MS",
-      "color": "#2ecc71"
+      "color": "#f39c12"
     },
     "gint": {
       "name": "Ginto",
       "short": "GI",
-      "color": "#f39c12"
+      "color": "#9b59b6"
     },
     "boit": {
       "name": "Boîte de 4",
       "short": "B4",
-      "color": "#9b59b6"
-    },
-    "team": {
-      "name": "Team Glouglou",
-      "short": "TG",
       "color": "#1abc9c"
     },
     "rhum": {
@@ -205,24 +205,24 @@
     {
       "rank": 5,
       "team": "team",
-      "mj": 15,
-      "g": 7,
+      "mj": 16,
+      "g": 8,
       "p": 8,
-      "setPlus": 27,
-      "setMinus": 27,
-      "ds": 0,
-      "coefSet": "1.00",
-      "ptsPlus": 1156,
-      "ptsMinus": 1156,
-      "dp": "0",
+      "setPlus": 30,
+      "setMinus": 28,
+      "ds": 2,
+      "coefSet": "1.07",
+      "ptsPlus": 1248,
+      "ptsMinus": 1249,
+      "dp": "-1",
       "coefPts": "1.00",
-      "pts": 22,
+      "pts": 24,
       "formAller": [
         "W",
         "L",
         "W",
-        "W",
         "L",
+        "W",
         "L",
         "L",
         "W"
@@ -233,7 +233,7 @@
         "W",
         "L",
         "L",
-        "D",
+        "W",
         "W",
         "L"
       ]
@@ -277,18 +277,18 @@
     {
       "rank": 7,
       "team": "rhum",
-      "mj": 13,
+      "mj": 14,
       "g": 5,
-      "p": 8,
-      "setPlus": 20,
-      "setMinus": 31,
-      "ds": -11,
-      "coefSet": "0.65",
-      "ptsPlus": 1097,
-      "ptsMinus": 1132,
-      "dp": "-35",
+      "p": 9,
+      "setPlus": 21,
+      "setMinus": 34,
+      "ds": -13,
+      "coefSet": "0.62",
+      "ptsPlus": 1190,
+      "ptsMinus": 1224,
+      "dp": "-34",
       "coefPts": "0.97",
-      "pts": 18,
+      "pts": 19,
       "formAller": [
         "W",
         "L",
@@ -305,7 +305,7 @@
         "L",
         "D",
         "L",
-        "D",
+        "L",
         "L",
         "D"
       ]
@@ -384,6 +384,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "05/06/2026",
+      "home": "team",
+      "away": "rhum",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "01/06/2026",
       "home": "olym",
@@ -990,15 +999,9 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "03/06/2026",
+      "date": "06/04/2026",
       "home": "olym",
       "away": "ryoi",
-      "status": "Reporté"
-    },
-    {
-      "date": "05/06/2026",
-      "home": "team",
-      "away": "rhum",
       "status": "Reporté"
     },
     {
@@ -1054,11 +1057,11 @@
     {
       "rank": 4,
       "team": "team",
-      "elo": 1494.8,
-      "movement": 27.4,
-      "record": "7-8",
-      "power": 48.9,
-      "calendar": "V vs RYŌIKI",
+      "elo": 1513.3,
+      "movement": 18.6,
+      "record": "8-8",
+      "power": 52.9,
+      "calendar": "V vs Les",
       "diffClass": "diff-easy"
     },
     {
@@ -1084,11 +1087,11 @@
     {
       "rank": 7,
       "team": "rhum",
-      "elo": 1395.9,
-      "movement": -19.3,
-      "record": "5-8",
-      "power": 27.5,
-      "calendar": "D x4",
+      "elo": 1377.4,
+      "movement": -18.6,
+      "record": "5-9",
+      "power": 23.5,
+      "calendar": "D x5",
       "diffClass": "diff-hard"
     },
     {
@@ -1150,6 +1153,25 @@
       1687.7,
       1731.6
     ],
+    "team": [
+      1500,
+      1473.1,
+      1505.0,
+      1542.4,
+      1508.8,
+      1531.2,
+      1510.2,
+      1532.2,
+      1498.9,
+      1521.9,
+      1469.7,
+      1436.8,
+      1422.6,
+      1473.4,
+      1467.4,
+      1494.8,
+      1513.3
+    ],
     "mort": [
       1500,
       1470.4,
@@ -1205,24 +1227,6 @@
       1543.1,
       1523.7
     ],
-    "team": [
-      1500,
-      1473.1,
-      1505.0,
-      1542.4,
-      1508.8,
-      1531.2,
-      1510.2,
-      1532.2,
-      1498.9,
-      1521.9,
-      1469.7,
-      1436.8,
-      1422.6,
-      1473.4,
-      1467.4,
-      1494.8
-    ],
     "rhum": [
       1500,
       1519.2,
@@ -1237,7 +1241,8 @@
       1461.3,
       1447.2,
       1415.2,
-      1395.9
+      1395.9,
+      1377.4
     ],
     "ryoi": [
       1500,
@@ -1320,6 +1325,28 @@
         ],
         "rank": 2
       },
+      "team": {
+        "points": [
+          0,
+          1,
+          3,
+          5,
+          6,
+          8,
+          9,
+          11,
+          12,
+          14,
+          15,
+          16,
+          17,
+          19,
+          20,
+          22,
+          24
+        ],
+        "rank": 5
+      },
       "mort": {
         "points": [
           0,
@@ -1384,27 +1411,6 @@
         ],
         "rank": 4
       },
-      "team": {
-        "points": [
-          0,
-          1,
-          3,
-          5,
-          6,
-          8,
-          9,
-          11,
-          12,
-          14,
-          15,
-          16,
-          17,
-          19,
-          20,
-          22
-        ],
-        "rank": 5
-      },
       "rhum": {
         "points": [
           0,
@@ -1420,7 +1426,8 @@
           15,
           16,
           17,
-          18
+          18,
+          19
         ],
         "rank": 7
       },

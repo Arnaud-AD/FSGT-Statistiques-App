@@ -5,10 +5,10 @@
     "name": "Or 6x6",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/4",
-    "lastUpdated": "2026-06-05T02:17:43",
+    "lastUpdated": "2026-06-06T19:14:10",
     "teamCount": 10,
-    "matchesPlayed": 88,
-    "matchesUpcoming": 2
+    "matchesPlayed": 89,
+    "matchesUpcoming": 1
   },
   "teams": {
     "cout": {
@@ -21,19 +21,19 @@
       "short": "RA",
       "color": "#3498db"
     },
-    "neui": {
-      "name": "Neuilly Sa Mère",
+    "no": {
+      "name": "No s(o)ucy",
       "short": "NS",
       "color": "#2ecc71"
+    },
+    "neui": {
+      "name": "Neuilly Sa Mère",
+      "short": "N2",
+      "color": "#f39c12"
     },
     "marv": {
       "name": "Marvels 6",
       "short": "M6",
-      "color": "#f39c12"
-    },
-    "no": {
-      "name": "No s(o)ucy",
-      "short": "N2",
       "color": "#9b59b6"
     },
     "cret": {
@@ -142,18 +142,18 @@
     {
       "rank": 3,
       "team": "no",
-      "mj": 17,
-      "g": 10,
+      "mj": 18,
+      "g": 11,
       "p": 7,
-      "setPlus": 39,
+      "setPlus": 42,
       "setMinus": 28,
-      "ds": 11,
-      "coefSet": "1.39",
-      "ptsPlus": 1520,
-      "ptsMinus": 1391,
-      "dp": "+129",
-      "coefPts": "1.09",
-      "pts": 27,
+      "ds": 14,
+      "coefSet": "1.50",
+      "ptsPlus": 1595,
+      "ptsMinus": 1427,
+      "dp": "+168",
+      "coefPts": "1.12",
+      "pts": 29,
       "formAller": [
         "L",
         "L",
@@ -172,7 +172,7 @@
         "W",
         "W",
         "L",
-        "D",
+        "W",
         "L",
         "W"
       ]
@@ -370,18 +370,18 @@
     {
       "rank": 9,
       "team": "vill",
-      "mj": 16,
+      "mj": 17,
       "g": 2,
-      "p": 14,
+      "p": 15,
       "setPlus": 12,
-      "setMinus": 42,
-      "ds": -30,
-      "coefSet": "0.29",
-      "ptsPlus": 998,
-      "ptsMinus": 1312,
-      "dp": "-314",
-      "coefPts": "0.76",
-      "pts": 18,
+      "setMinus": 45,
+      "ds": -33,
+      "coefSet": "0.27",
+      "ptsPlus": 1034,
+      "ptsMinus": 1387,
+      "dp": "-353",
+      "coefPts": "0.75",
+      "pts": 19,
       "formAller": [
         "L",
         "D",
@@ -400,7 +400,7 @@
         "L",
         "W",
         "L",
-        "D",
+        "L",
         "L",
         "L"
       ]
@@ -445,6 +445,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "05/06/2026",
+      "home": "no",
+      "away": "vill",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
     {
       "date": "04/06/2026",
       "home": "marv",
@@ -843,20 +852,20 @@
     },
     {
       "date": "12/02/2026",
-      "home": "neui",
-      "away": "vlan",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "12/02/2026",
       "home": "marv",
       "away": "no",
       "scoreHome": 2,
       "scoreAway": 3,
       "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "12/02/2026",
+      "home": "neui",
+      "away": "vlan",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
       "status": "Terminé"
     },
     {
@@ -1240,12 +1249,6 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "05/06/2026",
-      "home": "no",
-      "away": "vill",
-      "status": "Reporté"
-    },
-    {
       "date": "08/06/2026",
       "home": "vill",
       "away": "raia",
@@ -1276,11 +1279,11 @@
     {
       "rank": 3,
       "team": "no",
-      "elo": 1614.4,
-      "movement": 9.6,
-      "record": "10-7",
-      "power": 67.6,
-      "calendar": "V x3",
+      "elo": 1623.0,
+      "movement": 8.6,
+      "record": "11-7",
+      "power": 68.9,
+      "calendar": "V x4",
       "diffClass": "diff-easy"
     },
     {
@@ -1336,11 +1339,11 @@
     {
       "rank": 9,
       "team": "vill",
-      "elo": 1270.1,
-      "movement": -9.6,
-      "record": "2-14",
-      "power": 14.6,
-      "calendar": "D x5",
+      "elo": 1261.5,
+      "movement": -8.6,
+      "record": "2-15",
+      "power": 13.3,
+      "calendar": "D x6",
       "diffClass": "diff-hard"
     },
     {
@@ -1397,6 +1400,27 @@
       1701.7,
       1715.3
     ],
+    "no": [
+      1500,
+      1470.2,
+      1451.9,
+      1480.7,
+      1512.3,
+      1475.8,
+      1461.4,
+      1446.2,
+      1470.7,
+      1506.3,
+      1555.1,
+      1589.3,
+      1609.4,
+      1591.8,
+      1568.6,
+      1574.5,
+      1604.8,
+      1614.4,
+      1623.0
+    ],
     "neui": [
       1500,
       1530.7,
@@ -1438,26 +1462,6 @@
       1588.4,
       1549.4,
       1509.9
-    ],
-    "no": [
-      1500,
-      1470.2,
-      1451.9,
-      1480.7,
-      1512.3,
-      1475.8,
-      1461.4,
-      1446.2,
-      1470.7,
-      1506.3,
-      1555.1,
-      1589.3,
-      1609.4,
-      1591.8,
-      1568.6,
-      1574.5,
-      1604.8,
-      1614.4
     ],
     "cret": [
       1500,
@@ -1539,7 +1543,8 @@
       1309.2,
       1285.8,
       1279.7,
-      1270.1
+      1270.1,
+      1261.5
     ],
     "vlan": [
       1500,
@@ -1612,6 +1617,30 @@
         ],
         "rank": 2
       },
+      "no": {
+        "points": [
+          0,
+          1,
+          2,
+          4,
+          6,
+          7,
+          8,
+          9,
+          11,
+          13,
+          15,
+          17,
+          19,
+          20,
+          21,
+          23,
+          25,
+          27,
+          29
+        ],
+        "rank": 3
+      },
       "neui": {
         "points": [
           0,
@@ -1659,29 +1688,6 @@
           29
         ],
         "rank": 4
-      },
-      "no": {
-        "points": [
-          0,
-          1,
-          2,
-          4,
-          6,
-          7,
-          8,
-          9,
-          11,
-          13,
-          15,
-          17,
-          19,
-          20,
-          21,
-          23,
-          25,
-          27
-        ],
-        "rank": 3
       },
       "cret": {
         "points": [
@@ -1773,7 +1779,8 @@
           15,
           16,
           17,
-          18
+          18,
+          19
         ],
         "rank": 9
       },
