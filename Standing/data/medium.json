@@ -5,10 +5,10 @@
     "name": "Medium",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/15",
-    "lastUpdated": "2026-06-06T19:14:08",
+    "lastUpdated": "2026-06-09T15:09:43",
     "teamCount": 9,
-    "matchesPlayed": 68,
-    "matchesUpcoming": 4
+    "matchesPlayed": 70,
+    "matchesUpcoming": 2
   },
   "teams": {
     "coch": {
@@ -26,14 +26,14 @@
       "short": "TG",
       "color": "#2ecc71"
     },
-    "mort": {
-      "name": "Morts de Soif",
-      "short": "MS",
-      "color": "#f39c12"
-    },
     "gint": {
       "name": "Ginto",
       "short": "GI",
+      "color": "#f39c12"
+    },
+    "mort": {
+      "name": "Morts de Soif",
+      "short": "MS",
       "color": "#9b59b6"
     },
     "boit": {
@@ -97,18 +97,18 @@
     {
       "rank": 2,
       "team": "olym",
-      "mj": 14,
-      "g": 12,
+      "mj": 15,
+      "g": 13,
       "p": 2,
-      "setPlus": 38,
+      "setPlus": 41,
       "setMinus": 14,
-      "ds": 24,
-      "coefSet": "2.71",
-      "ptsPlus": 1208,
-      "ptsMinus": 1064,
-      "dp": "+144",
-      "coefPts": "1.14",
-      "pts": 26,
+      "ds": 27,
+      "coefSet": "2.93",
+      "ptsPlus": 1283,
+      "ptsMinus": 1115,
+      "dp": "+168",
+      "coefPts": "1.15",
+      "pts": 28,
       "formAller": [
         "W",
         "L",
@@ -124,7 +124,7 @@
         "W",
         "W",
         "W",
-        "D",
+        "W",
         "W",
         "D",
         "W"
@@ -132,42 +132,6 @@
     },
     {
       "rank": 3,
-      "team": "gint",
-      "mj": 15,
-      "g": 8,
-      "p": 7,
-      "setPlus": 28,
-      "setMinus": 29,
-      "ds": -1,
-      "coefSet": "0.97",
-      "ptsPlus": 1238,
-      "ptsMinus": 1269,
-      "dp": "-31",
-      "coefPts": "0.98",
-      "pts": 23,
-      "formAller": [
-        "L",
-        "W",
-        "L",
-        "W",
-        "W",
-        "L",
-        "W",
-        "W"
-      ],
-      "formRetour": [
-        "W",
-        "W",
-        "L",
-        "L",
-        "L",
-        "W",
-        "L",
-        "D"
-      ]
-    },
-    {
-      "rank": 4,
       "team": "boit",
       "mj": 15,
       "g": 7,
@@ -203,7 +167,7 @@
       ]
     },
     {
-      "rank": 5,
+      "rank": 4,
       "team": "team",
       "mj": 16,
       "g": 8,
@@ -235,6 +199,42 @@
         "L",
         "W",
         "W",
+        "L"
+      ]
+    },
+    {
+      "rank": 5,
+      "team": "gint",
+      "mj": 16,
+      "g": 8,
+      "p": 8,
+      "setPlus": 29,
+      "setMinus": 32,
+      "ds": -3,
+      "coefSet": "0.91",
+      "ptsPlus": 1321,
+      "ptsMinus": 1365,
+      "dp": "-44",
+      "coefPts": "0.97",
+      "pts": 24,
+      "formAller": [
+        "L",
+        "W",
+        "L",
+        "W",
+        "W",
+        "L",
+        "W",
+        "W"
+      ],
+      "formRetour": [
+        "W",
+        "W",
+        "L",
+        "L",
+        "L",
+        "W",
+        "L",
         "L"
       ]
     },
@@ -277,18 +277,18 @@
     {
       "rank": 7,
       "team": "rhum",
-      "mj": 14,
-      "g": 5,
+      "mj": 15,
+      "g": 6,
       "p": 9,
-      "setPlus": 21,
-      "setMinus": 34,
-      "ds": -13,
-      "coefSet": "0.62",
-      "ptsPlus": 1190,
-      "ptsMinus": 1224,
-      "dp": "-34",
-      "coefPts": "0.97",
-      "pts": 19,
+      "setPlus": 24,
+      "setMinus": 35,
+      "ds": -11,
+      "coefSet": "0.69",
+      "ptsPlus": 1286,
+      "ptsMinus": 1307,
+      "dp": "-21",
+      "coefPts": "0.98",
+      "pts": 21,
       "formAller": [
         "W",
         "L",
@@ -307,24 +307,24 @@
         "L",
         "L",
         "L",
-        "D"
+        "W"
       ]
     },
     {
       "rank": 8,
       "team": "ryoi",
-      "mj": 15,
+      "mj": 16,
       "g": 3,
-      "p": 12,
+      "p": 13,
       "setPlus": 21,
-      "setMinus": 36,
-      "ds": -15,
-      "coefSet": "0.58",
-      "ptsPlus": 1178,
-      "ptsMinus": 1307,
-      "dp": "-129",
-      "coefPts": "0.90",
-      "pts": 18,
+      "setMinus": 39,
+      "ds": -18,
+      "coefSet": "0.54",
+      "ptsPlus": 1229,
+      "ptsMinus": 1382,
+      "dp": "-153",
+      "coefPts": "0.89",
+      "pts": 19,
       "formAller": [
         "L",
         "L",
@@ -340,7 +340,7 @@
         "W",
         "L",
         "L",
-        "D",
+        "L",
         "L",
         "L",
         "W"
@@ -384,6 +384,24 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "08/06/2026",
+      "home": "olym",
+      "away": "ryoi",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé"
+    },
+    {
+      "date": "08/06/2026",
+      "home": "gint",
+      "away": "rhum",
+      "scoreHome": 1,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
     {
       "date": "05/06/2026",
       "home": "team",
@@ -728,20 +746,20 @@
     },
     {
       "date": "20/01/2026",
-      "home": "boit",
-      "away": "mort",
-      "scoreHome": 3,
-      "scoreAway": 2,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "20/01/2026",
       "home": "rhum",
       "away": "gint",
       "scoreHome": 1,
       "scoreAway": 3,
       "homeWin": false,
+      "status": "Terminé"
+    },
+    {
+      "date": "20/01/2026",
+      "home": "boit",
+      "away": "mort",
+      "scoreHome": 3,
+      "scoreAway": 2,
+      "homeWin": true,
       "status": "Terminé"
     },
     {
@@ -999,18 +1017,6 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "06/04/2026",
-      "home": "olym",
-      "away": "ryoi",
-      "status": "Reporté"
-    },
-    {
-      "date": "08/06/2026",
-      "home": "gint",
-      "away": "rhum",
-      "status": "Reporté"
-    },
-    {
       "date": "09/06/2026",
       "home": "tigr",
       "away": "rhum",
@@ -1027,11 +1033,11 @@
     {
       "rank": 1,
       "team": "olym",
-      "elo": 1731.6,
-      "movement": 44.0,
-      "record": "12-2",
+      "elo": 1739.3,
+      "movement": 7.6,
+      "record": "13-2",
       "power": 100.0,
-      "calendar": "V x8",
+      "calendar": "V x9",
       "diffClass": "diff-easy"
     },
     {
@@ -1040,7 +1046,7 @@
       "elo": 1725.2,
       "movement": -44.0,
       "record": "15-1",
-      "power": 98.6,
+      "power": 97.1,
       "calendar": "D vs Olympe",
       "diffClass": "diff-hard"
     },
@@ -1050,7 +1056,7 @@
       "elo": 1523.7,
       "movement": -19.5,
       "record": "7-8",
-      "power": 55.1,
+      "power": 55.0,
       "calendar": "D vs Morts",
       "diffClass": "diff-hard"
     },
@@ -1060,7 +1066,7 @@
       "elo": 1513.3,
       "movement": 18.6,
       "record": "8-8",
-      "power": 52.9,
+      "power": 52.8,
       "calendar": "V vs Les",
       "diffClass": "diff-easy"
     },
@@ -1077,31 +1083,31 @@
     {
       "rank": 6,
       "team": "gint",
-      "elo": 1486.5,
-      "movement": 14.0,
-      "record": "8-7",
-      "power": 46.8,
-      "calendar": "V vs RYŌIKI",
-      "diffClass": "diff-easy"
+      "elo": 1443.4,
+      "movement": -43.1,
+      "record": "8-8",
+      "power": 36.5,
+      "calendar": "D vs Les",
+      "diffClass": "diff-hard"
     },
     {
       "rank": 7,
       "team": "rhum",
-      "elo": 1377.4,
-      "movement": -18.6,
-      "record": "5-9",
-      "power": 20.9,
-      "calendar": "D x5",
-      "diffClass": "diff-hard"
+      "elo": 1420.5,
+      "movement": 43.1,
+      "record": "6-9",
+      "power": 31.1,
+      "calendar": "V vs Ginto",
+      "diffClass": "diff-easy"
     },
     {
       "rank": 8,
       "team": "ryoi",
-      "elo": 1365.7,
-      "movement": -27.4,
-      "record": "3-12",
-      "power": 18.1,
-      "calendar": "D vs Team",
+      "elo": 1358.1,
+      "movement": -7.6,
+      "record": "3-13",
+      "power": 16.3,
+      "calendar": "D vs Olympe",
       "diffClass": "diff-hard"
     },
     {
@@ -1151,7 +1157,8 @@
       1656.0,
       1670.2,
       1687.7,
-      1731.6
+      1731.6,
+      1739.3
     ],
     "team": [
       1500,
@@ -1172,6 +1179,25 @@
       1494.8,
       1513.3
     ],
+    "gint": [
+      1500,
+      1532.1,
+      1500.2,
+      1525.2,
+      1493.6,
+      1508.5,
+      1533.0,
+      1557.9,
+      1541.5,
+      1574.8,
+      1591.3,
+      1554.1,
+      1522.6,
+      1482.9,
+      1472.6,
+      1486.5,
+      1443.4
+    ],
     "mort": [
       1500,
       1470.4,
@@ -1190,24 +1216,6 @@
       1555.2,
       1504.3,
       1486.9
-    ],
-    "gint": [
-      1500,
-      1532.1,
-      1500.2,
-      1525.2,
-      1493.6,
-      1508.5,
-      1533.0,
-      1557.9,
-      1541.5,
-      1574.8,
-      1591.3,
-      1554.1,
-      1522.6,
-      1482.9,
-      1472.6,
-      1486.5
     ],
     "boit": [
       1500,
@@ -1242,7 +1250,8 @@
       1447.2,
       1415.2,
       1395.9,
-      1377.4
+      1377.4,
+      1420.5
     ],
     "ryoi": [
       1500,
@@ -1260,7 +1269,8 @@
       1383.4,
       1369.5,
       1393.1,
-      1365.7
+      1365.7,
+      1358.1
     ],
     "tigr": [
       1500,
@@ -1321,7 +1331,8 @@
           20,
           22,
           24,
-          26
+          26,
+          28
         ],
         "rank": 2
       },
@@ -1343,6 +1354,28 @@
           19,
           20,
           22,
+          24
+        ],
+        "rank": 4
+      },
+      "gint": {
+        "points": [
+          0,
+          2,
+          3,
+          5,
+          6,
+          8,
+          10,
+          12,
+          13,
+          15,
+          17,
+          18,
+          19,
+          20,
+          21,
+          23,
           24
         ],
         "rank": 5
@@ -1369,27 +1402,6 @@
         ],
         "rank": 6
       },
-      "gint": {
-        "points": [
-          0,
-          2,
-          3,
-          5,
-          6,
-          8,
-          10,
-          12,
-          13,
-          15,
-          17,
-          18,
-          19,
-          20,
-          21,
-          23
-        ],
-        "rank": 3
-      },
       "boit": {
         "points": [
           0,
@@ -1409,7 +1421,7 @@
           21,
           22
         ],
-        "rank": 4
+        "rank": 3
       },
       "rhum": {
         "points": [
@@ -1427,7 +1439,8 @@
           16,
           17,
           18,
-          19
+          19,
+          21
         ],
         "rank": 7
       },
@@ -1448,7 +1461,8 @@
           14,
           15,
           17,
-          18
+          18,
+          19
         ],
         "rank": 8
       },

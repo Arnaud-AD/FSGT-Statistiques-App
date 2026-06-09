@@ -5,10 +5,10 @@
     "name": "Or 6x6",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/4",
-    "lastUpdated": "2026-06-06T19:14:10",
+    "lastUpdated": "2026-06-09T15:09:45",
     "teamCount": 10,
-    "matchesPlayed": 89,
-    "matchesUpcoming": 1
+    "matchesPlayed": 90,
+    "matchesUpcoming": 0
   },
   "teams": {
     "cout": {
@@ -104,21 +104,21 @@
     {
       "rank": 2,
       "team": "raia",
-      "mj": 17,
-      "g": 14,
+      "mj": 18,
+      "g": 15,
       "p": 3,
-      "setPlus": 45,
+      "setPlus": 48,
       "setMinus": 19,
-      "ds": 26,
-      "coefSet": "2.37",
-      "ptsPlus": 1513,
-      "ptsMinus": 1290,
-      "dp": "+223",
+      "ds": 29,
+      "coefSet": "2.53",
+      "ptsPlus": 1588,
+      "ptsMinus": 1355,
+      "dp": "+233",
       "coefPts": "1.17",
-      "pts": 31,
+      "pts": 33,
       "formAller": [
         "L",
-        "D",
+        "W",
         "W",
         "W",
         "W",
@@ -370,21 +370,21 @@
     {
       "rank": 9,
       "team": "vill",
-      "mj": 17,
+      "mj": 18,
       "g": 2,
-      "p": 15,
+      "p": 16,
       "setPlus": 12,
-      "setMinus": 45,
-      "ds": -33,
-      "coefSet": "0.27",
-      "ptsPlus": 1034,
-      "ptsMinus": 1387,
-      "dp": "-353",
+      "setMinus": 48,
+      "ds": -36,
+      "coefSet": "0.25",
+      "ptsPlus": 1099,
+      "ptsMinus": 1462,
+      "dp": "-363",
       "coefPts": "0.75",
-      "pts": 19,
+      "pts": 20,
       "formAller": [
         "L",
-        "D",
+        "L",
         "L",
         "L",
         "W",
@@ -445,6 +445,15 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "08/06/2026",
+      "home": "vill",
+      "away": "raia",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé"
+    },
     {
       "date": "05/06/2026",
       "home": "no",
@@ -1247,14 +1256,7 @@
       "status": "Terminé"
     }
   ],
-  "matchesUpcoming": [
-    {
-      "date": "08/06/2026",
-      "home": "vill",
-      "away": "raia",
-      "status": "Reporté"
-    }
-  ],
+  "matchesUpcoming": [],
   "prTeams": [
     {
       "rank": 1,
@@ -1269,11 +1271,11 @@
     {
       "rank": 2,
       "team": "raia",
-      "elo": 1715.3,
-      "movement": 13.6,
-      "record": "14-3",
-      "power": 90.3,
-      "calendar": "V x9",
+      "elo": 1720.5,
+      "movement": 5.2,
+      "record": "15-3",
+      "power": 91.3,
+      "calendar": "V x10",
       "diffClass": "diff-easy"
     },
     {
@@ -1339,11 +1341,11 @@
     {
       "rank": 9,
       "team": "vill",
-      "elo": 1261.5,
-      "movement": -8.6,
-      "record": "2-15",
-      "power": 13.3,
-      "calendar": "D x6",
+      "elo": 1256.3,
+      "movement": -5.2,
+      "record": "2-16",
+      "power": 12.5,
+      "calendar": "D x7",
       "diffClass": "diff-hard"
     },
     {
@@ -1398,7 +1400,8 @@
       1687.7,
       1695.6,
       1701.7,
-      1715.3
+      1715.3,
+      1720.5
     ],
     "no": [
       1500,
@@ -1544,7 +1547,8 @@
       1285.8,
       1279.7,
       1270.1,
-      1261.5
+      1261.5,
+      1256.3
     ],
     "vlan": [
       1500,
@@ -1613,7 +1617,8 @@
           25,
           27,
           29,
-          31
+          31,
+          33
         ],
         "rank": 2
       },
@@ -1780,7 +1785,8 @@
           16,
           17,
           18,
-          19
+          19,
+          20
         ],
         "rank": 9
       },
