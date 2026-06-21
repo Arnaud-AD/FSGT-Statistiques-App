@@ -205,8 +205,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js" integrity="sha384-Qgqc/HETq5lqJnRDqWnV1AZGw3pgMYNUVaqLLN1W/55XuWK94epwbCQrOvdoh1Zo" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
     <script src="firebase-config.js?v=17.3"></script>
-    <!-- admin-config.js retiré : page publique, pas besoin d'exposer l'ADMIN_UID -->
-    <!-- isAdmin() retourne false si ADMIN_UID n'est pas défini (firebase-sync.js l.35) -->
+    <!-- admin-config.js : gitignoré donc absent du site déployé (ADMIN_UID undefined → isAdmin() false → actions admin masquées en public).
+         En local le fichier existe → restaure les boutons admin (Supprimer ce match, Date du match). La vraie sécurité = Firestore Rules. -->
+    <script src="admin-config.js"></script>
     <script src="firebase-sync.js?v=17.3"></script>
     <script src="analytics.js"></script>
 
