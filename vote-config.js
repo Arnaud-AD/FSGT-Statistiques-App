@@ -17,7 +17,7 @@ const AWARDS = [
     { id: 'receptionneur',  emoji: '🏐', title: 'Meilleur Réceptionneur', desc: "Le·la plus solide en réception" },
     { id: 'pires-conseils', emoji: '🗣️', title: 'Pires Conseils',         desc: "Celui ou celle qu'il ne faut surtout pas écouter" },
     { id: 'serveur',        emoji: '🎯', title: 'Meilleur Serveur',       desc: "Le service le plus redoutable (aces, pression)" },
-    { id: 'entrainement',   emoji: '🏋️', title: "Boss de l'entraînement", desc: "Monstre à l'entraînement… le match c'est autre chose 😏" },
+    { id: 'entrainement',   emoji: '🏋️', title: "Meilleur à l'entraînement", desc: "Investi·e, appliqué·e et plein·e d'énergie à chaque séance" },
     { id: 'libero',         emoji: '🏅', title: 'Meilleur Libéro',        desc: "Le·la spécialiste réception et défense" },
     { id: 'cinquieme-homme',emoji: '🔄', title: 'Meilleur 5e homme',      desc: "La meilleure entrée en jeu, l'impact du banc" },
     { id: 'defenseur',      emoji: '🛡️', title: 'Meilleur Défenseur',     desc: "Récupère les balles impossibles au sol" },
