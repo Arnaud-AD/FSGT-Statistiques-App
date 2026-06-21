@@ -249,6 +249,8 @@
         .menu-btn-icon.standing { background: linear-gradient(135deg, #0056D2, #4285f4); }
         .menu-btn-icon.match { background: linear-gradient(135deg, #ff6b35, #f7931e); }
         .menu-btn-icon.analytics { background: linear-gradient(135deg, #dc2626, #ef4444); }
+        .menu-btn-icon.awards { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+        .menu-btn-icon.results { background: linear-gradient(135deg, #b45309, #d97706); }
 
         /* Carte Analytique */
         .analytics-card {
@@ -622,6 +624,32 @@
                 <div class="menu-btn-content">
                     <span class="menu-btn-title">Classement</span>
                     <span class="menu-btn-desc">Classement et résultats FSGT</span>
+                </div>
+                <span class="menu-btn-arrow">›</span>
+            </a>
+
+            <a href="vote.html" class="menu-btn">
+                <div class="menu-btn-icon awards">
+                    <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                        <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/>
+                    </svg>
+                </div>
+                <div class="menu-btn-content">
+                    <span class="menu-btn-title">Awards</span>
+                    <span class="menu-btn-desc">Vote pour les awards de fin d'année 🏆</span>
+                </div>
+                <span class="menu-btn-arrow">›</span>
+            </a>
+
+            <a href="vote-results.html" class="menu-btn admin-only" style="display:none;">
+                <div class="menu-btn-icon results">
+                    <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                        <path d="M3 13h2v7H3v-7zm4-6h2v13H7V7zm4 9h2v4h-2v-4zm4-13h2v17h-2V3zm4 7h2v10h-2V10z"/>
+                    </svg>
+                </div>
+                <div class="menu-btn-content">
+                    <span class="menu-btn-title">Résultats des votes</span>
+                    <span class="menu-btn-desc">Dépouillement des awards</span>
                 </div>
                 <span class="menu-btn-arrow">›</span>
             </a>

@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://api.ipify.org https://www.gstatic.com; img-src 'self' data: https://*.googleusercontent.com; frame-src https://accounts.google.com https://*.firebaseapp.com;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote des Awards - Jen et ses Saints</title>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-header: #f8f9fa;
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --border-color: #e8eaed;
+            --accent-orange: #ff6b35;
+            --accent-blue: #0056D2;
+            --win-color: #34a853;
+            --loss-color: #ea4335;
+            --gold: #f59e0b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Roboto', 'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .app-container {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: var(--bg-header);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: var(--text-primary);
+            flex-shrink: 0;
+        }
+
+        .back-btn:hover { background: var(--border-color); }
+
+        .header-content { flex: 1; min-width: 0; }
+
+        .header-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .header-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .step { flex: 1; display: flex; flex-direction: column; }
+
+        /* ---------- Écran profil ---------- */
+        .intro {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .table-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .profile-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border-top: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .profile-row:first-child { border-top: none; }
+        .profile-row:hover { background: var(--bg-header); }
+        .profile-row.selected { background: #e8f2ff; }
+
+        .profile-info { flex: 1; min-width: 0; }
+        .profile-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        .profile-postes { display: flex; flex-wrap: wrap; gap: 4px; }
+
+        .poste-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .poste-passeur { background: #ede9fe; color: #7c3aed; }
+        .poste-r4 { background: #dbeafe; color: #2563eb; }
+        .poste-centre { background: #fee2e2; color: #dc2626; }
+        .poste-pointu { background: #dcfce7; color: #16a34a; }
+
+        .profile-action { flex-shrink: 0; }
+        .profile-chevron { color: var(--text-secondary); font-size: 20px; }
+
+        .start-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .start-btn:hover { background: #0047b3; }
+
+        .other-profile {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 13px;
+            color: var(--accent-blue);
+            cursor: pointer;
+        }
+        .other-profile:hover { text-decoration: underline; }
+
+        /* ---------- Écran award ---------- */
+        .progress-wrap { margin-bottom: 20px; }
+        .progress-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .progress-bar {
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--gold);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .award-head { text-align: center; margin-bottom: 20px; }
+        .award-emoji { font-size: 48px; line-height: 1; }
+        .award-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-top: 10px;
+        }
+        .award-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .voter-tag {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+        .voter-tag b { color: var(--accent-blue); }
+
+        .chips-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-size: 15px;
+            color: var(--text-primary);
+            text-align: left;
+            font-family: inherit;
+        }
+        .chip:hover { border-color: var(--accent-blue); background: #f0f7ff; }
+        .chip.selected {
+            border-color: var(--accent-blue);
+            background: #e8f2ff;
+            font-weight: 500;
+        }
+        .chip-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .chip-check {
+            margin-left: auto;
+            color: var(--accent-blue);
+            font-weight: 700;
+            opacity: 0;
+        }
+        .chip.selected .chip-check { opacity: 1; }
+
+        /* ---------- Navigation ---------- */
+        .nav {
+            display: flex;
+            gap: 12px;
+            margin-top: auto;
+            padding-top: 24px;
+        }
+        .nav-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 10px;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border-color);
+        }
+        .nav-btn.secondary { background: white; color: var(--text-primary); }
+        .nav-btn.secondary:hover { background: var(--bg-header); }
+        .nav-btn.primary {
+            background: var(--accent-blue);
+            color: white;
+            border-color: var(--accent-blue);
+        }
+        .nav-btn.primary:hover { background: #0047b3; }
+        .nav-btn.primary:disabled {
+            background: #c3d4ef;
+            border-color: #c3d4ef;
+            cursor: not-allowed;
+        }
+
+        /* ---------- Récap ---------- */
+        .recap-list {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .recap-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-top: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+        .recap-row:first-child { border-top: none; }
+        .recap-row:hover { background: var(--bg-header); }
+        .recap-emoji { font-size: 22px; flex-shrink: 0; }
+        .recap-award { flex: 1; min-width: 0; }
+        .recap-award-title { font-size: 13px; color: var(--text-secondary); }
+        .recap-pick { font-size: 15px; font-weight: 500; color: var(--text-primary); }
+        .recap-edit { color: var(--accent-blue); font-size: 13px; flex-shrink: 0; }
+
+        .error-box {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid var(--loss-color);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.4;
+            margin-top: 16px;
+        }
+
+        /* ---------- États terminaux (merci / déjà voté) ---------- */
+        .terminal {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 24px;
+        }
+        .terminal-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .terminal-icon.success { background: #dcfce7; color: var(--win-color); }
+        .terminal-icon.info { background: #fef3c7; color: var(--gold); }
+        .terminal-title {
+            font-family: 'Google Sans', sans-serif;
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .terminal-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 24px;
+            max-width: 320px;
+        }
+        .terminal-btn {
+            padding: 14px 28px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Google Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .terminal-btn:hover { background: #0047b3; }
+
+        .loading {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="header" id="pageHeader">
+            <a href="index.html" class="back-btn" id="backBtn">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                </svg>
+            </a>
+            <div class="header-content">
+                <h1 class="header-title">Vote des Awards 🏆</h1>
+                <p class="header-subtitle" id="headerSubtitle">Awards de fin d'année</p>
+            </div>
+        </header>
+
+        <main class="step" id="stepRoot">
+            <div class="loading">Chargement de l'équipe…</div>
+        </main>
+    </div>
+
+    <!-- Firebase SDK (compat CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js" integrity="sha384-Qgqc/HETq5lqJnRDqWnV1AZGw3pgMYNUVaqLLN1W/55XuWK94epwbCQrOvdoh1Zo" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
+    <script src="firebase-config.js"></script>
+    <script src="firebase-sync.js"></script>
+    <script src="analytics.js"></script>
+    <script src="storage.js"></script>
+    <script src="vote-config.js"></script>
+    <script>
+    (function() {
+        'use strict';
+
+        // Liste des awards : définie dans vote-config.js (source unique, partagée
+        // avec vote-results.html). Ajouter/éditer un award se fait là-bas.
+
+        const VOTES_COLLECTION = 'votes';
+        const VOTES_KEY = 'fsgt_my_votes';  // { slug: { voter, votes } } — votes émis depuis cet appareil
+        const ROLE_DOT = { 'Passeur': '#8b5cf6', 'R4': '#3b82f6', 'Centre': '#ef4444', 'Pointu': '#22c55e' };
+
+        // --- État ---
+        let roster = [];            // [{ prenom, poste:[...] }]
+        let voter = null;           // prénom du votant
+        let voterSlug = null;
+        let selections = {};        // { awardId: prénom }
+        let stepIndex = 0;          // 0 = profil, 1..N = awards, N+1 = récap
+        let submitting = false;
+        let submitError = '';
+        let isEditing = false;      // true si on modifie un vote déjà émis
+        let showAllProfiles = false; // true → réafficher tout le roster (appareil partagé)
+
+        const root = document.getElementById('stepRoot');
+        const subtitleEl = document.getElementById('headerSubtitle');
+
+        // --- Helpers ---
+        function escapeHtml(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+        function slugify(s) {
+            return (s || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        }
+
+        function posteClass(p) {
+            return ({ 'Passeur': 'passeur', 'R4': 'r4', 'Centre': 'centre', 'Pointu': 'pointu' })[p] || 'r4';
+        }
+
+        function getMyVotes() {
+            try { return JSON.parse(localStorage.getItem(VOTES_KEY) || '{}'); } catch (e) { return {}; }
+        }
+        function saveMyVote(slug, prenom, votes) {
+            const all = getMyVotes();
+            all[slug] = { voter: prenom, votes: votes };
+            localStorage.setItem(VOTES_KEY, JSON.stringify(all));
+        }
+
+        // --- Chargement du roster (Firebase prioritaire, fallback local) ---
+        async function loadRoster() {
+            let list = null;
+            if (typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured()) {
+                try { list = await FirebaseSync.getRoster(); } catch (e) { /* offline → fallback */ }
+            }
+            if (!list || !list.length) {
+                list = (typeof Storage !== 'undefined') ? Storage.getPlayers() : [];
+            }
+            return (list || []).filter(p => p && p.prenom);
+        }
+
+        // ========================================================================
+        // Rendu
+        // ========================================================================
+        function render() {
+            if (stepIndex === 0) return renderProfile();
+            if (stepIndex >= 1 && stepIndex <= AWARDS.length) return renderAward(stepIndex - 1);
+            return renderRecap();
+        }
+
+        function renderProfile() {
+            subtitleEl.textContent = 'Sélectionne ton profil';
+            if (!roster.length) {
+                root.innerHTML = '<div class="loading">Aucun joueur dans l\'équipe pour le moment.</div>';
+                return;
+            }
+
+            // Si on a déjà voté sur cet appareil, ne montrer que ce(s) profil(s)
+            // (sauf si on demande explicitement à voir tout le roster).
+            const myVotes = getMyVotes();
+            const votedSlugs = Object.keys(myVotes);
+            let list = roster.map((p, i) => ({ p: p, i: i }));
+            const returning = votedSlugs.length > 0 && !showAllProfiles;
+            if (returning) {
+                const filtered = list.filter(o => votedSlugs.includes(slugify(o.p.prenom)));
+                if (filtered.length) list = filtered;  // garde-fou : si profil renommé/supprimé → tout afficher
+            }
+
+            const rows = list.map(({ p, i }) => {
+                const postes = Array.isArray(p.poste) ? p.poste : [p.poste];
+                const badges = postes.filter(Boolean).map(x =>
+                    `<span class="poste-badge poste-${posteClass(x)}">${escapeHtml(x)}</span>`).join('');
+                const hasVoted = votedSlugs.includes(slugify(p.prenom));
+                const isSel = (voter === p.prenom);
+                const label = hasVoted ? 'Modifier mon vote' : 'Commencer le vote';
+                const action = isSel
+                    ? `<button class="start-btn" data-start="${i}">${label}</button>`
+                    : `<span class="profile-chevron">›</span>`;
+                return `<div class="profile-row ${isSel ? 'selected' : ''}" data-pick="${i}">
+                    <div class="profile-info">
+                        <div class="profile-name">${escapeHtml(p.prenom)}</div>
+                        <div class="profile-postes">${badges}</div>
+                    </div>
+                    <div class="profile-action">${action}</div>
+                </div>`;
+            }).join('');
+
+            const intro = returning
+                ? `<p class="intro">Tu as déjà voté sur cet appareil. Tu peux <b>revoir ou modifier</b> tes choix.</p>`
+                : `<p class="intro">Pour voter, choisis d'abord <b>ton</b> profil. Tu ne pourras pas voter pour toi-même.</p>`;
+            const otherLink = returning
+                ? `<p class="other-profile" id="otherProfileLink">Ce n'est pas toi ? Voter avec un autre profil</p>`
+                : '';
+
+            root.innerHTML = `
+                ${intro}
+                <div class="table-container">${rows}</div>
+                ${otherLink}`;
+
+            root.querySelectorAll('[data-pick]').forEach(rowEl => {
+                rowEl.addEventListener('click', (e) => {
+                    if (e.target.closest('[data-start]')) return;
+                    voter = roster[parseInt(rowEl.dataset.pick, 10)].prenom;
+                    render();
+                });
+            });
+            root.querySelectorAll('[data-start]').forEach(btn => {
+                btn.addEventListener('click', () => startVote(roster[parseInt(btn.dataset.start, 10)].prenom));
+            });
+            const other = document.getElementById('otherProfileLink');
+            if (other) other.addEventListener('click', () => { showAllProfiles = true; voter = null; render(); });
+        }
+
+        function startVote(prenom) {
+            voter = prenom;
+            voterSlug = slugify(prenom);
+            const mine = getMyVotes()[voterSlug];
+            isEditing = !!mine;
+            selections = mine ? Object.assign({}, mine.votes) : {};
+            submitError = '';
+            // Modification → on va direct au récap (choix pré-remplis) ; sinon award 1.
+            stepIndex = isEditing ? (AWARDS.length + 1) : 1;
+            render();
+        }
+
+        function renderAward(idx) {
+            const award = AWARDS[idx];
+            subtitleEl.textContent = `Award ${idx + 1} / ${AWARDS.length}`;
+            const pct = Math.round(((idx + 1) / AWARDS.length) * 100);
+            const candidates = roster.filter(p => p.prenom !== voter);
+            const chips = candidates.map(p => {
+                const firstPoste = Array.isArray(p.poste) ? p.poste[0] : p.poste;
+                const dot = ROLE_DOT[firstPoste] || '#9aa0a6';
+                const sel = selections[award.id] === p.prenom;
+                return `<button class="chip ${sel ? 'selected' : ''}" data-vote="${escapeHtml(p.prenom)}">
+                    <span class="chip-dot" style="background:${dot}"></span>
+                    <span>${escapeHtml(p.prenom)}</span>
+                    <span class="chip-check">✓</span>
+                </button>`;
+            }).join('');
+
+            const hasPick = !!selections[award.id];
+            root.innerHTML = `
+                <div class="progress-wrap">
+                    <div class="progress-label">Award ${idx + 1} sur ${AWARDS.length}</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+                </div>
+                <div class="award-head">
+                    <div class="award-emoji">${award.emoji}</div>
+                    <div class="award-title">${escapeHtml(award.title)}</div>
+                    <div class="award-desc">${escapeHtml(award.desc)}</div>
+                </div>
+                <div class="voter-tag">Tu votes en tant que <b>${escapeHtml(voter)}</b></div>
+                <div class="chips-grid">${chips}</div>
+                <div class="nav">
+                    <button class="nav-btn secondary" id="prevBtn">Précédent</button>
+                    <button class="nav-btn primary" id="nextBtn" ${hasPick ? '' : 'disabled'}>
+                        ${idx + 1 === AWARDS.length ? 'Terminer' : 'Suivant'}
+                    </button>
+                </div>`;
+
+            root.querySelectorAll('[data-vote]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    selections[award.id] = btn.dataset.vote;
+                    renderAward(idx); // re-render pour la sélection + activer Suivant
+                });
+            });
+            document.getElementById('prevBtn').addEventListener('click', () => { stepIndex--; render(); });
+            document.getElementById('nextBtn').addEventListener('click', () => {
+                if (!selections[award.id]) return;
+                stepIndex++;
+                render();
+            });
+        }
+
+        function renderRecap() {
+            subtitleEl.textContent = 'Récapitulatif';
+            const rows = AWARDS.map((a, i) => `
+                <div class="recap-row" data-goto="${i + 1}">
+                    <span class="recap-emoji">${a.emoji}</span>
+                    <div class="recap-award">
+                        <div class="recap-award-title">${escapeHtml(a.title)}</div>
+                        <div class="recap-pick">${escapeHtml(selections[a.id] || '—')}</div>
+                    </div>
+                    <span class="recap-edit">Modifier</span>
+                </div>`).join('');
+
+            root.innerHTML = `
+                <p class="intro">Vérifie tes choix avant d'envoyer. Tu votes en tant que <b>${escapeHtml(voter)}</b>.</p>
+                <div class="recap-list">${rows}</div>
+                ${submitError ? `<div class="error-box">${escapeHtml(submitError)}</div>` : ''}
+                <div class="nav">
+                    <button class="nav-btn secondary" id="prevBtn">Précédent</button>
+                    <button class="nav-btn primary" id="sendBtn" ${submitting ? 'disabled' : ''}>
+                        ${submitting ? 'Envoi…' : 'Envoyer mon vote'}
+                    </button>
+                </div>`;
+
+            root.querySelectorAll('[data-goto]').forEach(rowEl => {
+                rowEl.addEventListener('click', () => { stepIndex = parseInt(rowEl.dataset.goto, 10); render(); });
+            });
+            document.getElementById('prevBtn').addEventListener('click', () => { stepIndex--; render(); });
+            document.getElementById('sendBtn').addEventListener('click', submitVote);
+        }
+
+        async function submitVote() {
+            if (submitting) return;
+            submitting = true;
+            submitError = '';
+            renderRecap();
+
+            try {
+                if (typeof db === 'undefined') throw new Error('no-db');
+                await db.collection(VOTES_COLLECTION).doc(voterSlug).set({
+                    voter: voter,
+                    votes: selections,
+                    submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                saveMyVote(voterSlug, voter, selections);
+                renderDone();
+            } catch (e) {
+                submitting = false;
+                if (e && e.code === 'permission-denied') {
+                    submitError = "Envoi refusé — le vote n'est peut-être pas encore ouvert. Préviens l'organisateur.";
+                } else {
+                    submitError = "Échec de l'envoi — vérifie ta connexion et réessaie.";
+                }
+                renderRecap();
+            }
+        }
+
+        function renderDone() {
+            subtitleEl.textContent = 'Merci !';
+            document.getElementById('backBtn').style.visibility = 'hidden';
+            const title = isEditing ? 'Vote mis à jour !' : `Merci ${escapeHtml(voter)} !`;
+            const text = isEditing
+                ? 'Tes nouveaux choix ont bien été enregistrés. Tu peux revenir les modifier à tout moment.'
+                : "Ton vote a bien été enregistré. Rendez-vous à la réunion de fin d'année pour les résultats 🏆";
+            root.innerHTML = `
+                <div class="terminal">
+                    <div class="terminal-icon success">
+                        <svg width="40" height="40" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                    </div>
+                    <div class="terminal-title">${title}</div>
+                    <div class="terminal-text">${text}</div>
+                    <a class="terminal-btn" href="index.html">Retour à l'accueil</a>
+                </div>`;
+        }
+
+        // ========================================================================
+        // Init
+        // ========================================================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (typeof AppAnalytics !== 'undefined') AppAnalytics.trackPageView('vote');
+            roster = await loadRoster();
+            render();
+        });
+    })();
+    </script>
+</body>
+</html>
