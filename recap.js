@@ -271,10 +271,12 @@
                 if (pos.courtSide !== 'bottom' && pos.courtSide !== 'service_bottom') return null;
                 return { fx: c01(pos.x / 100), fy: c01(pos.y / 100) };
             }
+            // Attaque : terrain adverse vu par l'attaquant → filet EN BAS (fy=1),
+            // ligne de fond adverse en haut (fy=0). pos.y=100 = filet, pos.y=0 = fond.
             function mapAway(pos) {
                 if (!pos) return null;
                 if (pos.courtSide !== 'top' && pos.courtSide !== 'service_top') return null;
-                return { fx: c01(pos.x / 100), fy: c01((100 - pos.y) / 100) };
+                return { fx: c01(pos.x / 100), fy: c01(pos.y / 100) };
             }
             this._season.matches.forEach(function (m) {
                 (m.sets || []).forEach(function (set) {
@@ -301,8 +303,10 @@
         },
 
         // Dessine un demi-terrain + heatmap de densité (même technique que l'onglet Data)
-        _drawCourtHeat: function (canvas, points) {
+        // opts.netBottom : place le filet en bas (vue attaquant) au lieu d'en haut
+        _drawCourtHeat: function (canvas, points, opts) {
             if (!canvas) return;
+            var netBottom = !!(opts && opts.netBottom);
             var cssW = canvas.clientWidth || 140;
             var cssH = canvas.clientHeight || 184;
             var dpr = window.devicePixelRatio || 1;
@@ -352,16 +356,20 @@
                 }
             }
 
-            // Lignes du terrain : contour, filet (haut, épais), ligne des 3m (pointillés)
+            // Lignes du terrain : contour, filet (épais), ligne des 3m (pointillés).
+            // Filet en haut par défaut ; en bas pour l'attaque (vue attaquant).
             ctx.strokeStyle = 'rgba(255,255,255,0.8)';
             var bw = Math.max(2, Math.round(2 * dpr));
             ctx.lineWidth = bw;
             ctx.strokeRect(bw / 2, bw / 2, w - bw, h - bw);
-            ctx.lineWidth = Math.max(3, Math.round(3.5 * dpr));
-            ctx.beginPath(); ctx.moveTo(0, ctx.lineWidth / 2); ctx.lineTo(w, ctx.lineWidth / 2); ctx.stroke();
+            var netLw = Math.max(3, Math.round(3.5 * dpr));
+            ctx.lineWidth = netLw;
+            var netY = netBottom ? (h - netLw / 2) : (netLw / 2);
+            ctx.beginPath(); ctx.moveTo(0, netY); ctx.lineTo(w, netY); ctx.stroke();
             ctx.lineWidth = Math.max(1, Math.round(dpr));
             ctx.setLineDash([6 * dpr, 5 * dpr]);
-            ctx.beginPath(); ctx.moveTo(0, h * 0.34); ctx.lineTo(w, h * 0.34); ctx.stroke();
+            var lineY = netBottom ? (h * 0.66) : (h * 0.34);
+            ctx.beginPath(); ctx.moveTo(0, lineY); ctx.lineTo(w, lineY); ctx.stroke();
             ctx.setLineDash([]);
         },
 
@@ -522,7 +530,7 @@
                     kind: 'courts', bg: PALETTE[6], emoji: '🎯',
                     kicker: 'Attaque · zone d\'arrivée',
                     headline: 'Où atterrissent tes attaques',
-                    courts: [{ label: 'Arrivée', points: zones.att.end }]
+                    courts: [{ label: 'Arrivée', points: zones.att.end, netBottom: true }]
                 });
             }
 
@@ -938,7 +946,7 @@
                     story.slideEl.querySelectorAll('.recap-court-canvas').forEach(function (cv) {
                         var ci = parseInt(cv.getAttribute('data-court'), 10);
                         var c = sl.courts[ci];
-                        RecapView._drawCourtHeat(cv, c && c.points);
+                        RecapView._drawCourtHeat(cv, c && c.points, c);
                     });
                 });
             }
