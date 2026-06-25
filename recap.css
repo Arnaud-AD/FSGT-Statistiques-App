@@ -19,6 +19,39 @@
 
 .recap-overlay * { box-sizing: border-box; }
 
+/* Mode recap : on masque la page historique sous-jacente dès le 1er paint
+   (classe posée en <head>) pour ne jamais « passer par » Stats matchs passés. */
+html.recap-mode { background: #0a0a12; }
+html.recap-mode .app-container { display: none !important; }
+
+/* Écran de chargement (avant calcul de la saison) */
+.recap-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    background:
+        radial-gradient(1000px 500px at 50% 0%, rgba(139,92,246,0.30), transparent 60%),
+        #0a0a12;
+}
+.recap-spinner {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.18);
+    border-top-color: #c9b8ff;
+    animation: recapSpin 0.8s linear infinite;
+}
+.recap-loading-text {
+    font-size: 14px;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 0.3px;
+}
+@keyframes recapSpin { to { transform: rotate(360deg); } }
+
 /* Boutons coin (fermer / accueil) — partagés landing + story */
 .recap-iconbtn {
     position: absolute;

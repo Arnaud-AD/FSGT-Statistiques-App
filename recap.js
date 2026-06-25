@@ -65,6 +65,19 @@
             } catch (e) { return false; }
         },
 
+        // Affiche immédiatement l'overlay (écran de chargement), avant le calcul de saison,
+        // pour ne jamais laisser apparaître la page historique en transition.
+        boot: function () {
+            this._ensureOverlay();
+            this._overlay.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            this._overlay.innerHTML =
+                '<div class="recap-loading">' +
+                    '<div class="recap-spinner"></div>' +
+                    '<div class="recap-loading-text">Préparation de ton résumé…</div>' +
+                '</div>';
+        },
+
         open: function () {
             this._ensureOverlay();
             this._overlay.style.display = 'block';

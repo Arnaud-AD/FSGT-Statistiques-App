@@ -11916,6 +11916,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     SeasonSelector._updateFooter();
     TabNav.init();
 
+    // Résumé de l'année : afficher l'overlay (écran de chargement) IMMÉDIATEMENT
+    // pour ne jamais montrer l'historique « Stats matchs passés » en transition.
+    var recapWanted = (typeof RecapView !== 'undefined' && RecapView.isRequested());
+    if (recapWanted) RecapView.boot();
+
     // Rendu initial avec données locales (rapide)
     TabNav.switchTo(TabNav.currentTab);
 
