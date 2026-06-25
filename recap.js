@@ -285,10 +285,10 @@
         // Réutilise StatsVisuellesView._normalizePos + PassAttackAnalyzer._effectiveCameraSide
         // (purs, sans dépendance au DOM). Points {fx,fy} ∈ [0,1], filet en haut.
         _collectZones: function (name) {
-            var rec = { start: [], end: [] }, def = { start: [], end: [] }, att = { end: [] };
+            var rec = { start: [], end: [] }, def = { start: [], end: [] }, att = { end: [] }, pass = { start: [], end: [] };
             var SV = (typeof StatsVisuellesView !== 'undefined') ? StatsVisuellesView : null;
             var PA = (typeof PassAttackAnalyzer !== 'undefined') ? PassAttackAnalyzer : null;
-            if (!SV || !PA || !this._season) return { rec: rec, def: def, att: att };
+            if (!SV || !PA || !this._season) return { rec: rec, def: def, att: att, pass: pass };
             function c01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
             function mapHome(pos) {
                 if (!pos) return null;
@@ -318,12 +318,15 @@
                                 if (a.endPos) { var e2 = mapHome(SV._normalizePos(a.endPos, cam)); if (e2) def.end.push(e2); }
                             } else if (a.type === 'attack' && a.attackType !== 'relance') {
                                 if (a.endPos) { var e3 = mapAway(SV._normalizePos(a.endPos, cam)); if (e3) att.end.push(e3); }
+                            } else if (a.type === 'pass') {
+                                if (a.startPos) { var s4 = mapHome(SV._normalizePos(a.startPos, cam)); if (s4) pass.start.push(s4); }
+                                if (a.endPos) { var e4 = mapHome(SV._normalizePos(a.endPos, cam)); if (e4) pass.end.push(e4); }
                             }
                         });
                     });
                 });
             });
-            return { rec: rec, def: def, att: att };
+            return { rec: rec, def: def, att: att, pass: pass };
         },
 
         // Dessine un demi-terrain + heatmap de densité (même technique que l'onglet Data)
@@ -606,6 +609,19 @@
                         { label: 'Départ', points: zones.rec.start },
                         { label: 'Arrivée', points: zones.rec.end }
                     ]
+                });
+            }
+
+            // 6c. Passe — heatmaps zone de départ + zone d'arrivée (passeurs uniquement)
+            if (role === 'Passeur' && (zones.pass.start.length + zones.pass.end.length > 0)) {
+                var passCourts = [];
+                if (zones.pass.start.length > 0) passCourts.push({ label: 'Départ', points: zones.pass.start });
+                if (zones.pass.end.length > 0) passCourts.push({ label: 'Arrivée', points: zones.pass.end });
+                slides.push({
+                    kind: 'courts', bg: ROLE_GRAD['Passeur'] || PALETTE[4], emoji: '🤲',
+                    kicker: 'Passe · tes zones',
+                    headline: 'Départ et arrivée de tes passes',
+                    courts: passCourts
                 });
             }
 
