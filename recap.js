@@ -191,6 +191,15 @@
                 catch (e) { ip[name] = 0; }
             });
 
+            // Temps de jeu (réutilise le calcul de l'onglet T.Jeu : sets joués prorata + titularisations)
+            var playingTime = {};
+            var playingTimeList = [];
+            try {
+                playingTimeList = (typeof SetsPlayedView !== 'undefined')
+                    ? (SetsPlayedView.computePlayingTime(matches, roles) || []) : [];
+                playingTimeList.forEach(function (p) { playingTime[p.name] = p; });
+            } catch (e) { playingTimeList = []; }
+
             // Total équipe (somme des joueurs)
             var teamStats = StatsAggregator.initPlayerStats();
             players.forEach(function (name) { BilanView._mergePlayerStats(teamStats, statsMap[name]); });
@@ -218,6 +227,8 @@
                 roles: roles,
                 ip: ip,
                 players: players,
+                playingTime: playingTime,
+                playingTimeList: playingTimeList,
                 teamStats: teamStats,
                 teamRecord: teamRecord,
                 setsWon: setsWon,
@@ -477,10 +488,32 @@
                 kicker: 'Ta présence',
                 stat: { value: pres.matches }, statLabel: 'matchs disputés',
                 lines: [
-                    '<span class="strong">' + pres.sets + '</span> sets joués',
                     'Bilan : <span class="strong">' + pres.wins + 'V – ' + pres.losses + 'D</span> avec toi sur le terrain'
                 ]
             });
+
+            // 2b. Temps de jeu (réutilise l'onglet T.Jeu)
+            var pt = s.playingTime[name];
+            if (pt && pt.setsPlayed > 0) {
+                var totalSeasonSets = s.setsPlayed || 0;
+                var pctSeason = totalSeasonSets > 0 ? Math.round(pt.setsPlayed / totalSeasonSets * 100) : 0;
+                var ptSorted = (s.playingTimeList || []).slice().sort(function (a, b) { return b.setsPlayed - a.setsPlayed; });
+                var rank = ptSorted.findIndex(function (p) { return p.name === name; }) + 1;
+                var ptLines = ['<span class="strong">' + pctSeason + '%</span> du temps de jeu de la saison'];
+                if (pt.matchesPresent > 0) {
+                    ptLines.push('Titulaire <span class="strong">' + pt.matchesStarting + '/' + pt.matchesPresent + '</span> match' + (pt.matchesPresent > 1 ? 's' : ''));
+                }
+                if (rank > 0) {
+                    ptLines.push('<span class="strong">' + (rank === 1 ? '1er' : rank + 'e') + '</span> temps de jeu de l\'équipe');
+                }
+                slides.push({
+                    bg: 'linear-gradient(160deg,#14b8a6 0%,#0f766e 100%)',
+                    emoji: '⏱️',
+                    kicker: 'Ton temps de jeu',
+                    stat: { value: Math.round(pt.setsPlayed) }, statLabel: 'sets joués',
+                    lines: ptLines
+                });
+            }
 
             // 3. Poste de prédilection
             var roleKeys = Object.keys(rolesObj).sort(function (a, b) { return rolesObj[b] - rolesObj[a]; });
@@ -773,6 +806,24 @@
                 stat: { value: ts.attack.attplus }, statLabel: 'attaques gagnantes',
                 lines: ['La force de frappe de la saison']
             });
+
+            // Temps de jeu collectif — classement par sets joués (réutilise l'onglet T.Jeu)
+            var ptList = (s.playingTimeList || []).slice()
+                .filter(function (p) { return p.setsPlayed > 0; })
+                .sort(function (a, b) { return b.setsPlayed - a.setsPlayed; });
+            if (ptList.length) {
+                var totSets = s.setsPlayed || 0;
+                slides.push({
+                    bg: 'linear-gradient(160deg,#14b8a6 0%,#0f766e 100%)',
+                    emoji: '⏱️',
+                    kicker: 'Le temps de jeu',
+                    headline: totSets + ' sets disputés',
+                    list: ptList.slice(0, 12).map(function (p, i) {
+                        var pct = totSets > 0 ? Math.round(p.setsPlayed / totSets * 100) : 0;
+                        return { rank: i + 1, name: p.name, val: Math.round(p.setsPlayed) + ' · ' + pct + '%' };
+                    })
+                });
+            }
 
             // Distinctions de l'année — toutes les catégories (MVP retiré), par paquets
             var dist = s.distinctions || [];
