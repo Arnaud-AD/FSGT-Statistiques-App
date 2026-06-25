@@ -242,10 +242,17 @@
             return { generatedAt: Date.now(), voters: votes.length, awards };
         }
 
+        // onAuthStateChanged peut se déclencher plusieurs fois (null puis admin).
+        // Ce compteur garantit que seul le dernier appel écrit dans le DOM : un
+        // loadPublic() déclenché par un éphémère "null" ne peut pas écraser
+        // l'affichage admin résolu après lui.
+        let authGen = 0;
+
         // Admin : lit les bulletins bruts, affiche, puis publie le résumé agrégé
         // dans config/voteResults (lecture publique) pour que toute l'équipe voie les compteurs.
-        async function loadAdmin() {
+        async function loadAdmin(gen) {
             const snap = await db.collection('votes').get();
+            if (gen !== authGen) return;
             // On ignore les documents de test (id préfixé "verif-")
             const votes = snap.docs.filter(d => !d.id.startsWith('verif-')).map(d => d.data());
             if (!votes.length) { showState('Aucun vote enregistré pour le moment.'); return; }
@@ -257,12 +264,13 @@
 
         // Public (non-admin) : lit uniquement le résumé agrégé. Les bulletins
         // individuels (qui a voté pour qui) ne sont jamais accessibles.
-        async function loadPublic() {
+        async function loadPublic(gen) {
             try {
                 const doc = await db.collection('config').doc('voteResults').get();
+                if (gen !== authGen) return;
                 if (!doc.exists) { showState('Les résultats ne sont pas encore publiés. Reviens bientôt !'); return; }
                 renderAggregate(doc.data());
-            } catch (e) { showState('Erreur de chargement : ' + e.message); }
+            } catch (e) { if (gen === authGen) showState('Erreur de chargement : ' + e.message); }
         }
 
         if (typeof db === 'undefined' || typeof auth === 'undefined') {
@@ -271,9 +279,10 @@
         }
 
         auth.onAuthStateChanged(user => {
+            const gen = ++authGen;
             const isAdmin = user && typeof FirebaseSync !== 'undefined' && FirebaseSync.isAdmin();
-            if (isAdmin) loadAdmin().catch(e => showState('Erreur de chargement : ' + e.message));
-            else loadPublic();
+            if (isAdmin) loadAdmin(gen).catch(e => { if (gen === authGen) showState('Erreur de chargement : ' + e.message); });
+            else loadPublic(gen);
         });
     })();
     </script>
