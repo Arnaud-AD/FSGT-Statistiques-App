@@ -134,6 +134,7 @@
                 try { totals = StatsAggregator.aggregateStats(sets, 'home') || {}; }
                 catch (e) { totals = {}; }
 
+                // Stats agrégées (statsMap) — basées sur les actions enregistrées
                 Object.keys(totals).forEach(function (name) {
                     var st = totals[name];
                     var played = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block']
@@ -141,13 +142,13 @@
                     if (!played) return;
                     if (!statsMap[name]) statsMap[name] = StatsAggregator.initPlayerStats();
                     BilanView._mergePlayerStats(statsMap[name], st);
-                    if (!presence[name]) presence[name] = { matches: 0, sets: 0, wins: 0, losses: 0 };
-                    presence[name].matches++;
-                    if (m.result === 'win') presence[name].wins++;
-                    else if (m.result === 'loss') presence[name].losses++;
                 });
 
-                // Sets joués par joueur (depuis les lineups)
+                // Présence basée sur les COMPOSITIONS (joueurs réellement alignés), pas sur
+                // les actions ni la simple feuille de match. Cohérent avec le temps de jeu :
+                // un joueur sur la feuille mais resté sur le banc (absent des compos) n'est
+                // pas compté, et un match sans stats détaillées mais avec compo est compté.
+                var inMatch = {};
                 sets.forEach(function (s) {
                     var seen = {};
                     [s.initialHomeLineup, s.homeLineup].forEach(function (L) {
@@ -155,8 +156,15 @@
                         Object.keys(L).forEach(function (pos) { if (L[pos]) seen[L[pos]] = true; });
                     });
                     Object.keys(seen).forEach(function (name) {
-                        if (presence[name]) presence[name].sets++;
+                        if (!presence[name]) presence[name] = { matches: 0, sets: 0, wins: 0, losses: 0 };
+                        presence[name].sets++;
+                        inMatch[name] = true;
                     });
+                });
+                Object.keys(inMatch).forEach(function (name) {
+                    presence[name].matches++;
+                    if (m.result === 'win') presence[name].wins++;
+                    else if (m.result === 'loss') presence[name].losses++;
                 });
 
                 // Bilan équipe
@@ -516,8 +524,11 @@
                 var ptSorted = (s.playingTimeList || []).slice().sort(function (a, b) { return b.setsPlayed - a.setsPlayed; });
                 var rank = ptSorted.findIndex(function (p) { return p.name === name; }) + 1;
                 var ptLines = ['<span class="strong">' + pctSeason + '%</span> du temps de jeu de la saison'];
-                if (pt.matchesPresent > 0) {
-                    ptLines.push('Titulaire <span class="strong">' + pt.matchesStarting + '/' + pt.matchesPresent + '</span> match' + (pt.matchesPresent > 1 ? 's' : ''));
+                // Dénominateur = matchs réellement joués (compos), cohérent avec la carte présence
+                var ptMatches = pres.matches || pt.matchesPresent;
+                if (ptMatches > 0) {
+                    var starts = Math.min(pt.matchesStarting, ptMatches);
+                    ptLines.push('Titulaire <span class="strong">' + starts + '/' + ptMatches + '</span> match' + (ptMatches > 1 ? 's' : ''));
                 }
                 if (rank > 0) {
                     ptLines.push('<span class="strong">' + (rank === 1 ? '1er' : rank + 'e') + '</span> temps de jeu de l\'équipe');
