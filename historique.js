@@ -4658,6 +4658,7 @@ const BilanView = {
     // V20.26 : unifie sur computeAxisScores + IP_MIN_ACTIONS pour coherence avec spider charts
     renderDistinctions(homeTotals, playerRoles, filteredPlayers, completedSets, matches) {
         var self = this;
+        self._distData = []; // Collecte structurée (réutilisée par le Résumé de l'année)
         var players = filteredPlayers || Object.keys(homeTotals).filter(function(name) {
             return playerRoles[name];
         });
@@ -4716,6 +4717,7 @@ const BilanView = {
         if (ipRanking.length > 0) {
             var mvpName = ipRanking[0];
             var mvp = playerData[mvpName];
+            self._distData.push({ emoji: '👑', label: 'MVP', name: mvpName, role: mvp.role, highlight: 'IP ' + mvp.ip, detail: self._mvpStats(mvp.stats, mvp.role) });
             var mvpRunners = ipRanking.slice(1, 3).map(function(name) {
                 var rd = playerData[name];
                 return { name: name, role: rd.role, highlight: 'IP ' + rd.ip, detail: self._mvpStats(rd.stats, rd.role) };
@@ -4818,6 +4820,7 @@ const BilanView = {
         // --- Helper pour rendre une distinction avec top 3 expandable ---
         var distIdx = 0;
         function renderDistinctionRow(emoji, label, winner, statHighlight, statDetail, runners) {
+            self._distData.push({ emoji: emoji, label: label, name: winner.name, role: winner.role, highlight: statHighlight, detail: statDetail });
             var id = 'dist-expand-' + (distIdx++);
             var hasRunners = runners && runners.length > 0;
             html += '<div class="distinction-row' + (hasRunners ? ' distinction-expandable' : '') + '"' +
@@ -5014,7 +5017,31 @@ const BilanView = {
         }
 
         html += '</div>'; // bilan-distinctions
+        self._lastDistinctionsData = self._distData;
         return html;
+    },
+
+    // Distinctions structurées de la saison (réutilise renderDistinctions pour
+    // garantir des chiffres identiques à la modale historique). Retourne un tableau
+    // [{ emoji, label, name, role, highlight, detail }] — utilisé par le Résumé de l'année.
+    computeYearDistinctions(matches) {
+        var allSets = [];
+        (matches || []).forEach(function(m) {
+            (m.sets || []).filter(function(s) { return s.completed; }).forEach(function(s) { allSets.push(s); });
+        });
+        if (allSets.length === 0) return [];
+        var homeTotals = StatsAggregator.aggregateStats(allSets, 'home');
+        if (Object.keys(homeTotals).length === 0) return [];
+        var mergedRoles = this.getPlayerRolesYear(matches, 'home');
+        var statCategories = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'];
+        var players = Object.keys(homeTotals).filter(function(name) {
+            if (!mergedRoles[name]) return false;
+            var p = homeTotals[name];
+            return statCategories.some(function(cat) { return p[cat] && p[cat].tot > 0; });
+        });
+        this._lastDistinctionsData = [];
+        this.renderDistinctions(homeTotals, mergedRoles, players, allSets, matches);
+        return (this._lastDistinctionsData || []).slice();
     },
 
     // --- Helper : calcul des distinctions basees sur les rallies ---
@@ -11903,6 +11930,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         StatsVisuellesView._container = null;
         ImpactView._seasonIP = null;
         TabNav.switchTo(TabNav.currentTab);
+    }
+
+    // Résumé de l'année (« Wrapped ») : ouvert si ?recap=1, une fois les données chargées
+    if (typeof RecapView !== 'undefined' && RecapView.isRequested()) {
+        RecapView.open();
     }
 
     // Migration one-shot : push toutes les données locales vers Firebase (première connexion)

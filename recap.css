@@ -1,0 +1,399 @@
+/* ============================================================
+   recap.css — Résumé de l'année (style « Wrapped » immersif)
+   Surcouche plein écran affichée par-dessus historique.html
+   quand l'URL contient ?recap=1. Tout est préfixé .recap- pour
+   ne pas entrer en conflit avec historique.css.
+   ============================================================ */
+
+.recap-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: #0a0a12;
+    color: #fff;
+    font-family: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+.recap-overlay * { box-sizing: border-box; }
+
+/* Boutons coin (fermer / accueil) — partagés landing + story */
+.recap-iconbtn {
+    position: absolute;
+    top: 14px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.14);
+    color: #fff;
+    font-size: 20px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 30;
+    backdrop-filter: blur(6px);
+    transition: background 0.15s, transform 0.1s;
+}
+.recap-iconbtn:hover { background: rgba(255,255,255,0.26); }
+.recap-iconbtn:active { transform: scale(0.92); }
+.recap-close { right: 14px; }
+.recap-home { left: 14px; }
+
+/* ====================== LANDING ====================== */
+.recap-landing {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 64px 20px 40px;
+    background:
+        radial-gradient(1200px 600px at 50% -10%, rgba(139,92,246,0.30), transparent 60%),
+        radial-gradient(900px 500px at 100% 20%, rgba(59,130,246,0.22), transparent 55%),
+        #0a0a12;
+}
+.recap-landing-inner { max-width: 560px; margin: 0 auto; }
+
+.recap-landing-kicker {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #b39dffd9;
+    text-align: center;
+}
+.recap-landing-title {
+    font-size: 34px;
+    font-weight: 700;
+    text-align: center;
+    margin: 6px 0 4px;
+    line-height: 1.1;
+    background: linear-gradient(90deg, #fff, #c9b8ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.recap-landing-sub {
+    text-align: center;
+    color: rgba(255,255,255,0.62);
+    font-size: 14px;
+    margin-bottom: 26px;
+}
+
+/* Carte équipe (hero) */
+.recap-hero {
+    position: relative;
+    border-radius: 22px;
+    padding: 24px;
+    margin-bottom: 22px;
+    cursor: pointer;
+    overflow: hidden;
+    background: linear-gradient(135deg, #ff6b35, #b91d73 55%, #6d28d9);
+    box-shadow: 0 14px 40px rgba(185,29,115,0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.recap-hero:hover { transform: translateY(-2px); box-shadow: 0 18px 48px rgba(185,29,115,0.5); }
+.recap-hero:active { transform: scale(0.99); }
+.recap-hero-badge {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    opacity: 0.85;
+}
+.recap-hero-title { font-size: 25px; font-weight: 700; margin: 6px 0 2px; }
+.recap-hero-sub { font-size: 13px; opacity: 0.9; }
+.recap-hero-stats { display: flex; gap: 22px; margin-top: 16px; }
+.recap-hero-stat-v { font-size: 26px; font-weight: 700; line-height: 1; }
+.recap-hero-stat-l { font-size: 11px; opacity: 0.85; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+.recap-hero-cta {
+    margin-top: 16px;
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0.95;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.18);
+}
+
+.recap-section-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin: 0 4px 12px;
+}
+
+/* Grille joueurs */
+.recap-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.recap-tile {
+    position: relative;
+    border-radius: 18px;
+    padding: 18px 16px 16px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.09);
+    overflow: hidden;
+    transition: transform 0.15s, background 0.15s, border-color 0.15s;
+}
+.recap-tile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.16;
+    background: radial-gradient(120px 90px at 80% 0%, var(--tile-accent, #8b5cf6), transparent 70%);
+    pointer-events: none;
+}
+.recap-tile:hover { transform: translateY(-2px); background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.18); }
+.recap-tile:active { transform: scale(0.98); }
+.recap-tile-top { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.recap-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.recap-tile-role { font-size: 11px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.5px; }
+.recap-tile-name { font-size: 21px; font-weight: 700; line-height: 1.1; }
+.recap-tile-foot { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 12px; }
+.recap-tile-meta { font-size: 11px; color: rgba(255,255,255,0.55); }
+.recap-tile-ip {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.12);
+}
+
+.recap-empty {
+    text-align: center;
+    color: rgba(255,255,255,0.6);
+    padding: 60px 24px;
+}
+.recap-empty-emoji { font-size: 48px; margin-bottom: 12px; }
+
+/* ====================== STORY ====================== */
+.recap-story {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Barres de progression segmentées (style stories) */
+.recap-progress {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    gap: 5px;
+    z-index: 25;
+}
+.recap-progress-seg {
+    flex: 1;
+    height: 3px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.28);
+    overflow: hidden;
+}
+.recap-progress-fill {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: #fff;
+    border-radius: 3px;
+}
+
+/* Zones de tap (précédent / suivant) */
+.recap-tapzone {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 15;
+    cursor: pointer;
+}
+.recap-tap-prev { left: 0; width: 32%; }
+.recap-tap-next { right: 0; width: 68%; }
+
+/* Diapositive */
+.recap-slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 80px 30px 70px;
+    z-index: 10;
+    pointer-events: none;
+}
+.recap-slide-inner {
+    max-width: 460px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.recap-slide-emoji {
+    font-size: 60px;
+    line-height: 1;
+    margin-bottom: 18px;
+    animation: recapPop 0.5s cubic-bezier(.2,.8,.2,1.2) both;
+}
+.recap-kicker {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.78);
+    margin-bottom: 14px;
+    animation: recapFadeUp 0.45s ease both;
+    animation-delay: 0.05s;
+}
+.recap-statwrap {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 2px;
+    margin-bottom: 8px;
+    animation: recapPop 0.55s cubic-bezier(.2,.8,.2,1.2) both;
+    animation-delay: 0.1s;
+}
+.recap-stat-value {
+    font-size: 92px;
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -2px;
+}
+.recap-stat-suffix { font-size: 34px; font-weight: 700; opacity: 0.9; }
+.recap-headline {
+    font-size: 27px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 14px;
+    animation: recapFadeUp 0.5s ease both;
+    animation-delay: 0.15s;
+}
+.recap-headline .hl { color: #ffe27a; }
+.recap-lines {
+    font-size: 16px;
+    line-height: 1.5;
+    color: rgba(255,255,255,0.82);
+    animation: recapFadeUp 0.55s ease both;
+    animation-delay: 0.25s;
+}
+.recap-lines p { margin: 4px 0; }
+.recap-lines .strong { font-weight: 700; color: #fff; }
+
+.recap-badge-pill {
+    margin-top: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.16);
+    font-size: 14px;
+    font-weight: 600;
+    animation: recapFadeUp 0.6s ease both;
+    animation-delay: 0.35s;
+}
+
+/* Liste (ex: leaderboard équipe, effectif) */
+.recap-list {
+    width: 100%;
+    margin-top: 6px;
+    animation: recapFadeUp 0.55s ease both;
+    animation-delay: 0.2s;
+}
+.recap-list-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.09);
+    margin-bottom: 7px;
+    font-size: 15px;
+}
+.recap-list-rank { font-weight: 800; opacity: 0.7; width: 22px; flex-shrink: 0; }
+.recap-list-name { flex: 1; text-align: left; font-weight: 600; }
+.recap-list-val { font-weight: 700; }
+
+/* Heatmaps (zones réception / défense / attaque) */
+.recap-courts {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 8px;
+    width: 100%;
+    animation: recapFadeUp 0.55s ease both;
+    animation-delay: 0.15s;
+}
+.recap-court-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+.recap-court-canvas {
+    width: 132px;
+    height: 176px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.28);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+}
+.recap-court-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.92);
+}
+.recap-court-count {
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.14);
+    border-radius: 999px;
+    padding: 1px 7px;
+    margin-left: 2px;
+}
+
+/* Lignes de distinctions : libellé compact pour tenir sur une ligne */
+.recap-list-row.recap-list-dist { font-size: 14px; padding: 8px 12px; }
+
+.recap-hint {
+    position: absolute;
+    bottom: 22px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    z-index: 12;
+    pointer-events: none;
+}
+
+@keyframes recapPop {
+    from { opacity: 0; transform: scale(0.7); }
+    to   { opacity: 1; transform: scale(1); }
+}
+@keyframes recapFadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 380px) {
+    .recap-stat-value { font-size: 74px; }
+    .recap-grid { gap: 10px; }
+    .recap-landing-title { font-size: 29px; }
+}

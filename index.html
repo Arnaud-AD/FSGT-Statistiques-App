@@ -251,6 +251,7 @@
         .menu-btn-icon.analytics { background: linear-gradient(135deg, #dc2626, #ef4444); }
         .menu-btn-icon.awards { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
         .menu-btn-icon.results { background: linear-gradient(135deg, #b45309, #d97706); }
+        .menu-btn-icon.recap { background: linear-gradient(135deg, #ff6b35, #b91d73 55%, #6d28d9); }
 
         /* Carte Analytique */
         .analytics-card {
@@ -611,6 +612,19 @@
                 <div class="menu-btn-content">
                     <span class="menu-btn-title">Stats matchs passés</span>
                     <span class="menu-btn-desc">Historique et statistiques</span>
+                </div>
+                <span class="menu-btn-arrow">›</span>
+            </a>
+
+            <a href="historique.html?recap=1" class="menu-btn admin-only" style="display:none;">
+                <div class="menu-btn-icon recap">
+                    <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                        <path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/>
+                    </svg>
+                </div>
+                <div class="menu-btn-content">
+                    <span class="menu-btn-title">Résumé de l'année</span>
+                    <span class="menu-btn-desc">Le bilan de la saison, façon Wrapped 🎬</span>
                 </div>
                 <span class="menu-btn-arrow">›</span>
             </a>
