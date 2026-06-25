@@ -150,7 +150,6 @@
     <script src="firebase-config.js"></script>
     <script src="admin-config.js"></script>
     <script src="firebase-sync.js"></script>
-    <script src="admin-guard.js"></script>
     <script src="vote-config.js"></script>
     <script>
     (function() {
@@ -171,8 +170,8 @@
                 .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
         }
 
-        function renderAward(award, votes) {
-            const ranked = tally(votes, award.id);
+        function renderAward(award, ranked) {
+            ranked = ranked || [];
             const totalForAward = ranked.reduce((s, r) => s + r.count, 0);
             const max = ranked.length ? ranked[0].count : 0;
             const winners = ranked.filter(r => r.count === max && max > 0);
@@ -210,82 +209,72 @@
             </div>`;
         }
 
-        async function load() {
-            try {
-                if (typeof db === 'undefined') {
-                    root.innerHTML = '<div class="state">Firebase non disponible.</div>';
-                    return;
-                }
-                const snap = await db.collection('votes').get();
-                // On ignore les documents de test (id préfixé "verif-")
-                const votes = snap.docs.filter(d => !d.id.startsWith('verif-')).map(d => d.data());
+        function showState(msg) {
+            const div = document.createElement('div');
+            div.className = 'state';
+            div.textContent = msg;
+            root.innerHTML = '';
+            root.appendChild(div);
+        }
 
-                if (!votes.length) {
-                    root.innerHTML = '<div class="state">Aucun vote enregistré pour le moment.</div>';
-                    return;
-                }
-
-                const sortedVotes = votes.slice().sort((a, b) => (a.voter || '').localeCompare(b.voter || ''));
-
-                const votersDetail = sortedVotes.map((v, idx) => {
-                    const ballot = AWARDS.map(a => `
-                        <div class="ballot-row">
-                            <span class="ballot-award">${a.emoji} ${escapeHtml(a.title)}</span>
-                            <span class="ballot-pick">${escapeHtml((v.votes && v.votes[a.id]) || '—')}</span>
-                        </div>`).join('');
-                    return `<div class="voter-detail" data-voter="${idx}">
-                        <div class="voter-detail-head" data-voter-toggle="${idx}">
-                            <span class="voter-detail-name">${escapeHtml(v.voter || 'Anonyme')}</span>
-                            <span class="voter-detail-expand">▾</span>
-                        </div>
-                        <div class="voter-detail-ballot" id="ballot-${idx}" style="display:none">${ballot}</div>
-                    </div>`;
-                }).join('');
-
-                const html = `
-                    <div class="summary">
-                        <div class="summary-stat">
-                            <div class="summary-value">${sortedVotes.length}</div>
-                            <div class="summary-label">Votant${sortedVotes.length > 1 ? 's' : ''}</div>
-                        </div>
-                        <div class="summary-stat">
-                            <div class="summary-value">${AWARDS.length}</div>
-                            <div class="summary-label">Awards</div>
-                        </div>
+        // Rendu commun (admin et public) à partir du résumé agrégé : compteurs uniquement,
+        // jamais les bulletins individuels.
+        function renderAggregate(agg) {
+            const voters = agg.voters || 0;
+            const awards = agg.awards || {};
+            root.innerHTML = `
+                <div class="summary">
+                    <div class="summary-stat">
+                        <div class="summary-value">${voters}</div>
+                        <div class="summary-label">Votant${voters > 1 ? 's' : ''}</div>
                     </div>
-                    ${AWARDS.map(a => renderAward(a, votes)).join('')}
-                    <div class="voters-card">
-                        <div class="voters-title">Détail par votant (${sortedVotes.length})</div>
-                        ${votersDetail}
-                    </div>`;
-                root.innerHTML = html;
-
-                // Déplier / replier le bulletin de chaque votant
-                root.querySelectorAll('[data-voter-toggle]').forEach(head => {
-                    head.addEventListener('click', () => {
-                        const idx = head.dataset.voterToggle;
-                        const ballot = document.getElementById('ballot-' + idx);
-                        const block = head.closest('.voter-detail');
-                        const open = ballot.style.display !== 'none';
-                        ballot.style.display = open ? 'none' : 'block';
-                        if (block) block.classList.toggle('open', !open);
-                    });
-                });
-            } catch (e) {
-                const div = document.createElement('div');
-                div.className = 'state';
-                div.textContent = 'Erreur de chargement : ' + e.message;
-                root.innerHTML = '';
-                root.appendChild(div);
-            }
+                    <div class="summary-stat">
+                        <div class="summary-value">${AWARDS.length}</div>
+                        <div class="summary-label">Awards</div>
+                    </div>
+                </div>
+                ${AWARDS.map(a => renderAward(a, awards[a.id])).join('')}`;
         }
 
-        // admin-guard.js gère la redirection des non-admins. On charge une fois l'admin confirmé.
-        if (typeof auth !== 'undefined') {
-            auth.onAuthStateChanged(user => {
-                if (user && typeof FirebaseSync !== 'undefined' && FirebaseSync.isAdmin()) load();
-            });
+        function buildAggregate(votes) {
+            const awards = {};
+            AWARDS.forEach(a => { awards[a.id] = tally(votes, a.id); });
+            return { generatedAt: Date.now(), voters: votes.length, awards };
         }
+
+        // Admin : lit les bulletins bruts, affiche, puis publie le résumé agrégé
+        // dans config/voteResults (lecture publique) pour que toute l'équipe voie les compteurs.
+        async function loadAdmin() {
+            const snap = await db.collection('votes').get();
+            // On ignore les documents de test (id préfixé "verif-")
+            const votes = snap.docs.filter(d => !d.id.startsWith('verif-')).map(d => d.data());
+            if (!votes.length) { showState('Aucun vote enregistré pour le moment.'); return; }
+            const agg = buildAggregate(votes);
+            renderAggregate(agg);
+            try { await db.collection('config').doc('voteResults').set(agg); }
+            catch (e) { console.warn('Publication du résumé impossible :', e.message); }
+        }
+
+        // Public (non-admin) : lit uniquement le résumé agrégé. Les bulletins
+        // individuels (qui a voté pour qui) ne sont jamais accessibles.
+        async function loadPublic() {
+            try {
+                const doc = await db.collection('config').doc('voteResults').get();
+                if (!doc.exists) { showState('Les résultats ne sont pas encore publiés. Reviens bientôt !'); return; }
+                renderAggregate(doc.data());
+            } catch (e) { showState('Erreur de chargement : ' + e.message); }
+        }
+
+        if (typeof db === 'undefined' || typeof auth === 'undefined') {
+            showState('Firebase non disponible.');
+            return;
+        }
+
+        auth.onAuthStateChanged(user => {
+            const isAdmin = user && typeof FirebaseSync !== 'undefined' && FirebaseSync.isAdmin();
+            if (isAdmin) loadAdmin().catch(e => showState('Erreur de chargement : ' + e.message));
+            else loadPublic();
+        });
     })();
     </script>
 </body>
