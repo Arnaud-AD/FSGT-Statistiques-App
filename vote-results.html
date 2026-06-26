@@ -217,9 +217,47 @@
             root.appendChild(div);
         }
 
-        // Rendu commun (admin et public) à partir du résumé agrégé : compteurs uniquement,
-        // jamais les bulletins individuels.
-        function renderAggregate(agg) {
+        // Détail par votant (bulletins individuels) — ADMIN UNIQUEMENT.
+        // Construit à partir des bulletins bruts ; jamais exposé au public
+        // (l'agrégat lu par les spectateurs ne contient pas les bulletins).
+        function buildVotersDetail(votes) {
+            const sorted = votes.slice().sort((a, b) => (a.voter || '').localeCompare(b.voter || ''));
+            const rows = sorted.map((v, idx) => {
+                const ballot = AWARDS.map(a => `
+                    <div class="ballot-row">
+                        <span class="ballot-award">${a.emoji} ${escapeHtml(a.title)}</span>
+                        <span class="ballot-pick">${escapeHtml((v.votes && v.votes[a.id]) || '—')}</span>
+                    </div>`).join('');
+                return `<div class="voter-detail" data-voter="${idx}">
+                    <div class="voter-detail-head" data-voter-toggle="${idx}">
+                        <span class="voter-detail-name">${escapeHtml(v.voter || 'Anonyme')}</span>
+                        <span class="voter-detail-expand">▾</span>
+                    </div>
+                    <div class="voter-detail-ballot" id="ballot-${idx}" style="display:none">${ballot}</div>
+                </div>`;
+            }).join('');
+            return `<div class="voters-card">
+                <div class="voters-title">Détail par votant — admin uniquement (${sorted.length})</div>
+                ${rows}
+            </div>`;
+        }
+
+        function attachVoterToggles() {
+            root.querySelectorAll('[data-voter-toggle]').forEach(head => {
+                head.addEventListener('click', () => {
+                    const idx = head.dataset.voterToggle;
+                    const ballot = document.getElementById('ballot-' + idx);
+                    const block = head.closest('.voter-detail');
+                    const open = ballot.style.display !== 'none';
+                    ballot.style.display = open ? 'none' : 'block';
+                    if (block) block.classList.toggle('open', !open);
+                });
+            });
+        }
+
+        // Rendu des compteurs agrégés (admin + public). Si `rawVotes` est fourni
+        // (admin), on ajoute en plus le détail nominatif par votant.
+        function renderAggregate(agg, rawVotes) {
             const voters = agg.voters || 0;
             const awards = agg.awards || {};
             root.innerHTML = `
@@ -233,7 +271,9 @@
                         <div class="summary-label">Awards</div>
                     </div>
                 </div>
-                ${AWARDS.map(a => renderAward(a, awards[a.id])).join('')}`;
+                ${AWARDS.map(a => renderAward(a, awards[a.id])).join('')}
+                ${(rawVotes && rawVotes.length) ? buildVotersDetail(rawVotes) : ''}`;
+            if (rawVotes && rawVotes.length) attachVoterToggles();
         }
 
         function buildAggregate(votes) {
@@ -257,7 +297,7 @@
             const votes = snap.docs.filter(d => !d.id.startsWith('verif-')).map(d => d.data());
             if (!votes.length) { showState('Aucun vote enregistré pour le moment.'); return; }
             const agg = buildAggregate(votes);
-            renderAggregate(agg);
+            renderAggregate(agg, votes);
             try { await db.collection('config').doc('voteResults').set(agg); }
             catch (e) { console.warn('Publication du résumé impossible :', e.message); }
         }
