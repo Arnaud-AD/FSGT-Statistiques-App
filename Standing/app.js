@@ -1213,7 +1213,7 @@ window.addEventListener('resize', drawEvolutionChart);
 // Mobile: tap a team row to unfold / fold its details
 document.addEventListener('click', function(e) {
     var row = e.target.closest('.standings-row');
-    if (!row || !window.matchMedia('(max-width: 480px)').matches) return;
+    if (!row || !window.matchMedia('(max-width: 760px)').matches) return;
     var team = row.getAttribute('data-team');
     standingsExpanded[team] = !standingsExpanded[team];
     row.classList.toggle('expanded', standingsExpanded[team]);

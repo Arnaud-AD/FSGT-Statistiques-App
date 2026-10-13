@@ -1242,7 +1242,10 @@
                 margin: 0 -8px;
                 padding: 0 8px;
             }
+        }
 
+        /* Phones (portrait and landscape) and narrow windows */
+        @media (max-width: 760px) {
             /* Compact tables: key columns only, full names */
             table {
                 min-width: 0;
