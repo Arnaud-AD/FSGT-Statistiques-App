@@ -283,6 +283,7 @@ function renderStandings() {
             let cls = 'form-pending';
             if (f === 'W') cls = 'form-win';
             else if (f === 'L') cls = 'form-loss';
+            else if (f === 'C') cls = 'form-close';   // défaite serrée (1 set d'écart)
             else if (f === 'D') cls = 'form-postponed';
             return '<span class="form-item form-item-sm ' + cls + '"></span>';
         }).join('');
@@ -304,15 +305,15 @@ function renderStandings() {
     // Sortable column definitions: [label, dataField, boldClass]
     var sortableCols = [
         ['MJ', 'mj', ''],
-        ['G', 'g', ''],
-        ['P', 'p', ''],
+        ['V', 'g', ''],
+        ['D', 'p', ''],
         ['Set+', 'setPlus', 'col-opt'],
         ['Set-', 'setMinus', 'col-opt'],
         ['DS', 'ds', 'bold-col'],
         ['Coef Set', 'coefSet', 'col-opt'],
         ['Pts+', 'ptsPlus', 'col-opt'],
         ['Pts-', 'ptsMinus', 'col-opt'],
-        ['DP', 'dp', 'bold-col col-opt'],
+        ['DP', 'dp', 'col-opt'],
         ['Coef Pts', 'coefPts', 'col-opt'],
         ['Pts', 'pts', 'bold-col']
     ];
@@ -345,16 +346,16 @@ function renderStandings() {
             '</td>' +
             '<td>' + s.mj + '</td>' +
             '<td>' + s.g + '</td>' +
-            '<td class="bold-val">' + s.p + '</td>' +
+            '<td>' + s.p + '</td>' +
             '<td class="col-opt">' + s.setPlus + '</td>' +
             '<td class="col-opt">' + s.setMinus + '</td>' +
             '<td class="bold-val">' + s.ds + '</td>' +
             '<td class="col-opt">' + s.coefSet + '</td>' +
             '<td class="col-opt">' + s.ptsPlus + '</td>' +
             '<td class="col-opt">' + s.ptsMinus + '</td>' +
-            '<td class="bold-val col-opt">' + s.dp + '</td>' +
+            '<td class="col-opt">' + s.dp + '</td>' +
             '<td class="col-opt">' + s.coefPts + '</td>' +
-            '<td class="pts-val">' + s.pts + '</td>' +
+            '<td class="bold-val">' + s.pts + '</td>' +
             '<td class="col-opt">' +
                 '<div class="form-section">' +
                     '<span class="form-label">A</span>' +
@@ -379,7 +380,7 @@ function renderStandings() {
                     '<span class="detail-label">Points</span>' +
                     '<span class="detail-stat"><em>Pts+</em> ' + s.ptsPlus + '</span>' +
                     '<span class="detail-stat"><em>Pts-</em> ' + s.ptsMinus + '</span>' +
-                    '<span class="detail-stat"><em>DP</em> <strong>' + s.dp + '</strong></span>' +
+                    '<span class="detail-stat"><em>DP</em> ' + s.dp + '</span>' +
                     '<span class="detail-stat"><em>Coef</em> ' + s.coefPts + '</span>' +
                 '</div>' +
                 '<div class="detail-line">' +

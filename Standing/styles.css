@@ -377,6 +377,24 @@
             font-size: 8px;
         }
 
+        /* Défaite serrée (1 set d'écart) */
+        .form-close {
+            background: var(--rank-champion);
+        }
+
+        .form-close::after {
+            content: '~';
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1;
+            margin-top: -2px;
+        }
+
+        .form-item-sm.form-close::after {
+            font-size: 12px;
+        }
+
         .form-pending {
             background: #e8e8e8;
             border: 1.5px solid #d0d0d0;
@@ -418,6 +436,15 @@
             width: 4px;
             height: 16px;
             border-radius: 2px;
+        }
+
+        .legend-form {
+            margin-top: 0;
+            padding-top: 0;
+        }
+
+        .legend-form .form-item {
+            flex-shrink: 0;
         }
 
         /* Matches Tab */
@@ -1280,9 +1307,8 @@
                 font-size: 13px;
             }
 
-            td.pts-val {
+            td.bold-val {
                 font-weight: 700;
-                font-size: 15px;
             }
 
             .elo-movement {
