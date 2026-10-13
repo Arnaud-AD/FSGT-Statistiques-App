@@ -263,6 +263,22 @@ const FirebaseSync = {
         });
     },
 
+    /**
+     * Charger un match par ID depuis Firestore
+     * @param {string} matchId
+     * @returns {Promise<Object|null>} null si absent
+     */
+    async getMatch(matchId) {
+        if (!this.isConfigured()) return null;
+        const doc = await db.collection(this.COLLECTION).doc(matchId).get();
+        if (!doc.exists) return null;
+        const data = doc.data();
+        if (data.syncedAt && data.syncedAt.toMillis) {
+            data.syncedAt = data.syncedAt.toMillis();
+        }
+        return data;
+    },
+
     // ==================== PASS GRIDS SYNC ====================
 
     /**

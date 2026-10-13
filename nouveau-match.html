@@ -109,6 +109,14 @@
         .match-type-desc { font-size: 13px; color: var(--text-secondary); }
         .match-type-arrow { color: var(--text-secondary); font-size: 24px; }
 
+        .change-season-btn {
+            align-self: center; margin-bottom: 8px;
+            background: none; border: none; cursor: pointer;
+            font-size: 14px; color: var(--accent-blue);
+            padding: 8px 12px; border-radius: 8px;
+        }
+        .change-season-btn:hover { background: #f0f7ff; }
+
         /* Liste des matchs */
         .section-title {
             font-family: 'Google Sans', sans-serif;
@@ -269,29 +277,17 @@
             width: 90%; max-width: 360px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); text-align: center;
         }
-        .modal-icon {
-            width: 48px; height: 48px; border-radius: 50%;
-            background: #fef3c7;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 16px;
-        }
         .modal-title {
             font-family: 'Google Sans', sans-serif;
             font-size: 18px; font-weight: 500; margin-bottom: 8px;
         }
-        .modal-message {
-            font-size: 14px; color: var(--text-secondary);
-            line-height: 1.5; margin-bottom: 24px;
-        }
         .modal-actions { display: flex; gap: 12px; }
-        .btn-cancel, .btn-confirm {
+        .btn-cancel {
             flex: 1; padding: 12px; border: none; border-radius: 8px;
             font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s;
         }
         .btn-cancel { background: var(--bg-header); color: var(--text-primary); }
         .btn-cancel:hover { background: var(--border-color); }
-        .btn-confirm { background: #dc2626; color: white; }
-        .btn-confirm:hover { background: #b91c1c; }
 
         /* Ginette */
         .ginette-rounds { display: flex; flex-direction: column; gap: 8px; }
@@ -378,6 +374,7 @@
                     <span class="match-type-arrow">›</span>
                 </button>
             </div>
+            <button class="change-season-btn" onclick="showSeasonList()">Changer de saison</button>
         </div>
 
         <!-- Vue 2: Championnat -->
@@ -456,23 +453,6 @@
                     <button type="submit" class="btn-save">Continuer</button>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <!-- Modal confirmation -->
-    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-        <div class="modal" onclick="event.stopPropagation()">
-            <div class="modal-icon">
-                <svg width="24" height="24" fill="#d97706" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                </svg>
-            </div>
-            <h3 class="modal-title">Annuler la création ?</h3>
-            <p class="modal-message">Voulez-vous annuler la création de ce match ? Les données non enregistrées seront perdues.</p>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeModal()">Continuer</button>
-                <button class="btn-confirm" onclick="confirmCancel()">Annuler le match</button>
-            </div>
         </div>
     </div>
 
@@ -593,6 +573,8 @@
         function selectSeason(seasonKey) {
             currentSeason = seasonKey;
             currentView = 'type';
+            remoteById = new Map();
+            remoteLoaded = false;
             document.getElementById('headerTitle').textContent = SEASONS[seasonKey].label;
             document.getElementById('headerSubtitle').textContent = 'Choisir le type de match';
             showView('viewType');
@@ -617,11 +599,7 @@
             if (currentView === 'season') {
                 window.location.href = 'index.html';
             } else if (currentView === 'type') {
-                currentView = 'season';
-                currentSeason = null;
-                document.getElementById('headerTitle').textContent = 'Nouveau Match';
-                document.getElementById('headerSubtitle').textContent = 'Choisir la saison';
-                showView('viewSeason');
+                window.location.href = 'index.html';
             } else {
                 currentView = 'type';
                 document.getElementById('headerTitle').textContent = SEASONS[currentSeason].label;
@@ -630,51 +608,49 @@
             }
         }
 
-        function closeModal(event) {
-            if (event && event.target !== event.currentTarget) return;
-            document.getElementById('modalOverlay').classList.remove('active');
-        }
-
-        function confirmCancel() {
-            window.location.href = 'index.html';
-        }
-
         // ==================== RENDU 3 SECTIONS ====================
+        // Matchs Firebase absents du localStorage (tous statuts), indexés par ID.
+        // Les matchs terminés ne sont plus gardés en local (V26.5) : sans ce cache,
+        // un match terminé apparaîtrait « À jouer » et pourrait être écrasé.
+        let remoteById = new Map();
+        let remoteLoaded = false;
+
+        function _firebaseAvailable() {
+            return typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured();
+        }
+
         function renderMatchesList() {
             const container = document.getElementById('matchesList');
             // Rendu initial depuis localStorage (instantané)
             const allStored = Storage.getAllMatches();
-            _renderFromSources(container, allStored, []);
-            // Enrichissement async depuis Firebase (matchs completed manquants)
-            _enrichFromFirebase(container, allStored);
+            _renderFromSources(container, allStored, [...remoteById.values()]);
+            // Enrichissement async depuis Firebase (une seule lecture par saison)
+            if (!remoteLoaded) _enrichFromFirebase(container, allStored);
         }
 
         async function _enrichFromFirebase(container, localMatches) {
-            if (typeof FirebaseSync === 'undefined' || !FirebaseSync.isConfigured()) return;
+            if (!_firebaseAvailable()) { remoteLoaded = true; return; }
             try {
-                const remoteCompleted = await FirebaseSync.getCompletedMatches();
-                if (!remoteCompleted || remoteCompleted.length === 0) return;
-                // Ne garder que les matchs Firebase absents du localStorage
+                const remote = await FirebaseSync.getAllMatches();
                 const localIds = new Set(localMatches.map(m => m.id));
-                const extraCompleted = remoteCompleted.filter(m => !localIds.has(m.id));
-                if (extraCompleted.length === 0) return;
-                // Re-rendre avec les matchs Firebase en plus
-                _renderFromSources(container, localMatches, extraCompleted);
+                remoteById = new Map(remote.filter(m => m.id && !localIds.has(m.id)).map(m => [m.id, m]));
+                remoteLoaded = true;
+                if (currentView === 'championnat') _renderFromSources(container, Storage.getAllMatches(), [...remoteById.values()]);
             } catch (e) {
                 console.warn('[nouveau-match] Firebase enrichment failed:', e);
             }
         }
 
-        function _renderFromSources(container, localMatches, firebaseCompleted) {
+        function _renderFromSources(container, localMatches, firebaseMatches) {
             const seasonMatches = SEASONS[currentSeason].matches;
 
             const inProgress = [];
             const toPlay = [];
             const completed = [];
 
-            // Combiner les sources : localStorage + Firebase completed
+            // Combiner les sources : localStorage + Firebase
             const allStored = [...localMatches];
-            firebaseCompleted.forEach(fm => {
+            firebaseMatches.forEach(fm => {
                 if (!allStored.find(m => m.id === fm.id)) allStored.push(fm);
             });
 
@@ -687,7 +663,7 @@
                     if (stored.status === 'completed') {
                         completed.push({ ...match, index, matchId: stored.id, stored });
                     } else {
-                        inProgress.push({ ...match, index, matchId, stored });
+                        inProgress.push({ ...match, index, matchId: stored.id, stored });
                     }
                 } else {
                     toPlay.push({ ...match, index, matchId });
@@ -801,10 +777,52 @@
         }
 
         // ==================== ACTIONS ====================
-        function selectMatch(index) {
+        let selecting = false;
+
+        // Cherche un match existant : localStorage, puis cache Firebase, puis lecture directe.
+        // Hors ligne (Firebase injoignable) → null après 4 s, on laisse créer.
+        async function _findExistingMatch(matchId) {
+            const local = Storage.getMatchById(matchId);
+            if (local) return local;
+            if (remoteById.has(matchId)) return remoteById.get(matchId);
+            if (remoteLoaded || !_firebaseAvailable()) return null;
+            try {
+                return await Promise.race([
+                    FirebaseSync.getMatch(matchId),
+                    new Promise(resolve => setTimeout(() => resolve(null), 4000))
+                ]);
+            } catch (e) {
+                console.warn('[nouveau-match] Vérification Firebase impossible:', e);
+                return null;
+            }
+        }
+
+        // Copie un match Firebase en local sans le renvoyer vers Firebase
+        function _storeLocallyWithoutSync(match) {
+            const matches = Storage.getAllMatches().filter(m => m.id !== match.id);
+            matches.push(match);
+            localStorage.setItem(Storage.KEYS.MATCHES, JSON.stringify(matches));
+        }
+
+        async function selectMatch(index) {
+            if (selecting) return;
+            selecting = true;
             const match = SEASONS[currentSeason].matches[index];
+            const matchId = `champ_${currentSeason}_${index}`;
+            const existing = await _findExistingMatch(matchId);
+            if (existing) {
+                selecting = false;
+                if (existing.status === 'completed') {
+                    alert(`Ce match contre ${match.opponent} est déjà terminé.\nPour le rejouer, supprimez-le d'abord depuis la section « Terminés ».`);
+                } else if (confirm(`Un match contre ${match.opponent} est déjà en cours.\nLe reprendre ?`)) {
+                    resumeMatch(existing.id);
+                    return;
+                }
+                renderMatchesList();
+                return;
+            }
             const data = {
-                id: `champ_${currentSeason}_${index}`, type: 'championnat',
+                id: matchId, type: 'championnat',
                 season: currentSeason, status: 'in_progress',
                 opponent: match.opponent, location: match.location,
                 matchNumber: index + 1, timestamp: Date.now()
@@ -815,7 +833,12 @@
         }
 
         function resumeMatch(matchId) {
-            const match = Storage.getMatchById(matchId);
+            let match = Storage.getMatchById(matchId);
+            if (!match && remoteById.has(matchId)) {
+                // Match en cours démarré sur un autre navigateur
+                match = remoteById.get(matchId);
+                _storeLocallyWithoutSync(match);
+            }
             if (!match) return;
             Storage.setCurrentMatchId(matchId);
             window.location.href = Storage.getResumeTarget(match);
@@ -865,6 +888,7 @@
             closeContextMenu();
             if (confirm('Supprimer ce match et toutes ses données ?')) {
                 Storage.deleteMatch(matchId);
+                remoteById.delete(matchId);
                 renderMatchesList();
             }
         }
@@ -872,6 +896,7 @@
         function confirmDeleteMatch(matchId, opponent, setsWon, setsLost) {
             if (confirm('Supprimer ce match ?\n' + opponent + ' (' + setsWon + '-' + setsLost + ')')) {
                 Storage.deleteMatch(matchId);
+                remoteById.delete(matchId);
                 renderMatchesList();
             }
         }
@@ -911,8 +936,17 @@
             window.location.href = 'match-config.html';
         }
 
-        // Init
+        function showSeasonList() {
+            currentView = 'season';
+            currentSeason = null;
+            document.getElementById('headerTitle').textContent = 'Nouveau Match';
+            document.getElementById('headerSubtitle').textContent = 'Choisir la saison';
+            showView('viewSeason');
+        }
+
+        // Init : ouverture directe sur la saison en cours
         renderSeasonList();
+        selectSeason(DEFAULT_SEASON);
     </script>
 </body>
 </html>
