@@ -3,11 +3,14 @@
  *
  * Chaque visiteur est identifié via un hash SHA-256 (salé) de son IP publique.
  * Un persona séquentiel « Visiteur N » est attribué à la 1ʳᵉ visite, puis réutilisé.
- * L'IP n'est JAMAIS stockée en clair : seul le hash est envoyé à Firestore.
+ * L'IP n'est JAMAIS stockée en clair : le hash sert d'ID au document persona.
+ * Sécurité : les règles Firestore n'autorisent que la lecture par ID (`get`) sur
+ * analytics_personas, jamais le listing public — sinon les hashs (sel public)
+ * permettraient de retrouver les IP par force brute.
  *
  * Collections Firestore :
  *   - analytics                       : events (page_view / action) + champ `persona`
- *   - analytics_personas              : { ipHash, label, number, firstSeen, lastSeen, linkedVisitorIds[] }
+ *   - analytics_personas/{ipHash|auto}: { label, number, firstSeen, lastSeen, linkedVisitorIds[] }
  *   - analytics_meta/persona_counter  : { count } — compteur séquentiel atomique
  *
  * Exclusions : admin connecté (attendu via onAuthStateChanged), localhost.
@@ -90,27 +93,12 @@ const AppAnalytics = {
                 } catch (e) {}
             }
 
-            // 2) Chercher persona existant par visitorId (même device, IP changée)
-            try {
-                const byVisitor = await db.collection('analytics_personas')
-                    .where('linkedVisitorIds', 'array-contains', visitorId)
-                    .limit(1).get();
-                if (!byVisitor.empty) {
-                    const d = byVisitor.docs[0];
-                    this._persona = { id: d.id, ...d.data() };
-                    localStorage.setItem('analytics_persona_id', d.id);
-                    return this._persona;
-                }
-            } catch (e) {}
-
-            // 3) Chercher par ipHash — lier le visitorId courant au persona trouvé
+            // 2) Chercher le persona par ipHash (= ID du document, lecture directe sans requête)
             const ipHash = await this._fetchIpHash();
             if (ipHash) {
                 try {
-                    const byIp = await db.collection('analytics_personas')
-                        .where('ipHash', '==', ipHash).limit(1).get();
-                    if (!byIp.empty) {
-                        const d = byIp.docs[0];
+                    const d = await db.collection('analytics_personas').doc(ipHash).get();
+                    if (d.exists) {
                         const data = d.data();
                         if (!data.linkedVisitorIds || !data.linkedVisitorIds.includes(visitorId)) {
                             try {
@@ -129,7 +117,7 @@ const AppAnalytics = {
                 } catch (e) {}
             }
 
-            // 4) Créer un nouveau persona avec numérotation séquentielle atomique
+            // 3) Créer un nouveau persona avec numérotation séquentielle atomique
             try {
                 const counterRef = db.collection('analytics_meta').doc('persona_counter');
                 const newNumber = await db.runTransaction(async tx => {
@@ -140,8 +128,10 @@ const AppAnalytics = {
                     return next;
                 });
                 const label = 'Visiteur ' + newNumber;
-                const docRef = await db.collection('analytics_personas').add({
-                    ipHash: ipHash || null,
+                const docRef = ipHash
+                    ? db.collection('analytics_personas').doc(ipHash)
+                    : db.collection('analytics_personas').doc();
+                await docRef.set({
                     label: label,
                     number: newNumber,
                     firstSeen: firebase.firestore.FieldValue.serverTimestamp(),
@@ -150,7 +140,6 @@ const AppAnalytics = {
                 });
                 this._persona = {
                     id: docRef.id,
-                    ipHash: ipHash || null,
                     label: label,
                     number: newNumber,
                     linkedVisitorIds: [visitorId]

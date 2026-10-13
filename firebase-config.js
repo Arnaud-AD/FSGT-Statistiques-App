@@ -20,6 +20,18 @@ const firebaseConfig = {
 // Initialisation Firebase (SDK compat chargé via CDN dans les HTML)
 firebase.initializeApp(firebaseConfig);
 
+// App Check (reCAPTCHA Enterprise) : prouve à Firebase que les requêtes viennent du vrai site.
+// Clé du site PUBLIQUE par design (Enterprise : pas de clé secrète, liée au projet Google Cloud).
+// En local : jeton de debug affiché dans la console, à enregistrer dans
+// Firebase → App Check → Apps → ⋮ → Gérer les jetons de débogage.
+const RECAPTCHA_SITE_KEY = '6LfCj-0tAAAAAJuRSg5hP7XViiPt3hHS6xjvkIj9';
+if (typeof firebase.appCheck === 'function') {
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+    }
+    firebase.appCheck().activate(new firebase.appCheck.ReCaptchaEnterpriseProvider(RECAPTCHA_SITE_KEY), true);
+}
+
 // Services Firebase exposés globalement
 const db = firebase.firestore();
 const auth = firebase.auth();

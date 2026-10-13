@@ -85,6 +85,14 @@ async function loadChampionship(slug) {
     }
 }
 
+
+// Échappement HTML : les noms/dates/lieux viennent du scraping du site FSGT (source externe)
+function esc(v) {
+    return String(v == null ? '' : v)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 function setGinetteMode(isGinette) {
     var headerTabs = document.querySelector('.tabs');
     var mobileTabs = document.querySelector('.mobile-tabs');
@@ -340,8 +348,8 @@ function renderStandings() {
                     '<div class="rank-indicator"></div>' +
                     '<span class="row-chevron">&#9656;</span>' +
                     '<span class="rank-number">' + s.rank + '</span>' +
-                    '<div class="team-logo logo-' + s.team + '">' + team.short + '</div>' +
-                    '<span class="team-name">' + team.name + '</span>' +
+                    '<div class="team-logo logo-' + s.team + '">' + esc(team.short) + '</div>' +
+                    '<span class="team-name">' + esc(team.name) + '</span>' +
                 '</div>' +
             '</td>' +
             '<td>' + s.mj + '</td>' +
@@ -420,11 +428,11 @@ function renderMatches() {
         const awayTeam = DATA.teams[m.away];
         if (!homeTeam || !awayTeam) return;
         playedCards += '<div class="match-card">' +
-            '<div class="match-date">' + m.date + '</div>' +
+            '<div class="match-date">' + esc(m.date) + '</div>' +
             '<div class="match-teams">' +
                 '<div class="match-team home">' +
-                    '<span class="team-name">' + homeTeam.name + '</span>' +
-                    '<div class="team-logo logo-' + m.home + '">' + homeTeam.short + '</div>' +
+                    '<span class="team-name">' + esc(homeTeam.name) + '</span>' +
+                    '<div class="team-logo logo-' + esc(m.home) + '">' + esc(homeTeam.short) + '</div>' +
                 '</div>' +
                 '<div class="match-score">' +
                     '<span class="' + (m.homeWin ? 'winner' : 'loser') + '">' + m.scoreHome + '</span>' +
@@ -432,11 +440,11 @@ function renderMatches() {
                     '<span class="' + (m.homeWin ? 'loser' : 'winner') + '">' + m.scoreAway + '</span>' +
                 '</div>' +
                 '<div class="match-team away">' +
-                    '<div class="team-logo logo-' + m.away + '">' + awayTeam.short + '</div>' +
-                    '<span class="team-name">' + awayTeam.name + '</span>' +
+                    '<div class="team-logo logo-' + esc(m.away) + '">' + esc(awayTeam.short) + '</div>' +
+                    '<span class="team-name">' + esc(awayTeam.name) + '</span>' +
                 '</div>' +
             '</div>' +
-            '<div class="match-status"><span class="status-played">' + m.status + '</span></div>' +
+            '<div class="match-status"><span class="status-played">' + esc(m.status) + '</span></div>' +
         '</div>';
     });
 
@@ -500,21 +508,21 @@ function renderMatches() {
         }
 
         upcomingCards += '<div class="' + cardClasses + '">' +
-            '<div class="match-date">' + m.date + clashBadge + '</div>' +
+            '<div class="match-date">' + esc(m.date) + clashBadge + '</div>' +
             '<div class="match-teams">' +
                 '<div class="match-team home">' +
-                    '<span class="team-name">' + homeTeam.name + '</span>' +
-                    '<div class="team-logo logo-' + m.home + '">' + homeTeam.short + '</div>' +
+                    '<span class="team-name">' + esc(homeTeam.name) + '</span>' +
+                    '<div class="team-logo logo-' + esc(m.home) + '">' + esc(homeTeam.short) + '</div>' +
                 '</div>' +
                 '<div class="match-score">' +
                     '<span class="separator">-</span>' +
                 '</div>' +
                 '<div class="match-team away">' +
-                    '<div class="team-logo logo-' + m.away + '">' + awayTeam.short + '</div>' +
-                    '<span class="team-name">' + awayTeam.name + '</span>' +
+                    '<div class="team-logo logo-' + esc(m.away) + '">' + esc(awayTeam.short) + '</div>' +
+                    '<span class="team-name">' + esc(awayTeam.name) + '</span>' +
                 '</div>' +
             '</div>' +
-            '<div class="match-status"><span class="' + statusClass + '">' + m.status + '</span></div>' +
+            '<div class="match-status"><span class="' + statusClass + '">' + esc(m.status) + '</span></div>' +
         '</div>';
     });
 
@@ -556,12 +564,12 @@ function renderPRTeams() {
         const score = Math.round(r.power);
         rows += '<tr>' +
             '<td class="pr-rank">' + r.rank + '</td>' +
-            '<td><div class="team-cell"><div class="team-logo logo-' + r.team + '">' + team.short + '</div><span class="team-name">' + team.name + '</span></div></td>' +
-            '<td class="center"><span class="record-text">' + r.record + '</span></td>' +
+            '<td><div class="team-cell"><div class="team-logo logo-' + r.team + '">' + esc(team.short) + '</div><span class="team-name">' + esc(team.name) + '</span></div></td>' +
+            '<td class="center"><span class="record-text">' + esc(r.record) + '</span></td>' +
             '<td class="center"><span class="pr-value">' + score + '</span></td>' +
             '<td class="center col-opt"><div class="pr-bar-container"><div class="pr-bar"><div class="pr-bar-fill ' + barClass + '" style="width: ' + r.power + '%;"></div></div></div></td>' +
             '<td class="center"><span class="elo-movement ' + mvtClass + '">' + mvtArrow + ' ' + mvtText + '</span></td>' +
-            '<td class="center col-opt"><span class="difficulty-badge ' + r.diffClass + '">' + r.calendar + '</span></td>' +
+            '<td class="center col-opt"><span class="difficulty-badge ' + r.diffClass + '">' + esc(r.calendar) + '</span></td>' +
         '</tr>';
     });
 
@@ -601,9 +609,9 @@ function renderPRPlayers() {
         const barClass = p.rank <= 10 ? 'bar-rank-' + p.rank : 'bar-rank-rest';
         rows += '<tr>' +
             '<td class="pr-rank">' + p.rank + '</td>' +
-            '<td><span class="player-name">' + p.name + '</span></td>' +
-            '<td class="center"><div class="team-logo logo-' + p.team + '">' + team.short + '</div></td>' +
-            '<td class="center">' + p.pos + '</td>' +
+            '<td><span class="player-name">' + esc(p.name) + '</span></td>' +
+            '<td class="center"><div class="team-logo logo-' + p.team + '">' + esc(team.short) + '</div></td>' +
+            '<td class="center">' + esc(p.pos) + '</td>' +
             '<td class="center"><span class="pr-value">' + p.power + '</span></td>' +
             '<td class="center col-opt"><div class="pr-bar-container"><div class="pr-bar"><div class="pr-bar-fill ' + barClass + '" style="width: ' + p.power + '%;"></div></div></div></td>' +
         '</tr>';
@@ -679,26 +687,26 @@ function renderGinetteMatchCards(matches) {
         if (upcoming && (m.date || m.venue)) {
             var dateLine = '';
             if (m.date) {
-                dateLine = '<span class="ginette-finale-date">📅 ' + m.date + (m.time ? ' à ' + m.time : '') + '</span>';
+                dateLine = '<span class="ginette-finale-date">📅 ' + esc(m.date) + (m.time ? ' à ' + esc(m.time) : '') + '</span>';
             }
             var venueLine = '';
             if (m.venue) {
-                venueLine = '<span class="ginette-finale-venue">📍 ' + m.venue + (m.address ? ' — ' + m.address : '') + '</span>';
+                venueLine = '<span class="ginette-finale-venue">📍 ' + esc(m.venue) + (m.address ? ' — ' + esc(m.address) : '') + '</span>';
             }
-            var notesLine = m.notes ? '<span class="ginette-finale-notes">' + m.notes + '</span>' : '';
+            var notesLine = m.notes ? '<span class="ginette-finale-notes">' + esc(m.notes) + '</span>' : '';
             venueHtml = '<div class="ginette-finale-info">' + dateLine + venueLine + notesLine + '</div>';
         }
 
         html += '<div class="' + cardClass + '">' +
             '<div class="match-teams">' +
                 '<div class="match-team home">' +
-                    '<span class="division-badge division-badge-sm" style="background: ' + homeColor + ';">' + homeDivLabel + '</span>' +
-                    '<span class="team-name">' + m.home + '</span>' +
+                    '<span class="division-badge division-badge-sm" style="background: ' + homeColor + ';">' + esc(homeDivLabel) + '</span>' +
+                    '<span class="team-name">' + esc(m.home) + '</span>' +
                 '</div>' +
                 '<div class="match-score">' + scoreHtml + '</div>' +
                 '<div class="match-team away">' +
-                    '<span class="team-name">' + m.away + '</span>' +
-                    '<span class="division-badge division-badge-sm" style="background: ' + awayColor + ';">' + awayDivLabel + '</span>' +
+                    '<span class="team-name">' + esc(m.away) + '</span>' +
+                    '<span class="division-badge division-badge-sm" style="background: ' + awayColor + ';">' + esc(awayDivLabel) + '</span>' +
                 '</div>' +
             '</div>' +
             '<div class="ginette-match-detail">' + scoreDetail +
@@ -891,14 +899,14 @@ function renderGinette() {
             '<td class="pr-rank">' + r.rank + '</td>' +
             '<td>' +
                 '<div class="team-cell">' +
-                    '<span class="team-name">' + r.name + '</span>' +
+                    '<span class="team-name">' + esc(r.name) + '</span>' +
                 '</div>' +
             '</td>' +
-            '<td class="center"><span class="division-badge" style="background: ' + divColor + ';">' + r.division + '</span></td>' +
+            '<td class="center"><span class="division-badge" style="background: ' + divColor + ';">' + esc(r.division) + '</span></td>' +
             '<td class="center"><span class="pr-value">' + Math.round(r.elo) + '</span></td>' +
             '<td class="center col-opt"><div class="pr-bar-container"><div class="pr-bar"><div class="pr-bar-fill ' + barClass + '" style="width: ' + r.power + '%;"></div></div></div></td>' +
             '<td class="center"><span class="elo-movement ' + deltaClass + '">' + deltaArrow + ' ' + deltaText + '</span></td>' +
-            '<td class="center col-opt"><span class="record-text">' + r.record + '</span></td>' +
+            '<td class="center col-opt"><span class="record-text">' + esc(r.record) + '</span></td>' +
             '<td class="center col-opt"><div class="form-container" style="justify-content: center;">' + formHtml + '</div></td>' +
         '</tr>';
     });
@@ -924,7 +932,7 @@ function renderGinette() {
     divStats.forEach(function(d) {
         var divColor = GINETTE_DIV_COLORS[d.slug] || '#999';
         divRows += '<tr>' +
-            '<td><span class="division-badge" style="background: ' + divColor + ';">' + d.name + '</span></td>' +
+            '<td><span class="division-badge" style="background: ' + divColor + ';">' + esc(d.name) + '</span></td>' +
             '<td class="center">' + d.teams + '</td>' +
             '<td class="center"><strong>' + Math.round(d.avgElo) + '</strong></td>' +
             '<td class="center col-opt">' + Math.round(d.maxElo) + '</td>' +
@@ -973,12 +981,12 @@ function renderGinette() {
 
             upsetItems += '<div class="upset-item">' +
                 '<span class="upset-fire">' + fires + '</span> ' +
-                '<strong>' + u.winner + '</strong> ' +
-                '<span class="division-badge division-badge-sm" style="background: ' + wColor + ';">' + u.winnerDiv + '</span>' +
+                '<strong>' + esc(u.winner) + '</strong> ' +
+                '<span class="division-badge division-badge-sm" style="background: ' + wColor + ';">' + esc(u.winnerDiv) + '</span>' +
                 ' bat ' +
-                '<strong>' + u.loser + '</strong> ' +
-                '<span class="division-badge division-badge-sm" style="background: ' + lColor + ';">' + u.loserDiv + '</span>' +
-                ' <span class="upset-score">' + u.score + '</span>' +
+                '<strong>' + esc(u.loser) + '</strong> ' +
+                '<span class="division-badge division-badge-sm" style="background: ' + lColor + ';">' + esc(u.loserDiv) + '</span>' +
+                ' <span class="upset-score">' + esc(u.score) + '</span>' +
             '</div>';
         });
 

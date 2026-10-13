@@ -3,7 +3,7 @@
 <head>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://www.gstatic.com; img-src 'self' data: https://*.googleusercontent.com; frame-src https://accounts.google.com https://*.firebaseapp.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://www.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://www.gstatic.com https://content-firebaseappcheck.googleapis.com https://www.google.com; img-src 'self' data: https://*.googleusercontent.com; frame-src https://accounts.google.com https://*.firebaseapp.com https://www.google.com;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fix Pass FP Fantômes — Marvels 4</title>
     <style>
@@ -64,6 +64,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" integrity="sha384-4gq9w/AGf72FXdNQ3Kn3EqWP7633NbCMjpYHt8YCZyXf23o2opcuAr4cif41tLrC" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js" integrity="sha384-Qgqc/HETq5lqJnRDqWnV1AZGw3pgMYNUVaqLLN1W/55XuWK94epwbCQrOvdoh1Zo" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js" integrity="sha384-xtdq4MQqPj1dB5DQsuw9O7dh4kHhMP/Wp5u8O1jiaWiou13ZfJIgiccjtVK2pBhL" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-check-compat.js" integrity="sha384-NDFDftmSWhHkz3UIclV1BgVjP4jQatEUrT4I3UH3s3rOSAjwtTIGM332IgOKDs/d" crossorigin="anonymous"></script>
     <script src="match-live-helpers.js"></script>
     <script>
         // ===================== FIREBASE INIT =====================
@@ -76,6 +77,11 @@
             appId: "1:359241380045:web:d3d40b30796a096f2cf984"
         };
         firebase.initializeApp(firebaseConfig);
+        // App Check (même config que firebase-config.js)
+        if (typeof firebase.appCheck === 'function') {
+            if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+            firebase.appCheck().activate(new firebase.appCheck.ReCaptchaEnterpriseProvider('6LfCj-0tAAAAAJuRSg5hP7XViiPt3hHS6xjvkIj9'), true);
+        }
         const db = firebase.firestore();
         const auth = firebase.auth();
 
@@ -805,5 +811,9 @@
         // Also enable immediately since reads are public
         document.getElementById('btn-audit').disabled = false;
     </script>
+    <!-- Garde admin : outil de maintenance, réservé au propriétaire -->
+    <script src="admin-config.js"></script>
+    <script src="firebase-sync.js"></script>
+    <script src="admin-guard.js"></script>
 </body>
 </html>
