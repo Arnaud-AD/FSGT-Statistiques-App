@@ -2,30 +2,36 @@
   "championships": [
     {
       "id": 1,
+      "slug": "ultimate",
+      "name": "Ultimate",
+      "format": "4x4"
+    },
+    {
+      "id": 2,
       "slug": "elite",
       "name": "Elite",
       "format": "4x4"
     },
     {
-      "id": 2,
+      "id": 15,
       "slug": "hard",
       "name": "Hard",
       "format": "4x4"
     },
     {
-      "id": 15,
+      "id": 3,
       "slug": "medium",
       "name": "Medium",
       "format": "4x4"
     },
     {
-      "id": 3,
+      "id": 16,
       "slug": "easy",
       "name": "Easy",
       "format": "4x4"
     },
     {
-      "id": 16,
+      "id": 17,
       "slug": "starter",
       "name": "Starter",
       "format": "4x4"
@@ -37,12 +43,18 @@
       "format": "6x6"
     },
     {
+      "id": 5,
+      "slug": "argent",
+      "name": "Argent",
+      "format": "6x6"
+    },
+    {
       "id": null,
       "slug": "ginette",
       "name": "Coupe Ginette",
       "format": "coupe"
     }
   ],
-  "default": "elite",
-  "lastUpdated": "2026-06-16T07:58:33"
+  "default": "ultimate",
+  "lastUpdated": "2026-10-13T15:21:30"
 }

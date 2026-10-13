@@ -229,7 +229,7 @@ const HistoriqueData = {
 
 // ==================== SEASON SELECTOR ====================
 const SeasonSelector = {
-    current: '2025-2026',
+    current: '2026-2027',
 
     init() {
         var saved = sessionStorage.getItem('historique_season');

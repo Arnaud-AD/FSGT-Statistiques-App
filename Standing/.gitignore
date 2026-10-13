@@ -18,3 +18,6 @@ championships_data/
 # Assets obsolètes
 icon1.jpg
 icon2.png
+
+# Archives locales des saisons passées
+data/archive/

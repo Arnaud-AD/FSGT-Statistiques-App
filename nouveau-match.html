@@ -494,6 +494,28 @@
         function escapeHtml(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 
         const SEASONS = {
+            '2026-2027': {
+                label: 'Saison 2026-2027',
+                // Ultimate, 9 équipes : exempts J1 et J10 (J2→J9 puis J11→J18)
+                matches: [
+                    { opponent: "Dodos 4 ever", location: "extérieur" },
+                    { opponent: "Bières et le loup", location: "extérieur" },
+                    { opponent: "Les Indécis", location: "extérieur" },
+                    { opponent: "Red Hot Sucy Pépère", location: "extérieur" },
+                    { opponent: "Marvels 4", location: "extérieur" },
+                    { opponent: "Kiki Team", location: "domicile" },
+                    { opponent: "Les Rescapés", location: "domicile" },
+                    { opponent: "RSC Champigny 1", location: "extérieur" },
+                    { opponent: "Dodos 4 ever", location: "domicile" },
+                    { opponent: "Bières et le loup", location: "domicile" },
+                    { opponent: "Les Indécis", location: "domicile" },
+                    { opponent: "Red Hot Sucy Pépère", location: "domicile" },
+                    { opponent: "Marvels 4", location: "domicile" },
+                    { opponent: "Kiki Team", location: "extérieur" },
+                    { opponent: "Les Rescapés", location: "extérieur" },
+                    { opponent: "RSC Champigny 1", location: "domicile" }
+                ]
+            },
             '2025-2026': {
                 label: 'Saison 2025-2026',
                 matches: [
@@ -539,8 +561,8 @@
                 ]
             }
         };
-        const SEASON_ORDER = ['2025-2026', '2024-2025'];
-        const DEFAULT_SEASON = '2025-2026';
+        const SEASON_ORDER = ['2026-2027', '2025-2026', '2024-2025'];
+        const DEFAULT_SEASON = '2026-2027';
         let currentSeason = null;
 
         let currentView = 'season';

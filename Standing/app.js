@@ -302,7 +302,7 @@ function renderStandings() {
     var sortableCols = [
         ['MJ', 'mj', ''],
         ['G', 'g', ''],
-        ['P', 'p', 'bold-col'],
+        ['P', 'p', ''],
         ['Set+', 'setPlus', ''],
         ['Set-', 'setMinus', ''],
         ['DS', 'ds', 'bold-col'],
@@ -311,7 +311,7 @@ function renderStandings() {
         ['Pts-', 'ptsMinus', ''],
         ['DP', 'dp', 'bold-col'],
         ['Coef Pts', 'coefPts', ''],
-        ['Pts', 'pts', '']
+        ['Pts', 'pts', 'bold-col']
     ];
 
     var theadCols = '<th>Club</th>';
@@ -601,6 +601,7 @@ function renderPRPlayers() {
 // ------------------------------------------------------------
 
 var GINETTE_DIV_COLORS = {
+    "ultimate": "#212121",
     "elite": "#1a73e8",
     "hard": "#9b59b6",
     "medium": "#34a853",
@@ -970,6 +971,7 @@ function renderGinette() {
 }
 
 var DIV_LABELS_JS = {
+    "ultimate": "Ultimate",
     "elite": "Elite",
     "hard": "Hard",
     "medium": "Medium",
@@ -1018,7 +1020,7 @@ function drawEvolutionChart() {
     if (maxMatches === 0 || maxPoints === 0) return;
 
     // Grid
-    for (let i = 0; i <= maxPoints; i += 2) {
+    for (let i = 0; i <= maxPoints; i += 3) { // 3 pts = une victoire
         const y = padding.top + chartHeight - (i / maxPoints) * chartHeight;
         ctx.beginPath();
         ctx.strokeStyle = '#e8e8e8';

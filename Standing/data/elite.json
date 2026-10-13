@@ -1,2316 +1,1015 @@
 {
   "meta": {
-    "id": 1,
+    "id": 2,
     "slug": "elite",
     "name": "Elite",
     "format": "4x4",
-    "url": "https://volley-fsgt94.fr/championnat/1",
-    "lastUpdated": "2026-06-05T02:17:41",
-    "teamCount": 10,
-    "matchesPlayed": 90,
-    "matchesUpcoming": 0
+    "url": "https://volley-fsgt94.fr/championnat/2",
+    "lastUpdated": "2026-10-13T15:21:22",
+    "teamCount": 9,
+    "matchesPlayed": 2,
+    "matchesUpcoming": 70
   },
   "teams": {
-    "jen": {
-      "name": "Jen et ses Saints",
-      "short": "JS",
-      "color": "#9b59b6"
-    },
-    "kiki": {
-      "name": "Kiki Team",
-      "short": "KT",
-      "color": "#3498db"
-    },
-    "rhsp": {
-      "name": "Red Hot Sucy Pépère",
-      "short": "RH",
+    "punc": {
+      "name": "Les punchers",
+      "short": "PU",
       "color": "#e74c3c"
     },
-    "resc": {
-      "name": "Les Rescapés",
-      "short": "LR",
+    "padn": {
+      "name": "Padnom",
+      "short": "PA",
+      "color": "#3498db"
+    },
+    "team": {
+      "name": "Team Glouglou",
+      "short": "TG",
       "color": "#2ecc71"
     },
-    "marv": {
-      "name": "Marvels 4",
-      "short": "M4",
+    "olym": {
+      "name": "Olympe BB volley",
+      "short": "OB",
       "color": "#f39c12"
     },
-    "rsc": {
-      "name": "RSC Champigny 1",
-      "short": "RC",
+    "yip": {
+      "name": "Yip Yip",
+      "short": "YY",
+      "color": "#9b59b6"
+    },
+    "go": {
+      "name": "GO Team Apero",
+      "short": "GT",
       "color": "#1abc9c"
     },
-    "manu": {
-      "name": "Manu Andy-sport",
-      "short": "MA",
+    "sucy": {
+      "name": "SUCY N'EST PAS TROMPÉ",
+      "short": "SN",
       "color": "#e67e22"
     },
-    "bier": {
-      "name": "Bières et le loup",
-      "short": "BL",
+    "coch": {
+      "name": "Cochonou",
+      "short": "CO",
       "color": "#f1c40f"
     },
-    "rhin": {
-      "name": "Rhinos Féroces",
-      "short": "RF",
+    "neku": {
+      "name": "Nekutā",
+      "short": "NE",
       "color": "#95a5a6"
-    },
-    "star": {
-      "name": "StarPAFF",
-      "short": "SP",
-      "color": "#34495e"
     }
   },
   "standings": [
     {
       "rank": 1,
-      "team": "jen",
-      "mj": 18,
-      "g": 18,
+      "team": "punc",
+      "mj": 1,
+      "g": 1,
       "p": 0,
-      "setPlus": 54,
-      "setMinus": 4,
-      "ds": 50,
-      "coefSet": "13.50",
-      "ptsPlus": 1435,
-      "ptsMinus": 1014,
-      "dp": "+421",
-      "coefPts": "1.42",
-      "pts": 36,
+      "setPlus": 3,
+      "setMinus": 2,
+      "ds": 1,
+      "coefSet": "1.50",
+      "ptsPlus": 108,
+      "ptsMinus": 84,
+      "dp": "+24",
+      "coefPts": "1.29",
+      "pts": 3,
       "formAller": [
         "W",
-        "W",
-        "W",
-        "W",
-        "W",
-        "W",
-        "W",
-        "W",
-        "W"
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
       ],
       "formRetour": [
-        "W",
-        "W",
-        "W",
-        "W",
-        "W",
-        "W",
-        "W",
-        "W",
-        "W"
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
       ]
     },
     {
       "rank": 2,
-      "team": "resc",
-      "mj": 18,
-      "g": 13,
-      "p": 5,
-      "setPlus": 46,
-      "setMinus": 24,
-      "ds": 22,
-      "coefSet": "1.92",
-      "ptsPlus": 1603,
-      "ptsMinus": 1477,
-      "dp": "+126",
-      "coefPts": "1.09",
-      "pts": 31,
+      "team": "padn",
+      "mj": 1,
+      "g": 1,
+      "p": 0,
+      "setPlus": 3,
+      "setMinus": 2,
+      "ds": 1,
+      "coefSet": "1.50",
+      "ptsPlus": 99,
+      "ptsMinus": 99,
+      "dp": "0",
+      "coefPts": "1.00",
+      "pts": 3,
       "formAller": [
         "W",
-        "W",
-        "W",
-        "W",
-        "L",
-        "L",
-        "W",
-        "W",
-        "L"
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
       ],
       "formRetour": [
-        "W",
-        "W",
-        "W",
-        "W",
-        "W",
-        "L",
-        "W",
-        "W",
-        "L"
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
       ]
     },
     {
       "rank": 3,
-      "team": "marv",
-      "mj": 18,
-      "g": 12,
-      "p": 6,
-      "setPlus": 39,
-      "setMinus": 32,
-      "ds": 7,
-      "coefSet": "1.22",
-      "ptsPlus": 1577,
-      "ptsMinus": 1515,
-      "dp": "+62",
-      "coefPts": "1.04",
-      "pts": 30,
+      "team": "team",
+      "mj": 1,
+      "g": 0,
+      "p": 1,
+      "setPlus": 2,
+      "setMinus": 3,
+      "ds": -1,
+      "coefSet": "0.67",
+      "ptsPlus": 99,
+      "ptsMinus": 99,
+      "dp": "0",
+      "coefPts": "1.00",
+      "pts": 2,
       "formAller": [
-        "W",
-        "W",
-        "W",
         "L",
-        "W",
-        "W",
-        "L",
-        "W",
-        "L"
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
       ],
       "formRetour": [
-        "L",
-        "W",
-        "W",
-        "W",
-        "L",
-        "W",
-        "L",
-        "W",
-        "W"
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
       ]
     },
     {
       "rank": 4,
-      "team": "rhsp",
-      "mj": 18,
-      "g": 11,
-      "p": 7,
-      "setPlus": 38,
-      "setMinus": 31,
-      "ds": 7,
-      "coefSet": "1.23",
-      "ptsPlus": 1508,
-      "ptsMinus": 1421,
-      "dp": "+87",
-      "coefPts": "1.06",
-      "pts": 29,
+      "team": "olym",
+      "mj": 1,
+      "g": 0,
+      "p": 1,
+      "setPlus": 2,
+      "setMinus": 3,
+      "ds": -1,
+      "coefSet": "0.67",
+      "ptsPlus": 84,
+      "ptsMinus": 108,
+      "dp": "-24",
+      "coefPts": "0.78",
+      "pts": 2,
       "formAller": [
         "L",
-        "W",
-        "W",
-        "W",
-        "W",
-        "W",
-        "L",
-        "L",
-        "W"
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
       ],
       "formRetour": [
-        "L",
-        "W",
-        "L",
-        "L",
-        "W",
-        "W",
-        "W",
-        "L",
-        "W"
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
       ]
     },
     {
       "rank": 5,
-      "team": "kiki",
-      "mj": 18,
-      "g": 10,
-      "p": 8,
-      "setPlus": 37,
-      "setMinus": 36,
-      "ds": 1,
-      "coefSet": "1.03",
-      "ptsPlus": 1584,
-      "ptsMinus": 1523,
-      "dp": "+61",
-      "coefPts": "1.04",
-      "pts": 28,
+      "team": "yip",
+      "mj": 0,
+      "g": 0,
+      "p": 0,
+      "setPlus": 0,
+      "setMinus": 0,
+      "ds": 0,
+      "coefSet": "∞",
+      "ptsPlus": 0,
+      "ptsMinus": 0,
+      "dp": "0",
+      "coefPts": "∞",
+      "pts": 0,
       "formAller": [
-        "W",
-        "W",
-        "L",
-        "W",
-        "L",
-        "W",
-        "L",
-        "W",
-        "W"
+        "D",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
       ],
       "formRetour": [
-        "W",
-        "W",
-        "L",
-        "W",
-        "L",
-        "L",
-        "L",
-        "W",
-        "L"
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
       ]
     },
     {
       "rank": 6,
-      "team": "bier",
-      "mj": 18,
-      "g": 8,
-      "p": 10,
-      "setPlus": 32,
-      "setMinus": 34,
-      "ds": -2,
-      "coefSet": "0.94",
-      "ptsPlus": 1467,
-      "ptsMinus": 1380,
-      "dp": "+87",
-      "coefPts": "1.06",
-      "pts": 26,
+      "team": "go",
+      "mj": 0,
+      "g": 0,
+      "p": 0,
+      "setPlus": 0,
+      "setMinus": 0,
+      "ds": 0,
+      "coefSet": "∞",
+      "ptsPlus": 0,
+      "ptsMinus": 0,
+      "dp": "0",
+      "coefPts": "∞",
+      "pts": 0,
       "formAller": [
-        "W",
-        "L",
-        "L",
-        "L",
-        "W",
-        "L",
-        "W",
-        "L",
-        "W"
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
       ],
       "formRetour": [
-        "W",
-        "L",
-        "L",
-        "L",
-        "W",
-        "L",
-        "W",
-        "L",
-        "W"
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
       ]
     },
     {
       "rank": 7,
-      "team": "rsc",
-      "mj": 18,
-      "g": 8,
-      "p": 10,
-      "setPlus": 32,
-      "setMinus": 39,
-      "ds": -7,
-      "coefSet": "0.82",
-      "ptsPlus": 1492,
-      "ptsMinus": 1533,
-      "dp": "-41",
-      "coefPts": "0.97",
-      "pts": 26,
+      "team": "sucy",
+      "mj": 0,
+      "g": 0,
+      "p": 0,
+      "setPlus": 0,
+      "setMinus": 0,
+      "ds": 0,
+      "coefSet": "∞",
+      "ptsPlus": 0,
+      "ptsMinus": 0,
+      "dp": "0",
+      "coefPts": "∞",
+      "pts": 0,
       "formAller": [
-        "L",
-        "L",
-        "W",
-        "W",
-        "L",
-        "L",
-        "W",
-        "W",
-        "L"
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
       ],
       "formRetour": [
-        "W",
-        "L",
-        "W",
-        "W",
-        "L",
-        "L",
-        "L",
-        "W",
-        "L"
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
       ]
     },
     {
       "rank": 8,
-      "team": "manu",
-      "mj": 18,
-      "g": 7,
-      "p": 11,
-      "setPlus": 31,
-      "setMinus": 35,
-      "ds": -4,
-      "coefSet": "0.89",
-      "ptsPlus": 1474,
-      "ptsMinus": 1495,
-      "dp": "-21",
-      "coefPts": "0.99",
-      "pts": 25,
+      "team": "coch",
+      "mj": 0,
+      "g": 0,
+      "p": 0,
+      "setPlus": 0,
+      "setMinus": 0,
+      "ds": 0,
+      "coefSet": "∞",
+      "ptsPlus": 0,
+      "ptsMinus": 0,
+      "dp": "0",
+      "coefPts": "∞",
+      "pts": 0,
       "formAller": [
-        "L",
-        "L",
-        "L",
-        "L",
-        "W",
-        "L",
-        "L",
-        "L",
-        "W"
+        "D",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
       ],
       "formRetour": [
-        "L",
-        "L",
-        "W",
-        "L",
-        "W",
-        "W",
-        "W",
-        "L",
-        "W"
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
       ]
     },
     {
       "rank": 9,
-      "team": "rhin",
-      "mj": 18,
-      "g": 3,
-      "p": 15,
-      "setPlus": 23,
-      "setMinus": 46,
-      "ds": -23,
-      "coefSet": "0.50",
-      "ptsPlus": 1269,
-      "ptsMinus": 1547,
-      "dp": "-278",
-      "coefPts": "0.82",
-      "pts": 19,
-      "formAller": [
-        "L",
-        "L",
-        "L",
-        "L",
-        "L",
-        "W",
-        "W",
-        "L",
-        "L"
-      ],
-      "formRetour": [
-        "L",
-        "L",
-        "L",
-        "L",
-        "L",
-        "W",
-        "L",
-        "L",
-        "L"
-      ]
-    },
-    {
-      "rank": 10,
-      "team": "star",
-      "mj": 18,
+      "team": "neku",
+      "mj": 0,
       "g": 0,
-      "p": 18,
-      "setPlus": 3,
-      "setMinus": 54,
-      "ds": -51,
-      "coefSet": "0.06",
-      "ptsPlus": 910,
-      "ptsMinus": 1414,
-      "dp": "-504",
-      "coefPts": "0.64",
-      "pts": 18,
+      "p": 0,
+      "setPlus": 0,
+      "setMinus": 0,
+      "ds": 0,
+      "coefSet": "∞",
+      "ptsPlus": 0,
+      "ptsMinus": 0,
+      "dp": "0",
+      "coefPts": "∞",
+      "pts": 0,
       "formAller": [
-        "L",
-        "L",
-        "L",
-        "L",
-        "L",
-        "L",
-        "L",
-        "L",
-        "L"
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
       ],
       "formRetour": [
-        "L",
-        "L",
-        "L",
-        "L",
-        "L",
-        "L",
-        "L",
-        "L",
-        "L"
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
       ]
     }
   ],
   "matchesPlayed": [
     {
-      "date": "11/06/2026",
-      "home": "jen",
-      "away": "rhin",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Forfait"
-    },
-    {
-      "date": "04/06/2026",
-      "home": "rhsp",
-      "away": "resc",
+      "date": "12/10/2026",
+      "home": "punc",
+      "away": "olym",
       "scoreHome": 3,
       "scoreAway": 2,
       "homeWin": true,
       "status": "Terminé"
     },
     {
-      "date": "02/06/2026",
-      "home": "marv",
-      "away": "jen",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "01/06/2026",
-      "home": "resc",
-      "away": "manu",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "01/06/2026",
-      "home": "star",
-      "away": "bier",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "28/05/2026",
-      "home": "jen",
-      "away": "kiki",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "28/05/2026",
-      "home": "rhin",
-      "away": "rsc",
+      "date": "12/10/2026",
+      "home": "team",
+      "away": "padn",
       "scoreHome": 2,
       "scoreAway": 3,
       "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "27/05/2026",
-      "home": "star",
-      "away": "rhsp",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "25/05/2026",
-      "home": "rhsp",
-      "away": "manu",
-      "scoreHome": 1,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "22/05/2026",
-      "home": "rhin",
-      "away": "manu",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "21/05/2026",
-      "home": "marv",
-      "away": "kiki",
-      "scoreHome": 3,
-      "scoreAway": 2,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "19/05/2026",
-      "home": "bier",
-      "away": "rsc",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "18/05/2026",
-      "home": "resc",
-      "away": "jen",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "18/05/2026",
-      "home": "rhin",
-      "away": "star",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "13/05/2026",
-      "home": "manu",
-      "away": "marv",
-      "scoreHome": 2,
-      "scoreAway": 2,
-      "homeWin": false,
-      "status": "Marvels pts"
-    },
-    {
-      "date": "13/05/2026",
-      "home": "rsc",
-      "away": "star",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "11/05/2026",
-      "home": "resc",
-      "away": "bier",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "11/05/2026",
-      "home": "kiki",
-      "away": "rhsp",
-      "scoreHome": 3,
-      "scoreAway": 2,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "06/05/2026",
-      "home": "manu",
-      "away": "rsc",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "04/05/2026",
-      "home": "resc",
-      "away": "kiki",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "04/05/2026",
-      "home": "rhsp",
-      "away": "rhin",
-      "scoreHome": 3,
-      "scoreAway": 2,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "15/04/2026",
-      "home": "manu",
-      "away": "kiki",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "08/04/2026",
-      "home": "rsc",
-      "away": "jen",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "07/04/2026",
-      "home": "bier",
-      "away": "marv",
-      "scoreHome": 2,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "01/04/2026",
-      "home": "rsc",
-      "away": "rhsp",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "31/03/2026",
-      "home": "bier",
-      "away": "rhin",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Forfait"
-    },
-    {
-      "date": "30/03/2026",
-      "home": "resc",
-      "away": "marv",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "27/03/2026",
-      "home": "star",
-      "away": "manu",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "26/03/2026",
-      "home": "jen",
-      "away": "star",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "26/03/2026",
-      "home": "marv",
-      "away": "rhsp",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "25/03/2026",
-      "home": "manu",
-      "away": "resc",
-      "scoreHome": 1,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "25/03/2026",
-      "home": "rsc",
-      "away": "rhin",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "23/03/2026",
-      "home": "kiki",
-      "away": "bier",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "18/03/2026",
-      "home": "rsc",
-      "away": "manu",
-      "scoreHome": 3,
-      "scoreAway": 2,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "16/03/2026",
-      "home": "kiki",
-      "away": "resc",
-      "scoreHome": 2,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "12/03/2026",
-      "home": "marv",
-      "away": "rhin",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "10/03/2026",
-      "home": "bier",
-      "away": "jen",
-      "scoreHome": 1,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "09/03/2026",
-      "home": "resc",
-      "away": "star",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "09/03/2026",
-      "home": "kiki",
-      "away": "rsc",
-      "scoreHome": 1,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "18/02/2026",
-      "home": "manu",
-      "away": "jen",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "18/02/2026",
-      "home": "rsc",
-      "away": "resc",
-      "scoreHome": 1,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "16/02/2026",
-      "home": "star",
-      "away": "marv",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "16/02/2026",
-      "home": "rhsp",
-      "away": "bier",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "16/02/2026",
-      "home": "rhin",
-      "away": "kiki",
-      "scoreHome": 2,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "12/02/2026",
-      "home": "jen",
-      "away": "rhsp",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "11/02/2026",
-      "home": "rsc",
-      "away": "marv",
-      "scoreHome": 3,
-      "scoreAway": 2,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "11/02/2026",
-      "home": "star",
-      "away": "kiki",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "10/02/2026",
-      "home": "bier",
-      "away": "manu",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "09/02/2026",
-      "home": "resc",
-      "away": "rhin",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "29/01/2026",
-      "home": "jen",
-      "away": "manu",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "29/01/2026",
-      "home": "marv",
-      "away": "rsc",
-      "scoreHome": 3,
-      "scoreAway": 2,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "27/01/2026",
-      "home": "bier",
-      "away": "star",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "26/01/2026",
-      "home": "kiki",
-      "away": "jen",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "26/01/2026",
-      "home": "rhin",
-      "away": "rhsp",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "22/01/2026",
-      "home": "jen",
-      "away": "resc",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "21/01/2026",
-      "home": "rsc",
-      "away": "bier",
-      "scoreHome": 2,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "21/01/2026",
-      "home": "manu",
-      "away": "rhin",
-      "scoreHome": 3,
-      "scoreAway": 2,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "19/01/2026",
-      "home": "kiki",
-      "away": "marv",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "19/01/2026",
-      "home": "rhsp",
-      "away": "star",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "15/01/2026",
-      "home": "marv",
-      "away": "manu",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "14/01/2026",
-      "home": "star",
-      "away": "rsc",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "13/01/2026",
-      "home": "bier",
-      "away": "resc",
-      "scoreHome": 1,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "12/01/2026",
-      "home": "rhin",
-      "away": "jen",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "12/01/2026",
-      "home": "rhsp",
-      "away": "kiki",
-      "scoreHome": 2,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "08/01/2026",
-      "home": "jen",
-      "away": "marv",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "11/12/2025",
-      "home": "jen",
-      "away": "rsc",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "11/12/2025",
-      "home": "marv",
-      "away": "bier",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "08/12/2025",
-      "home": "resc",
-      "away": "rhsp",
-      "scoreHome": 2,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "08/12/2025",
-      "home": "kiki",
-      "away": "manu",
-      "scoreHome": 2,
-      "scoreAway": 2,
-      "homeWin": true,
-      "status": "Kiki pts"
-    },
-    {
-      "date": "08/12/2025",
-      "home": "star",
-      "away": "rhin",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "03/12/2025",
-      "home": "manu",
-      "away": "star",
-      "scoreHome": 3,
-      "scoreAway": 0,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "02/12/2025",
-      "home": "marv",
-      "away": "resc",
-      "scoreHome": 3,
-      "scoreAway": 2,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "01/12/2025",
-      "home": "rhsp",
-      "away": "rsc",
-      "scoreHome": 3,
-      "scoreAway": 2,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "01/12/2025",
-      "home": "rhin",
-      "away": "bier",
-      "scoreHome": 1,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "26/11/2025",
-      "home": "star",
-      "away": "jen",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "25/11/2025",
-      "home": "bier",
-      "away": "kiki",
-      "scoreHome": 1,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "24/11/2025",
-      "home": "rhsp",
-      "away": "marv",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "20/11/2025",
-      "home": "jen",
-      "away": "bier",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "19/11/2025",
-      "home": "star",
-      "away": "resc",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "19/11/2025",
-      "home": "manu",
-      "away": "rhsp",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "19/11/2025",
-      "home": "rsc",
-      "away": "kiki",
-      "scoreHome": 2,
-      "scoreAway": 2,
-      "homeWin": true,
-      "status": "RSC pts"
-    },
-    {
-      "date": "17/11/2025",
-      "home": "rhin",
-      "away": "marv",
-      "scoreHome": 2,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "06/11/2025",
-      "home": "marv",
-      "away": "star",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "04/11/2025",
-      "home": "bier",
-      "away": "rhsp",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "03/11/2025",
-      "home": "resc",
-      "away": "rsc",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "03/11/2025",
-      "home": "kiki",
-      "away": "rhin",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
-      "status": "Terminé"
-    },
-    {
-      "date": "15/10/2025",
-      "home": "manu",
-      "away": "bier",
-      "scoreHome": 1,
-      "scoreAway": 2,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "13/10/2025",
-      "home": "rhsp",
-      "away": "jen",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "13/10/2025",
-      "home": "rhin",
-      "away": "resc",
-      "scoreHome": 1,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé"
-    },
-    {
-      "date": "13/10/2025",
-      "home": "kiki",
-      "away": "star",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
       "status": "Terminé"
     }
   ],
-  "matchesUpcoming": [],
+  "matchesUpcoming": [
+    {
+      "date": "13/10/2026",
+      "home": "yip",
+      "away": "coch",
+      "status": "Reporté"
+    },
+    {
+      "date": "15/10/2026",
+      "home": "neku",
+      "away": "go",
+      "status": "Sem. 1"
+    },
+    {
+      "date": "02/11/2026",
+      "home": "go",
+      "away": "punc",
+      "status": "Sem. 2"
+    },
+    {
+      "date": "02/11/2026",
+      "home": "olym",
+      "away": "sucy",
+      "status": "Sem. 2"
+    },
+    {
+      "date": "03/11/2026",
+      "home": "padn",
+      "away": "yip",
+      "status": "Sem. 2"
+    },
+    {
+      "date": "04/11/2026",
+      "home": "coch",
+      "away": "neku",
+      "status": "Sem. 2"
+    },
+    {
+      "date": "09/11/2026",
+      "home": "punc",
+      "away": "coch",
+      "status": "Sem. 3"
+    },
+    {
+      "date": "09/11/2026",
+      "home": "sucy",
+      "away": "go",
+      "status": "Sem. 3"
+    },
+    {
+      "date": "10/11/2026",
+      "home": "yip",
+      "away": "team",
+      "status": "Sem. 3"
+    },
+    {
+      "date": "12/11/2026",
+      "home": "neku",
+      "away": "padn",
+      "status": "Sem. 3"
+    },
+    {
+      "date": "23/11/2026",
+      "home": "team",
+      "away": "neku",
+      "status": "Sem. 4"
+    },
+    {
+      "date": "23/11/2026",
+      "home": "go",
+      "away": "olym",
+      "status": "Sem. 4"
+    },
+    {
+      "date": "24/11/2026",
+      "home": "padn",
+      "away": "punc",
+      "status": "Sem. 4"
+    },
+    {
+      "date": "25/11/2026",
+      "home": "coch",
+      "away": "sucy",
+      "status": "Sem. 4"
+    },
+    {
+      "date": "30/11/2026",
+      "home": "punc",
+      "away": "team",
+      "status": "Sem. 5"
+    },
+    {
+      "date": "30/11/2026",
+      "home": "olym",
+      "away": "coch",
+      "status": "Sem. 5"
+    },
+    {
+      "date": "01/12/2026",
+      "home": "padn",
+      "away": "sucy",
+      "status": "Sem. 5"
+    },
+    {
+      "date": "03/12/2026",
+      "home": "neku",
+      "away": "yip",
+      "status": "Sem. 5"
+    },
+    {
+      "date": "07/12/2026",
+      "home": "team",
+      "away": "sucy",
+      "status": "Sem. 6"
+    },
+    {
+      "date": "08/12/2026",
+      "home": "yip",
+      "away": "punc",
+      "status": "Sem. 6"
+    },
+    {
+      "date": "08/12/2026",
+      "home": "padn",
+      "away": "olym",
+      "status": "Sem. 6"
+    },
+    {
+      "date": "09/12/2026",
+      "home": "coch",
+      "away": "go",
+      "status": "Sem. 6"
+    },
+    {
+      "date": "04/01/2027",
+      "home": "punc",
+      "away": "neku",
+      "status": "Sem. 7"
+    },
+    {
+      "date": "04/01/2027",
+      "home": "go",
+      "away": "padn",
+      "status": "Sem. 7"
+    },
+    {
+      "date": "04/01/2027",
+      "home": "olym",
+      "away": "team",
+      "status": "Sem. 7"
+    },
+    {
+      "date": "04/01/2027",
+      "home": "sucy",
+      "away": "yip",
+      "status": "Sem. 7"
+    },
+    {
+      "date": "11/01/2027",
+      "home": "team",
+      "away": "go",
+      "status": "Sem. 8"
+    },
+    {
+      "date": "12/01/2027",
+      "home": "padn",
+      "away": "coch",
+      "status": "Sem. 8"
+    },
+    {
+      "date": "12/01/2027",
+      "home": "yip",
+      "away": "olym",
+      "status": "Sem. 8"
+    },
+    {
+      "date": "14/01/2027",
+      "home": "neku",
+      "away": "sucy",
+      "status": "Sem. 8"
+    },
+    {
+      "date": "18/01/2027",
+      "home": "sucy",
+      "away": "punc",
+      "status": "Sem. 9"
+    },
+    {
+      "date": "18/01/2027",
+      "home": "olym",
+      "away": "neku",
+      "status": "Sem. 9"
+    },
+    {
+      "date": "18/01/2027",
+      "home": "go",
+      "away": "yip",
+      "status": "Sem. 9"
+    },
+    {
+      "date": "20/01/2027",
+      "home": "coch",
+      "away": "team",
+      "status": "Sem. 9"
+    },
+    {
+      "date": "01/03/2027",
+      "home": "olym",
+      "away": "punc",
+      "status": "Sem. 10"
+    },
+    {
+      "date": "01/03/2027",
+      "home": "go",
+      "away": "neku",
+      "status": "Sem. 10"
+    },
+    {
+      "date": "02/03/2027",
+      "home": "padn",
+      "away": "team",
+      "status": "Sem. 10"
+    },
+    {
+      "date": "03/03/2027",
+      "home": "coch",
+      "away": "yip",
+      "status": "Sem. 10"
+    },
+    {
+      "date": "08/03/2027",
+      "home": "punc",
+      "away": "go",
+      "status": "Sem. 11"
+    },
+    {
+      "date": "08/03/2027",
+      "home": "sucy",
+      "away": "olym",
+      "status": "Sem. 11"
+    },
+    {
+      "date": "09/03/2027",
+      "home": "yip",
+      "away": "padn",
+      "status": "Sem. 11"
+    },
+    {
+      "date": "11/03/2027",
+      "home": "neku",
+      "away": "coch",
+      "status": "Sem. 11"
+    },
+    {
+      "date": "15/03/2027",
+      "home": "team",
+      "away": "yip",
+      "status": "Sem. 12"
+    },
+    {
+      "date": "15/03/2027",
+      "home": "go",
+      "away": "sucy",
+      "status": "Sem. 12"
+    },
+    {
+      "date": "16/03/2027",
+      "home": "padn",
+      "away": "neku",
+      "status": "Sem. 12"
+    },
+    {
+      "date": "17/03/2027",
+      "home": "coch",
+      "away": "punc",
+      "status": "Sem. 12"
+    },
+    {
+      "date": "29/03/2027",
+      "home": "punc",
+      "away": "padn",
+      "status": "Sem. 13"
+    },
+    {
+      "date": "29/03/2027",
+      "home": "olym",
+      "away": "go",
+      "status": "Sem. 13"
+    },
+    {
+      "date": "29/03/2027",
+      "home": "sucy",
+      "away": "coch",
+      "status": "Sem. 13"
+    },
+    {
+      "date": "01/04/2027",
+      "home": "neku",
+      "away": "team",
+      "status": "Sem. 13"
+    },
+    {
+      "date": "19/04/2027",
+      "home": "team",
+      "away": "punc",
+      "status": "Sem. 14"
+    },
+    {
+      "date": "19/04/2027",
+      "home": "sucy",
+      "away": "padn",
+      "status": "Sem. 14"
+    },
+    {
+      "date": "20/04/2027",
+      "home": "yip",
+      "away": "neku",
+      "status": "Sem. 14"
+    },
+    {
+      "date": "21/04/2027",
+      "home": "coch",
+      "away": "olym",
+      "status": "Sem. 14"
+    },
+    {
+      "date": "26/04/2027",
+      "home": "punc",
+      "away": "yip",
+      "status": "Sem. 15"
+    },
+    {
+      "date": "26/04/2027",
+      "home": "olym",
+      "away": "padn",
+      "status": "Sem. 15"
+    },
+    {
+      "date": "26/04/2027",
+      "home": "sucy",
+      "away": "team",
+      "status": "Sem. 15"
+    },
+    {
+      "date": "26/04/2027",
+      "home": "go",
+      "away": "coch",
+      "status": "Sem. 15"
+    },
+    {
+      "date": "10/05/2027",
+      "home": "team",
+      "away": "olym",
+      "status": "Sem. 16"
+    },
+    {
+      "date": "11/05/2027",
+      "home": "padn",
+      "away": "go",
+      "status": "Sem. 16"
+    },
+    {
+      "date": "11/05/2027",
+      "home": "yip",
+      "away": "sucy",
+      "status": "Sem. 16"
+    },
+    {
+      "date": "13/05/2027",
+      "home": "neku",
+      "away": "punc",
+      "status": "Sem. 16"
+    },
+    {
+      "date": "17/05/2027",
+      "home": "go",
+      "away": "team",
+      "status": "Sem. 17"
+    },
+    {
+      "date": "17/05/2027",
+      "home": "olym",
+      "away": "yip",
+      "status": "Sem. 17"
+    },
+    {
+      "date": "17/05/2027",
+      "home": "sucy",
+      "away": "neku",
+      "status": "Sem. 17"
+    },
+    {
+      "date": "19/05/2027",
+      "home": "coch",
+      "away": "padn",
+      "status": "Sem. 17"
+    },
+    {
+      "date": "24/05/2027",
+      "home": "punc",
+      "away": "sucy",
+      "status": "Sem. 18"
+    },
+    {
+      "date": "24/05/2027",
+      "home": "team",
+      "away": "coch",
+      "status": "Sem. 18"
+    },
+    {
+      "date": "25/05/2027",
+      "home": "yip",
+      "away": "go",
+      "status": "Sem. 18"
+    },
+    {
+      "date": "27/05/2027",
+      "home": "neku",
+      "away": "olym",
+      "status": "Sem. 18"
+    }
+  ],
   "prTeams": [
     {
       "rank": 1,
-      "team": "jen",
-      "elo": 1843.4,
-      "movement": 2.5,
-      "record": "18-0",
+      "team": "punc",
+      "elo": 1521.7,
+      "movement": 21.7,
+      "record": "1-0",
       "power": 100.0,
-      "calendar": "V x18",
+      "calendar": "V vs Olympe",
       "diffClass": "diff-easy"
     },
     {
       "rank": 2,
-      "team": "resc",
-      "elo": 1644.1,
-      "movement": -31.8,
-      "record": "13-5",
-      "power": 71.0,
-      "calendar": "D vs Red",
-      "diffClass": "diff-hard"
+      "team": "padn",
+      "elo": 1521.7,
+      "movement": 21.7,
+      "record": "1-0",
+      "power": 100.0,
+      "calendar": "V vs Team",
+      "diffClass": "diff-easy"
     },
     {
       "rank": 3,
-      "team": "marv",
-      "elo": 1595.5,
-      "movement": -20.0,
-      "record": "12-6",
-      "power": 63.9,
-      "calendar": "D vs Jen",
-      "diffClass": "diff-hard"
+      "team": "yip",
+      "elo": 1500,
+      "movement": 0,
+      "record": "0-0",
+      "power": 0.0,
+      "calendar": "-",
+      "diffClass": "diff-easy"
     },
     {
       "rank": 4,
-      "team": "rhsp",
-      "elo": 1548.5,
-      "movement": 31.8,
-      "record": "11-7",
-      "power": 57.1,
-      "calendar": "V vs Les",
+      "team": "go",
+      "elo": 1500,
+      "movement": 0,
+      "record": "0-0",
+      "power": 0.0,
+      "calendar": "-",
       "diffClass": "diff-easy"
     },
     {
       "rank": 5,
-      "team": "manu",
-      "elo": 1511.6,
-      "movement": -15.2,
-      "record": "7-11",
-      "power": 51.7,
+      "team": "sucy",
+      "elo": 1500,
+      "movement": 0,
+      "record": "0-0",
+      "power": 0.0,
+      "calendar": "-",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 6,
+      "team": "coch",
+      "elo": 1500,
+      "movement": 0,
+      "record": "0-0",
+      "power": 0.0,
+      "calendar": "-",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 7,
+      "team": "neku",
+      "elo": 1500,
+      "movement": 0,
+      "record": "0-0",
+      "power": 0.0,
+      "calendar": "-",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 8,
+      "team": "team",
+      "elo": 1478.3,
+      "movement": -21.7,
+      "record": "0-1",
+      "power": 0.0,
+      "calendar": "D vs Padnom",
+      "diffClass": "diff-hard"
+    },
+    {
+      "rank": 9,
+      "team": "olym",
+      "elo": 1478.3,
+      "movement": -21.7,
+      "record": "0-1",
+      "power": 0.0,
       "calendar": "D vs Les",
       "diffClass": "diff-hard"
-    },
-    {
-      "rank": 6,
-      "team": "kiki",
-      "elo": 1501.4,
-      "movement": -10.6,
-      "record": "10-8",
-      "power": 50.2,
-      "calendar": "D vs Jen",
-      "diffClass": "diff-hard"
-    },
-    {
-      "rank": 7,
-      "team": "bier",
-      "elo": 1483.6,
-      "movement": 13.6,
-      "record": "8-10",
-      "power": 47.7,
-      "calendar": "V vs StarPAFF",
-      "diffClass": "diff-easy"
-    },
-    {
-      "rank": 8,
-      "team": "rsc",
-      "elo": 1431.8,
-      "movement": 18.7,
-      "record": "8-10",
-      "power": 40.4,
-      "calendar": "V vs Rhinos",
-      "diffClass": "diff-easy"
-    },
-    {
-      "rank": 9,
-      "team": "rhin",
-      "elo": 1296.0,
-      "movement": -2.5,
-      "record": "3-15",
-      "power": 21.3,
-      "calendar": "D x3",
-      "diffClass": "diff-hard"
-    },
-    {
-      "rank": 10,
-      "team": "star",
-      "elo": 1144.0,
-      "movement": -13.6,
-      "record": "0-18",
-      "power": 0.0,
-      "calendar": "D x18",
-      "diffClass": "diff-hard"
     }
   ],
-  "prPlayers": [
-    {
-      "rank": 1,
-      "name": "Delmoly Alexandre ⭐⭐",
-      "team": "jen",
-      "pos": "Passeur",
-      "power": 100.0
-    },
-    {
-      "rank": 2,
-      "name": "Alves dupont Arnaud ⭐",
-      "team": "jen",
-      "pos": "R4",
-      "power": 98.5
-    },
-    {
-      "rank": 3,
-      "name": "Moroni Mikael",
-      "team": "jen",
-      "pos": "R4",
-      "power": 98.5
-    },
-    {
-      "rank": 4,
-      "name": "Melart Tom",
-      "team": "jen",
-      "pos": "Pointu",
-      "power": 98.2
-    },
-    {
-      "rank": 5,
-      "name": "Bouvier Lenny",
-      "team": "jen",
-      "pos": "Pointu",
-      "power": 98.2
-    },
-    {
-      "rank": 6,
-      "name": "Moroni Antoine",
-      "team": "jen",
-      "pos": "Pointu",
-      "power": 98.2
-    },
-    {
-      "rank": 7,
-      "name": "Gombert Jennifer",
-      "team": "jen",
-      "pos": "Centre",
-      "power": 97.9
-    },
-    {
-      "rank": 8,
-      "name": "Assumpcao Nicolas",
-      "team": "jen",
-      "pos": "Centre",
-      "power": 97.9
-    },
-    {
-      "rank": 9,
-      "name": "Le bihan Cyril",
-      "team": "kiki",
-      "pos": "Centre",
-      "power": 71.7
-    },
-    {
-      "rank": 10,
-      "name": "Simic Anthony",
-      "team": "kiki",
-      "pos": "Pointu",
-      "power": 71.5
-    },
-    {
-      "rank": 11,
-      "name": "Hure Robin ⭐",
-      "team": "kiki",
-      "pos": "Pointu",
-      "power": 71.5
-    },
-    {
-      "rank": 12,
-      "name": "Hibon Nicolas ⭐",
-      "team": "kiki",
-      "pos": "R4",
-      "power": 71.2
-    },
-    {
-      "rank": 13,
-      "name": "Popelut Romain",
-      "team": "kiki",
-      "pos": "R4",
-      "power": 71.2
-    },
-    {
-      "rank": 14,
-      "name": "Cotard Baptiste",
-      "team": "kiki",
-      "pos": "R4",
-      "power": 71.2
-    },
-    {
-      "rank": 15,
-      "name": "Pazmino Omar",
-      "team": "kiki",
-      "pos": "Passeur",
-      "power": 70.9
-    },
-    {
-      "rank": 16,
-      "name": "Leur Maxime ⭐⭐",
-      "team": "kiki",
-      "pos": "Passeur",
-      "power": 69.9
-    },
-    {
-      "rank": 17,
-      "name": "Martin Xavier",
-      "team": "resc",
-      "pos": "Centre",
-      "power": 69.7
-    },
-    {
-      "rank": 18,
-      "name": "Oliver Julien ⭐",
-      "team": "rhsp",
-      "pos": "Passeur",
-      "power": 69.4
-    },
-    {
-      "rank": 19,
-      "name": "Meridiano Yannick ⭐",
-      "team": "rhsp",
-      "pos": "R4",
-      "power": 69.0
-    },
-    {
-      "rank": 20,
-      "name": "Godeau Bastien",
-      "team": "rhsp",
-      "pos": "R4",
-      "power": 69.0
-    },
-    {
-      "rank": 21,
-      "name": "Bailly Jean-philippe ⭐",
-      "team": "resc",
-      "pos": "Pointu",
-      "power": 68.7
-    },
-    {
-      "rank": 22,
-      "name": "Evesque Mateusz ⭐",
-      "team": "rhsp",
-      "pos": "Pointu",
-      "power": 68.6
-    },
-    {
-      "rank": 23,
-      "name": "Goujon Adrien",
-      "team": "rhsp",
-      "pos": "Pointu",
-      "power": 68.6
-    },
-    {
-      "rank": 24,
-      "name": "Techer Kevin",
-      "team": "rhsp",
-      "pos": "Centre",
-      "power": 68.2
-    },
-    {
-      "rank": 25,
-      "name": "Vieira Matthieu",
-      "team": "rhsp",
-      "pos": "Centre",
-      "power": 68.2
-    },
-    {
-      "rank": 26,
-      "name": "Martins Celia",
-      "team": "rhsp",
-      "pos": "Centre",
-      "power": 68.2
-    },
-    {
-      "rank": 27,
-      "name": "Shue Yven ⭐",
-      "team": "resc",
-      "pos": "R4",
-      "power": 67.7
-    },
-    {
-      "rank": 28,
-      "name": "Michard Hugo",
-      "team": "resc",
-      "pos": "R4",
-      "power": 67.7
-    },
-    {
-      "rank": 29,
-      "name": "Michard Arthur ⭐⭐",
-      "team": "resc",
-      "pos": "Passeur",
-      "power": 62.8
-    },
-    {
-      "rank": 30,
-      "name": "Nedjar Yannick ⭐",
-      "team": "marv",
-      "pos": "Passeur",
-      "power": 59.3
-    },
-    {
-      "rank": 31,
-      "name": "Lavenet Jerome ⭐",
-      "team": "marv",
-      "pos": "R4",
-      "power": 58.0
-    },
-    {
-      "rank": 32,
-      "name": "Pauvert Thomas",
-      "team": "marv",
-      "pos": "R4",
-      "power": 58.0
-    },
-    {
-      "rank": 33,
-      "name": "Donjon Thibaud",
-      "team": "marv",
-      "pos": "R4",
-      "power": 58.0
-    },
-    {
-      "rank": 34,
-      "name": "Darrigol Hugo",
-      "team": "marv",
-      "pos": "Pointu",
-      "power": 56.8
-    },
-    {
-      "rank": 35,
-      "name": "Galland Matthieu ⭐",
-      "team": "marv",
-      "pos": "Centre",
-      "power": 55.6
-    },
-    {
-      "rank": 36,
-      "name": "Rocton Gaylord ⭐",
-      "team": "rsc",
-      "pos": "Passeur",
-      "power": 54.1
-    },
-    {
-      "rank": 37,
-      "name": "Redlich Olivier ⭐",
-      "team": "rsc",
-      "pos": "R4",
-      "power": 53.7
-    },
-    {
-      "rank": 38,
-      "name": "Teboul Jean pierre",
-      "team": "rsc",
-      "pos": "R4",
-      "power": 53.7
-    },
-    {
-      "rank": 39,
-      "name": "Kanounnikoff Francois",
-      "team": "rsc",
-      "pos": "Pointu",
-      "power": 53.3
-    },
-    {
-      "rank": 40,
-      "name": "Roux Philippe",
-      "team": "rsc",
-      "pos": "Pointu",
-      "power": 53.3
-    },
-    {
-      "rank": 41,
-      "name": "Courcelle Guillaume",
-      "team": "rsc",
-      "pos": "Centre",
-      "power": 52.9
-    },
-    {
-      "rank": 42,
-      "name": "Bisaro Marylin",
-      "team": "rsc",
-      "pos": "Centre",
-      "power": 52.9
-    },
-    {
-      "rank": 43,
-      "name": "Denis Natacha",
-      "team": "rsc",
-      "pos": "Centre",
-      "power": 52.9
-    },
-    {
-      "rank": 44,
-      "name": "Nicolas-flores Krystel",
-      "team": "rsc",
-      "pos": "Centre",
-      "power": 52.9
-    },
-    {
-      "rank": 45,
-      "name": "Garric Julien ⭐⭐⭐",
-      "team": "bier",
-      "pos": "Passeur",
-      "power": 48.9
-    },
-    {
-      "rank": 46,
-      "name": "Breleur Tony ⭐",
-      "team": "bier",
-      "pos": "R4",
-      "power": 48.8
-    },
-    {
-      "rank": 47,
-      "name": "Chaulet Didier ⭐",
-      "team": "bier",
-      "pos": "Pointu",
-      "power": 48.8
-    },
-    {
-      "rank": 48,
-      "name": "Bone Ida",
-      "team": "bier",
-      "pos": "Centre",
-      "power": 48.8
-    },
-    {
-      "rank": 49,
-      "name": "Neyraud Gawen ⭐",
-      "team": "bier",
-      "pos": "Centre",
-      "power": 48.8
-    },
-    {
-      "rank": 50,
-      "name": "Noyelle Nolwen",
-      "team": "bier",
-      "pos": "Centre",
-      "power": 48.8
-    },
-    {
-      "rank": 51,
-      "name": "Patrocinio Neli",
-      "team": "bier",
-      "pos": "Centre",
-      "power": 48.8
-    },
-    {
-      "rank": 52,
-      "name": "Buyse Henri ⭐",
-      "team": "rhin",
-      "pos": "Centre",
-      "power": 42.4
-    },
-    {
-      "rank": 53,
-      "name": "Pelleray Mathieu",
-      "team": "rhin",
-      "pos": "Centre",
-      "power": 42.4
-    },
-    {
-      "rank": 54,
-      "name": "Leca Arthur",
-      "team": "rhin",
-      "pos": "Pointu",
-      "power": 41.3
-    },
-    {
-      "rank": 55,
-      "name": "Blanquer Antoine",
-      "team": "rhin",
-      "pos": "R4",
-      "power": 40.1
-    },
-    {
-      "rank": 56,
-      "name": "Wairy Jean ⭐",
-      "team": "rhin",
-      "pos": "Passeur",
-      "power": 39.0
-    },
-    {
-      "rank": 57,
-      "name": "Amesee Stephane ⭐",
-      "team": "manu",
-      "pos": "Passeur",
-      "power": 36.9
-    },
-    {
-      "rank": 58,
-      "name": "Vernazobres Lionel",
-      "team": "manu",
-      "pos": "R4",
-      "power": 36.7
-    },
-    {
-      "rank": 59,
-      "name": "Poncharville Prosper",
-      "team": "manu",
-      "pos": "Pointu",
-      "power": 36.4
-    },
-    {
-      "rank": 60,
-      "name": "De gonfreville Emmanuelle",
-      "team": "manu",
-      "pos": "Centre",
-      "power": 36.1
-    },
-    {
-      "rank": 61,
-      "name": "Roussiere Andy",
-      "team": "manu",
-      "pos": "Centre",
-      "power": 36.1
-    },
-    {
-      "rank": 62,
-      "name": "Rabiarivelo Ilo",
-      "team": "star",
-      "pos": "Centre",
-      "power": 0.6
-    },
-    {
-      "rank": 63,
-      "name": "Mehallel Hamsa",
-      "team": "star",
-      "pos": "Centre",
-      "power": 0.6
-    },
-    {
-      "rank": 64,
-      "name": "Bakouri Mehdi",
-      "team": "star",
-      "pos": "Centre",
-      "power": 0.6
-    },
-    {
-      "rank": 65,
-      "name": "Nieto Victor",
-      "team": "star",
-      "pos": "Pointu",
-      "power": 0.4
-    },
-    {
-      "rank": 66,
-      "name": "Ha Bryan",
-      "team": "star",
-      "pos": "Pointu",
-      "power": 0.4
-    },
-    {
-      "rank": 67,
-      "name": "Ty Samneang",
-      "team": "star",
-      "pos": "R4",
-      "power": 0.2
-    },
-    {
-      "rank": 68,
-      "name": "Bento dos santos Lucas",
-      "team": "star",
-      "pos": "R4",
-      "power": 0.2
-    },
-    {
-      "rank": 69,
-      "name": "Vulgaire Thierry",
-      "team": "star",
-      "pos": "R4",
-      "power": 0.2
-    },
-    {
-      "rank": 70,
-      "name": "Julien François",
-      "team": "star",
-      "pos": "R4",
-      "power": 0.2
-    },
-    {
-      "rank": 71,
-      "name": "Vincent dit mahaut Julien ⭐",
-      "team": "star",
-      "pos": "Passeur",
-      "power": 0.0
-    }
-  ],
+  "prPlayers": [],
   "eloHistory": {
-    "jen": [
+    "punc": [
       1500,
-      1537.0,
-      1557.5,
-      1582.7,
-      1605.9,
-      1632.6,
-      1651.1,
-      1669.5,
-      1702.0,
-      1711.5,
-      1731.2,
-      1743.3,
-      1755.3,
-      1758.6,
-      1774.6,
-      1810.3,
-      1820.9,
-      1840.9,
-      1843.4
+      1521.7
     ],
-    "kiki": [
+    "padn": [
       1500,
-      1527.8,
-      1547.2,
-      1528.2,
-      1553.6,
-      1566.3,
-      1589.9,
-      1613.3,
-      1580.8,
-      1595.0,
-      1612.6,
-      1564.7,
-      1542.9,
-      1564.5,
-      1524.3,
-      1503.8,
-      1529.1,
-      1512.0,
-      1501.4
+      1521.7
     ],
-    "rhsp": [
+    "team": [
       1500,
-      1463.0,
-      1504.0,
-      1537.5,
-      1563.0,
-      1578.3,
-      1598.7,
-      1575.2,
-      1586.1,
-      1539.4,
-      1519.7,
-      1547.5,
-      1514.0,
-      1557.6,
-      1567.7,
-      1542.5,
-      1504.7,
-      1516.7,
-      1548.5
+      1478.3
     ],
-    "resc": [
+    "olym": [
       1500,
-      1530.6,
-      1551.3,
-      1578.2,
-      1556.2,
-      1535.7,
-      1557.2,
-      1538.8,
-      1560.0,
-      1586.2,
-      1595.0,
-      1616.8,
-      1632.0,
-      1662.2,
-      1682.8,
-      1696.4,
-      1660.7,
-      1675.9,
-      1644.1
+      1478.3
     ],
-    "marv": [
-      1500,
-      1525.0,
-      1543.3,
-      1517.7,
-      1539.8,
-      1558.5,
-      1531.7,
-      1554.8,
-      1531.3,
-      1546.1,
-      1518.0,
-      1535.8,
-      1559.6,
-      1593.0,
-      1562.8,
-      1583.1,
-      1598.4,
-      1615.5,
-      1595.5
+    "yip": [
+      1500
     ],
-    "rsc": [
-      1500,
-      1479.3,
-      1498.4,
-      1483.1,
-      1459.9,
-      1485.4,
-      1459.7,
-      1445.0,
-      1473.1,
-      1446.9,
-      1494.8,
-      1508.8,
-      1528.5,
-      1485.0,
-      1469.0,
-      1436.1,
-      1451.1,
-      1413.1,
-      1431.8
+    "go": [
+      1500
     ],
-    "manu": [
-      1500,
-      1475.1,
-      1441.7,
-      1469.9,
-      1457.2,
-      1434.1,
-      1452.1,
-      1442.5,
-      1411.4,
-      1399.4,
-      1385.4,
-      1370.2,
-      1398.9,
-      1439.1,
-      1472.0,
-      1456.7,
-      1489.1,
-      1526.8,
-      1511.6
+    "sucy": [
+      1500
     ],
-    "bier": [
-      1500,
-      1524.9,
-      1483.8,
-      1463.4,
-      1437.9,
-      1468.6,
-      1449.9,
-      1428.4,
-      1454.0,
-      1472.1,
-      1503.3,
-      1475.5,
-      1463.5,
-      1441.9,
-      1466.0,
-      1445.7,
-      1432.0,
-      1470.0,
-      1483.6
+    "coch": [
+      1500
     ],
-    "rhin": [
-      1500,
-      1469.4,
-      1450.0,
-      1431.7,
-      1401.0,
-      1436.6,
-      1418.1,
-      1400.2,
-      1446.8,
-      1425.6,
-      1408.0,
-      1384.2,
-      1364.5,
-      1340.3,
-      1330.2,
-      1349.5,
-      1317.2,
-      1298.5,
-      1296.0
-    ],
-    "star": [
-      1500,
-      1472.2,
-      1447.2,
-      1420.3,
-      1395.0,
-      1366.9,
-      1331.3,
-      1305.9,
-      1294.9,
-      1276.8,
-      1262.6,
-      1244.9,
-      1236.1,
-      1232.8,
-      1204.0,
-      1189.0,
-      1169.6,
-      1157.6,
-      1144.0
+    "neku": [
+      1500
     ]
   },
   "evolutionData": {
     "teams": {
-      "jen": {
+      "punc": {
         "points": [
           0,
-          2,
-          4,
-          6,
-          8,
-          10,
-          12,
-          14,
-          16,
-          18,
-          20,
-          22,
-          24,
-          26,
-          28,
-          30,
-          32,
-          34,
-          36
+          3
         ],
         "rank": 1
       },
-      "kiki": {
+      "padn": {
         "points": [
           0,
-          2,
-          4,
-          5,
-          7,
-          9,
-          11,
-          13,
-          14,
-          16,
-          18,
-          19,
-          20,
-          22,
-          23,
-          24,
-          26,
-          27,
-          28
-        ],
-        "rank": 5
-      },
-      "rhsp": {
-        "points": [
-          0,
-          1,
-          3,
-          5,
-          7,
-          9,
-          11,
-          12,
-          14,
-          15,
-          16,
-          18,
-          19,
-          21,
-          23,
-          24,
-          25,
-          27,
-          29
-        ],
-        "rank": 4
-      },
-      "resc": {
-        "points": [
-          0,
-          2,
-          4,
-          6,
-          7,
-          8,
-          10,
-          11,
-          13,
-          15,
-          17,
-          19,
-          21,
-          23,
-          25,
-          27,
-          28,
-          30,
-          31
+          3
         ],
         "rank": 2
       },
-      "marv": {
+      "team": {
         "points": [
           0,
-          2,
-          4,
-          5,
-          7,
-          9,
-          10,
-          12,
-          13,
-          15,
-          16,
-          18,
-          20,
-          22,
-          23,
-          25,
-          27,
-          29,
-          30
+          2
         ],
         "rank": 3
       },
-      "rsc": {
+      "olym": {
         "points": [
           0,
-          1,
-          3,
-          4,
-          5,
-          7,
-          8,
-          9,
-          11,
-          12,
-          14,
-          16,
-          18,
-          19,
-          20,
-          21,
-          23,
-          24,
-          26
+          2
         ],
-        "rank": 7
+        "rank": 4
       },
-      "manu": {
+      "yip": {
         "points": [
-          0,
-          1,
-          2,
-          4,
-          5,
-          6,
-          8,
-          9,
-          10,
-          11,
-          12,
-          13,
-          15,
-          17,
-          19,
-          20,
-          22,
-          24,
-          25
+          0
         ],
-        "rank": 8
+        "rank": 5
       },
-      "bier": {
+      "go": {
         "points": [
-          0,
-          2,
-          3,
-          4,
-          5,
-          7,
-          8,
-          9,
-          11,
-          13,
-          15,
-          16,
-          17,
-          18,
-          20,
-          21,
-          22,
-          24,
-          26
+          0
         ],
         "rank": 6
       },
-      "rhin": {
+      "sucy": {
         "points": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          6,
-          7,
-          8,
-          10,
-          11,
-          12,
-          13,
-          14,
-          15,
-          16,
-          18,
-          19,
-          20,
-          21
+          0
+        ],
+        "rank": 7
+      },
+      "coch": {
+        "points": [
+          0
+        ],
+        "rank": 8
+      },
+      "neku": {
+        "points": [
+          0
         ],
         "rank": 9
-      },
-      "star": {
-        "points": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12,
-          13,
-          14,
-          15,
-          16,
-          17,
-          18
-        ],
-        "rank": 10
       }
     }
   }
