@@ -182,10 +182,22 @@ function injectTeamColors(teams) {
 
     let css = '';
     for (const key in teams) {
-        css += '.logo-' + key + ' { background: ' + teams[key].color + '; }\n';
+        css += '.logo-' + key + ' { background: ' + teams[key].color + '; color: ' + teamTextColor(teams[key].color) + '; }\n';
     }
     style.textContent = css;
     document.head.appendChild(style);
+}
+
+// Texte foncé sur les couleurs claires (jaune, cyan…) : blanc si contraste >= 2.5
+function teamTextColor(hex) {
+    var m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+    if (!m) return '#ffffff';
+    var lum = [0, 2, 4].map(function(i) {
+        var c = parseInt(m[1].substr(i, 2), 16) / 255;
+        return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    });
+    var l = 0.2126 * lum[0] + 0.7152 * lum[1] + 0.0722 * lum[2];
+    return 1.05 / (l + 0.05) >= 2.5 ? '#ffffff' : '#1f2937';
 }
 
 function injectRankColors(totalTeams) {
@@ -1162,7 +1174,7 @@ function drawEvolutionChart() {
         ctx.fill();
 
         // Team initials
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = teamTextColor(team.color);
         ctx.font = 'bold 9px -apple-system, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';

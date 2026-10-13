@@ -5,7 +5,7 @@
     "name": "Ultimate",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/1",
-    "lastUpdated": "2026-10-13T15:33:49",
+    "lastUpdated": "2026-10-13T15:46:32",
     "teamCount": 9,
     "matchesPlayed": 1,
     "matchesUpcoming": 71
@@ -14,17 +14,17 @@
     "resc": {
       "name": "Les Rescapés",
       "short": "LR",
-      "color": "#2ecc71"
+      "color": "#16a34a"
     },
     "bier": {
       "name": "Bières et le loup",
       "short": "BL",
-      "color": "#f1c40f"
+      "color": "#eab308"
     },
     "marv": {
       "name": "Marvels 4",
       "short": "M4",
-      "color": "#f39c12"
+      "color": "#f97316"
     },
     "jen": {
       "name": "Jen et ses Saints",
@@ -34,27 +34,27 @@
     "rsc": {
       "name": "RSC Champigny 1",
       "short": "RC",
-      "color": "#1abc9c"
+      "color": "#06b6d4"
     },
     "dodo": {
       "name": "Dodos 4 ever",
       "short": "D4",
-      "color": "#34495e"
+      "color": "#ec4899"
     },
     "inde": {
       "name": "Les Indécis",
       "short": "IN",
-      "color": "#e67e22"
+      "color": "#92400e"
     },
     "kiki": {
       "name": "Kiki Team",
       "short": "KT",
-      "color": "#3498db"
+      "color": "#2563eb"
     },
     "red": {
       "name": "Red Hot Sucy Pépère",
       "short": "RH",
-      "color": "#e74c3c"
+      "color": "#dc2626"
     }
   },
   "standings": [
