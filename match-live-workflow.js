@@ -54,11 +54,64 @@ const WorkflowEngine = {
             overridePlayer: gameState.overridePlayer,
             autoSelectedPlayer: gameState.autoSelectedPlayer,
             overrideTagsTeam: gameState.overrideTagsTeam,
+            // V29.22 : photo de l'affichage (marqueurs, flèches, terrain grisé, bandeau)
+            // → l'undo remet l'écran exactement tel qu'il était, sans le redessiner
+            visual: this._captureVisual(),
         };
         this.stateStack.push(snapshot);
         if (this.stateStack.length > this.maxStackSize) {
             this.stateStack.shift();
         }
+        // Modifs de contexte faites par les listeners AVANT le handler : appliquées
+        // après la photo, sinon l'undo les conserverait (ex: autoBlocker du filet)
+        this._applyPendingContextPatch();
+    },
+
+    // ==================== PHOTO VISUELLE (V29.22) ====================
+
+    _captureVisual() {
+        return {
+            markers: [...document.querySelectorAll('#courtContainer .click-marker')].map(m => m.outerHTML).join(''),
+            arrows: [...document.querySelectorAll('#arrowSvg line')].map(l => l.outerHTML).join(''),
+            courtTop: document.getElementById('courtTop').className,
+            courtBottom: document.getElementById('courtBottom').className,
+            phaseIndicator: document.getElementById('phaseIndicator').innerHTML,
+            // Sections de boutons affichées/masquées (ex: options 2ème touche cachées après « Relance »)
+            hiddenSections: Object.fromEntries([...document.querySelectorAll('#tagsContainer > div[id]')]
+                .map(el => [el.id, el.classList.contains('hidden')]))
+        };
+    },
+
+    _restoreVisual(visual) {
+        clearMarkers();
+        clearArrows();
+        document.getElementById('courtContainer').insertAdjacentHTML('beforeend', visual.markers);
+        document.getElementById('arrowSvg').insertAdjacentHTML('beforeend', visual.arrows);
+        document.getElementById('courtTop').className = visual.courtTop;
+        document.getElementById('courtBottom').className = visual.courtBottom;
+        document.getElementById('phaseIndicator').innerHTML = visual.phaseIndicator;
+        for (const [id, hidden] of Object.entries(visual.hiddenSections || {})) {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('hidden', hidden);
+        }
+    },
+
+    // Photos visuelles des derniers points, en mémoire seulement (pas en localStorage)
+    // → « revenir dans le point précédent » restaure aussi l'écran dans la même session
+    _visualCache: new Map(),
+
+    // ==================== PATCH DE CONTEXTE DIFFÉRÉ (V29.22) ====================
+
+    _pendingContextPatch: null,
+
+    _setPendingContext(patch) {
+        this._pendingContextPatch = Object.assign(this._pendingContextPatch || {}, patch);
+    },
+
+    _applyPendingContextPatch() {
+        if (!this._pendingContextPatch) return;
+        Object.assign(gameState.context, this._pendingContextPatch);
+        this._pendingContextPatch = null;
     },
 
     /**
@@ -107,21 +160,37 @@ const WorkflowEngine = {
         this._redrawCurrentAction();
 
         // Re-entrer dans la phase restaurée
+        // V29.22 : reenter() ne doit pas modifier le contexte (ex: attack_end recalculait
+        // autoDefender) → on remet celui de la photo juste après
+        const contextBefore = JSON.parse(JSON.stringify(gameState.context));
         const handler = this.phases[gameState.phase];
         if (handler && handler.reenter) {
             handler.reenter();
         }
+        gameState.context = contextBefore;
 
-        // Nettoyer et redessiner les flèches une dernière fois
-        // pour éliminer les doublons créés par reenter()
-        clearMarkers();
-        clearArrows();
-        redrawRally();
-        this._redrawCurrentAction();
+        // V29.22 : reenter() → renderOverrideTags() remet la sélection manuelle à zéro.
+        // On restaure celle de la photo, sinon le clic suivant prend le joueur auto.
+        gameState.overridePlayer = snapshot.overridePlayer;
+        gameState.autoSelectedPlayer = snapshot.autoSelectedPlayer;
+        gameState.overrideTagsTeam = snapshot.overrideTagsTeam;
+        updateOverrideVisuals();
 
         // Mettre à jour l'affichage
         updatePhase();
         updateScore();
+
+        if (snapshot.visual) {
+            // V29.22 : écran remis exactement tel qu'il était avant l'action
+            // (après updatePhase() qui réécrit le bandeau de phase)
+            this._restoreVisual(snapshot.visual);
+        } else {
+            // Photo absente (point repris après rechargement) : redessin depuis le rally
+            clearMarkers();
+            clearArrows();
+            redrawRally();
+            this._redrawCurrentAction();
+        }
 
         return true;
     },
@@ -163,6 +232,7 @@ const WorkflowEngine = {
         if (handler && handler.handleClick) {
             handler.handleClick(clickData);
         }
+        this._applyPendingContextPatch();
     },
 
     handleNetZoneClick(clickData) {
@@ -170,6 +240,7 @@ const WorkflowEngine = {
         if (handler && handler.handleNetClick) {
             handler.handleNetClick(clickData);
         }
+        this._applyPendingContextPatch();
     },
 
     handleOutAreaClick(clickData) {
@@ -177,6 +248,7 @@ const WorkflowEngine = {
         if (handler && handler.handleOutClick) {
             handler.handleOutClick(clickData);
         }
+        this._applyPendingContextPatch();
     },
 
     handleButton(action, ...args) {
@@ -184,6 +256,7 @@ const WorkflowEngine = {
         if (handler && handler.handleButton) {
             handler.handleButton(action, ...args);
         }
+        this._applyPendingContextPatch();
     },
 
     // ==================== LIFECYCLE ====================
@@ -225,9 +298,14 @@ const WorkflowEngine = {
             server: serviceAction ? serviceAction.player : null,
             timestamp: Date.now(),
             // V20.27 : cache du stack undo pour resume fidèle
-            _undoStack: JSON.parse(JSON.stringify(this.stateStack))
+            // V29.22 : sans les photos visuelles (gardées en mémoire, pas en localStorage)
+            _undoStack: JSON.parse(JSON.stringify(this.stateStack.map(({ visual, ...rest }) => rest)))
         };
         currentSet.points.push(point);
+        this._visualCache.set(point.timestamp, this.stateStack.map(snap => snap.visual));
+        if (this._visualCache.size > 5) {
+            this._visualCache.delete(this._visualCache.keys().next().value);
+        }
 
         // Rolling window : ne garder le stack que sur les 5 derniers points
         const points = currentSet.points;
@@ -412,7 +490,7 @@ const WorkflowEngine = {
             if (gameState.phase === 'attack_net_choice') {
                 const np = findNearestDefenseZonePlayer(e);
                 if (np) {
-                    gameState.context.autoDefender = { player: np };
+                    this._setPendingContext({ autoDefender: { player: np } });
                 }
             }
 
@@ -424,10 +502,10 @@ const WorkflowEngine = {
             e.stopPropagation();
             const zoneHalf = e.target.closest('.net-zone-half');
             if (zoneHalf && netClickZone.classList.contains('split')) {
-                gameState.context.autoBlocker = {
+                this._setPendingContext({ autoBlocker: {
                     player: zoneHalf.dataset.player,
                     role: zoneHalf.dataset.role
-                };
+                } });
             }
             const containerRect = document.getElementById('courtContainer').getBoundingClientRect();
             const netRect = document.getElementById('netZone').getBoundingClientRect();
@@ -531,7 +609,7 @@ const WorkflowEngine = {
     _handleOutOfBoundsClick(event, clickData) {
         const np = findNearestDefenseZonePlayer(event);
         if (gameState.phase === 'attack_net_choice' && np) {
-            gameState.context.autoDefender = { player: np };
+            this._setPendingContext({ autoDefender: { player: np } });
         } else if (gameState.phase === 'defense' && np) {
             this.handleButton('selectPlayer', np);
             return;
@@ -638,6 +716,8 @@ WorkflowEngine.registerPhase('serve_start', {
         if (btnSub) btnSub.style.display = 'none';
         if (btnEnd) btnEnd.style.display = 'none';
 
+        // V29.22 : mémorisé pour que reenter() affiche le même bandeau
+        gameState.context.serverContinueBanner = !!context.serverContinue;
         if (context.serverContinue) {
             // Même serveur continue — afficher le bandeau
             gameState.currentAction = {
@@ -687,8 +767,8 @@ WorkflowEngine.registerPhase('serve_start', {
         const selection = document.getElementById('serverSelection');
         banner.classList.add('hidden');
         selection.classList.add('hidden');
-        // Montrer le bon bandeau
-        if (gameState.currentServer) {
+        // Montrer le bon bandeau (seulement si enter() l'avait affiché)
+        if (gameState.currentServer && gameState.context.serverContinueBanner) {
             const nameSpan = document.getElementById('serverContinueName');
             const bannerEl = document.getElementById('serverContinueBanner');
             nameSpan.textContent = gameState.currentServer;
@@ -1403,15 +1483,19 @@ WorkflowEngine.registerPhase('net_block_end', {
             mode: 'override'
         });
 
-        // Si on a un pendingBlockEnd (clic court pendant net_choice), aller directement
+        // Si on a un pendingBlockEnd (clic court pendant net_choice), aller directement.
+        // V29.22 : sans pushState — le clic d'origine en a déjà fait un (1 clic = 1 undo)
         if (gameState.context.pendingBlockEnd) {
-            this.handleClick(gameState.context.pendingBlockEnd);
+            this._completeBlockEnd(gameState.context.pendingBlockEnd);
         }
     },
 
     handleClick(clickData) {
         WorkflowEngine.pushState('net_block_end_click');
+        this._completeBlockEnd(clickData);
+    },
 
+    _completeBlockEnd(clickData) {
         const blockingTeam = gameState.context.blockingTeam;
         const blockingCourtSide = getCourtSideForTeam(blockingTeam);
         const otherTeam = blockingTeam === 'home' ? 'away' : 'home';
@@ -2258,7 +2342,8 @@ WorkflowEngine.registerPhase('attack_end', {
             const defenderRole = args[1];
             const defClickData = args[2];
 
-            gameState.context.autoDefender = { player: defenderPlayer, role: defenderRole };
+            // V29.22 : appliqué après le pushState de handleClick (sinon l'undo le garderait)
+            WorkflowEngine._setPendingContext({ autoDefender: { player: defenderPlayer, role: defenderRole } });
             this.handleClick(defClickData);
         }
     },

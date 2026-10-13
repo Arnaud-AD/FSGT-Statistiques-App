@@ -39,3 +39,6 @@ Stats Passes*.html
 
 # Sauvegarde locale de la saison 2025-2026 (ne pas publier)
 Sauvegarde_Championnat_2025-2026/
+
+# Harnais de test local (non publié)
+tests/

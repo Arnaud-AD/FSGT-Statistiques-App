@@ -283,6 +283,12 @@ function confirmResumeLastPoint() {
         // V20.27 : stack caché → popState() fait EXACTEMENT comme un undo normal
         // Le dernier snapshot du stack = état juste avant l'action terminale
         WorkflowEngine.stateStack = JSON.parse(JSON.stringify(savedStack));
+        // V29.22 : rattacher les photos visuelles si le point a été joué dans cette session
+        const visuals = WorkflowEngine._visualCache.get(removedPoint.timestamp);
+        if (visuals && visuals.length === savedStack.length) {
+            WorkflowEngine.stateStack.forEach((snap, i) => { snap.visual = visuals[i]; });
+        }
+        WorkflowEngine._visualCache.delete(removedPoint.timestamp);
         WorkflowEngine.popState();
     } else {
         // Fallback : points anciens sans cache → reconstruction manuelle
