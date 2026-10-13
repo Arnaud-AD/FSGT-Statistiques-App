@@ -19,6 +19,9 @@ var standingsSort = { col: null, asc: true };
 // Columns where "less is better" → default sort is ascending
 var ASC_DEFAULT_COLS = { p: true, setMinus: true, ptsMinus: true };
 
+// Mobile: teams whose detail row is unfolded (team key → true)
+var standingsExpanded = {};
+
 // ------------------------------------------------------------
 // 2. Initialization
 // ------------------------------------------------------------
@@ -303,14 +306,14 @@ function renderStandings() {
         ['MJ', 'mj', ''],
         ['G', 'g', ''],
         ['P', 'p', ''],
-        ['Set+', 'setPlus', ''],
-        ['Set-', 'setMinus', ''],
+        ['Set+', 'setPlus', 'col-opt'],
+        ['Set-', 'setMinus', 'col-opt'],
         ['DS', 'ds', 'bold-col'],
-        ['Coef Set', 'coefSet', ''],
-        ['Pts+', 'ptsPlus', ''],
-        ['Pts-', 'ptsMinus', ''],
-        ['DP', 'dp', 'bold-col'],
-        ['Coef Pts', 'coefPts', ''],
+        ['Coef Set', 'coefSet', 'col-opt'],
+        ['Pts+', 'ptsPlus', 'col-opt'],
+        ['Pts-', 'ptsMinus', 'col-opt'],
+        ['DP', 'dp', 'bold-col col-opt'],
+        ['Coef Pts', 'coefPts', 'col-opt'],
         ['Pts', 'pts', 'bold-col']
     ];
 
@@ -320,7 +323,7 @@ function renderStandings() {
         if (c[2]) classes += ' ' + c[2];
         theadCols += '<th class="' + classes + '" data-sort-col="' + c[1] + '">' + c[0] + standingsSortIcon(c[1]) + '</th>';
     });
-    theadCols += '<th>Forme</th>';
+    theadCols += '<th class="col-opt">Forme</th>';
 
     let rows = '';
     sorted.forEach(function(s) {
@@ -329,10 +332,12 @@ function renderStandings() {
         const allerItems = buildFormItems(s.formAller);
         const retourItems = buildFormItems(s.formRetour);
 
-        rows += '<tr class="rank-' + s.rank + '">' +
+        const expanded = !!standingsExpanded[s.team];
+        rows += '<tr class="rank-' + s.rank + ' standings-row' + (expanded ? ' expanded' : '') + '" data-team="' + s.team + '">' +
             '<td>' +
                 '<div class="team-cell">' +
                     '<div class="rank-indicator"></div>' +
+                    '<span class="row-chevron">&#9656;</span>' +
                     '<span class="rank-number">' + s.rank + '</span>' +
                     '<div class="team-logo logo-' + s.team + '">' + team.short + '</div>' +
                     '<span class="team-name">' + team.name + '</span>' +
@@ -341,16 +346,16 @@ function renderStandings() {
             '<td>' + s.mj + '</td>' +
             '<td>' + s.g + '</td>' +
             '<td class="bold-val">' + s.p + '</td>' +
-            '<td>' + s.setPlus + '</td>' +
-            '<td>' + s.setMinus + '</td>' +
+            '<td class="col-opt">' + s.setPlus + '</td>' +
+            '<td class="col-opt">' + s.setMinus + '</td>' +
             '<td class="bold-val">' + s.ds + '</td>' +
-            '<td>' + s.coefSet + '</td>' +
-            '<td>' + s.ptsPlus + '</td>' +
-            '<td>' + s.ptsMinus + '</td>' +
-            '<td class="bold-val">' + s.dp + '</td>' +
-            '<td>' + s.coefPts + '</td>' +
-            '<td>' + s.pts + '</td>' +
-            '<td>' +
+            '<td class="col-opt">' + s.coefSet + '</td>' +
+            '<td class="col-opt">' + s.ptsPlus + '</td>' +
+            '<td class="col-opt">' + s.ptsMinus + '</td>' +
+            '<td class="bold-val col-opt">' + s.dp + '</td>' +
+            '<td class="col-opt">' + s.coefPts + '</td>' +
+            '<td class="pts-val">' + s.pts + '</td>' +
+            '<td class="col-opt">' +
                 '<div class="form-section">' +
                     '<span class="form-label">A</span>' +
                     '<div class="form-container">' + allerItems + '</div>' +
@@ -360,10 +365,33 @@ function renderStandings() {
                     '<div class="form-container">' + retourItems + '</div>' +
                 '</div>' +
             '</td>' +
+        '</tr>' +
+        // Mobile: details shown under the team when its row is expanded
+        '<tr class="standings-detail rank-' + s.rank + (expanded ? ' expanded' : '') + '" data-team="' + s.team + '">' +
+            '<td colspan="6">' +
+                '<div class="detail-line">' +
+                    '<span class="detail-label">Sets</span>' +
+                    '<span class="detail-stat"><em>Set+</em> ' + s.setPlus + '</span>' +
+                    '<span class="detail-stat"><em>Set-</em> ' + s.setMinus + '</span>' +
+                    '<span class="detail-stat"><em>Coef</em> ' + s.coefSet + '</span>' +
+                '</div>' +
+                '<div class="detail-line">' +
+                    '<span class="detail-label">Points</span>' +
+                    '<span class="detail-stat"><em>Pts+</em> ' + s.ptsPlus + '</span>' +
+                    '<span class="detail-stat"><em>Pts-</em> ' + s.ptsMinus + '</span>' +
+                    '<span class="detail-stat"><em>DP</em> <strong>' + s.dp + '</strong></span>' +
+                    '<span class="detail-stat"><em>Coef</em> ' + s.coefPts + '</span>' +
+                '</div>' +
+                '<div class="detail-line">' +
+                    '<span class="detail-label">Forme</span>' +
+                    '<div class="form-section"><span class="form-label">A</span><div class="form-container">' + allerItems + '</div></div>' +
+                    '<div class="form-section"><span class="form-label">R</span><div class="form-container">' + retourItems + '</div></div>' +
+                '</div>' +
+            '</td>' +
         '</tr>';
     });
 
-    container.innerHTML = '<div class="table-container">' +
+    container.innerHTML = '<div class="table-container standings-table">' +
         '<table>' +
             '<thead><tr>' + theadCols + '</tr></thead>' +
             '<tbody>' + rows + '</tbody>' +
@@ -530,9 +558,9 @@ function renderPRTeams() {
             '<td><div class="team-cell"><div class="team-logo logo-' + r.team + '">' + team.short + '</div><span class="team-name">' + team.name + '</span></div></td>' +
             '<td class="center"><span class="record-text">' + r.record + '</span></td>' +
             '<td class="center"><span class="pr-value">' + score + '</span></td>' +
-            '<td class="center"><div class="pr-bar-container"><div class="pr-bar"><div class="pr-bar-fill ' + barClass + '" style="width: ' + r.power + '%;"></div></div></div></td>' +
+            '<td class="center col-opt"><div class="pr-bar-container"><div class="pr-bar"><div class="pr-bar-fill ' + barClass + '" style="width: ' + r.power + '%;"></div></div></div></td>' +
             '<td class="center"><span class="elo-movement ' + mvtClass + '">' + mvtArrow + ' ' + mvtText + '</span></td>' +
-            '<td class="center"><span class="difficulty-badge ' + r.diffClass + '">' + r.calendar + '</span></td>' +
+            '<td class="center col-opt"><span class="difficulty-badge ' + r.diffClass + '">' + r.calendar + '</span></td>' +
         '</tr>';
     });
 
@@ -543,9 +571,9 @@ function renderPRTeams() {
                 '<th>\u00c9quipe</th>' +
                 '<th class="center">V-D</th>' +
                 '<th class="center">Score</th>' +
-                '<th class="center" style="width: 150px;"></th>' +
+                '<th class="center col-opt" style="width: 150px;"></th>' +
                 '<th class="center">Mvt</th>' +
-                '<th class="center">Forme</th>' +
+                '<th class="center col-opt">Forme</th>' +
             '</tr></thead>' +
             '<tbody>' + rows + '</tbody>' +
         '</table>' +
@@ -576,7 +604,7 @@ function renderPRPlayers() {
             '<td class="center"><div class="team-logo logo-' + p.team + '">' + team.short + '</div></td>' +
             '<td class="center">' + p.pos + '</td>' +
             '<td class="center"><span class="pr-value">' + p.power + '</span></td>' +
-            '<td class="center"><div class="pr-bar-container"><div class="pr-bar"><div class="pr-bar-fill ' + barClass + '" style="width: ' + p.power + '%;"></div></div></div></td>' +
+            '<td class="center col-opt"><div class="pr-bar-container"><div class="pr-bar"><div class="pr-bar-fill ' + barClass + '" style="width: ' + p.power + '%;"></div></div></div></td>' +
         '</tr>';
     });
 
@@ -588,7 +616,7 @@ function renderPRPlayers() {
                 '<th class="center">\u00c9quipe</th>' +
                 '<th class="center">Poste</th>' +
                 '<th class="center">Power</th>' +
-                '<th class="center" style="width: 150px;">Barre</th>' +
+                '<th class="center col-opt" style="width: 150px;">Barre</th>' +
             '</tr></thead>' +
             '<tbody>' + rows + '</tbody>' +
         '</table>' +
@@ -867,10 +895,10 @@ function renderGinette() {
             '</td>' +
             '<td class="center"><span class="division-badge" style="background: ' + divColor + ';">' + r.division + '</span></td>' +
             '<td class="center"><span class="pr-value">' + Math.round(r.elo) + '</span></td>' +
-            '<td class="center"><div class="pr-bar-container"><div class="pr-bar"><div class="pr-bar-fill ' + barClass + '" style="width: ' + r.power + '%;"></div></div></div></td>' +
+            '<td class="center col-opt"><div class="pr-bar-container"><div class="pr-bar"><div class="pr-bar-fill ' + barClass + '" style="width: ' + r.power + '%;"></div></div></div></td>' +
             '<td class="center"><span class="elo-movement ' + deltaClass + '">' + deltaArrow + ' ' + deltaText + '</span></td>' +
-            '<td class="center"><span class="record-text">' + r.record + '</span></td>' +
-            '<td class="center"><div class="form-container" style="justify-content: center;">' + formHtml + '</div></td>' +
+            '<td class="center col-opt"><span class="record-text">' + r.record + '</span></td>' +
+            '<td class="center col-opt"><div class="form-container" style="justify-content: center;">' + formHtml + '</div></td>' +
         '</tr>';
     });
 
@@ -881,10 +909,10 @@ function renderGinette() {
                 '<th>\u00c9quipe</th>' +
                 '<th class="center">Division</th>' +
                 '<th class="center">ELO</th>' +
-                '<th class="center" style="width: 120px;"></th>' +
+                '<th class="center col-opt" style="width: 120px;"></th>' +
                 '<th class="center">\u0394</th>' +
-                '<th class="center">V-D</th>' +
-                '<th class="center">Forme</th>' +
+                '<th class="center col-opt">V-D</th>' +
+                '<th class="center col-opt">Forme</th>' +
             '</tr></thead>' +
             '<tbody>' + rows + '</tbody>' +
         '</table>' +
@@ -898,8 +926,8 @@ function renderGinette() {
             '<td><span class="division-badge" style="background: ' + divColor + ';">' + d.name + '</span></td>' +
             '<td class="center">' + d.teams + '</td>' +
             '<td class="center"><strong>' + Math.round(d.avgElo) + '</strong></td>' +
-            '<td class="center">' + Math.round(d.maxElo) + '</td>' +
-            '<td class="center">' + Math.round(d.minElo) + '</td>' +
+            '<td class="center col-opt">' + Math.round(d.maxElo) + '</td>' +
+            '<td class="center col-opt">' + Math.round(d.minElo) + '</td>' +
             '<td class="center">' + d.wins + '-' + d.losses + '</td>' +
             '<td class="center"><strong>' + d.winPct + '%</strong></td>' +
         '</tr>';
@@ -913,8 +941,8 @@ function renderGinette() {
                     '<th>Division</th>' +
                     '<th class="center">\u00c9q.</th>' +
                     '<th class="center">ELO moy.</th>' +
-                    '<th class="center">Max</th>' +
-                    '<th class="center">Min</th>' +
+                    '<th class="center col-opt">Max</th>' +
+                    '<th class="center col-opt">Min</th>' +
                     '<th class="center">V-D</th>' +
                     '<th class="center">% Vic.</th>' +
                 '</tr></thead>' +
@@ -992,13 +1020,23 @@ function drawEvolutionChart() {
     const ctx = canvas.getContext('2d');
     const container = canvas.parentElement;
 
-    canvas.width = Math.min(container.clientWidth - 40, 900);
-    canvas.height = 600;
+    const cs = getComputedStyle(container);
+    const innerWidth = container.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const isSmall = innerWidth < 600;
+    const width = Math.min(innerWidth, 900);
+    const height = isSmall ? Math.max(300, Math.round(width * 0.95)) : 600;
+    const dpr = window.devicePixelRatio || 1;
 
-    const width = canvas.width;
-    const height = canvas.height;
-    const iconAreaWidth = 80;
-    const padding = { top: 30, right: 30 + iconAreaWidth, bottom: 50, left: 50 };
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const iconAreaWidth = isSmall ? 30 : 80;
+    const padding = isSmall
+        ? { top: 20, right: 8 + iconAreaWidth, bottom: 44, left: 38 }
+        : { top: 30, right: 30 + iconAreaWidth, bottom: 50, left: 50 };
     const chartWidth = width - padding.left - padding.right;
     const chartHeight = height - padding.top - padding.bottom;
 
@@ -1171,6 +1209,17 @@ function drawEvolutionChart() {
 }
 
 window.addEventListener('resize', drawEvolutionChart);
+
+// Mobile: tap a team row to unfold / fold its details
+document.addEventListener('click', function(e) {
+    var row = e.target.closest('.standings-row');
+    if (!row || !window.matchMedia('(max-width: 480px)').matches) return;
+    var team = row.getAttribute('data-team');
+    standingsExpanded[team] = !standingsExpanded[team];
+    row.classList.toggle('expanded', standingsExpanded[team]);
+    var detail = row.nextElementSibling;
+    if (detail && detail.classList.contains('standings-detail')) detail.classList.toggle('expanded', standingsExpanded[team]);
+});
 
 // Delegated click handler for standings column sorting
 document.addEventListener('click', function(e) {

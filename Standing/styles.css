@@ -698,6 +698,12 @@
         .classement-sub-tab-content { display: none; animation: fadeIn 0.3s ease; }
         .classement-sub-tab-content.active { display: block; }
         .chart-container { position: relative; width: 100%; overflow-x: auto; }
+        .evolution-chart { background: var(--bg-header); border-radius: 12px; padding: 20px; margin-top: 16px; }
+        .evolution-chart canvas { display: block; margin: 0 auto; }
+
+
+        /* Mobile-only expandable team details in the standings */
+        .row-chevron, .standings-detail { display: none; }
         .player-name { font-size: 13px; }
         #pr-joueurs .pr-table td { padding: 4px 8px; }
         #pr-joueurs .pr-table .team-logo { margin: 0; }
@@ -1103,22 +1109,84 @@
                 padding: 12px 14px;
             }
 
+            /* Line 1: date + week, line 2: home  score  away */
             .match-card {
-                padding: 10px 14px;
+                padding: 10px 12px;
+                flex-wrap: wrap;
+            }
+
+            .match-date {
+                flex: 1;
+                width: auto;
+                font-size: 11px;
+            }
+
+            .match-status {
+                order: 1;
+                width: auto;
             }
 
             .match-teams {
-                flex-direction: column;
-                gap: 8px;
+                order: 2;
+                flex-basis: 100%;
+                gap: 10px;
+                margin-top: 6px;
             }
 
-            .match-team {
-                justify-content: center;
+            .match-team,
+            .ginette-match-card .match-team {
+                flex: 1 1 0;
+                width: auto;
+                min-width: 0;
+            }
+
+            .match-team.home {
+                text-align: right;
+            }
+
+            .match-team .team-name,
+            .ginette-match-card .team-name {
+                max-width: none;
+                white-space: normal;
+                overflow-wrap: anywhere;
+                line-height: 1.25;
+                font-size: 13px;
             }
 
             .match-score {
+                flex: 0 0 auto;
+                min-width: 34px;
+                justify-content: center;
+            }
+
+            /* Ginette: name above its division badge */
+            .ginette-match-card {
+                padding: 10px 12px;
+            }
+
+            .ginette-match-card .match-teams {
+                margin-top: 0;
+            }
+
+            .ginette-match-card .match-team {
+                flex-direction: column;
+                gap: 3px;
+            }
+
+            .ginette-match-card .match-team.home {
+                align-items: flex-end;
+            }
+
+            .ginette-match-card .match-team.away {
+                align-items: flex-start;
+            }
+
+            .ginette-match-card .match-team.home .team-name {
                 order: -1;
-                margin-bottom: 8px;
+            }
+
+            .ginette-match-detail {
+                margin-top: 6px;
             }
 
             /* Power Ranking mobile */
@@ -1144,6 +1212,10 @@
                 padding: 10px;
             }
 
+            .evolution-chart {
+                padding: 8px;
+            }
+
             /* Legend mobile */
             .legend {
                 flex-wrap: wrap;
@@ -1166,21 +1238,126 @@
                 height: 36px;
             }
 
-            table {
-                min-width: 800px;
+            .table-container {
+                margin: 0 -8px;
+                padding: 0 8px;
             }
+
+            /* Compact tables: key columns only, full names */
+            table {
+                min-width: 0;
+            }
+
+            .col-opt {
+                display: none;
+            }
+
+            th, td {
+                padding: 8px 4px;
+                font-size: 13px;
+            }
+
+            .team-cell .team-name,
+            .pr-table .team-name {
+                max-width: none;
+                white-space: normal;
+                overflow-wrap: anywhere;
+                line-height: 1.25;
+                font-size: 13px;
+            }
+
+            .team-logo {
+                width: 22px;
+                height: 22px;
+                font-size: 9px;
+                flex-shrink: 0;
+            }
+
+            .rank-number {
+                font-size: 13px;
+            }
+
+            td.pts-val {
+                font-weight: 700;
+                font-size: 15px;
+            }
+
+            .elo-movement {
+                white-space: nowrap;
+            }
+
+            /* Expandable team row */
+            .standings-table .standings-row {
+                cursor: pointer;
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            .standings-table .row-chevron {
+                display: inline-block;
+                width: 10px;
+                margin-right: -4px;
+                font-size: 12px;
+                color: var(--text-secondary);
+                transition: transform 0.15s ease;
+            }
+
+            .standings-row.expanded .row-chevron {
+                transform: rotate(90deg);
+            }
+
+            .standings-row.expanded td {
+                border-bottom-color: transparent;
+            }
+
+            .standings-table .standings-detail.expanded {
+                display: table-row;
+            }
+
+            .standings-detail td {
+                padding: 0 4px 10px 34px;
+                background: var(--bg-header);
+            }
+
+            .standings-row.expanded td {
+                background: var(--bg-header);
+            }
+
+            .detail-line {
+                display: flex;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 4px 14px;
+                padding-top: 8px;
+                font-size: 13px;
+            }
+
+            .detail-label {
+                width: 52px;
+                font-size: 11px;
+                font-weight: 600;
+                text-transform: uppercase;
+                color: var(--text-secondary);
+            }
+
+            .detail-stat em {
+                font-style: normal;
+                font-size: 11px;
+                color: var(--text-secondary);
+                margin-right: 2px;
+            }
+
+            .detail-line .form-section {
+                margin: 0;
+            }
+
 
             .mobile-tabs .tab {
                 padding: 6px 10px;
                 font-size: 12px;
             }
 
-            .team-name {
-                max-width: 80px;
-            }
-
             .player-name {
-                max-width: 100px;
+                max-width: 140px;
             }
         }
 
