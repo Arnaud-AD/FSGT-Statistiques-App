@@ -1981,6 +1981,10 @@ WorkflowEngine.registerPhase('pass_direct_return_choice', {
 
         if (action === 'winner') {
             // Point direct pour l'équipe qui passe
+            // V29.23 : marquer la passe comme retour gagnant (comme réception/défense)
+            const lastPass = [...gameState.rally].reverse()
+                .find(a => a.type === 'pass' && a.team === gameState.attackingTeam);
+            if (lastPass) lastPass.isDirectReturnWinner = true;
             WorkflowEngine.awardPoint(gameState.attackingTeam);
             WorkflowEngine.endRally();
         }

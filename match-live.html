@@ -750,7 +750,7 @@
     <script src="storage.js"></script>
     <script src="match-live-helpers.js"></script>
     <script src="match-live-undo.js?v=29.22"></script>
-    <script src="match-live-workflow.js?v=29.22"></script>
+    <script src="match-live-workflow.js?v=29.23"></script>
 
     <!-- YouTube iframe API (chargé dynamiquement) -->
     <script>
@@ -1566,8 +1566,17 @@
             if (!confirm('Annuler ce point et recommencer ?')) return;
             WorkflowEngine._resetRallyState();
             WorkflowEngine.clearStack();
-            gameState.currentServer = null;
-            WorkflowEngine.transition('server_selection');
+            // V29.23 : en cours de tour de service (l'équipe au service a gagné le point
+            // précédent), le même serveur continue — sinon on choisit le serveur
+            const pts = currentSet.points || [];
+            const lastService = pts.length ? pts[pts.length - 1].rally.find(a => a.type === 'service') : null;
+            if (lastService && lastService.team === gameState.servingTeam) {
+                gameState.currentServer = lastService.player;
+                WorkflowEngine.transition('serve_start', { serverContinue: true });
+            } else {
+                gameState.currentServer = null;
+                WorkflowEngine.transition('server_selection');
+            }
         }
 
         // Bridge pour les anciennes fonctions appelées par les handlers HTML
@@ -3214,6 +3223,8 @@
 
         function updateStatsFromRally(rally) {
             if (!rally || rally.length === 0) return;
+            // V29.23 : index des défenses comptées D+ (pour la rétrogradation par une passe relance)
+            const defPlusIndexes = new Set();
 
             for (let i = 0; i < rally.length; i++) {
                 const action = rally[i];
@@ -3248,9 +3259,10 @@
                                 const rec = recAction.action;
                                 let note = receptionQualityToNote(rec.quality);
                                 if (note !== null) {
-                                    // Retour direct gagnant = pire outcome pour le serveur → note 0 (FR)
+                                    // V29.23 : retour direct gagnant = l'adversaire marque sur sa réception
+                                    // → pire résultat pour le serveur : note 4 (0 = meilleur serveur), pas de S+
                                     if (rec.isDirectReturnWinner) {
-                                        note = 0;
+                                        note = 4;
                                     }
                                     // Retour direct exploité par le serveur = réception catastrophique → note 0 (FR) + S+
                                     else if (rec.isDirectReturn && !rec.isDirectReturnWinner) {
@@ -3309,6 +3321,9 @@
                                 if (!prevPlayer) continue;
                                 const prevStats = setStats[team][prevPlayer];
                                 if (!prevStats) break;
+                                // V29.23 : seule la touche juste avant la relance est rétrogradée
+                                // (un bloc/passe/attaque de l'équipe = autre possession → on s'arrête)
+                                if (prev.type !== 'reception' && prev.type !== 'defense') break;
 
                                 if (prev.type === 'reception' && prev.quality) {
                                     // Annuler le score précédent et forcer R1
@@ -3326,7 +3341,9 @@
                                 }
                                 if (prev.type === 'defense') {
                                     // Annuler le score précédent et forcer D (V20.15)
-                                    if (prev.defenseQuality === 'positive') {
+                                    // V29.23 : seulement si cette défense a vraiment été comptée D+
+                                    // (une défense de relance est comptée en R+/R-, pas en D+)
+                                    if (defPlusIndexes.has(j)) {
                                         prevStats.defense.defplus--;
                                         prevStats.defense.defneutral++;
                                     }
@@ -3532,6 +3549,7 @@
                                     // Défense réussie : utiliser defenseQuality si disponible
                                     if (action.defenseQuality === 'positive') {
                                         stats.defense.defplus++;
+                                        defPlusIndexes.add(i);
                                     } else if (action.defenseQuality === 'negative') {
                                         stats.defense.defneutral++; // Touchée mais pas optimale → D
                                     } else {

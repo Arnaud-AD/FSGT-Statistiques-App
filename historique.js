@@ -647,6 +647,8 @@ const StatsRepair = {
     _processRally(rally, setStats, set) {
         if (!rally || rally.length === 0) return;
         var self = this;
+        // V29.23 : index des défenses comptées D+ (pour la rétrogradation par une passe relance)
+        var defPlusIndexes = new Set();
 
         for (var i = 0; i < rally.length; i++) {
             var action = rally[i];
@@ -679,7 +681,8 @@ const StatsRepair = {
                             var note = self._recQualityToNote(rec.quality);
                             if (note !== null) {
                                 if (rec.isDirectReturnWinner) {
-                                    note = 0;
+                                    // V29.23 : l'adversaire marque sur sa réception → pire note pour le serveur, pas de S+
+                                    note = 4;
                                 } else if (rec.isDirectReturn && !rec.isDirectReturnWinner) {
                                     if (self._isDirectReturnExploited(rally, recAction.index, rec.team)) note = 0;
                                 }
@@ -722,6 +725,8 @@ const StatsRepair = {
                             if (!prevPlayer) continue;
                             var prevStats = setStats[team] && setStats[team][prevPlayer];
                             if (!prevStats) break;
+                            // V29.23 : seule la touche juste avant la relance est rétrogradée
+                            if (prev.type !== 'reception' && prev.type !== 'defense') break;
                             if (prev.type === 'reception' && prev.quality) {
                                 switch (prev.quality.label) {
                                     case 'Excellente': prevStats.reception.r4--; break;
@@ -734,7 +739,8 @@ const StatsRepair = {
                                 break;
                             }
                             if (prev.type === 'defense') {
-                                if (prev.defenseQuality === 'positive') {
+                                // V29.23 : seulement si cette défense a vraiment été comptée D+
+                                if (defPlusIndexes.has(j)) {
                                     prevStats.defense.defplus--;
                                     prevStats.defense.defneutral++;
                                 }
@@ -875,7 +881,7 @@ const StatsRepair = {
                             } else if (action.result === 'fault') {
                                 stats.defense.defminus++;
                             } else {
-                                if (action.defenseQuality === 'positive') stats.defense.defplus++;
+                                if (action.defenseQuality === 'positive') { stats.defense.defplus++; defPlusIndexes.add(i); }
                                 else if (action.defenseQuality === 'negative') stats.defense.defneutral++;
                                 else stats.defense.defneutral++;
                             }
