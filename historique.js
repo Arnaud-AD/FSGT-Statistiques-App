@@ -165,9 +165,33 @@ const HistoriqueData = {
      */
     getCompletedMatches() {
         if (!this._cache) {
-            this._cache = Storage.getAllMatches().filter(m => m.status === 'completed');
+            this._cache = this._normalizeServiceStats(
+                Storage.getAllMatches().filter(m => m.status === 'completed'));
         }
         return this._cache;
+    },
+
+    /**
+     * V29.24 : un ace compte comme une réception adverse notée 0 dans recCountAdv
+     * (Moy = recSumAdv / recCountAdv, comme match-live). Les sets filmés le font déjà
+     * (réception « Faute » enregistrée sur chaque ace). Les sets sans points (saisie
+     * ancienne) ne l'incluaient pas → ajout en mémoire, une seule fois (marqueur sur le set).
+     */
+    _normalizeServiceStats(matches) {
+        matches.forEach(function(m) {
+            (m.sets || []).forEach(function(set) {
+                if (!set || !set.stats || set.acesInRecCountAdv) return;
+                if (set.points && set.points.length) return;
+                ['home', 'away'].forEach(function(team) {
+                    Object.values(set.stats[team] || {}).forEach(function(ps) {
+                        var sv = ps && ps.service;
+                        if (sv && sv.ace) sv.recCountAdv = (sv.recCountAdv || 0) + sv.ace;
+                    });
+                });
+                set.acesInRecCountAdv = true;
+            });
+        });
+        return matches;
     },
 
     /**
@@ -181,7 +205,7 @@ const HistoriqueData = {
         try {
             const local = Storage.getAllMatches().filter(m => m.status === 'completed');
             const remote = await FirebaseSync.getCompletedMatches();
-            this._cache = FirebaseSync.mergeMatches(local, remote);
+            this._cache = this._normalizeServiceStats(FirebaseSync.mergeMatches(local, remote));
             this._firebaseLoaded = true;
             return remote.length > 0;
         } catch (err) {
@@ -1173,7 +1197,8 @@ const PlusMinusCalculator = {
             r.dirMinus = r.fser + (r.fatt + r.bp) + r.fblc;
             r.direct = r.dirPlus - r.dirMinus;
             // Service bonus
-            var moyRecAdv = (r.recCountAdv + r.ace) > 0 ? r.recSumAdv / (r.recCountAdv + r.ace) : 3;
+            // V29.24 : recCountAdv inclut déjà les aces (note 0) — ne pas les recompter
+            var moyRecAdv = r.recCountAdv > 0 ? r.recSumAdv / r.recCountAdv : 3;
             r.servBonus = r.servTot > 0 ? r.servTot * (3 - moyRecAdv) / 19 : 0;
             // New Indirect (passe /3, R2 negatif, D neutre = 0)
             var indPlus = (r.r4 + r.r3) + (r.p4 + r.p3) / 3 + r.relplus + r.relminus + r.defplus + r.blcminus;
@@ -1448,7 +1473,8 @@ const PlusMinusCalculator = {
             r.dirMinus = r.fser + (r.fatt + r.bp) + r.fblc;
             r.direct = r.dirPlus - r.dirMinus;
             // Service bonus
-            var moyRecAdv = (r.recCountAdv + r.ace) > 0 ? r.recSumAdv / (r.recCountAdv + r.ace) : 3;
+            // V29.24 : recCountAdv inclut déjà les aces (note 0) — ne pas les recompter
+            var moyRecAdv = r.recCountAdv > 0 ? r.recSumAdv / r.recCountAdv : 3;
             r.servBonus = r.servTot > 0 ? r.servTot * (3 - moyRecAdv) / 19 : 0;
             // New Indirect (passe /3, R2 negatif, D neutre = 0)
             var indPlus = (r.r4 + r.r3) + (r.p4 + r.p3) / 3 + r.relplus + r.relminus + r.defplus + r.blcminus;
@@ -3368,7 +3394,8 @@ const StatsAggregator = {
      * Moyenne service (plus bas = meilleur serveur).
      */
     srvMoy(p) {
-        const count = p.service.recCountAdv + p.service.ace;
+        // V29.24 : recCountAdv inclut déjà les aces (note 0)
+        const count = p.service.recCountAdv;
         if (count === 0) return null;
         return p.service.recSumAdv / count;
     },
@@ -4764,7 +4791,7 @@ const BilanView = {
         var distinctions = [
             { axisKey: 'service',   emoji: '🎯', label: 'Meilleur Serveur',       statsFn: function(s) {
                 var srv = s.service;
-                var recCount = srv.recCountAdv + srv.ace;
+                var recCount = srv.recCountAdv; // V29.24 : aces déjà inclus
                 var moy = recCount > 0 ? srv.recSumAdv / recCount : 0;
                 return 'Tot : ' + srv.tot + ' · Ace : ' + srv.ace + ' (' + self._pct(srv.ace, srv.tot) + ')' +
                        ' · FS : ' + srv.fser + ' (' + self._pct(srv.fser, srv.tot) + ')' +
@@ -5841,7 +5868,7 @@ const BilanView = {
         if (srv.tot >= 3) {
             var aceRate = (srv.ace + srv.splus) / srv.tot;
             var faultRate = srv.fser / srv.tot;
-            var recCount = srv.recCountAdv + srv.ace;
+            var recCount = srv.recCountAdv; // V29.24 : aces déjà inclus
             // Moyenne adverse recentrée : 3.5 = neutre, < 3.5 = bonus, > 3.5 = pénalité
             var moyBonus = recCount > 0 ? (3.5 - srv.recSumAdv / recCount) * 20 : 0;
             // Bonus volume : servir beaucoup = fiabilite prouvee (plafonné à 60)
@@ -7839,7 +7866,7 @@ const ProgressionView = {
         } else { m.passMoy = null; }
         // Service pressure (min 3)
         var srv = s.service;
-        var recCount = (srv.recCountAdv || 0) + (srv.ace || 0);
+        var recCount = srv.recCountAdv || 0; // V29.24 : aces déjà inclus
         if (recCount >= 3) {
             m.srvPression = 4 - (srv.recSumAdv / recCount);
         } else { m.srvPression = null; }
@@ -10602,7 +10629,7 @@ const YearStatsView = {
         }
 
         // Meilleur serveur (moy basse)
-        var bestSrv = players.slice().filter(function(p) { return (p[1].service.recCountAdv + p[1].service.ace) > 0; })
+        var bestSrv = players.slice().filter(function(p) { return p[1].service.recCountAdv > 0; })
             .sort(function(a, b) {
                 return StatsAggregator.srvMoy(a[1]) - StatsAggregator.srvMoy(b[1]);
             })[0];
