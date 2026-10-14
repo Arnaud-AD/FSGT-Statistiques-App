@@ -6853,6 +6853,57 @@ const ImpactView = {
 };
 
 // ==================== TAB 5: RANKING VIEW ====================
+
+// V29.28 : équipes adverses renommées (ancien nom → nom actuel).
+// Les matchs gardent leur nom d'origine ; le Ranking les regroupe sous le nom actuel.
+const TEAM_ALIASES = {
+    'Manu Andy-sport': 'Dodos 4 ever'
+};
+
+// V29.28 : joueurs adverses transférés. Une ligne = un même joueur, sous ses couples
+// 'Équipe|Nom' successifs (équipe = nom actuel après TEAM_ALIASES), du plus ancien au plus récent.
+// Le Ranking Joueurs fusionne ses stats brutes ; le Ranking Équipes reste par équipe.
+const PLAYER_TRANSFERS = [
+    ['Les Rescapés|Jean-Phi', 'Bières et le loup|Jean-Phi'],
+    ['Rhinos Féroces|Henri', 'Dodos 4 ever|Henri']
+];
+
+// Comparaison tolérante aux variations de saisie (casse, accents, espaces, tirets)
+function _normalizeIdentityKey(str) {
+    return (str || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .toLowerCase().replace(/[\s\-_.']+/g, '');
+}
+
+const _TEAM_ALIASES_NORM = (function() {
+    var map = {};
+    Object.keys(TEAM_ALIASES).forEach(function(oldName) {
+        map[_normalizeIdentityKey(oldName)] = TEAM_ALIASES[oldName];
+    });
+    return map;
+})();
+
+function canonicalTeamName(teamName) {
+    return _TEAM_ALIASES_NORM[_normalizeIdentityKey(teamName)] || teamName;
+}
+
+// 'equipe|nom' normalisé → { id, order } (order = rang chronologique dans la ligne)
+const _PLAYER_TRANSFER_INDEX = (function() {
+    var index = {};
+    PLAYER_TRANSFERS.forEach(function(entries, i) {
+        entries.forEach(function(entry, order) {
+            var parts = entry.split('|');
+            var key = _normalizeIdentityKey(canonicalTeamName(parts[0])) + '|' + _normalizeIdentityKey(parts[1]);
+            index[key] = { id: 'transfer_' + i, order: order };
+        });
+    });
+    return index;
+})();
+
+function getPlayerTransfer(teamName, playerName) {
+    var key = _normalizeIdentityKey(canonicalTeamName(teamName)) + '|' + _normalizeIdentityKey(playerName);
+    return _PLAYER_TRANSFER_INDEX[key] || null;
+}
+
 const TEAM_COLORS = {
     'Jen et ses Saints': '#9b59b6',
     'Kiki Team': '#3498db',
@@ -6861,6 +6912,7 @@ const TEAM_COLORS = {
     'Marvels 4': '#f39c12',
     'RSC Champigny 1': '#1abc9c',
     'Manu Andy-sport': '#e67e22',
+    'Dodos 4 ever': '#e67e22', // ex-Manu Andy-sport (TEAM_ALIASES)
     'Bières et le loup': '#f1c40f',
     'Rhinos Féroces': '#607d8b',
     'StarPAFF': '#455a64',
@@ -7037,22 +7089,36 @@ const RankingView = {
         // 2. Grouper les matchs par adversaire
         var opponentGroups = {};
         matches.forEach(function(m) {
-            var opp = m.opponent || 'Adversaire';
+            var opp = canonicalTeamName(m.opponent || 'Adversaire'); // V29.28 : équipe renommée
             if (!opponentGroups[opp]) opponentGroups[opp] = [];
             opponentGroups[opp].push(m);
         });
 
+        var transferGroups = {}; // V29.28 : "idTransfert|famille" → contributions de chaque équipe
         Object.keys(opponentGroups).forEach(function(oppName) {
             var oppMatches = opponentGroups[oppName];
             var oppData = self._computeTeamData(oppMatches, 'away', oppName);
             teams.push(oppData);
             oppData.allPlayers.forEach(function(p) {
+                var transfer = getPlayerTransfer(oppName, p.name);
+                if (transfer) {
+                    var gKey = transfer.id + '|' + p.family;
+                    if (!transferGroups[gKey]) transferGroups[gKey] = [];
+                    transferGroups[gKey].push({ player: p, teamName: oppName, order: transfer.order,
+                        teamTotalService: oppData.teamTotalService || 0 });
+                    return;
+                }
                 allPlayerCards.push({
                     name: p.name, teamName: oppName,
                     role: p.role, roleColor: p.roleColor,
                     scores: p.scores, ip: p.ip
                 });
             });
+        });
+
+        // V29.28 : joueurs transférés → une seule carte, stats brutes cumulées sur toutes leurs équipes
+        Object.keys(transferGroups).forEach(function(gKey) {
+            allPlayerCards.push(self._mergeTransferredPlayer(transferGroups[gKey]));
         });
 
         // Tri par ipStarters decroissant
@@ -7070,6 +7136,40 @@ const RankingView = {
         allPlayerCards.sort(function(a, b) { return b.ip - a.ip; });
 
         return { teams: teams, allPlayerCards: allPlayerCards };
+    },
+
+    // V29.28 : fusionne les contributions d'un joueur transféré (même famille de poste).
+    // Même calcul que la branche AWAY de _computeTeamData, appliqué aux stats cumulées.
+    _mergeTransferredPlayer(contribs) {
+        contribs.sort(function(a, b) { return a.order - b.order; });
+        var current = contribs[contribs.length - 1]; // équipe la plus récente
+        var stats = StatsAggregator.initPlayerStats();
+        var roles = {};
+        var teamTotalService = 0;
+        contribs.forEach(function(c) {
+            BilanView._mergePlayerStats(stats, c.player.stats);
+            Object.keys(c.player.roles || {}).forEach(function(r) {
+                roles[r] = (roles[r] || 0) + c.player.roles[r];
+            });
+            teamTotalService += c.teamTotalService;
+        });
+
+        var family = current.player.family;
+        var primaryRole = Object.keys(roles).sort(function(a, b) { return roles[b] - roles[a]; })[0] || current.player.role;
+        var ipRole = (family === 'Ailier') ? 'R4' : family;
+        if (ipRole === 'Centre') ipRole = BilanView.getCentreIpRole(stats);
+        var effectiveRole = (family === 'Ailier') ? 'R4' : family;
+
+        var scores = BilanView.computeAxisScores(stats, ipRole);
+        // Seuil service : relatif au cumul des services des équipes concernées
+        var playerSrvTot = (scores._tots && scores._tots.service) || 0;
+        if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.04) scores.service = 0;
+
+        return {
+            name: current.player.name, teamName: current.teamName,
+            role: primaryRole, roleColor: BilanView.ROLE_COLORS[primaryRole] || '#5f6368',
+            scores: scores, ip: BilanView.computeIP(scores, effectiveRole)
+        };
     },
 
     _computeTeamData(matches, teamKey, teamName) {
@@ -7199,7 +7299,9 @@ const RankingView = {
 
                 allPlayers.push({
                     name: entry.name, role: primaryRole, roleColor: roleColor,
-                    scores: scores, ip: 0, effectiveRole: (primaryFamily === 'Ailier') ? 'R4' : primaryFamily, matchCount: entry.matchCount
+                    scores: scores, ip: 0, effectiveRole: (primaryFamily === 'Ailier') ? 'R4' : primaryFamily, matchCount: entry.matchCount,
+                    // V29.28 : stats brutes conservées pour fusionner les joueurs transférés
+                    family: primaryFamily, stats: stats, roles: entry.roles
                 });
             });
 
@@ -7268,7 +7370,8 @@ const RankingView = {
             allPlayers: allPlayers,
             starters: Object.values(bestByPos),
             ipAll: ipAll,
-            ipStarters: ipStarters
+            ipStarters: ipStarters,
+            teamTotalService: teamTotalService
         };
     },
 
