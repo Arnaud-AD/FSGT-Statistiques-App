@@ -178,6 +178,7 @@ body {
 
 /* ==================== SEASON SELECTOR ==================== */
 .season-selector {
+    container-type: inline-size;
     display: flex;
     gap: 6px;
     margin-bottom: 8px;
@@ -211,8 +212,9 @@ body {
     font-weight: 700;
 }
 
-/* Petits écrans : 4 saisons ne tiennent pas avec le préfixe « Saison » */
-@media (max-width: 480px) {
+/* Sélecteur étroit : 4 saisons ne tiennent pas avec le préfixe « Saison »
+   (~506px nécessaires) → on l'abrège selon la largeur réelle du sélecteur */
+@container (max-width: 520px) {
     .season-btn {
         padding: 8px 4px;
     }
