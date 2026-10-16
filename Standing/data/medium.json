@@ -5,7 +5,7 @@
     "name": "Medium",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/3",
-    "lastUpdated": "2026-10-15T02:34:11",
+    "lastUpdated": "2026-10-16T16:57:00",
     "teamCount": 8,
     "matchesPlayed": 3,
     "matchesUpcoming": 53
@@ -357,18 +357,6 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "N/C",
-      "home": "mort",
-      "away": "ryoi",
-      "status": "Reporté"
-    },
-    {
-      "date": "03/11/2026",
-      "home": "boit",
-      "away": "mort",
-      "status": "Sem. 2"
-    },
-    {
       "date": "03/11/2026",
       "home": "bats",
       "away": "tigr",
@@ -378,6 +366,12 @@
       "date": "03/11/2026",
       "home": "agen",
       "away": "mars",
+      "status": "Sem. 2"
+    },
+    {
+      "date": "04/11/2026",
+      "home": "boit",
+      "away": "mort",
       "status": "Sem. 2"
     },
     {
@@ -505,6 +499,12 @@
       "home": "boit",
       "away": "tigr",
       "status": "Sem. 7"
+    },
+    {
+      "date": "13/01/2027",
+      "home": "mort",
+      "away": "ryoi",
+      "status": "Reporté"
     },
     {
       "date": "02/03/2027",
