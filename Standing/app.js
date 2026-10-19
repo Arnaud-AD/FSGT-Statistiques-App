@@ -417,6 +417,45 @@ function toggleMatchSection(sectionId) {
     header.classList.toggle('header-collapsed');
 }
 
+function toggleMatchDetail(card) {
+    const detail = card.nextElementSibling;
+    if (!detail || !detail.classList.contains('match-detail')) return;
+    const open = detail.classList.toggle('open');
+    card.classList.toggle('expanded', open);
+    card.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+// Set-by-set table shown under a played match (sets: [[home, away], ...], total: [home, away])
+function buildSetsDetail(m, homeTeam, awayTeam) {
+    var total = m.total;
+    if (!total) {
+        total = [0, 0];
+        m.sets.forEach(function(st) { total[0] += st[0]; total[1] += st[1]; });
+    }
+    function cell(a, b) {
+        return '<td class="' + (a > b ? 'set-won' : '') + '">' + a + '</td>';
+    }
+    var head = '<th></th>';
+    var rowHome = '<th><span class="team-logo logo-' + esc(m.home) + '">' + esc(homeTeam.short) + '</span>' +
+        '<span class="set-team-name">' + esc(homeTeam.name) + '</span></th>';
+    var rowAway = '<th><span class="team-logo logo-' + esc(m.away) + '">' + esc(awayTeam.short) + '</span>' +
+        '<span class="set-team-name">' + esc(awayTeam.name) + '</span></th>';
+    m.sets.forEach(function(st, i) {
+        head += '<th>S' + (i + 1) + '</th>';
+        rowHome += cell(st[0], st[1]);
+        rowAway += cell(st[1], st[0]);
+    });
+    head += '<th class="set-total">Total</th>';
+    rowHome += '<td class="set-total ' + (total[0] > total[1] ? 'set-won' : '') + '">' + total[0] + '</td>';
+    rowAway += '<td class="set-total ' + (total[1] > total[0] ? 'set-won' : '') + '">' + total[1] + '</td>';
+    return '<div class="match-detail">' +
+        '<table class="sets-table">' +
+            '<thead><tr>' + head + '</tr></thead>' +
+            '<tbody><tr>' + rowHome + '</tr><tr>' + rowAway + '</tr></tbody>' +
+        '</table>' +
+    '</div>';
+}
+
 function renderMatches() {
     const container = document.getElementById('matchs-content');
     if (!container || !DATA) return;
@@ -427,7 +466,10 @@ function renderMatches() {
         const homeTeam = DATA.teams[m.home];
         const awayTeam = DATA.teams[m.away];
         if (!homeTeam || !awayTeam) return;
-        playedCards += '<div class="match-card">' +
+        const hasSets = Array.isArray(m.sets) && m.sets.length > 0;
+        playedCards += '<div class="match-card' + (hasSets ? ' match-card-clickable' : '') + '"' +
+            (hasSets ? ' onclick="toggleMatchDetail(this)" role="button" tabindex="0" aria-expanded="false"' +
+                ' onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();toggleMatchDetail(this);}"' : '') + '>' +
             '<div class="match-date">' + esc(m.date) + '</div>' +
             '<div class="match-teams">' +
                 '<div class="match-team home">' +
@@ -444,8 +486,11 @@ function renderMatches() {
                     '<span class="team-name">' + esc(awayTeam.name) + '</span>' +
                 '</div>' +
             '</div>' +
-            '<div class="match-status"><span class="status-played">' + esc(m.status) + '</span></div>' +
-        '</div>';
+            '<div class="match-status"><span class="status-played">' + esc(m.status) + '</span>' +
+                (hasSets ? '<span class="match-detail-arrow">&#9660;</span>' : '') +
+            '</div>' +
+        '</div>' +
+        (hasSets ? buildSetsDetail(m, homeTeam, awayTeam) : '');
     });
 
     // Sort upcoming matches by date (N/C first)

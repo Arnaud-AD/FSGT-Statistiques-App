@@ -616,6 +616,103 @@
             text-transform: uppercase;
         }
 
+        /* Played match: click to show set-by-set detail */
+        .match-card-clickable {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .match-card.expanded {
+            background: #f4f8fe;
+            border-bottom-color: transparent;
+        }
+
+        .match-detail-arrow {
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            margin-top: -6px;
+            line-height: 12px;
+            font-size: 10px;
+            color: var(--text-secondary);
+            transform: rotate(-90deg);
+            transition: transform 0.2s ease;
+        }
+
+        .match-card.expanded .match-detail-arrow {
+            transform: rotate(0deg);
+        }
+
+        .match-detail {
+            display: none;
+            background: #f4f8fe;
+            padding: 2px 20px 14px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .match-detail.open {
+            display: block;
+        }
+
+        .match-detail:last-child {
+            border-bottom: none;
+        }
+
+        .sets-table {
+            width: auto;
+            min-width: 360px;
+            margin: 0 auto;
+            border-collapse: collapse;
+            font-variant-numeric: tabular-nums;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .sets-table th,
+        .sets-table td {
+            padding: 6px 12px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .sets-table thead th {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sets-table tbody tr + tr {
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .sets-table tbody th {
+            text-align: left;
+            font-weight: 400;
+        }
+
+        .sets-table tbody th .team-logo {
+            display: inline-flex;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .sets-table td {
+            color: var(--text-secondary);
+        }
+
+        .sets-table td.set-won {
+            color: var(--win-color);
+            font-weight: 600;
+        }
+
+        .sets-table .set-total {
+            border-left: 1px solid var(--border-color);
+        }
+
         /* Clash badges */
         .clash-badge {
             display: inline-block;
@@ -1131,6 +1228,36 @@
                 gap: 2px;
             }
 
+            /* Set detail mobile: arrow next to the status, table fits the width */
+            .match-detail-arrow {
+                position: static;
+                display: inline-block;
+                margin: 0 0 0 6px;
+            }
+
+            .match-detail {
+                padding: 0 12px 12px;
+            }
+
+            .sets-table {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .sets-table td,
+            .sets-table thead th {
+                width: 12%;
+            }
+
+            .sets-table th,
+            .sets-table td {
+                padding: 6px 4px;
+            }
+
+            .sets-table tbody th {
+                padding-left: 8px;
+            }
+
             /* Match cards mobile */
             .section-header {
                 padding: 12px 14px;
@@ -1273,6 +1400,15 @@
 
         /* Phones (portrait and landscape) and narrow windows */
         @media (max-width: 760px) {
+            /* Set detail: short codes only */
+            .sets-table .set-team-name {
+                display: none;
+            }
+
+            .sets-table tbody th .team-logo {
+                margin-right: 0;
+            }
+
             /* Compact tables: key columns only, full names */
             table {
                 min-width: 0;
