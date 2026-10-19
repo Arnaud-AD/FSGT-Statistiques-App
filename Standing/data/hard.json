@@ -5,7 +5,7 @@
     "name": "Hard",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/15",
-    "lastUpdated": "2026-10-16T16:56:56",
+    "lastUpdated": "2026-10-19T16:14:46",
     "teamCount": 9,
     "matchesPlayed": 2,
     "matchesUpcoming": 70
@@ -254,7 +254,7 @@
       "coefPts": "∞",
       "pts": 0,
       "formAller": [
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -362,7 +362,7 @@
       "coefPts": "∞",
       "pts": 0,
       "formAller": [
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -391,7 +391,29 @@
       "scoreHome": 1,
       "scoreAway": 3,
       "homeWin": false,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          14,
+          25
+        ],
+        [
+          25,
+          20
+        ],
+        [
+          21,
+          25
+        ],
+        [
+          23,
+          25
+        ]
+      ],
+      "total": [
+        83,
+        95
+      ]
     },
     {
       "date": "12/10/2026",
@@ -400,15 +422,41 @@
       "scoreHome": 3,
       "scoreAway": 2,
       "homeWin": true,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          25,
+          19
+        ],
+        [
+          18,
+          25
+        ],
+        [
+          13,
+          25
+        ],
+        [
+          25,
+          18
+        ],
+        [
+          15,
+          8
+        ]
+      ],
+      "total": [
+        96,
+        95
+      ]
     }
   ],
   "matchesUpcoming": [
     {
-      "date": "16/10/2026",
+      "date": "N/C",
       "home": "rhin",
       "away": "bach",
-      "status": "Sem. 1"
+      "status": "Reporté"
     },
     {
       "date": "02/11/2026",

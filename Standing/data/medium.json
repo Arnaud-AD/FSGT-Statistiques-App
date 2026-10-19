@@ -5,7 +5,7 @@
     "name": "Medium",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/3",
-    "lastUpdated": "2026-10-16T16:57:00",
+    "lastUpdated": "2026-10-19T16:14:46",
     "teamCount": 8,
     "matchesPlayed": 3,
     "matchesUpcoming": 53
@@ -334,7 +334,25 @@
       "scoreHome": 3,
       "scoreAway": 0,
       "homeWin": true,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          25,
+          22
+        ],
+        [
+          25,
+          22
+        ],
+        [
+          25,
+          16
+        ]
+      ],
+      "total": [
+        75,
+        60
+      ]
     },
     {
       "date": "13/10/2026",
@@ -343,7 +361,25 @@
       "scoreHome": 3,
       "scoreAway": 0,
       "homeWin": true,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          25,
+          23
+        ],
+        [
+          25,
+          18
+        ],
+        [
+          25,
+          21
+        ]
+      ],
+      "total": [
+        75,
+        62
+      ]
     },
     {
       "date": "13/10/2026",
@@ -352,7 +388,29 @@
       "scoreHome": 3,
       "scoreAway": 1,
       "homeWin": true,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          25,
+          15
+        ],
+        [
+          25,
+          15
+        ],
+        [
+          22,
+          25
+        ],
+        [
+          25,
+          20
+        ]
+      ],
+      "total": [
+        97,
+        75
+      ]
     }
   ],
   "matchesUpcoming": [

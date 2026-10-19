@@ -5,7 +5,7 @@
     "name": "Easy",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/16",
-    "lastUpdated": "2026-10-16T16:57:03",
+    "lastUpdated": "2026-10-19T16:14:47",
     "teamCount": 8,
     "matchesPlayed": 2,
     "matchesUpcoming": 54
@@ -334,7 +334,25 @@
       "scoreHome": 3,
       "scoreAway": 0,
       "homeWin": true,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          27,
+          25
+        ],
+        [
+          25,
+          18
+        ],
+        [
+          26,
+          24
+        ]
+      ],
+      "total": [
+        78,
+        67
+      ]
     },
     {
       "date": "12/10/2026",
@@ -343,7 +361,33 @@
       "scoreHome": 3,
       "scoreAway": 2,
       "homeWin": true,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          19,
+          25
+        ],
+        [
+          25,
+          23
+        ],
+        [
+          25,
+          20
+        ],
+        [
+          16,
+          25
+        ],
+        [
+          11,
+          10
+        ]
+      ],
+      "total": [
+        96,
+        103
+      ]
     }
   ],
   "matchesUpcoming": [

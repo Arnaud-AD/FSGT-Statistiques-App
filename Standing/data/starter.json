@@ -5,7 +5,7 @@
     "name": "Starter",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/17",
-    "lastUpdated": "2026-10-16T16:57:07",
+    "lastUpdated": "2026-10-19T16:14:47",
     "teamCount": 8,
     "matchesPlayed": 4,
     "matchesUpcoming": 52
@@ -334,7 +334,25 @@
       "scoreHome": 3,
       "scoreAway": 0,
       "homeWin": true,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          25,
+          19
+        ],
+        [
+          25,
+          16
+        ],
+        [
+          25,
+          22
+        ]
+      ],
+      "total": [
+        75,
+        57
+      ]
     },
     {
       "date": "14/10/2026",
@@ -343,7 +361,25 @@
       "scoreHome": 0,
       "scoreAway": 3,
       "homeWin": false,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          16,
+          25
+        ],
+        [
+          17,
+          25
+        ],
+        [
+          17,
+          25
+        ]
+      ],
+      "total": [
+        50,
+        75
+      ]
     },
     {
       "date": "12/10/2026",
@@ -352,7 +388,29 @@
       "scoreHome": 3,
       "scoreAway": 1,
       "homeWin": true,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          25,
+          17
+        ],
+        [
+          12,
+          25
+        ],
+        [
+          34,
+          32
+        ],
+        [
+          17,
+          16
+        ]
+      ],
+      "total": [
+        88,
+        90
+      ]
     },
     {
       "date": "12/10/2026",
@@ -361,7 +419,29 @@
       "scoreHome": 2,
       "scoreAway": 2,
       "homeWin": true,
-      "status": "Clodo pts"
+      "status": "Clodo pts",
+      "sets": [
+        [
+          23,
+          25
+        ],
+        [
+          25,
+          15
+        ],
+        [
+          17,
+          25
+        ],
+        [
+          20,
+          18
+        ]
+      ],
+      "total": [
+        85,
+        83
+      ]
     }
   ],
   "matchesUpcoming": [

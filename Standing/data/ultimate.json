@@ -5,7 +5,7 @@
     "name": "Ultimate",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/1",
-    "lastUpdated": "2026-10-16T16:56:49",
+    "lastUpdated": "2026-10-19T16:14:44",
     "teamCount": 9,
     "matchesPlayed": 3,
     "matchesUpcoming": 69
@@ -391,7 +391,33 @@
       "scoreHome": 2,
       "scoreAway": 2,
       "homeWin": true,
-      "status": "Marvels pts"
+      "status": "Marvels pts",
+      "sets": [
+        [
+          23,
+          25
+        ],
+        [
+          24,
+          26
+        ],
+        [
+          25,
+          23
+        ],
+        [
+          24,
+          18
+        ],
+        [
+          17,
+          17
+        ]
+      ],
+      "total": [
+        113,
+        109
+      ]
     },
     {
       "date": "14/10/2026",
@@ -400,7 +426,29 @@
       "scoreHome": 1,
       "scoreAway": 3,
       "homeWin": false,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          13,
+          25
+        ],
+        [
+          19,
+          25
+        ],
+        [
+          25,
+          23
+        ],
+        [
+          22,
+          25
+        ]
+      ],
+      "total": [
+        79,
+        98
+      ]
     },
     {
       "date": "12/10/2026",
@@ -409,7 +457,25 @@
       "scoreHome": 3,
       "scoreAway": 0,
       "homeWin": true,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          25,
+          19
+        ],
+        [
+          26,
+          24
+        ],
+        [
+          25,
+          20
+        ]
+      ],
+      "total": [
+        76,
+        63
+      ]
     }
   ],
   "matchesUpcoming": [

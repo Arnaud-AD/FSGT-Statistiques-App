@@ -5,7 +5,7 @@
     "name": "Elite",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/2",
-    "lastUpdated": "2026-10-16T16:56:52",
+    "lastUpdated": "2026-10-19T16:14:45",
     "teamCount": 9,
     "matchesPlayed": 4,
     "matchesUpcoming": 68
@@ -391,7 +391,29 @@
       "scoreHome": 3,
       "scoreAway": 1,
       "homeWin": true,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          23,
+          25
+        ],
+        [
+          25,
+          17
+        ],
+        [
+          27,
+          25
+        ],
+        [
+          25,
+          19
+        ]
+      ],
+      "total": [
+        100,
+        86
+      ]
     },
     {
       "date": "13/10/2026",
@@ -400,7 +422,33 @@
       "scoreHome": 2,
       "scoreAway": 3,
       "homeWin": false,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          25,
+          21
+        ],
+        [
+          25,
+          23
+        ],
+        [
+          23,
+          25
+        ],
+        [
+          18,
+          25
+        ],
+        [
+          9,
+          15
+        ]
+      ],
+      "total": [
+        100,
+        109
+      ]
     },
     {
       "date": "12/10/2026",
@@ -409,7 +457,33 @@
       "scoreHome": 3,
       "scoreAway": 2,
       "homeWin": true,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          23,
+          25
+        ],
+        [
+          20,
+          25
+        ],
+        [
+          25,
+          16
+        ],
+        [
+          25,
+          8
+        ],
+        [
+          15,
+          10
+        ]
+      ],
+      "total": [
+        108,
+        84
+      ]
     },
     {
       "date": "12/10/2026",
@@ -418,7 +492,33 @@
       "scoreHome": 2,
       "scoreAway": 3,
       "homeWin": false,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          25,
+          11
+        ],
+        [
+          25,
+          21
+        ],
+        [
+          15,
+          25
+        ],
+        [
+          25,
+          27
+        ],
+        [
+          9,
+          15
+        ]
+      ],
+      "total": [
+        99,
+        99
+      ]
     }
   ],
   "matchesUpcoming": [

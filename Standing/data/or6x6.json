@@ -5,7 +5,7 @@
     "name": "Or 6x6",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/4",
-    "lastUpdated": "2026-10-16T16:57:11",
+    "lastUpdated": "2026-10-19T16:14:48",
     "teamCount": 11,
     "matchesPlayed": 5,
     "matchesUpcoming": 105
@@ -517,7 +517,25 @@
       "scoreHome": 0,
       "scoreAway": 3,
       "homeWin": false,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          18,
+          25
+        ],
+        [
+          8,
+          25
+        ],
+        [
+          17,
+          25
+        ]
+      ],
+      "total": [
+        43,
+        75
+      ]
     },
     {
       "date": "14/10/2026",
@@ -526,7 +544,29 @@
       "scoreHome": 1,
       "scoreAway": 3,
       "homeWin": false,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          12,
+          25
+        ],
+        [
+          25,
+          22
+        ],
+        [
+          20,
+          25
+        ],
+        [
+          19,
+          25
+        ]
+      ],
+      "total": [
+        76,
+        97
+      ]
     },
     {
       "date": "14/10/2026",
@@ -535,7 +575,25 @@
       "scoreHome": 2,
       "scoreAway": 1,
       "homeWin": true,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          25,
+          18
+        ],
+        [
+          16,
+          25
+        ],
+        [
+          25,
+          20
+        ]
+      ],
+      "total": [
+        66,
+        63
+      ]
     },
     {
       "date": "12/10/2026",
@@ -544,7 +602,25 @@
       "scoreHome": 3,
       "scoreAway": 0,
       "homeWin": true,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          25,
+          19
+        ],
+        [
+          25,
+          21
+        ],
+        [
+          25,
+          15
+        ]
+      ],
+      "total": [
+        75,
+        55
+      ]
     },
     {
       "date": "12/10/2026",
@@ -553,7 +629,29 @@
       "scoreHome": 1,
       "scoreAway": 3,
       "homeWin": false,
-      "status": "Terminé"
+      "status": "Terminé",
+      "sets": [
+        [
+          25,
+          21
+        ],
+        [
+          21,
+          25
+        ],
+        [
+          24,
+          26
+        ],
+        [
+          8,
+          10
+        ]
+      ],
+      "total": [
+        78,
+        82
+      ]
     }
   ],
   "matchesUpcoming": [
