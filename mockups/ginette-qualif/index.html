@@ -132,7 +132,6 @@ tr.jen td:first-child{box-shadow:inset 3px 0 0 var(--jen-line)}
   <div class="controls" id="divfilter" role="group" aria-label="Filtrer par division"></div>
   <div class="controls">
     <div class="legend"><span style="--c:var(--princ)">Principale (1-16)</span><span style="--c:var(--conso)">Consolante (17-32)</span><span style="--c:var(--elim)">Éliminé (33+)</span></div>
-    <label class="toggle" for="adj"><input type="checkbox" id="adj"> Loups-Phoques au niveau Ultimate</label>
   </div>
   <div class="tablewrap">
     <table>
@@ -153,9 +152,11 @@ tr.jen td:first-child{box-shadow:inset 3px 0 0 var(--jen-line)}
   <ul class="notes">
     <li><b>Force des équipes</b> : ELO de la page Power Ranking (ELO de championnat + écart fixe par division). Probabilité de victoire : formule ELO avec +20 pour l'équipe qui reçoit.</li>
     <li><b>Réglage</b> : les écarts d'ELO sont doublés, et chaque match reçoit un petit aléa de forme du jour. C'est ce réglage qui reproduit le mieux 2025-2026 : autant de 3-0 qu'en vrai (26 sur 49) et le bon nombre de surprises.</li>
-    <li><b>Test sur 2025-2026</b> : en partant de l'ELO d'avant la Coupe, les 16 favoris de la simulation contenaient 10 des 16 vrais qualifiés en principale (environ 4 au hasard), et les 32 favoris contenaient 25 des 32 qualifiés.</li>
+    <li><b>Test sur 2025-2026</b> : en partant de l'ELO d'avant la Coupe, les 16 favoris de la simulation contenaient 10 des 16 vrais qualifiés en principale (environ 4 au hasard), et les 32 favoris contenaient 25 des 32 qualifiés. Sans corriger Les Loups-Phoques et Les Indécis, on en retrouve 9 sur 16.</li>
     <li><b>Classement</b> : 3/2/1/0 point, puis set average et points average, comme la page Classement. Les matchs se jouent en 5 sets maximum : le cas du 2-2 à la fin du créneau n'est pas simulé.</li>
-    <li><b>Ce que l'ELO ne voit pas</b> : une équipe de Coupe peut être différente de l'équipe de championnat. L'an dernier, Les Loups-Phoques (renforcés) et Les Indécis jouaient bien au-dessus de leur division. La case « Loups-Phoques au niveau Ultimate » montre l'effet d'une correction manuelle (ELO 1900 au lieu de 1700).</li>
+    <li><b>Ce que l'ELO ne voit pas</b> : une équipe de Coupe peut être différente de l'équipe de championnat. L'an dernier, Les Loups-Phoques (renforcés) et Les Indécis jouaient bien au-dessus de leur division de Hard. Les Indécis sont en Ultimate cette année, et les Loups-Phoques n'auront pas leurs renforts : aucune correction n'est appliquée.</li>
+    <li><b>Forfaits</b> : ils ne sont pas simulés. Pourtant, une victoire par forfait (3-0, 75-0) donne un set average parfait : l'an dernier, 10 matchs sur 86 se sont terminés par forfait.</li>
+    <li><b>La part de hasard</b> : même si le modèle était parfait, ses 16 favoris ne contiendraient en moyenne que 10 des 16 qualifiés (entre 8 et 12 selon les tirages). Deux matchs, c'est très peu.</li>
   </ul>
 </section>
 </div>
@@ -244,7 +245,6 @@ document.getElementById('divfilter').addEventListener('click',function(e){
   Array.prototype.forEach.call(this.querySelectorAll('.chip'),function(c){c.setAttribute('aria-pressed',String(c===b))});
   renderRows(DATA[state.scen]);
 });
-document.getElementById('adj').addEventListener('change',function(){state.scen=this.checked?'ajuste':'base';render()});
 renderFilter();render();
 })();
 </script>
