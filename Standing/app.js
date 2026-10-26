@@ -26,9 +26,13 @@ var standingsExpanded = {};
 // 2. Initialization
 // ------------------------------------------------------------
 
+// 'no-cache' : le navigateur revalide toujours les JSON auprès du serveur,
+// les visiteurs voient donc chaque mise à jour sans hard refresh.
+const FETCH_FRESH = { cache: 'no-cache' };
+
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        const resp = await fetch('data/championships.json');
+        const resp = await fetch('data/championships.json', FETCH_FRESH);
         CHAMPIONSHIPS = await resp.json();
         populateChampionshipDropdown();
 
@@ -44,7 +48,7 @@ async function loadChampionship(slug) {
     showLoading(true);
     try {
         if (slug === 'ginette') {
-            const resp = await fetch('data/ginette.json');
+            const resp = await fetch('data/ginette.json', FETCH_FRESH);
             if (!resp.ok) throw new Error('Failed to load ginette');
             GINETTE_DATA = await resp.json();
             currentSlug = slug;
@@ -59,7 +63,7 @@ async function loadChampionship(slug) {
             renderGinetteClassement();
             renderGinette();
         } else {
-            const resp = await fetch('data/' + slug + '.json');
+            const resp = await fetch('data/' + slug + '.json', FETCH_FRESH);
             if (!resp.ok) throw new Error('Failed to load ' + slug);
             DATA = await resp.json();
             currentSlug = slug;
