@@ -148,11 +148,11 @@ tr.jen td:first-child{box-shadow:inset 3px 0 0 var(--jen-line)}
 
 <section aria-labelledby="h-diff">
   <h2 id="h-diff">Difficulté du parcours</h2>
-  <p class="sub">Note de 0 à 100 : la probabilité qu'une équipe de référence (ELO 1700, le niveau d'une Hard moyenne) ne gagne pas ses deux matchs face aux mêmes adversaires, avec les mêmes matchs à domicile ou à l'extérieur. Elle mesure le tirage et non la force de l'équipe. Seuls 3 des 64 matchs opposent deux équipes d'Ultimate ou d'Elite.</p>
-  <p class="sub"><b>Pour elle</b> : la même idée, mais avec le niveau réel de l'équipe. C'est la probabilité qu'elle n'atteigne pas le bilan qui qualifie presque à coup sûr (deux victoires en ne perdant qu'un set au plus). Le tableau est trié par note de tirage.</p>
+  <p class="sub"><b>Pour elle</b> (0 à 100, rouge pour le plus dur, vert pour le plus facile) : la probabilité que l'équipe, à son vrai niveau, rate le bilan qui qualifie presque à coup sûr (deux victoires en ne perdant qu'un set au plus). Le tableau est trié par cette note.</p>
+  <p class="sub"><b>Tirage</b> (0 à 100, plus le bleu est foncé, plus les adversaires sont forts) : la probabilité qu'une équipe de référence (ELO 1700, le niveau d'une Hard moyenne) ne gagne pas ses deux matchs face aux mêmes adversaires, avec les mêmes matchs à domicile ou à l'extérieur. Elle mesure le tirage et non la force de l'équipe. Seuls 3 des 64 matchs opposent deux équipes d'Ultimate ou d'Elite.</p>
   <div class="tablewrap">
     <table>
-      <thead><tr><th class="r">Tirage</th><th class="r">Pour elle</th><th>Équipe</th><th>Tour 1</th><th>Tour 2</th><th class="r hide-s">Princ.</th></tr></thead>
+      <thead><tr><th class="r">Pour elle</th><th class="r">Tirage</th><th>Équipe</th><th>Tour 1</th><th>Tour 2</th><th class="r hide-s">Princ.</th></tr></thead>
       <tbody id="diffrows"></tbody>
     </table>
   </div>
@@ -265,10 +265,13 @@ document.getElementById('divfilter').addEventListener('click',function(e){
 });
 function renderDiff(){
   var D=JSON.parse(document.getElementById('diffdata').textContent);
+  D.sort(function(a,b){return (b.own-a.own)||(b.diff-a.diff)});
+  function cell(v,color){return '<td class="r"><div class="diffcell"><span class="pct">'+v+'</span><span class="dbar"><i style="width:'+Math.max(v,3)+'%;background:'+color+'"></i></span></div></td>'}
+  function ownColor(v){return 'hsl('+Math.round(120*(1-v/100))+',72%,45%)'}
+  function drawColor(v){return 'hsl(214,75%,'+Math.round(78-v*0.5)+'%)'}
   document.getElementById('diffrows').innerHTML=D.map(function(r){
     var opp=r.opp.map(function(o){return '<div class="team">'+badge(o[1])+'<span>'+esc(o[0])+'</span><span class="num">'+(o[3]==='dom'?'dom.':'ext.')+'</span></div>'});
-    return '<tr class="'+(r.team===JEN?'jen':'')+'"><td class="r"><div class="diffcell"><span class="pct">'+r.diff+'</span><span class="dbar"><i style="width:'+r.diff+'%"></i></span></div></td>'+
-      '<td class="r"><div class="diffcell"><span class="pct">'+r.own+'</span><span class="dbar own"><i style="width:'+r.own+'%"></i></span></div></td>'+
+    return '<tr class="'+(r.team===JEN?'jen':'')+'">'+cell(r.own,ownColor(r.own))+cell(r.diff,drawColor(r.diff))+
       '<td><div class="team">'+badge(r.div)+'<span class="n">'+esc(r.team)+'</span></div></td><td>'+opp[0]+'</td><td>'+opp[1]+'</td><td class="r pct hide-s">'+pct(r.p)+'</td></tr>';
   }).join('');
 }
