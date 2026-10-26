@@ -771,15 +771,16 @@ function renderGinetteMatchCards(matches) {
 }
 
 // Classement après les tours 1 et 2, calculé comme en championnat :
-// victoire 3 pts, défaite serrée (1 set d'écart ou 2-2) 2 pts, défaite 1 pt, forfait 0.
+// victoire 3 pts, défaite serrée (1 set d'écart ou 2-2) 2 pts, défaite 1 pt, forfait 0,
+// moins les points de pénalité publiés par le site (penalties : { équipe: points }).
 // 1-16 → poule principale, 17-32 → poule consolante, au-delà → éliminé.
-function computeGinetteStandings(matches) {
+function computeGinetteStandings(matches, penalties) {
     var byTeam = {};
     var order = [];
     function entry(name, division) {
         if (!byTeam[name]) {
             byTeam[name] = { team: name, division: division, drawOrder: order.length, mj: 0, g: 0, p: 0,
-                setPlus: 0, setMinus: 0, ptsPlus: 0, ptsMinus: 0, pts: 0, results: [] };
+                setPlus: 0, setMinus: 0, ptsPlus: 0, ptsMinus: 0, pts: 0, penalty: 0, results: [] };
             order.push(name);
         }
         return byTeam[name];
@@ -820,6 +821,8 @@ function computeGinetteStandings(matches) {
     function ratio(a, b) { return b ? a / b : (a ? Infinity : 0); }
     var list = order.map(function(n) {
         var t = byTeam[n];
+        t.penalty = (penalties && penalties[n]) || 0;
+        t.pts -= t.penalty;
         t.setAvg = ratio(t.setPlus, t.setMinus);
         t.ptsAvg = ratio(t.ptsPlus, t.ptsMinus);
         return t;
@@ -838,7 +841,7 @@ function computeGinetteStandings(matches) {
 function renderGinetteStandings() {
     var container = document.getElementById('ginette-standings-content');
     if (!container || !GINETTE_DATA) return;
-    var list = computeGinetteStandings(GINETTE_DATA.matches);
+    var list = computeGinetteStandings(GINETTE_DATA.matches, GINETTE_DATA.penalties);
     if (!list.length) {
         container.innerHTML = '<p class="ginette-standings-note">Aucun match de tour 1 ou 2 pour l’instant.</p>';
         return;
@@ -886,6 +889,7 @@ function renderGinetteStandings() {
             '<td class="col-opt">' + t.ptsPlus + '</td>' +
             '<td class="col-opt">' + t.ptsMinus + '</td>' +
             '<td class="col-opt">' + fmtAvg(t.ptsAvg, played) + '</td>' +
+            '<td class="col-opt">' + (t.penalty ? '-' + t.penalty : '0') + '</td>' +
             '<td class="bold-val">' + t.pts + '</td>' +
         '</tr>' +
         '<tr class="standings-detail ginette-zone-' + t.zone + (expanded ? ' expanded' : '') + '" data-team="' + esc(key) + '">' +
@@ -901,6 +905,7 @@ function renderGinetteStandings() {
                     '<span class="detail-stat"><em>Pts+</em> ' + t.ptsPlus + '</span>' +
                     '<span class="detail-stat"><em>Pts-</em> ' + t.ptsMinus + '</span>' +
                     '<span class="detail-stat"><em>Avg</em> ' + fmtAvg(t.ptsAvg, played) + '</span>' +
+                    '<span class="detail-stat"><em>Pén.</em> ' + (t.penalty ? '-' + t.penalty : '0') + '</span>' +
                 '</div>' +
                 '<div class="detail-line">' +
                     '<span class="detail-label">Matchs</span>' + resultsHtml(t) +
@@ -916,7 +921,7 @@ function renderGinetteStandings() {
                 '<thead><tr>' +
                     '<th>Équipe</th><th>MJ</th><th>V</th><th>D</th>' +
                     '<th class="col-opt">Set+</th><th class="col-opt">Set-</th><th>Set avg</th>' +
-                    '<th class="col-opt">Pts+</th><th class="col-opt">Pts-</th><th class="col-opt">Pts avg</th>' +
+                    '<th class="col-opt">Pts+</th><th class="col-opt">Pts-</th><th class="col-opt">Pts avg</th><th class="col-opt">Pén.</th>' +
                     '<th class="bold-col">Pts</th>' +
                 '</tr></thead>' +
                 '<tbody>' + rows + '</tbody>' +
