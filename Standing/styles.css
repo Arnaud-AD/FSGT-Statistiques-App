@@ -7,6 +7,9 @@
             --rank-champion: #1a73e8;
             --rank-europe: #34a853;
             --rank-europa: #fbbc04;
+            --ginette-principale: #34a853;
+            --ginette-consolante: #1a73e8;
+            --ginette-elimine: #ea4335;
             --win-color: #34a853;
             --draw-color: #9aa0a6;
             --loss-color: #ea4335;
@@ -1530,4 +1533,20 @@
             .mobile-tabs, .mobile-ginette-tabs {
                 display: none;
             }
+        }
+        /* Ginette — classement des tours 1 et 2 */
+        .ginette-standings .rank-indicator { width: 4px; }
+        .ginette-zone-principale .rank-indicator { background: var(--ginette-principale); }
+        .ginette-zone-consolante .rank-indicator { background: var(--ginette-consolante); }
+        .ginette-zone-elimine .rank-indicator { background: var(--ginette-elimine); }
+        .ginette-zone-principale .rank-number { color: var(--ginette-principale); font-weight: 700; }
+        .ginette-zone-consolante .rank-number { color: var(--ginette-consolante); font-weight: 700; }
+        .ginette-zone-elimine .rank-number { color: var(--ginette-elimine); font-weight: 700; }
+        .ginette-standings tr.ginette-zone-break td { border-top: 2px solid var(--text-secondary); }
+        .ginette-standings .team-cell .division-badge { flex-shrink: 0; }
+        .ginette-standings .detail-stat .form-item { display: inline-block; vertical-align: middle; margin-right: 4px; }
+        .ginette-standings-note {
+            margin: 8px 0 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
         }
