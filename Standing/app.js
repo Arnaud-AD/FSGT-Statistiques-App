@@ -60,6 +60,7 @@ async function loadChampionship(slug) {
             document.title = 'FSGT94 Volley - Coupe Ginette';
             updateDropdownSelection(slug);
             setGinetteMode(true);
+            renderGinetteStandings();
             renderGinetteClassement();
             renderGinette();
         } else {
@@ -256,9 +257,10 @@ function showGinetteTab(tabId) {
     document.querySelectorAll('.ginette-tabs .tab, .mobile-ginette-tabs .tab').forEach(function(t) { t.classList.remove('active'); });
     document.getElementById(tabId).classList.add('active');
     // Sync both desktop and mobile tab button states
-    var idx = tabId === 'ginette-classement' ? 0 : 1;
+    var tabIds = ['ginette-classement', 'ginette-matchs', 'ginette-pr'];
+    var idx = tabIds.indexOf(tabId);
     document.querySelectorAll('.ginette-tabs .tab, .mobile-ginette-tabs .tab').forEach(function(t, i) {
-        if (i % 2 === idx) t.classList.add('active');
+        if (i % tabIds.length === idx) t.classList.add('active');
     });
 }
 
@@ -766,6 +768,160 @@ function renderGinetteMatchCards(matches) {
         '</div>';
     });
     return html;
+}
+
+// Classement après les tours 1 et 2, calculé comme en championnat :
+// victoire 3 pts, défaite serrée (1 set d'écart ou 2-2) 2 pts, défaite 1 pt, forfait 0.
+// 1-16 → poule principale, 17-32 → poule consolante, au-delà → éliminé.
+function computeGinetteStandings(matches) {
+    var byTeam = {};
+    var order = [];
+    function entry(name, division) {
+        if (!byTeam[name]) {
+            byTeam[name] = { team: name, division: division, drawOrder: order.length, mj: 0, g: 0, p: 0,
+                setPlus: 0, setMinus: 0, ptsPlus: 0, ptsMinus: 0, pts: 0, results: [] };
+            order.push(name);
+        }
+        return byTeam[name];
+    }
+    function sum(arr) { return (arr || []).reduce(function(a, b) { return a + b; }, 0); }
+
+    matches.forEach(function(m) {
+        if (m.round !== 'Tour 1' && m.round !== 'Tour 2') return;
+        var home = entry(m.home, m.homeDivision);
+        var away = entry(m.away, m.awayDivision);
+        var played = m.winner != null && m.homeSets != null && m.awaySets != null;
+        [[home, m.homeSets, m.awaySets, m.homeScores, m.awayScores, m.away],
+         [away, m.awaySets, m.homeSets, m.awayScores, m.homeScores, m.home]].forEach(function(x) {
+            var t = x[0];
+            var round = m.round === 'Tour 1' ? 'T1' : 'T2';
+            if (!played) {
+                t.results.push({ round: round, opponent: x[5], status: 'P' });
+                return;
+            }
+            var win = m.winner === t.team;
+            t.mj++;
+            t.setPlus += x[1];
+            t.setMinus += x[2];
+            t.ptsPlus += sum(x[3]);
+            t.ptsMinus += sum(x[4]);
+            var status;
+            if (win) { t.g++; t.pts += 3; status = 'W'; }
+            else {
+                t.p++;
+                if (m.forfeit) status = 'F';
+                else if (Math.abs(x[1] - x[2]) <= 1) { t.pts += 2; status = 'C'; }
+                else { t.pts += 1; status = 'L'; }
+            }
+            t.results.push({ round: round, opponent: x[5], status: status, sets: x[1] + '-' + x[2] });
+        });
+    });
+
+    function ratio(a, b) { return b ? a / b : (a ? Infinity : 0); }
+    var list = order.map(function(n) {
+        var t = byTeam[n];
+        t.setAvg = ratio(t.setPlus, t.setMinus);
+        t.ptsAvg = ratio(t.ptsPlus, t.ptsMinus);
+        return t;
+    });
+    // Sans résultat, l'ordre reste celui du tirage (comme sur le site)
+    list.sort(function(a, b) {
+        return (b.pts - a.pts) || (b.setAvg - a.setAvg) || (b.ptsAvg - a.ptsAvg) || (a.drawOrder - b.drawOrder);
+    });
+    list.forEach(function(t, i) {
+        t.rank = i + 1;
+        t.zone = t.rank <= 16 ? 'principale' : (t.rank <= 32 ? 'consolante' : 'elimine');
+    });
+    return list;
+}
+
+function renderGinetteStandings() {
+    var container = document.getElementById('ginette-standings-content');
+    if (!container || !GINETTE_DATA) return;
+    var list = computeGinetteStandings(GINETTE_DATA.matches);
+    if (!list.length) {
+        container.innerHTML = '<p class="ginette-standings-note">Aucun match de tour 1 ou 2 pour l’instant.</p>';
+        return;
+    }
+    var anyPlayed = list.some(function(t) { return t.mj > 0; });
+
+    function fmtAvg(v, played) {
+        if (!played) return '-';
+        return v === Infinity ? 'MAX' : v.toFixed(2);
+    }
+    var statusLabels = { W: 'V', C: 'D', L: 'D', F: 'Forfait', P: 'À venir' };
+    function resultsHtml(t) {
+        return t.results.map(function(r) {
+            var cls = r.status === 'W' ? 'form-win' : (r.status === 'C' ? 'form-close' : (r.status === 'P' ? 'form-pending' : 'form-loss'));
+            var label = statusLabels[r.status] + (r.sets && r.status !== 'F' ? ' ' + r.sets : '');
+            return '<span class="detail-stat"><span class="form-item form-item-sm ' + cls + '"></span>' +
+                '<em>' + r.round + '</em> ' + esc(label) + ' vs ' + esc(r.opponent) + '</span>';
+        }).join('');
+    }
+
+    var rows = '';
+    list.forEach(function(t) {
+        var key = 'ginette:' + t.team;
+        var expanded = !!standingsExpanded[key];
+        var divColor = GINETTE_DIV_COLORS[t.division] || '#999';
+        var divLabel = DIV_LABELS_JS[t.division] || t.division || '';
+        var played = t.mj > 0;
+        var zoneBreak = (t.rank === 17 || t.rank === 33) ? ' ginette-zone-break' : '';
+        rows += '<tr class="standings-row ginette-zone-' + t.zone + zoneBreak + (expanded ? ' expanded' : '') + '" data-team="' + esc(key) + '">' +
+            '<td>' +
+                '<div class="team-cell">' +
+                    '<div class="rank-indicator"></div>' +
+                    '<span class="row-chevron">&#9656;</span>' +
+                    '<span class="rank-number">' + t.rank + '</span>' +
+                    (divLabel ? '<span class="division-badge division-badge-sm" style="background: ' + divColor + ';">' + esc(divLabel) + '</span>' : '') +
+                    '<span class="team-name">' + esc(t.team) + '</span>' +
+                '</div>' +
+            '</td>' +
+            '<td>' + t.mj + '</td>' +
+            '<td>' + t.g + '</td>' +
+            '<td>' + t.p + '</td>' +
+            '<td class="col-opt">' + t.setPlus + '</td>' +
+            '<td class="col-opt">' + t.setMinus + '</td>' +
+            '<td>' + fmtAvg(t.setAvg, played) + '</td>' +
+            '<td class="col-opt">' + t.ptsPlus + '</td>' +
+            '<td class="col-opt">' + t.ptsMinus + '</td>' +
+            '<td class="col-opt">' + fmtAvg(t.ptsAvg, played) + '</td>' +
+            '<td class="bold-val">' + t.pts + '</td>' +
+        '</tr>' +
+        '<tr class="standings-detail ginette-zone-' + t.zone + (expanded ? ' expanded' : '') + '" data-team="' + esc(key) + '">' +
+            '<td colspan="6">' +
+                '<div class="detail-line">' +
+                    '<span class="detail-label">Sets</span>' +
+                    '<span class="detail-stat"><em>Set+</em> ' + t.setPlus + '</span>' +
+                    '<span class="detail-stat"><em>Set-</em> ' + t.setMinus + '</span>' +
+                    '<span class="detail-stat"><em>Avg</em> ' + fmtAvg(t.setAvg, played) + '</span>' +
+                '</div>' +
+                '<div class="detail-line">' +
+                    '<span class="detail-label">Points</span>' +
+                    '<span class="detail-stat"><em>Pts+</em> ' + t.ptsPlus + '</span>' +
+                    '<span class="detail-stat"><em>Pts-</em> ' + t.ptsMinus + '</span>' +
+                    '<span class="detail-stat"><em>Avg</em> ' + fmtAvg(t.ptsAvg, played) + '</span>' +
+                '</div>' +
+                '<div class="detail-line">' +
+                    '<span class="detail-label">Matchs</span>' + resultsHtml(t) +
+                '</div>' +
+            '</td>' +
+        '</tr>';
+    });
+
+    container.innerHTML =
+        (anyPlayed ? '' : '<p class="ginette-standings-note">Aucun match joué pour l’instant : les équipes sont dans l’ordre du tirage.</p>') +
+        '<div class="table-container standings-table ginette-standings">' +
+            '<table>' +
+                '<thead><tr>' +
+                    '<th>Équipe</th><th>MJ</th><th>V</th><th>D</th>' +
+                    '<th class="col-opt">Set+</th><th class="col-opt">Set-</th><th>Set avg</th>' +
+                    '<th class="col-opt">Pts+</th><th class="col-opt">Pts-</th><th class="col-opt">Pts avg</th>' +
+                    '<th class="bold-col">Pts</th>' +
+                '</tr></thead>' +
+                '<tbody>' + rows + '</tbody>' +
+            '</table>' +
+        '</div>';
 }
 
 function renderGinetteClassement() {

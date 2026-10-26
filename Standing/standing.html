@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self';">
     <title>FSGT94 Volley</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=2026.10.26">
+    <link rel="stylesheet" href="styles.css?v=2026.10.26b">
 </head>
 <body>
     <div class="container">
@@ -27,6 +27,7 @@
             </div>
             <div class="ginette-tabs" style="display: none;">
                 <button class="tab active" onclick="showGinetteTab('ginette-classement')">Classement</button>
+                <button class="tab" onclick="showGinetteTab('ginette-matchs')">Matchs</button>
                 <button class="tab" onclick="showGinetteTab('ginette-pr')">Power Ranking</button>
             </div>
         </header>
@@ -42,6 +43,7 @@
         </div>
         <div class="mobile-ginette-tabs" style="display: none;">
             <button class="tab active" onclick="showGinetteTab('ginette-classement')">Classement</button>
+            <button class="tab" onclick="showGinetteTab('ginette-matchs')">Matchs</button>
             <button class="tab" onclick="showGinetteTab('ginette-pr')">Power Ranking</button>
         </div>
 
@@ -96,9 +98,21 @@
 
         <!-- GINETTE (Coupe inter-divisions) -->
         <div id="ginette" class="tab-content">
-            <!-- Ginette Classement -->
+            <!-- Ginette Classement (cumul Tour 1 + Tour 2) -->
             <div id="ginette-classement" class="ginette-tab-content active">
-                <h2 class="section-title">Classement — Coupe Ginette</h2>
+                <h2 class="section-title">Classement — Tours 1 et 2</h2>
+                <div id="ginette-standings-content"></div>
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-bar" style="background: var(--ginette-principale);"></div>1-16 : poule principale</div>
+                    <div class="legend-item"><div class="legend-bar" style="background: var(--ginette-consolante);"></div>17-32 : poule consolante</div>
+                    <div class="legend-item"><div class="legend-bar" style="background: var(--ginette-elimine);"></div>33 et + : &#233;limin&#233;</div>
+                </div>
+                <p class="ginette-standings-note">Comme en championnat : victoire 3 pts, d&#233;faite serr&#233;e (1 set d'&#233;cart ou 2-2) 2 pts, d&#233;faite 1 pt, forfait 0. &#201;galit&#233; d&#233;partag&#233;e au set average puis au points average. Les p&#233;nalit&#233;s du site ne sont pas prises en compte.</p>
+            </div>
+
+            <!-- Ginette Matchs -->
+            <div id="ginette-matchs" class="ginette-tab-content">
+                <h2 class="section-title">Matchs — Coupe Ginette</h2>
                 <div class="sub-tabs">
                     <button class="sub-tab active" onclick="showGinetteSubTab('ginette-tour1', this)">Tour 1</button>
                     <button class="sub-tab" onclick="showGinetteSubTab('ginette-tour2', this)">Tour 2</button>
@@ -128,6 +142,6 @@
         </div>
     </div>
 
-    <script src="app.js?v=2026.10.26"></script>
+    <script src="app.js?v=2026.10.26b"></script>
 </body>
 </html>
