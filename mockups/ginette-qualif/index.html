@@ -152,7 +152,7 @@ tr.jen td:first-child{box-shadow:inset 3px 0 0 var(--jen-line)}
   <p class="sub"><b>Tirage</b> (0 à 100, plus le bleu est foncé, plus les adversaires sont forts) : la probabilité qu'une équipe de référence (ELO 1700, le niveau d'une Hard moyenne) ne gagne pas ses deux matchs face aux mêmes adversaires, avec les mêmes matchs à domicile ou à l'extérieur. Elle mesure le tirage et non la force de l'équipe. Seuls 3 des 64 matchs opposent deux équipes d'Ultimate ou d'Elite.</p>
   <div class="tablewrap">
     <table>
-      <thead><tr><th class="r">Pour elle</th><th class="r">Tirage</th><th>Équipe</th><th>Tour 1</th><th>Tour 2</th><th class="r hide-s">Princ.</th></tr></thead>
+      <thead><tr><th class="r">Pour elle</th><th class="r">Tirage</th><th>Équipe</th><th>Tour 1</th><th>Tour 2</th></tr></thead>
       <tbody id="diffrows"></tbody>
     </table>
   </div>
@@ -272,7 +272,7 @@ function renderDiff(){
   document.getElementById('diffrows').innerHTML=D.map(function(r){
     var opp=r.opp.map(function(o){return '<div class="team">'+badge(o[1])+'<span>'+esc(o[0])+'</span><span class="num">'+(o[3]==='dom'?'dom.':'ext.')+'</span></div>'});
     return '<tr class="'+(r.team===JEN?'jen':'')+'">'+cell(r.own,ownColor(r.own))+cell(r.diff,drawColor(r.diff))+
-      '<td><div class="team">'+badge(r.div)+'<span class="n">'+esc(r.team)+'</span></div></td><td>'+opp[0]+'</td><td>'+opp[1]+'</td><td class="r pct hide-s">'+pct(r.p)+'</td></tr>';
+      '<td><div class="team">'+badge(r.div)+'<span class="n">'+esc(r.team)+'</span></div></td><td>'+opp[0]+'</td><td>'+opp[1]+'</td></tr>';
   }).join('');
 }
 renderFilter();render();renderDiff();
