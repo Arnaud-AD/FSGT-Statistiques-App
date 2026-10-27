@@ -2880,7 +2880,9 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
 .sv-court {
     position: relative;
     width: 100%;
-    max-width: 280px;
+    /* Mêmes proportions que match-live (terrain 180px dans un conteneur 288px de large),
+       mais un peu plus grand ; assez petit pour tenir sur un écran de téléphone */
+    max-width: 210px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -2950,7 +2952,7 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
 
 /* Service zones */
 .sv-service-zone {
-    height: 40px;
+    aspect-ratio: 9 / 2; /* 40px pour un terrain de 180px, comme match-live */
     border: 2px dashed rgba(255,255,255,0.3);
     position: relative;
     display: flex;
@@ -3126,7 +3128,7 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
 /* Desktop: slightly wider court */
 @media (min-width: 768px) {
     .sv-court {
-        max-width: 320px;
+        max-width: 260px;
     }
 }
 
