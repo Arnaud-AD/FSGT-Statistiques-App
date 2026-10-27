@@ -9516,8 +9516,8 @@ const StatsVisuellesView = {
 
         // Adapt labels to active heatmap categories
         var sel = this._selectedCategories;
-        var heatCats = ['reception', 'defense', 'attack'].filter(function(c) { return sel[c]; });
-        var startTextFor = { reception: 'où on réceptionne', defense: 'où on défend', attack: 'où on attaque' };
+        var heatCats = ['service', 'reception', 'defense', 'attack'].filter(function(c) { return sel[c]; });
+        var startTextFor = { service: 'où on sert', reception: 'où on réceptionne', defense: 'où on défend', attack: 'où on attaque' };
         var startInner = heatCats.length > 1 ? 'position du joueur' : (startTextFor[heatCats[0]] || 'position du joueur');
         var startLabel = 'Départ (' + startInner + ')';
         var endLabel = 'Arrivée (où va la balle)';
@@ -9533,7 +9533,7 @@ const StatsVisuellesView = {
                 '<span class="sv-legend-label">' + endLabel + '</span>' +
                 '</div>';
         } else {
-            var startTextSingle = { reception: 'Où on réceptionne', defense: 'Où on défend', attack: 'Où on attaque' };
+            var startTextSingle = { service: 'Où on sert', reception: 'Où on réceptionne', defense: 'Où on défend', attack: 'Où on attaque' };
             var startText = heatCats.length > 1 ? 'Position du joueur' : (startTextSingle[heatCats[0]] || 'Position du joueur');
             var label = mode === 'start' ? startText : 'Où va la balle';
             div.innerHTML =
@@ -9577,12 +9577,12 @@ const StatsVisuellesView = {
 
         this._trajectories = this._extractTrajectories();
 
-        // Split heatmap categories (reception, defense, attack) from SVG categories
+        // Split heatmap categories (service, reception, defense, attack) from SVG categories
         var heatmapTrajs = [];
         var svgTrajs = [];
         var attackHeatmapActive = this._selectedCategories['attack'];
         this._trajectories.forEach(function(t) {
-            if (t.type === 'reception' || t.type === 'defense' || t.type === 'attack') {
+            if (t.type === 'service' || t.type === 'reception' || t.type === 'defense' || t.type === 'attack') {
                 heatmapTrajs.push(t);
             } else if (t.type === 'block-touch' && attackHeatmapActive) {
                 // Suppress block-touch SVG arrows when attack heatmap is on (avoid overlay noise)
@@ -9648,7 +9648,7 @@ const StatsVisuellesView = {
                 // Label based on active heatmap categories
                 var hmTypes = {};
                 heatmapTrajs.forEach(function(t) { hmTypes[t.type] = true; });
-                var hmNames = { reception: 'réception', defense: 'défense', attack: 'attaque' };
+                var hmNames = { service: 'service', reception: 'réception', defense: 'défense', attack: 'attaque' };
                 var hmKeys = Object.keys(hmTypes);
                 var hmLabel = hmKeys.length > 1 ? 'actions' :
                               (hmNames[hmKeys[0]] || 'action') + (heatmapTrajs.length > 1 ? 's' : '');
