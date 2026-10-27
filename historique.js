@@ -9109,10 +9109,11 @@ const StatsVisuellesView = {
     },
 
     // Géométrie du courtContainer de match-live (match-live.css) au moment de la saisie :
-    // conteneur 288×504 (padding 15/25), terrain 180px centré, zone de service 40px,
-    // label 15px, demi-terrain 180×180, filet 4px. Vérifié sur les positions net/out stockées
-    // (toutes multiples de 1/288 en X et 1/504 en Y, filet à y=50%).
-    ML_COURT: { W: 288, H: 504, courtLeft: 54, half: 180, awayTop: 70, netTop: 250, netH: 4, homeTop: 254 },
+    // app fixée à 600px → conteneur 576×504, terrain 180px centré (198px de chaque côté),
+    // zone de service 40px, label 15px, demi-terrain 180×180, filet 4px. Vérifié sur les
+    // positions out/net stockées : X entiers sur 576px, filet à y=50%, et avec cette géométrie
+    // toutes les balles out tombent bien hors du terrain.
+    ML_COURT: { W: 576, H: 504, courtLeft: 198, half: 180, awayTop: 70, netTop: 250, netH: 4, homeTop: 254 },
 
     // Convertit une position net/out (en % du courtContainer match-live) en coordonnées
     // relatives au terrain : u = fraction de la largeur du terrain, v = fraction de la hauteur
@@ -9261,36 +9262,24 @@ const StatsVisuellesView = {
         var court = document.getElementById('svCourt');
         if (!canvas || !court) return;
 
+        // Le canvas couvre tout le cadre bleu (et pas seulement le terrain) pour afficher
+        // les balles out à leur position exacte autour du terrain
         var rect = court.getBoundingClientRect();
+        var wrapper = court.parentElement;
+        var wRect = wrapper.getBoundingClientRect();
+        var ox = rect.left - wRect.left;
+        var oy = rect.top - wRect.top;
         var w = rect.width;
-        var h = rect.height;
         var dpr = window.devicePixelRatio || 1;
-        canvas.width = Math.round(w * dpr);
-        canvas.height = Math.round(h * dpr);
-        canvas.style.width = w + 'px';
-        canvas.style.height = h + 'px';
+        canvas.width = Math.round(wRect.width * dpr);
+        canvas.height = Math.round(wRect.height * dpr);
+        canvas.style.width = wRect.width + 'px';
+        canvas.style.height = wRect.height + 'px';
+        canvas.style.left = (-ox) + 'px';
+        canvas.style.top = (-oy) + 'px';
         var ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Clip to court area (service zones + court halves) to prevent overflow
-        var cR = rect; // court (svCourt) rect
-        var awayEl = document.getElementById('svCourtAway');
-        var homeEl = document.getElementById('svCourtHome');
-        var svcTopEl = document.getElementById('svServiceTop');
-        var svcBotEl = document.getElementById('svServiceBot');
-        if (awayEl && homeEl) {
-            var aR = awayEl.getBoundingClientRect();
-            var hR = homeEl.getBoundingClientRect();
-            // Clip from top of away court to bottom of home court (full playable area)
-            var clipTop = (svcTopEl ? svcTopEl.getBoundingClientRect().top : aR.top) - cR.top;
-            var clipBot = (svcBotEl ? svcBotEl.getBoundingClientRect().bottom : hR.bottom) - cR.top;
-            var clipLeft = aR.left - cR.left;
-            var clipRight = aR.right - cR.left;
-            ctx.save();
-            ctx.beginPath();
-            ctx.rect(clipLeft * dpr, clipTop * dpr, (clipRight - clipLeft) * dpr, (clipBot - clipTop) * dpr);
-            ctx.clip();
-        }
+        ctx.save();
 
         var mode = this._heatmapMode;
 
@@ -9299,10 +9288,10 @@ const StatsVisuellesView = {
         var endPts = [];
         receptionTrajs.forEach(function(t) {
             if (t.startPos && (mode === 'start' || mode === 'both') && t.startCourtSide !== 'net') {
-                startPts.push({ x: t.startPos.x * dpr, y: t.startPos.y * dpr });
+                startPts.push({ x: (t.startPos.x + ox) * dpr, y: (t.startPos.y + oy) * dpr });
             }
             if (t.endPos && (mode === 'end' || mode === 'both') && t.endCourtSide !== 'net') {
-                endPts.push({ x: t.endPos.x * dpr, y: t.endPos.y * dpr });
+                endPts.push({ x: (t.endPos.x + ox) * dpr, y: (t.endPos.y + oy) * dpr });
             }
         });
 
@@ -9527,8 +9516,8 @@ const StatsVisuellesView = {
 
         // Adapt labels to active heatmap categories
         var sel = this._selectedCategories;
-        var heatCats = ['reception', 'defense', 'attack'].filter(function(c) { return sel[c]; });
-        var startTextFor = { reception: 'où on réceptionne', defense: 'où on défend', attack: 'où on attaque' };
+        var heatCats = ['service', 'reception', 'defense', 'attack'].filter(function(c) { return sel[c]; });
+        var startTextFor = { service: 'où on sert', reception: 'où on réceptionne', defense: 'où on défend', attack: 'où on attaque' };
         var startInner = heatCats.length > 1 ? 'position du joueur' : (startTextFor[heatCats[0]] || 'position du joueur');
         var startLabel = 'Départ (' + startInner + ')';
         var endLabel = 'Arrivée (où va la balle)';
@@ -9544,7 +9533,7 @@ const StatsVisuellesView = {
                 '<span class="sv-legend-label">' + endLabel + '</span>' +
                 '</div>';
         } else {
-            var startTextSingle = { reception: 'Où on réceptionne', defense: 'Où on défend', attack: 'Où on attaque' };
+            var startTextSingle = { service: 'Où on sert', reception: 'Où on réceptionne', defense: 'Où on défend', attack: 'Où on attaque' };
             var startText = heatCats.length > 1 ? 'Position du joueur' : (startTextSingle[heatCats[0]] || 'Position du joueur');
             var label = mode === 'start' ? startText : 'Où va la balle';
             div.innerHTML =
@@ -9588,12 +9577,12 @@ const StatsVisuellesView = {
 
         this._trajectories = this._extractTrajectories();
 
-        // Split heatmap categories (reception, defense, attack) from SVG categories
+        // Split heatmap categories (service, reception, defense, attack) from SVG categories
         var heatmapTrajs = [];
         var svgTrajs = [];
         var attackHeatmapActive = this._selectedCategories['attack'];
         this._trajectories.forEach(function(t) {
-            if (t.type === 'reception' || t.type === 'defense' || t.type === 'attack') {
+            if (t.type === 'service' || t.type === 'reception' || t.type === 'defense' || t.type === 'attack') {
                 heatmapTrajs.push(t);
             } else if (t.type === 'block-touch' && attackHeatmapActive) {
                 // Suppress block-touch SVG arrows when attack heatmap is on (avoid overlay noise)
@@ -9659,7 +9648,7 @@ const StatsVisuellesView = {
                 // Label based on active heatmap categories
                 var hmTypes = {};
                 heatmapTrajs.forEach(function(t) { hmTypes[t.type] = true; });
-                var hmNames = { reception: 'réception', defense: 'défense', attack: 'attaque' };
+                var hmNames = { service: 'service', reception: 'réception', defense: 'défense', attack: 'attaque' };
                 var hmKeys = Object.keys(hmTypes);
                 var hmLabel = hmKeys.length > 1 ? 'actions' :
                               (hmNames[hmKeys[0]] || 'action') + (heatmapTrajs.length > 1 ? 's' : '');
