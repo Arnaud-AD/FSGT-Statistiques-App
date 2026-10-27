@@ -9021,7 +9021,14 @@ const StatsVisuellesView = {
                         var endPos = action.endPos;
 
                         var hasStart = startPos && startPos.courtSide;
-                        var startSvg = hasStart ? self._posToSvg(self._normalizePos(startPos, cameraSide)) : null;
+                        var normStart = hasStart ? self._normalizePos(startPos, cameraSide) : null;
+                        // Attaque directe sur la réception adverse : match-live reprend comme départ la fin
+                        // de la réception, enregistrée dans le terrain adverse → départ placé au filet
+                        if (normStart && normStart.courtSide === 'top' &&
+                            (effectiveType === 'attack' || effectiveType === 'relance')) {
+                            normStart = { x: normStart.x, y: 0, courtSide: 'bottom' };
+                        }
+                        var startSvg = normStart ? self._posToSvg(normStart) : null;
 
                         // Blocs : afficher au filet (pas à endPos qui est l'atterrissage)
                         // On utilise startPos.x de l'attaque adverse (= position attaquant, en face du bloqueur)
