@@ -9016,22 +9016,9 @@ const StatsVisuellesView = {
                             else if (action.attackType === 'deuxieme_main') attackArrowType = 'attack-second';
                         }
 
-                        // Annoter les positions 'out' avec targetCourt pour le clampage
-                        // home team : startPos = terrain home, endPos dépend du type d'action
-                        var startPos = action.startPos ? Object.assign({}, action.startPos) : null;
-                        var endPos = Object.assign({}, action.endPos);
-                        if (startPos && startPos.courtSide === 'out') {
-                            startPos.targetCourt = 'home'; // Le joueur home est toujours sur son terrain
-                        }
-                        if (endPos.courtSide === 'out') {
-                            // Défense, réception, passe : endPos sur le terrain home
-                            // Attaque, service : endPos sur le terrain adverse (là où la balle atterrit)
-                            if (effectiveType === 'defense' || effectiveType === 'reception' || effectiveType === 'pass') {
-                                endPos.targetCourt = 'home';
-                            } else if (effectiveType === 'service' || effectiveType === 'attack' || effectiveType === 'relance') {
-                                endPos.targetCourt = 'away';
-                            }
-                        }
+                        // Positions out/net : placées à leur vrai emplacement autour du terrain (_posToSvg)
+                        var startPos = action.startPos || null;
+                        var endPos = action.endPos;
 
                         var hasStart = startPos && startPos.courtSide;
                         var startSvg = hasStart ? self._posToSvg(self._normalizePos(startPos, cameraSide)) : null;
@@ -9046,7 +9033,9 @@ const StatsVisuellesView = {
                                 var prevA = point.rally[bi];
                                 if (prevA.type === 'attack' && prevA.startPos) {
                                     var normAttacker = self._normalizePos(prevA.startPos, cameraSide);
-                                    blockX = normAttacker.x;
+                                    blockX = (normAttacker.courtSide === 'net' || normAttacker.courtSide === 'out')
+                                        ? self._mlToCourt(normAttacker).u * 100
+                                        : normAttacker.x;
                                     break;
                                 }
                             }
@@ -9103,9 +9092,7 @@ const StatsVisuellesView = {
         if (!pos) return pos;
         // Si cameraSide === 'home', home=bottom et away=top (déjà canonique)
         if (cameraSide === 'home') {
-            var r = { x: pos.x, y: pos.y, courtSide: pos.courtSide };
-            if (pos.targetCourt) r.targetCourt = pos.targetCourt;
-            return r;
+            return { x: pos.x, y: pos.y, courtSide: pos.courtSide };
         }
 
         // cameraSide === 'away': rotation 180° — home était en top, away en bottom
@@ -9118,9 +9105,27 @@ const StatsVisuellesView = {
             y: 100 - pos.y,
             courtSide: newSide
         };
-        // Préserver targetCourt (logique, pas dépendant de la caméra)
-        if (pos.targetCourt) result.targetCourt = pos.targetCourt;
         return result;
+    },
+
+    // Géométrie du courtContainer de match-live (match-live.css) au moment de la saisie :
+    // conteneur 288×504 (padding 15/25), terrain 180px centré, zone de service 40px,
+    // label 15px, demi-terrain 180×180, filet 4px. Vérifié sur les positions net/out stockées
+    // (toutes multiples de 1/288 en X et 1/504 en Y, filet à y=50%).
+    ML_COURT: { W: 288, H: 504, courtLeft: 54, half: 180, awayTop: 70, netTop: 250, netH: 4, homeTop: 254 },
+
+    // Convertit une position net/out (en % du courtContainer match-live) en coordonnées
+    // relatives au terrain : u = fraction de la largeur du terrain, v = fraction de la hauteur
+    // du demi-terrain le plus proche (peut sortir de [0,1] si la balle est dehors).
+    _mlToCourt(pos) {
+        var G = this.ML_COURT;
+        var px = (pos.x / 100) * G.W;
+        var py = (pos.y / 100) * G.H;
+        var u = (px - G.courtLeft) / G.half;
+        if (py < G.netTop + G.netH / 2) {
+            return { u: u, v: (py - G.awayTop) / G.half, half: 'away' };
+        }
+        return { u: u, v: (py - G.homeTop) / G.half, half: 'home' };
     },
 
     _posToSvg(pos) {
@@ -9140,37 +9145,22 @@ const StatsVisuellesView = {
             case 'top': return mapTo(L.away, pos.x, pos.y);
             case 'service_bottom': return mapTo(L.svcBot, pos.x, pos.y);
             case 'service_top': return mapTo(L.svcTop, pos.x, pos.y);
-            case 'net': {
-                // net x,y sont en % de courtContainer (= sv-court-wrapper)
-                // X : mapper via wrapper puis convertir en coords SVG (relatives à sv-court)
-                // Y : toujours le centre mesuré du filet (dans match-live, Y stocké = centre du filet)
-                var wR = L.wrapper;
-                return {
-                    x: (pos.x / 100) * wR.width + (wR.left - cR.left),
-                    y: (L.net.top - cR.top) + L.net.height / 2
-                };
-            }
+            case 'net':
             case 'out': {
-                // out x,y sont en % de courtContainer (= sv-court-wrapper)
-                // Mapper via wrapper puis convertir en coords SVG, puis clamper vers le demi-terrain cible
-                var wR = L.wrapper;
-                var svgX = (pos.x / 100) * wR.width + (wR.left - cR.left);
-                var svgY = (pos.y / 100) * wR.height + (wR.top - cR.top);
-                var homeTop = L.home.top - cR.top;
-                var homeBot = homeTop + L.home.height;
-                var awayTop = L.away.top - cR.top;
-                var awayBot = awayTop + L.away.height;
-                var netY = (homeTop + awayBot) / 2;
-                var target = pos.targetCourt || (svgY <= netY ? 'away' : 'home');
-                if (target === 'home') {
-                    svgY = Math.max(homeTop, Math.min(homeBot, svgY));
+                // net/out x,y sont en % du courtContainer de match-live, qui n'a pas les mêmes
+                // proportions que sv-court-wrapper → passer par la géométrie de match-live
+                var ml = this._mlToCourt(pos);
+                var halfR = ml.half === 'away' ? L.away : L.home;
+                var svgY;
+                if (pos.courtSide === 'net') {
+                    svgY = (L.net.top - cR.top) + L.net.height / 2;
                 } else {
-                    svgY = Math.max(awayTop, Math.min(awayBot, svgY));
+                    svgY = (halfR.top - cR.top) + ml.v * halfR.height;
                 }
-                var courtLeft = L.home.left - cR.left;
-                var courtRight = courtLeft + L.home.width;
-                svgX = Math.max(courtLeft, Math.min(courtRight, svgX));
-                return { x: svgX, y: svgY };
+                return {
+                    x: (L.home.left - cR.left) + ml.u * L.home.width,
+                    y: svgY
+                };
             }
             default:
                 return {
@@ -9667,11 +9657,12 @@ const StatsVisuellesView = {
         if (countEl) {
             if (heatmapTrajs.length > 0 && svgTrajs.length === 0) {
                 // Label based on active heatmap categories
-                var hmHasRec = heatmapTrajs.some(function(t) { return t.type === 'reception'; });
-                var hmHasDef = heatmapTrajs.some(function(t) { return t.type === 'defense'; });
-                var hmLabel = hmHasRec && hmHasDef ? 'actions' :
-                              hmHasDef ? 'défense' + (heatmapTrajs.length > 1 ? 's' : '') :
-                              'réception' + (heatmapTrajs.length > 1 ? 's' : '');
+                var hmTypes = {};
+                heatmapTrajs.forEach(function(t) { hmTypes[t.type] = true; });
+                var hmNames = { reception: 'réception', defense: 'défense', attack: 'attaque' };
+                var hmKeys = Object.keys(hmTypes);
+                var hmLabel = hmKeys.length > 1 ? 'actions' :
+                              (hmNames[hmKeys[0]] || 'action') + (heatmapTrajs.length > 1 ? 's' : '');
                 countEl.textContent = heatmapTrajs.length + ' ' + hmLabel;
             } else {
                 countEl.textContent = totalCount > 0 ? totalCount + ' trajectoire' + (totalCount > 1 ? 's' : '') : 'Aucune trajectoire';
