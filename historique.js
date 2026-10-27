@@ -8945,25 +8945,36 @@ const StatsVisuellesView = {
     _getPlayersForScope(matches) {
         var scopeMatches = this._selectedMatch === 'all' ? matches : matches.filter(function(m) { return m.id === this._selectedMatch; }.bind(this));
         var playerMap = {};
-        var self = this;
+        var roleCounts = {}; // name → { role: nb de matchs } : poste le plus fréquent sur la période
 
         scopeMatches.forEach(function(match) {
             if (!match.sets) return;
             var roles = BilanView.getPlayerRoles ? BilanView.getPlayerRoles(match, 'home') : {};
+            var seen = {};
             match.sets.forEach(function(set) {
                 if (!set.homeLineup) return;
                 Object.keys(set.homeLineup).forEach(function(pos) {
                     var name = set.homeLineup[pos];
-                    if (!name || playerMap[name]) return;
+                    if (!name || seen[name]) return;
+                    seen[name] = true;
+                    if (!playerMap[name]) {
+                        var color = (ProgressionView.PLAYER_COLORS && ProgressionView.PLAYER_COLORS[name]) || '#0056D2';
+                        playerMap[name] = { name: name, role: '', roleColor: '#999', color: color };
+                        roleCounts[name] = {};
+                    }
                     var role = roles[name] ? roles[name].primaryRole : '';
-                    var roleColor = BilanView.ROLE_COLORS ? (BilanView.ROLE_COLORS[role] || '#999') : '#999';
-                    var color = (ProgressionView.PLAYER_COLORS && ProgressionView.PLAYER_COLORS[name]) || '#0056D2';
-                    playerMap[name] = { name: name, role: role, roleColor: roleColor, color: color };
+                    if (role) roleCounts[name][role] = (roleCounts[name][role] || 0) + 1;
                 });
             });
         });
 
         var players = Object.values(playerMap);
+        players.forEach(function(p) {
+            var rc = roleCounts[p.name];
+            var role = Object.keys(rc).sort(function(a, b) { return rc[b] - rc[a]; })[0] || '';
+            p.role = role;
+            p.roleColor = BilanView.ROLE_COLORS ? (BilanView.ROLE_COLORS[role] || '#999') : '#999';
+        });
         players.sort(function(a, b) { return a.name.localeCompare(b.name); });
         return players;
     },
