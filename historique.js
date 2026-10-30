@@ -7877,6 +7877,10 @@ const ProgressionView = {
                 if (!playerMap[name]) {
                     playerMap[name] = { role: null, _roleCounts: {}, matchData: [] };
                 }
+                // Combler les matchs précédant sa première apparition (index = match)
+                while (playerMap[name].matchData.length < mi) {
+                    playerMap[name].matchData.push({ played: false, matchIndex: playerMap[name].matchData.length });
+                }
                 var pd = playerMap[name];
 
                 // Total actions
