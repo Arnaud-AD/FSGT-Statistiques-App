@@ -5,10 +5,10 @@
     "name": "Hard",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/15",
-    "lastUpdated": "2026-10-19T16:14:46",
+    "lastUpdated": "2026-11-02T22:52:16",
     "teamCount": 9,
-    "matchesPlayed": 2,
-    "matchesUpcoming": 70
+    "matchesPlayed": 5,
+    "matchesUpcoming": 67
   },
   "teams": {
     "pyth": {
@@ -16,39 +16,39 @@
       "short": "PC",
       "color": "#e74c3c"
     },
-    "deme": {
-      "name": "LES DÉMENTS",
-      "short": "DÉ",
-      "color": "#3498db"
-    },
-    "gint": {
-      "name": "Ginto",
-      "short": "GI",
-      "color": "#2ecc71"
-    },
     "copa": {
       "name": "Copains comme Cachan",
       "short": "CC",
-      "color": "#f39c12"
-    },
-    "alam": {
-      "name": "Alambic",
-      "short": "AL",
-      "color": "#9b59b6"
-    },
-    "rhin": {
-      "name": "Rhinos Féroces",
-      "short": "RF",
-      "color": "#1abc9c"
+      "color": "#3498db"
     },
     "loup": {
       "name": "Les Loups-Phoques",
       "short": "LO",
-      "color": "#e67e22"
+      "color": "#2ecc71"
+    },
+    "deme": {
+      "name": "LES DÉMENTS",
+      "short": "DÉ",
+      "color": "#f39c12"
+    },
+    "gint": {
+      "name": "Ginto",
+      "short": "GI",
+      "color": "#9b59b6"
+    },
+    "alam": {
+      "name": "Alambic",
+      "short": "AL",
+      "color": "#1abc9c"
     },
     "star": {
       "name": "StarPAFF",
       "short": "ST",
+      "color": "#e67e22"
+    },
+    "rhin": {
+      "name": "Rhinos Féroces",
+      "short": "RF",
       "color": "#f1c40f"
     },
     "bach": {
@@ -61,21 +61,21 @@
     {
       "rank": 1,
       "team": "pyth",
-      "mj": 1,
-      "g": 1,
+      "mj": 2,
+      "g": 2,
       "p": 0,
-      "setPlus": 3,
+      "setPlus": 6,
       "setMinus": 1,
-      "ds": 2,
-      "coefSet": "3.00",
-      "ptsPlus": 95,
-      "ptsMinus": 83,
-      "dp": "+12",
-      "coefPts": "1.14",
-      "pts": 3,
+      "ds": 5,
+      "coefSet": "6.00",
+      "ptsPlus": 170,
+      "ptsMinus": 139,
+      "dp": "+31",
+      "coefPts": "1.22",
+      "pts": 6,
       "formAller": [
         "W",
-        "P",
+        "W",
         "P",
         "P",
         "P",
@@ -96,18 +96,54 @@
     },
     {
       "rank": 2,
-      "team": "deme",
+      "team": "copa",
+      "mj": 2,
+      "g": 1,
+      "p": 1,
+      "setPlus": 4,
+      "setMinus": 4,
+      "ds": 0,
+      "coefSet": "1.00",
+      "ptsPlus": 177,
+      "ptsMinus": 167,
+      "dp": "+10",
+      "coefPts": "1.06",
+      "pts": 4,
+      "formAller": [
+        "L",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 3,
+      "team": "loup",
       "mj": 1,
       "g": 1,
       "p": 0,
       "setPlus": 3,
-      "setMinus": 2,
-      "ds": 1,
-      "coefSet": "1.50",
-      "ptsPlus": 96,
-      "ptsMinus": 95,
-      "dp": "+1",
-      "coefPts": "1.01",
+      "setMinus": 0,
+      "ds": 3,
+      "coefSet": "∞",
+      "ptsPlus": 75,
+      "ptsMinus": 60,
+      "dp": "+15",
+      "coefPts": "1.25",
       "pts": 3,
       "formAller": [
         "W",
@@ -131,59 +167,23 @@
       ]
     },
     {
-      "rank": 3,
-      "team": "gint",
-      "mj": 1,
-      "g": 0,
-      "p": 1,
-      "setPlus": 2,
-      "setMinus": 3,
-      "ds": -1,
-      "coefSet": "0.67",
-      "ptsPlus": 95,
-      "ptsMinus": 96,
-      "dp": "-1",
-      "coefPts": "0.99",
-      "pts": 2,
-      "formAller": [
-        "C",
-        "P",
-        "D",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
       "rank": 4,
-      "team": "copa",
+      "team": "deme",
       "mj": 1,
-      "g": 0,
-      "p": 1,
-      "setPlus": 1,
-      "setMinus": 3,
-      "ds": -2,
-      "coefSet": "0.33",
-      "ptsPlus": 83,
+      "g": 1,
+      "p": 0,
+      "setPlus": 3,
+      "setMinus": 2,
+      "ds": 1,
+      "coefSet": "1.50",
+      "ptsPlus": 96,
       "ptsMinus": 95,
-      "dp": "-12",
-      "coefPts": "0.87",
-      "pts": 1,
+      "dp": "+1",
+      "coefPts": "1.01",
+      "pts": 3,
       "formAller": [
-        "L",
-        "P",
+        "W",
+        "D",
         "P",
         "P",
         "P",
@@ -204,22 +204,22 @@
     },
     {
       "rank": 5,
-      "team": "alam",
-      "mj": 0,
+      "team": "gint",
+      "mj": 2,
       "g": 0,
-      "p": 0,
-      "setPlus": 0,
-      "setMinus": 0,
-      "ds": 0,
-      "coefSet": "∞",
-      "ptsPlus": 0,
-      "ptsMinus": 0,
-      "dp": "0",
-      "coefPts": "∞",
-      "pts": 0,
+      "p": 2,
+      "setPlus": 3,
+      "setMinus": 6,
+      "ds": -3,
+      "coefSet": "0.50",
+      "ptsPlus": 167,
+      "ptsMinus": 190,
+      "dp": "-23",
+      "coefPts": "0.88",
+      "pts": 3,
       "formAller": [
-        "D",
-        "P",
+        "C",
+        "L",
         "D",
         "P",
         "P",
@@ -240,22 +240,22 @@
     },
     {
       "rank": 6,
-      "team": "rhin",
-      "mj": 0,
+      "team": "star",
+      "mj": 1,
       "g": 0,
-      "p": 0,
+      "p": 1,
       "setPlus": 0,
-      "setMinus": 0,
-      "ds": 0,
-      "coefSet": "∞",
-      "ptsPlus": 0,
-      "ptsMinus": 0,
-      "dp": "0",
-      "coefPts": "∞",
-      "pts": 0,
+      "setMinus": 3,
+      "ds": -3,
+      "coefSet": "0.00",
+      "ptsPlus": 60,
+      "ptsMinus": 75,
+      "dp": "-15",
+      "coefPts": "0.80",
+      "pts": 1,
       "formAller": [
         "D",
-        "P",
+        "L",
         "P",
         "P",
         "P",
@@ -276,23 +276,23 @@
     },
     {
       "rank": 7,
-      "team": "loup",
-      "mj": 0,
+      "team": "alam",
+      "mj": 1,
       "g": 0,
-      "p": 0,
+      "p": 1,
       "setPlus": 0,
-      "setMinus": 0,
-      "ds": 0,
-      "coefSet": "∞",
-      "ptsPlus": 0,
-      "ptsMinus": 0,
-      "dp": "0",
-      "coefPts": "∞",
-      "pts": 0,
+      "setMinus": 3,
+      "ds": -3,
+      "coefSet": "0.00",
+      "ptsPlus": 56,
+      "ptsMinus": 75,
+      "dp": "-19",
+      "coefPts": "0.75",
+      "pts": 1,
       "formAller": [
-        "P",
-        "P",
-        "P",
+        "D",
+        "L",
+        "D",
         "P",
         "P",
         "P",
@@ -312,7 +312,7 @@
     },
     {
       "rank": 8,
-      "team": "star",
+      "team": "rhin",
       "mj": 0,
       "g": 0,
       "p": 0,
@@ -327,7 +327,7 @@
       "pts": 0,
       "formAller": [
         "D",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -384,6 +384,91 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "02/11/2026",
+      "home": "pyth",
+      "away": "alam",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé",
+      "sets": [
+        [
+          25,
+          15
+        ],
+        [
+          25,
+          18
+        ],
+        [
+          25,
+          23
+        ]
+      ],
+      "total": [
+        75,
+        56
+      ]
+    },
+    {
+      "date": "02/11/2026",
+      "home": "gint",
+      "away": "copa",
+      "scoreHome": 1,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé",
+      "sets": [
+        [
+          19,
+          25
+        ],
+        [
+          9,
+          25
+        ],
+        [
+          25,
+          19
+        ],
+        [
+          19,
+          25
+        ]
+      ],
+      "total": [
+        72,
+        94
+      ]
+    },
+    {
+      "date": "02/11/2026",
+      "home": "star",
+      "away": "loup",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé",
+      "sets": [
+        [
+          20,
+          25
+        ],
+        [
+          23,
+          25
+        ],
+        [
+          17,
+          25
+        ]
+      ],
+      "total": [
+        60,
+        75
+      ]
+    },
     {
       "date": "14/10/2026",
       "home": "copa",
@@ -459,28 +544,10 @@
       "status": "Reporté"
     },
     {
-      "date": "02/11/2026",
-      "home": "pyth",
-      "away": "alam",
-      "status": "Sem. 2"
-    },
-    {
-      "date": "02/11/2026",
-      "home": "gint",
-      "away": "copa",
-      "status": "Sem. 2"
-    },
-    {
-      "date": "02/11/2026",
-      "home": "star",
-      "away": "loup",
-      "status": "Sem. 2"
-    },
-    {
       "date": "06/11/2026",
       "home": "rhin",
       "away": "deme",
-      "status": "Sem. 2"
+      "status": "Reporté"
     },
     {
       "date": "09/11/2026",
@@ -628,14 +695,14 @@
     },
     {
       "date": "18/01/2027",
-      "home": "gint",
-      "away": "bach",
+      "home": "star",
+      "away": "copa",
       "status": "Sem. 9"
     },
     {
       "date": "18/01/2027",
-      "home": "star",
-      "away": "copa",
+      "home": "gint",
+      "away": "bach",
       "status": "Sem. 9"
     },
     {
@@ -877,35 +944,45 @@
     {
       "rank": 1,
       "team": "pyth",
-      "elo": 1529.3,
-      "movement": 29.3,
-      "record": "1-0",
+      "elo": 1557.9,
+      "movement": 28.5,
+      "record": "2-0",
       "power": 100.0,
-      "calendar": "V vs Copains",
+      "calendar": "V vs Alambic",
       "diffClass": "diff-easy"
     },
     {
       "rank": 2,
-      "team": "deme",
-      "elo": 1518.4,
-      "movement": 18.4,
+      "team": "loup",
+      "elo": 1536.2,
+      "movement": 36.2,
       "record": "1-0",
-      "power": 81.4,
-      "calendar": "V vs Ginto",
+      "power": 81.3,
+      "calendar": "V vs StarPAFF",
       "diffClass": "diff-easy"
     },
     {
       "rank": 3,
-      "team": "alam",
-      "elo": 1500,
-      "movement": 0,
-      "record": "0-0",
-      "power": 0.0,
-      "calendar": "-",
+      "team": "deme",
+      "elo": 1518.4,
+      "movement": 18.4,
+      "record": "1-0",
+      "power": 65.9,
+      "calendar": "V vs Ginto",
       "diffClass": "diff-easy"
     },
     {
       "rank": 4,
+      "team": "copa",
+      "elo": 1503.0,
+      "movement": 32.4,
+      "record": "1-1",
+      "power": 52.6,
+      "calendar": "V vs Ginto",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 5,
       "team": "rhin",
       "elo": 1500,
       "movement": 0,
@@ -915,27 +992,7 @@
       "diffClass": "diff-easy"
     },
     {
-      "rank": 5,
-      "team": "loup",
-      "elo": 1500,
-      "movement": 0,
-      "record": "0-0",
-      "power": 0.0,
-      "calendar": "-",
-      "diffClass": "diff-easy"
-    },
-    {
       "rank": 6,
-      "team": "star",
-      "elo": 1500,
-      "movement": 0,
-      "record": "0-0",
-      "power": 0.0,
-      "calendar": "-",
-      "diffClass": "diff-easy"
-    },
-    {
-      "rank": 7,
       "team": "bach",
       "elo": 1500,
       "movement": 0,
@@ -945,23 +1002,33 @@
       "diffClass": "diff-easy"
     },
     {
-      "rank": 8,
-      "team": "gint",
-      "elo": 1481.6,
-      "movement": -18.4,
+      "rank": 7,
+      "team": "alam",
+      "elo": 1471.5,
+      "movement": -28.5,
       "record": "0-1",
       "power": 0.0,
-      "calendar": "D vs LES",
+      "calendar": "D vs Pythons",
+      "diffClass": "diff-hard"
+    },
+    {
+      "rank": 8,
+      "team": "star",
+      "elo": 1463.8,
+      "movement": -36.2,
+      "record": "0-1",
+      "power": 0.0,
+      "calendar": "D vs Les",
       "diffClass": "diff-hard"
     },
     {
       "rank": 9,
-      "team": "copa",
-      "elo": 1470.7,
-      "movement": -29.3,
-      "record": "0-1",
+      "team": "gint",
+      "elo": 1449.2,
+      "movement": -32.4,
+      "record": "0-2",
       "power": 0.0,
-      "calendar": "D vs Pythons",
+      "calendar": "D vs Copains",
       "diffClass": "diff-hard"
     }
   ],
@@ -969,7 +1036,17 @@
   "eloHistory": {
     "pyth": [
       1500,
-      1529.3
+      1529.3,
+      1557.9
+    ],
+    "copa": [
+      1500,
+      1470.7,
+      1503.0
+    ],
+    "loup": [
+      1500,
+      1536.2
     ],
     "deme": [
       1500,
@@ -977,22 +1054,18 @@
     ],
     "gint": [
       1500,
-      1481.6
-    ],
-    "copa": [
-      1500,
-      1470.7
+      1481.6,
+      1449.2
     ],
     "alam": [
-      1500
-    ],
-    "rhin": [
-      1500
-    ],
-    "loup": [
-      1500
+      1500,
+      1471.5
     ],
     "star": [
+      1500,
+      1463.8
+    ],
+    "rhin": [
       1500
     ],
     "bach": [
@@ -1004,50 +1077,56 @@
       "pyth": {
         "points": [
           0,
-          3
+          3,
+          6
         ],
         "rank": 1
+      },
+      "copa": {
+        "points": [
+          0,
+          1,
+          4
+        ],
+        "rank": 2
+      },
+      "loup": {
+        "points": [
+          0,
+          3
+        ],
+        "rank": 3
       },
       "deme": {
         "points": [
           0,
           3
         ],
-        "rank": 2
+        "rank": 4
       },
       "gint": {
         "points": [
           0,
-          2
+          2,
+          3
         ],
-        "rank": 3
+        "rank": 5
       },
-      "copa": {
+      "alam": {
         "points": [
           0,
           1
         ],
-        "rank": 4
-      },
-      "alam": {
-        "points": [
-          0
-        ],
-        "rank": 5
-      },
-      "rhin": {
-        "points": [
-          0
-        ],
-        "rank": 6
-      },
-      "loup": {
-        "points": [
-          0
-        ],
         "rank": 7
       },
       "star": {
+        "points": [
+          0,
+          1
+        ],
+        "rank": 6
+      },
+      "rhin": {
         "points": [
           0
         ],
