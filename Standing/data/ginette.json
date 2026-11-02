@@ -4,7 +4,7 @@
     "name": "Coupe Ginette",
     "season": "2026-2027",
     "format": "coupe",
-    "lastUpdated": "2026-10-26T14:45:37",
+    "lastUpdated": "2026-11-02T21:59:29",
     "teamCount": 64,
     "matchCount": 0,
     "forfeitCount": 0,
@@ -29,7 +29,7 @@
       "division": "Ultimate",
       "divSlug": "ultimate",
       "elo": 1930.7,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -43,7 +43,7 @@
       "division": "Ultimate",
       "divSlug": "ultimate",
       "elo": 1916.0,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -99,7 +99,7 @@
       "division": "Ultimate",
       "divSlug": "ultimate",
       "elo": 1884.0,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -113,7 +113,7 @@
       "division": "Ultimate",
       "divSlug": "ultimate",
       "elo": 1870.0,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -127,7 +127,7 @@
       "division": "Ultimate",
       "divSlug": "ultimate",
       "elo": 1869.3,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -141,7 +141,7 @@
       "division": "Elite",
       "divSlug": "elite",
       "elo": 1824.9,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -155,7 +155,7 @@
       "division": "Elite",
       "divSlug": "elite",
       "elo": 1823.1,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -169,7 +169,7 @@
       "division": "Elite",
       "divSlug": "elite",
       "elo": 1821.7,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -183,7 +183,7 @@
       "division": "Elite",
       "divSlug": "elite",
       "elo": 1821.7,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -211,7 +211,7 @@
       "division": "Elite",
       "divSlug": "elite",
       "elo": 1778.3,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -225,7 +225,7 @@
       "division": "Elite",
       "divSlug": "elite",
       "elo": 1778.3,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -239,7 +239,7 @@
       "division": "Elite",
       "divSlug": "elite",
       "elo": 1776.9,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -253,7 +253,7 @@
       "division": "Elite",
       "divSlug": "elite",
       "elo": 1775.1,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -267,7 +267,7 @@
       "division": "Hard",
       "divSlug": "hard",
       "elo": 1729.3,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -281,7 +281,7 @@
       "division": "Hard",
       "divSlug": "hard",
       "elo": 1718.4,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -365,7 +365,7 @@
       "division": "Or 6x6",
       "divSlug": "or6x6",
       "elo": 1681.6,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -379,7 +379,7 @@
       "division": "Hard",
       "divSlug": "hard",
       "elo": 1681.6,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -393,7 +393,7 @@
       "division": "Or 6x6",
       "divSlug": "or6x6",
       "elo": 1681.1,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -407,7 +407,7 @@
       "division": "Or 6x6",
       "divSlug": "or6x6",
       "elo": 1668.9,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -421,7 +421,7 @@
       "division": "Or 6x6",
       "divSlug": "or6x6",
       "elo": 1631.1,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -435,7 +435,7 @@
       "division": "Medium",
       "divSlug": "medium",
       "elo": 1630.5,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -449,7 +449,7 @@
       "division": "Medium",
       "divSlug": "medium",
       "elo": 1630.0,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -463,7 +463,7 @@
       "division": "Medium",
       "divSlug": "medium",
       "elo": 1626.4,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -477,7 +477,7 @@
       "division": "Or 6x6",
       "divSlug": "or6x6",
       "elo": 1622.0,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -491,7 +491,7 @@
       "division": "Or 6x6",
       "divSlug": "or6x6",
       "elo": 1618.9,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -505,7 +505,7 @@
       "division": "Or 6x6",
       "divSlug": "or6x6",
       "elo": 1618.4,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -547,7 +547,7 @@
       "division": "Medium",
       "divSlug": "medium",
       "elo": 1573.6,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -561,7 +561,7 @@
       "division": "Medium",
       "divSlug": "medium",
       "elo": 1570.0,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -575,7 +575,7 @@
       "division": "Medium",
       "divSlug": "medium",
       "elo": 1569.5,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -589,7 +589,7 @@
       "division": "Easy",
       "divSlug": "easy",
       "elo": 1529.5,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -603,7 +603,7 @@
       "division": "Easy",
       "divSlug": "easy",
       "elo": 1518.3,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -673,7 +673,7 @@
       "division": "Easy",
       "divSlug": "easy",
       "elo": 1481.7,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -687,7 +687,7 @@
       "division": "Easy",
       "divSlug": "easy",
       "elo": 1470.5,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -701,7 +701,7 @@
       "division": "Starter",
       "divSlug": "starter",
       "elo": 1439.1,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -715,7 +715,7 @@
       "division": "Starter",
       "divSlug": "starter",
       "elo": 1431.2,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -729,7 +729,7 @@
       "division": "Starter",
       "divSlug": "starter",
       "elo": 1422.8,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -743,7 +743,7 @@
       "division": "Starter",
       "divSlug": "starter",
       "elo": 1415.9,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -757,7 +757,7 @@
       "division": "Starter",
       "divSlug": "starter",
       "elo": 1384.1,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -771,7 +771,7 @@
       "division": "Starter",
       "divSlug": "starter",
       "elo": 1377.2,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -785,7 +785,7 @@
       "division": "Starter",
       "divSlug": "starter",
       "elo": 1360.9,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -799,7 +799,7 @@
       "division": "Argent",
       "divSlug": "argent",
       "elo": 1336.2,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -813,7 +813,7 @@
       "division": "Argent",
       "divSlug": "argent",
       "elo": 1332.1,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -827,7 +827,7 @@
       "division": "Argent",
       "divSlug": "argent",
       "elo": 1328.7,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -841,7 +841,7 @@
       "division": "Argent",
       "divSlug": "argent",
       "elo": 1324.7,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -883,7 +883,7 @@
       "division": "Argent",
       "divSlug": "argent",
       "elo": 1275.3,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -897,7 +897,7 @@
       "division": "Argent",
       "divSlug": "argent",
       "elo": 1271.3,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -911,7 +911,7 @@
       "division": "Argent",
       "divSlug": "argent",
       "elo": 1263.8,
-      "delta": 0,
+      "delta": 0.0,
       "record": "0-0",
       "wins": 0,
       "losses": 0,
@@ -1028,7 +1028,8 @@
       "upcoming": true,
       "date": "18/11/2026",
       "time": "20:00",
-      "notes": "Ou le lundi 16/11 à 20:00 · Lieu à confirmer"
+      "notes": "Ou le lundi 16/11 à 20:00 · Lieu à confirmer",
+      "siteId": 6691
     },
     {
       "round": "Tour 1",
@@ -1048,7 +1049,8 @@
       "date": "19/11/2026",
       "time": "20:30",
       "venue": "Espace du Sport",
-      "address": "2 Rue des Halliers, Rungis"
+      "address": "2 Rue des Halliers, Rungis",
+      "siteId": 6692
     },
     {
       "round": "Tour 1",
@@ -1068,7 +1070,8 @@
       "date": "16/11/2026",
       "time": "20:00",
       "venue": "Lycée Louis Armand 1",
-      "address": "173 Boulevard de Strasbourg, Nogent-sur-marne"
+      "address": "173 Boulevard de Strasbourg, Nogent-sur-marne",
+      "siteId": 6693
     },
     {
       "round": "Tour 1",
@@ -1088,7 +1091,8 @@
       "date": "16/11/2026",
       "time": "20:00",
       "venue": "Gymnase Pierre de Coubertin",
-      "address": "Rue Pierre de Coubertin, 94510 La Queue-en-Brie"
+      "address": "Rue Pierre de Coubertin, 94510 La Queue-en-Brie",
+      "siteId": 6694
     },
     {
       "round": "Tour 1",
@@ -1108,7 +1112,8 @@
       "date": "17/11/2026",
       "time": "20:30",
       "venue": "Gymnase Budé",
-      "address": "Voie Georges Pompidou, Limeil brévannes"
+      "address": "Voie Georges Pompidou, Limeil brévannes",
+      "siteId": 6695
     },
     {
       "round": "Tour 1",
@@ -1128,7 +1133,8 @@
       "date": "16/11/2026",
       "time": "20:15",
       "venue": "Yves Querlier",
-      "address": "19 rue entroncamento, Villiers sur marne"
+      "address": "19 rue entroncamento, Villiers sur marne",
+      "siteId": 6696
     },
     {
       "round": "Tour 1",
@@ -1148,7 +1154,8 @@
       "date": "18/11/2026",
       "time": "20:45",
       "venue": "Gymnase de la Citadelle",
-      "address": "31 Rue de la Citadelle, Draveil"
+      "address": "31 Rue de la Citadelle, Draveil",
+      "siteId": 6697
     },
     {
       "round": "Tour 1",
@@ -1168,7 +1175,8 @@
       "date": "20/11/2026",
       "time": "20:30",
       "venue": "Gymnase Montaleau",
-      "address": "29 rue de Montaleau 94370 Sucy, Sucy-en-brie"
+      "address": "29 rue de Montaleau 94370 Sucy, Sucy-en-brie",
+      "siteId": 6698
     },
     {
       "round": "Tour 1",
@@ -1188,7 +1196,8 @@
       "date": "19/11/2026",
       "time": "20:00",
       "venue": "Lycée Louis Armand 2",
-      "address": "173 Boulevard de Strasbourg, Nogent-sur-marne"
+      "address": "173 Boulevard de Strasbourg, Nogent-sur-marne",
+      "siteId": 6699
     },
     {
       "round": "Tour 1",
@@ -1208,7 +1217,8 @@
       "date": "16/11/2026",
       "time": "20:00",
       "venue": "Gymnase Pierre de Coubertin",
-      "address": "Rue Pierre de Coubertin, 94510 La Queue-en-Brie"
+      "address": "Rue Pierre de Coubertin, 94510 La Queue-en-Brie",
+      "siteId": 6700
     },
     {
       "round": "Tour 1",
@@ -1227,7 +1237,8 @@
       "upcoming": true,
       "date": "18/11/2026",
       "time": "20:00",
-      "notes": "Ou le lundi 16/11 à 20:00 · Lieu à confirmer"
+      "notes": "Ou le lundi 16/11 à 20:00 · Lieu à confirmer",
+      "siteId": 6701
     },
     {
       "round": "Tour 1",
@@ -1247,7 +1258,8 @@
       "date": "16/11/2026",
       "time": "20:15",
       "venue": "Yves Querlier",
-      "address": "19 rue entroncamento, Villiers sur marne"
+      "address": "19 rue entroncamento, Villiers sur marne",
+      "siteId": 6702
     },
     {
       "round": "Tour 1",
@@ -1267,7 +1279,8 @@
       "date": "20/11/2026",
       "time": "20:30",
       "venue": "Lycée Louis Armand 3",
-      "address": "173 Boulevard de Strasbourg, Nogent-sur-marne"
+      "address": "173 Boulevard de Strasbourg, Nogent-sur-marne",
+      "siteId": 6703
     },
     {
       "round": "Tour 1",
@@ -1287,7 +1300,8 @@
       "date": "17/11/2026",
       "time": "20:00",
       "venue": "Mistral",
-      "address": "1 rue Frédéric Mistral, Fresnes"
+      "address": "1 rue Frédéric Mistral, Fresnes",
+      "siteId": 6704
     },
     {
       "round": "Tour 1",
@@ -1307,7 +1321,8 @@
       "date": "16/11/2026",
       "time": "20:30",
       "venue": "Gymnase Marie-Amélie Le Fur",
-      "address": "3 Rue du Clos Sainte-Catherine, Bry sur marne"
+      "address": "3 Rue du Clos Sainte-Catherine, Bry sur marne",
+      "siteId": 6705
     },
     {
       "round": "Tour 1",
@@ -1327,7 +1342,8 @@
       "date": "18/11/2026",
       "time": "20:30",
       "venue": "Venise Gosnat",
-      "address": "30 Rue Amédée Huon, 94200 Ivry-sur-seine"
+      "address": "30 Rue Amédée Huon, 94200 Ivry-sur-Seine",
+      "siteId": 6706
     },
     {
       "round": "Tour 1",
@@ -1347,7 +1363,8 @@
       "date": "19/11/2026",
       "time": "20:00",
       "venue": "Lycée Louis Armand 2",
-      "address": "173 Boulevard de Strasbourg, Nogent-sur-marne"
+      "address": "173 Boulevard de Strasbourg, Nogent-sur-marne",
+      "siteId": 6707
     },
     {
       "round": "Tour 1",
@@ -1367,7 +1384,8 @@
       "date": "16/11/2026",
       "time": "20:00",
       "venue": "Centre des bords de Marne",
-      "address": "2 Rue de la Prairie, 94170 le perreux sur marne"
+      "address": "2 Rue de la Prairie, 94170 le perreux sur marne",
+      "siteId": 6708
     },
     {
       "round": "Tour 1",
@@ -1387,7 +1405,8 @@
       "date": "16/11/2026",
       "time": "20:30",
       "venue": "Venise Gosnat",
-      "address": "30 Rue Amédée Huon, 94200 Ivry-sur-seine"
+      "address": "30 Rue Amédée Huon, 94200 Ivry-sur-Seine",
+      "siteId": 6709
     },
     {
       "round": "Tour 1",
@@ -1407,7 +1426,8 @@
       "date": "16/11/2026",
       "time": "20:00",
       "venue": "Collège/Lycée Saint Michel de Saint-Mandé",
-      "address": "10 ter av Jeanne d'Arc, Saint mande"
+      "address": "10 ter av Jeanne d’Arc, Saint mande",
+      "siteId": 6710
     },
     {
       "round": "Tour 1",
@@ -1426,7 +1446,8 @@
       "upcoming": true,
       "date": "16/11/2026",
       "time": "20:00",
-      "notes": "Ou le vendredi 20/11 à 20:00 · Lieu à confirmer"
+      "notes": "Ou le vendredi 20/11 à 20:00 · Lieu à confirmer",
+      "siteId": 6711
     },
     {
       "round": "Tour 1",
@@ -1446,7 +1467,8 @@
       "date": "18/11/2026",
       "time": "20:00",
       "venue": "Henri Wallon",
-      "address": "Rue Louise aglae crette, Vitry sur Seine"
+      "address": "Rue Louise aglae crette, Vitry sur seine",
+      "siteId": 6712
     },
     {
       "round": "Tour 1",
@@ -1466,7 +1488,8 @@
       "date": "18/11/2026",
       "time": "20:00",
       "venue": "gymnase Eugene Delacroix",
-      "address": "rue du Maréchal Manoury, Maisons-alfort"
+      "address": "rue du Maréchal Manoury, Maisons-alfort",
+      "siteId": 6713
     },
     {
       "round": "Tour 1",
@@ -1486,7 +1509,8 @@
       "date": "16/11/2026",
       "time": "20:30",
       "venue": "PASTEUR",
-      "address": "10 rue Henri Matisse, Creteil"
+      "address": "10 rue Henri Matisse, Creteil",
+      "siteId": 6714
     },
     {
       "round": "Tour 1",
@@ -1506,7 +1530,8 @@
       "date": "18/11/2026",
       "time": "20:30",
       "venue": "Clarisse Agbegnenou",
-      "address": "6 promenade Arthur Rimbaud, Chevilly larue"
+      "address": "6 promenade Arthur Rimbaud, Chevilly larue",
+      "siteId": 6715
     },
     {
       "round": "Tour 1",
@@ -1526,7 +1551,8 @@
       "date": "16/11/2026",
       "time": "20:30",
       "venue": "Gymnase des Sablons",
-      "address": "44 rue des Sablons, 77400 - saint-thibault-des-vignes"
+      "address": "44 rue des Sablons, 77400 - saint-thibault-des-vignes",
+      "siteId": 6716
     },
     {
       "round": "Tour 1",
@@ -1546,7 +1572,8 @@
       "date": "19/11/2026",
       "time": "20:20",
       "venue": "Gymnase Georges Pompidou",
-      "address": "12 Rue Georges Gaume, Maisons-alfort"
+      "address": "12 Rue Georges Gaume, Maisons-alfort",
+      "siteId": 6717
     },
     {
       "round": "Tour 1",
@@ -1566,7 +1593,8 @@
       "date": "16/11/2026",
       "time": "20:30",
       "venue": "Gymnase du Piple",
-      "address": "154 RUE DE BOISSY 94370 SUCY EN BRIE, Sucy-en-brie"
+      "address": "154 RUE DE BOISSY 94370 SUCY EN BRIE",
+      "siteId": 6718
     },
     {
       "round": "Tour 1",
@@ -1586,7 +1614,8 @@
       "date": "16/11/2026",
       "time": "20:00",
       "venue": "Gymnase Pierre de Coubertin",
-      "address": "Rue Pierre de Coubertin, 94510 La Queue-en-Brie"
+      "address": "Rue Pierre de Coubertin, 94510 La Queue-en-Brie",
+      "siteId": 6719
     },
     {
       "round": "Tour 1",
@@ -1606,7 +1635,8 @@
       "date": "17/11/2026",
       "time": "20:45",
       "venue": "GYMNASE DELAUNE",
-      "address": "5 RUE PETIT, Juvisy sur orge"
+      "address": "5 RUE PETIT, Juvisy sur orge",
+      "siteId": 6720
     },
     {
       "round": "Tour 1",
@@ -1626,7 +1656,8 @@
       "date": "18/11/2026",
       "time": "20:00",
       "venue": "Guyard",
-      "address": "12 rue Thomas Edison, Créteil"
+      "address": "12 rue Thomas Edison, Créteil",
+      "siteId": 6721
     },
     {
       "round": "Tour 1",
@@ -1645,7 +1676,8 @@
       "upcoming": true,
       "date": "20/11/2026",
       "time": "20:00",
-      "notes": "Ou le mercredi 18/11 à 20:00 · Lieu à confirmer"
+      "notes": "Ou le mercredi 18/11 à 20:00 · Lieu à confirmer",
+      "siteId": 6722
     },
     {
       "round": "Tour 2",
@@ -1664,7 +1696,8 @@
       "upcoming": true,
       "date": "15/12/2026",
       "time": "20:00",
-      "notes": "Ou le mercredi 16/12 à 20:30 · Lieu à confirmer"
+      "notes": "Ou le mercredi 16/12 à 20:30 · Lieu à confirmer",
+      "siteId": 6723
     },
     {
       "round": "Tour 2",
@@ -1684,7 +1717,8 @@
       "date": "15/12/2026",
       "time": "20:45",
       "venue": "GYMNASE DELAUNE",
-      "address": "5 RUE PETIT, Juvisy sur orge"
+      "address": "5 RUE PETIT, Juvisy sur orge",
+      "siteId": 6724
     },
     {
       "round": "Tour 2",
@@ -1704,7 +1738,8 @@
       "date": "16/12/2026",
       "time": "20:00",
       "venue": "Auguste DELAUNE",
-      "address": "119 rue de Verdun, Champigny sur marne"
+      "address": "119 rue de Verdun, Champigny sur marne",
+      "siteId": 6725
     },
     {
       "round": "Tour 2",
@@ -1724,7 +1759,8 @@
       "date": "14/12/2026",
       "time": "20:00",
       "venue": "Gymnase Pierre de Coubertin",
-      "address": "Rue Pierre de Coubertin, 94510 La Queue-en-Brie"
+      "address": "Rue Pierre de Coubertin, 94510 La Queue-en-Brie",
+      "siteId": 6726
     },
     {
       "round": "Tour 2",
@@ -1744,7 +1780,8 @@
       "date": "14/12/2026",
       "time": "20:30",
       "venue": "Gymnase du Piple",
-      "address": "154 RUE DE BOISSY, 94370 SUCY EN BRIE"
+      "address": "154 RUE DE BOISSY 94370 SUCY EN BRIE",
+      "siteId": 6727
     },
     {
       "round": "Tour 2",
@@ -1764,7 +1801,8 @@
       "date": "14/12/2026",
       "time": "20:15",
       "venue": "Yves Querlier",
-      "address": "19 rue entroncamento, Villiers sur marne"
+      "address": "19 rue entroncamento, Villiers sur marne",
+      "siteId": 6728
     },
     {
       "round": "Tour 2",
@@ -1784,7 +1822,8 @@
       "date": "18/12/2026",
       "time": "20:30",
       "venue": "Gymnase Montaleau",
-      "address": "29 rue de Montaleau, 94370 Sucy"
+      "address": "29 rue de Montaleau 94370 Sucy, Sucy-en-brie",
+      "siteId": 6729
     },
     {
       "round": "Tour 2",
@@ -1804,7 +1843,8 @@
       "date": "15/12/2026",
       "time": "19:30",
       "venue": "Clarisse Agbegnenou",
-      "address": "6 promenade Arthur Rimbaud, Chevilly larue"
+      "address": "6 promenade Arthur Rimbaud, Chevilly larue",
+      "siteId": 6730
     },
     {
       "round": "Tour 2",
@@ -1824,7 +1864,8 @@
       "date": "14/12/2026",
       "time": "20:00",
       "venue": "Gymnase Pierre de Coubertin",
-      "address": "Rue Pierre de Coubertin, 94510 La Queue-en-Brie"
+      "address": "Rue Pierre de Coubertin, 94510 La Queue-en-Brie",
+      "siteId": 6731
     },
     {
       "round": "Tour 2",
@@ -1844,7 +1885,8 @@
       "date": "17/12/2026",
       "time": "20:20",
       "venue": "Gymnase Georges Pompidou",
-      "address": "12 Rue Georges Gaume, Maisons-alfort"
+      "address": "12 Rue Georges Gaume, Maisons-alfort",
+      "siteId": 6732
     },
     {
       "round": "Tour 2",
@@ -1863,7 +1905,8 @@
       "upcoming": true,
       "date": "16/12/2026",
       "time": "20:00",
-      "notes": "Ou le lundi 14/12 à 20:00 · Lieu à confirmer"
+      "notes": "Ou le lundi 14/12 à 20:00 · Lieu à confirmer",
+      "siteId": 6733
     },
     {
       "round": "Tour 2",
@@ -1883,7 +1926,8 @@
       "date": "14/12/2026",
       "time": "20:30",
       "venue": "Gymnase Marie-Amélie Le Fur",
-      "address": "3 Rue du Clos Sainte-Catherine, Bry sur marne"
+      "address": "3 Rue du Clos Sainte-Catherine, Bry sur marne",
+      "siteId": 6734
     },
     {
       "round": "Tour 2",
@@ -1903,7 +1947,8 @@
       "date": "15/12/2026",
       "time": "20:00",
       "venue": "Mistral",
-      "address": "1 rue Frédéric Mistral, Fresnes"
+      "address": "1 rue Frédéric Mistral, Fresnes",
+      "siteId": 6735
     },
     {
       "round": "Tour 2",
@@ -1923,7 +1968,8 @@
       "date": "16/12/2026",
       "time": "20:00",
       "venue": "Henri Wallon",
-      "address": "Rue Louise aglae crette, Vitry sur Seine"
+      "address": "Rue Louise aglae crette, Vitry sur seine",
+      "siteId": 6736
     },
     {
       "round": "Tour 2",
@@ -1943,7 +1989,8 @@
       "date": "14/12/2026",
       "time": "20:30",
       "venue": "Gymnase des Sablons",
-      "address": "44 rue des Sablons, 77400 Saint-Thibault-des-Vignes"
+      "address": "44 rue des Sablons, 77400 - saint-thibault-des-vignes",
+      "siteId": 6737
     },
     {
       "round": "Tour 2",
@@ -1963,7 +2010,8 @@
       "date": "14/12/2026",
       "time": "20:00",
       "venue": "Collège/Lycée Saint Michel de Saint-Mandé",
-      "address": "10 ter av Jeanne d'Arc, Saint Mande"
+      "address": "10 ter av Jeanne d’Arc, Saint mande",
+      "siteId": 6738
     },
     {
       "round": "Tour 2",
@@ -1983,7 +2031,8 @@
       "date": "16/12/2026",
       "time": "20:45",
       "venue": "Gymnase de la Citadelle",
-      "address": "31 Rue de la Citadelle, Draveil"
+      "address": "31 Rue de la Citadelle, Draveil",
+      "siteId": 6739
     },
     {
       "round": "Tour 2",
@@ -2000,9 +2049,10 @@
       "deltaHome": 0,
       "deltaAway": 0,
       "upcoming": true,
-      "date": "16/12/2026",
+      "date": "14/12/2026",
       "time": "20:00",
-      "notes": "Ou le vendredi 18/12 à 20:00 · Lieu à confirmer"
+      "notes": "Horaire à confirmer · Lieu à confirmer",
+      "siteId": 6740
     },
     {
       "round": "Tour 2",
@@ -2022,7 +2072,8 @@
       "date": "14/12/2026",
       "time": "20:00",
       "venue": "Centre des bords de Marne",
-      "address": "2 Rue de la Prairie, 94170 le perreux sur marne"
+      "address": "2 Rue de la Prairie, 94170 le perreux sur marne",
+      "siteId": 6741
     },
     {
       "round": "Tour 2",
@@ -2042,7 +2093,8 @@
       "date": "16/12/2026",
       "time": "20:00",
       "venue": "gymnase Eugene Delacroix",
-      "address": "rue du Maréchal Manoury, Maisons-alfort"
+      "address": "rue du Maréchal Manoury, Maisons-alfort",
+      "siteId": 6742
     },
     {
       "round": "Tour 2",
@@ -2062,7 +2114,8 @@
       "date": "16/12/2026",
       "time": "20:30",
       "venue": "Venise Gosnat",
-      "address": "30 Rue Amédée Huon, 94200 Ivry-sur-Seine"
+      "address": "30 Rue Amédée Huon, 94200 Ivry-sur-Seine",
+      "siteId": 6743
     },
     {
       "round": "Tour 2",
@@ -2082,7 +2135,8 @@
       "date": "15/12/2026",
       "time": "20:00",
       "venue": "Salle Pascal Tabanelli",
-      "address": "1 Rue À Trait, Champigny-sur-marne"
+      "address": "1 Rue À Trait, Champigny-sur-marne",
+      "siteId": 6744
     },
     {
       "round": "Tour 2",
@@ -2102,7 +2156,8 @@
       "date": "14/12/2026",
       "time": "20:20",
       "venue": "Gymnase Georges Pompidou",
-      "address": "12 Rue Georges Gaume, Maisons-alfort"
+      "address": "12 Rue Georges Gaume, Maisons-alfort",
+      "siteId": 6745
     },
     {
       "round": "Tour 2",
@@ -2122,7 +2177,8 @@
       "date": "14/12/2026",
       "time": "20:30",
       "venue": "PASTEUR",
-      "address": "10 rue Henri Matisse, Creteil"
+      "address": "10 rue Henri Matisse, Creteil",
+      "siteId": 6746
     },
     {
       "round": "Tour 2",
@@ -2142,7 +2198,8 @@
       "date": "14/12/2026",
       "time": "20:00",
       "venue": "Gymnase Pierre de Coubertin",
-      "address": "Rue Pierre de Coubertin, 94510 La Queue-en-Brie"
+      "address": "Rue Pierre de Coubertin, 94510 La Queue-en-Brie",
+      "siteId": 6747
     },
     {
       "round": "Tour 2",
@@ -2162,7 +2219,8 @@
       "date": "14/12/2026",
       "time": "20:00",
       "venue": "Lycée Louis Armand 1",
-      "address": "173 Boulevard de Strasbourg, Nogent-sur-marne"
+      "address": "173 Boulevard de Strasbourg, Nogent-sur-marne",
+      "siteId": 6748
     },
     {
       "round": "Tour 2",
@@ -2182,7 +2240,8 @@
       "date": "15/12/2026",
       "time": "20:45",
       "venue": "GYMNASE DELAUNE",
-      "address": "5 RUE PETIT, Juvisy sur orge"
+      "address": "5 RUE PETIT, Juvisy sur orge",
+      "siteId": 6749
     },
     {
       "round": "Tour 2",
@@ -2202,7 +2261,8 @@
       "date": "18/12/2026",
       "time": "20:30",
       "venue": "Lycée Louis Armand 3",
-      "address": "173 Boulevard de Strasbourg, Nogent-sur-marne"
+      "address": "173 Boulevard de Strasbourg, Nogent-sur-marne",
+      "siteId": 6750
     },
     {
       "round": "Tour 2",
@@ -2222,7 +2282,8 @@
       "date": "17/12/2026",
       "time": "20:00",
       "venue": "Lycée Louis Armand 2",
-      "address": "173 Boulevard de Strasbourg, Nogent-sur-marne"
+      "address": "173 Boulevard de Strasbourg, Nogent-sur-marne",
+      "siteId": 6751
     },
     {
       "round": "Tour 2",
@@ -2242,7 +2303,8 @@
       "date": "14/12/2026",
       "time": "20:15",
       "venue": "Yves Querlier",
-      "address": "19 rue entroncamento, Villiers sur marne"
+      "address": "19 rue entroncamento, Villiers sur marne",
+      "siteId": 6752
     },
     {
       "round": "Tour 2",
@@ -2262,7 +2324,8 @@
       "date": "15/12/2026",
       "time": "20:30",
       "venue": "Gymnase Budé",
-      "address": "Voie Georges Pompidou, Limeil brévannes"
+      "address": "Voie Georges Pompidou, Limeil brévannes",
+      "siteId": 6753
     },
     {
       "round": "Tour 2",
@@ -2282,7 +2345,8 @@
       "date": "14/12/2026",
       "time": "20:30",
       "venue": "Venise Gosnat",
-      "address": "30 Rue Amédée Huon, 94200 Ivry-sur-Seine"
+      "address": "30 Rue Amédée Huon, 94200 Ivry-sur-Seine",
+      "siteId": 6754
     }
   ],
   "upsets": []
