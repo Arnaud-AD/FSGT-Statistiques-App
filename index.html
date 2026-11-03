@@ -431,6 +431,47 @@
             display: inline-block;
         }
         .persona-block.open .persona-expand { transform: rotate(180deg); }
+        .persona-me-btn {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            border: 1px solid #d1d5db;
+            background: #fff;
+            color: #6b7280;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .persona-me-btn.on { background: #1e3a5f; border-color: #1e3a5f; color: #fff; }
+        .persona-block.is-me .persona-label { color: #9ca3af; }
+        .analytics-device {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 0 0 12px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            background: #f3f4f6;
+            font-size: 12px;
+            color: #374151;
+        }
+        .analytics-device button {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: none;
+            background: #1e3a5f;
+            color: #fff;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .analytics-mine-toggle {
+            margin-top: 12px;
+            font-size: 12px;
+            color: #6b7280;
+            cursor: pointer;
+            user-select: none;
+        }
         .persona-timeline {
             padding: 6px 8px 10px 8px;
             background: #fafbfc;
@@ -722,7 +763,7 @@
     <script src="firebase-config.js"></script>
     <script src="admin-config.js"></script>
     <script src="firebase-sync.js"></script>
-    <script src="analytics.js"></script>
+    <script src="analytics.js?v=29.35"></script>
 
     <script src="storage.js"></script>
     <script>
@@ -749,6 +790,20 @@
             });
             showEndOfSeasonCards();
             checkInProgressMatch();
+            _markThisDeviceAsMine();
+        }
+
+        // Connexion admin sur cet appareil → ne plus jamais le compter dans l'analytique,
+        // et marquer « Moi » le visiteur déjà associé à cet appareil (nettoie l'historique).
+        async function _markThisDeviceAsMine() {
+            if (typeof AppAnalytics === 'undefined' || typeof db === 'undefined') return;
+            AppAnalytics.setOptOut(true);
+            let pid = null;
+            try { pid = localStorage.getItem('analytics_persona_id'); } catch (e) {}
+            if (!pid) return;
+            try {
+                await db.collection('analytics_personas').doc(pid).update({ isMe: true });
+            } catch (e) { /* silencieux */ }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -958,18 +1013,17 @@
                         number: data.number || 0,
                         linkedVisitorIds: data.linkedVisitorIds || [],
                         events: [],
-                        isAnonymous: false
+                        isAnonymous: false,
+                        isMe: data.isMe === true
                     };
                     (data.linkedVisitorIds || []).forEach(uuid => { uuidToPersona[uuid] = d.id; });
                 });
 
                 // Distribuer les events : chaque UUID orphelin devient un bucket "Anonyme #N" propre
-                let totalPageViews = 0;
                 let anonymousIndex = 0;
                 const visitorToAnon = {};
                 eventsSnap.forEach(d => {
                     const ev = { id: d.id, ...d.data() };
-                    if (ev.type === 'page_view') totalPageViews++;
                     let pid = ev.persona && personas[ev.persona]
                         ? ev.persona
                         : uuidToPersona[ev.visitor];
@@ -1002,28 +1056,39 @@
                 }
 
                 // Liste triée par dernière activité (event le plus récent en tête)
-                const personaList = Object.values(personas)
+                const allActive = Object.values(personas)
                     .filter(p => p.events.length > 0)
                     .sort((a, b) => {
                         const ta = a.events[0]?.timestamp?.toMillis?.() || 0;
                         const tb = b.events[0]?.timestamp?.toMillis?.() || 0;
                         return tb - ta;
                     });
+                // Les visiteurs marqués « Moi » sont exclus des totaux et listés à part
+                const personaList = allActive.filter(p => !p.isMe);
+                const mineList = allActive.filter(p => p.isMe);
+                const countViews = list => list.reduce(
+                    (n, p) => n + p.events.filter(ev => ev.type === 'page_view').length, 0);
+                const totalPageViews = countViews(personaList);
+                const minePageViews = countViews(mineList);
 
                 const identifiedCount = personaList.filter(p => !p.isAnonymous).length;
                 const anonymousCount = personaList.filter(p => p.isAnonymous).length;
                 const totalVisitors = identifiedCount + anonymousCount;
 
-                const personaRows = personaList.map(p => {
+                const renderPersona = p => {
                     const count = p.events.length;
                     const last = p.events[0];
                     const lastSeen = _formatRelativeTime(last && last.timestamp);
                     const labelCls = p.isAnonymous ? 'persona-label persona-anon' : 'persona-label';
                     const title = p.isAnonymous ? 'title="Cliquer pour identifier ce visiteur"' : 'title="Cliquer pour renommer"';
-                    return '<div class="persona-block" data-persona-id="' + escapeHtml(p.id) + '">'
+                    const meBtn = p.isAnonymous ? ''
+                        : '<button class="persona-me-btn' + (p.isMe ? ' on' : '') + '" data-me-id="' + escapeHtml(p.id) + '" title="'
+                          + (p.isMe ? 'Recompter ce visiteur' : 'C\'est moi : exclure des totaux') + '">' + (p.isMe ? 'Moi ✓' : 'Moi ?') + '</button>';
+                    return '<div class="persona-block' + (p.isMe ? ' is-me' : '') + '" data-persona-id="' + escapeHtml(p.id) + '">'
                         + '<div class="persona-header" data-persona-toggle="' + escapeHtml(p.id) + '">'
                         + '<div class="persona-name"><span class="' + labelCls + '" data-rename-id="' + escapeHtml(p.id) + '" ' + title + '>' + escapeHtml(p.label) + '</span></div>'
                         + '<div class="persona-meta">'
+                        + meBtn
                         + '<span class="persona-count">' + count + '</span>'
                         + '<span class="persona-last">' + escapeHtml(lastSeen) + '</span>'
                         + '<span class="persona-expand">▾</span>'
@@ -1031,13 +1096,22 @@
                         + '</div>'
                         + '<div class="persona-timeline" id="timeline-' + escapeHtml(p.id) + '" style="display:none;"></div>'
                         + '</div>';
-                }).join('');
+                };
+                const personaRows = personaList.map(renderPersona).join('');
+                const mineRows = mineList.map(renderPersona).join('');
+
+                const optedOut = typeof AppAnalytics !== 'undefined' && AppAnalytics.isOptedOut();
+                const deviceBar = '<div class="analytics-device">'
+                    + '<span>' + (optedOut ? '✓ Cet appareil n\'est pas compté' : '⚠ Cet appareil est compté quand tu es déconnecté') + '</span>'
+                    + '<button id="analyticsDeviceBtn">' + (optedOut ? 'Le recompter' : 'Ne plus le compter') + '</button>'
+                    + '</div>';
 
                 const subtitle = identifiedCount > 0 || anonymousCount > 0
                     ? (identifiedCount + ' identifié' + (identifiedCount > 1 ? 's' : '') + ' · ' + anonymousCount + ' anonyme' + (anonymousCount > 1 ? 's' : ''))
                     : '';
 
                 container.innerHTML = ''
+                    + deviceBar
                     + '<div class="analytics-grid">'
                     + '<div class="analytics-stat"><div class="analytics-stat-value">' + totalPageViews + '</div><div class="analytics-stat-label">Pages vues</div></div>'
                     + '<div class="analytics-stat"><div class="analytics-stat-value">' + totalVisitors + '</div><div class="analytics-stat-label">Visiteurs uniques</div>'
@@ -1047,7 +1121,39 @@
                     + '<div class="analytics-detail">'
                     + '<div class="analytics-detail-title">Visiteurs (clic sur un nom pour renommer, sur la ligne pour dérouler)</div>'
                     + (personaRows || '<div class="analytics-loading">Aucun</div>')
+                    + (mineList.length
+                        ? '<div class="analytics-mine-toggle" id="analyticsMineToggle">▸ Mes appareils (' + mineList.length + ' · ' + minePageViews + ' pages vues, exclus des totaux)</div>'
+                          + '<div id="analyticsMineList" style="display:none;">' + mineRows + '</div>'
+                        : '')
                     + '</div>';
+
+                const deviceBtn = document.getElementById('analyticsDeviceBtn');
+                if (deviceBtn) deviceBtn.addEventListener('click', async () => {
+                    if (typeof AppAnalytics === 'undefined') return;
+                    if (AppAnalytics.isOptedOut()) AppAnalytics.setOptOut(false);
+                    else await _markThisDeviceAsMine();
+                    loadAnalytics(_currentAnalyticsPeriod());
+                });
+                const mineToggle = document.getElementById('analyticsMineToggle');
+                if (mineToggle) mineToggle.addEventListener('click', () => {
+                    const list = document.getElementById('analyticsMineList');
+                    const show = list.style.display === 'none';
+                    list.style.display = show ? 'block' : 'none';
+                    mineToggle.textContent = (show ? '▾' : '▸') + mineToggle.textContent.slice(1);
+                });
+                container.querySelectorAll('[data-me-id]').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        const p = _analyticsPersonas[btn.dataset.meId];
+                        if (!p) return;
+                        try {
+                            await db.collection('analytics_personas').doc(p.id).update({ isMe: !p.isMe });
+                            loadAnalytics(_currentAnalyticsPeriod());
+                        } catch (err) {
+                            alert('Erreur : ' + err.message);
+                        }
+                    });
+                });
 
                 // Handlers : toggle timeline + rename
                 container.querySelectorAll('[data-persona-toggle]').forEach(header => {
