@@ -5,7 +5,7 @@
     "name": "Or 6x6",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/4",
-    "lastUpdated": "2026-11-02T22:52:19",
+    "lastUpdated": "2026-11-04T15:21:14",
     "teamCount": 11,
     "matchesPlayed": 7,
     "matchesUpcoming": 103
@@ -744,15 +744,15 @@
       "status": "Sem. 3"
     },
     {
-      "date": "12/11/2026",
-      "home": "marv",
-      "away": "smas",
+      "date": "09/11/2026",
+      "home": "no",
+      "away": "raia",
       "status": "Sem. 3"
     },
     {
-      "date": "13/11/2026",
-      "home": "no",
-      "away": "raia",
+      "date": "10/11/2026",
+      "home": "marv",
+      "away": "smas",
       "status": "Sem. 3"
     },
     {

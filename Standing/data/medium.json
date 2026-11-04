@@ -5,40 +5,40 @@
     "name": "Medium",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/3",
-    "lastUpdated": "2026-11-02T22:52:17",
+    "lastUpdated": "2026-11-04T15:21:11",
     "teamCount": 8,
-    "matchesPlayed": 3,
-    "matchesUpcoming": 53
+    "matchesPlayed": 4,
+    "matchesUpcoming": 52
   },
   "teams": {
+    "agen": {
+      "name": "Agent K",
+      "short": "AK",
+      "color": "#e74c3c"
+    },
     "mort": {
       "name": "Morts de Soif",
       "short": "MS",
-      "color": "#e74c3c"
+      "color": "#3498db"
     },
     "bats": {
       "name": "Batstreet Back",
       "short": "BB",
-      "color": "#3498db"
+      "color": "#2ecc71"
     },
     "rhum": {
       "name": "Les Rhum'Antik",
       "short": "RH",
-      "color": "#2ecc71"
-    },
-    "boit": {
-      "name": "Boîte de 4",
-      "short": "B4",
       "color": "#f39c12"
-    },
-    "agen": {
-      "name": "Agent K",
-      "short": "AK",
-      "color": "#9b59b6"
     },
     "mars": {
       "name": "Les Marsupilamyyy",
       "short": "MA",
+      "color": "#9b59b6"
+    },
+    "boit": {
+      "name": "Boîte de 4",
+      "short": "B4",
       "color": "#1abc9c"
     },
     "tigr": {
@@ -55,6 +55,40 @@
   "standings": [
     {
       "rank": 1,
+      "team": "agen",
+      "mj": 2,
+      "g": 1,
+      "p": 1,
+      "setPlus": 3,
+      "setMinus": 4,
+      "ds": -1,
+      "coefSet": "0.75",
+      "ptsPlus": 161,
+      "ptsMinus": 170,
+      "dp": "-9",
+      "coefPts": "0.95",
+      "pts": 4,
+      "formAller": [
+        "L",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 2,
       "team": "mort",
       "mj": 1,
       "g": 1,
@@ -88,7 +122,7 @@
       ]
     },
     {
-      "rank": 2,
+      "rank": 3,
       "team": "bats",
       "mj": 1,
       "g": 1,
@@ -122,7 +156,7 @@
       ]
     },
     {
-      "rank": 3,
+      "rank": 4,
       "team": "rhum",
       "mj": 1,
       "g": 1,
@@ -156,57 +190,23 @@
       ]
     },
     {
-      "rank": 4,
-      "team": "boit",
-      "mj": 1,
-      "g": 0,
-      "p": 1,
-      "setPlus": 1,
-      "setMinus": 3,
-      "ds": -2,
-      "coefSet": "0.33",
-      "ptsPlus": 75,
-      "ptsMinus": 97,
-      "dp": "-22",
-      "coefPts": "0.77",
-      "pts": 1,
-      "formAller": [
-        "L",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
       "rank": 5,
       "team": "mars",
-      "mj": 1,
+      "mj": 2,
       "g": 0,
-      "p": 1,
-      "setPlus": 0,
-      "setMinus": 3,
-      "ds": -3,
-      "coefSet": "0.00",
-      "ptsPlus": 62,
-      "ptsMinus": 75,
-      "dp": "-13",
-      "coefPts": "0.83",
-      "pts": 1,
+      "p": 2,
+      "setPlus": 1,
+      "setMinus": 6,
+      "ds": -5,
+      "coefSet": "0.17",
+      "ptsPlus": 157,
+      "ptsMinus": 176,
+      "dp": "-19",
+      "coefPts": "0.89",
+      "pts": 2,
       "formAller": [
         "L",
-        "P",
+        "L",
         "P",
         "P",
         "P",
@@ -225,18 +225,18 @@
     },
     {
       "rank": 6,
-      "team": "agen",
+      "team": "boit",
       "mj": 1,
       "g": 0,
       "p": 1,
-      "setPlus": 0,
+      "setPlus": 1,
       "setMinus": 3,
-      "ds": -3,
-      "coefSet": "0.00",
-      "ptsPlus": 60,
-      "ptsMinus": 75,
-      "dp": "-15",
-      "coefPts": "0.80",
+      "ds": -2,
+      "coefSet": "0.33",
+      "ptsPlus": 75,
+      "ptsMinus": 97,
+      "dp": "-22",
+      "coefPts": "0.77",
       "pts": 1,
       "formAller": [
         "L",
@@ -328,6 +328,37 @@
   ],
   "matchesPlayed": [
     {
+      "date": "03/11/2026",
+      "home": "agen",
+      "away": "mars",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé",
+      "sets": [
+        [
+          24,
+          26
+        ],
+        [
+          25,
+          21
+        ],
+        [
+          25,
+          23
+        ],
+        [
+          27,
+          25
+        ]
+      ],
+      "total": [
+        101,
+        95
+      ]
+    },
+    {
       "date": "14/10/2026",
       "home": "mort",
       "away": "agen",
@@ -415,10 +446,10 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "03/11/2026",
-      "home": "agen",
-      "away": "mars",
-      "status": "Sem. 2"
+      "date": "13/10/2026",
+      "home": "tigr",
+      "away": "ryoi",
+      "status": "Reporté"
     },
     {
       "date": "04/11/2026",
@@ -443,12 +474,6 @@
       "home": "rhum",
       "away": "tigr",
       "status": "Sem. 3"
-    },
-    {
-      "date": "17/11/2026",
-      "home": "tigr",
-      "away": "ryoi",
-      "status": "Reporté"
     },
     {
       "date": "17/11/2026",
@@ -506,6 +531,12 @@
     },
     {
       "date": "08/12/2026",
+      "home": "tigr",
+      "away": "agen",
+      "status": "Sem. 6"
+    },
+    {
+      "date": "08/12/2026",
       "home": "bats",
       "away": "mort",
       "status": "Sem. 6"
@@ -514,12 +545,6 @@
       "date": "08/12/2026",
       "home": "rhum",
       "away": "mars",
-      "status": "Sem. 6"
-    },
-    {
-      "date": "08/12/2026",
-      "home": "tigr",
-      "away": "agen",
       "status": "Sem. 6"
     },
     {
@@ -590,6 +615,12 @@
     },
     {
       "date": "09/03/2027",
+      "home": "agen",
+      "away": "boit",
+      "status": "Sem. 9"
+    },
+    {
+      "date": "09/03/2027",
       "home": "tigr",
       "away": "bats",
       "status": "Sem. 9"
@@ -598,12 +629,6 @@
       "date": "09/03/2027",
       "home": "rhum",
       "away": "ryoi",
-      "status": "Sem. 9"
-    },
-    {
-      "date": "09/03/2027",
-      "home": "agen",
-      "away": "boit",
       "status": "Sem. 9"
     },
     {
@@ -638,14 +663,14 @@
     },
     {
       "date": "30/03/2027",
-      "home": "bats",
-      "away": "rhum",
+      "home": "agen",
+      "away": "mars",
       "status": "Sem. 11"
     },
     {
       "date": "30/03/2027",
-      "home": "agen",
-      "away": "mars",
+      "home": "bats",
+      "away": "rhum",
       "status": "Sem. 11"
     },
     {
@@ -710,14 +735,14 @@
     },
     {
       "date": "11/05/2027",
-      "home": "bats",
-      "away": "ryoi",
+      "home": "rhum",
+      "away": "agen",
       "status": "Sem. 14"
     },
     {
       "date": "11/05/2027",
-      "home": "rhum",
-      "away": "agen",
+      "home": "bats",
+      "away": "ryoi",
       "status": "Sem. 14"
     },
     {
@@ -786,6 +811,16 @@
     },
     {
       "rank": 6,
+      "team": "agen",
+      "elo": 1493.3,
+      "movement": 23.7,
+      "record": "1-1",
+      "power": 43.8,
+      "calendar": "V vs Les",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 7,
       "team": "boit",
       "elo": 1473.6,
       "movement": -26.4,
@@ -795,28 +830,23 @@
       "diffClass": "diff-hard"
     },
     {
-      "rank": 7,
-      "team": "mars",
-      "elo": 1470.0,
-      "movement": -30.0,
-      "record": "0-1",
-      "power": 0.0,
-      "calendar": "D vs Batstreet",
-      "diffClass": "diff-hard"
-    },
-    {
       "rank": 8,
-      "team": "agen",
-      "elo": 1469.5,
-      "movement": -30.5,
-      "record": "0-1",
+      "team": "mars",
+      "elo": 1446.3,
+      "movement": -23.7,
+      "record": "0-2",
       "power": 0.0,
-      "calendar": "D vs Morts",
+      "calendar": "D vs Agent",
       "diffClass": "diff-hard"
     }
   ],
   "prPlayers": [],
   "eloHistory": {
+    "agen": [
+      1500,
+      1469.5,
+      1493.3
+    ],
     "mort": [
       1500,
       1530.5
@@ -829,17 +859,14 @@
       1500,
       1526.4
     ],
+    "mars": [
+      1500,
+      1470.0,
+      1446.3
+    ],
     "boit": [
       1500,
       1473.6
-    ],
-    "agen": [
-      1500,
-      1469.5
-    ],
-    "mars": [
-      1500,
-      1470.0
     ],
     "tigr": [
       1500
@@ -850,47 +877,49 @@
   },
   "evolutionData": {
     "teams": {
-      "mort": {
+      "agen": {
         "points": [
           0,
-          3
+          1,
+          4
         ],
         "rank": 1
       },
-      "bats": {
+      "mort": {
         "points": [
           0,
           3
         ],
         "rank": 2
       },
-      "rhum": {
+      "bats": {
         "points": [
           0,
           3
         ],
         "rank": 3
       },
+      "rhum": {
+        "points": [
+          0,
+          3
+        ],
+        "rank": 4
+      },
+      "mars": {
+        "points": [
+          0,
+          1,
+          2
+        ],
+        "rank": 5
+      },
       "boit": {
         "points": [
           0,
           1
         ],
-        "rank": 4
-      },
-      "agen": {
-        "points": [
-          0,
-          1
-        ],
         "rank": 6
-      },
-      "mars": {
-        "points": [
-          0,
-          1
-        ],
-        "rank": 5
       },
       "tigr": {
         "points": [
