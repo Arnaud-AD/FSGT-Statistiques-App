@@ -604,10 +604,19 @@ function renderPRTeams() {
     const container = document.getElementById('pr-equipes-content');
     if (!container || !DATA) return;
 
+    // Une équipe sans match joué reste à l'ELO de départ : on ne la classe pas,
+    // elle passe en bas avec « — » (sinon elle s'intercale au milieu avec un score à 0)
+    function hasPlayed(r) {
+        return (r.record || '0-0').split('-').some(function(n) { return parseInt(n, 10) > 0; });
+    }
+    var played = DATA.prTeams.filter(hasPlayed);
+    var notPlayed = DATA.prTeams.filter(function(r) { return !hasPlayed(r); });
+
     let rows = '';
-    DATA.prTeams.forEach(function(r) {
+    played.forEach(function(r, i) {
         const team = DATA.teams[r.team];
         if (!team) return;
+        r = Object.assign({}, r, { rank: i + 1 });
         const barClass = r.rank <= 10 ? 'bar-rank-' + r.rank : 'bar-rank-rest';
         const mvtClass = r.movement > 0 ? 'elo-up' : r.movement < 0 ? 'elo-down' : 'elo-neutral';
         const mvtArrow = r.movement > 0 ? '\u25b2' : r.movement < 0 ? '\u25bc' : '';
@@ -620,6 +629,19 @@ function renderPRTeams() {
             '<td class="center"><span class="pr-value">' + score + '</span></td>' +
             '<td class="center col-opt"><div class="pr-bar-container"><div class="pr-bar"><div class="pr-bar-fill ' + barClass + '" style="width: ' + r.power + '%;"></div></div></div></td>' +
             '<td class="center"><span class="elo-movement ' + mvtClass + '">' + mvtArrow + ' ' + mvtText + '</span></td>' +
+            '<td class="center col-opt"><span class="difficulty-badge ' + r.diffClass + '">' + esc(r.calendar) + '</span></td>' +
+        '</tr>';
+    });
+    notPlayed.forEach(function(r) {
+        const team = DATA.teams[r.team];
+        if (!team) return;
+        rows += '<tr class="pr-not-played">' +
+            '<td class="pr-rank">\u2014</td>' +
+            '<td><div class="team-cell"><div class="team-logo logo-' + r.team + '">' + esc(team.short) + '</div><span class="team-name">' + esc(team.name) + '</span></div></td>' +
+            '<td class="center"><span class="record-text">' + esc(r.record) + '</span></td>' +
+            '<td class="center"><span class="pr-value">\u2014</span></td>' +
+            '<td class="center col-opt"></td>' +
+            '<td class="center"><span class="elo-movement elo-neutral">-</span></td>' +
             '<td class="center col-opt"><span class="difficulty-badge ' + r.diffClass + '">' + esc(r.calendar) + '</span></td>' +
         '</tr>';
     });
