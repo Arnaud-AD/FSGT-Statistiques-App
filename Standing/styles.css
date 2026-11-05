@@ -1550,3 +1550,6 @@
             font-size: 12px;
             color: var(--text-secondary);
         }
+
+/* Power Ranking : équipes sans match joué (non classées, en bas) */
+.pr-not-played { opacity: 0.55; }
