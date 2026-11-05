@@ -261,7 +261,7 @@
         .rank-1 .rank-indicator { background: var(--rank-champion); }
         .rank-2 .rank-indicator, .rank-3 .rank-indicator { background: var(--rank-europe); }
         .rank-4 .rank-indicator, .rank-5 .rank-indicator, .rank-6 .rank-indicator, .rank-7 .rank-indicator { background: transparent; }
-        .rank-8 .rank-indicator, .rank-9 .rank-indicator, .rank-10 .rank-indicator { background: var(--rank-europa); }
+        /* Relegation (last 2) is set per pool by injectRankColors() in app.js */
 
         .rank-number {
             min-width: 20px;
