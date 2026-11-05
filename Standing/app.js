@@ -577,11 +577,19 @@ function renderMatches() {
         '</div>';
     });
 
+    // Part de la saison jouée / restante (sur le total des matchs du calendrier)
+    var nPlayed = DATA.matchesPlayed.length;
+    var nUpcoming = DATA.matchesUpcoming.length;
+    var nTotal = nPlayed + nUpcoming;
+    var pctPlayed = nTotal ? Math.round(nPlayed / nTotal * 100) : 0;
+    var pctUpcoming = nTotal ? 100 - pctPlayed : 0;
+
     container.innerHTML =
         '<div class="matches-section">' +
             '<div class="section-header header-collapsed" onclick="toggleMatchSection(\'played-matches-content\')">' +
                 '<h3 class="section-title">R\u00e9sultats</h3>' +
-                '<span class="section-badge">' + DATA.matchesPlayed.length + ' matchs</span>' +
+                '<span class="section-badge">' + nPlayed + ' matchs</span>' +
+                '<span class="section-badge">' + pctPlayed + ' % jou\u00e9s</span>' +
                 '<span class="section-arrow collapsed">&#9660;</span>' +
             '</div>' +
             '<div id="played-matches-content" class="section-collapsible collapsed">' +
@@ -591,7 +599,8 @@ function renderMatches() {
         '<div class="matches-section">' +
             '<div class="section-header" onclick="toggleMatchSection(\'upcoming-matches-content\')">' +
                 '<h3 class="section-title">\u00c0 venir</h3>' +
-                '<span class="section-badge">' + DATA.matchesUpcoming.length + ' matchs</span>' +
+                '<span class="section-badge">' + nUpcoming + ' matchs</span>' +
+                '<span class="section-badge">' + pctUpcoming + ' % \u00e0 venir</span>' +
                 '<span class="section-arrow">&#9660;</span>' +
             '</div>' +
             '<div id="upcoming-matches-content" class="section-collapsible">' +
