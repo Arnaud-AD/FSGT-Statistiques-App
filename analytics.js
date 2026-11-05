@@ -13,7 +13,10 @@
  *   - analytics_personas/{ipHash|auto}: { label, number, firstSeen, lastSeen, linkedVisitorIds[] }
  *   - analytics_meta/persona_counter  : { count } — compteur séquentiel atomique
  *
- * Exclusions : admin connecté (attendu via onAuthStateChanged), localhost.
+ * Exclusions : admin connecté (attendu via onAuthStateChanged), localhost,
+ * et appareils marqués « à moi » (localStorage `analytics_optout` = '1').
+ * Toute connexion admin marque automatiquement l'appareil, qui reste exclu
+ * ensuite même déconnecté.
  */
 
 const AppAnalytics = {
@@ -25,10 +28,30 @@ const AppAnalytics = {
     _resolvePromise: null,
     _authReadyPromise: null,
 
-    /** Exclure admin connecté et dev local */
+    _OPTOUT_KEY: 'analytics_optout',
+
+    /** Cet appareil est-il exclu du suivi (appareil de l'admin) ? */
+    isOptedOut() {
+        try { return localStorage.getItem(this._OPTOUT_KEY) === '1'; } catch (e) { return false; }
+    },
+
+    /** Exclure / réinclure cet appareil du suivi */
+    setOptOut(on) {
+        try {
+            if (on) localStorage.setItem(this._OPTOUT_KEY, '1');
+            else localStorage.removeItem(this._OPTOUT_KEY);
+        } catch (e) {}
+    },
+
+    /** Exclure admin connecté, appareils de l'admin et dev local */
     shouldTrack() {
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return false;
-        if (typeof auth !== 'undefined' && auth.currentUser) return false;
+        if (typeof auth !== 'undefined' && auth.currentUser) {
+            // Connexion admin sur cet appareil : on le mémorise pour ne plus le compter déconnecté
+            this.setOptOut(true);
+            return false;
+        }
+        if (this.isOptedOut()) return false;
         if (typeof db === 'undefined') return false;
         return true;
     },
