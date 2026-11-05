@@ -5,10 +5,10 @@
     "name": "Ultimate",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/1",
-    "lastUpdated": "2026-11-04T15:21:09",
+    "lastUpdated": "2026-11-05T04:29:32",
     "teamCount": 9,
-    "matchesPlayed": 5,
-    "matchesUpcoming": 67
+    "matchesPlayed": 6,
+    "matchesUpcoming": 66
   },
   "teams": {
     "red": {
@@ -16,15 +16,20 @@
       "short": "RH",
       "color": "#e74c3c"
     },
+    "resc": {
+      "name": "Les Rescapés",
+      "short": "LR",
+      "color": "#2ecc71"
+    },
     "bier": {
       "name": "Bières et le loup",
       "short": "BL",
       "color": "#f1c40f"
     },
-    "resc": {
-      "name": "Les Rescapés",
-      "short": "LR",
-      "color": "#2ecc71"
+    "inde": {
+      "name": "Les Indécis",
+      "short": "IN",
+      "color": "#000000"
     },
     "dodo": {
       "name": "Dodos 4 ever",
@@ -50,11 +55,6 @@
       "name": "Jen et ses Saints",
       "short": "JS",
       "color": "#9b59b6"
-    },
-    "inde": {
-      "name": "Les Indécis",
-      "short": "IN",
-      "color": "#000000"
     }
   },
   "standings": [
@@ -133,21 +133,21 @@
     {
       "rank": 3,
       "team": "resc",
-      "mj": 1,
+      "mj": 2,
       "g": 1,
-      "p": 0,
+      "p": 1,
       "setPlus": 3,
-      "setMinus": 0,
-      "ds": 3,
-      "coefSet": "∞",
-      "ptsPlus": 76,
-      "ptsMinus": 63,
-      "dp": "+13",
-      "coefPts": "1.21",
-      "pts": 3,
+      "setMinus": 3,
+      "ds": 0,
+      "coefSet": "1.00",
+      "ptsPlus": 140,
+      "ptsMinus": 138,
+      "dp": "+2",
+      "coefPts": "1.01",
+      "pts": 4,
       "formAller": [
         "W",
-        "P",
+        "L",
         "P",
         "P",
         "P",
@@ -168,6 +168,42 @@
     },
     {
       "rank": 4,
+      "team": "inde",
+      "mj": 1,
+      "g": 1,
+      "p": 0,
+      "setPlus": 3,
+      "setMinus": 0,
+      "ds": 3,
+      "coefSet": "∞",
+      "ptsPlus": 75,
+      "ptsMinus": 64,
+      "dp": "+11",
+      "coefPts": "1.17",
+      "pts": 3,
+      "formAller": [
+        "D",
+        "W",
+        "D",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 5,
       "team": "dodo",
       "mj": 1,
       "g": 1,
@@ -203,7 +239,7 @@
       ]
     },
     {
-      "rank": 5,
+      "rank": 6,
       "team": "marv",
       "mj": 1,
       "g": 1,
@@ -239,7 +275,7 @@
       ]
     },
     {
-      "rank": 6,
+      "rank": 7,
       "team": "rsc",
       "mj": 2,
       "g": 0,
@@ -275,7 +311,7 @@
       ]
     },
     {
-      "rank": 7,
+      "rank": 8,
       "team": "kiki",
       "mj": 1,
       "g": 0,
@@ -311,7 +347,7 @@
       ]
     },
     {
-      "rank": 8,
+      "rank": 9,
       "team": "jen",
       "mj": 0,
       "g": 0,
@@ -345,45 +381,36 @@
         "P",
         "P"
       ]
-    },
-    {
-      "rank": 9,
-      "team": "inde",
-      "mj": 0,
-      "g": 0,
-      "p": 0,
-      "setPlus": 0,
-      "setMinus": 0,
-      "ds": 0,
-      "coefSet": "∞",
-      "ptsPlus": 0,
-      "ptsMinus": 0,
-      "dp": "0",
-      "coefPts": "∞",
-      "pts": 0,
-      "formAller": [
-        "D",
-        "P",
-        "D",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "04/11/2026",
+      "home": "inde",
+      "away": "resc",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé",
+      "sets": [
+        [
+          25,
+          22
+        ],
+        [
+          25,
+          22
+        ],
+        [
+          25,
+          20
+        ]
+      ],
+      "total": [
+        75,
+        64
+      ]
+    },
     {
       "date": "03/11/2026",
       "home": "bier",
@@ -538,12 +565,6 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "04/11/2026",
-      "home": "inde",
-      "away": "resc",
-      "status": "Sem. 2"
-    },
-    {
       "date": "09/11/2026",
       "home": "resc",
       "away": "red",
@@ -671,14 +692,14 @@
     },
     {
       "date": "14/01/2027",
-      "home": "marv",
-      "away": "bier",
+      "home": "jen",
+      "away": "resc",
       "status": "Sem. 8"
     },
     {
       "date": "14/01/2027",
-      "home": "jen",
-      "away": "resc",
+      "home": "marv",
+      "away": "bier",
       "status": "Sem. 8"
     },
     {
@@ -917,14 +938,14 @@
     },
     {
       "date": "24/05/2027",
-      "home": "kiki",
-      "away": "bier",
+      "home": "dodo",
+      "away": "resc",
       "status": "Sem. 18"
     },
     {
       "date": "24/05/2027",
-      "home": "dodo",
-      "away": "resc",
+      "home": "kiki",
+      "away": "bier",
       "status": "Sem. 18"
     },
     {
@@ -943,22 +964,22 @@
   "prTeams": [
     {
       "rank": 1,
-      "team": "dodo",
-      "elo": 1530.7,
-      "movement": 30.7,
+      "team": "inde",
+      "elo": 1532.4,
+      "movement": 32.4,
       "record": "1-0",
       "power": 100.0,
-      "calendar": "V vs RSC",
+      "calendar": "V vs Les",
       "diffClass": "diff-easy"
     },
     {
       "rank": 2,
-      "team": "resc",
-      "elo": 1530.0,
-      "movement": 30.0,
+      "team": "dodo",
+      "elo": 1530.7,
+      "movement": 30.7,
       "record": "1-0",
-      "power": 98.9,
-      "calendar": "V vs Bières",
+      "power": 97.4,
+      "calendar": "V vs RSC",
       "diffClass": "diff-easy"
     },
     {
@@ -967,7 +988,7 @@
       "elo": 1516.0,
       "movement": 16.0,
       "record": "1-0",
-      "power": 76.1,
+      "power": 74.7,
       "calendar": "V vs Red",
       "diffClass": "diff-easy"
     },
@@ -977,7 +998,7 @@
       "elo": 1509.9,
       "movement": 25.9,
       "record": "1-1",
-      "power": 66.1,
+      "power": 65.3,
       "calendar": "V vs Kiki",
       "diffClass": "diff-easy"
     },
@@ -987,7 +1008,7 @@
       "elo": 1501.5,
       "movement": 31.5,
       "record": "1-1",
-      "power": 52.4,
+      "power": 52.3,
       "calendar": "V vs RSC",
       "diffClass": "diff-easy"
     },
@@ -1003,13 +1024,13 @@
     },
     {
       "rank": 7,
-      "team": "inde",
-      "elo": 1500,
-      "movement": 0,
-      "record": "0-0",
-      "power": 0.0,
-      "calendar": "-",
-      "diffClass": "diff-easy"
+      "team": "resc",
+      "elo": 1497.6,
+      "movement": -32.4,
+      "record": "1-1",
+      "power": 48.1,
+      "calendar": "D vs Les",
+      "diffClass": "diff-hard"
     },
     {
       "rank": 8,
@@ -1039,14 +1060,19 @@
       1484.0,
       1509.9
     ],
+    "resc": [
+      1500,
+      1530.0,
+      1497.6
+    ],
     "bier": [
       1500,
       1470.0,
       1501.5
     ],
-    "resc": [
+    "inde": [
       1500,
-      1530.0
+      1532.4
     ],
     "dodo": [
       1500,
@@ -1067,9 +1093,6 @@
     ],
     "jen": [
       1500
-    ],
-    "inde": [
-      1500
     ]
   },
   "evolutionData": {
@@ -1082,6 +1105,14 @@
         ],
         "rank": 1
       },
+      "resc": {
+        "points": [
+          0,
+          3,
+          4
+        ],
+        "rank": 3
+      },
       "bier": {
         "points": [
           0,
@@ -1090,26 +1121,26 @@
         ],
         "rank": 2
       },
-      "resc": {
-        "points": [
-          0,
-          3
-        ],
-        "rank": 3
-      },
-      "dodo": {
+      "inde": {
         "points": [
           0,
           3
         ],
         "rank": 4
       },
-      "marv": {
+      "dodo": {
         "points": [
           0,
           3
         ],
         "rank": 5
+      },
+      "marv": {
+        "points": [
+          0,
+          3
+        ],
+        "rank": 6
       },
       "rsc": {
         "points": [
@@ -1117,22 +1148,16 @@
           1,
           2
         ],
-        "rank": 6
+        "rank": 7
       },
       "kiki": {
         "points": [
           0,
           1
         ],
-        "rank": 7
-      },
-      "jen": {
-        "points": [
-          0
-        ],
         "rank": 8
       },
-      "inde": {
+      "jen": {
         "points": [
           0
         ],

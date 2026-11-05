@@ -5,7 +5,7 @@
     "name": "Starter",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/17",
-    "lastUpdated": "2026-11-04T15:21:13",
+    "lastUpdated": "2026-11-05T04:29:35",
     "teamCount": 8,
     "matchesPlayed": 5,
     "matchesUpcoming": 51
@@ -172,7 +172,7 @@
       "pts": 3,
       "formAller": [
         "W",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -240,7 +240,7 @@
       "pts": 2,
       "formAller": [
         "C",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -480,7 +480,7 @@
       "date": "04/11/2026",
       "home": "gold",
       "away": "futs",
-      "status": "Sem. 2"
+      "status": "Reporté"
     },
     {
       "date": "05/11/2026",
