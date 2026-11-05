@@ -212,8 +212,8 @@ function injectRankColors(totalTeams) {
     style.id = 'dynamic-rank-styles';
 
     let css = '';
-    // Relegation zone: last 3 teams (or last 2 if <= 8 teams)
-    const relegationStart = totalTeams <= 8 ? totalTeams - 1 : totalTeams - 2;
+    // Relegation zone: last 2 teams, whatever the pool size (rule since 2026-2027)
+    const relegationStart = totalTeams - 1;
     for (let i = 4; i <= totalTeams; i++) {
         if (i >= relegationStart) {
             css += '.rank-' + i + ' .rank-indicator { background: var(--rank-europa); }\n';
