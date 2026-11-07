@@ -1988,10 +1988,23 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
     }
 
     /* Bilan : 3 colonnes + espacement confortable */
-    .bilan-grid,
     .bilan-grid-year {
         grid-template-columns: repeat(3, 1fr);
         gap: 12px;
+    }
+
+    /* Radars d'un match : Jen à gauche (col. 1-2), adverse à droite (col. 3-4),
+       un poste par ligne (placement calculé dans BilanView.render). */
+    .bilan-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+    }
+    .bilan-grid > .bilan-h2h-card {
+        grid-column: var(--h2h-col);
+        grid-row: var(--h2h-row);
+    }
+    .bilan-grid > .bilan-player-empty {
+        display: none;
     }
 
     /* Ranking joueurs : 3 colonnes */
@@ -2749,23 +2762,6 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
         margin-bottom: 0;
     }
 
-    /* Sections Bilan : grille dashboard 2 colonnes.
-       Les enfants non-section (filtres, carte bilan, sélecteurs) et le tableau
-       stats large restent pleine largeur. */
-    #bilanContainer,
-    .detail-section,
-    #content-yearStats.active {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0 28px;
-        align-items: start;
-    }
-    #bilanContainer > :not(.hist-section),
-    .detail-section > :not(.hist-section),
-    #content-yearStats > :not(.hist-section),
-    .hist-section:has(.stats-desktop) {
-        grid-column: 1 / -1;
-    }
 }
 
 /* ==================== DATA SUB-TABS ==================== */
@@ -3402,3 +3398,138 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
     .prog-chart-wrap { height: 300px; }
 }
 */
+
+/* ==================== MISE EN PAGE LARGE (V29.38) ====================
+   Piste B : chaque section prend toute la largeur et répartit son propre
+   contenu selon SA largeur (container queries), pas celle de l'écran.
+   Seuil 1000px : seul l'ordinateur (contenu ~1136px) est concerné ;
+   tablette (~904px) et mobile gardent exactement leur rendu. */
+.hist-section {
+    container-type: inline-size;
+}
+
+/* Onglet Année : Side Out | Momentum côte à côte, avant Passe/Attaque */
+@media (min-width: 1280px) {
+    #content-yearStats.active {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        column-gap: 28px;
+        align-items: start;
+    }
+    #content-yearStats > * {
+        grid-column: 1 / -1;
+    }
+    #content-yearStats > .sideout-section,
+    #content-yearStats > .momentum-section {
+        grid-column: auto;
+    }
+    #content-yearStats > .pa-section {
+        order: 1;
+    }
+}
+
+@container (min-width: 1000px) {
+    /* Profils radar : 5 cartes par ligne */
+    .bilan-grid-year {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+    }
+    /* Les cases vides de parité (grille 2 colonnes mobile) n'ont plus de sens */
+    .bilan-grid-year > .bilan-player-empty {
+        display: none;
+    }
+
+    /* Radars d'un match (Jen | Adversaire, 4 colonnes) : largeur plafonnée
+       pour garder des cartes de taille raisonnable */
+    .bilan-section:has(.bilan-grid) > :not(.hist-section-title) {
+        max-width: 880px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Impact +/- : Global | Technique côte à côte */
+    .impact-tables {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 28px;
+        align-items: start;
+    }
+
+    /* Relation Passe / Attaque : sous-blocs par paires,
+       Mental passeur et courbe par set en pleine largeur */
+    #pa-content-year,
+    #pa-content-match {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 28px;
+        align-items: start;
+    }
+    #pa-content-year > .pa-subsection:nth-child(n+5),
+    #pa-content-match > .pa-subsection:nth-child(n+5) {
+        grid-column: 1 / -1;
+    }
+    /* Tableau « sous pression » et courbe par set : même largeur qu'une colonne */
+    #pa-content-year > .pa-subsection:nth-child(n+5) .pa-table:not(.pa-funnel-table),
+    #pa-content-match > .pa-subsection:nth-child(n+5) .pa-table:not(.pa-funnel-table),
+    #pa-content-match .pa-chart-wrap {
+        max-width: calc(50% - 14px);
+    }
+    .pa-funnel-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 12px;
+        align-items: start;
+    }
+    .pa-funnel-grid > .pa-funnel-card {
+        margin: 0;
+    }
+}
+
+/* Barre de raccourcis vers les sections : ordinateur uniquement */
+.section-nav {
+    display: none;
+}
+@media (min-width: 1280px) {
+    .section-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: var(--bg-primary);
+        padding: 10px 0;
+        margin-top: 8px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .section-nav:empty {
+        display: none;
+    }
+    .section-nav-btn {
+        font-family: 'Google Sans', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 6px 14px;
+        border: none;
+        border-radius: 16px;
+        background: var(--bg-container);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s;
+    }
+    .section-nav-btn:hover {
+        background: #e2e5e9;
+    }
+    .section-nav-btn.active {
+        background: var(--accent-blue);
+        color: #fff;
+    }
+    /* Défilement vers une section : ne pas la cacher sous la barre */
+    #content-yearStats .hist-section {
+        scroll-margin-top: 64px;
+    }
+    /* La 1re section suit la barre : pas de double filet */
+    .section-nav + .hist-section {
+        border-top: none;
+    }
+}

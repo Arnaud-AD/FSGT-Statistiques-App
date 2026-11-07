@@ -2876,7 +2876,8 @@ const PassAttackAnalyzer = {
         }
         if (attackers.length === 0) return '';
 
-        var html = '';
+        // Grille de cartes (1 colonne sur mobile, plusieurs en large via container query)
+        var html = '<div class="pa-funnel-grid">';
         // 3 lignes : A+, A-, FA(BP) — BP et FA fusionnés pour échantillon significatif
         var cats = ['aplus', 'aminus', 'fabp'];
         var catLabels = { aplus: 'A+', aminus: 'A\u2212', fabp: 'FA(BP)' };
@@ -2957,6 +2958,7 @@ const PassAttackAnalyzer = {
             html += '</tbody></table></div>';
         });
 
+        html += '</div>';
         return html;
     },
 
@@ -4660,7 +4662,16 @@ const BilanView = {
             if (bestH) bestHomeByFamily[fam] = { scores: bestH.scores, role: bestH.effectiveRole, name: bestH.name, ip: bestH.ip };
         });
 
-        // Rendu paires home/away alignees par slot
+        // Rendu paires home/away alignees par slot.
+        // Mobile (2 colonnes) : ordre du DOM home, away, home, away…
+        // Tablette/ordinateur (4 colonnes) : placement explicite via --h2h-col /
+        // --h2h-row (Jen colonnes 1-2, adverse 3-4, chaque poste sur sa ligne),
+        // sinon le flux automatique mélangeait les deux équipes.
+        function placed(cardHtml, col, row) {
+            return cardHtml.replace('class="bilan-player-card"',
+                'class="bilan-player-card bilan-h2h-card" style="--h2h-col:' + col + ';--h2h-row:' + row + '"');
+        }
+        var wideRow = 1;
         SLOT_ORDER.forEach(function(slot) {
             var homeSlot = homeBySlot[slot] || [];
             var awaySlot = awayBySlot[slot] || [];
@@ -4668,20 +4679,22 @@ const BilanView = {
             if (maxLen === 0) return;
 
             for (var i = 0; i < maxLen; i++) {
+                var row = wideRow + Math.floor(i / 2);
                 if (homeSlot[i]) {
                     var h = homeSlot[i];
-                    html += self.renderSpiderChart(h.name, h.effectiveRole, h.scores, h.ip, h.primaryColor, h.axes, false, bestAwayByFamily[h.family], h.roleColors);
+                    html += placed(self.renderSpiderChart(h.name, h.effectiveRole, h.scores, h.ip, h.primaryColor, h.axes, false, bestAwayByFamily[h.family], h.roleColors), 1 + (i % 2), row);
                 } else {
                     html += '<div class="bilan-player-card bilan-player-empty"></div>';
                 }
 
                 if (awaySlot[i]) {
                     var a = awaySlot[i];
-                    html += self.renderSpiderChart(a.name, a.effectiveRole, a.scores, a.ip, a.primaryColor, a.axes, true, bestHomeByFamily[a.family], a.roleColors);
+                    html += placed(self.renderSpiderChart(a.name, a.effectiveRole, a.scores, a.ip, a.primaryColor, a.axes, true, bestHomeByFamily[a.family], a.roleColors), 3 + (i % 2), row);
                 } else {
                     html += '<div class="bilan-player-card bilan-player-empty"></div>';
                 }
             }
+            wideRow += Math.ceil(maxLen / 2);
         });
 
         html += '</div>'; // ferme bilan-grid
@@ -6571,8 +6584,11 @@ const ImpactView = {
         this._caches[ctx] = { data: data, playerRoles: playerRoles, showToggle: this._showToggle };
         var html = '<div class="hist-section impact-section collapsed" data-impact-ctx="' + ctx + '">';
         html += '<div class="hist-section-title">Impact +/\u2212</div>';
+        // Global + Technique : empilés sur mobile, côte à côte en large (container query)
+        html += '<div class="impact-tables">';
         html += this._renderClaudeTable(data, playerRoles);
         html += this._renderArnaudTable(data, playerRoles);
+        html += '</div>';
         html += '</div>';
         return html;
     },
@@ -10699,6 +10715,9 @@ const YearStatsView = {
         // Bilan saison
         html += this.renderSummary(filtered);
 
+        // Barre de raccourcis vers les sections (ordinateur uniquement, cf. CSS)
+        html += '<nav class="section-nav" id="yearSectionNav"></nav>';
+
         // Spider charts par famille
         html += this.renderSpiderCharts(filtered);
 
@@ -10716,11 +10735,13 @@ const YearStatsView = {
         html += PassAttackAnalyzer.renderForYear(filtered, 'home');
 
         // Graphique momentum agrege
+        // (sur ordinateur, remonté à côté de Side Out via CSS `order`)
         html += this.renderYearMomentum(filtered);
 
         container.innerHTML = html;
         OpenSections.restore(container);
         this.bindEvents(container);
+        SectionNav.build(container, document.getElementById('yearSectionNav'));
 
         // Bouton Distinctions dans Bilan Saison
         var yearDistBtn = document.getElementById('yearDistinctionsBtn');
@@ -12109,6 +12130,102 @@ var RankingTeamModal = {
 };
 
 // ==================== SECTIONS OUVERTES (tracking) ====================
+// ==================== SECTION NAV (V29.38) ====================
+// Barre collante de raccourcis vers les sections d'un onglet (visible
+// uniquement sur ordinateur, cf. .section-nav dans historique.css).
+// Un clic ouvre la section si elle est fermée puis y fait défiler la page ;
+// la section visible est surlignée.
+const SectionNav = {
+    LABELS: {
+        'bilan-section': 'Profils radar',
+        'impact-section': 'Impact +/−',
+        'stats-section': 'Tableaux',
+        'sideout-section': 'Side Out',
+        'momentum-section': 'Momentum',
+        'pa-section': 'Passe / Attaque'
+    },
+    _labelFor(section) {
+        var keys = Object.keys(this.LABELS);
+        for (var i = 0; i < keys.length; i++) {
+            if (section.classList.contains(keys[i])) return this.LABELS[keys[i]];
+        }
+        var title = section.querySelector('.hist-section-title');
+        return title ? title.textContent.trim() : '';
+    },
+
+    _onScroll: null,
+
+    // Hauteur à réserver en haut de l'écran quand on fait défiler vers une
+    // section (barre collante visible sur ordinateur, sinon simple marge).
+    stickyOffset(section) {
+        var tab = section && section.closest('.tab-content');
+        var nav = tab && tab.querySelector('.section-nav');
+        return (nav && nav.offsetParent && nav.offsetHeight) ? nav.offsetHeight + 8 : 8;
+    },
+
+    // Les sections peuvent être remplacées (ex. toggle Tot/Moy d'Impact) :
+    // on les retrouve toujours à la volée par leur classe.
+    _sectionKey(section) {
+        var keys = Object.keys(this.LABELS);
+        for (var i = 0; i < keys.length; i++) {
+            if (section.classList.contains(keys[i])) return keys[i];
+        }
+        return null;
+    },
+
+    build(container, nav) {
+        if (!container || !nav) return;
+        var self = this;
+        if (this._onScroll) { window.removeEventListener('scroll', this._onScroll); this._onScroll = null; }
+
+        // Ordre d'affichage sur ordinateur (= ordre de LABELS)
+        var keys = Object.keys(this.LABELS).filter(function(k) {
+            var s = container.querySelector('.' + k);
+            return s && s.style.display !== 'none';
+        });
+        if (keys.length < 2) { nav.innerHTML = ''; return; }
+
+        nav.innerHTML = keys.map(function(k) {
+            return '<button type="button" class="section-nav-btn" data-nav-key="' + k + '">' +
+                self.LABELS[k] + '</button>';
+        }).join('');
+
+        var buttons = Array.prototype.slice.call(nav.querySelectorAll('.section-nav-btn'));
+        buttons.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var section = container.querySelector('.' + btn.dataset.navKey);
+                if (!section) return;
+                // Section fermée : le clic sur son titre l'ouvre et y fait défiler
+                var title = section.querySelector('.hist-section-title');
+                if (section.classList.contains('collapsed') && title) {
+                    title.click();
+                } else {
+                    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Section active = dernière dont le haut a passé le bas de la barre
+        var ticking = false;
+        function update() {
+            ticking = false;
+            if (!nav.isConnected || !nav.offsetParent) return;
+            var limit = nav.getBoundingClientRect().bottom + 24;
+            var active = -1;
+            keys.forEach(function(k, i) {
+                var s = container.querySelector('.' + k);
+                if (s && s.getBoundingClientRect().top <= limit) active = i;
+            });
+            buttons.forEach(function(b, i) { b.classList.toggle('active', i === active); });
+        }
+        this._onScroll = function() {
+            if (!ticking) { ticking = true; requestAnimationFrame(update); }
+        };
+        window.addEventListener('scroll', this._onScroll, { passive: true });
+        update();
+    }
+};
+
 const OpenSections = {
     _open: new Set(),
     track(titleText, isOpen) {
@@ -12238,7 +12355,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             section.classList.remove('collapsed');
             section._animating = false;
             requestAnimationFrame(function() {
-                var headerOffset = 8;
+                var headerOffset = SectionNav.stickyOffset(section);
                 var titleRect = title.getBoundingClientRect();
                 var scrollTarget = window.pageYOffset + titleRect.top - headerOffset;
                 var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
@@ -12247,7 +12364,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             });
         } else {
             // FERMETURE : scroll vers le titre, puis animer la hauteur
-            var headerOffset = 8;
+            var headerOffset = SectionNav.stickyOffset(section);
             var titleRect = title.getBoundingClientRect();
             var needsScroll = titleRect.top < -10 || titleRect.top > 80;
 
