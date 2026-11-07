@@ -8085,16 +8085,23 @@ const ProgressionView = {
         return html;
     },
 
+    // Tendance de la carte joueur : même calcul que « Forme récente »
+    // (moyenne des 3 derniers matchs vs moyenne de la saison) pour afficher le même %.
     _computeTrend(played) {
-        if (played.length < 4) return { text: '→ stable', cls: 'prog-trend-stable' };
-        var last3 = played.slice(-3);
-        var prev = played.slice(0, -3);
-        var avg3 = last3.reduce(function(s, d) { return s + d.ip; }, 0) / last3.length;
-        var avgPrev = prev.reduce(function(s, d) { return s + d.ip; }, 0) / prev.length;
-        var diff = avgPrev > 0 ? ((avg3 - avgPrev) / avgPrev * 100) : 0;
-        if (diff > 8) return { text: '↑ +' + Math.round(diff) + '%', cls: 'prog-trend-up' };
-        if (diff < -8) return { text: '↓ ' + Math.round(diff) + '%', cls: 'prog-trend-down' };
+        var vals = played.map(function(d) { return d.ip; }).filter(function(v) { return v != null; });
+        if (vals.length < 4) return { text: 'peu de matchs', cls: 'prog-trend-few' };
+        var rounded = Math.round(this._formeDiff(vals));
+        if (rounded >= 5) return { text: '↑ +' + rounded + '%', cls: 'prog-trend-up' };
+        if (rounded <= -5) return { text: '↓ ' + rounded + '%', cls: 'prog-trend-down' };
         return { text: '→ stable', cls: 'prog-trend-stable' };
+    },
+
+    // Écart en % entre la moyenne des 3 derniers matchs et la moyenne de la saison
+    _formeDiff(vals) {
+        var avg = vals.reduce(function(a, b) { return a + b; }, 0) / vals.length;
+        var last3 = vals.slice(-3);
+        var rolling = last3.reduce(function(a, b) { return a + b; }, 0) / last3.length;
+        return avg !== 0 ? ((rolling - avg) / Math.abs(avg) * 100) : 0;
     },
 
     _renderChartHTML() {
@@ -8129,13 +8136,15 @@ const ProgressionView = {
             var avg = vals.reduce(function(a, b) { return a + b; }, 0) / vals.length * mul;
             var last3 = vals.slice(-3);
             var rolling = last3.reduce(function(a, b) { return a + b; }, 0) / last3.length * mul;
-            var diff = avg !== 0 ? ((rolling - avg) / Math.abs(avg) * 100) : 0;
+            var diff = self._formeDiff(vals);
+            // Arrondi d'abord : évite un « -0% » rouge pour un écart de -0,3 %
+            var diffR = Math.round(diff);
 
             html += '<tr>';
             html += '<td><span class="prog-player-dot" style="background:' + p.color + '"></span><span class="prog-player-name">' + p.name + '</span></td>';
             html += '<td>' + avg.toFixed(metric.decimals) + (metric.unit || '') + '</td>';
             html += '<td>' + rolling.toFixed(metric.decimals) + (metric.unit || '') + '</td>';
-            html += '<td class="' + (diff >= 0 ? 'prog-diff-positive' : 'prog-diff-negative') + '">' + (diff >= 0 ? '+' : '') + diff.toFixed(0) + '%</td>';
+            html += '<td class="' + (diffR >= 0 ? 'prog-diff-positive' : 'prog-diff-negative') + '">' + (diffR > 0 ? '+' : '') + diffR + '%</td>';
             var barW = Math.min(Math.abs(diff) * 3, 100);
             html += '<td class="prog-bar-cell"><div class="prog-bar ' + (diff >= 0 ? 'prog-bar-positive' : 'prog-bar-negative') + '" style="width:' + barW + 'px"></div></td>';
             html += '</tr>';

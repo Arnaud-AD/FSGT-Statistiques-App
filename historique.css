@@ -3267,6 +3267,7 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
 .prog-trend-up { color: #137333; }
 .prog-trend-down { color: #c5221f; }
 .prog-trend-stable { color: #5f6368; }
+.prog-trend-few { color: #9aa0a6; font-style: italic; }
 
 .prog-sparkline {
     width: 100%;
