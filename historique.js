@@ -6134,39 +6134,49 @@ const BilanView = {
 
         var html = '<div class="bilan-player-card">';
 
-        // Header : role dot(s) + nom + IP — multi-pastilles si plusieurs roles dans la famille
-        html += '<div class="bilan-player-header">';
+        // V29.39 — En-tête : nom + pastille(s) de poste dessous, IP dans un anneau à droite
         var dotColors = multiRoleColors && multiRoleColors.length > 1 ? multiRoleColors : [roleColor];
-        if (dotColors.length > 1) {
-            html += '<span class="bilan-role-dots">';
-            dotColors.forEach(function(c) {
-                html += '<span class="bilan-role-dot bilan-role-dot-stacked" style="background:' + c + '"></span>';
-            });
-            html += '</span>';
-        } else {
-            html += '<span class="bilan-role-dot" style="background:' + dotColors[0] + '"></span>';
-        }
+        html += '<div class="bilan-player-header">';
+        html += '<div class="bilan-player-who">';
         html += '<span class="bilan-player-name">' + Utils.escapeHtml(playerName) + '</span>';
-        html += '<span class="bilan-ip" style="color:' + roleColor + '">IP ' + ip + '</span>';
+        html += '<span class="bilan-role-pills">';
+        dotColors.slice(0, 2).forEach(function(c) {
+            html += '<span class="bilan-role-pill" style="color:' + c + ';background:' + c + '1f">' +
+                self._roleLabel(c, role) + '</span>';
+        });
+        html += '</span></div>';
+        var ringC = 2 * Math.PI * 16;
+        var ipPct = Math.max(0, Math.min(100, ip || 0));
+        html += '<span class="bilan-ip-ring" title="Indice de performance">';
+        html += '<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="none" stroke="#eceef1" stroke-width="3.5"/>';
+        html += '<circle cx="20" cy="20" r="16" fill="none" stroke="' + roleColor + '" stroke-width="3.5" stroke-linecap="round" ' +
+            'stroke-dasharray="' + (ringC * ipPct / 100).toFixed(1) + ' ' + ringC.toFixed(1) + '" transform="rotate(-90 20 20)"/></svg>';
+        html += '<b class="bilan-ip" style="color:' + roleColor + '">' + ip + '</b></span>';
         html += '</div>';
 
         // SVG spider chart
         html += '<svg class="spider-chart" viewBox="0 0 150 160" xmlns="http://www.w3.org/2000/svg">';
 
-        // Polygones concentriques de fond (25%, 50%, 75%, 100%) — grille reguliere (non deformee)
-        [0.25, 0.5, 0.75, 1.0].forEach(function(scale) {
+        // V29.39 — Grille : 3 heptagones + rayons, dessinés PAR-DESSUS le remplissage
+        // pour garder l'échelle lisible (fond blanc uni).
+        var gridSvg = '';
+        [1 / 3, 2 / 3, 1.0].forEach(function(scale) {
             var points = axes.map(function(axis) {
                 var pt = self.polarToCartesian(cx, cy, maxR * scale, axis.angle);
                 return pt.x.toFixed(1) + ',' + pt.y.toFixed(1);
             }).join(' ');
-            html += '<polygon points="' + points + '" fill="none" stroke="#e8eaed" stroke-width="0.8"/>';
+            gridSvg += '<polygon points="' + points + '" fill="none" stroke="#c4c8cd" stroke-opacity="0.75" stroke-width="' + (scale === 1 ? 1.1 : 0.8) + '"/>';
         });
-
-        // Lignes d'axes (centre → sommet) — longueur reguliere (grille non deformee)
         axes.forEach(function(axis) {
             var pt = self.polarToCartesian(cx, cy, maxR, axis.angle);
-            html += '<line x1="' + cx + '" y1="' + cy + '" x2="' + pt.x.toFixed(1) + '" y2="' + pt.y.toFixed(1) + '" stroke="#e8eaed" stroke-width="0.8"/>';
+            gridSvg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + pt.x.toFixed(1) + '" y2="' + pt.y.toFixed(1) + '" stroke="#c4c8cd" stroke-opacity="0.6" stroke-width="0.7"/>';
         });
+
+        // Dégradé radial couleur du poste (id unique par carte)
+        var gradId = 'spg' + (self._gradSeq = (self._gradSeq || 0) + 1);
+        html += '<defs><radialGradient id="' + gradId + '" cx="50%" cy="50%" r="50%">' +
+            '<stop offset="0" stop-color="' + chartColor + '" stop-opacity="0.10"/>' +
+            '<stop offset="1" stop-color="' + chartColor + '" stop-opacity="0.38"/></radialGradient></defs>';
 
         // Polygone de donnees — regle basee sur le nombre de sommets avec valeur :
         // 7 sommets : heptagone complet
@@ -6213,14 +6223,18 @@ const BilanView = {
             }
         });
 
+        var dataPolygon = polyPoints.map(function(pt) { return pt.x.toFixed(1) + ',' + pt.y.toFixed(1); }).join(' ');
         if (polyPoints.length >= 2) {
-            var dataPolygon = polyPoints.map(function(pt) { return pt.x.toFixed(1) + ',' + pt.y.toFixed(1); }).join(' ');
-            html += '<polygon points="' + dataPolygon + '" fill="' + chartColor + '" fill-opacity="0.2" stroke="' + chartColor + '" stroke-width="1.5"/>';
+            html += '<polygon points="' + dataPolygon + '" fill="url(#' + gradId + ')"/>';
+        }
+        html += gridSvg;
+        if (polyPoints.length >= 2) {
+            html += '<polygon points="' + dataPolygon + '" fill="none" stroke="' + chartColor + '" stroke-width="1.1" stroke-linejoin="round"/>';
         }
 
-        // Points (cercles) uniquement sur les axes avec valeur
+        // Points (cercles fins) uniquement sur les axes avec valeur
         dotPoints.forEach(function(pt) {
-            html += '<circle cx="' + pt.x.toFixed(1) + '" cy="' + pt.y.toFixed(1) + '" r="2.5" fill="' + chartColor + '"/>';
+            html += '<circle cx="' + pt.x.toFixed(1) + '" cy="' + pt.y.toFixed(1) + '" r="1.9" fill="#fff" stroke="' + chartColor + '" stroke-width="1"/>';
         });
 
         // --- Overlay adversaire (visible seulement quand toggle "comparer" actif) ---
@@ -6288,11 +6302,14 @@ const BilanView = {
 
             html += '<text x="' + pt.x.toFixed(1) + '" y="' + (pt.y + dy).toFixed(1) + '" ';
             html += 'text-anchor="' + anchor + '" font-size="8" font-weight="500" ';
-            html += 'font-family="Google Sans, Roboto, sans-serif" fill="#5f6368">';
+            html += 'font-family="Google Sans, Roboto, sans-serif" fill="' + ((axisScores[axis.key] || 0) > 0 ? '#5f6368' : '#bdc1c6') + '">';
             html += axis.label + '</text>';
         });
 
         html += '</svg>';
+
+        // V29.39 — 3 barres fixes selon le poste
+        html += this._renderRoleBars(axisScores, role, roleColor);
 
         // Label du joueur compare (visible uniquement quand toggle comparer actif)
         if (overlayData && overlayData.name) {
@@ -6306,6 +6323,48 @@ const BilanView = {
 
         html += '</div>';
         return html;
+    },
+
+    // V29.39 — Barres fixes par poste sous le radar
+    ROLE_BARS: {
+        'Passeur': ['passe', 'defense', 'service'],
+        'Ailier':  ['reception', 'attaque', 'bloc'],
+        'R4':      ['reception', 'attaque', 'bloc'],
+        'Pointu':  ['reception', 'attaque', 'bloc'],
+        'Centre':  ['reception', 'defense', 'service']
+    },
+    AXIS_NAMES: {
+        attaque: ['Attaque', 'Att'], bloc: ['Bloc', 'Blc'], relance: ['Relance', 'Rel'],
+        service: ['Service', 'Srv'], passe: ['Passe', 'Pas'], defense: ['D\u00e9fense', 'Def'],
+        reception: ['R\u00e9ception', 'Rec']
+    },
+
+    _renderRoleBars(axisScores, role, color) {
+        var keys = this.ROLE_BARS[role];
+        if (!keys) return '';
+        var self = this;
+        var html = '<div class="bilan-bars">';
+        keys.forEach(function(k) {
+            var v = Math.round(axisScores[k] || 0);
+            var names = self.AXIS_NAMES[k];
+            html += '<div class="bilan-bar">';
+            html += '<span class="bilan-bar-label"><span class="bilan-bar-long">' + names[0] + '</span><span class="bilan-bar-short">' + names[1] + '</span></span>';
+            html += '<span class="bilan-bar-track"><i style="width:' + Math.min(100, v) + '%;background:' + color + '"></i></span>';
+            html += '<span class="bilan-bar-val">' + (v > 0 ? v : '\u2013') + '</span>';
+            html += '</div>';
+        });
+        html += '</div>';
+        return html;
+    },
+
+    // Libellé de poste d'une pastille, depuis sa couleur (ROLE_COLORS) sinon le rôle passé
+    _roleLabel(color, role) {
+        var self = this;
+        var found = null;
+        Object.keys(self.ROLE_COLORS).forEach(function(r) {
+            if (!found && String(self.ROLE_COLORS[r]).toLowerCase() === String(color).toLowerCase()) found = r;
+        });
+        return found || role || '';
     },
 
     // --- Utilitaires ---
