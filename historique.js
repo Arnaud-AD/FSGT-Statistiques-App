@@ -5975,9 +5975,11 @@ const BilanView = {
         var rec = s.reception;
         if (rec.tot > 0) {
             var recRaw = (rec.r4 * 100 + rec.r3 * 75 + rec.r2 * 40 + rec.r1 * 15) / rec.tot;
-            // Bonus taux positif : (R4+R3)/tot au-dessus de 50% → jusqu'à +10
+            // Bonus taux positif : (R4+R3)/tot au-dessus de 50% → jusqu'à +5
+            // V29.52 : bonus divise par 2 (+10 max avant) : avec +10, un match sans R2/R1 atteignait 100
+            // des ~60 % de R4, et beaucoup de matchs restaient colles au plafond.
             var positiveRate = (rec.r4 + rec.r3) / rec.tot;
-            var recBonus = Math.max(0, positiveRate - 0.5) * 20;
+            var recBonus = Math.max(0, positiveRate - 0.5) * 10;
             scores.reception = this.clamp(floor, 100, Math.round(recRaw + recBonus));
         } else {
             scores.reception = 0;
