@@ -6111,12 +6111,10 @@ const BilanView = {
     // --- Indice de Performance SAISON : meme calcul + lissage vers la moyenne du poste ---
     // matches = matchs de la periode (sert a calculer les moyennes de poste du championnat)
     computeSeasonIP(axisScores, role, matches) {
-        var d = this.computeIPDetail(axisScores, role);
-        if (d.raw <= 0) return 0;
         var priors = this._ipPriorsBusy ? null : this.getIPPriors(matches);
         var fam = this._ipFamily(role);
         var P = priors && priors[fam];
-        if (!P) return Math.round(d.raw);
+        if (!P) return this.computeIP(axisScores, role);
         var weights = this.IP_WEIGHTS[fam === 'Ailier' ? 'R4' : fam];
         var mNum = 0, mDen = 0;
         Object.keys(weights).forEach(function(key) {
@@ -6125,6 +6123,16 @@ const BilanView = {
             mDen += weights[key];
         });
         var M = mNum / mDen;
+        // V29.46 : la note de service est plus severe que les autres axes (moyenne passeurs 69
+        // contre 87 a la passe) : on la recale sur le niveau moyen du poste, pour que bien
+        // servir beaucoup ne fasse pas baisser l'IP.
+        var scores = axisScores;
+        if (axisScores.service > 0 && P.service !== undefined) {
+            scores = Object.assign({}, axisScores);
+            scores.service = Math.min(100, axisScores.service + (M - P.service));
+        }
+        var d = this.computeIPDetail(scores, role);
+        if (d.raw <= 0) return 0;
         var C0 = this.IP_SEASON_C0;
         return Math.round((d.actions * d.raw + C0 * M) / (d.actions + C0));
     },
