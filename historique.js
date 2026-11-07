@@ -4467,13 +4467,16 @@ const BilanView = {
         'Pointu': '#22C532'     // vert decale
     },
 
-    // Ponderations IP par poste (V20.25)
+    // V29.45 — Ponderations IP par poste : chaque grille prevoit tout ce que le poste peut faire
+    // (centre qui sert ou frappe, passeur qui attaque, pointu qui bloque). Un axe non joue ne compte
+    // simplement pas (pas de penalite de profil) ; un axe peu joue pese peu (voir IP_VOLUME_K).
+    // Les anciens bonus « service ailier » et « passeur polyvalent » sont integres dans les grilles.
     IP_WEIGHTS: {
-        'Passeur':    { attaque: 0.00, bloc: 0.00, relance: 0.05, reception: 0.00, defense: 0.35, passe: 0.35, service: 0.25 },
+        'Passeur':    { attaque: 0.09, bloc: 0.04, relance: 0.04, reception: 0.00, defense: 0.30, passe: 0.30, service: 0.23 },
         'Centre':     { attaque: 0.10, bloc: 0.05, relance: 0.10, reception: 0.25, defense: 0.25, passe: 0.05, service: 0.20 },
-        'CentreDef':  { attaque: 0.00, bloc: 0.00, relance: 0.15, reception: 0.30, defense: 0.30, passe: 0.05, service: 0.20 },
-        'R4':         { attaque: 0.45, bloc: 0.10, relance: 0.05, reception: 0.30, defense: 0.05, passe: 0.00, service: 0.05 },
-        'Pointu':     { attaque: 0.45, bloc: 0.10, relance: 0.05, reception: 0.30, defense: 0.05, passe: 0.00, service: 0.05 }
+        'CentreDef':  { attaque: 0.10, bloc: 0.05, relance: 0.10, reception: 0.25, defense: 0.25, passe: 0.05, service: 0.20 },
+        'R4':         { attaque: 0.40, bloc: 0.09, relance: 0.04, reception: 0.26, defense: 0.04, passe: 0.00, service: 0.17 },
+        'Pointu':     { attaque: 0.40, bloc: 0.09, relance: 0.04, reception: 0.26, defense: 0.04, passe: 0.00, service: 0.17 }
     },
 
     // Determine si un centre est offensif (attaque/bloque) ou defensif (pur recep/def)
@@ -4718,7 +4721,7 @@ const BilanView = {
 
     // --- Distinctions : MVP + meilleurs joueurs par categorie ---
     // V20.26 : unifie sur computeAxisScores + IP_MIN_ACTIONS pour coherence avec spider charts
-    renderDistinctions(homeTotals, playerRoles, filteredPlayers, completedSets, matches) {
+    renderDistinctions(homeTotals, playerRoles, filteredPlayers, completedSets, matches, isSeason) {
         var self = this;
         self._distData = []; // Collecte structurée (réutilisée par le Résumé de l'année)
         var players = filteredPlayers || Object.keys(homeTotals).filter(function(name) {
@@ -4734,7 +4737,8 @@ const BilanView = {
             var ipRole = displayRole;
             if (displayRole === 'Centre') ipRole = self.getCentreIpRole(homeTotals[name]);
             var axes = self.computeAxisScores(homeTotals[name], ipRole);
-            var ip = self.computeIP(axes, ipRole);
+            // V29.45 : IP saison lisse sur la saison, IP brut sur un match
+            var ip = isSeason ? self.computeSeasonIP(axes, ipRole, matches) : self.computeIP(axes, ipRole);
             playerData[name] = { role: displayRole, axes: axes, ip: ip, stats: homeTotals[name] };
         });
 
@@ -5102,7 +5106,7 @@ const BilanView = {
             return statCategories.some(function(cat) { return p[cat] && p[cat].tot > 0; });
         });
         this._lastDistinctionsData = [];
-        this.renderDistinctions(homeTotals, mergedRoles, players, allSets, matches);
+        this.renderDistinctions(homeTotals, mergedRoles, players, allSets, matches, true);
         return (this._lastDistinctionsData || []).slice();
     },
 
@@ -5886,7 +5890,7 @@ const BilanView = {
 
             var ipRole = (familyIpRole === 'Centre') ? self.getCentreIpRole(stats) : familyIpRole;
             var scores = self.computeAxisScores(stats, ipRole);
-            var ip = self.computeIP(scores, ipRole);
+            var ip = self.computeSeasonIP(scores, ipRole, matches);
 
             results.push({
                 name: name,
@@ -5922,7 +5926,7 @@ const BilanView = {
         if (!hasAnyMatch) return 0;
         var effectiveRole = (role === 'Centre') ? self.getCentreIpRole(merged) : role;
         var scores = self.computeAxisScores(merged, effectiveRole);
-        return self.computeIP(scores, effectiveRole);
+        return self.computeSeasonIP(scores, effectiveRole, matches);
     },
 
     // Score plancher par axe : evite les polygones ecrases pour les postes
@@ -6051,121 +6055,116 @@ const BilanView = {
         return scores;
     },
 
-    // Seuils minimums d'actions par axe pour compter dans l'IP (V20.25)
-    // Si tot < seuil, le score est VISIBLE sur le spider chart mais EXCLU de l'IP
-    // Evite qu'un joueur avec 2 services dont 1 ace ait un IP gonfle
+    // Seuils minimums d'actions par axe (V20.25). V29.45 : ne servent plus a l'IP,
+    // seulement aux Distinctions (meilleur joueur sur un axe).
     IP_MIN_ACTIONS: {
-        service: 5,     // 2 services = pas significatif
-        reception: 2,   // 1 reception ratee = pas representatif, 2+ = ok
-        passe: 3,       // 1-2 passes = anecdotique
-        attaque: 3,     // 1-2 attaques = pas significatif
-        bloc: 1,        // le bloc est rare, 1 suffit
-        relance: 5,     // V22.05 : 2-4 relances donnent souvent score 100 → non significatif
-        defense: 2      // 1 defense = anecdotique
+        service: 5,
+        reception: 2,
+        passe: 3,
+        attaque: 3,
+        bloc: 1,
+        relance: 5,
+        defense: 2
     },
 
-    // --- Indice de Performance (somme ponderee par poste) ---
-    // V20.26 : redistribution partielle 50% des poids des axes inactifs
-    // Un axe inactif ne redistribue que 50% de son poids aux axes actifs
-    // Les 50% restants sont "perdus" = penalite pour ne pas avoir joue sur cet axe
-    computeIP(axisScores, role) {
+    // V29.45 — Volume par axe : un axe pese poids_poste × n / (n + K).
+    // K = nombre d'actions pour que l'axe compte a moitie (4 services ≈ 9 %, 140 receptions ≈ 96 %).
+    // Remplace les seuils minimums, le seuil des 4 % et la penalite « axe non joue ».
+    IP_VOLUME_K: { service: 40, reception: 6, passe: 10, attaque: 8, bloc: 4, relance: 5, defense: 6 },
+
+    // V29.45 — Lissage saison : l'IP saison est ramene vers la moyenne du poste dans le championnat
+    // selon le nombre total d'actions (20 actions = moitie joueur, moitie moyenne). Pas de lissage
+    // sur un match : les stats d'un match restent brutes.
+    IP_SEASON_C0: 20,
+
+    _ipFamily(role) {
+        if (role === 'Passeur') return 'Passeur';
+        if (role === 'Centre' || role === 'CentreDef') return 'Centre';
+        return 'Ailier';
+    },
+
+    // IP brut + volume total d'actions (axes ponderes du poste)
+    computeIPDetail(axisScores, role) {
         var weights = this.IP_WEIGHTS[role] || this.IP_WEIGHTS['R4'];
-        var minActions = this.IP_MIN_ACTIONS;
-        var tots = axisScores._tots || {}; // volumes bruts (absent pour les scores moyennes)
-
-        // V20.282 : Ailiers (R4/Pointu) qui servent — booster service de 0.05 à 0.20 (comme Centre)
-        // Redistribution proportionnelle sur 115% pour rester à 100%
-        // V20.283 : seuil minimum 5 services pour activer le boost (évite surpondération sur petit volume)
-        var ailierServiceTot = tots.service || 0;
-        if ((role === 'R4' || role === 'Pointu') && axisScores.service && axisScores.service > 0 && ailierServiceTot >= 5) {
-            var boosted = {};
-            Object.keys(weights).forEach(function(key) { boosted[key] = weights[key]; });
-            boosted.service = 0.20;
-            var newTotal = 0;
-            Object.keys(boosted).forEach(function(key) { newTotal += boosted[key]; });
-            Object.keys(boosted).forEach(function(key) { boosted[key] = boosted[key] / newTotal; });
-            weights = boosted;
-        }
-
-        // V22.05 : Passeur polyvalent — boost attaque (+0.10) et bloc (+0.05) si volume suffisant
-        // En 4v4, les passeurs attaquent et bloquent souvent. Redistribution proportionnelle pour rester a 100%
-        if (role === 'Passeur') {
-            var passeurAttTot = tots.attaque || 0;
-            var passeurBlcTot = tots.bloc || 0;
-            var needsPasseurBoost = false;
-            if (axisScores.attaque && axisScores.attaque > 0 && passeurAttTot >= 3) needsPasseurBoost = true;
-            if (axisScores.bloc && axisScores.bloc > 0 && passeurBlcTot >= 1) needsPasseurBoost = true;
-            if (needsPasseurBoost) {
-                var boosted = {};
-                Object.keys(weights).forEach(function(key) { boosted[key] = weights[key]; });
-                if (axisScores.attaque && axisScores.attaque > 0 && passeurAttTot >= 3) {
-                    boosted.attaque = 0.10;
-                }
-                if (axisScores.bloc && axisScores.bloc > 0 && passeurBlcTot >= 1) {
-                    boosted.bloc = 0.05;
-                }
-                var newTotal = 0;
-                Object.keys(boosted).forEach(function(key) { newTotal += boosted[key]; });
-                Object.keys(boosted).forEach(function(key) { boosted[key] = boosted[key] / newTotal; });
-                weights = boosted;
-            }
-        }
-
-        // Calculer le poids total de tous les axes du role (= 1.0 normalement)
-        var totalWeight = 0;
-        Object.keys(weights).forEach(function(key) {
-            if (weights[key] > 0) totalWeight += weights[key];
-        });
-
-        // V20.285 : helper pour verifier si un axe atteint le seuil minimum d'actions
-        // Exception ailier : 1 seule reception R4 compte, sinon 1 recep ne compte pas
-        var isAilier = (role === 'R4' || role === 'Pointu');
-        function meetsMinActions(key) {
-            var tot = tots[key];
-            if (tot === undefined || !minActions[key]) return true; // pas de seuil defini
-            if (tot >= minActions[key]) return true; // seuil atteint
-            // Exception ailier : 1 reception unique R4 compte dans l'IP
-            if (isAilier && key === 'reception' && tot === 1 && (tots.reception_r4 || 0) === 1) return true;
-            return false;
-        }
-
-        // Calculer le poids des axes actifs et inactifs (score > 0 + seuil atteint)
-        // V22.05 : approche hybride — axes offensifs (attaque, bloc) penalises a 50% si inactifs
-        // Axes defensifs (tout le reste) : redistribution 100% (pas de penalite)
-        // Logique : en 4v4, ne jamais attaquer/bloquer est une vraie limitation,
-        // mais 0 defense peut etre contextuel (adversaire evite le joueur)
-        // V29.45 : le service n'est plus penalise (poste ou seuil des 4 %) — servir ou non
-        // depend de la rotation et des remplacements, pas du niveau du joueur
-        var OFFENSIVE_AXES = { attaque: true, bloc: true };
-        var activeWeight = 0;
-        var inactiveOffWeight = 0;
+        var K = this.IP_VOLUME_K;
+        var tots = axisScores._tots || {};
+        var num = 0, den = 0, actions = 0;
         Object.keys(weights).forEach(function(key) {
             if (weights[key] <= 0) return;
+            var n = tots[key] || 0;
+            if (n <= 0) return;
+            actions += n;
             var score = axisScores[key] || 0;
-            if (score <= 0 || !meetsMinActions(key)) {
-                if (OFFENSIVE_AXES[key]) inactiveOffWeight += weights[key];
-                // Axes defensifs inactifs : redistribution 100% (poids ignore)
-                return;
-            }
-            activeWeight += weights[key];
+            if (score <= 0) return; // sous le seuil de la formule (ex : < 3 services) : pas de note
+            var w = weights[key] * n / (n + K[key]);
+            num += w * score;
+            den += w;
         });
-        if (activeWeight === 0) return 0;
+        return { raw: den > 0 ? num / den : 0, actions: actions };
+    },
 
-        // Denominateur : actifs + 50% des offensifs inactifs (penalite polyvalence)
-        var effectiveDenominator = activeWeight + inactiveOffWeight * 0.5;
+    // --- Indice de Performance d'un MATCH (stats brutes, pas de lissage) ---
+    computeIP(axisScores, role) {
+        return Math.round(this.computeIPDetail(axisScores, role).raw);
+    },
 
-        // IP = somme ponderee / denominateur effectif
-        var ip = 0;
+    // --- Indice de Performance SAISON : meme calcul + lissage vers la moyenne du poste ---
+    // matches = matchs de la periode (sert a calculer les moyennes de poste du championnat)
+    computeSeasonIP(axisScores, role, matches) {
+        var d = this.computeIPDetail(axisScores, role);
+        if (d.raw <= 0) return 0;
+        var priors = this._ipPriorsBusy ? null : this.getIPPriors(matches);
+        var fam = this._ipFamily(role);
+        var P = priors && priors[fam];
+        if (!P) return Math.round(d.raw);
+        var weights = this.IP_WEIGHTS[fam === 'Ailier' ? 'R4' : fam];
+        var mNum = 0, mDen = 0;
         Object.keys(weights).forEach(function(key) {
             if (weights[key] <= 0) return;
-            var score = axisScores[key] || 0;
-            if (score <= 0) return;
-            if (!meetsMinActions(key)) return;
-            ip += score * weights[key];
+            mNum += weights[key] * (P[key] !== undefined ? P[key] : 50);
+            mDen += weights[key];
         });
-        ip = ip / effectiveDenominator;
+        var M = mNum / mDen;
+        var C0 = this.IP_SEASON_C0;
+        return Math.round((d.actions * d.raw + C0 * M) / (d.actions + C0));
+    },
 
-        return Math.round(ip);
+    // Moyennes par axe et par famille de poste sur tout le championnat (Jen + adversaires),
+    // ponderees par le volume. Calculees a partir des donnees du Classement, mises en cache.
+    getIPPriors(matches) {
+        if (!matches || matches.length === 0 || typeof RankingView === 'undefined') return null;
+        var key = matches.map(function(m) { return m.id; }).join('|');
+        if (this._ipPriorsCache && this._ipPriorsCache.key === key) return this._ipPriorsCache.priors;
+        var self = this;
+        var acc = {};
+        this._ipPriorsBusy = true;
+        try {
+            var data = RankingView._computeRankingData(matches);
+            data.allPlayerCards.forEach(function(c) {
+                var fam = self._ipFamily(c.role);
+                var t = (c.scores && c.scores._tots) || {};
+                acc[fam] = acc[fam] || {};
+                Object.keys(self.IP_VOLUME_K).forEach(function(a) {
+                    var n = t[a] || 0, sc = c.scores[a] || 0;
+                    if (n <= 0 || sc <= 0) return;
+                    acc[fam][a] = acc[fam][a] || { sw: 0, n: 0 };
+                    acc[fam][a].sw += sc * n;
+                    acc[fam][a].n += n;
+                });
+            });
+        } finally {
+            this._ipPriorsBusy = false;
+        }
+        var priors = {};
+        Object.keys(acc).forEach(function(fam) {
+            priors[fam] = {};
+            Object.keys(self.IP_VOLUME_K).forEach(function(a) {
+                var x = acc[fam][a];
+                priors[fam][a] = x ? Math.round(x.sw / x.n) : 50;
+            });
+        });
+        this._ipPriorsCache = { key: key, priors: priors };
+        return priors;
     },
 
     // --- Rendu SVG d'un spider chart pour un joueur ---
@@ -7247,6 +7246,8 @@ const RankingView = {
     // --- Calcul central des donnees ---
     _computeRankingData(matches) {
         var self = this;
+        var prevSeasonMatches = self._seasonMatches;
+        self._seasonMatches = matches; // V29.45 : base des moyennes de poste pour l'IP saison
         var teams = [];
         var allPlayerCards = [];
 
@@ -7279,8 +7280,7 @@ const RankingView = {
                 if (transfer) {
                     var gKey = transfer.id + '|' + p.family;
                     if (!transferGroups[gKey]) transferGroups[gKey] = [];
-                    transferGroups[gKey].push({ player: p, teamName: oppName, order: transfer.order,
-                        teamTotalService: oppData.teamTotalService || 0 });
+                    transferGroups[gKey].push({ player: p, teamName: oppName, order: transfer.order });
                     return;
                 }
                 allPlayerCards.push({
@@ -7310,6 +7310,7 @@ const RankingView = {
         // Tri joueurs par IP decroissant
         allPlayerCards.sort(function(a, b) { return b.ip - a.ip; });
 
+        self._seasonMatches = prevSeasonMatches;
         return { teams: teams, allPlayerCards: allPlayerCards };
     },
 
@@ -7320,13 +7321,11 @@ const RankingView = {
         var current = contribs[contribs.length - 1]; // équipe la plus récente
         var stats = StatsAggregator.initPlayerStats();
         var roles = {};
-        var teamTotalService = 0;
         contribs.forEach(function(c) {
             BilanView._mergePlayerStats(stats, c.player.stats);
             Object.keys(c.player.roles || {}).forEach(function(r) {
                 roles[r] = (roles[r] || 0) + c.player.roles[r];
             });
-            teamTotalService += c.teamTotalService;
         });
 
         var family = current.player.family;
@@ -7337,14 +7336,12 @@ const RankingView = {
 
         var scores = BilanView.computeAxisScores(stats, ipRole);
         // Seuil service : relatif au cumul des services des équipes concernées
-        var playerSrvTot = (scores._tots && scores._tots.service) || 0;
-        if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.04) scores.service = 0;
 
         return {
             name: current.player.name, teamName: current.teamName,
             role: primaryRole, roleColor: BilanView.ROLE_COLORS[primaryRole] || '#5f6368',
-            // V29.45 : poids IP du profil reel (CentreDef pour un centre qui ne frappe pas)
-            scores: scores, ip: BilanView.computeIP(scores, ipRole)
+            // V29.45 : IP saison (volume par axe + lissage), plus de seuil des 4 %
+            scores: scores, ip: BilanView.computeSeasonIP(scores, ipRole, RankingView._seasonMatches)
         };
     },
 
@@ -7400,18 +7397,9 @@ const RankingView = {
                 });
             });
 
-            // Phase 2 : seuil 10% service (identique a Annee Profils radar V21.21)
-            var teamTotalService = 0;
+            // Phase 2 : IP saison (V29.45 : volume par axe + lissage, plus de seuil des 4 %)
             allPlayers.forEach(function(d) {
-                teamTotalService += (d.scores._tots && d.scores._tots.service) || 0;
-            });
-            allPlayers.forEach(function(d) {
-                var playerSrvTot = (d.scores._tots && d.scores._tots.service) || 0;
-                if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.04) {
-                    d.scores.service = 0;
-                }
-                // IP = agregat sur stats cumulees
-                d.ip = BilanView.computeIP(d.scores, d.ipRole); // V29.45 : poids du profil reel (CentreDef)
+                d.ip = BilanView.computeSeasonIP(d.scores, d.ipRole, RankingView._seasonMatches || matches);
             });
         } else {
             // AWAY : V27.0 — agreger stats par joueur PAR FAMILLE sur tous les matchs, multi-cartes
@@ -7481,18 +7469,9 @@ const RankingView = {
                 });
             });
 
-            // Phase 2 Away : seuil 10% service (coherence avec Home, V22.05)
-            var teamTotalService = 0;
+            // Phase 2 Away : IP saison (V29.45 : volume par axe + lissage, plus de seuil des 4 %)
             allPlayers.forEach(function(d) {
-                teamTotalService += (d.scores._tots && d.scores._tots.service) || 0;
-            });
-            allPlayers.forEach(function(d) {
-                var playerSrvTot = (d.scores._tots && d.scores._tots.service) || 0;
-                if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.04) {
-                    d.scores.service = 0;
-                }
-                // IP = agregat sur stats cumulees
-                d.ip = BilanView.computeIP(d.scores, d.ipRole); // V29.45 : poids du profil reel (CentreDef)
+                d.ip = BilanView.computeSeasonIP(d.scores, d.ipRole, RankingView._seasonMatches || matches);
             });
         }
 
@@ -7546,8 +7525,7 @@ const RankingView = {
             allPlayers: allPlayers,
             starters: Object.values(bestByPos),
             ipAll: ipAll,
-            ipStarters: ipStarters,
-            teamTotalService: teamTotalService
+            ipStarters: ipStarters
         };
     },
 
@@ -11084,12 +11062,13 @@ const YearStatsView = {
             teamTotalService += (d.scores._tots && d.scores._tots.service) || 0;
         });
         allPlayerData.forEach(function(d) {
+            // V29.45 : IP saison calcule AVANT le masquage (le seuil des 4 % ne sert plus qu'a l'affichage
+            // du radar ; dans l'IP, quelques services pesent peu grace au volume par axe)
+            d.ip = BilanView.computeSeasonIP(d.scores, d.ipRole, matches);
             var playerSrvTot = (d.scores._tots && d.scores._tots.service) || 0;
             if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.04) {
                 d.scores.service = 0;
             }
-            // IP = agregat sur stats cumulees
-            d.ip = BilanView.computeIP(d.scores, d.ipRole); // V29.45 : poids du profil reel (CentreDef)
         });
 
         // Trier par slot puis IP desc
@@ -11249,7 +11228,7 @@ const YearStatsView = {
             return statCategories.some(function(cat) { return p[cat] && p[cat].tot > 0; });
         });
 
-        return BilanView.renderDistinctions(homeTotals, mergedRoles, players, allSets, matches);
+        return BilanView.renderDistinctions(homeTotals, mergedRoles, players, allSets, matches, true);
     },
 
     renderYearSideOut(matches) {
