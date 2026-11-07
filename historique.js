@@ -6134,17 +6134,19 @@ const BilanView = {
 
         var html = '<div class="bilan-player-card">';
 
-        // V29.39 — En-tête : nom + pastille(s) de poste dessous, IP dans un anneau à droite
+        // V29.41 — En-tête : pastille(s) de poste (points) + nom, IP dans un petit anneau à droite
         var dotColors = multiRoleColors && multiRoleColors.length > 1 ? multiRoleColors : [roleColor];
         html += '<div class="bilan-player-header">';
-        html += '<div class="bilan-player-who">';
+        if (dotColors.length > 1) {
+            html += '<span class="bilan-role-dots">';
+            dotColors.forEach(function(c) {
+                html += '<span class="bilan-role-dot bilan-role-dot-stacked" style="background:' + c + '" title="' + self._roleLabel(c, role) + '"></span>';
+            });
+            html += '</span>';
+        } else {
+            html += '<span class="bilan-role-dot" style="background:' + dotColors[0] + '" title="' + self._roleLabel(dotColors[0], role) + '"></span>';
+        }
         html += '<span class="bilan-player-name">' + Utils.escapeHtml(playerName) + '</span>';
-        html += '<span class="bilan-role-pills">';
-        dotColors.slice(0, 2).forEach(function(c) {
-            html += '<span class="bilan-role-pill" style="color:' + c + ';background:' + c + '1f">' +
-                self._roleLabel(c, role) + '</span>';
-        });
-        html += '</span></div>';
         var ringC = 2 * Math.PI * 16;
         var ipPct = Math.max(0, Math.min(100, ip || 0));
         html += '<span class="bilan-ip-ring" title="Indice de performance">';
