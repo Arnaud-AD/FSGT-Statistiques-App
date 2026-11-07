@@ -6271,6 +6271,7 @@ const BilanView = {
                 var pt = self.polarToCartesian(cx, cy, r, axis.angle);
                 polyPoints.push(pt);
                 dotPoints.push(pt);
+                if (skipZeros && self._skipGapCrossesCenter(vals, i)) polyPoints.push({ x: cx, y: cy });
             } else if (!skipZeros) {
                 polyPoints.push({ x: cx, y: cy });
             }
@@ -6325,6 +6326,7 @@ const BilanView = {
                 if (val > 0) {
                     var r = ovAxisMaxR[axis.key] * val / 100;
                     ovPoints.push(self.polarToCartesian(cx, cy, r, axis.angle));
+                    if (ovSkipZeros && self._skipGapCrossesCenter(ovVals, i)) ovPoints.push({ x: cx, y: cy });
                 } else if (!ovSkipZeros) {
                     ovPoints.push({ x: cx, y: cy });
                 }
@@ -6418,6 +6420,17 @@ const BilanView = {
             if (!found && String(self.ROLE_COLORS[r]).toLowerCase() === String(color).toLowerCase()) found = r;
         });
         return found || role || '';
+    },
+
+    // V29.43 — Quand on saute les zéros, le segment qui relie deux sommets séparés
+    // de plus d'un demi-tour passe de l'autre côté du centre (polygone croisé).
+    // Dans ce cas on fait passer le tracé par le centre.
+    _skipGapCrossesCenter(vals, i) {
+        var n = vals.length;
+        for (var step = 1; step < n; step++) {
+            if (vals[(i + step) % n] > 0) return step * 2 > n;
+        }
+        return false;
     },
 
     // --- Utilitaires ---
