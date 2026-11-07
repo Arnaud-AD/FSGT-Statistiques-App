@@ -3251,6 +3251,10 @@ const StatsAggregator = {
             var intervals = bySet[setIndex];
             var points = set.points || [];
             var totalPoints = points.length;
+            // V29.49 : sets joues (prorata des points), pour les volumes par set de computeAxisScores
+            var covered = 0;
+            intervals.forEach(function(iv) { covered += Math.max(0, Math.min(iv.end, totalPoints) - iv.start); });
+            merged._setsPlayed = (merged._setsPlayed || 0) + (totalPoints > 0 ? covered / totalPoints : 1);
 
             // Optimisation : si intervalle couvre tout le set ET set.stats existe, lire directement
             if (intervals.length === 1 && intervals[0].start === 0 && intervals[0].end >= totalPoints
@@ -5704,6 +5708,7 @@ const BilanView = {
     },
 
     _mergePlayerStats(target, source) {
+        target._setsPlayed = (target._setsPlayed || 0) + (source._setsPlayed || 0); // V29.49
         var cats = ['service', 'reception', 'attack', 'relance', 'defense', 'block'];
         cats.forEach(function(cat) {
             if (!source[cat]) return;
@@ -6002,7 +6007,10 @@ const BilanView = {
         if (atk.tot >= 3) {
             var killPct = atk.attplus / atk.tot;
             var errorPct = (atk.fatt + atk.bp) / atk.tot;
-            var raw = 40 + killPct * 80 - errorPct * 40;
+            // V29.49 : + attaques gagnantes par set joue (plafond 8) : la production offensive compte,
+            // pas seulement le taux. Base 30 au lieu de 40 : un attaquant a 4 kills/set garde sa note.
+            var kps = s._setsPlayed > 0 ? atk.attplus / s._setsPlayed : null;
+            var raw = (kps !== null ? 30 + Math.min(kps, 8) * 2.5 : 40) + killPct * 80 - errorPct * 40;
             scores.attaque = this.clamp(floor, 100, Math.round(raw));
         } else {
             scores.attaque = 0;
@@ -6039,7 +6047,10 @@ const BilanView = {
             var neutralRate = (def.defneutral || 0) / def.tot;
             var negRate = def.defminus / def.tot;
             var faultRate = def.fdef / def.tot;
-            var raw = 40 + posRate * 60 + neutralRate * 15 - negRate * 15 - faultRate * 25 + Math.min(def.tot, 15) * 1.5;
+            // V29.49 : bonus de volume par set joue (8 defenses/set = +22,4) au lieu du total plafonne a 15,
+            // atteint par tout le monde sur une saison quel que soit son volume reel.
+            var defVol = s._setsPlayed > 0 ? Math.min(def.tot / s._setsPlayed, 8) * 2.8 : Math.min(def.tot, 15) * 1.5;
+            var raw = 40 + posRate * 60 + neutralRate * 15 - negRate * 15 - faultRate * 25 + defVol;
             scores.defense = this.clamp(floor, 100, Math.round(raw));
         } else {
             scores.defense = 0;
