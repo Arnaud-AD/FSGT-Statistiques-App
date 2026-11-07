@@ -4479,7 +4479,8 @@ const BilanView = {
     // Determine si un centre est offensif (attaque/bloque) ou defensif (pur recep/def)
     // Retourne 'Centre' (offensif) ou 'CentreDef' (defensif) pour lookup IP_WEIGHTS
     getCentreIpRole(stats) {
-        var hasAttack = stats.attack && stats.attack.tot >= 2;
+        // V29.45 : 3 attaques = meme seuil que le score d'attaque (sinon centre « offensif » sans score d'attaque)
+        var hasAttack = stats.attack && stats.attack.tot >= 3;
         var hasBlock = stats.block && stats.block.tot >= 1;
         return (hasAttack || hasBlock) ? 'Centre' : 'CentreDef';
     },
@@ -6133,14 +6134,16 @@ const BilanView = {
         // Axes defensifs (tout le reste) : redistribution 100% (pas de penalite)
         // Logique : en 4v4, ne jamais attaquer/bloquer est une vraie limitation,
         // mais 0 defense peut etre contextuel (adversaire evite le joueur)
-        var OFFENSIVE_AXES = { attaque: true, bloc: true, service: true };
+        // V29.45 : le service n'est plus penalise (poste ou seuil des 4 %) — servir ou non
+        // depend de la rotation et des remplacements, pas du niveau du joueur
+        var OFFENSIVE_AXES = { attaque: true, bloc: true };
         var activeWeight = 0;
         var inactiveOffWeight = 0;
         Object.keys(weights).forEach(function(key) {
             if (weights[key] <= 0) return;
             var score = axisScores[key] || 0;
             if (score <= 0 || !meetsMinActions(key)) {
-                if (OFFENSIVE_AXES[key] && !(key === 'service' && axisScores._serviceMasked)) inactiveOffWeight += weights[key];
+                if (OFFENSIVE_AXES[key]) inactiveOffWeight += weights[key];
                 // Axes defensifs inactifs : redistribution 100% (poids ignore)
                 return;
             }
@@ -7335,12 +7338,13 @@ const RankingView = {
         var scores = BilanView.computeAxisScores(stats, ipRole);
         // Seuil service : relatif au cumul des services des équipes concernées
         var playerSrvTot = (scores._tots && scores._tots.service) || 0;
-        if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.04) { scores.service = 0; if (playerSrvTot > 0) scores._serviceMasked = true; }
+        if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.04) scores.service = 0;
 
         return {
             name: current.player.name, teamName: current.teamName,
             role: primaryRole, roleColor: BilanView.ROLE_COLORS[primaryRole] || '#5f6368',
-            scores: scores, ip: BilanView.computeIP(scores, effectiveRole)
+            // V29.45 : poids IP du profil reel (CentreDef pour un centre qui ne frappe pas)
+            scores: scores, ip: BilanView.computeIP(scores, ipRole)
         };
     },
 
@@ -7390,7 +7394,7 @@ const RankingView = {
 
                     allPlayers.push({
                         name: name, role: familyPrimaryRole, roleColor: roleColor,
-                        scores: scores, ip: 0, effectiveRole: familyIpRole,
+                        scores: scores, ip: 0, effectiveRole: familyIpRole, ipRole: playerIpRole,
                         matchCount: famData.matchSets.length
                     });
                 });
@@ -7405,10 +7409,9 @@ const RankingView = {
                 var playerSrvTot = (d.scores._tots && d.scores._tots.service) || 0;
                 if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.04) {
                     d.scores.service = 0;
-                    if (playerSrvTot > 0) d.scores._serviceMasked = true;
                 }
                 // IP = agregat sur stats cumulees
-                d.ip = BilanView.computeIP(d.scores, d.effectiveRole);
+                d.ip = BilanView.computeIP(d.scores, d.ipRole); // V29.45 : poids du profil reel (CentreDef)
             });
         } else {
             // AWAY : V27.0 — agreger stats par joueur PAR FAMILLE sur tous les matchs, multi-cartes
@@ -7472,7 +7475,7 @@ const RankingView = {
 
                 allPlayers.push({
                     name: entry.name, role: primaryRole, roleColor: roleColor,
-                    scores: scores, ip: 0, effectiveRole: (primaryFamily === 'Ailier') ? 'R4' : primaryFamily, matchCount: entry.matchCount,
+                    scores: scores, ip: 0, effectiveRole: (primaryFamily === 'Ailier') ? 'R4' : primaryFamily, ipRole: ipRole, matchCount: entry.matchCount,
                     // V29.28 : stats brutes conservées pour fusionner les joueurs transférés
                     family: primaryFamily, stats: stats, roles: entry.roles
                 });
@@ -7487,10 +7490,9 @@ const RankingView = {
                 var playerSrvTot = (d.scores._tots && d.scores._tots.service) || 0;
                 if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.04) {
                     d.scores.service = 0;
-                    if (playerSrvTot > 0) d.scores._serviceMasked = true;
                 }
                 // IP = agregat sur stats cumulees
-                d.ip = BilanView.computeIP(d.scores, d.effectiveRole);
+                d.ip = BilanView.computeIP(d.scores, d.ipRole); // V29.45 : poids du profil reel (CentreDef)
             });
         }
 
@@ -11068,7 +11070,7 @@ const YearStatsView = {
                 allPlayerData.push({
                     name: name, scores: scores, ip: 0, stats: stats,
                     primaryColor: primaryColor, roleColors: roleColors,
-                    effectiveRole: familyIpRole, family: family, slot: slot,
+                    effectiveRole: familyIpRole, ipRole: playerIpRole, family: family, slot: slot,
                     axes: familyAxes, bestName: bestName, secondBestName: secondBestName
                 });
             });
@@ -11085,11 +11087,9 @@ const YearStatsView = {
             var playerSrvTot = (d.scores._tots && d.scores._tots.service) || 0;
             if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.04) {
                 d.scores.service = 0;
-                // V29.44 — service joué mais masqué : neutre dans l'IP (pas de pénalité « axe non joué »)
-                if (playerSrvTot > 0) d.scores._serviceMasked = true;
             }
             // IP = agregat sur stats cumulees
-            d.ip = BilanView.computeIP(d.scores, d.effectiveRole);
+            d.ip = BilanView.computeIP(d.scores, d.ipRole); // V29.45 : poids du profil reel (CentreDef)
         });
 
         // Trier par slot puis IP desc
