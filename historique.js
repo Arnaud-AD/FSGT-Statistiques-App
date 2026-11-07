@@ -5977,16 +5977,17 @@ const BilanView = {
             scores.reception = 0;
         }
 
-        // PASSE (V22.05) : P4 majore pour recompenser la precision — plafond non-passeur (80)
+        // PASSE — plafond non-passeur (80)
         // V29.46 : seules les passes notees (P4 a P1 + FP) comptent. Une passe enregistree sans
         // note (grille absente sur une partie du match) n'est plus comptee comme une passe ratee.
+        // V29.48 : une P4 vaut 100 (et non 120) et plus de bonus +5 passeur. L'ancien bareme mettait
+        // la note de passe moyenne des passeurs a 89, loin au-dessus des autres axes (46 a 73), ce
+        // qui gonflait l'IP des passeurs par rapport aux autres postes.
         var pas = s.pass || {};
         var pasRated = (pas.p4 || 0) + (pas.p3 || 0) + (pas.p2 || 0) + (pas.p1 || 0) + (pas.fp || 0);
         if (pasRated > 0) {
-            var passeRaw = (pas.p4 * 120 + pas.p3 * 60 + pas.p2 * 30 + pas.p1 * 10) / pasRated;
-            if (role === 'Passeur') {
-                passeRaw += 5; // Bonus passeur : son role premier, recompense la constance
-            } else if (role) {
+            var passeRaw = (pas.p4 * 100 + pas.p3 * 60 + pas.p2 * 30 + pas.p1 * 10) / pasRated;
+            if (role && role !== 'Passeur') {
                 passeRaw = Math.min(passeRaw, 80); // Non-passeur plafonne a 80
             }
             scores.passe = this.clamp(floor, 100, Math.round(passeRaw));
