@@ -4662,7 +4662,16 @@ const BilanView = {
             if (bestH) bestHomeByFamily[fam] = { scores: bestH.scores, role: bestH.effectiveRole, name: bestH.name, ip: bestH.ip };
         });
 
-        // Rendu paires home/away alignees par slot
+        // Rendu paires home/away alignees par slot.
+        // Mobile (2 colonnes) : ordre du DOM home, away, home, away…
+        // Tablette/ordinateur (4 colonnes) : placement explicite via --h2h-col /
+        // --h2h-row (Jen colonnes 1-2, adverse 3-4, chaque poste sur sa ligne),
+        // sinon le flux automatique mélangeait les deux équipes.
+        function placed(cardHtml, col, row) {
+            return cardHtml.replace('class="bilan-player-card"',
+                'class="bilan-player-card bilan-h2h-card" style="--h2h-col:' + col + ';--h2h-row:' + row + '"');
+        }
+        var wideRow = 1;
         SLOT_ORDER.forEach(function(slot) {
             var homeSlot = homeBySlot[slot] || [];
             var awaySlot = awayBySlot[slot] || [];
@@ -4670,20 +4679,22 @@ const BilanView = {
             if (maxLen === 0) return;
 
             for (var i = 0; i < maxLen; i++) {
+                var row = wideRow + Math.floor(i / 2);
                 if (homeSlot[i]) {
                     var h = homeSlot[i];
-                    html += self.renderSpiderChart(h.name, h.effectiveRole, h.scores, h.ip, h.primaryColor, h.axes, false, bestAwayByFamily[h.family], h.roleColors);
+                    html += placed(self.renderSpiderChart(h.name, h.effectiveRole, h.scores, h.ip, h.primaryColor, h.axes, false, bestAwayByFamily[h.family], h.roleColors), 1 + (i % 2), row);
                 } else {
                     html += '<div class="bilan-player-card bilan-player-empty"></div>';
                 }
 
                 if (awaySlot[i]) {
                     var a = awaySlot[i];
-                    html += self.renderSpiderChart(a.name, a.effectiveRole, a.scores, a.ip, a.primaryColor, a.axes, true, bestHomeByFamily[a.family], a.roleColors);
+                    html += placed(self.renderSpiderChart(a.name, a.effectiveRole, a.scores, a.ip, a.primaryColor, a.axes, true, bestHomeByFamily[a.family], a.roleColors), 3 + (i % 2), row);
                 } else {
                     html += '<div class="bilan-player-card bilan-player-empty"></div>';
                 }
             }
+            wideRow += Math.ceil(maxLen / 2);
         });
 
         html += '</div>'; // ferme bilan-grid

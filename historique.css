@@ -1988,10 +1988,23 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
     }
 
     /* Bilan : 3 colonnes + espacement confortable */
-    .bilan-grid,
     .bilan-grid-year {
         grid-template-columns: repeat(3, 1fr);
         gap: 12px;
+    }
+
+    /* Radars d'un match : Jen à gauche (col. 1-2), adverse à droite (col. 3-4),
+       un poste par ligne (placement calculé dans BilanView.render). */
+    .bilan-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+    }
+    .bilan-grid > .bilan-h2h-card {
+        grid-column: var(--h2h-col);
+        grid-row: var(--h2h-row);
+    }
+    .bilan-grid > .bilan-player-empty {
+        display: none;
     }
 
     /* Ranking joueurs : 3 colonnes */
