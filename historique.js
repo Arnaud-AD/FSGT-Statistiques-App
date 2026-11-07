@@ -6140,7 +6140,7 @@ const BilanView = {
             if (weights[key] <= 0) return;
             var score = axisScores[key] || 0;
             if (score <= 0 || !meetsMinActions(key)) {
-                if (OFFENSIVE_AXES[key]) inactiveOffWeight += weights[key];
+                if (OFFENSIVE_AXES[key] && !(key === 'service' && axisScores._serviceMasked)) inactiveOffWeight += weights[key];
                 // Axes defensifs inactifs : redistribution 100% (poids ignore)
                 return;
             }
@@ -7335,7 +7335,7 @@ const RankingView = {
         var scores = BilanView.computeAxisScores(stats, ipRole);
         // Seuil service : relatif au cumul des services des équipes concernées
         var playerSrvTot = (scores._tots && scores._tots.service) || 0;
-        if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.04) scores.service = 0;
+        if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.04) { scores.service = 0; if (playerSrvTot > 0) scores._serviceMasked = true; }
 
         return {
             name: current.player.name, teamName: current.teamName,
@@ -7405,6 +7405,7 @@ const RankingView = {
                 var playerSrvTot = (d.scores._tots && d.scores._tots.service) || 0;
                 if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.04) {
                     d.scores.service = 0;
+                    if (playerSrvTot > 0) d.scores._serviceMasked = true;
                 }
                 // IP = agregat sur stats cumulees
                 d.ip = BilanView.computeIP(d.scores, d.effectiveRole);
@@ -7486,6 +7487,7 @@ const RankingView = {
                 var playerSrvTot = (d.scores._tots && d.scores._tots.service) || 0;
                 if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.04) {
                     d.scores.service = 0;
+                    if (playerSrvTot > 0) d.scores._serviceMasked = true;
                 }
                 // IP = agregat sur stats cumulees
                 d.ip = BilanView.computeIP(d.scores, d.effectiveRole);
@@ -11083,6 +11085,8 @@ const YearStatsView = {
             var playerSrvTot = (d.scores._tots && d.scores._tots.service) || 0;
             if (teamTotalService > 0 && playerSrvTot < teamTotalService * 0.04) {
                 d.scores.service = 0;
+                // V29.44 — service joué mais masqué : neutre dans l'IP (pas de pénalité « axe non joué »)
+                if (playerSrvTot > 0) d.scores._serviceMasked = true;
             }
             // IP = agregat sur stats cumulees
             d.ip = BilanView.computeIP(d.scores, d.effectiveRole);
