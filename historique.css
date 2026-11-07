@@ -2047,6 +2047,32 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
     white-space: nowrap;
 }
 
+/* Mobile : noms complets et nombres à 4 chiffres sans troncature */
+@media (max-width: 480px) {
+    .impact-table th,
+    .impact-table td {
+        padding: 8px 2px;
+        font-size: 12px;
+    }
+    .impact-table th {
+        font-size: 10px;
+    }
+    .impact-table th:first-child,
+    .impact-table td:first-child {
+        padding-left: 8px;
+    }
+    .impact-table th[data-sort-col] {
+        white-space: normal;
+        line-height: 1.2;
+    }
+    .impact-table th .sort-arrow {
+        margin-left: 1px;
+    }
+    .impact-table .player-cell {
+        gap: 4px;
+    }
+}
+
 .impact-col-main {
     border-left: 2px solid var(--border-color);
     border-right: 2px solid var(--border-color);
@@ -2517,6 +2543,27 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
 .ranking-matchcount {
     color: #9aa0a6;
     font-size: 12px;
+}
+
+/* Mobile : le tableau Équipes dépassait de ~12 px (colonne IP Titulaires coupée) */
+@media (max-width: 480px) {
+    .ranking-table th {
+        padding: 8px 4px;
+        font-size: 10px;
+        letter-spacing: 0;
+    }
+    .ranking-table td {
+        padding: 10px 4px;
+    }
+    .ranking-table .ranking-team-badge {
+        padding: 5px 8px;
+    }
+}
+@media (max-width: 374px) {
+    .ranking-table .ranking-team-badge {
+        font-size: 11px;
+        padding: 5px 6px;
+    }
 }
 
 /* Grille joueurs (mobile: 2 colonnes) */
@@ -3220,6 +3267,7 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
 .prog-trend-up { color: #137333; }
 .prog-trend-down { color: #c5221f; }
 .prog-trend-stable { color: #5f6368; }
+.prog-trend-few { color: #9aa0a6; font-style: italic; }
 
 .prog-sparkline {
     width: 100%;
