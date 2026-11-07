@@ -1831,7 +1831,7 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
     border-radius: 3px;
 }
 .bilan-bar-val {
-    font-family: 'Roboto Mono', 'Google Sans', monospace;
+    font-family: 'Google Sans', sans-serif;
     font-weight: 700;
     text-align: right;
     font-variant-numeric: tabular-nums;
