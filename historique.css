@@ -3386,7 +3386,7 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
 }
 */
 
-/* ==================== MISE EN PAGE LARGE (V29.37) ====================
+/* ==================== MISE EN PAGE LARGE (V29.38) ====================
    Piste B : chaque section prend toute la largeur et répartit son propre
    contenu selon SA largeur (container queries), pas celle de l'écran.
    Seuil 1000px : seul l'ordinateur (contenu ~1136px) est concerné ;

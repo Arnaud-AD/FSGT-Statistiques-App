@@ -12119,7 +12119,7 @@ var RankingTeamModal = {
 };
 
 // ==================== SECTIONS OUVERTES (tracking) ====================
-// ==================== SECTION NAV (V29.37) ====================
+// ==================== SECTION NAV (V29.38) ====================
 // Barre collante de raccourcis vers les sections d'un onglet (visible
 // uniquement sur ordinateur, cf. .section-nav dans historique.css).
 // Un clic ouvre la section si elle est fermée puis y fait défiler la page ;
