@@ -5977,9 +5977,12 @@ const BilanView = {
         }
 
         // PASSE (V22.05) : P4 majore pour recompenser la precision — plafond non-passeur (80)
+        // V29.46 : seules les passes notees (P4 a P1 + FP) comptent. Une passe enregistree sans
+        // note (grille absente sur une partie du match) n'est plus comptee comme une passe ratee.
         var pas = s.pass || {};
-        if (pas.tot > 0) {
-            var passeRaw = (pas.p4 * 120 + pas.p3 * 60 + pas.p2 * 30 + pas.p1 * 10) / pas.tot;
+        var pasRated = (pas.p4 || 0) + (pas.p3 || 0) + (pas.p2 || 0) + (pas.p1 || 0) + (pas.fp || 0);
+        if (pasRated > 0) {
+            var passeRaw = (pas.p4 * 120 + pas.p3 * 60 + pas.p2 * 30 + pas.p1 * 10) / pasRated;
             if (role === 'Passeur') {
                 passeRaw += 5; // Bonus passeur : son role premier, recompense la constance
             } else if (role) {
@@ -6045,7 +6048,7 @@ const BilanView = {
             service: srv.tot,
             reception: rec.tot,
             reception_r4: rec.r4,  // V20.285 : discriminant ailier 1 recep R4
-            passe: (pas.tot || 0),
+            passe: pasRated, // V29.46 : volume = passes notees (sert au poids de l'axe dans l'IP)
             attaque: atk.tot,
             bloc: blk.tot,
             relance: (rel && rel.tot) || 0,
