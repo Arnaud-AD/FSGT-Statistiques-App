@@ -3251,6 +3251,10 @@ const StatsAggregator = {
             var intervals = bySet[setIndex];
             var points = set.points || [];
             var totalPoints = points.length;
+            // V29.49 : sets joues (prorata des points), pour les volumes par set de computeAxisScores
+            var covered = 0;
+            intervals.forEach(function(iv) { covered += Math.max(0, Math.min(iv.end, totalPoints) - iv.start); });
+            merged._setsPlayed = (merged._setsPlayed || 0) + (totalPoints > 0 ? covered / totalPoints : 1);
 
             // Optimisation : si intervalle couvre tout le set ET set.stats existe, lire directement
             if (intervals.length === 1 && intervals[0].start === 0 && intervals[0].end >= totalPoints
@@ -4526,7 +4530,6 @@ const BilanView = {
         }
 
         var self = this;
-        var seasonMs = self.seasonMatchesOf(match); // V29.47 : moyennes de poste de la saison du match
 
         // Familles par joueur (avec indices des sets et roles specifiques)
         var homeFamilies = this.getPlayerFamilies(match, 'home');
@@ -4610,7 +4613,7 @@ const BilanView = {
                     var primaryColor = self.ROLE_COLORS[primaryRoleInFamily];
 
                     var scores = self.computeAxisScores(stats, ipRole);
-                    var ip = self.computeIP(scores, ipRole, seasonMs);
+                    var ip = self.computeIP(scores, ipRole);
 
                     // Slot de tri : pour les ailiers, utiliser le role principal (R4 ou Pointu)
                     var slot = family;
@@ -4739,7 +4742,7 @@ const BilanView = {
             if (displayRole === 'Centre') ipRole = self.getCentreIpRole(homeTotals[name]);
             var axes = self.computeAxisScores(homeTotals[name], ipRole);
             // V29.45 : IP saison lisse sur la saison, IP brut sur un match
-            var ip = isSeason ? self.computeSeasonIP(axes, ipRole, matches) : self.computeIP(axes, ipRole, self.seasonMatchesOf(matches && matches[0]));
+            var ip = isSeason ? self.computeSeasonIP(axes, ipRole, matches) : self.computeIP(axes, ipRole);
             playerData[name] = { role: displayRole, axes: axes, ip: ip, stats: homeTotals[name] };
         });
 
@@ -5273,7 +5276,7 @@ const BilanView = {
                 var ipRole = displayRole;
                 if (displayRole === 'Centre') ipRole = BilanView.getCentreIpRole(awayTotals[name]);
                 var axes = BilanView.computeAxisScores(awayTotals[name], ipRole);
-                var ip = BilanView.computeIP(axes, ipRole, BilanView.seasonMatchesOf(match));
+                var ip = BilanView.computeIP(axes, ipRole);
                 if (!bestByPos[displayRole] || ip > bestByPos[displayRole]) bestByPos[displayRole] = ip;
             });
             var posValues = POSITIONS.map(function(pos) { return bestByPos[pos] || null; }).filter(function(v) { return v !== null; });
@@ -5705,6 +5708,7 @@ const BilanView = {
     },
 
     _mergePlayerStats(target, source) {
+        target._setsPlayed = (target._setsPlayed || 0) + (source._setsPlayed || 0); // V29.49
         var cats = ['service', 'reception', 'attack', 'relance', 'defense', 'block'];
         cats.forEach(function(cat) {
             if (!source[cat]) return;
@@ -5948,7 +5952,9 @@ const BilanView = {
         var floor = this.AXIS_FLOOR;
 
         // SERVICE (V20.26) : moyenne adverse recentrée sur 3.5 + bonus volume
-        // Echelle : moy 2.0 + aces = 90+, moy 2.7 + peu de fautes = 65-70, moy 3.5 = 40-50
+        // V29.49 : base 45 (au lieu de 30). Avec la base 30, la note de service etait sur une echelle
+        // bien plus basse que les autres axes (moyenne 46 a 59 selon le poste) : servir, meme
+        // correctement, tirait l'IP vers le bas. La note ne depend que des stats du joueur.
         var srv = s.service;
         if (srv.tot >= 3) {
             var aceRate = (srv.ace + srv.splus) / srv.tot;
@@ -5958,7 +5964,7 @@ const BilanView = {
             var moyBonus = recCount > 0 ? (3.5 - srv.recSumAdv / recCount) * 20 : 0;
             // Bonus volume : servir beaucoup = fiabilite prouvee (plafonné à 60)
             var volBonus = Math.min(srv.tot, 60) * 0.3;
-            var raw = 30 + moyBonus + aceRate * 80 - faultRate * 80 + volBonus;
+            var raw = 45 + moyBonus + aceRate * 80 - faultRate * 80 + volBonus;
             scores.service = this.clamp(floor, 100, Math.round(raw));
         } else {
             scores.service = 0;
@@ -6001,7 +6007,10 @@ const BilanView = {
         if (atk.tot >= 3) {
             var killPct = atk.attplus / atk.tot;
             var errorPct = (atk.fatt + atk.bp) / atk.tot;
-            var raw = 40 + killPct * 80 - errorPct * 40;
+            // V29.49 : + attaques gagnantes par set joue (plafond 8) : la production offensive compte,
+            // pas seulement le taux. Base 30 au lieu de 40 : un attaquant a 4 kills/set garde sa note.
+            var kps = s._setsPlayed > 0 ? atk.attplus / s._setsPlayed : null;
+            var raw = (kps !== null ? 30 + Math.min(kps, 8) * 2.5 : 40) + killPct * 80 - errorPct * 40;
             scores.attaque = this.clamp(floor, 100, Math.round(raw));
         } else {
             scores.attaque = 0;
@@ -6038,7 +6047,10 @@ const BilanView = {
             var neutralRate = (def.defneutral || 0) / def.tot;
             var negRate = def.defminus / def.tot;
             var faultRate = def.fdef / def.tot;
-            var raw = 40 + posRate * 60 + neutralRate * 15 - negRate * 15 - faultRate * 25 + Math.min(def.tot, 15) * 1.5;
+            // V29.49 : bonus de volume par set joue (8 defenses/set = +22,4) au lieu du total plafonne a 15,
+            // atteint par tout le monde sur une saison quel que soit son volume reel.
+            var defVol = s._setsPlayed > 0 ? Math.min(def.tot / s._setsPlayed, 8) * 2.8 : Math.min(def.tot, 15) * 1.5;
+            var raw = 40 + posRate * 60 + neutralRate * 15 - negRate * 15 - faultRate * 25 + defVol;
             scores.defense = this.clamp(floor, 100, Math.round(raw));
         } else {
             scores.defense = 0;
@@ -6089,15 +6101,11 @@ const BilanView = {
     },
 
     // IP brut + volume total d'actions (axes ponderes du poste)
-    // V29.47 — srvPrior = note de service moyenne du poste dans le championnat. Les notes de service
-    // sont sur une echelle plus basse que les autres axes : en moyenne simple, servir tirait l'IP vers
-    // le bas meme en servant bien, alors que ne pas servir etait neutre. Le service ne compte plus que
-    // par son ecart a la moyenne du poste : servir dans la moyenne = meme IP que ne pas servir.
-    computeIPDetail(axisScores, role, srvPrior) {
+    computeIPDetail(axisScores, role) {
         var weights = this.IP_WEIGHTS[role] || this.IP_WEIGHTS['R4'];
         var K = this.IP_VOLUME_K;
         var tots = axisScores._tots || {};
-        var num = 0, den = 0, actions = 0, srvW = 0, srvScore = 0;
+        var num = 0, den = 0, actions = 0;
         Object.keys(weights).forEach(function(key) {
             if (weights[key] <= 0) return;
             var n = tots[key] || 0;
@@ -6106,53 +6114,25 @@ const BilanView = {
             var score = axisScores[key] || 0;
             if (score <= 0) return; // sous le seuil de la formule (ex : < 3 services) : pas de note
             var w = weights[key] * n / (n + K[key]);
-            if (key === 'service' && srvPrior) { srvW = w; srvScore = score; return; }
             num += w * score;
             den += w;
         });
-        if (srvW > 0) {
-            if (den <= 0) return { raw: srvScore, actions: actions }; // service seul : note brute
-            var rawOthers = num / den;
-            var raw = rawOthers + srvW / (den + srvW) * (srvScore - srvPrior);
-            return { raw: Math.max(0, Math.min(100, raw)), actions: actions };
-        }
         return { raw: den > 0 ? num / den : 0, actions: actions };
     },
 
-    // Note de service moyenne du poste (null si moyennes indisponibles)
-    _ipSrvPrior(role, matches) {
-        if (this._ipPriorsBusy || !matches) return null;
-        var priors = this.getIPPriors(matches);
-        var P = priors && priors[this._ipFamily(role)];
-        return P ? P.service : null;
-    },
-
-    // Matchs de la saison d'un match : les moyennes de poste d'un IP de match viennent de sa saison
-    seasonMatchesOf(match) {
-        if (!match || typeof HistoriqueData === 'undefined') return null;
-        var all = HistoriqueData.getCompletedMatches();
-        var season = match.season || '2025-2026';
-        if (this._seasonMatchesSrc !== all) { this._seasonMatchesSrc = all; this._seasonMatchesCache = {}; }
-        if (!this._seasonMatchesCache[season]) {
-            this._seasonMatchesCache[season] = all.filter(function(m) { return (m.season || '2025-2026') === season; });
-        }
-        return this._seasonMatchesCache[season];
-    },
-
     // --- Indice de Performance d'un MATCH (stats brutes, pas de lissage) ---
-    // seasonMatches = matchs de la saison (moyenne de service du poste) ; sans eux, moyenne simple
-    computeIP(axisScores, role, seasonMatches) {
-        return Math.round(this.computeIPDetail(axisScores, role, this._ipSrvPrior(role, seasonMatches)).raw);
+    computeIP(axisScores, role) {
+        return Math.round(this.computeIPDetail(axisScores, role).raw);
     },
 
     // --- Indice de Performance SAISON : meme calcul + lissage vers la moyenne du poste ---
     // matches = matchs de la periode (sert a calculer les moyennes de poste du championnat)
     computeSeasonIP(axisScores, role, matches) {
+        var d = this.computeIPDetail(axisScores, role);
+        if (d.raw <= 0) return 0;
         var priors = this._ipPriorsBusy ? null : this.getIPPriors(matches);
         var fam = this._ipFamily(role);
         var P = priors && priors[fam];
-        var d = this.computeIPDetail(axisScores, role, P ? P.service : null);
-        if (d.raw <= 0) return 0;
         if (!P) return Math.round(d.raw);
         var weights = this.IP_WEIGHTS[fam === 'Ailier' ? 'R4' : fam];
         var mNum = 0, mDen = 0;
@@ -6547,7 +6527,7 @@ const BilanView = {
                 });
                 if (!hasAny) return;
 
-                var ip = self.computeIP(scores, effectiveRole, self.seasonMatchesOf(match));
+                var ip = self.computeIP(scores, effectiveRole);
                 if (ip > bestIp) {
                     bestIp = ip;
                     bestScores = scores;
@@ -6580,7 +6560,7 @@ const BilanView = {
         return {
             name: (ROLE_LABELS[role] || role) + ' Adv.',
             scores: avgScores,
-            ip: self.computeIP(avgScores, role, matches),
+            ip: self.computeIP(avgScores, role),
             count: bestPerMatch.length
         };
     },
@@ -8097,7 +8077,7 @@ const ProgressionView = {
                 // Compute IP
                 var ipRole = (role === 'Centre') ? BilanView.getCentreIpRole(pStats) : role;
                 var axisScores = BilanView.computeAxisScores(pStats, ipRole);
-                var ip = BilanView.computeIP(axisScores, ipRole, BilanView.seasonMatchesOf(match));
+                var ip = BilanView.computeIP(axisScores, ipRole);
 
                 // Derived metrics
                 var metrics = self._computeDerived(pStats);
@@ -8213,7 +8193,7 @@ const ProgressionView = {
             if (totalAct < 3) return;
             var ipRole = (role === 'Centre') ? BilanView.getCentreIpRole(s) : role;
             var axisScores = BilanView.computeAxisScores(s, ipRole);
-            var ip = BilanView.computeIP(axisScores, ipRole, BilanView.seasonMatchesOf(match));
+            var ip = BilanView.computeIP(axisScores, ipRole);
             if (bestByRole[role] === null || ip > bestByRole[role]) {
                 bestByRole[role] = ip;
             }
