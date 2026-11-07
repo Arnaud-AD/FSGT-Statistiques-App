@@ -7897,12 +7897,18 @@ const ProgressionView = {
 
     METRICS: [
         { key: 'ip', label: 'IP', unit: '', decimals: 0 },
-        { key: 'attEff', label: 'Eff. Att', unit: '%', decimals: 0, multiply: 100 },
-        { key: 'recMoy', label: 'Rec Moy', unit: '', decimals: 2 },
-        { key: 'passMoy', label: 'Passe Moy', unit: '', decimals: 2 },
-        { key: 'srvPression', label: 'Srv Pression', unit: '', decimals: 2 },
-        { key: 'defPlusRate', label: 'D+ Rate', unit: '%', decimals: 0, multiply: 100 }
+        // V29.51 : notes par axe du match = memes notes que celles qui composent l'IP (computeAxisScores)
+        { key: 'ipAttaque', label: 'Attaque', unit: '', decimals: 0, axis: 'attaque' },
+        { key: 'ipReception', label: 'Réception', unit: '', decimals: 0, axis: 'reception' },
+        { key: 'ipPasse', label: 'Passe', unit: '', decimals: 0, axis: 'passe' },
+        { key: 'ipService', label: 'Service', unit: '', decimals: 0, axis: 'service' },
+        { key: 'ipDefense', label: 'Défense', unit: '', decimals: 0, axis: 'defense' },
+        { key: 'ipBloc', label: 'Bloc', unit: '', decimals: 0, axis: 'bloc' },
+        { key: 'ipRelance', label: 'Relance', unit: '', decimals: 0, axis: 'relance' }
     ],
+
+    // Nombre minimum d'actions sur l'axe dans le match pour afficher sa note (sinon point absent)
+    AXIS_MIN_ACTIONS: { attaque: 3, reception: 3, passe: 3, service: 3, defense: 3, bloc: 2, relance: 3 },
 
     // Métriques pour le graphique équipe (inclut SO% et BO%)
     TEAM_METRICS: [
@@ -8078,20 +8084,16 @@ const ProgressionView = {
                 var axisScores = BilanView.computeAxisScores(pStats, ipRole);
                 var ip = BilanView.computeIP(axisScores, ipRole);
 
-                // Derived metrics
-                var metrics = self._computeDerived(pStats);
-
-                pd.matchData.push({
-                    played: true,
-                    matchIndex: mi,
-                    ip: ip,
-                    role: role,
-                    attEff: metrics.attEff,
-                    recMoy: metrics.recMoy,
-                    passMoy: metrics.passMoy,
-                    srvPression: metrics.srvPression,
-                    defPlusRate: metrics.defPlusRate
+                var entry = { played: true, matchIndex: mi, ip: ip, role: role };
+                // Note de chaque axe (celle qui entre dans l'IP), si le joueur a assez joue l'axe
+                var tots = axisScores._tots || {};
+                self.METRICS.forEach(function(m) {
+                    if (!m.axis) return;
+                    var n = tots[m.axis] || 0;
+                    var sc = axisScores[m.axis] || 0;
+                    entry[m.key] = (n >= self.AXIS_MIN_ACTIONS[m.axis] && sc > 0) ? sc : null;
                 });
+                pd.matchData.push(entry);
             });
 
             // Fill 'not played' for players not in this match
@@ -8701,6 +8703,11 @@ const ProgressionView = {
         var range = dataMax - dataMin || 1;
         var yMin = dataMin - range * 0.15;
         var yMax = dataMax + range * 0.15;
+        // Notes sur 100 (IP et axes) : l'echelle ne depasse pas 0-100
+        if (metricKey === 'ip' || metricDef.axis) {
+            yMin = Math.max(yMin, 0);
+            yMax = Math.min(yMax, 100);
+        }
 
         function xPos(i) { return pad.left + (numMatches === 1 ? chartW / 2 : (i / (numMatches - 1)) * chartW); }
         function yPos(v) { return pad.top + (1 - (v - yMin) / (yMax - yMin)) * chartH; }
