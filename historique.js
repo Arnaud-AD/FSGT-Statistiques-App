@@ -5549,6 +5549,14 @@ const BilanView = {
             return s.team === team;
         }).sort(function(a, b) { return a.pointIndex - b.pointIndex; });
 
+        // V29.42 : changements de joueur non enregistrés comme remplacement
+        // (ex. Kiki Team 2025-26 S3 : Olivier entre pour Arnaud, aucune
+        // substitution « home » saisie ; 7 sets concernés en 2025-26). On compare la compo finale à celle
+        // obtenue en rejouant les remplacements, et on ajoute un remplacement
+        // implicite au premier point où le joueur entrant apparaît.
+        subs = subs.concat(self._inferMissingSubs(set, team, initialLineup, subs))
+            .sort(function(a, b) { return a.pointIndex - b.pointIndex; });
+
         // Construire les intervalles globaux { start, end, roleMap }
         var rawIntervals = [];
         var currentRoleMap = Object.assign({}, roleMap);
@@ -5600,6 +5608,49 @@ const BilanView = {
 
         set[cacheKey] = result;
         return result;
+    },
+
+    _inferMissingSubs(set, team, initialLineup, subs) {
+        // Jen uniquement : côté adverse, les positions des remplacements saisis
+        // ne suivent pas la même numérotation que la compo, la comparaison n'est pas fiable.
+        if (team !== 'home') return [];
+        var finalLineup = set[(team === 'away') ? 'awayLineup' : 'homeLineup'];
+        if (!initialLineup || !finalLineup) return [];
+        // Rejouer les remplacements enregistrés sur les positions
+        var posMap = Object.assign({}, initialLineup);
+        subs.forEach(function(sub) {
+            if (sub.type === 'swap') {
+                var p1 = null, p2 = null;
+                Object.keys(posMap).forEach(function(pos) {
+                    if (posMap[pos] === sub.player1) p1 = pos;
+                    if (posMap[pos] === sub.player2) p2 = pos;
+                });
+                if (p1 && p2) { posMap[p1] = sub.player2; posMap[p2] = sub.player1; }
+            } else if (sub.position != null) {
+                posMap[sub.position] = sub.playerIn;
+            }
+        });
+        var points = set.points || [];
+        var inferred = [];
+        Object.keys(finalLineup).forEach(function(pos) {
+            var playerIn = finalLineup[pos];
+            var playerOut = posMap[pos];
+            if (!playerIn || playerIn === playerOut) return;
+            // Joueur déjà sur le terrain à une autre position : pas un remplacement
+            var elsewhere = Object.keys(posMap).some(function(p) { return p !== pos && posMap[p] === playerIn; });
+            if (elsewhere) return;
+            var firstIdx = -1;
+            for (var i = 0; i < points.length && firstIdx === -1; i++) {
+                var rally = points[i].rally || [];
+                for (var j = 0; j < rally.length; j++) {
+                    if (rally[j].team === team && rally[j].player === playerIn) { firstIdx = i; break; }
+                }
+            }
+            if (firstIdx === -1) return;
+            inferred.push({ team: team, position: +pos, playerOut: playerOut, playerIn: playerIn,
+                pointIndex: firstIdx, inferred: true });
+        });
+        return inferred;
     },
 
     // V27.0 : Retourne par joueur : familles jouees, indices des sets, roles specifiques + pointIntervals
