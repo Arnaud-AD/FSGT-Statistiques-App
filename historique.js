@@ -6140,7 +6140,7 @@ const BilanView = {
             if (weights[key] <= 0) return;
             var score = axisScores[key] || 0;
             if (score <= 0 || !meetsMinActions(key)) {
-                if (OFFENSIVE_AXES[key] && !(key === 'service' && axisScores._serviceMasked)) inactiveOffWeight += weights[key];
+                if (OFFENSIVE_AXES[key] && !(key === 'service' && axisScores._serviceMasked && (role === 'Centre' || role === 'CentreDef'))) inactiveOffWeight += weights[key];
                 // Axes defensifs inactifs : redistribution 100% (poids ignore)
                 return;
             }
