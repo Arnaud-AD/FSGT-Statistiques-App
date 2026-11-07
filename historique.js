@@ -6001,16 +6001,15 @@ const BilanView = {
             scores.passe = 0;
         }
 
-        // ATTAQUE (V20.26) : base 35 + kill% bonus - error penalty (30→40)
+        // ATTAQUE (V20.26) : base 40 + kill% bonus - error penalty
         // Seuil minimum 3 attaques pour eviter les scores gonfles (1 kill = 100)
+        // V29.50 : retour au taux seul (sans le bonus kills par set de la V29.49). Ce bonus donnait
+        // jusqu'a +18 a l'attaquant qui frappe le plus et creusait l'ecart avec les autres postes.
         var atk = s.attack;
         if (atk.tot >= 3) {
             var killPct = atk.attplus / atk.tot;
             var errorPct = (atk.fatt + atk.bp) / atk.tot;
-            // V29.49 : + attaques gagnantes par set joue (plafond 8) : la production offensive compte,
-            // pas seulement le taux. Base 30 au lieu de 40 : un attaquant a 4 kills/set garde sa note.
-            var kps = s._setsPlayed > 0 ? atk.attplus / s._setsPlayed : null;
-            var raw = (kps !== null ? 30 + Math.min(kps, 8) * 2.5 : 40) + killPct * 80 - errorPct * 40;
+            var raw = 40 + killPct * 80 - errorPct * 40;
             scores.attaque = this.clamp(floor, 100, Math.round(raw));
         } else {
             scores.attaque = 0;
