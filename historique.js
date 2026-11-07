@@ -1010,7 +1010,7 @@ const PlusMinusCalculator = {
 
     _initRecord() {
         return {
-            ptsPlayed: 0, setsPlayed: 0, proratedSets: 0, teamScored: 0, teamConceded: 0, plusMinus: 0,
+            ptsPlayed: 0, setsPlayed: 0, proratedSets: 0, filmedProratedSets: 0, teamScored: 0, teamConceded: 0, plusMinus: 0,
             offPtsPlayed: 0, offTeamScored: 0, offTeamConceded: 0,
             ace: 0, attplus: 0, blcplus: 0, defplus: 0,
             fser: 0, fatt: 0, bp: 0, frec: 0, fdef: 0, defminus: 0, fblc: 0, fp: 0,
@@ -1157,6 +1157,9 @@ const PlusMinusCalculator = {
                         if (lineups[pp] && lineups[pp].indexOf(name) >= 0) ptsInSet++;
                     }
                     r.proratedSets += ptsInSet / totalPtsInSet;
+                    // Sets filmés uniquement : base des colonnes issues des rallies
+                    // (Direct, Indirect, Technique), que les sets non filmés n'alimentent pas
+                    r.filmedProratedSets += ptsInSet / totalPtsInSet;
                     // Service : splus, servTot, recSumAdv, recCountAdv
                     r.splus += (ps.service && ps.service.splus) || 0;
                     r.servTot += (ps.service && ps.service.tot) || 0;
@@ -1452,7 +1455,7 @@ const PlusMinusCalculator = {
                 if (!combined[name]) combined[name] = self._initRecord();
                 var dst = combined[name];
                 var src = matchData[name];
-                var rawFields = ['ptsPlayed', 'setsPlayed', 'proratedSets', 'teamScored', 'teamConceded',
+                var rawFields = ['ptsPlayed', 'setsPlayed', 'proratedSets', 'filmedProratedSets', 'teamScored', 'teamConceded',
                     'offPtsPlayed', 'offTeamScored', 'offTeamConceded',
                     'ace', 'attplus', 'blcplus', 'defplus', 'fser', 'fatt', 'bp', 'frec', 'fdef', 'defminus', 'fblc', 'fp',
                     'recWinner', 'passWinner', 'defWinner',
@@ -1511,7 +1514,7 @@ const PlusMinusCalculator = {
         var seasonDirPerSet = {};
         Object.keys(combined).forEach(function(name) {
             var r = combined[name];
-            seasonDirPerSet[name] = r.proratedSets > 0 ? r.direct / r.proratedSets : 0;
+            seasonDirPerSet[name] = r.filmedProratedSets > 0 ? r.direct / r.filmedProratedSets : 0;
         });
 
         // Phase 2 : parcourir chaque match > set > point pour accumuler co-players' strength
@@ -3066,6 +3069,14 @@ const StatsAggregator = {
      * Agrege les stats d'une equipe sur plusieurs sets.
      * Gere les noms de champs legacy (fs/fser, fd/attplus, bl/blcplus, faute/frec).
      */
+    // Le joueur a-t-il au moins une action dans ce set (stats manuelles d'un set non filmé) ?
+    _hasAnyStat(ps) {
+        if (!ps) return false;
+        return ['service', 'reception', 'pass', 'attack', 'defense', 'block', 'relance'].some(function(k) {
+            return ps[k] && ps[k].tot > 0;
+        });
+    },
+
     aggregateStats(setsData, teamKey, validPlayers) {
         // V20.287 : reparer les stats manquantes depuis les rallies avant aggregation
         setsData.forEach(function(s) {
@@ -3124,6 +3135,10 @@ const StatsAggregator = {
                         if (lineups[pp] && lineups[pp].indexOf(name) >= 0) ptsInSet++;
                     }
                     t._setsPlayed += ptsInSet / totalPts;
+                } else if (totalPts === 0 && StatsAggregator._hasAnyStat(data)) {
+                    // Set non filmé avec stats saisies à la main : le joueur a joué le set
+                    // (sinon ses stats comptent au numérateur sans rien au dénominateur en Moy)
+                    t._setsPlayed += 1;
                 }
 
                 // Service
@@ -6584,6 +6599,7 @@ const ImpactView = {
     _getSortValue(r, colKey, name) {
         var isMoy = this._avgMode === 'moy';
         var sp = r.proratedSets || r.setsPlayed || 1;
+        var spF = this._filmedSets(r);
         var raw;
         switch (colKey) {
             case 'pts': raw = r.ptsPlayed; break;
@@ -6601,7 +6617,15 @@ const ImpactView = {
             case 'defblc': raw = r.techDefBlc; break;
             default: raw = r.plusMinus;
         }
-        return isMoy && sp > 1 ? raw / sp : raw;
+        // +/- et points joués : tous les sets ; colonnes issues des rallies : sets filmés
+        var base = (colKey === 'pts' || colKey === 'pm' || !colKey) ? sp : spF;
+        return isMoy && base > 1 ? raw / base : raw;
+    },
+
+    // Base « Moy » des colonnes issues des rallies (Direct, Indirect, Technique) :
+    // sets filmés au prorata, sinon on divise par des sets qui n'ont rien apporté.
+    _filmedSets(r) {
+        return r.filmedProratedSets || r.proratedSets || r.setsPlayed || 1;
     },
 
     _sortPlayers(data, playerRoles) {
@@ -6652,13 +6676,14 @@ const ImpactView = {
         var fields = ['ptsPlayed', 'plusMinus', 'direct', 'indirect',
             'techServ', 'techRec', 'techPasse', 'techAtt', 'techRel', 'techDef', 'techBlc', 'techDefBlc',
             'servImpact', 'recImpact', 'pasImpact', 'attImpact', 'defImpact', 'blcImpact'];
-        var t = { setsPlayed: 0, proratedSets: 0, onOff: null, influence: null };
+        var t = { setsPlayed: 0, proratedSets: 0, filmedProratedSets: 0, onOff: null, influence: null };
         fields.forEach(function(f) { t[f] = 0; });
         players.forEach(function(name) {
             var r = data[name];
             fields.forEach(function(f) { t[f] += r[f]; });
             if (r.setsPlayed > t.setsPlayed) t.setsPlayed = r.setsPlayed;
             if (r.proratedSets > t.proratedSets) t.proratedSets = r.proratedSets;
+            if ((r.filmedProratedSets || 0) > t.filmedProratedSets) t.filmedProratedSets = r.filmedProratedSets;
         });
         return t;
     },
@@ -6760,13 +6785,14 @@ const ImpactView = {
         players.forEach(function(name) {
             var r = data[name];
             var sp = r.proratedSets || r.setsPlayed || 1;
+            var spF = self._filmedSets(r);
             html += '<tr>';
             html += '<td>' + self._renderPlayerCell(name, playerRoles) + '</td>';
             var ptsDisplay = isMoy && sp > 1 ? (r.ptsPlayed / sp).toFixed(1) : r.ptsPlayed;
             html += '<td><span class="impact-dark">' + ptsDisplay + '</span></td>';
             html += '<td class="impact-col-main">' + self._fmtVal(r.plusMinus, sp, true, 'dark') + '</td>';
-            html += '<td>' + self._fmtVal(r.direct, sp) + '</td>';
-            html += '<td>' + self._fmtVal(r.indirect, sp) + '</td>';
+            html += '<td>' + self._fmtVal(r.direct, spF) + '</td>';
+            html += '<td>' + self._fmtVal(r.indirect, spF) + '</td>';
             html += '<td>' + self._fmtIP(r.rosterIP) + '</td>';
             html += '</tr>';
         });
@@ -6774,6 +6800,7 @@ const ImpactView = {
         // Ligne Total equipe
         var t = this._teamTotals(data, players);
         var tsp = t.proratedSets || t.setsPlayed || 1;
+        var tspF = self._filmedSets(t);
         // Roster total = moyenne des roster IP individuels
         var rosterSum = 0, rosterCount = 0;
         players.forEach(function(name) {
@@ -6785,8 +6812,8 @@ const ImpactView = {
         html += '<tr class="total-row"><td>Total</td>';
         html += '<td><span class="impact-dark">' + totalPtsDisplay + '</span></td>';
         html += '<td class="impact-col-main">' + self._fmtVal(t.plusMinus, tsp, true, 'dark') + '</td>';
-        html += '<td>' + self._fmtVal(t.direct, tsp) + '</td>';
-        html += '<td>' + self._fmtVal(t.indirect, tsp) + '</td>';
+        html += '<td>' + self._fmtVal(t.direct, tspF) + '</td>';
+        html += '<td>' + self._fmtVal(t.indirect, tspF) + '</td>';
         html += '<td>' + self._fmtIP(teamRosterIP) + '</td>';
         html += '</tr>';
 
@@ -6825,27 +6852,29 @@ const ImpactView = {
         players.forEach(function(name) {
             var r = data[name];
             var sp = r.proratedSets || r.setsPlayed || 1;
+            var spF = self._filmedSets(r);
             html += '<tr>';
             html += '<td>' + self._renderPlayerCell(name, playerRoles) + '</td>';
-            html += '<td>' + self._fmtVal(r.techServ, sp) + '</td>';
-            html += '<td>' + self._fmtVal(r.techRec, sp) + '</td>';
-            html += '<td>' + self._fmtVal(r.techPasse, sp) + '</td>';
-            html += '<td>' + self._fmtVal(r.techAtt, sp) + '</td>';
-            html += '<td>' + self._fmtVal(r.techDef, sp) + '</td>';
-            html += '<td>' + self._fmtVal(r.techBlc, sp) + '</td>';
+            html += '<td>' + self._fmtVal(r.techServ, spF) + '</td>';
+            html += '<td>' + self._fmtVal(r.techRec, spF) + '</td>';
+            html += '<td>' + self._fmtVal(r.techPasse, spF) + '</td>';
+            html += '<td>' + self._fmtVal(r.techAtt, spF) + '</td>';
+            html += '<td>' + self._fmtVal(r.techDef, spF) + '</td>';
+            html += '<td>' + self._fmtVal(r.techBlc, spF) + '</td>';
             html += '</tr>';
         });
 
         // Ligne Total equipe
         var t = this._teamTotals(data, players);
         var tsp = t.proratedSets || t.setsPlayed || 1;
+        var tspF = self._filmedSets(t);
         html += '<tr class="total-row"><td>Total</td>';
-        html += '<td>' + self._fmtVal(t.techServ, tsp) + '</td>';
-        html += '<td>' + self._fmtVal(t.techRec, tsp) + '</td>';
-        html += '<td>' + self._fmtVal(t.techPasse, tsp) + '</td>';
-        html += '<td>' + self._fmtVal(t.techAtt, tsp) + '</td>';
-        html += '<td>' + self._fmtVal(t.techDef, tsp) + '</td>';
-        html += '<td>' + self._fmtVal(t.techBlc, tsp) + '</td>';
+        html += '<td>' + self._fmtVal(t.techServ, tspF) + '</td>';
+        html += '<td>' + self._fmtVal(t.techRec, tspF) + '</td>';
+        html += '<td>' + self._fmtVal(t.techPasse, tspF) + '</td>';
+        html += '<td>' + self._fmtVal(t.techAtt, tspF) + '</td>';
+        html += '<td>' + self._fmtVal(t.techDef, tspF) + '</td>';
+        html += '<td>' + self._fmtVal(t.techBlc, tspF) + '</td>';
         html += '</tr>';
 
         html += '</tbody></table>';
@@ -10385,7 +10414,9 @@ const MatchStatsView = {
 
         // Toggle Tot/Moy : visible uniquement en Set ALL (multi-sets)
         // V20.293 : ne compter que les sets avec stats (exclure sets sans camera)
-        var setsWithStats = setsToUse.filter(function(s) { return s.stats && (s.stats.home || s.stats.away); });
+        // Sets avec de vraies stats (filmés, ou saisie manuelle non vide) : un set non filmé
+        // dont les stats sont à zéro ne doit pas compter au dénominateur de la ligne Total (Moy)
+        var setsWithStats = setsToUse.filter(function(s) { return Utils.setHasStats(s); });
         SharedComponents._showAvgToggle = (setFilter === 'all' && setsWithStats.length > 1);
         SharedComponents._totalSets = setsWithStats.length;
         if (!SharedComponents._showAvgToggle) SharedComponents._avgMode = 'tot';
@@ -11270,7 +11301,8 @@ const YearStatsView = {
 
         // Toggle Tot/Moy : toujours visible en Stats Annee (multi-sets)
         // V20.293 : ne compter que les sets avec stats (exclure sets sans camera)
-        var setsWithStats = allSets.filter(function(s) { return s.stats && (s.stats.home || s.stats.away); });
+        // Sets avec de vraies stats (filmés, ou saisie manuelle non vide)
+        var setsWithStats = allSets.filter(function(s) { return Utils.setHasStats(s); });
         SharedComponents._showAvgToggle = (setsWithStats.length > 1);
         SharedComponents._totalSets = setsWithStats.length;
 
@@ -11332,7 +11364,7 @@ const YearStatsView = {
 
         // Toggle Tot/Moy : toujours visible en Stats Annee (multi-sets)
         // V20.293 : ne compter que les sets avec stats (exclure sets sans camera)
-        var setsWithStats2 = allSets.filter(function(s) { return s.stats && (s.stats.home || s.stats.away); });
+        var setsWithStats2 = allSets.filter(function(s) { return Utils.setHasStats(s); });
         SharedComponents._showAvgToggle = (setsWithStats2.length > 1);
         SharedComponents._totalSets = setsWithStats2.length;
 
