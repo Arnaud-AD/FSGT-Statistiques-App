@@ -3429,7 +3429,7 @@ const SharedComponents = {
             ]
         },
         reception: {
-            label: 'Reception', key: 'reception',
+            label: 'Réception', key: 'reception',
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
                 { key: 'r4', label: 'R4', cls: 'positive', pct: true },
@@ -3467,7 +3467,7 @@ const SharedComponents = {
             ]
         },
         defense: {
-            label: 'Defense', key: 'defense',
+            label: 'Défense', key: 'defense',
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
                 { key: 'defplus', label: 'D+', cls: 'positive', pct: true },
@@ -3499,7 +3499,7 @@ const SharedComponents = {
             ]
         },
         reception: {
-            label: 'Reception', key: 'reception',
+            label: 'Réception', key: 'reception',
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
                 { key: 'r4', label: 'R4', cls: 'positive', pct: true },
@@ -3537,7 +3537,7 @@ const SharedComponents = {
             ]
         },
         defense: {
-            label: 'Defense', key: 'defense',
+            label: 'Défense', key: 'defense',
             columns: [
                 { key: 'tot', label: 'Tot', cls: '' },
                 { key: 'defplus', label: 'D+', cls: 'positive', pct: true },
@@ -6683,8 +6683,10 @@ const ImpactView = {
         }
         if (Math.abs(v) < 0.05) return '<span class="impact-zero">' + zeroLabel + '</span>';
         var cls = this._colorCls(v, colorMode);
-        // En Tot : arrondir a 1 decimale si float (servBonus rend certaines valeurs non-entieres)
-        var display = (v % 1 !== 0) ? v.toFixed(1) : String(v);
+        // En Tot : arrondir a 1 decimale si float (servBonus rend certaines valeurs non-entieres).
+        // Au-dela de 100, la decimale n'apporte rien et fait deborder la colonne sur mobile → entier.
+        var display = (v % 1 === 0) ? String(v)
+            : (Math.abs(v) >= 100 ? String(Math.round(v)) : v.toFixed(1));
         return '<span class="' + cls + '">' + (v > 0 ? '+' : '') + display + '</span>';
     },
 
@@ -6745,7 +6747,7 @@ const ImpactView = {
         }
         html += '</div>';
         html += '<table class="stats-table impact-table">';
-        html += '<colgroup><col style="width:20%"><col style="width:12%"><col style="width:14%"><col style="width:14%"><col style="width:14%"><col style="width:12%"></colgroup>';
+        html += '<colgroup><col style="width:25%"><col style="width:15%"><col style="width:15%"><col style="width:14%"><col style="width:16%"><col style="width:15%"></colgroup>';
         html += '<thead><tr>';
         html += '<th data-sort-col="player" class="impact-sortable">Joueur' + self._sortIcon('player') + '</th>';
         html += '<th data-sort-col="pts" class="impact-sortable">Pts Jou\u00e9s' + self._sortIcon('pts') + '</th>';
@@ -6809,7 +6811,7 @@ const ImpactView = {
         }
         html += '</div>';
         html += '<table class="stats-table impact-table">';
-        html += '<colgroup><col style="width:19%"><col style="width:13.5%"><col style="width:13.5%"><col style="width:13.5%"><col style="width:13.5%"><col style="width:13.5%"><col style="width:13.5%"></colgroup>';
+        html += '<colgroup><col style="width:25%"><col style="width:12.5%"><col style="width:12.5%"><col style="width:12.5%"><col style="width:12.5%"><col style="width:12.5%"><col style="width:12.5%"></colgroup>';
         html += '<thead><tr>';
         html += '<th data-sort-col="player" class="impact-sortable">Joueur' + self._sortIcon('player') + '</th>';
         html += '<th data-sort-col="serv" class="impact-sortable">Serv' + self._sortIcon('serv') + '</th>';
@@ -7848,7 +7850,7 @@ const ProgressionView = {
 
         matches.forEach(function(match, mi) {
             var label = match.opponent || '?';
-            if (label.length > 10) label = label.substring(0, 9) + '.';
+            if (label.length > 10) label = label.substring(0, 9).trim() + '.';
             matchLabels.push(label);
             matchResults.push(match.result);
 
@@ -8211,8 +8213,32 @@ const ProgressionView = {
         if (!canvas) return;
         var self = this;
         var wrap = canvas.parentElement;
+        var numMatches = this._data.matchLabels.length;
+        if (numMatches === 0) return;
         var w = wrap.offsetWidth;
-        var h = wrap.offsetHeight;
+
+        // Étiquettes adversaires : à l'horizontale si elles tiennent, sinon inclinées
+        // (une sur deux, trois… si nécessaire) pour ne jamais se chevaucher.
+        var labelFont = '10px Roboto, sans-serif';
+        var measureCtx = canvas.getContext('2d');
+        measureCtx.font = labelFont;
+        var maxLabelW = 0;
+        this._data.matchLabels.forEach(function(l) {
+            maxLabelW = Math.max(maxLabelW, measureCtx.measureText(l).width);
+        });
+        var LABEL_ANGLE = Math.PI / 3; // 60°
+        var spacingGuess = numMatches > 1 ? (w - 35) / (numMatches - 1) : w;
+        var rotateLabels = maxLabelW + 6 > spacingGuess;
+        var labelZone = rotateLabels
+            ? Math.ceil(maxLabelW * Math.sin(LABEL_ANGLE) + 10 * Math.cos(LABEL_ANGLE)) + 4
+            : 0;
+
+        // Hauteur : celle du CSS + la zone des étiquettes inclinées (base mémorisée
+        // pour ne pas cumuler au fil des redessins)
+        if (!wrap.dataset.baseH) wrap.dataset.baseH = wrap.offsetHeight;
+        var h = parseInt(wrap.dataset.baseH, 10) + labelZone;
+        wrap.style.height = h + 'px';
+
         var dpr = window.devicePixelRatio || 1;
         canvas.width = w * dpr;
         canvas.height = h * dpr;
@@ -8221,11 +8247,13 @@ const ProgressionView = {
         var ctx = canvas.getContext('2d');
         ctx.scale(dpr, dpr);
 
-        var pad = { top: 20, right: 25, bottom: 28, left: 10 };
+        var pad = { top: 20, right: 25, bottom: 28 + labelZone, left: 10 };
+        if (rotateLabels) {
+            // Le 1er libellé part vers la gauche : réserver la place pour qu'il ne soit pas coupé
+            pad.left = Math.max(10, Math.ceil(maxLabelW * Math.cos(LABEL_ANGLE)) - 4);
+        }
         var chartW = w - pad.left - pad.right;
         var chartH = h - pad.top - pad.bottom;
-        var numMatches = this._data.matchLabels.length;
-        if (numMatches === 0) return;
 
         var metricKey = this._currentTeamMetric;
         var metricDef = this.TEAM_METRICS.find(function(m) { return m.key === metricKey; });
@@ -8284,17 +8312,39 @@ const ProgressionView = {
             ctx.fillText(gv.toFixed(decimals) + unit, w - 2, gy + 3);
         }
 
-        // Labels adversaires en bas
+        // Labels adversaires en bas + pastille résultat
         ctx.fillStyle = '#5f6368';
-        ctx.font = '10px Roboto, sans-serif';
-        ctx.textAlign = 'center';
+        ctx.font = labelFont;
+        var spacing = numMatches > 1 ? chartW / (numMatches - 1) : chartW;
+        // Inclinées : espacement perpendiculaire mini 11 px entre deux libellés affichés
+        var labelStep = rotateLabels
+            ? Math.max(1, Math.ceil(11 / (spacing * Math.sin(LABEL_ANGLE))))
+            : 1;
+        var dotY = h - labelZone - 18;
         for (var li = 0; li < numMatches; li++) {
             var lx = xPos(li);
-            ctx.fillText(this._data.matchLabels[li], lx, h - 2);
+            // Toujours afficher le dernier match (le plus récent)
+            var showLabel = rotateLabels
+                ? ((numMatches - 1 - li) % labelStep === 0)
+                : true;
+            if (showLabel) {
+                if (rotateLabels) {
+                    ctx.save();
+                    ctx.translate(lx + 3, h - labelZone - 6);
+                    ctx.rotate(-LABEL_ANGLE);
+                    ctx.textAlign = 'right';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(this._data.matchLabels[li], 0, 0);
+                    ctx.restore();
+                } else {
+                    ctx.textAlign = 'center';
+                    ctx.fillText(this._data.matchLabels[li], lx, h - 2);
+                }
+            }
             var res = this._data.matchResults[li];
             if (res) {
                 ctx.beginPath();
-                ctx.arc(lx, h - 18, 3, 0, Math.PI * 2);
+                ctx.arc(lx, dotY, 3, 0, Math.PI * 2);
                 ctx.fillStyle = res === 'win' ? '#34a853' : res === 'loss' ? '#ea4335' : '#f59e0b';
                 ctx.fill();
                 ctx.fillStyle = '#5f6368';
@@ -9944,7 +9994,7 @@ const MatchStatsView = {
 
         document.getElementById('detailResultIcon').textContent = isWin ? '🏆' : (isLoss ? '😔' : '🤝');
         var labelEl = document.getElementById('detailResultLabel');
-        labelEl.textContent = isWin ? 'Victoire' : (isLoss ? 'Defaite' : 'Match nul');
+        labelEl.textContent = isWin ? 'Victoire' : (isLoss ? 'Défaite' : 'Match nul');
         labelEl.className = 'detail-result-label ' + (match.result || 'draw');
         document.getElementById('detailOpponent').textContent = 'vs ' + opponent;
 
@@ -10658,7 +10708,7 @@ const YearStatsView = {
             '<svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg>' +
             '</div>' +
             '<h3 class="empty-state-title">Statistiques annuelles</h3>' +
-            '<p class="empty-state-desc">Les statistiques cumulees de la saison seront disponibles apres vos premiers matchs.</p>' +
+            '<p class="empty-state-desc">Les statistiques cumulées de la saison seront disponibles après vos premiers matchs.</p>' +
             '</div>';
     },
 
@@ -11155,7 +11205,7 @@ const YearStatsView = {
         html += '<line x1="' + padLeft + '" y1="' + midY + '" x2="' + (svgWidth - padRight) + '" y2="' + midY + '" stroke="#333" stroke-width="1"/>';
 
         // Separateurs tiers + labels abscisse
-        var thirds = ['Debut', 'Milieu', 'Fin'];
+        var thirds = ['Début', 'Milieu', 'Fin'];
         for (var t = 0; t < 3; t++) {
             var thirdX = padLeft + ((t + 0.5) / 3) * chartW;
             html += '<text x="' + thirdX.toFixed(1) + '" y="' + (botY + 9) + '" text-anchor="middle" font-size="7" fill="#5f6368">' + thirds[t] + '</text>';
@@ -11499,7 +11549,7 @@ const SetsPlayedView = {
             '<svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>' +
             '</div>' +
             '<h3 class="empty-state-title">Temps de jeu</h3>' +
-            '<p class="empty-state-desc">Les statistiques de temps de jeu seront disponibles apres vos premiers matchs.</p>' +
+            '<p class="empty-state-desc">Les statistiques de temps de jeu seront disponibles après vos premiers matchs.</p>' +
             '</div>';
     },
 
@@ -11806,7 +11856,7 @@ const SetsPlayedView = {
 
     renderTable(data, matches) {
         if (data.length === 0) {
-            return '<div style="text-align:center;color:var(--text-secondary);padding:24px;">Aucune donnee de temps de jeu.</div>';
+            return '<div style="text-align:center;color:var(--text-secondary);padding:24px;">Aucune donnée de temps de jeu.</div>';
         }
 
         // Totaux pour X/Y
