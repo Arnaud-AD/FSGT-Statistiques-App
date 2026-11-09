@@ -5,10 +5,10 @@
     "name": "Or 6x6",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/4",
-    "lastUpdated": "2026-11-05T04:29:36",
+    "lastUpdated": "2026-11-10T00:17:28",
     "teamCount": 11,
-    "matchesPlayed": 8,
-    "matchesUpcoming": 102
+    "matchesPlayed": 12,
+    "matchesUpcoming": 98
   },
   "teams": {
     "cout": {
@@ -16,39 +16,39 @@
       "short": "CS",
       "color": "#e74c3c"
     },
-    "oss": {
-      "name": "Oss 226",
-      "short": "O2",
-      "color": "#3498db"
-    },
-    "smas": {
-      "name": "Smash or Pass",
-      "short": "SO",
-      "color": "#2ecc71"
-    },
-    "marv": {
-      "name": "Marvels 6",
-      "short": "M6",
-      "color": "#f39c12"
-    },
-    "raia": {
-      "name": "La Raïa",
-      "short": "RA",
-      "color": "#9b59b6"
-    },
     "no": {
       "name": "No s(o)ucy",
       "short": "NS",
-      "color": "#1abc9c"
+      "color": "#3498db"
+    },
+    "oss": {
+      "name": "Oss 226",
+      "short": "O2",
+      "color": "#2ecc71"
     },
     "inar": {
       "name": "Inarizaki",
       "short": "IN",
-      "color": "#e67e22"
+      "color": "#f39c12"
     },
     "neui": {
       "name": "Neuilly Sa Mère",
       "short": "N2",
+      "color": "#9b59b6"
+    },
+    "raia": {
+      "name": "La Raïa",
+      "short": "RA",
+      "color": "#1abc9c"
+    },
+    "smas": {
+      "name": "Smash or Pass",
+      "short": "SO",
+      "color": "#e67e22"
+    },
+    "marv": {
+      "name": "Marvels 6",
+      "short": "M6",
       "color": "#f1c40f"
     },
     "ivry": {
@@ -71,22 +71,22 @@
     {
       "rank": 1,
       "team": "cout",
-      "mj": 2,
-      "g": 2,
+      "mj": 3,
+      "g": 3,
       "p": 0,
-      "setPlus": 6,
-      "setMinus": 0,
-      "ds": 6,
-      "coefSet": "∞",
-      "ptsPlus": 150,
-      "ptsMinus": 104,
-      "dp": "+46",
-      "coefPts": "1.44",
-      "pts": 6,
+      "setPlus": 8,
+      "setMinus": 1,
+      "ds": 7,
+      "coefSet": "8.00",
+      "ptsPlus": 225,
+      "ptsMinus": 172,
+      "dp": "+53",
+      "coefPts": "1.31",
+      "pts": 9,
       "formAller": [
         "W",
         "W",
-        "P",
+        "W",
         "P",
         "P",
         "P",
@@ -110,23 +110,23 @@
     },
     {
       "rank": 2,
-      "team": "oss",
-      "mj": 2,
-      "g": 1,
-      "p": 1,
-      "setPlus": 5,
-      "setMinus": 2,
-      "ds": 3,
-      "coefSet": "2.50",
-      "ptsPlus": 153,
-      "ptsMinus": 144,
-      "dp": "+9",
-      "coefPts": "1.06",
-      "pts": 5,
+      "team": "no",
+      "mj": 3,
+      "g": 3,
+      "p": 0,
+      "setPlus": 9,
+      "setMinus": 4,
+      "ds": 5,
+      "coefSet": "2.25",
+      "ptsPlus": 294,
+      "ptsMinus": 251,
+      "dp": "+43",
+      "coefPts": "1.17",
+      "pts": 9,
       "formAller": [
         "W",
-        "C",
-        "P",
+        "W",
+        "W",
         "P",
         "P",
         "P",
@@ -150,23 +150,23 @@
     },
     {
       "rank": 3,
-      "team": "smas",
-      "mj": 2,
+      "team": "oss",
+      "mj": 3,
       "g": 1,
-      "p": 1,
-      "setPlus": 3,
+      "p": 2,
+      "setPlus": 7,
       "setMinus": 5,
-      "ds": -2,
-      "coefSet": "0.60",
-      "ptsPlus": 167,
-      "ptsMinus": 160,
-      "dp": "+7",
-      "coefPts": "1.04",
-      "pts": 4,
+      "ds": 2,
+      "coefSet": "1.40",
+      "ptsPlus": 255,
+      "ptsMinus": 252,
+      "dp": "+3",
+      "coefPts": "1.01",
+      "pts": 7,
       "formAller": [
-        "L",
         "W",
-        "P",
+        "C",
+        "C",
         "P",
         "P",
         "P",
@@ -190,23 +190,23 @@
     },
     {
       "rank": 4,
-      "team": "no",
-      "mj": 1,
-      "g": 1,
+      "team": "inar",
+      "mj": 2,
+      "g": 2,
       "p": 0,
-      "setPlus": 3,
-      "setMinus": 1,
+      "setPlus": 5,
+      "setMinus": 3,
       "ds": 2,
-      "coefSet": "3.00",
-      "ptsPlus": 97,
-      "ptsMinus": 76,
-      "dp": "+21",
-      "coefPts": "1.28",
-      "pts": 3,
+      "coefSet": "1.67",
+      "ptsPlus": 174,
+      "ptsMinus": 165,
+      "dp": "+9",
+      "coefPts": "1.05",
+      "pts": 6,
       "formAller": [
         "W",
         "D",
-        "P",
+        "W",
         "P",
         "P",
         "P",
@@ -230,23 +230,23 @@
     },
     {
       "rank": 5,
-      "team": "marv",
-      "mj": 1,
-      "g": 1,
-      "p": 0,
-      "setPlus": 3,
-      "setMinus": 1,
-      "ds": 2,
-      "coefSet": "3.00",
-      "ptsPlus": 83,
-      "ptsMinus": 76,
-      "dp": "+7",
-      "coefPts": "1.09",
-      "pts": 3,
+      "team": "neui",
+      "mj": 3,
+      "g": 0,
+      "p": 3,
+      "setPlus": 4,
+      "setMinus": 7,
+      "ds": -3,
+      "coefSet": "0.57",
+      "ptsPlus": 229,
+      "ptsMinus": 250,
+      "dp": "-21",
+      "coefPts": "0.92",
+      "pts": 6,
       "formAller": [
-        "W",
-        "P",
-        "P",
+        "C",
+        "C",
+        "C",
         "P",
         "P",
         "P",
@@ -271,22 +271,22 @@
     {
       "rank": 6,
       "team": "raia",
-      "mj": 1,
+      "mj": 2,
       "g": 1,
-      "p": 0,
-      "setPlus": 3,
-      "setMinus": 1,
-      "ds": 2,
-      "coefSet": "3.00",
-      "ptsPlus": 82,
-      "ptsMinus": 78,
-      "dp": "+4",
-      "coefPts": "1.05",
-      "pts": 3,
+      "p": 1,
+      "setPlus": 4,
+      "setMinus": 4,
+      "ds": 0,
+      "coefSet": "1.00",
+      "ptsPlus": 159,
+      "ptsMinus": 166,
+      "dp": "-7",
+      "coefPts": "0.96",
+      "pts": 4,
       "formAller": [
         "W",
         "D",
-        "P",
+        "L",
         "P",
         "P",
         "P",
@@ -310,23 +310,23 @@
     },
     {
       "rank": 7,
-      "team": "inar",
-      "mj": 1,
+      "team": "smas",
+      "mj": 2,
       "g": 1,
-      "p": 0,
-      "setPlus": 2,
-      "setMinus": 1,
-      "ds": 1,
-      "coefSet": "2.00",
-      "ptsPlus": 66,
-      "ptsMinus": 63,
-      "dp": "+3",
-      "coefPts": "1.05",
-      "pts": 3,
+      "p": 1,
+      "setPlus": 3,
+      "setMinus": 5,
+      "ds": -2,
+      "coefSet": "0.60",
+      "ptsPlus": 167,
+      "ptsMinus": 160,
+      "dp": "+7",
+      "coefPts": "1.04",
+      "pts": 4,
       "formAller": [
+        "L",
         "W",
         "D",
-        "P",
         "P",
         "P",
         "P",
@@ -350,21 +350,21 @@
     },
     {
       "rank": 8,
-      "team": "neui",
+      "team": "marv",
       "mj": 1,
-      "g": 0,
-      "p": 1,
-      "setPlus": 1,
-      "setMinus": 2,
-      "ds": -1,
-      "coefSet": "0.50",
-      "ptsPlus": 63,
-      "ptsMinus": 66,
-      "dp": "-3",
-      "coefPts": "0.95",
-      "pts": 2,
+      "g": 1,
+      "p": 0,
+      "setPlus": 3,
+      "setMinus": 1,
+      "ds": 2,
+      "coefSet": "3.00",
+      "ptsPlus": 83,
+      "ptsMinus": 76,
+      "dp": "+7",
+      "coefPts": "1.09",
+      "pts": 3,
       "formAller": [
-        "C",
+        "W",
         "D",
         "P",
         "P",
@@ -510,6 +510,134 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "09/11/2026",
+      "home": "cout",
+      "away": "neui",
+      "scoreHome": 2,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé",
+      "sets": [
+        [
+          25,
+          21
+        ],
+        [
+          25,
+          20
+        ],
+        [
+          25,
+          27
+        ]
+      ],
+      "total": [
+        75,
+        68
+      ]
+    },
+    {
+      "date": "09/11/2026",
+      "home": "no",
+      "away": "raia",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé",
+      "sets": [
+        [
+          13,
+          25
+        ],
+        [
+          25,
+          15
+        ],
+        [
+          25,
+          21
+        ],
+        [
+          25,
+          16
+        ]
+      ],
+      "total": [
+        88,
+        77
+      ]
+    },
+    {
+      "date": "09/11/2026",
+      "home": "oss",
+      "away": "inar",
+      "scoreHome": 2,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé",
+      "sets": [
+        [
+          26,
+          24
+        ],
+        [
+          18,
+          25
+        ],
+        [
+          25,
+          18
+        ],
+        [
+          24,
+          26
+        ],
+        [
+          9,
+          15
+        ]
+      ],
+      "total": [
+        102,
+        108
+      ]
+    },
+    {
+      "date": "05/11/2026",
+      "home": "no",
+      "away": "neui",
+      "scoreHome": 3,
+      "scoreAway": 2,
+      "homeWin": true,
+      "status": "Terminé",
+      "sets": [
+        [
+          20,
+          25
+        ],
+        [
+          25,
+          18
+        ],
+        [
+          24,
+          26
+        ],
+        [
+          25,
+          18
+        ],
+        [
+          15,
+          11
+        ]
+      ],
+      "total": [
+        109,
+        98
+      ]
+    },
     {
       "date": "04/11/2026",
       "home": "cret",
@@ -751,34 +879,10 @@
       "status": "Reporté"
     },
     {
-      "date": "05/11/2026",
-      "home": "no",
-      "away": "neui",
-      "status": "Reporté"
-    },
-    {
-      "date": "09/11/2026",
-      "home": "cout",
-      "away": "neui",
-      "status": "Sem. 3"
-    },
-    {
-      "date": "09/11/2026",
-      "home": "oss",
-      "away": "inar",
-      "status": "Sem. 3"
-    },
-    {
-      "date": "09/11/2026",
-      "home": "no",
-      "away": "raia",
-      "status": "Sem. 3"
-    },
-    {
       "date": "10/11/2026",
       "home": "marv",
       "away": "smas",
-      "status": "Sem. 3"
+      "status": "Reporté"
     },
     {
       "date": "23/11/2026",
@@ -794,14 +898,14 @@
     },
     {
       "date": "25/11/2026",
-      "home": "cret",
-      "away": "smas",
+      "home": "bloc",
+      "away": "neui",
       "status": "Sem. 4"
     },
     {
       "date": "25/11/2026",
-      "home": "bloc",
-      "away": "neui",
+      "home": "cret",
+      "away": "smas",
       "status": "Sem. 4"
     },
     {
@@ -824,14 +928,14 @@
     },
     {
       "date": "02/12/2026",
-      "home": "bloc",
-      "away": "raia",
+      "home": "ivry",
+      "away": "neui",
       "status": "Sem. 5"
     },
     {
       "date": "02/12/2026",
-      "home": "ivry",
-      "away": "neui",
+      "home": "bloc",
+      "away": "raia",
       "status": "Sem. 5"
     },
     {
@@ -854,6 +958,12 @@
     },
     {
       "date": "09/12/2026",
+      "home": "cret",
+      "away": "no",
+      "status": "Sem. 6"
+    },
+    {
+      "date": "09/12/2026",
       "home": "bloc",
       "away": "oss",
       "status": "Sem. 6"
@@ -862,12 +972,6 @@
       "date": "09/12/2026",
       "home": "ivry",
       "away": "raia",
-      "status": "Sem. 6"
-    },
-    {
-      "date": "09/12/2026",
-      "home": "cret",
-      "away": "no",
       "status": "Sem. 6"
     },
     {
@@ -884,14 +988,14 @@
     },
     {
       "date": "07/01/2027",
-      "home": "marv",
-      "away": "bloc",
+      "home": "neui",
+      "away": "raia",
       "status": "Sem. 7"
     },
     {
       "date": "07/01/2027",
-      "home": "neui",
-      "away": "raia",
+      "home": "marv",
+      "away": "bloc",
       "status": "Sem. 7"
     },
     {
@@ -968,20 +1072,14 @@
     },
     {
       "date": "27/01/2027",
-      "home": "ivry",
-      "away": "smas",
-      "status": "Sem. 10"
-    },
-    {
-      "date": "27/01/2027",
       "home": "bloc",
       "away": "inar",
       "status": "Sem. 10"
     },
     {
-      "date": "28/01/2027",
-      "home": "marv",
-      "away": "raia",
+      "date": "27/01/2027",
+      "home": "ivry",
+      "away": "smas",
       "status": "Sem. 10"
     },
     {
@@ -991,15 +1089,21 @@
       "status": "Sem. 10"
     },
     {
-      "date": "22/02/2027",
-      "home": "smas",
-      "away": "neui",
-      "status": "Sem. 11"
+      "date": "28/01/2027",
+      "home": "marv",
+      "away": "raia",
+      "status": "Sem. 10"
     },
     {
       "date": "22/02/2027",
       "home": "inar",
       "away": "ivry",
+      "status": "Sem. 11"
+    },
+    {
+      "date": "22/02/2027",
+      "home": "smas",
+      "away": "neui",
       "status": "Sem. 11"
     },
     {
@@ -1070,14 +1174,14 @@
     },
     {
       "date": "11/03/2027",
-      "home": "marv",
-      "away": "cret",
+      "home": "neui",
+      "away": "no",
       "status": "Sem. 13"
     },
     {
       "date": "11/03/2027",
-      "home": "neui",
-      "away": "no",
+      "home": "marv",
+      "away": "cret",
       "status": "Sem. 13"
     },
     {
@@ -1340,14 +1444,14 @@
     },
     {
       "date": "09/06/2027",
-      "home": "cret",
-      "away": "raia",
+      "home": "bloc",
+      "away": "no",
       "status": "Sem. 22"
     },
     {
       "date": "09/06/2027",
-      "home": "bloc",
-      "away": "no",
+      "home": "cret",
+      "away": "raia",
       "status": "Sem. 22"
     },
     {
@@ -1361,31 +1465,31 @@
     {
       "rank": 1,
       "team": "cout",
-      "elo": 1562.9,
-      "movement": 23.8,
-      "record": "2-0",
+      "elo": 1576.8,
+      "movement": 13.9,
+      "record": "3-0",
       "power": 100.0,
-      "calendar": "V vs Ivry",
+      "calendar": "V x3",
       "diffClass": "diff-easy"
     },
     {
       "rank": 2,
       "team": "no",
-      "elo": 1531.1,
-      "movement": 31.1,
-      "record": "1-0",
-      "power": 74.7,
-      "calendar": "V vs Ivry",
+      "elo": 1571.0,
+      "movement": 23.2,
+      "record": "3-0",
+      "power": 96.2,
+      "calendar": "V x3",
       "diffClass": "diff-easy"
     },
     {
       "rank": 3,
-      "team": "raia",
-      "elo": 1528.0,
-      "movement": 28.0,
-      "record": "1-0",
-      "power": 72.3,
-      "calendar": "V vs Smash",
+      "team": "inar",
+      "elo": 1541.1,
+      "movement": 22.2,
+      "record": "2-0",
+      "power": 76.8,
+      "calendar": "V vs Oss",
       "diffClass": "diff-easy"
     },
     {
@@ -1394,32 +1498,22 @@
       "elo": 1526.2,
       "movement": 26.2,
       "record": "1-0",
-      "power": 70.8,
+      "power": 67.1,
       "calendar": "V vs Cret'1",
       "diffClass": "diff-easy"
     },
     {
       "rank": 5,
-      "team": "inar",
-      "elo": 1518.9,
-      "movement": 18.9,
-      "record": "1-0",
-      "power": 65.0,
-      "calendar": "V vs Neuilly",
-      "diffClass": "diff-easy"
-    },
-    {
-      "rank": 6,
-      "team": "oss",
-      "elo": 1511.0,
-      "movement": -20.6,
+      "team": "raia",
+      "elo": 1504.8,
+      "movement": -23.2,
       "record": "1-1",
-      "power": 58.7,
-      "calendar": "D vs Smash",
+      "power": 53.1,
+      "calendar": "D vs No",
       "diffClass": "diff-hard"
     },
     {
-      "rank": 7,
+      "rank": 6,
       "team": "smas",
       "elo": 1492.6,
       "movement": 20.6,
@@ -1429,23 +1523,33 @@
       "diffClass": "diff-easy"
     },
     {
-      "rank": 8,
-      "team": "neui",
-      "elo": 1481.1,
-      "movement": -18.9,
-      "record": "0-1",
-      "power": 0.0,
+      "rank": 7,
+      "team": "oss",
+      "elo": 1488.9,
+      "movement": -22.2,
+      "record": "1-2",
+      "power": 40.4,
       "calendar": "D vs Inarizaki",
       "diffClass": "diff-hard"
     },
     {
-      "rank": 9,
+      "rank": 8,
       "team": "bloc",
       "elo": 1460.9,
       "movement": -39.1,
       "record": "0-1",
       "power": 0.0,
       "calendar": "D vs Coutiao",
+      "diffClass": "diff-hard"
+    },
+    {
+      "rank": 9,
+      "team": "neui",
+      "elo": 1450.5,
+      "movement": -13.9,
+      "record": "0-3",
+      "power": 0.0,
+      "calendar": "D x3",
       "diffClass": "diff-hard"
     },
     {
@@ -1474,12 +1578,36 @@
     "cout": [
       1500,
       1539.1,
-      1562.9
+      1562.9,
+      1576.8
+    ],
+    "no": [
+      1500,
+      1531.1,
+      1547.8,
+      1571.0
     ],
     "oss": [
       1500,
       1531.6,
-      1511.0
+      1511.0,
+      1488.9
+    ],
+    "inar": [
+      1500,
+      1518.9,
+      1541.1
+    ],
+    "neui": [
+      1500,
+      1481.1,
+      1464.4,
+      1450.5
+    ],
+    "raia": [
+      1500,
+      1528.0,
+      1504.8
     ],
     "smas": [
       1500,
@@ -1489,22 +1617,6 @@
     "marv": [
       1500,
       1526.2
-    ],
-    "raia": [
-      1500,
-      1528.0
-    ],
-    "no": [
-      1500,
-      1531.1
-    ],
-    "inar": [
-      1500,
-      1518.9
-    ],
-    "neui": [
-      1500,
-      1481.1
     ],
     "ivry": [
       1500,
@@ -1527,17 +1639,53 @@
         "points": [
           0,
           3,
-          6
+          6,
+          9
         ],
         "rank": 1
+      },
+      "no": {
+        "points": [
+          0,
+          3,
+          6,
+          9
+        ],
+        "rank": 2
       },
       "oss": {
         "points": [
           0,
           3,
-          5
+          5,
+          7
         ],
-        "rank": 2
+        "rank": 3
+      },
+      "inar": {
+        "points": [
+          0,
+          3,
+          6
+        ],
+        "rank": 4
+      },
+      "neui": {
+        "points": [
+          0,
+          2,
+          4,
+          6
+        ],
+        "rank": 5
+      },
+      "raia": {
+        "points": [
+          0,
+          3,
+          4
+        ],
+        "rank": 6
       },
       "smas": {
         "points": [
@@ -1545,40 +1693,12 @@
           1,
           4
         ],
-        "rank": 3
+        "rank": 7
       },
       "marv": {
         "points": [
           0,
           3
-        ],
-        "rank": 5
-      },
-      "raia": {
-        "points": [
-          0,
-          3
-        ],
-        "rank": 6
-      },
-      "no": {
-        "points": [
-          0,
-          3
-        ],
-        "rank": 4
-      },
-      "inar": {
-        "points": [
-          0,
-          3
-        ],
-        "rank": 7
-      },
-      "neui": {
-        "points": [
-          0,
-          2
         ],
         "rank": 8
       },

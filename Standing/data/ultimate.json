@@ -5,10 +5,10 @@
     "name": "Ultimate",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/1",
-    "lastUpdated": "2026-11-05T04:29:32",
+    "lastUpdated": "2026-11-10T00:17:28",
     "teamCount": 9,
-    "matchesPlayed": 6,
-    "matchesUpcoming": 66
+    "matchesPlayed": 7,
+    "matchesUpcoming": 65
   },
   "teams": {
     "red": {
@@ -26,6 +26,16 @@
       "short": "BL",
       "color": "#f1c40f"
     },
+    "kiki": {
+      "name": "Kiki Team",
+      "short": "KT",
+      "color": "#3498db"
+    },
+    "marv": {
+      "name": "Marvels 4",
+      "short": "M4",
+      "color": "#f39c12"
+    },
     "inde": {
       "name": "Les Indécis",
       "short": "IN",
@@ -36,20 +46,10 @@
       "short": "D4",
       "color": "#95a5a6"
     },
-    "marv": {
-      "name": "Marvels 4",
-      "short": "M4",
-      "color": "#f39c12"
-    },
     "rsc": {
       "name": "RSC Champigny 1",
       "short": "RC",
       "color": "#1abc9c"
-    },
-    "kiki": {
-      "name": "Kiki Team",
-      "short": "KT",
-      "color": "#3498db"
     },
     "jen": {
       "name": "Jen et ses Saints",
@@ -76,7 +76,7 @@
       "formAller": [
         "C",
         "W",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -148,7 +148,7 @@
       "formAller": [
         "W",
         "L",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -168,6 +168,78 @@
     },
     {
       "rank": 4,
+      "team": "kiki",
+      "mj": 2,
+      "g": 1,
+      "p": 1,
+      "setPlus": 4,
+      "setMinus": 4,
+      "ds": 0,
+      "coefSet": "1.00",
+      "ptsPlus": 178,
+      "ptsMinus": 185,
+      "dp": "-7",
+      "coefPts": "0.96",
+      "pts": 4,
+      "formAller": [
+        "D",
+        "L",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 5,
+      "team": "marv",
+      "mj": 2,
+      "g": 1,
+      "p": 1,
+      "setPlus": 3,
+      "setMinus": 5,
+      "ds": -2,
+      "coefSet": "0.60",
+      "ptsPlus": 203,
+      "ptsMinus": 204,
+      "dp": "-1",
+      "coefPts": "1.00",
+      "pts": 4,
+      "formAller": [
+        "W",
+        "L",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 6,
       "team": "inde",
       "mj": 1,
       "g": 1,
@@ -203,7 +275,7 @@
       ]
     },
     {
-      "rank": 5,
+      "rank": 7,
       "team": "dodo",
       "mj": 1,
       "g": 1,
@@ -239,43 +311,7 @@
       ]
     },
     {
-      "rank": 6,
-      "team": "marv",
-      "mj": 1,
-      "g": 1,
-      "p": 0,
-      "setPlus": 2,
-      "setMinus": 2,
-      "ds": 0,
-      "coefSet": "1.00",
-      "ptsPlus": 113,
-      "ptsMinus": 109,
-      "dp": "+4",
-      "coefPts": "1.04",
-      "pts": 3,
-      "formAller": [
-        "W",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 7,
+      "rank": 8,
       "team": "rsc",
       "mj": 2,
       "g": 0,
@@ -293,42 +329,6 @@
         "L",
         "L",
         "D",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 8,
-      "team": "kiki",
-      "mj": 1,
-      "g": 0,
-      "p": 1,
-      "setPlus": 1,
-      "setMinus": 3,
-      "ds": -2,
-      "coefSet": "0.33",
-      "ptsPlus": 83,
-      "ptsMinus": 95,
-      "dp": "-12",
-      "coefPts": "0.87",
-      "pts": 1,
-      "formAller": [
-        "D",
-        "L",
-        "P",
         "P",
         "P",
         "P",
@@ -384,6 +384,37 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "09/11/2026",
+      "home": "kiki",
+      "away": "marv",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé",
+      "sets": [
+        [
+          25,
+          23
+        ],
+        [
+          20,
+          25
+        ],
+        [
+          25,
+          20
+        ],
+        [
+          25,
+          22
+        ]
+      ],
+      "total": [
+        95,
+        90
+      ]
+    },
     {
       "date": "04/11/2026",
       "home": "inde",
@@ -568,13 +599,7 @@
       "date": "09/11/2026",
       "home": "resc",
       "away": "red",
-      "status": "Sem. 3"
-    },
-    {
-      "date": "09/11/2026",
-      "home": "kiki",
-      "away": "marv",
-      "status": "Sem. 3"
+      "status": "Reporté"
     },
     {
       "date": "10/11/2026",
@@ -902,14 +927,14 @@
     },
     {
       "date": "10/05/2027",
-      "home": "dodo",
-      "away": "marv",
+      "home": "kiki",
+      "away": "jen",
       "status": "Sem. 16"
     },
     {
       "date": "10/05/2027",
-      "home": "kiki",
-      "away": "jen",
+      "home": "dodo",
+      "away": "marv",
       "status": "Sem. 16"
     },
     {
@@ -984,16 +1009,6 @@
     },
     {
       "rank": 3,
-      "team": "marv",
-      "elo": 1516.0,
-      "movement": 16.0,
-      "record": "1-0",
-      "power": 74.7,
-      "calendar": "V vs Red",
-      "diffClass": "diff-easy"
-    },
-    {
-      "rank": 4,
       "team": "red",
       "elo": 1509.9,
       "movement": 25.9,
@@ -1003,13 +1018,23 @@
       "diffClass": "diff-easy"
     },
     {
-      "rank": 5,
+      "rank": 4,
       "team": "bier",
       "elo": 1501.5,
       "movement": 31.5,
       "record": "1-1",
       "power": 52.3,
       "calendar": "V vs RSC",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 5,
+      "team": "kiki",
+      "elo": 1500.8,
+      "movement": 26.7,
+      "record": "1-1",
+      "power": 51.2,
+      "calendar": "V vs Marvels",
       "diffClass": "diff-easy"
     },
     {
@@ -1034,12 +1059,12 @@
     },
     {
       "rank": 8,
-      "team": "kiki",
-      "elo": 1474.1,
-      "movement": -25.9,
-      "record": "0-1",
-      "power": 0.0,
-      "calendar": "D vs Red",
+      "team": "marv",
+      "elo": 1489.3,
+      "movement": -26.7,
+      "record": "1-1",
+      "power": 41.4,
+      "calendar": "D vs Kiki",
       "diffClass": "diff-hard"
     },
     {
@@ -1070,6 +1095,16 @@
       1470.0,
       1501.5
     ],
+    "kiki": [
+      1500,
+      1474.1,
+      1500.8
+    ],
+    "marv": [
+      1500,
+      1516.0,
+      1489.3
+    ],
     "inde": [
       1500,
       1532.4
@@ -1078,18 +1113,10 @@
       1500,
       1530.7
     ],
-    "marv": [
-      1500,
-      1516.0
-    ],
     "rsc": [
       1500,
       1469.3,
       1437.8
-    ],
-    "kiki": [
-      1500,
-      1474.1
     ],
     "jen": [
       1500
@@ -1121,39 +1148,41 @@
         ],
         "rank": 2
       },
-      "inde": {
+      "kiki": {
         "points": [
           0,
-          3
+          1,
+          4
         ],
         "rank": 4
       },
-      "dodo": {
+      "marv": {
         "points": [
           0,
-          3
+          3,
+          4
         ],
         "rank": 5
       },
-      "marv": {
+      "inde": {
         "points": [
           0,
           3
         ],
         "rank": 6
       },
+      "dodo": {
+        "points": [
+          0,
+          3
+        ],
+        "rank": 7
+      },
       "rsc": {
         "points": [
           0,
           1,
           2
-        ],
-        "rank": 7
-      },
-      "kiki": {
-        "points": [
-          0,
-          1
         ],
         "rank": 8
       },
