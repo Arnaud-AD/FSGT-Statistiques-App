@@ -13,6 +13,7 @@
             --win-color: #34a853;
             --draw-color: #9aa0a6;
             --loss-color: #ea4335;
+            --close-color: #fa7b17;
         }
 
         * {
@@ -382,7 +383,7 @@
 
         /* Défaite serrée (1 set d'écart) */
         .form-close {
-            background: var(--rank-champion);
+            background: var(--close-color);
         }
 
         .form-close::after {
