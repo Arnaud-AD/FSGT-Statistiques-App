@@ -3254,7 +3254,12 @@ const StatsAggregator = {
             // V29.49 : sets joues (prorata des points), pour les volumes par set de computeAxisScores
             var covered = 0;
             intervals.forEach(function(iv) { covered += Math.max(0, Math.min(iv.end, totalPoints) - iv.start); });
-            merged._setsPlayed = (merged._setsPlayed || 0) + (totalPoints > 0 ? covered / totalPoints : 1);
+            // V29.53 : un set non filme (sans points) ne compte que si le joueur y a des stats saisies,
+            // comme dans aggregateStats. Avant, il comptait toujours pour 1 set : la defense par set
+            // etait sous-estimee dans Stats Matchs, Profils radar et Ranking (pas dans Data > Evolution).
+            var setCount = totalPoints > 0 ? covered / totalPoints
+                : ((set.stats && set.stats[teamKey] && StatsAggregator._hasAnyStat(set.stats[teamKey][playerName] || {})) ? 1 : 0);
+            merged._setsPlayed = (merged._setsPlayed || 0) + setCount;
 
             // Optimisation : si intervalle couvre tout le set ET set.stats existe, lire directement
             if (intervals.length === 1 && intervals[0].start === 0 && intervals[0].end >= totalPoints
