@@ -362,17 +362,12 @@
         }
 
         .form-loss {
-            border: 2px solid var(--loss-color);
-            background: transparent;
-        }
-
-        .form-item-sm.form-loss {
-            border-width: 1.5px;
+            background: var(--loss-color);
         }
 
         .form-loss::after {
             content: '✕';
-            color: var(--loss-color);
+            color: white;
             font-size: 10px;
             font-weight: 600;
         }
