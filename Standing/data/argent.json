@@ -5,7 +5,7 @@
     "name": "Argent",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/5",
-    "lastUpdated": "2026-11-10T00:44:03",
+    "lastUpdated": "2026-11-10T13:32:58",
     "teamCount": 11,
     "matchesPlayed": 10,
     "matchesUpcoming": 100
@@ -518,6 +518,7 @@
       "scoreAway": 3,
       "homeWin": false,
       "status": "Terminé",
+      "time": "20:30",
       "sets": [
         [
           25,
@@ -553,6 +554,7 @@
       "scoreAway": 3,
       "homeWin": false,
       "status": "Terminé",
+      "time": "20:00",
       "sets": [
         [
           17,
@@ -584,6 +586,7 @@
       "scoreAway": 0,
       "homeWin": true,
       "status": "Terminé",
+      "time": "19:30",
       "sets": [
         [
           25,
@@ -611,6 +614,7 @@
       "scoreAway": 3,
       "homeWin": false,
       "status": "Terminé",
+      "time": "20:15",
       "sets": [
         [
           25,
@@ -646,6 +650,7 @@
       "scoreAway": 3,
       "homeWin": false,
       "status": "Terminé",
+      "time": "20:15",
       "sets": [
         [
           12,
@@ -673,6 +678,7 @@
       "scoreAway": 0,
       "homeWin": true,
       "status": "Terminé",
+      "time": "20:30",
       "sets": [
         [
           25,
@@ -700,6 +706,7 @@
       "scoreAway": 3,
       "homeWin": false,
       "status": "Terminé",
+      "time": "20:00",
       "sets": [
         [
           18,
@@ -727,6 +734,7 @@
       "scoreAway": 0,
       "homeWin": true,
       "status": "Terminé",
+      "time": "19:30",
       "sets": [
         [
           25,
@@ -754,6 +762,7 @@
       "scoreAway": 1,
       "homeWin": true,
       "status": "Terminé",
+      "time": "20:30",
       "sets": [
         [
           27,
@@ -785,6 +794,7 @@
       "scoreAway": 3,
       "homeWin": false,
       "status": "Terminé",
+      "time": "20:30",
       "sets": [
         [
           25,
@@ -814,601 +824,701 @@
       "date": "09/11/2026",
       "home": "ball",
       "away": "vill",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": "20:30"
     },
     {
       "date": "10/11/2026",
       "home": "smas",
       "away": "vil2",
-      "status": "Sem. 3"
+      "status": "Sem. 3",
+      "time": "20:00"
     },
     {
       "date": "11/11/2026",
       "home": "affr",
       "away": "eagl",
-      "status": "Sem. 3"
+      "status": "Sem. 3",
+      "time": "20:00"
     },
     {
       "date": "12/11/2026",
       "home": "ping",
       "away": "bier",
-      "status": "Sem. 3"
+      "status": "Sem. 3",
+      "time": "20:00"
     },
     {
       "date": "17/11/2026",
       "home": "smas",
       "away": "bryc",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": "19:45"
     },
     {
       "date": "23/11/2026",
       "home": "vend",
       "away": "bier",
-      "status": "Sem. 4"
+      "status": "Sem. 4",
+      "time": "20:30"
     },
     {
       "date": "23/11/2026",
       "home": "vill",
       "away": "smas",
-      "status": "Sem. 4"
+      "status": "Sem. 4",
+      "time": "20:15"
     },
     {
       "date": "23/11/2026",
       "home": "eagl",
       "away": "bryc",
-      "status": "Sem. 4"
+      "status": "Sem. 4",
+      "time": "20:00"
     },
     {
       "date": "23/11/2026",
       "home": "vil2",
       "away": "affr",
-      "status": "Sem. 4"
+      "status": "Sem. 4",
+      "time": "20:15"
     },
     {
       "date": "24/11/2026",
       "home": "go",
       "away": "ball",
-      "status": "Sem. 4"
+      "status": "Sem. 4",
+      "time": "19:30"
     },
     {
       "date": "30/11/2026",
       "home": "vend",
       "away": "ping",
-      "status": "Sem. 5"
+      "status": "Sem. 5",
+      "time": "20:30"
     },
     {
       "date": "30/11/2026",
       "home": "ball",
       "away": "bier",
-      "status": "Sem. 5"
+      "status": "Sem. 5",
+      "time": "20:30"
     },
     {
       "date": "30/11/2026",
       "home": "bryc",
       "away": "vil2",
-      "status": "Sem. 5"
+      "status": "Sem. 5",
+      "time": "20:30"
     },
     {
       "date": "01/12/2026",
       "home": "smas",
       "away": "go",
-      "status": "Sem. 5"
+      "status": "Sem. 5",
+      "time": "20:00"
     },
     {
       "date": "02/12/2026",
       "home": "affr",
       "away": "vill",
-      "status": "Sem. 5"
+      "status": "Sem. 5",
+      "time": "20:00"
     },
     {
       "date": "07/12/2026",
       "home": "vill",
       "away": "bryc",
-      "status": "Sem. 6"
+      "status": "Sem. 6",
+      "time": "20:15"
     },
     {
       "date": "07/12/2026",
       "home": "vil2",
       "away": "eagl",
-      "status": "Sem. 6"
+      "status": "Sem. 6",
+      "time": "20:15"
     },
     {
       "date": "08/12/2026",
       "home": "go",
       "away": "affr",
-      "status": "Sem. 6"
+      "status": "Sem. 6",
+      "time": "19:30"
     },
     {
       "date": "08/12/2026",
       "home": "smas",
       "away": "bier",
-      "status": "Sem. 6"
+      "status": "Sem. 6",
+      "time": "20:00"
     },
     {
       "date": "10/12/2026",
       "home": "ping",
       "away": "ball",
-      "status": "Sem. 6"
+      "status": "Sem. 6",
+      "time": "20:00"
     },
     {
       "date": "04/01/2027",
       "home": "bryc",
       "away": "go",
-      "status": "Sem. 7"
+      "status": "Sem. 7",
+      "time": "20:30"
     },
     {
       "date": "04/01/2027",
       "home": "ball",
       "away": "vend",
-      "status": "Sem. 7"
+      "status": "Sem. 7",
+      "time": "20:30"
     },
     {
       "date": "04/01/2027",
       "home": "eagl",
       "away": "vill",
-      "status": "Sem. 7"
+      "status": "Sem. 7",
+      "time": "20:00"
     },
     {
       "date": "05/01/2027",
       "home": "smas",
       "away": "ping",
-      "status": "Sem. 7"
+      "status": "Sem. 7",
+      "time": "20:00"
     },
     {
       "date": "06/01/2027",
       "home": "affr",
       "away": "bier",
-      "status": "Sem. 7"
+      "status": "Sem. 7",
+      "time": "20:00"
     },
     {
       "date": "11/01/2027",
       "home": "vend",
       "away": "smas",
-      "status": "Sem. 8"
+      "status": "Sem. 8",
+      "time": "20:30"
     },
     {
       "date": "11/01/2027",
       "home": "vill",
       "away": "vil2",
-      "status": "Sem. 8"
+      "status": "Sem. 8",
+      "time": "20:15"
     },
     {
       "date": "11/01/2027",
       "home": "bryc",
       "away": "bier",
-      "status": "Sem. 8"
+      "status": "Sem. 8",
+      "time": "20:30"
     },
     {
       "date": "12/01/2027",
       "home": "go",
       "away": "eagl",
-      "status": "Sem. 8"
+      "status": "Sem. 8",
+      "time": "19:30"
     },
     {
       "date": "14/01/2027",
       "home": "ping",
       "away": "affr",
-      "status": "Sem. 8"
+      "status": "Sem. 8",
+      "time": "20:00"
     },
     {
       "date": "18/01/2027",
       "home": "vil2",
       "away": "go",
-      "status": "Sem. 9"
+      "status": "Sem. 9",
+      "time": "20:15"
     },
     {
       "date": "18/01/2027",
       "home": "eagl",
       "away": "bier",
-      "status": "Sem. 9"
+      "status": "Sem. 9",
+      "time": "20:00"
     },
     {
       "date": "18/01/2027",
       "home": "bryc",
       "away": "ping",
-      "status": "Sem. 9"
+      "status": "Sem. 9",
+      "time": "20:30"
     },
     {
       "date": "19/01/2027",
       "home": "smas",
       "away": "ball",
-      "status": "Sem. 9"
+      "status": "Sem. 9",
+      "time": "20:00"
     },
     {
       "date": "20/01/2027",
       "home": "affr",
       "away": "vend",
-      "status": "Sem. 9"
+      "status": "Sem. 9",
+      "time": "20:00"
     },
     {
       "date": "25/01/2027",
       "home": "vend",
       "away": "bryc",
-      "status": "Sem. 10"
+      "status": "Sem. 10",
+      "time": "20:30"
     },
     {
       "date": "25/01/2027",
       "home": "ball",
       "away": "affr",
-      "status": "Sem. 10"
+      "status": "Sem. 10",
+      "time": "20:30"
     },
     {
       "date": "25/01/2027",
       "home": "vil2",
       "away": "bier",
-      "status": "Sem. 10"
+      "status": "Sem. 10",
+      "time": "20:15"
     },
     {
       "date": "26/01/2027",
       "home": "go",
       "away": "vill",
-      "status": "Sem. 10"
+      "status": "Sem. 10",
+      "time": "19:30"
     },
     {
       "date": "28/01/2027",
       "home": "ping",
       "away": "eagl",
-      "status": "Sem. 10"
+      "status": "Sem. 10",
+      "time": "20:00"
     },
     {
       "date": "22/02/2027",
       "home": "eagl",
       "away": "vend",
-      "status": "Sem. 11"
+      "status": "Sem. 11",
+      "time": "20:00"
     },
     {
       "date": "22/02/2027",
       "home": "vill",
       "away": "bier",
-      "status": "Sem. 11"
+      "status": "Sem. 11",
+      "time": "20:15"
     },
     {
       "date": "22/02/2027",
       "home": "bryc",
       "away": "ball",
-      "status": "Sem. 11"
+      "status": "Sem. 11",
+      "time": "20:30"
     },
     {
       "date": "22/02/2027",
       "home": "vil2",
       "away": "ping",
-      "status": "Sem. 11"
+      "status": "Sem. 11",
+      "time": "20:15"
     },
     {
       "date": "24/02/2027",
       "home": "affr",
       "away": "smas",
-      "status": "Sem. 11"
+      "status": "Sem. 11",
+      "time": "20:00"
     },
     {
       "date": "01/03/2027",
       "home": "vil2",
       "away": "vend",
-      "status": "Sem. 12"
+      "status": "Sem. 12",
+      "time": "20:15"
     },
     {
       "date": "01/03/2027",
       "home": "vill",
       "away": "ball",
-      "status": "Sem. 12"
+      "status": "Sem. 12",
+      "time": "20:15"
     },
     {
       "date": "01/03/2027",
       "home": "eagl",
       "away": "ping",
-      "status": "Sem. 12"
+      "status": "Sem. 12",
+      "time": "20:00"
     },
     {
       "date": "01/03/2027",
       "home": "bryc",
       "away": "smas",
-      "status": "Sem. 12"
+      "status": "Sem. 12",
+      "time": "20:30"
     },
     {
       "date": "05/03/2027",
       "home": "bier",
       "away": "affr",
-      "status": "Sem. 12"
+      "status": "Sem. 12",
+      "time": "20:30"
     },
     {
       "date": "08/03/2027",
       "home": "ball",
       "away": "go",
-      "status": "Sem. 13"
+      "status": "Sem. 13",
+      "time": "20:30"
     },
     {
       "date": "08/03/2027",
       "home": "vend",
       "away": "vill",
-      "status": "Sem. 13"
+      "status": "Sem. 13",
+      "time": "20:30"
     },
     {
       "date": "09/03/2027",
       "home": "smas",
       "away": "eagl",
-      "status": "Sem. 13"
+      "status": "Sem. 13",
+      "time": "20:00"
     },
     {
       "date": "10/03/2027",
       "home": "affr",
       "away": "bryc",
-      "status": "Sem. 13"
+      "status": "Sem. 13",
+      "time": "20:00"
     },
     {
       "date": "11/03/2027",
       "home": "ping",
       "away": "vil2",
-      "status": "Sem. 13"
+      "status": "Sem. 13",
+      "time": "20:00"
     },
     {
       "date": "15/03/2027",
       "home": "vill",
       "away": "ping",
-      "status": "Sem. 14"
+      "status": "Sem. 14",
+      "time": "20:15"
     },
     {
       "date": "15/03/2027",
       "home": "eagl",
       "away": "affr",
-      "status": "Sem. 14"
+      "status": "Sem. 14",
+      "time": "20:00"
     },
     {
       "date": "15/03/2027",
       "home": "vil2",
       "away": "smas",
-      "status": "Sem. 14"
+      "status": "Sem. 14",
+      "time": "20:15"
     },
     {
       "date": "16/03/2027",
       "home": "go",
       "away": "vend",
-      "status": "Sem. 14"
+      "status": "Sem. 14",
+      "time": "19:30"
     },
     {
       "date": "19/03/2027",
       "home": "bier",
       "away": "bryc",
-      "status": "Sem. 14"
+      "status": "Sem. 14",
+      "time": "20:30"
     },
     {
       "date": "29/03/2027",
       "home": "bryc",
       "away": "eagl",
-      "status": "Sem. 15"
+      "status": "Sem. 15",
+      "time": "20:30"
     },
     {
       "date": "30/03/2027",
       "home": "smas",
       "away": "vill",
-      "status": "Sem. 15"
+      "status": "Sem. 15",
+      "time": "20:00"
     },
     {
       "date": "31/03/2027",
       "home": "affr",
       "away": "vil2",
-      "status": "Sem. 15"
+      "status": "Sem. 15",
+      "time": "20:00"
     },
     {
       "date": "01/04/2027",
       "home": "ping",
       "away": "go",
-      "status": "Sem. 15"
+      "status": "Sem. 15",
+      "time": "20:00"
     },
     {
       "date": "02/04/2027",
       "home": "bier",
       "away": "ball",
-      "status": "Sem. 15"
+      "status": "Sem. 15",
+      "time": "20:30"
     },
     {
       "date": "19/04/2027",
       "home": "vend",
       "away": "ball",
-      "status": "Sem. 16"
+      "status": "Sem. 16",
+      "time": "20:30"
     },
     {
       "date": "19/04/2027",
       "home": "vill",
       "away": "affr",
-      "status": "Sem. 16"
+      "status": "Sem. 16",
+      "time": "20:15"
     },
     {
       "date": "19/04/2027",
       "home": "vil2",
       "away": "bryc",
-      "status": "Sem. 16"
+      "status": "Sem. 16",
+      "time": "20:15"
     },
     {
       "date": "20/04/2027",
       "home": "go",
       "away": "smas",
-      "status": "Sem. 16"
+      "status": "Sem. 16",
+      "time": "19:30"
     },
     {
       "date": "23/04/2027",
       "home": "bier",
       "away": "eagl",
-      "status": "Sem. 16"
+      "status": "Sem. 16",
+      "time": "20:30"
     },
     {
       "date": "26/04/2027",
       "home": "bryc",
       "away": "vill",
-      "status": "Sem. 17"
+      "status": "Sem. 17",
+      "time": "20:30"
     },
     {
       "date": "26/04/2027",
       "home": "ball",
       "away": "ping",
-      "status": "Sem. 17"
+      "status": "Sem. 17",
+      "time": "20:30"
     },
     {
       "date": "26/04/2027",
       "home": "eagl",
       "away": "vil2",
-      "status": "Sem. 17"
+      "status": "Sem. 17",
+      "time": "20:00"
     },
     {
       "date": "28/04/2027",
       "home": "affr",
       "away": "go",
-      "status": "Sem. 17"
+      "status": "Sem. 17",
+      "time": "20:00"
     },
     {
       "date": "30/04/2027",
       "home": "bier",
       "away": "vend",
-      "status": "Sem. 17"
+      "status": "Sem. 17",
+      "time": "20:30"
     },
     {
       "date": "10/05/2027",
       "home": "vill",
       "away": "eagl",
-      "status": "Sem. 18"
+      "status": "Sem. 18",
+      "time": "20:15"
     },
     {
       "date": "10/05/2027",
       "home": "ball",
       "away": "smas",
-      "status": "Sem. 18"
+      "status": "Sem. 18",
+      "time": "20:30"
     },
     {
       "date": "11/05/2027",
       "home": "go",
       "away": "bryc",
-      "status": "Sem. 18"
+      "status": "Sem. 18",
+      "time": "19:30"
     },
     {
       "date": "13/05/2027",
       "home": "ping",
       "away": "vend",
-      "status": "Sem. 18"
+      "status": "Sem. 18",
+      "time": "20:00"
     },
     {
       "date": "14/05/2027",
       "home": "bier",
       "away": "vil2",
-      "status": "Sem. 18"
+      "status": "Sem. 18",
+      "time": "20:30"
     },
     {
       "date": "17/05/2027",
       "home": "eagl",
       "away": "go",
-      "status": "Sem. 19"
+      "status": "Sem. 19",
+      "time": "20:00"
     },
     {
       "date": "17/05/2027",
       "home": "vil2",
       "away": "vill",
-      "status": "Sem. 19"
+      "status": "Sem. 19",
+      "time": "20:15"
     },
     {
       "date": "18/05/2027",
       "home": "smas",
       "away": "vend",
-      "status": "Sem. 19"
+      "status": "Sem. 19",
+      "time": "20:00"
     },
     {
       "date": "19/05/2027",
       "home": "affr",
       "away": "ball",
-      "status": "Sem. 19"
+      "status": "Sem. 19",
+      "time": "20:00"
     },
     {
       "date": "21/05/2027",
       "home": "bier",
       "away": "ping",
-      "status": "Sem. 19"
+      "status": "Sem. 19",
+      "time": "20:30"
     },
     {
       "date": "24/05/2027",
       "home": "vend",
       "away": "affr",
-      "status": "Sem. 20"
+      "status": "Sem. 20",
+      "time": "20:30"
     },
     {
       "date": "24/05/2027",
       "home": "ball",
       "away": "bryc",
-      "status": "Sem. 20"
+      "status": "Sem. 20",
+      "time": "20:30"
     },
     {
       "date": "25/05/2027",
       "home": "go",
       "away": "vil2",
-      "status": "Sem. 20"
+      "status": "Sem. 20",
+      "time": "19:30"
     },
     {
       "date": "27/05/2027",
       "home": "ping",
       "away": "smas",
-      "status": "Sem. 20"
+      "status": "Sem. 20",
+      "time": "20:00"
     },
     {
       "date": "28/05/2027",
       "home": "bier",
       "away": "vill",
-      "status": "Sem. 20"
+      "status": "Sem. 20",
+      "time": "20:30"
     },
     {
       "date": "31/05/2027",
       "home": "vill",
       "away": "go",
-      "status": "Sem. 21"
+      "status": "Sem. 21",
+      "time": "20:15"
     },
     {
       "date": "31/05/2027",
       "home": "bryc",
       "away": "vend",
-      "status": "Sem. 21"
+      "status": "Sem. 21",
+      "time": "20:30"
     },
     {
       "date": "31/05/2027",
       "home": "eagl",
       "away": "ball",
-      "status": "Sem. 21"
+      "status": "Sem. 21",
+      "time": null
     },
     {
       "date": "02/06/2027",
       "home": "affr",
       "away": "ping",
-      "status": "Sem. 21"
+      "status": "Sem. 21",
+      "time": "20:00"
     },
     {
       "date": "04/06/2027",
       "home": "bier",
       "away": "smas",
-      "status": "Sem. 21"
+      "status": "Sem. 21",
+      "time": "20:30"
     },
     {
       "date": "07/06/2027",
       "home": "vend",
       "away": "eagl",
-      "status": "Sem. 22"
+      "status": "Sem. 22",
+      "time": "20:30"
     },
     {
       "date": "07/06/2027",
       "home": "ball",
       "away": "vil2",
-      "status": "Sem. 22"
+      "status": "Sem. 22",
+      "time": "20:30"
     },
     {
       "date": "08/06/2027",
       "home": "smas",
       "away": "affr",
-      "status": "Sem. 22"
+      "status": "Sem. 22",
+      "time": "20:00"
     },
     {
       "date": "10/06/2027",
       "home": "ping",
       "away": "bryc",
-      "status": "Sem. 22"
+      "status": "Sem. 22",
+      "time": "20:00"
     },
     {
       "date": "11/06/2027",
       "home": "bier",
       "away": "go",
-      "status": "Sem. 22"
+      "status": "Sem. 22",
+      "time": "20:30"
     }
   ],
   "prTeams": [

@@ -5,7 +5,7 @@
     "name": "Starter",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/17",
-    "lastUpdated": "2026-11-10T00:43:55",
+    "lastUpdated": "2026-11-10T13:32:50",
     "teamCount": 8,
     "matchesPlayed": 9,
     "matchesUpcoming": 47
@@ -335,6 +335,7 @@
       "scoreAway": 2,
       "homeWin": true,
       "status": "Terminé",
+      "time": "20:30",
       "sets": [
         [
           25,
@@ -370,6 +371,7 @@
       "scoreAway": 3,
       "homeWin": false,
       "status": "Terminé",
+      "time": "20:20",
       "sets": [
         [
           25,
@@ -401,6 +403,7 @@
       "scoreAway": 0,
       "homeWin": true,
       "status": "Terminé",
+      "time": "20:30",
       "sets": [
         [
           25,
@@ -428,6 +431,7 @@
       "scoreAway": 3,
       "homeWin": false,
       "status": "Terminé",
+      "time": "20:00",
       "sets": [
         [
           14,
@@ -455,6 +459,7 @@
       "scoreAway": 3,
       "homeWin": false,
       "status": "Terminé",
+      "time": "20:00",
       "sets": [
         [
           20,
@@ -486,6 +491,7 @@
       "scoreAway": 0,
       "homeWin": true,
       "status": "Terminé",
+      "time": "20:00",
       "sets": [
         [
           25,
@@ -513,6 +519,7 @@
       "scoreAway": 3,
       "homeWin": false,
       "status": "Terminé",
+      "time": "20:00",
       "sets": [
         [
           16,
@@ -540,6 +547,7 @@
       "scoreAway": 2,
       "homeWin": true,
       "status": "Clodo pts",
+      "time": "20:30",
       "sets": [
         [
           23,
@@ -571,6 +579,7 @@
       "scoreAway": 1,
       "homeWin": true,
       "status": "Terminé",
+      "time": "20:00",
       "sets": [
         [
           25,
@@ -600,283 +609,330 @@
       "date": "09/11/2026",
       "home": "los",
       "away": "futs",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": "20:00"
     },
     {
       "date": "13/11/2026",
       "home": "file",
       "away": "krok",
-      "status": "Sem. 3"
+      "status": "Sem. 3",
+      "time": "20:30"
     },
     {
       "date": "13/11/2026",
       "home": "choi",
       "away": "bler",
-      "status": "Sem. 3"
+      "status": "Sem. 3",
+      "time": "20:00"
     },
     {
       "date": "23/11/2026",
       "home": "clod",
       "away": "los",
-      "status": "Sem. 4"
+      "status": "Sem. 4",
+      "time": "20:30"
     },
     {
       "date": "25/11/2026",
       "home": "choi",
       "away": "futs",
-      "status": "Sem. 4"
+      "status": "Sem. 4",
+      "time": "20:00"
     },
     {
       "date": "26/11/2026",
       "home": "krok",
       "away": "gold",
-      "status": "Sem. 4"
+      "status": "Sem. 4",
+      "time": "20:20"
     },
     {
       "date": "27/11/2026",
       "home": "file",
       "away": "bler",
-      "status": "Sem. 4"
+      "status": "Sem. 4",
+      "time": "20:30"
     },
     {
       "date": "02/12/2026",
       "home": "gold",
       "away": "los",
-      "status": "Sem. 5"
+      "status": "Sem. 5",
+      "time": "20:00"
     },
     {
       "date": "03/12/2026",
       "home": "krok",
       "away": "bler",
-      "status": "Sem. 5"
+      "status": "Sem. 5",
+      "time": "20:20"
     },
     {
       "date": "04/12/2026",
       "home": "choi",
       "away": "clod",
-      "status": "Sem. 5"
+      "status": "Sem. 5",
+      "time": "20:00"
     },
     {
       "date": "04/12/2026",
       "home": "file",
       "away": "futs",
-      "status": "Sem. 5"
+      "status": "Sem. 5",
+      "time": "20:30"
     },
     {
       "date": "07/12/2026",
       "home": "clod",
       "away": "file",
-      "status": "Sem. 6"
+      "status": "Sem. 6",
+      "time": "20:30"
     },
     {
       "date": "07/12/2026",
       "home": "bler",
       "away": "futs",
-      "status": "Sem. 6"
+      "status": "Sem. 6",
+      "time": null
     },
     {
       "date": "09/12/2026",
       "home": "gold",
       "away": "choi",
-      "status": "Sem. 6"
+      "status": "Sem. 6",
+      "time": "20:00"
     },
     {
       "date": "10/12/2026",
       "home": "krok",
       "away": "los",
-      "status": "Sem. 6"
+      "status": "Sem. 6",
+      "time": "20:20"
     },
     {
       "date": "04/01/2027",
       "home": "clod",
       "away": "bler",
-      "status": "Sem. 7"
+      "status": "Sem. 7",
+      "time": "20:30"
     },
     {
       "date": "04/01/2027",
       "home": "los",
       "away": "choi",
-      "status": "Sem. 7"
+      "status": "Sem. 7",
+      "time": "20:00"
     },
     {
       "date": "07/01/2027",
       "home": "krok",
       "away": "futs",
-      "status": "Sem. 7"
+      "status": "Sem. 7",
+      "time": "20:20"
     },
     {
       "date": "08/01/2027",
       "home": "file",
       "away": "gold",
-      "status": "Sem. 7"
+      "status": "Sem. 7",
+      "time": "20:30"
     },
     {
       "date": "01/03/2027",
       "home": "los",
       "away": "clod",
-      "status": "Sem. 8"
+      "status": "Sem. 8",
+      "time": "20:00"
     },
     {
       "date": "01/03/2027",
       "home": "choi",
       "away": "file",
-      "status": "Sem. 8"
+      "status": "Sem. 8",
+      "time": null
     },
     {
       "date": "03/03/2027",
       "home": "gold",
       "away": "bler",
-      "status": "Sem. 8"
+      "status": "Sem. 8",
+      "time": "20:00"
     },
     {
       "date": "04/03/2027",
       "home": "krok",
       "away": "futs",
-      "status": "Sem. 8"
+      "status": "Sem. 8",
+      "time": "20:20"
     },
     {
       "date": "08/03/2027",
       "home": "clod",
       "away": "krok",
-      "status": "Sem. 9"
+      "status": "Sem. 9",
+      "time": "20:30"
     },
     {
       "date": "08/03/2027",
       "home": "los",
       "away": "gold",
-      "status": "Sem. 9"
+      "status": "Sem. 9",
+      "time": "20:00"
     },
     {
       "date": "08/03/2027",
       "home": "choi",
       "away": "bler",
-      "status": "Sem. 9"
+      "status": "Sem. 9",
+      "time": null
     },
     {
       "date": "12/03/2027",
       "home": "file",
       "away": "futs",
-      "status": "Sem. 9"
+      "status": "Sem. 9",
+      "time": "20:30"
     },
     {
       "date": "15/03/2027",
       "home": "futs",
       "away": "bler",
-      "status": "Sem. 10"
+      "status": "Sem. 10",
+      "time": null
     },
     {
       "date": "15/03/2027",
       "home": "choi",
       "away": "los",
-      "status": "Sem. 10"
+      "status": "Sem. 10",
+      "time": null
     },
     {
       "date": "17/03/2027",
       "home": "gold",
       "away": "clod",
-      "status": "Sem. 10"
+      "status": "Sem. 10",
+      "time": "20:00"
     },
     {
       "date": "18/03/2027",
       "home": "krok",
       "away": "file",
-      "status": "Sem. 10"
+      "status": "Sem. 10",
+      "time": "20:20"
     },
     {
       "date": "29/03/2027",
       "home": "los",
       "away": "futs",
-      "status": "Sem. 11"
+      "status": "Sem. 11",
+      "time": "20:00"
     },
     {
       "date": "31/03/2027",
       "home": "clod",
       "away": "choi",
-      "status": "Sem. 11"
+      "status": "Sem. 11",
+      "time": "20:30"
     },
     {
       "date": "31/03/2027",
       "home": "gold",
       "away": "krok",
-      "status": "Sem. 11"
+      "status": "Sem. 11",
+      "time": "20:00"
     },
     {
       "date": "02/04/2027",
       "home": "file",
       "away": "bler",
-      "status": "Sem. 11"
+      "status": "Sem. 11",
+      "time": "20:30"
     },
     {
       "date": "19/04/2027",
       "home": "clod",
       "away": "futs",
-      "status": "Sem. 12"
+      "status": "Sem. 12",
+      "time": "20:30"
     },
     {
       "date": "19/04/2027",
       "home": "choi",
       "away": "gold",
-      "status": "Sem. 12"
+      "status": "Sem. 12",
+      "time": null
     },
     {
       "date": "22/04/2027",
       "home": "krok",
       "away": "bler",
-      "status": "Sem. 12"
+      "status": "Sem. 12",
+      "time": "20:20"
     },
     {
       "date": "23/04/2027",
       "home": "file",
       "away": "los",
-      "status": "Sem. 12"
+      "status": "Sem. 12",
+      "time": "20:30"
     },
     {
       "date": "26/04/2027",
       "home": "los",
       "away": "bler",
-      "status": "Sem. 13"
+      "status": "Sem. 13",
+      "time": "20:00"
     },
     {
       "date": "28/04/2027",
       "home": "gold",
       "away": "futs",
-      "status": "Sem. 13"
+      "status": "Sem. 13",
+      "time": "20:00"
     },
     {
       "date": "29/04/2027",
       "home": "krok",
       "away": "choi",
-      "status": "Sem. 13"
+      "status": "Sem. 13",
+      "time": "20:20"
     },
     {
       "date": "30/04/2027",
       "home": "file",
       "away": "clod",
-      "status": "Sem. 13"
+      "status": "Sem. 13",
+      "time": "20:30"
     },
     {
       "date": "10/05/2027",
       "home": "clod",
       "away": "bler",
-      "status": "Sem. 14"
+      "status": "Sem. 14",
+      "time": "20:30"
     },
     {
       "date": "10/05/2027",
       "home": "choi",
       "away": "futs",
-      "status": "Sem. 14"
+      "status": "Sem. 14",
+      "time": null
     },
     {
       "date": "10/05/2027",
       "home": "los",
       "away": "krok",
-      "status": "Sem. 14"
+      "status": "Sem. 14",
+      "time": "20:00"
     },
     {
       "date": "12/05/2027",
       "home": "gold",
       "away": "file",
-      "status": "Sem. 14"
+      "status": "Sem. 14",
+      "time": "20:00"
     }
   ],
   "prTeams": [

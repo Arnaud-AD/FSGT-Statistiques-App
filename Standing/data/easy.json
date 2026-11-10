@@ -5,7 +5,7 @@
     "name": "Easy",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/16",
-    "lastUpdated": "2026-11-10T00:43:51",
+    "lastUpdated": "2026-11-10T13:32:47",
     "teamCount": 8,
     "matchesPlayed": 7,
     "matchesUpcoming": 49
@@ -335,6 +335,7 @@
       "scoreAway": 3,
       "homeWin": false,
       "status": "Terminé",
+      "time": "20:00",
       "sets": [
         [
           25,
@@ -370,6 +371,7 @@
       "scoreAway": 0,
       "homeWin": true,
       "status": "Terminé",
+      "time": "20:30",
       "sets": [
         [
           25,
@@ -397,6 +399,7 @@
       "scoreAway": 3,
       "homeWin": false,
       "status": "Terminé",
+      "time": "20:20",
       "sets": [
         [
           22,
@@ -428,6 +431,7 @@
       "scoreAway": 3,
       "homeWin": false,
       "status": "Terminé",
+      "time": "20:00",
       "sets": [
         [
           16,
@@ -459,6 +463,7 @@
       "scoreAway": 3,
       "homeWin": false,
       "status": "Terminé",
+      "time": "20:00",
       "sets": [
         [
           19,
@@ -494,6 +499,7 @@
       "scoreAway": 0,
       "homeWin": true,
       "status": "Terminé",
+      "time": "20:00",
       "sets": [
         [
           27,
@@ -521,6 +527,7 @@
       "scoreAway": 2,
       "homeWin": true,
       "status": "Terminé",
+      "time": "20:00",
       "sets": [
         [
           19,
@@ -554,295 +561,344 @@
       "date": "N/C",
       "home": "gail",
       "away": "miel",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": null
     },
     {
       "date": "N/C",
       "home": "coco",
       "away": "miel",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": null
     },
     {
       "date": "12/10/2026",
       "home": "fata",
       "away": "coc2",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": "20:00"
     },
     {
       "date": "09/11/2026",
       "home": "daiq",
       "away": "punc",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": "20:00"
     },
     {
       "date": "23/11/2026",
       "home": "punc",
       "away": "gail",
-      "status": "Sem. 4"
+      "status": "Sem. 4",
+      "time": "20:00"
     },
     {
       "date": "25/11/2026",
       "home": "coc2",
       "away": "coco",
-      "status": "Sem. 4"
+      "status": "Sem. 4",
+      "time": "20:30"
     },
     {
       "date": "26/11/2026",
       "home": "ours",
       "away": "daiq",
-      "status": "Sem. 4"
+      "status": "Sem. 4",
+      "time": "20:00"
     },
     {
       "date": "30/11/2026",
       "home": "fata",
       "away": "daiq",
-      "status": "Sem. 5"
+      "status": "Sem. 5",
+      "time": "20:00"
     },
     {
       "date": "30/11/2026",
       "home": "coco",
       "away": "punc",
-      "status": "Sem. 5"
+      "status": "Sem. 5",
+      "time": "20:00"
     },
     {
       "date": "30/11/2026",
       "home": "miel",
       "away": "coc2",
-      "status": "Sem. 5"
+      "status": "Sem. 5",
+      "time": "20:20"
     },
     {
       "date": "02/12/2026",
       "home": "gail",
       "away": "ours",
-      "status": "Sem. 5"
+      "status": "Sem. 5",
+      "time": "20:00"
     },
     {
       "date": "07/12/2026",
       "home": "fata",
       "away": "gail",
-      "status": "Sem. 6"
+      "status": "Sem. 6",
+      "time": "20:00"
     },
     {
       "date": "07/12/2026",
       "home": "daiq",
       "away": "miel",
-      "status": "Sem. 6"
+      "status": "Sem. 6",
+      "time": "20:00"
     },
     {
       "date": "07/12/2026",
       "home": "punc",
       "away": "coc2",
-      "status": "Sem. 6"
+      "status": "Sem. 6",
+      "time": "20:00"
     },
     {
       "date": "04/01/2027",
       "home": "coco",
       "away": "fata",
-      "status": "Sem. 7"
+      "status": "Sem. 7",
+      "time": "20:00"
     },
     {
       "date": "04/01/2027",
       "home": "punc",
       "away": "miel",
-      "status": "Sem. 7"
+      "status": "Sem. 7",
+      "time": "20:00"
     },
     {
       "date": "06/01/2027",
       "home": "coc2",
       "away": "ours",
-      "status": "Sem. 7"
+      "status": "Sem. 7",
+      "time": "20:30"
     },
     {
       "date": "06/01/2027",
       "home": "gail",
       "away": "daiq",
-      "status": "Sem. 7"
+      "status": "Sem. 7",
+      "time": "20:00"
     },
     {
       "date": "14/01/2027",
       "home": "ours",
       "away": "coco",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": "20:00"
     },
     {
       "date": "18/01/2027",
       "home": "miel",
       "away": "fata",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": "20:20"
     },
     {
       "date": "25/01/2027",
       "home": "fata",
       "away": "miel",
-      "status": "Sem. 11"
+      "status": "Sem. 11",
+      "time": "20:00"
     },
     {
       "date": "24/02/2027",
       "home": "gail",
       "away": "coc2",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": "20:00"
     },
     {
       "date": "01/03/2027",
       "home": "coco",
       "away": "daiq",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": "20:00"
     },
     {
       "date": "01/03/2027",
       "home": "miel",
       "away": "gail",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": "20:20"
     },
     {
       "date": "03/03/2027",
       "home": "coc2",
       "away": "punc",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": "20:30"
     },
     {
       "date": "04/03/2027",
       "home": "ours",
       "away": "fata",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": "20:00"
     },
     {
       "date": "08/03/2027",
       "home": "daiq",
       "away": "ours",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": "20:00"
     },
     {
       "date": "08/03/2027",
       "home": "fata",
       "away": "punc",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": "20:00"
     },
     {
       "date": "10/03/2027",
       "home": "gail",
       "away": "coco",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": "20:00"
     },
     {
       "date": "10/03/2027",
       "home": "coc2",
       "away": "miel",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": "20:30"
     },
     {
       "date": "15/03/2027",
       "home": "miel",
       "away": "coco",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": "20:20"
     },
     {
       "date": "15/03/2027",
       "home": "punc",
       "away": "daiq",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": "20:00"
     },
     {
       "date": "17/03/2027",
       "home": "coc2",
       "away": "fata",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": "20:30"
     },
     {
       "date": "18/03/2027",
       "home": "ours",
       "away": "gail",
-      "status": "Reporté"
+      "status": "Reporté",
+      "time": "20:00"
     },
     {
       "date": "29/03/2027",
       "home": "coco",
       "away": "ours",
-      "status": "Sem. 11"
+      "status": "Sem. 11",
+      "time": "20:00"
     },
     {
       "date": "29/03/2027",
       "home": "daiq",
       "away": "coc2",
-      "status": "Sem. 11"
+      "status": "Sem. 11",
+      "time": "20:00"
     },
     {
       "date": "31/03/2027",
       "home": "gail",
       "away": "punc",
-      "status": "Sem. 11"
+      "status": "Sem. 11",
+      "time": "20:00"
     },
     {
       "date": "19/04/2027",
       "home": "daiq",
       "away": "fata",
-      "status": "Sem. 12"
+      "status": "Sem. 12",
+      "time": "20:00"
     },
     {
       "date": "19/04/2027",
       "home": "punc",
       "away": "coco",
-      "status": "Sem. 12"
+      "status": "Sem. 12",
+      "time": "20:00"
     },
     {
       "date": "21/04/2027",
       "home": "coc2",
       "away": "gail",
-      "status": "Sem. 12"
+      "status": "Sem. 12",
+      "time": "20:30"
     },
     {
       "date": "22/04/2027",
       "home": "ours",
       "away": "miel",
-      "status": "Sem. 12"
+      "status": "Sem. 12",
+      "time": "20:00"
     },
     {
       "date": "26/04/2027",
       "home": "punc",
       "away": "ours",
-      "status": "Sem. 13"
+      "status": "Sem. 13",
+      "time": "20:00"
     },
     {
       "date": "26/04/2027",
       "home": "coco",
       "away": "coc2",
-      "status": "Sem. 13"
+      "status": "Sem. 13",
+      "time": "20:00"
     },
     {
       "date": "26/04/2027",
       "home": "miel",
       "away": "daiq",
-      "status": "Sem. 13"
+      "status": "Sem. 13",
+      "time": "20:20"
     },
     {
       "date": "28/04/2027",
       "home": "gail",
       "away": "fata",
-      "status": "Sem. 13"
+      "status": "Sem. 13",
+      "time": "20:00"
     },
     {
       "date": "10/05/2027",
       "home": "fata",
       "away": "coco",
-      "status": "Sem. 14"
+      "status": "Sem. 14",
+      "time": "20:00"
     },
     {
       "date": "10/05/2027",
       "home": "daiq",
       "away": "gail",
-      "status": "Sem. 14"
+      "status": "Sem. 14",
+      "time": "20:00"
     },
     {
       "date": "10/05/2027",
       "home": "miel",
       "away": "punc",
-      "status": "Sem. 14"
+      "status": "Sem. 14",
+      "time": "20:20"
     },
     {
       "date": "13/05/2027",
       "home": "ours",
       "away": "coc2",
-      "status": "Sem. 14"
+      "status": "Sem. 14",
+      "time": "20:00"
     }
   ],
   "prTeams": [
