@@ -1549,3 +1549,134 @@
 
 /* Power Ranking : équipes sans match joué (non classées, en bas) */
 .pr-not-played { opacity: 0.55; }
+
+        /* Desktop-only: full team calendar unfolded under a standings row (like the FSGT site) */
+        .standings-calendar { display: none; }
+
+        @media (min-width: 761px) {
+            .standings-table .standings-row { cursor: pointer; }
+            .standings-table .standings-row:hover td { background: #fafbfc; }
+            .standings-table .standings-row.cal-open td {
+                background: var(--bg-header);
+                border-bottom-color: transparent;
+            }
+            .standings-table .standings-calendar.open { display: table-row; }
+            .standings-table .standings-calendar.open > td {
+                padding: 0 16px 18px 40px;
+                background: var(--bg-header);
+            }
+            .team-calendar {
+                background: var(--bg-primary);
+                border: 1px solid var(--border-color);
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: 0 1px 2px rgba(60, 64, 67, 0.08);
+            }
+            .cal-header {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 12px 20px;
+                border-bottom: 1px solid var(--border-color);
+            }
+            .cal-header .team-logo { width: 32px; height: 32px; font-size: 11px; flex-shrink: 0; }
+            .cal-heading {
+                display: flex;
+                flex-direction: column;
+                margin: 0 auto 0 4px;
+                text-align: left;
+            }
+            .cal-kicker {
+                font-size: 10px;
+                font-weight: 600;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                color: var(--rank-champion);
+            }
+            .cal-title {
+                font-family: 'Google Sans', 'Roboto', sans-serif;
+                font-size: 15px;
+                font-weight: 600;
+                color: var(--text-primary);
+            }
+            .standings-table .cal-table { width: 100%; min-width: 0; border-collapse: collapse; }
+            .standings-table .cal-table td {
+                padding: 9px 12px;
+                font-size: 13px;
+                text-align: left;
+                border-bottom: 1px solid #f0f0f0;
+                background: transparent;
+                vertical-align: middle;
+            }
+            .standings-table .cal-table tr:last-child td { border-bottom: none; }
+            .standings-table .cal-table td:first-child { padding-left: 20px; }
+            .standings-table .cal-table td:last-child { padding-right: 20px; text-align: right; }
+            .cal-row { transition: background 0.15s ease; }
+            .cal-row:hover td { background: #fafbfc !important; }
+
+            .cal-date { width: 150px; white-space: nowrap; }
+            .cal-date-main { display: flex; align-items: baseline; gap: 4px; }
+            .cal-day { font-size: 12px; color: var(--text-secondary); text-transform: capitalize; }
+            .cal-daynum { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+            .cal-month { font-size: 12px; color: var(--text-secondary); }
+            .cal-time { font-size: 11px; color: var(--text-secondary); margin-top: 1px; font-variant-numeric: tabular-nums; }
+
+            .cal-venue { width: 90px; }
+            .cal-venue-pill {
+                display: inline-block;
+                padding: 2px 8px;
+                border-radius: 20px;
+                font-size: 11px;
+                font-weight: 500;
+                color: var(--text-secondary);
+                background: var(--bg-header);
+                border: 1px solid var(--border-color);
+            }
+            .cal-venue-pill.home {
+                color: var(--rank-champion);
+                background: rgba(26, 115, 232, 0.08);
+                border-color: rgba(26, 115, 232, 0.2);
+            }
+
+            .cal-opp-inner { display: flex; align-items: center; gap: 8px; }
+            .cal-opp .team-logo { width: 24px; height: 24px; font-size: 9px; flex-shrink: 0; }
+
+            .cal-result { width: 90px; white-space: nowrap; }
+            .cal-result-inner { display: flex; align-items: center; gap: 8px; }
+            .cal-result .form-item { flex-shrink: 0; margin: 0; }
+            .cal-score { font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums; }
+            .cal-score .separator { color: var(--text-secondary); margin: 0 3px; font-weight: 400; }
+            .cal-score.winner { color: var(--win-color); }
+            .cal-score.loser { color: var(--text-secondary); }
+            .cal-vs { color: #bdc1c6; font-size: 12px; padding-left: 26px; }
+
+            .cal-sets { white-space: nowrap; }
+            .cal-set {
+                display: inline-block;
+                min-width: 40px;
+                font-size: 12px;
+                color: var(--text-secondary);
+                font-variant-numeric: tabular-nums;
+            }
+            .cal-set-won { color: var(--text-primary); font-weight: 600; }
+
+            .cal-status { width: 90px; white-space: nowrap; }
+
+            .cal-next td { background: rgba(26, 115, 232, 0.05); }
+            .cal-next .cal-daynum { color: var(--rank-champion); }
+            .cal-next-badge {
+                margin-left: 4px;
+                padding: 2px 8px;
+                border-radius: 20px;
+                font-size: 10px;
+                font-weight: 600;
+                letter-spacing: 0.02em;
+                color: #fff;
+                background: var(--rank-champion);
+                white-space: nowrap;
+            }
+            .cal-postponed .cal-date-main,
+            .cal-postponed .cal-time { opacity: 0.55; text-decoration: line-through; }
+            .cal-postponed .team-name { color: var(--text-secondary); }
+            .cal-empty { padding: 16px 20px; color: var(--text-secondary); font-size: 13px; }
+        }
