@@ -452,14 +452,14 @@ function buildTeamCalendar(teamKey) {
     var team = DATA.teams[teamKey] || { name: teamKey, short: '?' };
     var nPlayed = 0;
     var nextFound = false;
-    var rows = '';
+    var rows = [];
     list.forEach(function(e) {
         var m = e.m;
         var isHome = m.home === teamKey;
         var oppKey = isHome ? m.away : m.home;
         var opp = DATA.teams[oppKey] || { name: oppKey, short: '?' };
         var cls = 'cal-row';
-        var result = '<span class="cal-vs">vs</span>';
+        var result = '<span class="cal-vs">–</span>';
         var sets = '';
         var status;
 
@@ -491,47 +491,40 @@ function buildTeamCalendar(teamKey) {
             status = '<span class="status-upcoming">' + esc(m.status) + '</span>';
         }
 
-        var dateHtml;
-        if (e.d) {
-            dateHtml = '<span class="cal-day">' + CAL_DAYS[e.d.getDay()] + '</span>' +
-                '<span class="cal-daynum">' + e.d.getDate() + '</span>' +
-                '<span class="cal-month">' + CAL_MONTHS[e.d.getMonth()] + ' ' + e.d.getFullYear() + '</span>';
-        } else {
-            dateHtml = '<span class="cal-month">Date à définir</span>';
-        }
+        var dateHtml = e.d
+            ? '<span class="cal-day">' + CAL_DAYS[e.d.getDay()] + '</span> ' +
+              String(e.d.getDate()).padStart(2, '0') + '/' + String(e.d.getMonth() + 1).padStart(2, '0')
+            : 'N/C';
 
-        rows += '<tr class="' + cls + '">' +
-            '<td class="cal-date">' +
-                '<div class="cal-date-main">' + dateHtml + '</div>' +
-                (m.time ? '<div class="cal-time">' + esc(m.time) + '</div>' : '') +
-            '</td>' +
-            '<td class="cal-venue"><span class="cal-venue-pill' + (isHome ? ' home' : '') + '">' + (isHome ? 'Domicile' : 'Extérieur') + '</span></td>' +
-            '<td class="cal-opp"><div class="cal-opp-inner">' +
-                '<div class="team-logo logo-' + esc(oppKey) + '">' + esc(opp.short) + '</div>' +
+        rows.push('<div class="' + cls + '">' +
+            '<span class="cal-date">' + dateHtml +
+                (m.time ? '<span class="cal-time">' + esc(m.time) + '</span>' : '') +
+            '</span>' +
+            '<span class="cal-venue' + (isHome ? ' home' : '') + '" title="' + (isHome ? 'Domicile' : 'Extérieur') + '">' + (isHome ? 'D' : 'E') + '</span>' +
+            '<span class="cal-opp">' +
+                '<span class="team-logo logo-' + esc(oppKey) + '">' + esc(opp.short) + '</span>' +
                 '<span class="team-name">' + esc(opp.name) + '</span>' +
-                (cls.indexOf('cal-next') !== -1 ? '<span class="cal-next-badge">Prochain match</span>' : '') +
-            '</div></td>' +
-            '<td class="cal-result"><div class="cal-result-inner">' + result + '</div></td>' +
-            '<td class="cal-sets">' + sets + '</td>' +
-            '<td class="cal-status">' + status + '</td>' +
-        '</tr>';
+            '</span>' +
+            '<span class="cal-result">' + result + '</span>' +
+            '<span class="cal-sets">' + sets + '</span>' +
+            '<span class="cal-status">' + status + '</span>' +
+        '</div>');
     });
 
     var header = '<div class="cal-header">' +
-        '<div class="team-logo logo-' + esc(teamKey) + '">' + esc(team.short) + '</div>' +
-        '<div class="cal-heading">' +
-            '<span class="cal-kicker">Calendrier</span>' +
-            '<span class="cal-title">' + esc(team.name) + '</span>' +
-        '</div>' +
-        '<span class="section-badge">' + list.length + ' matchs</span>' +
-        '<span class="section-badge">' + nPlayed + ' joués</span>' +
-        '<span class="section-badge">' + (list.length - nPlayed) + ' à venir</span>' +
+        '<span class="cal-title">Calendrier de ' + esc(team.name) + '</span>' +
+        '<span class="cal-counts">' + list.length + ' matchs · ' + nPlayed + ' joués · ' + (list.length - nPlayed) + ' à venir</span>' +
     '</div>';
 
-    if (!rows) return '<div class="team-calendar">' + header + '<div class="cal-empty">Aucun match au calendrier</div></div>';
+    if (!rows.length) return '<div class="team-calendar">' + header + '<div class="cal-empty">Aucun match au calendrier</div></div>';
 
+    // Two columns (first half / second half of the season) to keep it short
+    var half = Math.ceil(rows.length / 2);
     return '<div class="team-calendar">' + header +
-        '<table class="cal-table"><tbody>' + rows + '</tbody></table>' +
+        '<div class="cal-grid">' +
+            '<div class="cal-col">' + rows.slice(0, half).join('') + '</div>' +
+            '<div class="cal-col">' + rows.slice(half).join('') + '</div>' +
+        '</div>' +
     '</div>';
 }
 
