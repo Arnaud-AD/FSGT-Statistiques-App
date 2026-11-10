@@ -22,6 +22,9 @@ var ASC_DEFAULT_COLS = { p: true, setMinus: true, ptsMinus: true };
 // Mobile: teams whose detail row is unfolded (team key → true)
 var standingsExpanded = {};
 
+// Desktop: teams whose full calendar is unfolded (team key → true)
+var standingsCalendarOpen = {};
+
 // ------------------------------------------------------------
 // 2. Initialization
 // ------------------------------------------------------------
@@ -348,7 +351,7 @@ function renderStandings() {
         const retourItems = buildFormItems(s.formRetour);
 
         const expanded = !!standingsExpanded[s.team];
-        rows += '<tr class="rank-' + s.rank + ' standings-row' + (expanded ? ' expanded' : '') + '" data-team="' + s.team + '">' +
+        rows += '<tr class="rank-' + s.rank + ' standings-row' + (expanded ? ' expanded' : '') + (standingsCalendarOpen[s.team] ? ' cal-open' : '') + '" data-team="' + s.team + '">' +
             '<td>' +
                 '<div class="team-cell">' +
                     '<div class="rank-indicator"></div>' +
@@ -403,6 +406,10 @@ function renderStandings() {
                     '<div class="form-section"><span class="form-label">R</span><div class="form-container">' + retourItems + '</div></div>' +
                 '</div>' +
             '</td>' +
+        '</tr>' +
+        // Desktop: full calendar shown under the team when its row is clicked
+        '<tr class="standings-calendar rank-' + s.rank + (standingsCalendarOpen[s.team] ? ' open' : '') + '" data-team="' + s.team + '">' +
+            '<td colspan="' + (sortableCols.length + 2) + '">' + buildTeamCalendar(s.team) + '</td>' +
         '</tr>';
     });
 
@@ -411,6 +418,120 @@ function renderStandings() {
             '<thead><tr>' + theadCols + '</tr></thead>' +
             '<tbody>' + rows + '</tbody>' +
         '</table>' +
+    '</div>';
+}
+
+// "dd/mm/yyyy" → Date (null for "N/C" or anything unparsable)
+function parseFrDate(d) {
+    if (!d || d === 'N/C') return null;
+    var parts = d.split('/');
+    if (parts.length !== 3) return null;
+    return new Date(parts[2], parts[1] - 1, parts[0]);
+}
+
+// Desktop: full calendar of one team (played + upcoming, by date), like the FSGT site
+var CAL_DAYS = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+var CAL_MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+
+function buildTeamCalendar(teamKey) {
+    var list = [];
+    DATA.matchesPlayed.forEach(function(m) {
+        if (m.home === teamKey || m.away === teamKey) list.push({ m: m, played: true });
+    });
+    DATA.matchesUpcoming.forEach(function(m) {
+        if (m.home === teamKey || m.away === teamKey) list.push({ m: m, played: false });
+    });
+    list.forEach(function(e, i) { e.order = i; e.d = parseFrDate(e.m.date); });
+    list.sort(function(a, b) {
+        if (!a.d && !b.d) return a.order - b.order;
+        if (!a.d) return 1;   // N/C at the end
+        if (!b.d) return -1;
+        return (a.d - b.d) || (a.order - b.order);
+    });
+
+    var team = DATA.teams[teamKey] || { name: teamKey, short: '?' };
+    var nPlayed = 0;
+    var nextFound = false;
+    var rows = '';
+    list.forEach(function(e) {
+        var m = e.m;
+        var isHome = m.home === teamKey;
+        var oppKey = isHome ? m.away : m.home;
+        var opp = DATA.teams[oppKey] || { name: oppKey, short: '?' };
+        var cls = 'cal-row';
+        var result = '<span class="cal-vs">vs</span>';
+        var sets = '';
+        var status;
+
+        if (e.played) {
+            nPlayed++;
+            var own = isHome ? m.scoreHome : m.scoreAway;
+            var other = isHome ? m.scoreAway : m.scoreHome;
+            var won = isHome ? !!m.homeWin : !m.homeWin;
+            var formCls = won ? 'form-win' : (other - own <= 1 ? 'form-close' : 'form-loss');
+            result = '<span class="form-item form-item-sm ' + formCls + '"></span>' +
+                '<span class="cal-score ' + (won ? 'winner' : 'loser') + '">' + own + '<span class="separator">-</span>' + other + '</span>';
+            if (Array.isArray(m.sets) && m.sets.length) {
+                sets = m.sets.map(function(st) {
+                    var a = isHome ? st[0] : st[1];
+                    var b = isHome ? st[1] : st[0];
+                    return '<span class="cal-set' + (a > b ? ' cal-set-won' : '') + '">' + a + '-' + b + '</span>';
+                }).join('');
+            }
+            cls += ' cal-played';
+            status = '<span class="status-played">' + esc(m.status) + '</span>';
+        } else if (m.status.indexOf('Report') !== -1) {
+            cls += ' cal-postponed';
+            status = '<span class="status-postponed">' + esc(m.status) + '</span>';
+        } else {
+            if (!nextFound) {
+                nextFound = true;
+                cls += ' cal-next';
+            }
+            status = '<span class="status-upcoming">' + esc(m.status) + '</span>';
+        }
+
+        var dateHtml;
+        if (e.d) {
+            dateHtml = '<span class="cal-day">' + CAL_DAYS[e.d.getDay()] + '</span>' +
+                '<span class="cal-daynum">' + e.d.getDate() + '</span>' +
+                '<span class="cal-month">' + CAL_MONTHS[e.d.getMonth()] + ' ' + e.d.getFullYear() + '</span>';
+        } else {
+            dateHtml = '<span class="cal-month">Date à définir</span>';
+        }
+
+        rows += '<tr class="' + cls + '">' +
+            '<td class="cal-date">' +
+                '<div class="cal-date-main">' + dateHtml + '</div>' +
+                (m.time ? '<div class="cal-time">' + esc(m.time) + '</div>' : '') +
+            '</td>' +
+            '<td class="cal-venue"><span class="cal-venue-pill' + (isHome ? ' home' : '') + '">' + (isHome ? 'Domicile' : 'Extérieur') + '</span></td>' +
+            '<td class="cal-opp"><div class="cal-opp-inner">' +
+                '<div class="team-logo logo-' + esc(oppKey) + '">' + esc(opp.short) + '</div>' +
+                '<span class="team-name">' + esc(opp.name) + '</span>' +
+                (cls.indexOf('cal-next') !== -1 ? '<span class="cal-next-badge">Prochain match</span>' : '') +
+            '</div></td>' +
+            '<td class="cal-result"><div class="cal-result-inner">' + result + '</div></td>' +
+            '<td class="cal-sets">' + sets + '</td>' +
+            '<td class="cal-status">' + status + '</td>' +
+        '</tr>';
+    });
+
+    var header = '<div class="cal-header">' +
+        '<div class="team-logo logo-' + esc(teamKey) + '">' + esc(team.short) + '</div>' +
+        '<div class="cal-heading">' +
+            '<span class="cal-kicker">Calendrier</span>' +
+            '<span class="cal-title">' + esc(team.name) + '</span>' +
+        '</div>' +
+        '<span class="section-badge">' + list.length + ' matchs</span>' +
+        '<span class="section-badge">' + nPlayed + ' joués</span>' +
+        '<span class="section-badge">' + (list.length - nPlayed) + ' à venir</span>' +
+    '</div>';
+
+    if (!rows) return '<div class="team-calendar">' + header + '<div class="cal-empty">Aucun match au calendrier</div></div>';
+
+    return '<div class="team-calendar">' + header +
+        '<table class="cal-table"><tbody>' + rows + '</tbody></table>' +
     '</div>';
 }
 
@@ -500,15 +621,9 @@ function renderMatches() {
     });
 
     // Sort upcoming matches by date (N/C first)
-    function parseMatchDate(d) {
-        if (!d || d === 'N/C') return null;
-        var parts = d.split('/');
-        if (parts.length !== 3) return null;
-        return new Date(parts[2], parts[1] - 1, parts[0]);
-    }
     var sortedUpcoming = DATA.matchesUpcoming.slice().sort(function(a, b) {
-        var da = parseMatchDate(a.date);
-        var db = parseMatchDate(b.date);
+        var da = parseFrDate(a.date);
+        var db = parseFrDate(b.date);
         if (!da && !db) return 0;
         if (!da) return -1;
         if (!db) return 1;
@@ -1459,6 +1574,18 @@ function drawEvolutionChart() {
 }
 
 window.addEventListener('resize', drawEvolutionChart);
+
+// Desktop: click a team row to unfold / fold its full calendar
+document.addEventListener('click', function(e) {
+    var row = e.target.closest('.standings-row');
+    if (!row || window.matchMedia('(max-width: 760px)').matches) return;
+    var team = row.getAttribute('data-team');
+    var cal = row.parentNode.querySelector('.standings-calendar[data-team="' + team + '"]');
+    if (!cal) return;   // e.g. Ginette standings: no calendar
+    standingsCalendarOpen[team] = !standingsCalendarOpen[team];
+    row.classList.toggle('cal-open', standingsCalendarOpen[team]);
+    cal.classList.toggle('open', standingsCalendarOpen[team]);
+});
 
 // Mobile: tap a team row to unfold / fold its details
 document.addEventListener('click', function(e) {
