@@ -9307,7 +9307,7 @@ const StatsVisuellesView = {
                         // Need at least endPos
                         if (!action.endPos) return;
 
-                        var result = self._classifyResult(action);
+                        var result = self._classifyResult(action, point.rally, actionIdx);
                         // Result filter
                         if (self._selectedResult !== 'all' && result !== self._selectedResult) return;
 
@@ -9481,7 +9481,7 @@ const StatsVisuellesView = {
         }
     },
 
-    _classifyResult(action) {
+    _classifyResult(action, rally, actionIdx) {
         switch (action.type) {
             case 'service':
                 if (action.result === 'ace') return 'positive';
@@ -9503,6 +9503,13 @@ const StatsVisuellesView = {
                 if (action.result === 'point' || action.result === 'bloc_out') return 'positive';
                 if (action.result === 'blocked' || action.result === 'out' || action.result === 'fault_net') return 'negative';
                 if (action.attackType === 'faute') return 'negative';
+                // Attaque défendue : même lecture que les tableaux de stats (A+ / BP / A-).
+                // Défense adverse ratée → point marqué par l'attaque → '+'.
+                if (action.result === 'defended' && rally) {
+                    var outcome = StatsRepair._analyzeAfterDefended(rally, actionIdx, action.team === 'home' ? 'away' : 'home');
+                    if (outcome === 'ended') return 'positive';
+                    if (outcome === 'blocked') return 'negative';
+                }
                 return 'neutral';
             case 'defense':
                 if (action.defenseQuality === 'positive') return 'positive';
