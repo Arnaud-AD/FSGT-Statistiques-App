@@ -1603,7 +1603,8 @@ WorkflowEngine.registerPhase('pass', {
             autoRole = passeur ? 'Passeur' : null;
         }
 
-        showAttackZones(team);
+        // Si le passeur auto n'est pas le Passeur (ex. Pointu), sa zone est reprise par le Passeur
+        showAttackZones(team, autoPlayer && autoPlayer !== passeur ? autoPlayer : null);
 
         renderOverrideTags({
             team,
@@ -1793,7 +1794,7 @@ WorkflowEngine.registerPhase('pass', {
         }
         if (action === 'attackZoneClick') {
             // Clic zone d'attaque en phase pass = auto-passe + auto-attaquant
-            const attackerPlayer = args[0];
+            let attackerPlayer = args[0];
             const attackerRole = args[1];
             const clickData = args[2];
 
@@ -1803,6 +1804,17 @@ WorkflowEngine.registerPhase('pass', {
             const passeur = getPlayerByRole(team, 'Passeur');
             const effectiveOverride = getEffectivePlayer();
             const selectedPasser = effectiveOverride || passeur;
+
+            // Le passeur ne peut pas attaquer sa propre passe (double touche).
+            // Zone Pointu → le Passeur prend sa place ; autre zone → choix manuel.
+            let needManualAttacker = false;
+            if (attackerPlayer && attackerPlayer === selectedPasser) {
+                if (attackerRole === 'Pointu' && passeur && passeur !== selectedPasser) {
+                    attackerPlayer = passeur;
+                } else {
+                    needManualAttacker = true;
+                }
+            }
 
             // Créer l'action passe
             gameState.currentAction = {
@@ -1820,6 +1832,12 @@ WorkflowEngine.registerPhase('pass', {
             hideAttackZones();
             deactivateNetZone();
             document.getElementById('outArea').classList.remove('active');
+
+            if (needManualAttacker) {
+                gameState.context.attackAutoSelected = false;
+                WorkflowEngine.transition('attack_player');
+                return;
+            }
 
             // Sélectionner l'attaquant directement
             WorkflowEngine.transition('attack_type', {
