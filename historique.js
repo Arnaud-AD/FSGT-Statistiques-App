@@ -5871,6 +5871,16 @@ const BilanView = {
     // 50 points ≈ 1.2 sets → exige au moins 2 demi-sets ou 1 set+ pour etre significatif
     MIN_POINTS_FOR_FAMILY: 50,
 
+    // V29.54 : le seuil ne s'applique qu'aux familles SECONDAIRES (depannage a un autre poste).
+    // La famille principale d'un joueur a toujours sa carte, meme sous 50 points
+    // (ex : un seul set joue en debut de saison).
+    isFamilyBelowThreshold(playerData, family) {
+        var famData = playerData && playerData.families[family];
+        if (!famData) return true;
+        if (family === playerData.primaryFamily) return false;
+        return famData.totalPoints !== undefined && famData.totalPoints < this.MIN_POINTS_FOR_FAMILY;
+    },
+
     // IP agregat par famille : agrege les stats sur tous les matchs, calcule un seul IP
     // V27.0 : itere TOUTES les familles d'un joueur (plus filtre par primaryFamily)
     computeIPForFamily(matches, playerFamiliesYear, family) {
@@ -5884,7 +5894,7 @@ const BilanView = {
             var famData = pData.families[family];
             if (!famData) return;
             // Seuil minimum de points pour famille secondaire
-            if (famData.totalPoints !== undefined && famData.totalPoints < self.MIN_POINTS_FOR_FAMILY) return;
+            if (self.isFamilyBelowThreshold(pData, family)) return;
 
             // Agreger les stats sur tous les matchs de la famille
             var stats = self.aggregateStatsForFamilyYear(matches, name, famData);
@@ -7381,7 +7391,7 @@ const RankingView = {
                     // V27.0 : ne plus filtrer par primaryFamily — iterer toutes les familles
                     var famData = playerFamiliesYear[name].families[family];
                     if (!famData) return;
-                    if (famData.totalPoints !== undefined && famData.totalPoints < BilanView.MIN_POINTS_FOR_FAMILY) return;
+                    if (BilanView.isFamilyBelowThreshold(playerFamiliesYear[name], family)) return;
 
                     var stats = BilanView.aggregateStatsForFamilyYear(matchesWithSets, name, famData);
                     var hasStats = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'].some(function(cat) {
@@ -11027,7 +11037,7 @@ const YearStatsView = {
                 // V27.0 : ne plus filtrer par primaryFamily — iterer toutes les familles
                 var famData = playerFamiliesYear[name].families[family];
                 if (!famData) return;
-                if (famData.totalPoints !== undefined && famData.totalPoints < BilanView.MIN_POINTS_FOR_FAMILY) return;
+                if (BilanView.isFamilyBelowThreshold(playerFamiliesYear[name], family)) return;
                 playersInFamily.push(name);
             });
             if (playersInFamily.length === 0) return;
