@@ -8066,12 +8066,18 @@ const ProgressionView = {
 
         // Tri chronologique par date réelle du match (ancien à gauche → récent à droite)
         var self = this;
+        // Saisons ALL : regrouper d'abord par saison. Les matchs de 2024-2025 n'ont pas de
+        // matchDate et leur timestamp est la date de saisie (2026) : sans ce tri, ils se
+        // mélangeaient aux matchs de 2025-2026.
         matches.sort(function(a, b) {
+            var sa = a.season || '2025-2026', sb = b.season || '2025-2026';
+            if (sa !== sb) return sa < sb ? -1 : 1;
             return (a.matchDate || a.timestamp || 0) - (b.matchDate || b.timestamp || 0);
         });
 
         var matchLabels = [];
         var matchResults = [];
+        var matchSeasons = [];
         var playerMap = {}; // name → { role, color, matchData[] }
         var teamData = [];  // Stats équipe Jen par match
         var awayData = [];  // Stats adversaire par match
@@ -8081,6 +8087,7 @@ const ProgressionView = {
             if (label.length > 10) label = label.substring(0, 9).trim() + '.';
             matchLabels.push(label);
             matchResults.push(match.result);
+            matchSeasons.push(match.season || '2025-2026'); // sans champ season = legacy 2025-2026
 
             var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
             if (completedSets.length === 0) {
@@ -8178,7 +8185,7 @@ const ProgressionView = {
 
         players.sort(function(a, b) { return b.lastIP - a.lastIP; });
 
-        return { matches: matches, matchLabels: matchLabels, matchResults: matchResults, players: players, playerMap: playerMap, teamData: teamData, awayData: awayData };
+        return { matches: matches, matchLabels: matchLabels, matchResults: matchResults, matchSeasons: matchSeasons, players: players, playerMap: playerMap, teamData: teamData, awayData: awayData };
     },
 
     _computeDerived(s) {
@@ -8441,6 +8448,53 @@ const ProgressionView = {
         return html;
     },
 
+    // Segments de saison consécutifs (vue Saisons ALL) : [{ season, start, end }]
+    _seasonSegments() {
+        var seasons = (this._data && this._data.matchSeasons) || [];
+        var segs = [];
+        seasons.forEach(function(s, i) {
+            var last = segs[segs.length - 1];
+            if (last && last.season === s) last.end = i;
+            else segs.push({ season: s, start: i, end: i });
+        });
+        return segs;
+    },
+
+    // Lignes verticales entre deux saisons + nom de la saison en haut de chaque segment.
+    // Rien n'est dessiné quand le graphique ne couvre qu'une saison.
+    _drawSeasonDividers(ctx, xPos, top, bottom, left, right) {
+        var segs = this._seasonSegments();
+        if (segs.length < 2) return;
+        ctx.save();
+        // Séparateurs à mi-chemin entre le dernier match d'une saison et le premier de la suivante
+        ctx.strokeStyle = '#9aa0a6';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        var bounds = [left];
+        for (var i = 1; i < segs.length; i++) {
+            var x = Math.round((xPos(segs[i - 1].end) + xPos(segs[i].start)) / 2) + 0.5;
+            bounds.push(x);
+            ctx.beginPath();
+            ctx.moveTo(x, top - 14);
+            ctx.lineTo(x, bottom);
+            ctx.stroke();
+        }
+        bounds.push(right);
+        ctx.setLineDash([]);
+        // Libellés « 2024-25 » centrés sur chaque saison (seulement s'ils tiennent)
+        ctx.font = '600 10px Roboto, sans-serif';
+        ctx.fillStyle = '#80868b';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        segs.forEach(function(seg, si) {
+            var label = seg.season.replace(/^(\d{4})-\d{2}(\d{2})$/, '$1-$2');
+            var x0 = bounds[si], x1 = bounds[si + 1];
+            if (ctx.measureText(label).width + 8 > x1 - x0) return;
+            ctx.fillText(label, (x0 + x1) / 2, top - 7);
+        });
+        ctx.restore();
+    },
+
     _drawTeamChart(container) {
         var canvas = container.querySelector('#progTeamChart');
         if (!canvas) return;
@@ -8544,6 +8598,9 @@ const ProgressionView = {
             ctx.stroke();
             ctx.fillText(gv.toFixed(decimals) + unit, w - 2, gy + 3);
         }
+
+        // Séparation des saisons (Saisons ALL)
+        this._drawSeasonDividers(ctx, xPos, pad.top, pad.top + chartH, pad.left, w - pad.right);
 
         // Labels adversaires en bas + pastille résultat
         ctx.fillStyle = '#5f6368';
@@ -8776,6 +8833,9 @@ const ProgressionView = {
             ctx.stroke();
             ctx.fillText(gv.toFixed(metricDef.decimals), w - 2, gy + 3);
         }
+
+        // Séparation des saisons (Saisons ALL)
+        this._drawSeasonDividers(ctx, xPos, pad.top, pad.top + chartH, pad.left, w - pad.right);
 
         // Store point positions for tooltip hit-testing
         this._chartPoints = [];
