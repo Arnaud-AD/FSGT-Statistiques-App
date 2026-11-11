@@ -5871,6 +5871,16 @@ const BilanView = {
     // 50 points ≈ 1.2 sets → exige au moins 2 demi-sets ou 1 set+ pour etre significatif
     MIN_POINTS_FOR_FAMILY: 50,
 
+    // V29.54 : le seuil ne s'applique qu'aux familles SECONDAIRES (depannage a un autre poste).
+    // La famille principale d'un joueur a toujours sa carte, meme sous 50 points
+    // (ex : un seul set joue en debut de saison).
+    isFamilyBelowThreshold(playerData, family) {
+        var famData = playerData && playerData.families[family];
+        if (!famData) return true;
+        if (family === playerData.primaryFamily) return false;
+        return famData.totalPoints !== undefined && famData.totalPoints < this.MIN_POINTS_FOR_FAMILY;
+    },
+
     // IP agregat par famille : agrege les stats sur tous les matchs, calcule un seul IP
     // V27.0 : itere TOUTES les familles d'un joueur (plus filtre par primaryFamily)
     computeIPForFamily(matches, playerFamiliesYear, family) {
@@ -5884,7 +5894,7 @@ const BilanView = {
             var famData = pData.families[family];
             if (!famData) return;
             // Seuil minimum de points pour famille secondaire
-            if (famData.totalPoints !== undefined && famData.totalPoints < self.MIN_POINTS_FOR_FAMILY) return;
+            if (self.isFamilyBelowThreshold(pData, family)) return;
 
             // Agreger les stats sur tous les matchs de la famille
             var stats = self.aggregateStatsForFamilyYear(matches, name, famData);
@@ -6126,25 +6136,11 @@ const BilanView = {
         return Math.round(this.computeIPDetail(axisScores, role).raw);
     },
 
-    // --- Indice de Performance SAISON : meme calcul + lissage vers la moyenne du poste ---
-    // matches = matchs de la periode (sert a calculer les moyennes de poste du championnat)
+    // --- Indice de Performance SAISON : meme calcul que le match, sur les stats cumulees ---
+    // V29.54 : plus de lissage vers la moyenne du poste (Arnaud, 2026-11-11) : l'IP saison est brut,
+    // comme l'IP match. getIPPriors / IP_SEASON_C0 ne servent plus a l'IP (gardes pour reference).
     computeSeasonIP(axisScores, role, matches) {
-        var d = this.computeIPDetail(axisScores, role);
-        if (d.raw <= 0) return 0;
-        var priors = this._ipPriorsBusy ? null : this.getIPPriors(matches);
-        var fam = this._ipFamily(role);
-        var P = priors && priors[fam];
-        if (!P) return Math.round(d.raw);
-        var weights = this.IP_WEIGHTS[fam === 'Ailier' ? 'R4' : fam];
-        var mNum = 0, mDen = 0;
-        Object.keys(weights).forEach(function(key) {
-            if (weights[key] <= 0) return;
-            mNum += weights[key] * (P[key] !== undefined ? P[key] : 50);
-            mDen += weights[key];
-        });
-        var M = mNum / mDen;
-        var C0 = this.IP_SEASON_C0;
-        return Math.round((d.actions * d.raw + C0 * M) / (d.actions + C0));
+        return Math.round(this.computeIPDetail(axisScores, role).raw);
     },
 
     // Moyennes par axe et par famille de poste sur tout le championnat (Jen + adversaires).
@@ -7363,7 +7359,7 @@ const RankingView = {
         return {
             name: current.player.name, teamName: current.teamName,
             role: primaryRole, roleColor: BilanView.ROLE_COLORS[primaryRole] || '#5f6368',
-            // V29.45 : IP saison (volume par axe + lissage), plus de seuil des 4 %
+            // V29.45 : IP saison (volume par axe, brut depuis V29.54), plus de seuil des 4 %
             scores: scores, ip: BilanView.computeSeasonIP(scores, ipRole, RankingView._seasonMatches)
         };
     },
@@ -7395,7 +7391,7 @@ const RankingView = {
                     // V27.0 : ne plus filtrer par primaryFamily — iterer toutes les familles
                     var famData = playerFamiliesYear[name].families[family];
                     if (!famData) return;
-                    if (famData.totalPoints !== undefined && famData.totalPoints < BilanView.MIN_POINTS_FOR_FAMILY) return;
+                    if (BilanView.isFamilyBelowThreshold(playerFamiliesYear[name], family)) return;
 
                     var stats = BilanView.aggregateStatsForFamilyYear(matchesWithSets, name, famData);
                     var hasStats = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'].some(function(cat) {
@@ -7420,7 +7416,7 @@ const RankingView = {
                 });
             });
 
-            // Phase 2 : IP saison (V29.45 : volume par axe + lissage, plus de seuil des 4 %)
+            // Phase 2 : IP saison (V29.45 : volume par axe, brut depuis V29.54, plus de seuil des 4 %)
             allPlayers.forEach(function(d) {
                 d.ip = BilanView.computeSeasonIP(d.scores, d.ipRole, RankingView._seasonMatches || matches);
             });
@@ -7492,7 +7488,7 @@ const RankingView = {
                 });
             });
 
-            // Phase 2 Away : IP saison (V29.45 : volume par axe + lissage, plus de seuil des 4 %)
+            // Phase 2 Away : IP saison (V29.45 : volume par axe, brut depuis V29.54, plus de seuil des 4 %)
             allPlayers.forEach(function(d) {
                 d.ip = BilanView.computeSeasonIP(d.scores, d.ipRole, RankingView._seasonMatches || matches);
             });
@@ -11041,7 +11037,7 @@ const YearStatsView = {
                 // V27.0 : ne plus filtrer par primaryFamily — iterer toutes les familles
                 var famData = playerFamiliesYear[name].families[family];
                 if (!famData) return;
-                if (famData.totalPoints !== undefined && famData.totalPoints < BilanView.MIN_POINTS_FOR_FAMILY) return;
+                if (BilanView.isFamilyBelowThreshold(playerFamiliesYear[name], family)) return;
                 playersInFamily.push(name);
             });
             if (playersInFamily.length === 0) return;
