@@ -7983,6 +7983,7 @@ const ProgressionView = {
         if (!container) return;
 
         this._data = this._computeAllData();
+        this._radarIPs = null; // IP radar recalculés pour la saison affichée
 
         // Sous-onglets Évolution / Stats Visuelles
         var self = this;
@@ -8066,12 +8067,18 @@ const ProgressionView = {
 
         // Tri chronologique par date réelle du match (ancien à gauche → récent à droite)
         var self = this;
+        // Saisons ALL : regrouper d'abord par saison. Les matchs de 2024-2025 n'ont pas de
+        // matchDate et leur timestamp est la date de saisie (2026) : sans ce tri, ils se
+        // mélangeaient aux matchs de 2025-2026.
         matches.sort(function(a, b) {
+            var sa = a.season || '2025-2026', sb = b.season || '2025-2026';
+            if (sa !== sb) return sa < sb ? -1 : 1;
             return (a.matchDate || a.timestamp || 0) - (b.matchDate || b.timestamp || 0);
         });
 
         var matchLabels = [];
         var matchResults = [];
+        var matchSeasons = [];
         var playerMap = {}; // name → { role, color, matchData[] }
         var teamData = [];  // Stats équipe Jen par match
         var awayData = [];  // Stats adversaire par match
@@ -8081,6 +8088,7 @@ const ProgressionView = {
             if (label.length > 10) label = label.substring(0, 9).trim() + '.';
             matchLabels.push(label);
             matchResults.push(match.result);
+            matchSeasons.push(match.season || '2025-2026'); // sans champ season = legacy 2025-2026
 
             var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
             if (completedSets.length === 0) {
@@ -8178,7 +8186,7 @@ const ProgressionView = {
 
         players.sort(function(a, b) { return b.lastIP - a.lastIP; });
 
-        return { matches: matches, matchLabels: matchLabels, matchResults: matchResults, players: players, playerMap: playerMap, teamData: teamData, awayData: awayData };
+        return { matches: matches, matchLabels: matchLabels, matchResults: matchResults, matchSeasons: matchSeasons, players: players, playerMap: playerMap, teamData: teamData, awayData: awayData };
     },
 
     _computeDerived(s) {
@@ -8272,8 +8280,7 @@ const ProgressionView = {
         var html = '';
         html += this._renderCardsHTML();
         html += this._renderChartHTML();
-        html += this._renderFormeHTML();
-        html += this._renderProgressionHTML();
+        html += this._renderTablesHTML();
         html += this._renderTeamEvolutionHTML();
         container.innerHTML = html;
 
@@ -8299,7 +8306,7 @@ const ProgressionView = {
 
             // Trend
             var played = p.matchData.filter(function(d) { return d.played; });
-            var trend = self._computeTrend(played);
+            var trend = self._computeTrend(played, self._radarIP(p.name));
             html += '<div class="prog-card-trend ' + trend.cls + '">' + trend.text + '</div>';
 
             html += '<canvas class="prog-sparkline" data-player="' + p.name + '"></canvas>';
@@ -8309,20 +8316,75 @@ const ProgressionView = {
         return html;
     },
 
+    // IP saison du profil radar (Année > Profils radar / Ranking) : stats de toute la saison
+    // mises en commun pour la famille de poste principale du joueur. Sert de « Moy. saison »
+    // pour la métrique IP, à la place de la moyenne des IP match par match.
+    _radarIP(name, season) {
+        if (!this._radarIPs) this._radarIPs = {};
+        var key = season || '__vue';
+        if (!this._radarIPs[key]) {
+            var matches = SeasonSelector.getFilteredMatches().filter(function(m) {
+                if (season && (m.season || '2025-2026') !== season) return false;
+                return (m.sets || []).some(function(s) { return s.completed; });
+            });
+            this._radarIPs[key] = this._computeRadarIPs(matches);
+        }
+        var v = this._radarIPs[key][name];
+        return v ? v.ip : null;
+    },
+
+    // Valeur de référence de la saison pour une métrique = celle du profil radar :
+    // IP saison, ou note de l'axe (stats de la saison mises en commun). null si la
+    // métrique n'a pas d'équivalent radar ou si le joueur n'a pas de note sur cet axe.
+    _seasonRef(name, metricKey, season) {
+        var metric = this.METRICS.find(function(m) { return m.key === metricKey; });
+        if (!metric) return null;
+        if (metricKey === 'ip') return this._radarIP(name, season);
+        if (!metric.axis) return null;
+        this._radarIP(name, season); // remplit le cache
+        var d = this._radarIPs[season || '__vue'][name];
+        if (!d || !d.scores._tots || !(d.scores._tots[metric.axis] > 0)) return null;
+        // 0 = pas de note radar (moins de 3 actions sur l'axe dans la famille principale)
+        var v = d.scores[metric.axis];
+        return v > 0 ? v : null;
+    },
+
+    _computeRadarIPs(matches) {
+        var map = {};
+        var fams = BilanView.getPlayerFamiliesYear(matches);
+        Object.keys(fams).forEach(function(n) {
+            var family = fams[n].primaryFamily;
+            var famData = family && fams[n].families[family];
+            if (!famData) return;
+            var stats = BilanView.aggregateStatsForFamilyYear(matches, n, famData);
+            var hasStats = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'].some(function(cat) {
+                return stats[cat] && stats[cat].tot > 0;
+            });
+            if (!hasStats) return;
+            var familyIpRole = (family === 'Ailier') ? 'R4' : family;
+            var ipRole = (family === 'Centre') ? BilanView.getCentreIpRole(stats) : familyIpRole;
+            var scores = BilanView.computeAxisScores(stats, ipRole);
+            map[n] = { ip: BilanView.computeSeasonIP(scores, ipRole, matches), scores: scores };
+        });
+        return map;
+    },
+
     // Tendance de la carte joueur : même calcul que « Forme récente »
     // (moyenne des 3 derniers matchs vs moyenne de la saison) pour afficher le même %.
-    _computeTrend(played) {
+    _computeTrend(played, ref) {
         var vals = played.map(function(d) { return d.ip; }).filter(function(v) { return v != null; });
         if (vals.length < 4) return { text: 'peu de matchs', cls: 'prog-trend-few' };
-        var rounded = Math.round(this._formeDiff(vals));
+        var rounded = Math.round(this._formeDiff(vals, ref));
         if (rounded >= 5) return { text: '↑ +' + rounded + '%', cls: 'prog-trend-up' };
         if (rounded <= -5) return { text: '↓ ' + rounded + '%', cls: 'prog-trend-down' };
         return { text: '→ stable', cls: 'prog-trend-stable' };
     },
 
     // Écart en % entre la moyenne des 3 derniers matchs et la moyenne de la saison
-    _formeDiff(vals) {
-        var avg = vals.reduce(function(a, b) { return a + b; }, 0) / vals.length;
+    // ref (optionnel) : valeur de référence de la saison à la place de la moyenne des matchs
+    // (IP du profil radar pour la métrique IP).
+    _formeDiff(vals, ref) {
+        var avg = (ref != null) ? ref : vals.reduce(function(a, b) { return a + b; }, 0) / vals.length;
         var last3 = vals.slice(-3);
         var rolling = last3.reduce(function(a, b) { return a + b; }, 0) / last3.length;
         return avg !== 0 ? ((rolling - avg) / Math.abs(avg) * 100) : 0;
@@ -8342,10 +8404,65 @@ const ProgressionView = {
         return html;
     },
 
+    // Vue Saisons ALL : un seul tableau « saison par saison » (la forme sur 3 matchs ou les
+    // moitiés n'ont pas de sens à cheval sur plusieurs saisons). Sinon Forme + Progression.
+    _renderTablesHTML() {
+        if (this._seasonSegments().length > 1) return this._renderSeasonsHTML();
+        return this._renderFormeHTML() + this._renderProgressionHTML();
+    },
+
+    _renderSeasonsHTML() {
+        var self = this;
+        var metric = this.METRICS.find(function(m) { return m.key === self._currentMetric; });
+        var mul = metric.multiply || 1;
+        var seasons = this._seasonSegments();
+        var html = '<div class="prog-section" id="prog-seasons-section">';
+        html += '<div class="prog-section-title">Saison par saison — ' + metric.label + '</div>';
+        html += '<div class="prog-seasons-note">Valeur de la saison = profil radar (' + (metric.key === 'ip' ? 'IP' : 'note de l\'axe') + '). En petit : écart avec la saison précédente.</div>';
+        html += '<div class="prog-seasons-scroll"><table class="prog-table prog-seasons-table"><thead><tr><th>Joueur</th>';
+        seasons.forEach(function(seg) {
+            var n = seg.end - seg.start + 1;
+            html += '<th>' + seg.season.replace(/^(\d{4})-\d{2}(\d{2})$/, '$1-$2') +
+                '<span class="prog-seasons-count">' + n + ' match' + (n > 1 ? 's' : '') + '</span></th>';
+        });
+        html += '</tr></thead><tbody>';
+
+        this._data.players.forEach(function(p) {
+            if (self._selectedPlayers[p.name] === false) return;
+            var all = self._getMetricValues(p.name, self._currentMetric);
+            var cells = seasons.map(function(seg) {
+                var vals = all.slice(seg.start, seg.end + 1).filter(function(v) { return v !== null; });
+                if (vals.length === 0) return null;
+                var r = self._seasonRef(p.name, self._currentMetric, seg.season);
+                if (r != null) return r;
+                return vals.reduce(function(a, b) { return a + b; }, 0) / vals.length * mul;
+            });
+            if (cells.every(function(c) { return c === null; })) return;
+
+            html += '<tr><td><span class="prog-player-dot" style="background:' + p.color + '"></span><span class="prog-player-name">' + p.name + '</span></td>';
+            var prev = null;
+            cells.forEach(function(c) {
+                if (c === null) { html += '<td class="prog-seasons-empty">—</td>'; return; }
+                html += '<td>' + c.toFixed(metric.decimals) + (metric.unit || '');
+                if (prev !== null) {
+                    var d = parseFloat((c - prev).toFixed(metric.decimals));
+                    var cls = d > 0 ? 'prog-diff-positive' : d < 0 ? 'prog-diff-negative' : 'prog-seasons-flat';
+                    html += '<span class="prog-seasons-delta ' + cls + '">' + (d > 0 ? '+' : '') + d.toFixed(metric.decimals) + '</span>';
+                }
+                html += '</td>';
+                prev = c;
+            });
+            html += '</tr>';
+        });
+
+        html += '</tbody></table></div></div>';
+        return html;
+    },
+
     _renderFormeHTML() {
         var self = this;
         var metric = this.METRICS.find(function(m) { return m.key === self._currentMetric; });
-        var html = '<div class="prog-section">';
+        var html = '<div class="prog-section" id="prog-forme-section">';
         html += '<div class="prog-section-title">Forme récente (3 derniers matchs) vs Moyenne saison — ' + metric.label + '</div>';
         html += '<table class="prog-table"><thead><tr>';
         html += '<th>Joueur</th><th>Moy. saison</th><th>3 derniers</th><th>Écart</th><th>Forme</th>';
@@ -8357,10 +8474,12 @@ const ProgressionView = {
             if (vals.length < 2) return;
 
             var mul = metric.multiply || 1;
-            var avg = vals.reduce(function(a, b) { return a + b; }, 0) / vals.length * mul;
+            // Référence de la saison = profil radar (IP ou note de l'axe), même chiffre partout
+            var ref = self._seasonRef(p.name, metric.key);
+            var avg = (ref != null) ? ref : vals.reduce(function(a, b) { return a + b; }, 0) / vals.length * mul;
             var last3 = vals.slice(-3);
             var rolling = last3.reduce(function(a, b) { return a + b; }, 0) / last3.length * mul;
-            var diff = self._formeDiff(vals);
+            var diff = self._formeDiff(vals, ref);
             // Arrondi d'abord : évite un « -0% » rouge pour un écart de -0,3 %
             var diffR = Math.round(diff);
 
@@ -8381,7 +8500,7 @@ const ProgressionView = {
     _renderProgressionHTML() {
         var self = this;
         var metric = this.METRICS.find(function(m) { return m.key === self._currentMetric; });
-        var html = '<div class="prog-section">';
+        var html = '<div class="prog-section" id="prog-progression-section">';
         html += '<div class="prog-section-title">Progression 1ère moitié → 2ème moitié — ' + metric.label + '</div>';
         html += '<table class="prog-table"><thead><tr>';
         html += '<th>Joueur</th><th>1ère moitié</th><th>2ème moitié</th><th>Progression</th><th>Tendance</th>';
@@ -8439,6 +8558,53 @@ const ProgressionView = {
         html += '<div class="prog-chart-wrap"><canvas id="progTeamChart"></canvas><div class="prog-team-tooltip" style="display:none;position:absolute;background:rgba(0,0,0,.85);color:#fff;padding:6px 10px;border-radius:6px;font-size:12px;pointer-events:none;z-index:10;white-space:nowrap"></div></div>';
         html += '</div>';
         return html;
+    },
+
+    // Segments de saison consécutifs (vue Saisons ALL) : [{ season, start, end }]
+    _seasonSegments() {
+        var seasons = (this._data && this._data.matchSeasons) || [];
+        var segs = [];
+        seasons.forEach(function(s, i) {
+            var last = segs[segs.length - 1];
+            if (last && last.season === s) last.end = i;
+            else segs.push({ season: s, start: i, end: i });
+        });
+        return segs;
+    },
+
+    // Lignes verticales entre deux saisons + nom de la saison en haut de chaque segment.
+    // Rien n'est dessiné quand le graphique ne couvre qu'une saison.
+    _drawSeasonDividers(ctx, xPos, top, bottom, left, right) {
+        var segs = this._seasonSegments();
+        if (segs.length < 2) return;
+        ctx.save();
+        // Séparateurs à mi-chemin entre le dernier match d'une saison et le premier de la suivante
+        ctx.strokeStyle = '#9aa0a6';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        var bounds = [left];
+        for (var i = 1; i < segs.length; i++) {
+            var x = Math.round((xPos(segs[i - 1].end) + xPos(segs[i].start)) / 2) + 0.5;
+            bounds.push(x);
+            ctx.beginPath();
+            ctx.moveTo(x, top - 14);
+            ctx.lineTo(x, bottom);
+            ctx.stroke();
+        }
+        bounds.push(right);
+        ctx.setLineDash([]);
+        // Libellés « 2024-25 » centrés sur chaque saison (seulement s'ils tiennent)
+        ctx.font = '600 10px Roboto, sans-serif';
+        ctx.fillStyle = '#80868b';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+        segs.forEach(function(seg, si) {
+            var label = seg.season.replace(/^(\d{4})-\d{2}(\d{2})$/, '$1-$2');
+            var x0 = bounds[si], x1 = bounds[si + 1];
+            if (ctx.measureText(label).width + 8 > x1 - x0) return;
+            ctx.fillText(label, (x0 + x1) / 2, top - 7);
+        });
+        ctx.restore();
     },
 
     _drawTeamChart(container) {
@@ -8544,6 +8710,9 @@ const ProgressionView = {
             ctx.stroke();
             ctx.fillText(gv.toFixed(decimals) + unit, w - 2, gy + 3);
         }
+
+        // Séparation des saisons (Saisons ALL)
+        this._drawSeasonDividers(ctx, xPos, pad.top, pad.top + chartH, pad.left, w - pad.right);
 
         // Labels adversaires en bas + pastille résultat
         ctx.fillStyle = '#5f6368';
@@ -8777,6 +8946,9 @@ const ProgressionView = {
             ctx.fillText(gv.toFixed(metricDef.decimals), w - 2, gy + 3);
         }
 
+        // Séparation des saisons (Saisons ALL)
+        this._drawSeasonDividers(ctx, xPos, pad.top, pad.top + chartH, pad.left, w - pad.right);
+
         // Store point positions for tooltip hit-testing
         this._chartPoints = [];
         this._chartMeta = { pad: pad, w: w, h: h, xPos: xPos, yPos: yPos, mul: mul, metricDef: metricDef };
@@ -8828,7 +9000,8 @@ const ProgressionView = {
             // Season average dashed line
             var nonNull = vals.filter(function(v) { return v !== null; });
             if (nonNull.length > 1) {
-                var avg = nonNull.reduce(function(a, b) { return a + b; }, 0) / nonNull.length * mul;
+                var radarRef = self._seasonRef(p.name, metricKey);
+                var avg = (radarRef != null) ? radarRef : nonNull.reduce(function(a, b) { return a + b; }, 0) / nonNull.length * mul;
                 var avgY = yPos(avg);
                 ctx.setLineDash([4, 4]);
                 ctx.strokeStyle = p.color + '50';
@@ -8958,17 +9131,14 @@ const ProgressionView = {
 
     _redrawDynamic(container) {
         this._drawChart(container);
-        // Re-render tables (replace innerHTML of table sections)
-        var sections = container.querySelectorAll('.prog-section');
-        if (sections.length >= 3) {
-            // Forme = section[2], Progression = section[3]
-            var formeDiv = document.createElement('div');
-            formeDiv.innerHTML = this._renderFormeHTML();
-            sections[2].replaceWith(formeDiv.firstElementChild);
-
-            var progDiv = document.createElement('div');
-            progDiv.innerHTML = this._renderProgressionHTML();
-            sections[3].replaceWith(progDiv.firstElementChild);
+        // Re-render des tableaux (Forme + Progression, ou Saison par saison en vue ALL)
+        var old = container.querySelectorAll('#prog-forme-section, #prog-progression-section, #prog-seasons-section');
+        if (old.length) {
+            var tmp = document.createElement('div');
+            tmp.innerHTML = this._renderTablesHTML();
+            var nodes = Array.prototype.slice.call(tmp.children);
+            nodes.forEach(function(n) { old[0].parentNode.insertBefore(n, old[0]); });
+            Array.prototype.forEach.call(old, function(n) { n.remove(); });
         }
     }
 };
