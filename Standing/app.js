@@ -337,16 +337,18 @@ function renderStandings() {
         ['Pts-', 'ptsMinus', 'col-opt'],
         ['DP', 'dp', 'col-opt'],
         ['Coef Pts', 'coefPts', 'col-opt'],
-        ['Pts', 'pts', 'bold-col'],
-        ['PP', 'pp', 'col-opt']
+        ['Pts', 'pts', 'bold-col']
     ];
 
-    var theadCols = '<th>Club</th>';
+    // Clic sur « Club » : tri caché par points perdus (3 × MJ − Pts), puis DS.
+    // Pas de flèche tant qu'il n'est pas actif.
+    var clubActive = standingsSort.col === 'pp';
+    var theadCols = '<th class="standings-sortable" data-sort-col="pp" title="Trier par points perdus">Club' +
+        (clubActive ? standingsSortIcon('pp') : '') + '</th>';
     sortableCols.forEach(function(c) {
         var classes = 'standings-sortable';
         if (c[2]) classes += ' ' + c[2];
-        var title = c[1] === 'pp' ? ' title="Points perdus = 3 \u00d7 MJ \u2212 Pts (moins = mieux)"' : '';
-        theadCols += '<th class="' + classes + '" data-sort-col="' + c[1] + '"' + title + '>' + c[0] + standingsSortIcon(c[1]) + '</th>';
+        theadCols += '<th class="' + classes + '" data-sort-col="' + c[1] + '">' + c[0] + standingsSortIcon(c[1]) + '</th>';
     });
     theadCols += '<th class="col-opt">Forme</th>';
 
@@ -380,7 +382,6 @@ function renderStandings() {
             '<td class="col-opt">' + s.dp + '</td>' +
             '<td class="col-opt">' + s.coefPts + '</td>' +
             '<td class="bold-val">' + s.pts + '</td>' +
-            '<td class="col-opt" title="Points perdus = 3 \u00d7 MJ \u2212 Pts">' + pointsPerdus(s) + '</td>' +
             '<td class="col-opt">' +
                 '<div class="form-section">' +
                     '<span class="form-label">A</span>' +
@@ -407,7 +408,6 @@ function renderStandings() {
                     '<span class="detail-stat"><em>Pts-</em> ' + s.ptsMinus + '</span>' +
                     '<span class="detail-stat"><em>DP</em> ' + s.dp + '</span>' +
                     '<span class="detail-stat"><em>Coef</em> ' + s.coefPts + '</span>' +
-                    '<span class="detail-stat"><em>PP</em> ' + pointsPerdus(s) + '</span>' +
                 '</div>' +
                 '<div class="detail-line">' +
                     '<span class="detail-label">Forme</span>' +
@@ -1607,7 +1607,10 @@ document.addEventListener('click', function(e) {
     var col = th.getAttribute('data-sort-col');
     if (!col) return;
 
-    if (standingsSort.col === col) {
+    if (col === 'pp' && standingsSort.col === 'pp') {
+        // Clic sur « Club » : simple bascule tri points perdus ↔ classement officiel
+        standingsSort = { col: null, asc: true };
+    } else if (standingsSort.col === col) {
         // Same column: toggle asc/desc, then reset on third click
         if (standingsSort.asc === !ASC_DEFAULT_COLS[col]) {
             // Was on non-default order → reset to official rank
