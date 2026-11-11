@@ -1695,6 +1695,25 @@ const PassAttackAnalyzer = {
 
     // --- Extraction donnees rallies ---
 
+    // Passeur de l'equipe : d'abord dans le rally courant, sinon dans le set
+    _findSetPasseur(set, team, rally) {
+        var find = function(actions) {
+            for (var i = 0; i < (actions || []).length; i++) {
+                var a = actions[i];
+                if (a.team === team && a.role === 'Passeur' && a.player) return a.player;
+            }
+            return null;
+        };
+        var p = find(rally);
+        if (p) return p;
+        var points = set.points || [];
+        for (var k = 0; k < points.length; k++) {
+            p = find(points[k].rally);
+            if (p) return p;
+        }
+        return null;
+    },
+
     analyzeSet(set, team) {
         var self = this;
         var points = set.points || [];
@@ -1726,10 +1745,24 @@ const PassAttackAnalyzer = {
 
                 // Chercher l'attaque suivante (meme equipe, pas le passeur lui-meme)
                 var attackAction = null;
+                var attackIdx = -1;
                 for (var j = i + 1; j < rally.length; j++) {
                     if (rally[j].team === team && rally[j].type === 'attack') {
-                        if (rally[j].player === action.player) continue; // Ignorer passe vers soi-meme (override errone)
+                        if (rally[j].player === action.player) {
+                            // Passe vers soi-meme = double touche impossible : bug de saisie match-live
+                            // (clic zone Pointu apres une passe du Pointu → attaquant = passeur de la passe).
+                            // Le Pointu qui passe est remplace a droite par le Passeur (meme logique que
+                            // getAttackerFromClickX) → on reattribue l'attaque au Passeur du set.
+                            var setPasseur = (action.role === 'Pointu') ? self._findSetPasseur(set, team, rally) : null;
+                            if (setPasseur && setPasseur !== action.player) {
+                                attackAction = Object.assign({}, rally[j], { player: setPasseur, role: 'Passeur' });
+                                attackIdx = j;
+                                break;
+                            }
+                            continue; // Sinon ignorer (override errone)
+                        }
                         attackAction = rally[j];
+                        attackIdx = j;
                         break;
                     }
                     if (rally[j].team !== team && rally[j].type !== 'block') break;
@@ -1779,7 +1812,7 @@ const PassAttackAnalyzer = {
                             attackCat = 'fa';
                         } else if (attackAction.result === 'defended') {
                             // Analyser la suite du rally (port de analyzeAfterDefended)
-                            var afterIdx = rally.indexOf(attackAction);
+                            var afterIdx = attackIdx;
                             var otherTeam = team === 'home' ? 'away' : 'home';
                             var outcome = self._analyzeAfterDefended(rally, afterIdx, otherTeam);
                             if (outcome === 'blocked') {
@@ -2387,9 +2420,27 @@ const PassAttackAnalyzer = {
                 html += '<td class="' + (aPlusMinus > 0 ? 'pa-positive' : aPlusMinus < 0 ? 'pa-negative' : '') + '">' + (aPlusMinus > 0 ? '+' : '') + aPlusMinus + '</td>';
                 html += '</tr>';
             });
+            html += self._renderNoAttackRow(z, dist.total);
         });
 
         html += '</tbody></table></div>';
+        return html;
+    },
+
+    // Passes de la zone sans attaque derriere (passe faute, rally interrompu) :
+    // sous-ligne dediee pour que la somme des joueurs = total de la zone
+    _renderNoAttackRow(z, distTotal) {
+        var attributed = 0;
+        Object.keys(z.byAttacker).forEach(function(n) { attributed += z.byAttacker[n].total; });
+        var missing = z.total - attributed;
+        if (missing <= 0) return '';
+        var pct = distTotal > 0 ? Math.round(missing / distTotal * 100) : 0;
+        var html = '<tr class="pa-player-row pa-noattack-row" title="Passe faute ou rally termin\u00e9 avant l\u2019attaque">';
+        html += '<td><div class="player-cell" style="font-style:italic;color:var(--text-secondary,#6b7280)">Sans attaque</div></td>';
+        html += '<td>' + missing + '</td>';
+        html += '<td>' + pct + '%</td>';
+        html += '<td>-</td><td>-</td><td>-</td><td>-</td>';
+        html += '</tr>';
         return html;
     },
 
@@ -2477,6 +2528,7 @@ const PassAttackAnalyzer = {
                 html += '<td class="' + (aPlusMinus > 0 ? 'pa-positive' : aPlusMinus < 0 ? 'pa-negative' : '') + '">' + (aPlusMinus > 0 ? '+' : '') + aPlusMinus + '</td>';
                 html += '</tr>';
             });
+            html += self._renderNoAttackRow(z, dist.total);
         });
 
         html += '</tbody></table></div>';
@@ -2518,6 +2570,7 @@ const PassAttackAnalyzer = {
         var self = this;
         var html = '<div class="pa-subsection">';
         html += '<div class="pa-subtitle">Encha\u00eenement R\u00e9ception \u2192 Attaque</div>';
+        html += '<div style="font-size:11px;color:var(--text-secondary);margin:-4px 0 6px">R\u00e9ceptions R4/R3 uniquement (bonnes r\u00e9ceptions, le passeur a le choix), suivies d\u2019une passe du passeur et d\u2019une attaque</div>';
 
         // Tableau par joueur
         html += '<table class="pa-table pa-dist-table" data-pa-mode="' + mode + '" data-pa-table="recatt">';
