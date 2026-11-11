@@ -17,7 +17,10 @@ let currentSlug = null;   // Currently loaded championship slug
 var standingsSort = { col: null, asc: true };
 
 // Columns where "less is better" → default sort is ascending
-var ASC_DEFAULT_COLS = { p: true, setMinus: true, ptsMinus: true };
+var ASC_DEFAULT_COLS = { p: true, setMinus: true, ptsMinus: true, pp: true };
+
+// Points perdus : ce qu'une équipe a laissé filer sur ses matchs joués (3 par match max)
+function pointsPerdus(s) { return 3 * s.mj - s.pts; }
 
 // Mobile: teams whose detail row is unfolded (team key → true)
 var standingsExpanded = {};
@@ -288,6 +291,7 @@ function standingsSortIcon(col) {
 
 function getStandingSortValue(s, col) {
     if (col === 'coefSet' || col === 'coefPts') return parseFloat(s[col]) || 0;
+    if (col === 'pp') return pointsPerdus(s);
     return s[col];
 }
 
@@ -315,6 +319,7 @@ function renderStandings() {
             var va = getStandingSortValue(a, col);
             var vb = getStandingSortValue(b, col);
             if (va !== vb) return asc ? va - vb : vb - va;
+            if (col === 'pp' && a.ds !== b.ds) return b.ds - a.ds; // PP égaux : meilleure DS devant
             return a.rank - b.rank; // tie-break: official rank
         });
     }
@@ -332,14 +337,16 @@ function renderStandings() {
         ['Pts-', 'ptsMinus', 'col-opt'],
         ['DP', 'dp', 'col-opt'],
         ['Coef Pts', 'coefPts', 'col-opt'],
-        ['Pts', 'pts', 'bold-col']
+        ['Pts', 'pts', 'bold-col'],
+        ['PP', 'pp', 'col-opt']
     ];
 
     var theadCols = '<th>Club</th>';
     sortableCols.forEach(function(c) {
         var classes = 'standings-sortable';
         if (c[2]) classes += ' ' + c[2];
-        theadCols += '<th class="' + classes + '" data-sort-col="' + c[1] + '">' + c[0] + standingsSortIcon(c[1]) + '</th>';
+        var title = c[1] === 'pp' ? ' title="Points perdus = 3 \u00d7 MJ \u2212 Pts (moins = mieux)"' : '';
+        theadCols += '<th class="' + classes + '" data-sort-col="' + c[1] + '"' + title + '>' + c[0] + standingsSortIcon(c[1]) + '</th>';
     });
     theadCols += '<th class="col-opt">Forme</th>';
 
@@ -373,6 +380,7 @@ function renderStandings() {
             '<td class="col-opt">' + s.dp + '</td>' +
             '<td class="col-opt">' + s.coefPts + '</td>' +
             '<td class="bold-val">' + s.pts + '</td>' +
+            '<td class="col-opt" title="Points perdus = 3 \u00d7 MJ \u2212 Pts">' + pointsPerdus(s) + '</td>' +
             '<td class="col-opt">' +
                 '<div class="form-section">' +
                     '<span class="form-label">A</span>' +
@@ -399,6 +407,7 @@ function renderStandings() {
                     '<span class="detail-stat"><em>Pts-</em> ' + s.ptsMinus + '</span>' +
                     '<span class="detail-stat"><em>DP</em> ' + s.dp + '</span>' +
                     '<span class="detail-stat"><em>Coef</em> ' + s.coefPts + '</span>' +
+                    '<span class="detail-stat"><em>PP</em> ' + pointsPerdus(s) + '</span>' +
                 '</div>' +
                 '<div class="detail-line">' +
                     '<span class="detail-label">Forme</span>' +
