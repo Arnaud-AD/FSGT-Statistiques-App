@@ -5,10 +5,10 @@
     "name": "Ultimate",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/1",
-    "lastUpdated": "2026-11-10T13:32:32",
+    "lastUpdated": "2026-11-11T01:35:17",
     "teamCount": 9,
-    "matchesPlayed": 7,
-    "matchesUpcoming": 65
+    "matchesPlayed": 8,
+    "matchesUpcoming": 64
   },
   "teams": {
     "red": {
@@ -16,15 +16,15 @@
       "short": "RH",
       "color": "#e74c3c"
     },
-    "resc": {
-      "name": "Les Rescapés",
-      "short": "LR",
-      "color": "#2ecc71"
-    },
     "bier": {
       "name": "Bières et le loup",
       "short": "BL",
       "color": "#f1c40f"
+    },
+    "resc": {
+      "name": "Les Rescapés",
+      "short": "LR",
+      "color": "#2ecc71"
     },
     "kiki": {
       "name": "Kiki Team",
@@ -35,6 +35,11 @@
       "name": "Marvels 4",
       "short": "M4",
       "color": "#f39c12"
+    },
+    "jen": {
+      "name": "Jen et ses Saints",
+      "short": "JS",
+      "color": "#9b59b6"
     },
     "inde": {
       "name": "Les Indécis",
@@ -50,11 +55,6 @@
       "name": "RSC Champigny 1",
       "short": "RC",
       "color": "#1abc9c"
-    },
-    "jen": {
-      "name": "Jen et ses Saints",
-      "short": "JS",
-      "color": "#9b59b6"
     }
   },
   "standings": [
@@ -97,22 +97,22 @@
     {
       "rank": 2,
       "team": "bier",
-      "mj": 2,
+      "mj": 3,
       "g": 1,
-      "p": 1,
+      "p": 2,
       "setPlus": 3,
-      "setMinus": 3,
-      "ds": 0,
-      "coefSet": "1.00",
-      "ptsPlus": 139,
-      "ptsMinus": 132,
-      "dp": "+7",
-      "coefPts": "1.05",
-      "pts": 4,
+      "setMinus": 6,
+      "ds": -3,
+      "coefSet": "0.50",
+      "ptsPlus": 198,
+      "ptsMinus": 207,
+      "dp": "-9",
+      "coefPts": "0.96",
+      "pts": 5,
       "formAller": [
         "L",
         "W",
-        "P",
+        "L",
         "P",
         "P",
         "P",
@@ -240,6 +240,42 @@
     },
     {
       "rank": 6,
+      "team": "jen",
+      "mj": 1,
+      "g": 1,
+      "p": 0,
+      "setPlus": 3,
+      "setMinus": 0,
+      "ds": 3,
+      "coefSet": "∞",
+      "ptsPlus": 75,
+      "ptsMinus": 59,
+      "dp": "+16",
+      "coefPts": "1.27",
+      "pts": 3,
+      "formAller": [
+        "D",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 7,
       "team": "inde",
       "mj": 1,
       "g": 1,
@@ -275,7 +311,7 @@
       ]
     },
     {
-      "rank": 7,
+      "rank": 8,
       "team": "dodo",
       "mj": 1,
       "g": 1,
@@ -311,7 +347,7 @@
       ]
     },
     {
-      "rank": 8,
+      "rank": 9,
       "team": "rsc",
       "mj": 2,
       "g": 0,
@@ -345,45 +381,37 @@
         "P",
         "P"
       ]
-    },
-    {
-      "rank": 9,
-      "team": "jen",
-      "mj": 0,
-      "g": 0,
-      "p": 0,
-      "setPlus": 0,
-      "setMinus": 0,
-      "ds": 0,
-      "coefSet": "∞",
-      "ptsPlus": 0,
-      "ptsMinus": 0,
-      "dp": "0",
-      "coefPts": "∞",
-      "pts": 0,
-      "formAller": [
-        "D",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "10/11/2026",
+      "home": "bier",
+      "away": "jen",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé",
+      "time": "20:45",
+      "sets": [
+        [
+          20,
+          25
+        ],
+        [
+          21,
+          25
+        ],
+        [
+          18,
+          25
+        ]
+      ],
+      "total": [
+        59,
+        75
+      ]
+    },
     {
       "date": "09/11/2026",
       "home": "kiki",
@@ -610,13 +638,6 @@
       "time": "20:00"
     },
     {
-      "date": "10/11/2026",
-      "home": "bier",
-      "away": "jen",
-      "status": "Sem. 3",
-      "time": "20:45"
-    },
-    {
       "date": "23/11/2026",
       "home": "red",
       "away": "rsc",
@@ -744,15 +765,15 @@
     },
     {
       "date": "14/01/2027",
-      "home": "jen",
-      "away": "resc",
+      "home": "marv",
+      "away": "bier",
       "status": "Sem. 8",
       "time": "20:30"
     },
     {
       "date": "14/01/2027",
-      "home": "marv",
-      "away": "bier",
+      "home": "jen",
+      "away": "resc",
       "status": "Sem. 8",
       "time": "20:30"
     },
@@ -1031,15 +1052,15 @@
     },
     {
       "date": "24/05/2027",
-      "home": "dodo",
-      "away": "resc",
+      "home": "kiki",
+      "away": "bier",
       "status": "Sem. 18",
       "time": "20:30"
     },
     {
       "date": "24/05/2027",
-      "home": "kiki",
-      "away": "bier",
+      "home": "dodo",
+      "away": "resc",
       "status": "Sem. 18",
       "time": "20:30"
     },
@@ -1061,42 +1082,42 @@
   "prTeams": [
     {
       "rank": 1,
-      "team": "inde",
-      "elo": 1532.4,
-      "movement": 32.4,
+      "team": "jen",
+      "elo": 1536.6,
+      "movement": 36.6,
       "record": "1-0",
       "power": 100.0,
-      "calendar": "V vs Les",
+      "calendar": "V vs Bières",
       "diffClass": "diff-easy"
     },
     {
       "rank": 2,
-      "team": "dodo",
-      "elo": 1530.7,
-      "movement": 30.7,
+      "team": "inde",
+      "elo": 1532.4,
+      "movement": 32.4,
       "record": "1-0",
-      "power": 97.4,
-      "calendar": "V vs RSC",
+      "power": 94.3,
+      "calendar": "V vs Les",
       "diffClass": "diff-easy"
     },
     {
       "rank": 3,
-      "team": "red",
-      "elo": 1509.9,
-      "movement": 25.9,
-      "record": "1-1",
-      "power": 65.3,
-      "calendar": "V vs Kiki",
+      "team": "dodo",
+      "elo": 1530.7,
+      "movement": 30.7,
+      "record": "1-0",
+      "power": 91.9,
+      "calendar": "V vs RSC",
       "diffClass": "diff-easy"
     },
     {
       "rank": 4,
-      "team": "bier",
-      "elo": 1501.5,
-      "movement": 31.5,
+      "team": "red",
+      "elo": 1509.9,
+      "movement": 25.9,
       "record": "1-1",
-      "power": 52.3,
-      "calendar": "V vs RSC",
+      "power": 63.5,
+      "calendar": "V vs Kiki",
       "diffClass": "diff-easy"
     },
     {
@@ -1105,22 +1126,12 @@
       "elo": 1500.8,
       "movement": 26.7,
       "record": "1-1",
-      "power": 51.2,
+      "power": 51.1,
       "calendar": "V vs Marvels",
       "diffClass": "diff-easy"
     },
     {
       "rank": 6,
-      "team": "jen",
-      "elo": 1500,
-      "movement": 0,
-      "record": "0-0",
-      "power": 0.0,
-      "calendar": "-",
-      "diffClass": "diff-easy"
-    },
-    {
-      "rank": 7,
       "team": "resc",
       "elo": 1497.6,
       "movement": -32.4,
@@ -1130,13 +1141,23 @@
       "diffClass": "diff-hard"
     },
     {
-      "rank": 8,
+      "rank": 7,
       "team": "marv",
       "elo": 1489.3,
       "movement": -26.7,
       "record": "1-1",
       "power": 41.4,
       "calendar": "D vs Kiki",
+      "diffClass": "diff-hard"
+    },
+    {
+      "rank": 8,
+      "team": "bier",
+      "elo": 1464.9,
+      "movement": -36.6,
+      "record": "1-2",
+      "power": 21.8,
+      "calendar": "D vs Jen",
       "diffClass": "diff-hard"
     },
     {
@@ -1157,15 +1178,16 @@
       1484.0,
       1509.9
     ],
+    "bier": [
+      1500,
+      1470.0,
+      1501.5,
+      1464.9
+    ],
     "resc": [
       1500,
       1530.0,
       1497.6
-    ],
-    "bier": [
-      1500,
-      1470.0,
-      1501.5
     ],
     "kiki": [
       1500,
@@ -1176,6 +1198,10 @@
       1500,
       1516.0,
       1489.3
+    ],
+    "jen": [
+      1500,
+      1536.6
     ],
     "inde": [
       1500,
@@ -1189,9 +1215,6 @@
       1500,
       1469.3,
       1437.8
-    ],
-    "jen": [
-      1500
     ]
   },
   "evolutionData": {
@@ -1204,6 +1227,15 @@
         ],
         "rank": 1
       },
+      "bier": {
+        "points": [
+          0,
+          1,
+          4,
+          5
+        ],
+        "rank": 2
+      },
       "resc": {
         "points": [
           0,
@@ -1211,14 +1243,6 @@
           4
         ],
         "rank": 3
-      },
-      "bier": {
-        "points": [
-          0,
-          1,
-          4
-        ],
-        "rank": 2
       },
       "kiki": {
         "points": [
@@ -1236,31 +1260,32 @@
         ],
         "rank": 5
       },
-      "inde": {
+      "jen": {
         "points": [
           0,
           3
         ],
         "rank": 6
       },
-      "dodo": {
+      "inde": {
         "points": [
           0,
           3
         ],
         "rank": 7
       },
+      "dodo": {
+        "points": [
+          0,
+          3
+        ],
+        "rank": 8
+      },
       "rsc": {
         "points": [
           0,
           1,
           2
-        ],
-        "rank": 8
-      },
-      "jen": {
-        "points": [
-          0
         ],
         "rank": 9
       }

@@ -5,10 +5,10 @@
     "name": "Argent",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/5",
-    "lastUpdated": "2026-11-10T13:32:58",
+    "lastUpdated": "2026-11-11T01:35:43",
     "teamCount": 11,
-    "matchesPlayed": 10,
-    "matchesUpcoming": 100
+    "matchesPlayed": 12,
+    "matchesUpcoming": 98
   },
   "teams": {
     "go": {
@@ -16,34 +16,34 @@
       "short": "GE",
       "color": "#e74c3c"
     },
-    "vend": {
-      "name": "Les Vendangeurs",
-      "short": "VE",
-      "color": "#3498db"
-    },
     "vill": {
       "name": "Villyé-ball",
       "short": "VI",
+      "color": "#3498db"
+    },
+    "vend": {
+      "name": "Les Vendangeurs",
+      "short": "VE",
       "color": "#2ecc71"
-    },
-    "ball": {
-      "name": "BALLES PERDUES",
-      "short": "BP",
-      "color": "#f39c12"
-    },
-    "eagl": {
-      "name": "Eagle+4à6",
-      "short": "EA",
-      "color": "#9b59b6"
-    },
-    "bryc": {
-      "name": "Les Bry-Colo",
-      "short": "BR",
-      "color": "#1abc9c"
     },
     "smas": {
       "name": "Smashmallow",
       "short": "SM",
+      "color": "#f39c12"
+    },
+    "ball": {
+      "name": "BALLES PERDUES",
+      "short": "BP",
+      "color": "#9b59b6"
+    },
+    "eagl": {
+      "name": "Eagle+4à6",
+      "short": "EA",
+      "color": "#1abc9c"
+    },
+    "bryc": {
+      "name": "Les Bry-Colo",
+      "short": "BR",
       "color": "#e67e22"
     },
     "vil2": {
@@ -110,6 +110,46 @@
     },
     {
       "rank": 2,
+      "team": "vill",
+      "mj": 3,
+      "g": 2,
+      "p": 1,
+      "setPlus": 8,
+      "setMinus": 4,
+      "ds": 4,
+      "coefSet": "2.00",
+      "ptsPlus": 265,
+      "ptsMinus": 259,
+      "dp": "+6",
+      "coefPts": "1.02",
+      "pts": 8,
+      "formAller": [
+        "W",
+        "C",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 3,
       "team": "vend",
       "mj": 3,
       "g": 2,
@@ -149,64 +189,24 @@
       ]
     },
     {
-      "rank": 3,
-      "team": "vill",
-      "mj": 2,
-      "g": 1,
-      "p": 1,
-      "setPlus": 5,
-      "setMinus": 3,
-      "ds": 2,
-      "coefSet": "1.67",
-      "ptsPlus": 178,
-      "ptsMinus": 178,
-      "dp": "0",
-      "coefPts": "1.00",
-      "pts": 5,
-      "formAller": [
-        "W",
-        "C",
-        "D",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
       "rank": 4,
-      "team": "ball",
+      "team": "smas",
       "mj": 2,
-      "g": 1,
-      "p": 1,
-      "setPlus": 4,
-      "setMinus": 3,
-      "ds": 1,
-      "coefSet": "1.33",
-      "ptsPlus": 148,
-      "ptsMinus": 130,
-      "dp": "+18",
-      "coefPts": "1.14",
-      "pts": 4,
+      "g": 2,
+      "p": 0,
+      "setPlus": 6,
+      "setMinus": 1,
+      "ds": 5,
+      "coefSet": "6.00",
+      "ptsPlus": 159,
+      "ptsMinus": 135,
+      "dp": "+24",
+      "coefPts": "1.18",
+      "pts": 6,
       "formAller": [
-        "L",
-        "W",
         "D",
+        "W",
+        "W",
         "P",
         "P",
         "P",
@@ -230,23 +230,23 @@
     },
     {
       "rank": 5,
-      "team": "eagl",
-      "mj": 2,
+      "team": "ball",
+      "mj": 3,
       "g": 1,
-      "p": 1,
-      "setPlus": 4,
-      "setMinus": 4,
-      "ds": 0,
-      "coefSet": "1.00",
-      "ptsPlus": 149,
-      "ptsMinus": 154,
-      "dp": "-5",
-      "coefPts": "0.97",
-      "pts": 4,
+      "p": 2,
+      "setPlus": 5,
+      "setMinus": 6,
+      "ds": -1,
+      "coefSet": "0.83",
+      "ptsPlus": 229,
+      "ptsMinus": 217,
+      "dp": "+12",
+      "coefPts": "1.06",
+      "pts": 5,
       "formAller": [
+        "L",
         "W",
         "L",
-        "P",
         "P",
         "P",
         "P",
@@ -270,6 +270,46 @@
     },
     {
       "rank": 6,
+      "team": "eagl",
+      "mj": 2,
+      "g": 1,
+      "p": 1,
+      "setPlus": 4,
+      "setMinus": 4,
+      "ds": 0,
+      "coefSet": "1.00",
+      "ptsPlus": 149,
+      "ptsMinus": 154,
+      "dp": "-5",
+      "coefPts": "0.97",
+      "pts": 4,
+      "formAller": [
+        "W",
+        "L",
+        "D",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 7,
       "team": "bryc",
       "mj": 1,
       "g": 1,
@@ -309,64 +349,24 @@
       ]
     },
     {
-      "rank": 7,
-      "team": "smas",
-      "mj": 1,
-      "g": 1,
-      "p": 0,
-      "setPlus": 3,
-      "setMinus": 1,
-      "ds": 2,
-      "coefSet": "3.00",
-      "ptsPlus": 82,
-      "ptsMinus": 70,
-      "dp": "+12",
-      "coefPts": "1.17",
-      "pts": 3,
-      "formAller": [
-        "D",
-        "W",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
       "rank": 8,
       "team": "vil2",
-      "mj": 2,
+      "mj": 3,
       "g": 0,
-      "p": 2,
+      "p": 3,
       "setPlus": 1,
-      "setMinus": 6,
-      "ds": -5,
-      "coefSet": "0.17",
-      "ptsPlus": 140,
-      "ptsMinus": 178,
-      "dp": "-38",
-      "coefPts": "0.79",
-      "pts": 2,
+      "setMinus": 9,
+      "ds": -8,
+      "coefSet": "0.11",
+      "ptsPlus": 205,
+      "ptsMinus": 255,
+      "dp": "-50",
+      "coefPts": "0.80",
+      "pts": 3,
       "formAller": [
         "L",
         "L",
-        "P",
+        "L",
         "P",
         "P",
         "P",
@@ -406,7 +406,7 @@
       "formAller": [
         "L",
         "L",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -445,7 +445,7 @@
       "pts": 1,
       "formAller": [
         "L",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -485,7 +485,7 @@
       "pts": 1,
       "formAller": [
         "L",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -510,6 +510,34 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "10/11/2026",
+      "home": "smas",
+      "away": "vil2",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé",
+      "time": "20:00",
+      "sets": [
+        [
+          25,
+          21
+        ],
+        [
+          27,
+          25
+        ],
+        [
+          25,
+          19
+        ]
+      ],
+      "total": [
+        77,
+        65
+      ]
+    },
     {
       "date": "09/11/2026",
       "home": "vend",
@@ -544,6 +572,38 @@
       "total": [
         101,
         109
+      ]
+    },
+    {
+      "date": "09/11/2026",
+      "home": "ball",
+      "away": "vill",
+      "scoreHome": 1,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé",
+      "time": "20:30",
+      "sets": [
+        [
+          20,
+          25
+        ],
+        [
+          25,
+          12
+        ],
+        [
+          18,
+          25
+        ],
+        [
+          18,
+          25
+        ]
+      ],
+      "total": [
+        81,
+        87
       ]
     },
     {
@@ -821,31 +881,17 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "09/11/2026",
-      "home": "ball",
-      "away": "vill",
-      "status": "Reporté",
-      "time": "20:30"
-    },
-    {
-      "date": "10/11/2026",
-      "home": "smas",
-      "away": "vil2",
-      "status": "Sem. 3",
-      "time": "20:00"
-    },
-    {
       "date": "11/11/2026",
       "home": "affr",
       "away": "eagl",
-      "status": "Sem. 3",
+      "status": "Reporté",
       "time": "20:00"
     },
     {
       "date": "12/11/2026",
       "home": "ping",
       "away": "bier",
-      "status": "Sem. 3",
+      "status": "Reporté",
       "time": "20:00"
     },
     {
@@ -857,17 +903,17 @@
     },
     {
       "date": "23/11/2026",
-      "home": "vend",
-      "away": "bier",
-      "status": "Sem. 4",
-      "time": "20:30"
-    },
-    {
-      "date": "23/11/2026",
       "home": "vill",
       "away": "smas",
       "status": "Sem. 4",
       "time": "20:15"
+    },
+    {
+      "date": "23/11/2026",
+      "home": "vend",
+      "away": "bier",
+      "status": "Sem. 4",
+      "time": "20:30"
     },
     {
       "date": "23/11/2026",
@@ -969,17 +1015,17 @@
     },
     {
       "date": "04/01/2027",
-      "home": "ball",
-      "away": "vend",
-      "status": "Sem. 7",
-      "time": "20:30"
-    },
-    {
-      "date": "04/01/2027",
       "home": "eagl",
       "away": "vill",
       "status": "Sem. 7",
       "time": "20:00"
+    },
+    {
+      "date": "04/01/2027",
+      "home": "ball",
+      "away": "vend",
+      "status": "Sem. 7",
+      "time": "20:30"
     },
     {
       "date": "05/01/2027",
@@ -997,17 +1043,17 @@
     },
     {
       "date": "11/01/2027",
-      "home": "vend",
-      "away": "smas",
-      "status": "Sem. 8",
-      "time": "20:30"
-    },
-    {
-      "date": "11/01/2027",
       "home": "vill",
       "away": "vil2",
       "status": "Sem. 8",
       "time": "20:15"
+    },
+    {
+      "date": "11/01/2027",
+      "home": "vend",
+      "away": "smas",
+      "status": "Sem. 8",
+      "time": "20:30"
     },
     {
       "date": "11/01/2027",
@@ -1102,17 +1148,17 @@
     },
     {
       "date": "22/02/2027",
-      "home": "eagl",
-      "away": "vend",
-      "status": "Sem. 11",
-      "time": "20:00"
-    },
-    {
-      "date": "22/02/2027",
       "home": "vill",
       "away": "bier",
       "status": "Sem. 11",
       "time": "20:15"
+    },
+    {
+      "date": "22/02/2027",
+      "home": "eagl",
+      "away": "vend",
+      "status": "Sem. 11",
+      "time": "20:00"
     },
     {
       "date": "22/02/2027",
@@ -1137,13 +1183,6 @@
     },
     {
       "date": "01/03/2027",
-      "home": "vil2",
-      "away": "vend",
-      "status": "Sem. 12",
-      "time": "20:15"
-    },
-    {
-      "date": "01/03/2027",
       "home": "vill",
       "away": "ball",
       "status": "Sem. 12",
@@ -1151,10 +1190,10 @@
     },
     {
       "date": "01/03/2027",
-      "home": "eagl",
-      "away": "ping",
+      "home": "vil2",
+      "away": "vend",
       "status": "Sem. 12",
-      "time": "20:00"
+      "time": "20:15"
     },
     {
       "date": "01/03/2027",
@@ -1162,6 +1201,13 @@
       "away": "smas",
       "status": "Sem. 12",
       "time": "20:30"
+    },
+    {
+      "date": "01/03/2027",
+      "home": "eagl",
+      "away": "ping",
+      "status": "Sem. 12",
+      "time": "20:00"
     },
     {
       "date": "05/03/2027",
@@ -1214,17 +1260,17 @@
     },
     {
       "date": "15/03/2027",
-      "home": "eagl",
-      "away": "affr",
-      "status": "Sem. 14",
-      "time": "20:00"
-    },
-    {
-      "date": "15/03/2027",
       "home": "vil2",
       "away": "smas",
       "status": "Sem. 14",
       "time": "20:15"
+    },
+    {
+      "date": "15/03/2027",
+      "home": "eagl",
+      "away": "affr",
+      "status": "Sem. 14",
+      "time": "20:00"
     },
     {
       "date": "16/03/2027",
@@ -1277,17 +1323,17 @@
     },
     {
       "date": "19/04/2027",
-      "home": "vend",
-      "away": "ball",
-      "status": "Sem. 16",
-      "time": "20:30"
-    },
-    {
-      "date": "19/04/2027",
       "home": "vill",
       "away": "affr",
       "status": "Sem. 16",
       "time": "20:15"
+    },
+    {
+      "date": "19/04/2027",
+      "home": "vend",
+      "away": "ball",
+      "status": "Sem. 16",
+      "time": "20:30"
     },
     {
       "date": "19/04/2027",
@@ -1534,6 +1580,26 @@
     },
     {
       "rank": 2,
+      "team": "smas",
+      "elo": 1553.2,
+      "movement": 21.2,
+      "record": "2-0",
+      "power": 83.9,
+      "calendar": "V vs Villiers",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 3,
+      "team": "vill",
+      "elo": 1539.7,
+      "movement": 28.3,
+      "record": "2-1",
+      "power": 75.3,
+      "calendar": "V vs BALLES",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 4,
       "team": "bryc",
       "elo": 1532.9,
       "movement": 32.9,
@@ -1543,17 +1609,7 @@
       "diffClass": "diff-easy"
     },
     {
-      "rank": 3,
-      "team": "smas",
-      "elo": 1531.9,
-      "movement": 31.9,
-      "record": "1-0",
-      "power": 70.3,
-      "calendar": "V vs Eagle+4à6",
-      "diffClass": "diff-easy"
-    },
-    {
-      "rank": 4,
+      "rank": 5,
       "team": "vend",
       "elo": 1526.8,
       "movement": -22.6,
@@ -1563,33 +1619,23 @@
       "diffClass": "diff-hard"
     },
     {
-      "rank": 5,
-      "team": "vill",
-      "elo": 1511.5,
-      "movement": -24.7,
-      "record": "1-1",
-      "power": 57.3,
-      "calendar": "D vs Les",
-      "diffClass": "diff-hard"
-    },
-    {
       "rank": 6,
-      "team": "ball",
-      "elo": 1510.7,
-      "movement": 39.4,
-      "record": "1-1",
-      "power": 56.8,
-      "calendar": "V vs Villiers",
-      "diffClass": "diff-easy"
-    },
-    {
-      "rank": 7,
       "team": "eagl",
       "elo": 1496.7,
       "movement": -31.9,
       "record": "1-1",
-      "power": 47.4,
+      "power": 48.1,
       "calendar": "D vs Smashmallow",
+      "diffClass": "diff-hard"
+    },
+    {
+      "rank": 7,
+      "team": "ball",
+      "elo": 1482.5,
+      "movement": -28.3,
+      "record": "1-2",
+      "power": 39.7,
+      "calendar": "D vs Villyé-ball",
       "diffClass": "diff-hard"
     },
     {
@@ -1625,11 +1671,11 @@
     {
       "rank": 11,
       "team": "vil2",
-      "elo": 1435.9,
-      "movement": -39.4,
-      "record": "0-2",
+      "elo": 1414.7,
+      "movement": -21.2,
+      "record": "0-3",
       "power": 0.0,
-      "calendar": "D vs BALLES",
+      "calendar": "D x3",
       "diffClass": "diff-hard"
     }
   ],
@@ -1641,21 +1687,28 @@
       1555.9,
       1578.4
     ],
+    "vill": [
+      1500,
+      1536.2,
+      1511.5,
+      1539.7
+    ],
     "vend": [
       1500,
       1524.7,
       1549.4,
       1526.8
     ],
-    "vill": [
+    "smas": [
       1500,
-      1536.2,
-      1511.5
+      1531.9,
+      1553.2
     ],
     "ball": [
       1500,
       1471.3,
-      1510.7
+      1510.7,
+      1482.5
     ],
     "eagl": [
       1500,
@@ -1666,14 +1719,11 @@
       1500,
       1532.9
     ],
-    "smas": [
-      1500,
-      1531.9
-    ],
     "vil2": [
       1500,
       1475.3,
-      1435.9
+      1435.9,
+      1414.7
     ],
     "ping": [
       1500,
@@ -1700,6 +1750,15 @@
         ],
         "rank": 1
       },
+      "vill": {
+        "points": [
+          0,
+          3,
+          5,
+          8
+        ],
+        "rank": 2
+      },
       "vend": {
         "points": [
           0,
@@ -1707,23 +1766,24 @@
           6,
           8
         ],
-        "rank": 2
+        "rank": 3
       },
-      "vill": {
+      "smas": {
         "points": [
           0,
           3,
-          5
+          6
         ],
-        "rank": 3
+        "rank": 4
       },
       "ball": {
         "points": [
           0,
           1,
-          4
+          4,
+          5
         ],
-        "rank": 4
+        "rank": 5
       },
       "eagl": {
         "points": [
@@ -1731,16 +1791,9 @@
           3,
           4
         ],
-        "rank": 5
-      },
-      "bryc": {
-        "points": [
-          0,
-          3
-        ],
         "rank": 6
       },
-      "smas": {
+      "bryc": {
         "points": [
           0,
           3
@@ -1751,7 +1804,8 @@
         "points": [
           0,
           1,
-          2
+          2,
+          3
         ],
         "rank": 8
       },

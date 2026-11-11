@@ -5,10 +5,10 @@
     "name": "Starter",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/17",
-    "lastUpdated": "2026-11-10T13:32:50",
+    "lastUpdated": "2026-11-11T01:35:35",
     "teamCount": 8,
-    "matchesPlayed": 9,
-    "matchesUpcoming": 47
+    "matchesPlayed": 10,
+    "matchesUpcoming": 46
   },
   "teams": {
     "clod": {
@@ -16,29 +16,29 @@
       "short": "CD",
       "color": "#e74c3c"
     },
-    "gold": {
-      "name": "Gold Digger",
-      "short": "GD",
-      "color": "#3498db"
-    },
     "futs": {
       "name": "Les Fûts furieux",
       "short": "FF",
+      "color": "#3498db"
+    },
+    "gold": {
+      "name": "Gold Digger",
+      "short": "GD",
       "color": "#2ecc71"
-    },
-    "krok": {
-      "name": "Krokeur Squad",
-      "short": "KS",
-      "color": "#f39c12"
-    },
-    "file": {
-      "name": "Les Filets O'Fish",
-      "short": "FO",
-      "color": "#9b59b6"
     },
     "los": {
       "name": "Los Americanos",
       "short": "LA",
+      "color": "#f39c12"
+    },
+    "krok": {
+      "name": "Krokeur Squad",
+      "short": "KS",
+      "color": "#9b59b6"
+    },
+    "file": {
+      "name": "Les Filets O'Fish",
+      "short": "FO",
       "color": "#1abc9c"
     },
     "bler": {
@@ -89,6 +89,40 @@
     },
     {
       "rank": 2,
+      "team": "futs",
+      "mj": 3,
+      "g": 2,
+      "p": 1,
+      "setPlus": 8,
+      "setMinus": 2,
+      "ds": 6,
+      "coefSet": "4.00",
+      "ptsPlus": 234,
+      "ptsMinus": 202,
+      "dp": "+32",
+      "coefPts": "1.16",
+      "pts": 8,
+      "formAller": [
+        "C",
+        "W",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 3,
       "team": "gold",
       "mj": 3,
       "g": 1,
@@ -122,24 +156,24 @@
       ]
     },
     {
-      "rank": 3,
-      "team": "futs",
-      "mj": 2,
+      "rank": 4,
+      "team": "los",
+      "mj": 3,
       "g": 1,
-      "p": 1,
-      "setPlus": 5,
-      "setMinus": 2,
-      "ds": 3,
-      "coefSet": "2.50",
-      "ptsPlus": 159,
-      "ptsMinus": 143,
-      "dp": "+16",
-      "coefPts": "1.11",
+      "p": 2,
+      "setPlus": 4,
+      "setMinus": 7,
+      "ds": -3,
+      "coefSet": "0.57",
+      "ptsPlus": 240,
+      "ptsMinus": 265,
+      "dp": "-25",
+      "coefPts": "0.91",
       "pts": 5,
       "formAller": [
-        "C",
         "W",
-        "D",
+        "L",
+        "L",
         "P",
         "P",
         "P",
@@ -156,7 +190,7 @@
       ]
     },
     {
-      "rank": 4,
+      "rank": 5,
       "team": "file",
       "mj": 2,
       "g": 1,
@@ -190,7 +224,7 @@
       ]
     },
     {
-      "rank": 5,
+      "rank": 6,
       "team": "krok",
       "mj": 2,
       "g": 1,
@@ -208,40 +242,6 @@
         "W",
         "L",
         "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 6,
-      "team": "los",
-      "mj": 2,
-      "g": 1,
-      "p": 1,
-      "setPlus": 4,
-      "setMinus": 4,
-      "ds": 0,
-      "coefSet": "1.00",
-      "ptsPlus": 181,
-      "ptsMinus": 190,
-      "dp": "-9",
-      "coefPts": "0.95",
-      "pts": 4,
-      "formAller": [
-        "W",
-        "L",
-        "D",
         "P",
         "P",
         "P",
@@ -361,6 +361,34 @@
       "total": [
         101,
         99
+      ]
+    },
+    {
+      "date": "09/11/2026",
+      "home": "los",
+      "away": "futs",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé",
+      "time": "20:00",
+      "sets": [
+        [
+          17,
+          25
+        ],
+        [
+          20,
+          25
+        ],
+        [
+          22,
+          25
+        ]
+      ],
+      "total": [
+        59,
+        75
       ]
     },
     {
@@ -605,13 +633,6 @@
     }
   ],
   "matchesUpcoming": [
-    {
-      "date": "09/11/2026",
-      "home": "los",
-      "away": "futs",
-      "status": "Reporté",
-      "time": "20:00"
-    },
     {
       "date": "13/11/2026",
       "home": "file",
@@ -949,11 +970,11 @@
     {
       "rank": 2,
       "team": "futs",
-      "elo": 1525.6,
-      "movement": 41.5,
-      "record": "1-1",
-      "power": 70.1,
-      "calendar": "V vs Gold",
+      "elo": 1558.7,
+      "movement": 33.1,
+      "record": "2-1",
+      "power": 96.1,
+      "calendar": "V vs Los",
       "diffClass": "diff-easy"
     },
     {
@@ -988,22 +1009,22 @@
     },
     {
       "rank": 6,
-      "team": "los",
-      "elo": 1490.6,
-      "movement": -32.3,
-      "record": "1-1",
-      "power": 43.2,
-      "calendar": "D vs Les",
-      "diffClass": "diff-hard"
-    },
-    {
-      "rank": 7,
       "team": "gold",
       "elo": 1474.5,
       "movement": -15.2,
       "record": "1-2",
       "power": 31.6,
       "calendar": "D vs Clodo",
+      "diffClass": "diff-hard"
+    },
+    {
+      "rank": 7,
+      "team": "los",
+      "elo": 1457.5,
+      "movement": -33.1,
+      "record": "1-2",
+      "power": 19.4,
+      "calendar": "D vs Les",
       "diffClass": "diff-hard"
     },
     {
@@ -1025,16 +1046,23 @@
       1548.5,
       1563.7
     ],
+    "futs": [
+      1500,
+      1484.1,
+      1525.6,
+      1558.7
+    ],
     "gold": [
       1500,
       1531.2,
       1489.7,
       1474.5
     ],
-    "futs": [
+    "los": [
       1500,
-      1484.1,
-      1525.6
+      1522.8,
+      1490.6,
+      1457.5
     ],
     "krok": [
       1500,
@@ -1045,11 +1073,6 @@
       1500,
       1477.2,
       1507.4
-    ],
-    "los": [
-      1500,
-      1522.8,
-      1490.6
     ],
     "bler": [
       1500,
@@ -1073,6 +1096,15 @@
         ],
         "rank": 1
       },
+      "futs": {
+        "points": [
+          0,
+          2,
+          5,
+          8
+        ],
+        "rank": 2
+      },
       "gold": {
         "points": [
           0,
@@ -1080,15 +1112,16 @@
           4,
           6
         ],
-        "rank": 2
+        "rank": 3
       },
-      "futs": {
+      "los": {
         "points": [
           0,
-          2,
+          3,
+          4,
           5
         ],
-        "rank": 3
+        "rank": 4
       },
       "krok": {
         "points": [
@@ -1096,7 +1129,7 @@
           3,
           4
         ],
-        "rank": 5
+        "rank": 6
       },
       "file": {
         "points": [
@@ -1104,15 +1137,7 @@
           1,
           4
         ],
-        "rank": 4
-      },
-      "los": {
-        "points": [
-          0,
-          3,
-          4
-        ],
-        "rank": 6
+        "rank": 5
       },
       "bler": {
         "points": [

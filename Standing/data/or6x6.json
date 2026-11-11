@@ -5,10 +5,10 @@
     "name": "Or 6x6",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/4",
-    "lastUpdated": "2026-11-10T13:32:54",
+    "lastUpdated": "2026-11-11T01:35:39",
     "teamCount": 11,
-    "matchesPlayed": 12,
-    "matchesUpcoming": 98
+    "matchesPlayed": 13,
+    "matchesUpcoming": 97
   },
   "teams": {
     "cout": {
@@ -26,24 +26,24 @@
       "short": "O2",
       "color": "#2ecc71"
     },
+    "smas": {
+      "name": "Smash or Pass",
+      "short": "SO",
+      "color": "#f39c12"
+    },
     "inar": {
       "name": "Inarizaki",
       "short": "IN",
-      "color": "#f39c12"
+      "color": "#9b59b6"
     },
     "neui": {
       "name": "Neuilly Sa Mère",
       "short": "N2",
-      "color": "#9b59b6"
+      "color": "#1abc9c"
     },
     "raia": {
       "name": "La Raïa",
       "short": "RA",
-      "color": "#1abc9c"
-    },
-    "smas": {
-      "name": "Smash or Pass",
-      "short": "SO",
       "color": "#e67e22"
     },
     "marv": {
@@ -190,6 +190,46 @@
     },
     {
       "rank": 4,
+      "team": "smas",
+      "mj": 3,
+      "g": 2,
+      "p": 1,
+      "setPlus": 6,
+      "setMinus": 5,
+      "ds": 1,
+      "coefSet": "1.20",
+      "ptsPlus": 242,
+      "ptsMinus": 219,
+      "dp": "+23",
+      "coefPts": "1.11",
+      "pts": 7,
+      "formAller": [
+        "L",
+        "W",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 5,
       "team": "inar",
       "mj": 2,
       "g": 2,
@@ -229,7 +269,7 @@
       ]
     },
     {
-      "rank": 5,
+      "rank": 6,
       "team": "neui",
       "mj": 3,
       "g": 0,
@@ -269,7 +309,7 @@
       ]
     },
     {
-      "rank": 6,
+      "rank": 7,
       "team": "raia",
       "mj": 2,
       "g": 1,
@@ -309,63 +349,23 @@
       ]
     },
     {
-      "rank": 7,
-      "team": "smas",
+      "rank": 8,
+      "team": "marv",
       "mj": 2,
       "g": 1,
       "p": 1,
       "setPlus": 3,
-      "setMinus": 5,
-      "ds": -2,
-      "coefSet": "0.60",
-      "ptsPlus": 167,
-      "ptsMinus": 160,
-      "dp": "+7",
-      "coefPts": "1.04",
+      "setMinus": 4,
+      "ds": -1,
+      "coefSet": "0.75",
+      "ptsPlus": 142,
+      "ptsMinus": 151,
+      "dp": "-9",
+      "coefPts": "0.94",
       "pts": 4,
       "formAller": [
+        "W",
         "L",
-        "W",
-        "D",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 8,
-      "team": "marv",
-      "mj": 1,
-      "g": 1,
-      "p": 0,
-      "setPlus": 3,
-      "setMinus": 1,
-      "ds": 2,
-      "coefSet": "3.00",
-      "ptsPlus": 83,
-      "ptsMinus": 76,
-      "dp": "+7",
-      "coefPts": "1.09",
-      "pts": 3,
-      "formAller": [
-        "W",
-        "D",
         "P",
         "P",
         "P",
@@ -510,6 +510,34 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "10/11/2026",
+      "home": "marv",
+      "away": "smas",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé",
+      "time": "20:30",
+      "sets": [
+        [
+          21,
+          25
+        ],
+        [
+          19,
+          25
+        ],
+        [
+          19,
+          25
+        ]
+      ],
+      "total": [
+        59,
+        75
+      ]
+    },
     {
       "date": "09/11/2026",
       "home": "cout",
@@ -892,13 +920,6 @@
       "time": null
     },
     {
-      "date": "10/11/2026",
-      "home": "marv",
-      "away": "smas",
-      "status": "Reporté",
-      "time": "20:30"
-    },
-    {
       "date": "23/11/2026",
       "home": "cout",
       "away": "raia",
@@ -906,23 +927,16 @@
       "time": "20:30"
     },
     {
-      "date": "23/11/2026",
-      "home": "inar",
-      "away": "marv",
-      "status": "Sem. 4",
-      "time": null
-    },
-    {
       "date": "25/11/2026",
-      "home": "bloc",
-      "away": "neui",
+      "home": "cret",
+      "away": "smas",
       "status": "Sem. 4",
       "time": "20:00"
     },
     {
       "date": "25/11/2026",
-      "home": "cret",
-      "away": "smas",
+      "home": "bloc",
+      "away": "neui",
       "status": "Sem. 4",
       "time": "20:00"
     },
@@ -934,6 +948,13 @@
       "time": "20:30"
     },
     {
+      "date": "27/11/2026",
+      "home": "inar",
+      "away": "marv",
+      "status": "Sem. 4",
+      "time": "20:00"
+    },
+    {
       "date": "30/11/2026",
       "home": "oss",
       "away": "cout",
@@ -941,11 +962,11 @@
       "time": "20:15"
     },
     {
-      "date": "30/11/2026",
+      "date": "02/12/2026",
       "home": "inar",
       "away": "cret",
       "status": "Sem. 5",
-      "time": null
+      "time": "20:00"
     },
     {
       "date": "02/12/2026",
@@ -1117,17 +1138,17 @@
     },
     {
       "date": "27/01/2027",
-      "home": "bloc",
-      "away": "inar",
-      "status": "Sem. 10",
-      "time": "20:00"
-    },
-    {
-      "date": "27/01/2027",
       "home": "ivry",
       "away": "smas",
       "status": "Sem. 10",
       "time": "20:30"
+    },
+    {
+      "date": "27/01/2027",
+      "home": "bloc",
+      "away": "inar",
+      "status": "Sem. 10",
+      "time": "20:00"
     },
     {
       "date": "28/01/2027",
@@ -1145,17 +1166,17 @@
     },
     {
       "date": "22/02/2027",
-      "home": "inar",
-      "away": "ivry",
-      "status": "Sem. 11",
-      "time": null
-    },
-    {
-      "date": "22/02/2027",
       "home": "smas",
       "away": "neui",
       "status": "Sem. 11",
       "time": "20:30"
+    },
+    {
+      "date": "22/02/2027",
+      "home": "inar",
+      "away": "ivry",
+      "status": "Sem. 11",
+      "time": null
     },
     {
       "date": "24/02/2027",
@@ -1604,12 +1625,12 @@
     },
     {
       "rank": 4,
-      "team": "marv",
-      "elo": 1526.2,
-      "movement": 26.2,
-      "record": "1-0",
-      "power": 67.1,
-      "calendar": "V vs Cret'1",
+      "team": "smas",
+      "elo": 1532.3,
+      "movement": 39.7,
+      "record": "2-1",
+      "power": 71.0,
+      "calendar": "V vs Marvels",
       "diffClass": "diff-easy"
     },
     {
@@ -1624,22 +1645,22 @@
     },
     {
       "rank": 6,
-      "team": "smas",
-      "elo": 1492.6,
-      "movement": 20.6,
-      "record": "1-1",
-      "power": 43.6,
-      "calendar": "V vs Oss",
-      "diffClass": "diff-easy"
-    },
-    {
-      "rank": 7,
       "team": "oss",
       "elo": 1488.9,
       "movement": -22.2,
       "record": "1-2",
       "power": 40.4,
       "calendar": "D vs Inarizaki",
+      "diffClass": "diff-hard"
+    },
+    {
+      "rank": 7,
+      "team": "marv",
+      "elo": 1486.5,
+      "movement": -39.7,
+      "record": "1-1",
+      "power": 38.3,
+      "calendar": "D vs Smash",
       "diffClass": "diff-hard"
     },
     {
@@ -1703,6 +1724,12 @@
       1511.0,
       1488.9
     ],
+    "smas": [
+      1500,
+      1472.0,
+      1492.6,
+      1532.3
+    ],
     "inar": [
       1500,
       1518.9,
@@ -1719,14 +1746,10 @@
       1528.0,
       1504.8
     ],
-    "smas": [
-      1500,
-      1472.0,
-      1492.6
-    ],
     "marv": [
       1500,
-      1526.2
+      1526.2,
+      1486.5
     ],
     "ivry": [
       1500,
@@ -1772,13 +1795,22 @@
         ],
         "rank": 3
       },
+      "smas": {
+        "points": [
+          0,
+          1,
+          4,
+          7
+        ],
+        "rank": 4
+      },
       "inar": {
         "points": [
           0,
           3,
           6
         ],
-        "rank": 4
+        "rank": 5
       },
       "neui": {
         "points": [
@@ -1787,7 +1819,7 @@
           4,
           6
         ],
-        "rank": 5
+        "rank": 6
       },
       "raia": {
         "points": [
@@ -1795,20 +1827,13 @@
           3,
           4
         ],
-        "rank": 6
-      },
-      "smas": {
-        "points": [
-          0,
-          1,
-          4
-        ],
         "rank": 7
       },
       "marv": {
         "points": [
           0,
-          3
+          3,
+          4
         ],
         "rank": 8
       },
