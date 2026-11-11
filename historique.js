@@ -7983,6 +7983,7 @@ const ProgressionView = {
         if (!container) return;
 
         this._data = this._computeAllData();
+        this._radarIPs = null; // IP radar recalculés pour la saison affichée
 
         // Sous-onglets Évolution / Stats Visuelles
         var self = this;
@@ -8306,7 +8307,7 @@ const ProgressionView = {
 
             // Trend
             var played = p.matchData.filter(function(d) { return d.played; });
-            var trend = self._computeTrend(played);
+            var trend = self._computeTrend(played, self._radarIP(p.name));
             html += '<div class="prog-card-trend ' + trend.cls + '">' + trend.text + '</div>';
 
             html += '<canvas class="prog-sparkline" data-player="' + p.name + '"></canvas>';
@@ -8316,20 +8317,51 @@ const ProgressionView = {
         return html;
     },
 
+    // IP saison du profil radar (Année > Profils radar / Ranking) : stats de toute la saison
+    // mises en commun pour la famille de poste principale du joueur. Sert de « Moy. saison »
+    // pour la métrique IP, à la place de la moyenne des IP match par match.
+    _radarIP(name) {
+        if (!this._radarIPs) {
+            var map = {};
+            var matches = SeasonSelector.getFilteredMatches().filter(function(m) {
+                return (m.sets || []).some(function(s) { return s.completed; });
+            });
+            var fams = BilanView.getPlayerFamiliesYear(matches);
+            Object.keys(fams).forEach(function(n) {
+                var family = fams[n].primaryFamily;
+                var famData = family && fams[n].families[family];
+                if (!famData) return;
+                var stats = BilanView.aggregateStatsForFamilyYear(matches, n, famData);
+                var hasStats = ['service', 'reception', 'pass', 'attack', 'relance', 'defense', 'block'].some(function(cat) {
+                    return stats[cat] && stats[cat].tot > 0;
+                });
+                if (!hasStats) return;
+                var familyIpRole = (family === 'Ailier') ? 'R4' : family;
+                var ipRole = (family === 'Centre') ? BilanView.getCentreIpRole(stats) : familyIpRole;
+                map[n] = BilanView.computeSeasonIP(BilanView.computeAxisScores(stats, ipRole), ipRole, matches);
+            });
+            this._radarIPs = map;
+        }
+        var v = this._radarIPs[name];
+        return v != null ? v : null;
+    },
+
     // Tendance de la carte joueur : même calcul que « Forme récente »
     // (moyenne des 3 derniers matchs vs moyenne de la saison) pour afficher le même %.
-    _computeTrend(played) {
+    _computeTrend(played, ref) {
         var vals = played.map(function(d) { return d.ip; }).filter(function(v) { return v != null; });
         if (vals.length < 4) return { text: 'peu de matchs', cls: 'prog-trend-few' };
-        var rounded = Math.round(this._formeDiff(vals));
+        var rounded = Math.round(this._formeDiff(vals, ref));
         if (rounded >= 5) return { text: '↑ +' + rounded + '%', cls: 'prog-trend-up' };
         if (rounded <= -5) return { text: '↓ ' + rounded + '%', cls: 'prog-trend-down' };
         return { text: '→ stable', cls: 'prog-trend-stable' };
     },
 
     // Écart en % entre la moyenne des 3 derniers matchs et la moyenne de la saison
-    _formeDiff(vals) {
-        var avg = vals.reduce(function(a, b) { return a + b; }, 0) / vals.length;
+    // ref (optionnel) : valeur de référence de la saison à la place de la moyenne des matchs
+    // (IP du profil radar pour la métrique IP).
+    _formeDiff(vals, ref) {
+        var avg = (ref != null) ? ref : vals.reduce(function(a, b) { return a + b; }, 0) / vals.length;
         var last3 = vals.slice(-3);
         var rolling = last3.reduce(function(a, b) { return a + b; }, 0) / last3.length;
         return avg !== 0 ? ((rolling - avg) / Math.abs(avg) * 100) : 0;
@@ -8364,10 +8396,12 @@ const ProgressionView = {
             if (vals.length < 2) return;
 
             var mul = metric.multiply || 1;
-            var avg = vals.reduce(function(a, b) { return a + b; }, 0) / vals.length * mul;
+            // IP : la référence de la saison est l'IP du profil radar (même chiffre partout)
+            var ref = (metric.key === 'ip') ? self._radarIP(p.name) : null;
+            var avg = (ref != null) ? ref : vals.reduce(function(a, b) { return a + b; }, 0) / vals.length * mul;
             var last3 = vals.slice(-3);
             var rolling = last3.reduce(function(a, b) { return a + b; }, 0) / last3.length * mul;
-            var diff = self._formeDiff(vals);
+            var diff = self._formeDiff(vals, ref);
             // Arrondi d'abord : évite un « -0% » rouge pour un écart de -0,3 %
             var diffR = Math.round(diff);
 
@@ -8888,7 +8922,8 @@ const ProgressionView = {
             // Season average dashed line
             var nonNull = vals.filter(function(v) { return v !== null; });
             if (nonNull.length > 1) {
-                var avg = nonNull.reduce(function(a, b) { return a + b; }, 0) / nonNull.length * mul;
+                var radarRef = (metricKey === 'ip') ? self._radarIP(p.name) : null;
+                var avg = (radarRef != null) ? radarRef : nonNull.reduce(function(a, b) { return a + b; }, 0) / nonNull.length * mul;
                 var avgY = yPos(avg);
                 ctx.setLineDash([4, 4]);
                 ctx.strokeStyle = p.color + '50';
