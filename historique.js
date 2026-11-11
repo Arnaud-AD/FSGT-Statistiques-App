@@ -4866,8 +4866,19 @@ const BilanView = {
                 return 'D+ : ' + d.defplus + ' · D- : ' + d.defminus + ' · FD : ' + d.fdef +
                        ' · R+ : ' + rl.relplus + ' · R- : ' + rl.relminus + ' · FR : ' + rl.frel;
             }},
-            // V29.56 : meme note Bloc que le radar (plus de score par set, qui favorisait un joueur sur 1 set)
             { axisKey: 'bloc',      emoji: '🧱', label: 'Meilleur Bloqueur',
+              // Score custom : meme formule que computeAxisScores mais volume normalise par set joue
+              // Cela recompense la production par set (presence au filet) plutot que le total brut
+              // Un joueur qui bloque 6/set sur 11 sets bat un joueur qui bloque 3.6/set sur 15 sets
+              customScoreFn: function(stats) {
+                var blk = stats.block;
+                if (!blk || blk.tot <= 0) return 0;
+                var setsPlayed = stats._setsPlayed || 1;
+                var effectiveSuccess = (blk.blcplus + blk.blcminus * 0.5) / blk.tot;
+                var perSetTot = blk.tot / setsPlayed;
+                var volBonus = Math.min(perSetTot, 6) * 5;
+                return self.clamp(self.AXIS_FLOOR, 100, Math.round(20 + effectiveSuccess * 50 + volBonus));
+              },
               statsFn: function(s) {
                 var b = s.block;
                 return 'B+ : ' + b.blcplus + ' (' + self._pct(b.blcplus, b.tot) + ')' +
@@ -4919,15 +4930,15 @@ const BilanView = {
             if (!topN) return;
             var best = topN[0];
             var d = playerData[best.name];
-            // V29.56 : afficher la note de l'axe (celle du radar), pas l'IP global du joueur
+            // V29.56 : afficher la note de l'axe (celle du radar ; score par set pour le bloc), pas l'IP global
             var axisLabel = AXIS_LABELS[dist.axisKey];
             var runners = topN.slice(1).map(function(r) {
                 var rd = playerData[r.name];
-                return { name: r.name, role: rd.role, highlight: axisLabel + ' ' + (rd.axes[dist.axisKey] || 0), detail: dist.statsFn(rd.stats) };
+                return { name: r.name, role: rd.role, highlight: axisLabel + ' ' + r.score, detail: dist.statsFn(rd.stats) };
             });
             renderDistinctionRow(dist.emoji, dist.label,
                 { name: best.name, role: d.role },
-                axisLabel + ' ' + (d.axes[dist.axisKey] || 0), dist.statsFn(d.stats), runners);
+                axisLabel + ' ' + best.score, dist.statsFn(d.stats), runners);
         });
 
         // --- Meilleur Libero : meilleur IP parmi les Centres ---
