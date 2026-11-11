@@ -5980,17 +5980,12 @@ const BilanView = {
             scores.service = 0;
         }
 
-        // RECEPTION (V20.26) : moyenne ponderee + bonus taux positif (R4+R3)
-        // Bonus : un joueur avec >50% de R4+R3 est recompense pour sa regularite
+        // RECEPTION : moyenne ponderee R4=100, R3=75, R2=40, R1=15, faute=0
+        // V29.55 : bonus de regularite supprime (Arnaud, 2026-11-11) : 100 = que des R4
         var rec = s.reception;
         if (rec.tot > 0) {
             var recRaw = (rec.r4 * 100 + rec.r3 * 75 + rec.r2 * 40 + rec.r1 * 15) / rec.tot;
-            // Bonus taux positif : (R4+R3)/tot au-dessus de 50% → jusqu'à +5
-            // V29.52 : bonus divise par 2 (+10 max avant) : avec +10, un match sans R2/R1 atteignait 100
-            // des ~60 % de R4, et beaucoup de matchs restaient colles au plafond.
-            var positiveRate = (rec.r4 + rec.r3) / rec.tot;
-            var recBonus = Math.max(0, positiveRate - 0.5) * 10;
-            scores.reception = this.clamp(floor, 100, Math.round(recRaw + recBonus));
+            scores.reception = this.clamp(floor, 100, Math.round(recRaw));
         } else {
             scores.reception = 0;
         }
