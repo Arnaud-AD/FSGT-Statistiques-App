@@ -4924,18 +4924,21 @@ const BilanView = {
             html += '</div>';
         }
 
+        var AXIS_LABELS = { service: 'Service', reception: 'Réception', passe: 'Passe', attaque: 'Attaque', relance: 'Relance', defense: 'Défense', bloc: 'Bloc' };
         distinctions.forEach(function(dist) {
             var topN = findBestOnAxis(dist.axisKey, dist.eligibleRoles, dist.customScoreFn);
             if (!topN) return;
             var best = topN[0];
             var d = playerData[best.name];
+            // V29.56 : afficher la note de l'axe (celle du radar ; score par set pour le bloc), pas l'IP global
+            var axisLabel = AXIS_LABELS[dist.axisKey];
             var runners = topN.slice(1).map(function(r) {
                 var rd = playerData[r.name];
-                return { name: r.name, role: rd.role, highlight: 'IP ' + rd.ip, detail: dist.statsFn(rd.stats) };
+                return { name: r.name, role: rd.role, highlight: axisLabel + ' ' + r.score, detail: dist.statsFn(rd.stats) };
             });
             renderDistinctionRow(dist.emoji, dist.label,
                 { name: best.name, role: d.role },
-                'IP ' + d.ip, dist.statsFn(d.stats), runners);
+                axisLabel + ' ' + best.score, dist.statsFn(d.stats), runners);
         });
 
         // --- Meilleur Libero : meilleur IP parmi les Centres ---
