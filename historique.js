@@ -6079,14 +6079,14 @@ const BilanView = {
         }
 
         // BLOC (V29.62) : "pression au bloc", inspiree de l'indice bloc LNV (blocs gagnants par point joue).
-        // Pression par set = (B+ + 0,4 x B- - 0,6 x bloc out) / sets joues, puis courbe 0 -> 100 sans plafond
+        // Pression par set = (B+ + 0,4 x B- - 0,3 x bloc out) / sets joues (V29.63 : bloc out 0,6 -> 0,3, moins puni qu un bloc gagnant ne rapporte), puis courbe 0 -> 100 sans plafond
         // fixe : 100 x (1 - e^(-pression / 0,7)) -> 0,5/set = 51, 1/set = 76, 1,5/set = 88, 2/set = 94.
         // L'ancienne formule (20 + efficacite x 50 + min(tot, 6) x 5) donnait 59 a 81 a tout le monde
         // sur une saison (le bonus volume etait toujours atteint) : bons et mauvais bloqueurs confondus.
         var blk = s.block;
         if (blk.tot > 0) {
             var blkSets = s._setsPlayed > 0 ? s._setsPlayed : 1;
-            var pression = (blk.blcplus + blk.blcminus * 0.4 - blk.fblc * 0.6) / blkSets;
+            var pression = (blk.blcplus + blk.blcminus * 0.4 - blk.fblc * 0.3) / blkSets;
             var raw = 100 * (1 - Math.exp(-Math.max(pression, 0) / 0.7));
             scores.bloc = this.clamp(floor, 100, Math.round(raw));
         } else {
