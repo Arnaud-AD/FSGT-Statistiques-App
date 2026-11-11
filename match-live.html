@@ -2419,6 +2419,16 @@
         };
 
         function openEndSetModal(mode) {
+            // V29.24 : si le score est déjà gagnant (ex. 25-21 après « ← Corriger »),
+            // le bouton « Fin du Set » rouvre l'écran de fin de set normal, sans raison à choisir
+            if (mode === 'manual') {
+                const target = Storage.getTargetScore(currentMatch);
+                const h = gameState.homeScore, a = gameState.awayScore;
+                if ((h >= target || a >= target) && Math.abs(h - a) >= 2) {
+                    gameState.setEnded = true;
+                    mode = 'auto';
+                }
+            }
             endSetState.mode = mode;
             endSetState.reason = null;
 
