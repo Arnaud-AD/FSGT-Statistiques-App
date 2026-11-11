@@ -6126,25 +6126,11 @@ const BilanView = {
         return Math.round(this.computeIPDetail(axisScores, role).raw);
     },
 
-    // --- Indice de Performance SAISON : meme calcul + lissage vers la moyenne du poste ---
-    // matches = matchs de la periode (sert a calculer les moyennes de poste du championnat)
+    // --- Indice de Performance SAISON : meme calcul que le match, sur les stats cumulees ---
+    // V29.54 : plus de lissage vers la moyenne du poste (Arnaud, 2026-11-11) : l'IP saison est brut,
+    // comme l'IP match. getIPPriors / IP_SEASON_C0 ne servent plus a l'IP (gardes pour reference).
     computeSeasonIP(axisScores, role, matches) {
-        var d = this.computeIPDetail(axisScores, role);
-        if (d.raw <= 0) return 0;
-        var priors = this._ipPriorsBusy ? null : this.getIPPriors(matches);
-        var fam = this._ipFamily(role);
-        var P = priors && priors[fam];
-        if (!P) return Math.round(d.raw);
-        var weights = this.IP_WEIGHTS[fam === 'Ailier' ? 'R4' : fam];
-        var mNum = 0, mDen = 0;
-        Object.keys(weights).forEach(function(key) {
-            if (weights[key] <= 0) return;
-            mNum += weights[key] * (P[key] !== undefined ? P[key] : 50);
-            mDen += weights[key];
-        });
-        var M = mNum / mDen;
-        var C0 = this.IP_SEASON_C0;
-        return Math.round((d.actions * d.raw + C0 * M) / (d.actions + C0));
+        return Math.round(this.computeIPDetail(axisScores, role).raw);
     },
 
     // Moyennes par axe et par famille de poste sur tout le championnat (Jen + adversaires).
@@ -7363,7 +7349,7 @@ const RankingView = {
         return {
             name: current.player.name, teamName: current.teamName,
             role: primaryRole, roleColor: BilanView.ROLE_COLORS[primaryRole] || '#5f6368',
-            // V29.45 : IP saison (volume par axe + lissage), plus de seuil des 4 %
+            // V29.45 : IP saison (volume par axe, brut depuis V29.54), plus de seuil des 4 %
             scores: scores, ip: BilanView.computeSeasonIP(scores, ipRole, RankingView._seasonMatches)
         };
     },
@@ -7420,7 +7406,7 @@ const RankingView = {
                 });
             });
 
-            // Phase 2 : IP saison (V29.45 : volume par axe + lissage, plus de seuil des 4 %)
+            // Phase 2 : IP saison (V29.45 : volume par axe, brut depuis V29.54, plus de seuil des 4 %)
             allPlayers.forEach(function(d) {
                 d.ip = BilanView.computeSeasonIP(d.scores, d.ipRole, RankingView._seasonMatches || matches);
             });
@@ -7492,7 +7478,7 @@ const RankingView = {
                 });
             });
 
-            // Phase 2 Away : IP saison (V29.45 : volume par axe + lissage, plus de seuil des 4 %)
+            // Phase 2 Away : IP saison (V29.45 : volume par axe, brut depuis V29.54, plus de seuil des 4 %)
             allPlayers.forEach(function(d) {
                 d.ip = BilanView.computeSeasonIP(d.scores, d.ipRole, RankingView._seasonMatches || matches);
             });
