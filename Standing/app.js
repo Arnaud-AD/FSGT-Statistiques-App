@@ -17,7 +17,10 @@ let currentSlug = null;   // Currently loaded championship slug
 var standingsSort = { col: null, asc: true };
 
 // Columns where "less is better" → default sort is ascending
-var ASC_DEFAULT_COLS = { p: true, setMinus: true, ptsMinus: true };
+var ASC_DEFAULT_COLS = { p: true, setMinus: true, ptsMinus: true, pp: true };
+
+// Points perdus : ce qu'une équipe a laissé filer sur ses matchs joués (3 par match max)
+function pointsPerdus(s) { return 3 * s.mj - s.pts; }
 
 // Mobile: teams whose detail row is unfolded (team key → true)
 var standingsExpanded = {};
@@ -288,6 +291,7 @@ function standingsSortIcon(col) {
 
 function getStandingSortValue(s, col) {
     if (col === 'coefSet' || col === 'coefPts') return parseFloat(s[col]) || 0;
+    if (col === 'pp') return pointsPerdus(s);
     return s[col];
 }
 
@@ -315,6 +319,7 @@ function renderStandings() {
             var va = getStandingSortValue(a, col);
             var vb = getStandingSortValue(b, col);
             if (va !== vb) return asc ? va - vb : vb - va;
+            if (col === 'pp' && a.ds !== b.ds) return b.ds - a.ds; // PP égaux : meilleure DS devant
             return a.rank - b.rank; // tie-break: official rank
         });
     }
@@ -335,7 +340,11 @@ function renderStandings() {
         ['Pts', 'pts', 'bold-col']
     ];
 
-    var theadCols = '<th>Club</th>';
+    // Clic sur « Club » : tri caché par points perdus (3 × MJ − Pts), puis DS.
+    // Pas de flèche tant qu'il n'est pas actif.
+    var clubActive = standingsSort.col === 'pp';
+    var theadCols = '<th class="standings-sortable" data-sort-col="pp" title="Trier par points perdus">Club' +
+        (clubActive ? standingsSortIcon('pp') : '') + '</th>';
     sortableCols.forEach(function(c) {
         var classes = 'standings-sortable';
         if (c[2]) classes += ' ' + c[2];
@@ -1598,7 +1607,10 @@ document.addEventListener('click', function(e) {
     var col = th.getAttribute('data-sort-col');
     if (!col) return;
 
-    if (standingsSort.col === col) {
+    if (col === 'pp' && standingsSort.col === 'pp') {
+        // Clic sur « Club » : simple bascule tri points perdus ↔ classement officiel
+        standingsSort = { col: null, asc: true };
+    } else if (standingsSort.col === col) {
         // Same column: toggle asc/desc, then reset on third click
         if (standingsSort.asc === !ASC_DEFAULT_COLS[col]) {
             // Was on non-default order → reset to official rank
