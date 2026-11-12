@@ -246,12 +246,46 @@ const HistoriqueData = {
         try {
             const local = Storage.getAllMatches().filter(m => m.status === 'completed');
             const remote = await FirebaseSync.getCompletedMatches();
-            this._cache = this._normalizeServiceStats(this._applyPlayerAliases(FirebaseSync.mergeMatches(local, remote)));
+            const merged = FirebaseSync.mergeMatches(local, remote);
+            this._refreshLocalCopies(local, merged);
+            this._cache = this._normalizeServiceStats(this._applyPlayerAliases(merged));
             this._firebaseLoaded = true;
             return remote.length > 0;
         } catch (err) {
             console.warn('[Historique] Firebase indisponible, données locales uniquement :', err.message);
             return false;
+        }
+    },
+
+    /**
+     * V29.72 : quand la version Firebase d'un match terminé remplace la copie locale
+     * (ex. match corrigé dans Firestore), on remplace aussi la copie dans le localStorage,
+     * pour que le prochain affichage immédiat (avant la réponse Firebase) soit déjà juste.
+     * Écriture directe (pas Storage.saveMatch) : rien n'est renvoyé vers Firebase.
+     */
+    _refreshLocalCopies(local, merged) {
+        try {
+            var byId = {};
+            merged.forEach(function(m) { byId[m.id] = m; });
+            var stale = local.filter(function(m) { return byId[m.id] && byId[m.id] !== m; });
+            if (!stale.length) return;
+            var key = Storage.KEYS.MATCHES;
+            var all = JSON.parse(localStorage.getItem(key) || '[]');
+            var changed = 0;
+            all.forEach(function(m, i) {
+                var fresh = byId[m.id];
+                if (fresh && m.status === 'completed' && fresh.status === 'completed'
+                        && JSON.stringify(fresh) !== JSON.stringify(m)) {
+                    all[i] = JSON.parse(JSON.stringify(fresh));
+                    changed++;
+                }
+            });
+            if (changed) {
+                localStorage.setItem(key, JSON.stringify(all));
+                console.log('[Historique] ' + changed + ' match(s) local(aux) remplacé(s) par la version Firebase');
+            }
+        } catch (e) {
+            console.warn('[Historique] Copie locale non rafraîchie :', e.message);
         }
     },
 

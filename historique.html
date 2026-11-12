@@ -226,7 +226,7 @@
     <!-- admin-config.js : gitignoré donc absent du site déployé (ADMIN_UID undefined → isAdmin() false → actions admin masquées en public).
          En local le fichier existe → restaure les boutons admin (Supprimer ce match, Date du match). La vraie sécurité = Firestore Rules. -->
     <script src="admin-config.js"></script>
-    <script src="firebase-sync.js?v=17.3"></script>
+    <script src="firebase-sync.js?v=17.4"></script>
     <script src="analytics.js"></script>
 
     <!-- Modal Distinctions -->
@@ -248,7 +248,7 @@
     </div>
 
     <script src="storage.js?v=20.287"></script>
-    <script src="historique.js?v=29.71"></script>
+    <script src="historique.js?v=29.72"></script>
     <!-- Filet de sécurité : ne jamais rester bloqué sur l'écran de chargement -->
     <script>setTimeout(function() { document.body.classList.remove('hist-is-loading'); }, 25000);</script>
     <script src="recap.js?v=7"></script>
