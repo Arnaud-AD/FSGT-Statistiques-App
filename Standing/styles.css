@@ -1689,3 +1689,7 @@
             color: #ea580c;
             background: rgba(249, 115, 22, 0.1);
         }
+
+        /* Ginette Matchs: Tours 1-2 / Principale / Consolante */
+        .ginette-phase-content { display: none; }
+        .ginette-phase-content.active { display: block; }

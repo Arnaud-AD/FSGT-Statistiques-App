@@ -965,16 +965,71 @@ function buildGinetteCtx() {
     return GINETTE_CTX;
 }
 
+// Matchs tab: three phases (Tours 1-2, Principale, Consolante), each with Résultats + À venir
+var GINETTE_PHASES = [
+    { id: 'tours', label: 'Tours 1-2', match: function(r) { return r === 'Tour 1' || r === 'Tour 2'; },
+      empty: '' },
+    { id: 'principale', label: 'Principale', match: function(r) { return / Principale$/.test(r); },
+      empty: 'Le tableau principal (1-16) sera connu après le Tour 2.' },
+    { id: 'consolante', label: 'Consolante', match: function(r) { return / Consolante$/.test(r); },
+      empty: 'Le tableau consolante (17-32) sera connu après le Tour 2.' }
+];
+var ginetteMatchPhase = null;   // phase shown (kept across re-renders)
+
+function ginettePhaseStatus(round) {
+    // Within a phase tab the suffix is redundant: "1/8 Principale" → "1/8ème"
+    return ginetteRoundLabel(String(round).replace(/ (Principale|Consolante)$/, ''));
+}
+
 function renderGinetteMatches() {
     var container = document.getElementById('ginette-matchs-content');
     if (!container || !GINETTE_CTX) return;
-    container.innerHTML = buildMatchesTab(GINETTE_CTX, {
-        idPrefix: 'ginette-',
-        // Alternating backgrounds by round
-        groupOf: function(m) {
-            var i = GINETTE_ROUND_ORDER.indexOf(m.round);
-            return i === -1 ? null : i;
+
+    var phases = GINETTE_PHASES.map(function(ph) {
+        function pick(list) {
+            return list.filter(function(m) { return ph.match(m.round); })
+                .map(function(m) { return Object.assign({}, m, { status: ginettePhaseStatus(m.round) }); });
         }
+        return { ph: ph, ctx: { played: pick(GINETTE_CTX.played), upcoming: pick(GINETTE_CTX.upcoming), teams: GINETTE_CTX.teams } };
+    });
+
+    // Default: the phase in progress (first one with matches to come), else the last one with results
+    if (!ginetteMatchPhase) {
+        var current = phases.find(function(x) { return x.ctx.upcoming.length; }) ||
+            phases.slice().reverse().find(function(x) { return x.ctx.played.length; }) || phases[0];
+        ginetteMatchPhase = current.ph.id;
+    }
+
+    var tabs = '<div class="sub-tabs ginette-phase-tabs">' + phases.map(function(x) {
+        return '<button class="sub-tab' + (x.ph.id === ginetteMatchPhase ? ' active' : '') + '" onclick="showGinetteMatchPhase(\'' + x.ph.id + '\', this)">' + x.ph.label + '</button>';
+    }).join('') + '</div>';
+
+    var panels = phases.map(function(x) {
+        var body;
+        if (!x.ctx.played.length && !x.ctx.upcoming.length) {
+            body = '<p class="ginette-standings-note">' + esc(x.ph.empty || 'Aucun match pour l’instant.') + '</p>';
+        } else {
+            body = buildMatchesTab(x.ctx, {
+                idPrefix: 'ginette-' + x.ph.id + '-',
+                // Alternating backgrounds by round
+                groupOf: function(m) {
+                    var i = GINETTE_ROUND_ORDER.indexOf(m.round);
+                    return i === -1 ? null : i;
+                }
+            });
+        }
+        return '<div class="ginette-phase-content' + (x.ph.id === ginetteMatchPhase ? ' active' : '') + '" data-phase="' + x.ph.id + '">' + body + '</div>';
+    }).join('');
+
+    container.innerHTML = tabs + panels;
+}
+
+function showGinetteMatchPhase(phaseId, btn) {
+    ginetteMatchPhase = phaseId;
+    btn.parentElement.querySelectorAll('.sub-tab').forEach(function(t) { t.classList.remove('active'); });
+    btn.classList.add('active');
+    document.querySelectorAll('.ginette-phase-content').forEach(function(c) {
+        c.classList.toggle('active', c.getAttribute('data-phase') === phaseId);
     });
 }
 
