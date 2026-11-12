@@ -9052,28 +9052,37 @@ const ProgressionView = {
 
     // Lignes verticales entre deux saisons + nom de la saison en haut de chaque segment.
     // Rien n'est dessiné quand le graphique ne couvre qu'une saison.
+    // Bornes x des segments de saison : [left, sep1, sep2, ..., right]
+    // (séparateur à mi-chemin entre le dernier match d'une saison et le premier de la suivante)
+    _seasonBounds(xPos, left, right) {
+        var segs = this._seasonSegments();
+        var bounds = [left];
+        for (var i = 1; i < segs.length; i++) {
+            bounds.push(Math.round((xPos(segs[i - 1].end) + xPos(segs[i].start)) / 2) + 0.5);
+        }
+        bounds.push(right);
+        return bounds;
+    },
+
     _drawSeasonDividers(ctx, xPos, top, bottom, left, right) {
         var segs = this._seasonSegments();
         if (segs.length < 2) return;
         ctx.save();
-        // Séparateurs à mi-chemin entre le dernier match d'une saison et le premier de la suivante
-        ctx.strokeStyle = '#9aa0a6';
+        ctx.strokeStyle = '#c4c7cc';
         ctx.lineWidth = 1;
-        ctx.setLineDash([3, 3]);
-        var bounds = [left];
+        ctx.setLineDash([2, 4]);
+        var bounds = this._seasonBounds(xPos, left, right);
         for (var i = 1; i < segs.length; i++) {
-            var x = Math.round((xPos(segs[i - 1].end) + xPos(segs[i].start)) / 2) + 0.5;
-            bounds.push(x);
+            var x = bounds[i];
             ctx.beginPath();
             ctx.moveTo(x, top - 14);
             ctx.lineTo(x, bottom);
             ctx.stroke();
         }
-        bounds.push(right);
         ctx.setLineDash([]);
         // Libellés « 2024-25 » centrés sur chaque saison (seulement s'ils tiennent)
-        ctx.font = '600 10px Roboto, sans-serif';
-        ctx.fillStyle = '#80868b';
+        ctx.font = '500 10px Roboto, sans-serif';
+        ctx.fillStyle = '#9aa0a6';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'alphabetic';
         segs.forEach(function(seg, si) {
@@ -9081,6 +9090,93 @@ const ProgressionView = {
             var x0 = bounds[si], x1 = bounds[si + 1];
             if (ctx.measureText(label).width + 8 > x1 - x0) return;
             ctx.fillText(label, (x0 + x1) / 2, top - 7);
+        });
+        ctx.restore();
+    },
+
+    // ----- Style des courbes (DA des cartes radar : traits fins, points creux, fonds légers) -----
+
+    _drawGrid(ctx, yPos, yMin, yMax, left, right, w, fmt) {
+        ctx.save();
+        ctx.strokeStyle = '#eef0f2';
+        ctx.lineWidth = 1;
+        ctx.fillStyle = '#9aa0a6';
+        ctx.font = '10px Roboto, sans-serif';
+        ctx.textAlign = 'right';
+        for (var gi = 0; gi <= 4; gi++) {
+            var gv = yMin + (gi / 4) * (yMax - yMin);
+            var gy = Math.round(yPos(gv)) + 0.5;
+            ctx.beginPath();
+            ctx.moveTo(left, gy);
+            ctx.lineTo(right, gy);
+            ctx.stroke();
+            ctx.fillText(fmt(gv), w - 2, gy + 3);
+        }
+        ctx.restore();
+    },
+
+    // Fond dégradé sous la courbe (un seul joueur / une seule série visible)
+    _drawSeriesArea(ctx, pts, color, top, bottom) {
+        if (pts.length < 2) return;
+        var grad = ctx.createLinearGradient(0, top, 0, bottom);
+        grad.addColorStop(0, color + '26');
+        grad.addColorStop(1, color + '03');
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, bottom);
+        pts.forEach(function(pt) { ctx.lineTo(pt.x, pt.y); });
+        ctx.lineTo(pts[pts.length - 1].x, bottom);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+    },
+
+    // Trait fin + points creux (fond blanc, contour couleur) comme les sommets des radars
+    _drawSeriesLine(ctx, pts, color) {
+        ctx.save();
+        ctx.beginPath();
+        pts.forEach(function(pt, i) { i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y); });
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.5;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        pts.forEach(function(pt) {
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.25;
+            ctx.stroke();
+        });
+        ctx.restore();
+    },
+
+    // Ligne de moyenne en pointillé : une par saison (Saisons ALL), sinon une sur toute la largeur.
+    // vals : valeurs déjà à l'échelle (null = pas joué). refFn(season) : référence radar ou null.
+    // V29.75
+    _drawSeasonAverages(ctx, vals, color, xPos, yPos, left, right, refFn) {
+        var segs = this._seasonSegments();
+        var multi = segs.length > 1;
+        if (!multi) segs = [{ season: null, start: 0, end: vals.length - 1 }];
+        var bounds = multi ? this._seasonBounds(xPos, left, right) : [left, right];
+        ctx.save();
+        ctx.setLineDash([3, 4]);
+        ctx.strokeStyle = color + '80';
+        ctx.lineWidth = 1;
+        segs.forEach(function(seg, si) {
+            var segVals = vals.slice(seg.start, seg.end + 1).filter(function(v) { return v !== null; });
+            if (segVals.length < (multi ? 1 : 2)) return;
+            var ref = refFn ? refFn(seg.season) : null;
+            var avg = (ref != null) ? ref : segVals.reduce(function(a, b) { return a + b; }, 0) / segVals.length;
+            var y = Math.round(yPos(avg)) + 0.5;
+            // Petit retrait pour ne pas toucher les séparateurs de saison
+            var x0 = bounds[si] + (multi && si > 0 ? 4 : 0);
+            var x1 = bounds[si + 1] - (multi && si < segs.length - 1 ? 4 : 0);
+            ctx.beginPath();
+            ctx.moveTo(x0, y);
+            ctx.lineTo(x1, y);
+            ctx.stroke();
         });
         ctx.restore();
     },
@@ -9174,20 +9270,7 @@ const ProgressionView = {
         function yPos(v) { return pad.top + (1 - (v - yMin) / (yMax - yMin)) * chartH; }
 
         // Grille Y
-        ctx.strokeStyle = '#e8eaed';
-        ctx.lineWidth = 0.5;
-        ctx.fillStyle = '#5f6368';
-        ctx.font = '11px Roboto, sans-serif';
-        ctx.textAlign = 'right';
-        for (var gi = 0; gi <= 4; gi++) {
-            var gv = yMin + (gi / 4) * (yMax - yMin);
-            var gy = yPos(gv);
-            ctx.beginPath();
-            ctx.moveTo(pad.left, gy);
-            ctx.lineTo(w - pad.right, gy);
-            ctx.stroke();
-            ctx.fillText(gv.toFixed(decimals) + unit, w - 2, gy + 3);
-        }
+        this._drawGrid(ctx, yPos, yMin, yMax, pad.left, w - pad.right, w, function(v) { return v.toFixed(decimals) + unit; });
 
         // Séparation des saisons (Saisons ALL)
         this._drawSeasonDividers(ctx, xPos, pad.top, pad.top + chartH, pad.left, w - pad.right);
@@ -9224,7 +9307,7 @@ const ProgressionView = {
             var res = this._data.matchResults[li];
             if (res) {
                 ctx.beginPath();
-                ctx.arc(lx, dotY, 3, 0, Math.PI * 2);
+                ctx.arc(lx, dotY, 2.5, 0, Math.PI * 2);
                 ctx.fillStyle = res === 'win' ? '#34a853' : res === 'loss' ? '#ea4335' : '#f59e0b';
                 ctx.fill();
                 ctx.fillStyle = '#5f6368';
@@ -9246,7 +9329,7 @@ const ProgressionView = {
         if (!el) return;
         var html = '<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:8px 0 4px;font-size:12px;color:var(--text-secondary)">';
         series.forEach(function(s) {
-            html += '<span><span style="display:inline-block;width:12px;height:3px;background:' + s.color + ';vertical-align:middle;margin-right:4px;border-radius:2px"></span>' + s.label + '</span>';
+            html += '<span><span style="display:inline-block;width:12px;height:2px;background:' + s.color + ';vertical-align:middle;margin-right:4px;border-radius:2px"></span>' + s.label + '</span>';
         });
         html += '</div>';
         el.innerHTML = html;
@@ -9260,40 +9343,14 @@ const ProgressionView = {
         });
         if (pts.length < 1) return;
 
-        // Ligne
-        ctx.beginPath();
-        pts.forEach(function(pt, i) { i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y); });
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2.5;
-        ctx.lineJoin = 'round';
-        ctx.stroke();
+        // Moyenne (une par saison en Saisons ALL), sous la courbe
+        this._drawSeasonAverages(ctx, vals, color, xPos, yPos, pad.left, w - pad.right, null);
 
-        // Points
+        // Ligne + points
+        this._drawSeriesLine(ctx, pts, color);
         pts.forEach(function(pt) {
-            ctx.beginPath();
-            ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
-            ctx.fillStyle = color;
-            ctx.fill();
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
-            ctx.stroke();
             self._teamChartPoints.push({ x: pt.x, y: pt.y, val: pt.val, matchIdx: pt.idx, team: team, color: color });
         });
-
-        // Moyenne saison (pointillé)
-        var nonNull = vals.filter(function(v) { return v !== null; });
-        if (nonNull.length > 1) {
-            var avg = nonNull.reduce(function(a, b) { return a + b; }, 0) / nonNull.length;
-            var avgY = yPos(avg);
-            ctx.setLineDash([4, 4]);
-            ctx.strokeStyle = color + '50';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(pad.left, avgY);
-            ctx.lineTo(w - pad.right, avgY);
-            ctx.stroke();
-            ctx.setLineDash([]);
-        }
     },
 
     // ========== CANVAS DRAWING ==========
@@ -9409,20 +9466,7 @@ const ProgressionView = {
         function yPos(v) { return pad.top + (1 - (v - yMin) / (yMax - yMin)) * chartH; }
 
         // Grid
-        ctx.strokeStyle = '#e8eaed';
-        ctx.lineWidth = 0.5;
-        ctx.fillStyle = '#5f6368';
-        ctx.font = '11px Roboto, sans-serif';
-        ctx.textAlign = 'right';
-        for (var gi = 0; gi <= 4; gi++) {
-            var gv = yMin + (gi / 4) * (yMax - yMin);
-            var gy = yPos(gv);
-            ctx.beginPath();
-            ctx.moveTo(pad.left, gy);
-            ctx.lineTo(w - pad.right, gy);
-            ctx.stroke();
-            ctx.fillText(gv.toFixed(metricDef.decimals), w - 2, gy + 3);
-        }
+        this._drawGrid(ctx, yPos, yMin, yMax, pad.left, w - pad.right, w, function(v) { return v.toFixed(metricDef.decimals); });
 
         // Séparation des saisons (Saisons ALL)
         this._drawSeasonDividers(ctx, xPos, pad.top, pad.top + chartH, pad.left, w - pad.right);
@@ -9445,51 +9489,20 @@ const ProgressionView = {
 
             // Area fill (only when single player visible)
             var visibleCount = self._data.players.filter(function(pl) { return self._selectedPlayers[pl.name] !== false; }).length;
-            if (visibleCount === 1) {
-                ctx.beginPath();
-                ctx.moveTo(pts[0].x, pad.top + chartH);
-                pts.forEach(function(pt) { ctx.lineTo(pt.x, pt.y); });
-                ctx.lineTo(pts[pts.length - 1].x, pad.top + chartH);
-                ctx.closePath();
-                ctx.fillStyle = p.color + '12';
-                ctx.fill();
-            }
+            if (visibleCount === 1) self._drawSeriesArea(ctx, pts, p.color, pad.top, pad.top + chartH);
 
-            // Line
-            ctx.beginPath();
-            pts.forEach(function(pt, i) { i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y); });
-            ctx.strokeStyle = p.color;
-            ctx.lineWidth = 2.5;
-            ctx.lineJoin = 'round';
-            ctx.stroke();
-
-            // Dots + store for tooltip
-            pts.forEach(function(pt) {
-                ctx.beginPath();
-                ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
-                ctx.fillStyle = p.color;
-                ctx.fill();
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                self._chartPoints.push({ x: pt.x, y: pt.y, val: pt.val, matchIdx: pt.idx, player: p.name, color: p.color });
+            // Moyenne saison en pointillé (une par saison en Saisons ALL), sous la courbe.
+            // Référence = profil radar de la saison si dispo, sinon moyenne des matchs.
+            var scaled = vals.map(function(v) { return v === null ? null : v * mul; });
+            self._drawSeasonAverages(ctx, scaled, p.color, xPos, yPos, pad.left, w - pad.right, function(season) {
+                return self._seasonRef(p.name, metricKey, season || undefined);
             });
 
-            // Season average dashed line
-            var nonNull = vals.filter(function(v) { return v !== null; });
-            if (nonNull.length > 1) {
-                var radarRef = self._seasonRef(p.name, metricKey);
-                var avg = (radarRef != null) ? radarRef : nonNull.reduce(function(a, b) { return a + b; }, 0) / nonNull.length * mul;
-                var avgY = yPos(avg);
-                ctx.setLineDash([4, 4]);
-                ctx.strokeStyle = p.color + '50';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(pad.left, avgY);
-                ctx.lineTo(w - pad.right, avgY);
-                ctx.stroke();
-                ctx.setLineDash([]);
-            }
+            // Line + dots
+            self._drawSeriesLine(ctx, pts, p.color);
+            pts.forEach(function(pt) {
+                self._chartPoints.push({ x: pt.x, y: pt.y, val: pt.val, matchIdx: pt.idx, player: p.name, color: p.color });
+            });
         });
     },
 
