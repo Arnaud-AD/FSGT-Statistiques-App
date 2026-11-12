@@ -66,8 +66,10 @@ async function loadChampionship(slug) {
             document.title = 'FSGT94 Volley - Coupe Ginette';
             updateDropdownSelection(slug);
             setGinetteMode(true);
+            await loadGinetteTeamInfo();
+            buildGinetteCtx();
             renderGinetteStandings();
-            renderGinetteClassement();
+            renderGinetteMatches();
             renderGinette();
         } else {
             const resp = await fetch('data/' + slug + '.json', FETCH_FRESH);
@@ -270,13 +272,6 @@ function showGinetteTab(tabId) {
     });
 }
 
-function showGinetteSubTab(subTabId, btn) {
-    document.querySelectorAll('.ginette-sub-tab-content').forEach(function(c) { c.classList.remove('active'); });
-    btn.parentElement.querySelectorAll('.sub-tab').forEach(function(t) { t.classList.remove('active'); });
-    document.getElementById(subTabId).classList.add('active');
-    btn.classList.add('active');
-}
-
 // ------------------------------------------------------------
 // 6. Render functions
 // ------------------------------------------------------------
@@ -450,12 +445,18 @@ function parseFrDate(d) {
 var CAL_DAYS = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
 var CAL_MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
 
-function buildTeamCalendar(teamKey) {
+// ctx: { played, upcoming, teams } — the championship (DATA) by default, or the Ginette (ginetteMatchCtx)
+function champMatchCtx() {
+    return { played: DATA.matchesPlayed, upcoming: DATA.matchesUpcoming, teams: DATA.teams };
+}
+
+function buildTeamCalendar(teamKey, ctx) {
+    ctx = ctx || champMatchCtx();
     var list = [];
-    DATA.matchesPlayed.forEach(function(m) {
+    ctx.played.forEach(function(m) {
         if (m.home === teamKey || m.away === teamKey) list.push({ m: m, played: true });
     });
-    DATA.matchesUpcoming.forEach(function(m) {
+    ctx.upcoming.forEach(function(m) {
         if (m.home === teamKey || m.away === teamKey) list.push({ m: m, played: false });
     });
     list.forEach(function(e, i) { e.order = i; e.d = parseFrDate(e.m.date); });
@@ -466,7 +467,7 @@ function buildTeamCalendar(teamKey) {
         return (a.d - b.d) || (a.order - b.order);
     });
 
-    var team = DATA.teams[teamKey] || { name: teamKey, short: '?' };
+    var team = ctx.teams[teamKey] || { name: teamKey, short: '?' };
     var nPlayed = 0;
     var nextFound = false;
     var rows = [];
@@ -474,7 +475,7 @@ function buildTeamCalendar(teamKey) {
         var m = e.m;
         var isHome = m.home === teamKey;
         var oppKey = isHome ? m.away : m.home;
-        var opp = DATA.teams[oppKey] || { name: oppKey, short: '?' };
+        var opp = ctx.teams[oppKey] || { name: oppKey, short: '?' };
         var cls = 'cal-row';
         var result = '<span class="cal-vs">–</span>';
         var sets = '';
@@ -597,17 +598,45 @@ function renderMatches() {
     const container = document.getElementById('matchs-content');
     if (!container || !DATA) return;
 
+    // Build rank lookup for clash detection
+    var teamRank = {};
+    DATA.standings.forEach(function(s) { teamRank[s.team] = s.rank; });
+
+    container.innerHTML = buildMatchesTab(champMatchCtx(), {
+        idPrefix: '',
+        // Alternating backgrounds by week ("Sem. 3")
+        groupOf: function(m) {
+            var semMatch = m.status.match(/Sem\.\s*(\d+)/);
+            return semMatch ? parseInt(semMatch[1]) : null;
+        },
+        badgeOf: function(m) {
+            var rH = teamRank[m.home] || 99;
+            var rA = teamRank[m.away] || 99;
+            if (rH <= 3 && rA <= 3) return '<span class="clash-badge clash-top3" title="Choc au sommet">\uD83D\uDD25</span>';
+            if (rH <= 5 && rA <= 5) return '<span class="clash-badge clash-top5" title="Affiche">\u26A1</span>';
+            return '';
+        }
+    });
+}
+
+// "Résultats" (folded) + "À venir" sections, shared by the championships and the Ginette.
+// ctx: { played, upcoming, teams }; opts: { idPrefix, groupOf(m) → number for alternating backgrounds, badgeOf(m) }
+function buildMatchesTab(ctx, opts) {
+    var teams = ctx.teams;
+    var playedId = opts.idPrefix + 'played-matches-content';
+    var upcomingId = opts.idPrefix + 'upcoming-matches-content';
+
     // Played matches
     let playedCards = '';
-    DATA.matchesPlayed.forEach(function(m) {
-        const homeTeam = DATA.teams[m.home];
-        const awayTeam = DATA.teams[m.away];
+    ctx.played.forEach(function(m) {
+        const homeTeam = teams[m.home];
+        const awayTeam = teams[m.away];
         if (!homeTeam || !awayTeam) return;
         const hasSets = Array.isArray(m.sets) && m.sets.length > 0;
-        playedCards += '<div class="match-card' + (hasSets ? ' match-card-clickable' : '') + '"' +
+        playedCards += '<div class="match-card' + (hasSets ? ' match-card-clickable' : '') + (m.forfeit ? ' match-card-forfeit' : '') + '"' +
             (hasSets ? ' onclick="toggleMatchDetail(this)" role="button" tabindex="0" aria-expanded="false"' +
                 ' onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();toggleMatchDetail(this);}"' : '') + '>' +
-            '<div class="match-date">' + esc(m.date) + '</div>' +
+            '<div class="match-date">' + esc(m.date) + (m.forfeit ? '<span class="forfeit-badge">Forfait</span>' : '') + '</div>' +
             '<div class="match-teams">' +
                 '<div class="match-team home">' +
                     '<span class="team-name">' + esc(homeTeam.name) + '</span>' +
@@ -631,7 +660,7 @@ function renderMatches() {
     });
 
     // Sort upcoming matches by date (N/C first)
-    var sortedUpcoming = DATA.matchesUpcoming.slice().sort(function(a, b) {
+    var sortedUpcoming = ctx.upcoming.slice().sort(function(a, b) {
         var da = parseFrDate(a.date);
         var db = parseFrDate(b.date);
         if (!da && !db) return 0;
@@ -640,24 +669,20 @@ function renderMatches() {
         return da - db;
     });
 
-    // Group semaines for alternating backgrounds
-    var semaineSet = new Set();
+    // Group (week or round) for alternating backgrounds
+    var groupSet = new Set();
     sortedUpcoming.forEach(function(m) {
-        var semMatch = m.status.match(/Sem\.\s*(\d+)/);
-        if (semMatch) semaineSet.add(parseInt(semMatch[1]));
+        var g = opts.groupOf(m);
+        if (g != null) groupSet.add(g);
     });
-    var semaineList = Array.from(semaineSet).sort(function(a, b) { return a - b; });
-    var semaineIndex = {};
-    semaineList.forEach(function(sem, i) { semaineIndex[sem] = i; });
-
-    // Build rank lookup for clash detection
-    var teamRank = {};
-    DATA.standings.forEach(function(s) { teamRank[s.team] = s.rank; });
+    var groupIndex = {};
+    Array.from(groupSet).sort(function(a, b) { return a - b; })
+        .forEach(function(g, i) { groupIndex[g] = i; });
 
     let upcomingCards = '';
     sortedUpcoming.forEach(function(m) {
-        const homeTeam = DATA.teams[m.home];
-        const awayTeam = DATA.teams[m.away];
+        const homeTeam = teams[m.home];
+        const awayTeam = teams[m.away];
         if (!homeTeam || !awayTeam) return;
         const isPostponed = m.status.includes('Report');
         const statusClass = isPostponed ? 'status-postponed' : 'status-upcoming';
@@ -666,25 +691,12 @@ function renderMatches() {
         if (isPostponed) {
             cardClasses += ' match-card-postponed';
         } else {
-            var semMatch = m.status.match(/Sem\.\s*(\d+)/);
-            if (semMatch) {
-                var idx = semaineIndex[parseInt(semMatch[1])];
-                if (idx % 2 === 0) cardClasses += ' match-card-sem-even';
-            }
-        }
-
-        // Clash badges
-        var rH = teamRank[m.home] || 99;
-        var rA = teamRank[m.away] || 99;
-        let clashBadge = '';
-        if (rH <= 3 && rA <= 3) {
-            clashBadge = '<span class="clash-badge clash-top3" title="Choc au sommet">\uD83D\uDD25</span>';
-        } else if (rH <= 5 && rA <= 5) {
-            clashBadge = '<span class="clash-badge clash-top5" title="Affiche">\u26A1</span>';
+            var g = opts.groupOf(m);
+            if (g != null && groupIndex[g] % 2 === 0) cardClasses += ' match-card-sem-even';
         }
 
         upcomingCards += '<div class="' + cardClasses + '">' +
-            '<div class="match-date">' + esc(m.date) + clashBadge + '</div>' +
+            '<div class="match-date">' + esc(m.date) + (opts.badgeOf ? opts.badgeOf(m) : '') + '</div>' +
             '<div class="match-teams">' +
                 '<div class="match-team home">' +
                     '<span class="team-name">' + esc(homeTeam.name) + '</span>' +
@@ -703,32 +715,31 @@ function renderMatches() {
     });
 
     // Part de la saison jouée / restante (sur le total des matchs du calendrier)
-    var nPlayed = DATA.matchesPlayed.length;
-    var nUpcoming = DATA.matchesUpcoming.length;
+    var nPlayed = ctx.played.length;
+    var nUpcoming = ctx.upcoming.length;
     var nTotal = nPlayed + nUpcoming;
     var pctPlayed = nTotal ? Math.round(nPlayed / nTotal * 100) : 0;
     var pctUpcoming = nTotal ? 100 - pctPlayed : 0;
 
-    container.innerHTML =
-        '<div class="matches-section">' +
-            '<div class="section-header header-collapsed" onclick="toggleMatchSection(\'played-matches-content\')">' +
+    return '<div class="matches-section">' +
+            '<div class="section-header header-collapsed" onclick="toggleMatchSection(\'' + playedId + '\')">' +
                 '<h3 class="section-title">R\u00e9sultats</h3>' +
                 '<span class="section-badge">' + nPlayed + ' matchs</span>' +
                 '<span class="section-badge">' + pctPlayed + ' % jou\u00e9s</span>' +
                 '<span class="section-arrow collapsed">&#9660;</span>' +
             '</div>' +
-            '<div id="played-matches-content" class="section-collapsible collapsed">' +
+            '<div id="' + playedId + '" class="section-collapsible collapsed">' +
                 playedCards +
             '</div>' +
         '</div>' +
         '<div class="matches-section">' +
-            '<div class="section-header" onclick="toggleMatchSection(\'upcoming-matches-content\')">' +
+            '<div class="section-header" onclick="toggleMatchSection(\'' + upcomingId + '\')">' +
                 '<h3 class="section-title">\u00c0 venir</h3>' +
                 '<span class="section-badge">' + nUpcoming + ' matchs</span>' +
                 '<span class="section-badge">' + pctUpcoming + ' % \u00e0 venir</span>' +
                 '<span class="section-arrow">&#9660;</span>' +
             '</div>' +
-            '<div id="upcoming-matches-content" class="section-collapsible">' +
+            '<div id="' + upcomingId + '" class="section-collapsible">' +
                 upcomingCards +
             '</div>' +
         '</div>';
@@ -855,75 +866,175 @@ var GINETTE_DIV_COLORS = {
     "argent": "#607d8b"
 };
 
-function renderGinetteMatchCards(matches) {
-    var html = '';
-    matches.forEach(function(m) {
-        var homeColor = GINETTE_DIV_COLORS[m.homeDivision] || '#999';
-        var awayColor = GINETTE_DIV_COLORS[m.awayDivision] || '#999';
-        var homeDivLabel = DIV_LABELS_JS[m.homeDivision] || m.homeDivision;
-        var awayDivLabel = DIV_LABELS_JS[m.awayDivision] || m.awayDivision;
-        var homeWin = m.winner === m.home;
-        var forfeit = m.forfeit;
-        var upcoming = m.upcoming === true || (m.winner == null && (m.homeSets == null || m.awaySets == null));
+// Ginette teams come from every division: logo (short + color) taken from the championship JSONs,
+// loaded once (loadGinetteTeamInfo). Keys 'g0', 'g1'… so the championship match/calendar code can be reused.
+var GINETTE_TEAM_INFO = null;   // team name → { short, color }
+var GINETTE_CTX = null;         // { played, upcoming, teams, keyOf }
 
-        var scoreDetail = '';
-        if (m.homeScores && m.homeScores.length > 0 && !forfeit) {
-            var setScores = [];
-            for (var i = 0; i < m.homeScores.length; i++) {
-                setScores.push(m.homeScores[i] + '-' + m.awayScores[i]);
-            }
-            scoreDetail = '<span class="ginette-set-detail">(' + setScores.join(', ') + ')</span>';
+var GINETTE_ROUND_ORDER = ['Tour 1', 'Tour 2', '1/8 Principale', '1/8 Consolante', '1/4 Principale', '1/4 Consolante',
+    '1/2 Principale', '1/2 Consolante', 'Finale Principale', 'Finale Consolante'];
+
+function ginetteRoundLabel(round) {
+    return String(round || '').replace(/^1\/8\b/, '1/8ème');
+}
+
+async function loadGinetteTeamInfo() {
+    if (GINETTE_TEAM_INFO) return;
+    var info = {};
+    var slugs = (CHAMPIONSHIPS ? CHAMPIONSHIPS.championships : [])
+        .filter(function(c) { return c.format !== 'coupe'; })
+        .map(function(c) { return c.slug; });
+    await Promise.all(slugs.map(async function(slug) {
+        try {
+            var resp = await fetch('data/' + slug + '.json', FETCH_FRESH);
+            if (!resp.ok) return;
+            var d = await resp.json();
+            Object.keys(d.teams || {}).forEach(function(k) {
+                var t = d.teams[k];
+                if (t && t.name && !info[t.name]) info[t.name] = { short: t.short, color: t.color };
+            });
+        } catch (e) { /* logo falls back to initials + division color */ }
+    }));
+    GINETTE_TEAM_INFO = info;
+}
+
+function ginetteInitials(name) {
+    var words = String(name).replace(/[^A-Za-zÀ-ÿ0-9 ]/g, ' ').split(/\s+/).filter(Boolean);
+    if (!words.length) return '?';
+    if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+    return (words[0][0] + words[1][0]).toUpperCase();
+}
+
+function buildGinetteCtx() {
+    var teams = {};
+    var keyByName = {};
+    var info = GINETTE_TEAM_INFO || {};
+    function keyOf(name, division) {
+        if (keyByName[name]) return keyByName[name];
+        var key = 'g' + Object.keys(keyByName).length;
+        keyByName[name] = key;
+        var i = info[name] || {};
+        teams[key] = {
+            name: name,
+            short: i.short || ginetteInitials(name),
+            color: i.color || GINETTE_DIV_COLORS[division] || '#999'
+        };
+        return key;
+    }
+    var played = [];
+    var upcoming = [];
+    GINETTE_DATA.matches.forEach(function(m, idx) {
+        var home = keyOf(m.home, m.homeDivision);
+        var away = keyOf(m.away, m.awayDivision);
+        var isUpcoming = m.upcoming === true || (m.winner == null && (m.homeSets == null || m.awaySets == null));
+        var label = ginetteRoundLabel(m.round);
+        var x = { date: m.date || 'N/C', time: m.time, home: home, away: away, round: m.round, order: idx };
+        if (isUpcoming) {
+            x.status = label;
+            upcoming.push(x);
+            return;
         }
-
-        var cardClass = 'match-card ginette-match-card';
-        if (forfeit) cardClass += ' ginette-match-forfeit';
-        if (upcoming) cardClass += ' ginette-match-upcoming';
-
-        var scoreHtml;
-        if (upcoming) {
-            scoreHtml = '<span class="ginette-vs">VS</span>';
-        } else {
-            scoreHtml =
-                '<span class="' + (homeWin ? 'winner' : 'loser') + '">' + m.homeSets + '</span>' +
-                '<span class="separator">-</span>' +
-                '<span class="' + (homeWin ? 'loser' : 'winner') + '">' + m.awaySets + '</span>';
+        x.scoreHome = m.homeSets;
+        x.scoreAway = m.awaySets;
+        x.homeWin = m.winner === m.home;
+        x.forfeit = !!m.forfeit;
+        x.status = label;
+        if (!m.forfeit && m.homeScores && m.homeScores.length) {
+            x.sets = m.homeScores.map(function(h, i) { return [h, m.awayScores[i]]; });
         }
-
-        // Infos date/lieu pour les matchs à venir
-        var venueHtml = '';
-        if (upcoming && (m.date || m.venue)) {
-            var dateLine = '';
-            if (m.date) {
-                dateLine = '<span class="ginette-finale-date">📅 ' + esc(m.date) + (m.time ? ' à ' + esc(m.time) : '') + '</span>';
-            }
-            var venueLine = '';
-            if (m.venue) {
-                venueLine = '<span class="ginette-finale-venue">📍 ' + esc(m.venue) + (m.address ? ' — ' + esc(m.address) : '') + '</span>';
-            }
-            var notesLine = m.notes ? '<span class="ginette-finale-notes">' + esc(m.notes) + '</span>' : '';
-            venueHtml = '<div class="ginette-finale-info">' + dateLine + venueLine + notesLine + '</div>';
-        }
-
-        html += '<div class="' + cardClass + '">' +
-            '<div class="match-teams">' +
-                '<div class="match-team home">' +
-                    '<span class="division-badge division-badge-sm" style="background: ' + homeColor + ';">' + esc(homeDivLabel) + '</span>' +
-                    '<span class="team-name">' + esc(m.home) + '</span>' +
-                '</div>' +
-                '<div class="match-score">' + scoreHtml + '</div>' +
-                '<div class="match-team away">' +
-                    '<span class="team-name">' + esc(m.away) + '</span>' +
-                    '<span class="division-badge division-badge-sm" style="background: ' + awayColor + ';">' + esc(awayDivLabel) + '</span>' +
-                '</div>' +
-            '</div>' +
-            '<div class="ginette-match-detail">' + scoreDetail +
-                (forfeit ? '<span class="ginette-forfeit-badge">Forfait</span>' : '') +
-                (upcoming ? '<span class="ginette-upcoming-badge">À venir</span>' : '') +
-            '</div>' +
-            venueHtml +
-        '</div>';
+        played.push(x);
     });
-    return html;
+    // Results: most recent first, as in the championships (round, then date)
+    function dateVal(x) { var d = parseFrDate(x.date); return d ? d.getTime() : 0; }
+    played.sort(function(a, b) {
+        return (GINETTE_ROUND_ORDER.indexOf(b.round) - GINETTE_ROUND_ORDER.indexOf(a.round)) ||
+            (dateVal(b) - dateVal(a)) || (a.order - b.order);
+    });
+
+    var css = '';
+    Object.keys(teams).forEach(function(k) { css += '.logo-' + k + ' { background: ' + teams[k].color + '; }\n'; });
+    var style = document.getElementById('ginette-team-styles');
+    if (!style) {
+        style = document.createElement('style');
+        style.id = 'ginette-team-styles';
+        document.head.appendChild(style);
+    }
+    style.textContent = css;
+
+    GINETTE_CTX = { played: played, upcoming: upcoming, teams: teams, keyOf: function(n) { return keyByName[n]; } };
+    return GINETTE_CTX;
+}
+
+// Matchs tab. Before the 1/8 draw: just Résultats + À venir for the Tours.
+// Once the 1/8 are drawn: three folding menus (Tours 1-2, Principale, Consolante), each with Résultats + À venir.
+var GINETTE_PHASES = [
+    { id: 'tours', label: 'Tours 1-2', match: function(r) { return r === 'Tour 1' || r === 'Tour 2'; } },
+    { id: 'principale', label: 'Principale', match: function(r) { return / Principale$/.test(r); } },
+    { id: 'consolante', label: 'Consolante', match: function(r) { return / Consolante$/.test(r); } }
+];
+var ginettePhaseOpen = null;   // phase id → open (kept across re-renders)
+
+function ginettePhaseStatus(round) {
+    // Within a phase the suffix is redundant: "1/8 Principale" → "1/8ème"
+    return ginetteRoundLabel(String(round).replace(/ (Principale|Consolante)$/, ''));
+}
+
+function renderGinetteMatches() {
+    var container = document.getElementById('ginette-matchs-content');
+    if (!container || !GINETTE_CTX) return;
+
+    var phases = GINETTE_PHASES.map(function(ph) {
+        function pick(list) {
+            return list.filter(function(m) { return ph.match(m.round); })
+                .map(function(m) { return Object.assign({}, m, { status: ginettePhaseStatus(m.round) }); });
+        }
+        return { ph: ph, ctx: { played: pick(GINETTE_CTX.played), upcoming: pick(GINETTE_CTX.upcoming), teams: GINETTE_CTX.teams } };
+    });
+    function body(x) {
+        return buildMatchesTab(x.ctx, {
+            idPrefix: 'ginette-' + x.ph.id + '-',
+            // Alternating backgrounds by round
+            groupOf: function(m) {
+                var i = GINETTE_ROUND_ORDER.indexOf(m.round);
+                return i === -1 ? null : i;
+            }
+        });
+    }
+
+    var drawn = phases.slice(1).some(function(x) { return x.ctx.played.length || x.ctx.upcoming.length; });
+    if (!drawn) {
+        container.innerHTML = body(phases[0]);
+        return;
+    }
+
+    // Open by default: the phase in progress (matches to come), else the last one with results
+    if (!ginettePhaseOpen) {
+        var current = phases.find(function(x) { return x.ctx.upcoming.length; }) ||
+            phases.slice().reverse().find(function(x) { return x.ctx.played.length; }) || phases[0];
+        ginettePhaseOpen = {};
+        ginettePhaseOpen[current.ph.id] = true;
+    }
+
+    container.innerHTML = phases.map(function(x) {
+        var open = !!ginettePhaseOpen[x.ph.id];
+        var id = 'ginette-phase-' + x.ph.id;
+        var n = x.ctx.played.length + x.ctx.upcoming.length;
+        return '<div class="matches-section ginette-phase">' +
+            '<div class="section-header ginette-phase-header' + (open ? '' : ' header-collapsed') + '" onclick="toggleGinettePhase(\'' + x.ph.id + '\')">' +
+                '<h3 class="section-title">' + x.ph.label + '</h3>' +
+                '<span class="section-badge">' + n + ' matchs</span>' +
+                '<span class="section-arrow' + (open ? '' : ' collapsed') + '">&#9660;</span>' +
+            '</div>' +
+            '<div id="' + id + '" class="section-collapsible ginette-phase-body' + (open ? '' : ' collapsed') + '">' +
+                (n ? body(x) : '<p class="ginette-standings-note">Aucun match pour l’instant.</p>') +
+            '</div>' +
+        '</div>';
+    }).join('');
+}
+
+function toggleGinettePhase(phaseId) {
+    ginettePhaseOpen[phaseId] = !ginettePhaseOpen[phaseId];
+    toggleMatchSection('ginette-phase-' + phaseId);
 }
 
 // Classement après les tours 1 et 2, calculé comme en championnat :
@@ -1026,7 +1137,9 @@ function renderGinetteStandings() {
         var divLabel = DIV_LABELS_JS[t.division] || t.division || '';
         var played = t.mj > 0;
         var zoneBreak = (t.rank === 17 || t.rank === 33) ? ' ginette-zone-break' : '';
-        rows += '<tr class="standings-row ginette-zone-' + t.zone + zoneBreak + (expanded ? ' expanded' : '') + '" data-team="' + esc(key) + '">' +
+        var calOpen = !!standingsCalendarOpen[key];
+        var teamKey = GINETTE_CTX ? GINETTE_CTX.keyOf(t.team) : null;
+        rows += '<tr class="standings-row ginette-zone-' + t.zone + zoneBreak + (expanded ? ' expanded' : '') + (calOpen ? ' cal-open' : '') + '" data-team="' + esc(key) + '">' +
             '<td>' +
                 '<div class="team-cell">' +
                     '<div class="rank-indicator"></div>' +
@@ -1067,7 +1180,11 @@ function renderGinetteStandings() {
                     '<span class="detail-label">Matchs</span>' + resultsHtml(t) +
                 '</div>' +
             '</td>' +
-        '</tr>';
+        '</tr>' +
+        // Desktop: the team's Ginette calendar, as in the championships
+        (teamKey ? '<tr class="standings-calendar ginette-zone-' + t.zone + (calOpen ? ' open' : '') + '" data-team="' + esc(key) + '">' +
+            '<td colspan="12">' + buildTeamCalendar(teamKey, GINETTE_CTX) + '</td>' +
+        '</tr>' : '');
     });
 
     container.innerHTML =
@@ -1083,158 +1200,6 @@ function renderGinetteStandings() {
                 '<tbody>' + rows + '</tbody>' +
             '</table>' +
         '</div>';
-}
-
-function renderGinetteClassement() {
-    if (!GINETTE_DATA) return;
-    var matches = GINETTE_DATA.matches;
-
-    var tour1 = matches.filter(function(m) { return m.round === 'Tour 1'; });
-    var tour2 = matches.filter(function(m) { return m.round === 'Tour 2'; });
-    var principale = matches.filter(function(m) { return m.round === '1/8 Principale'; });
-    var consolante = matches.filter(function(m) { return m.round === '1/8 Consolante'; });
-    var quartPrincipale = matches.filter(function(m) { return m.round === '1/4 Principale'; });
-    var quartConsolante = matches.filter(function(m) { return m.round === '1/4 Consolante'; });
-    var demiPrincipale = matches.filter(function(m) { return m.round === '1/2 Principale'; });
-    var demiConsolante = matches.filter(function(m) { return m.round === '1/2 Consolante'; });
-    var finalePrincipale = matches.filter(function(m) { return m.round === 'Finale Principale'; });
-    var finaleConsolante = matches.filter(function(m) { return m.round === 'Finale Consolante'; });
-
-    // Tour 1
-    var tour1Container = document.getElementById('ginette-tour1');
-    if (tour1Container) {
-        tour1Container.innerHTML =
-            '<div class="matches-section">' +
-                '<div class="section-header" onclick="toggleMatchSection(\'ginette-tour1-matches\')">' +
-                    '<h3 class="section-title">Tour 1</h3>' +
-                    '<span class="section-badge">' + tour1.length + ' matchs</span>' +
-                    '<span class="section-arrow">&#9660;</span>' +
-                '</div>' +
-                '<div id="ginette-tour1-matches" class="section-collapsible">' +
-                    renderGinetteMatchCards(tour1) +
-                '</div>' +
-            '</div>';
-    }
-
-    // Tour 2
-    var tour2Container = document.getElementById('ginette-tour2');
-    if (tour2Container) {
-        tour2Container.innerHTML =
-            '<div class="matches-section">' +
-                '<div class="section-header" onclick="toggleMatchSection(\'ginette-tour2-matches\')">' +
-                    '<h3 class="section-title">Tour 2</h3>' +
-                    '<span class="section-badge">' + tour2.length + ' matchs</span>' +
-                    '<span class="section-arrow">&#9660;</span>' +
-                '</div>' +
-                '<div id="ginette-tour2-matches" class="section-collapsible">' +
-                    renderGinetteMatchCards(tour2) +
-                '</div>' +
-            '</div>';
-    }
-
-    // 1/8ème de finale
-    var huitContainer = document.getElementById('ginette-8eme');
-    if (huitContainer) {
-        huitContainer.innerHTML =
-            '<div class="matches-section">' +
-                '<div class="section-header" onclick="toggleMatchSection(\'ginette-principale-matches\')">' +
-                    '<h3 class="section-title">Principale</h3>' +
-                    '<span class="section-badge">' + principale.length + ' matchs</span>' +
-                    '<span class="section-arrow">&#9660;</span>' +
-                '</div>' +
-                '<div id="ginette-principale-matches" class="section-collapsible">' +
-                    renderGinetteMatchCards(principale) +
-                '</div>' +
-            '</div>' +
-            '<div class="matches-section" style="margin-top: 16px;">' +
-                '<div class="section-header" onclick="toggleMatchSection(\'ginette-consolante-matches\')">' +
-                    '<h3 class="section-title">Consolante</h3>' +
-                    '<span class="section-badge">' + consolante.length + ' matchs</span>' +
-                    '<span class="section-arrow">&#9660;</span>' +
-                '</div>' +
-                '<div id="ginette-consolante-matches" class="section-collapsible">' +
-                    renderGinetteMatchCards(consolante) +
-                '</div>' +
-            '</div>';
-    }
-
-    // 1/4 de finale
-    var quartContainer = document.getElementById('ginette-quart');
-    if (quartContainer) {
-        quartContainer.innerHTML =
-            '<div class="matches-section">' +
-                '<div class="section-header" onclick="toggleMatchSection(\'ginette-quart-principale-matches\')">' +
-                    '<h3 class="section-title">Principale</h3>' +
-                    '<span class="section-badge">' + quartPrincipale.length + ' matchs</span>' +
-                    '<span class="section-arrow">&#9660;</span>' +
-                '</div>' +
-                '<div id="ginette-quart-principale-matches" class="section-collapsible">' +
-                    renderGinetteMatchCards(quartPrincipale) +
-                '</div>' +
-            '</div>' +
-            '<div class="matches-section" style="margin-top: 16px;">' +
-                '<div class="section-header" onclick="toggleMatchSection(\'ginette-quart-consolante-matches\')">' +
-                    '<h3 class="section-title">Consolante</h3>' +
-                    '<span class="section-badge">' + quartConsolante.length + ' matchs</span>' +
-                    '<span class="section-arrow">&#9660;</span>' +
-                '</div>' +
-                '<div id="ginette-quart-consolante-matches" class="section-collapsible">' +
-                    renderGinetteMatchCards(quartConsolante) +
-                '</div>' +
-            '</div>';
-    }
-
-    // 1/2 finale
-    var demiContainer = document.getElementById('ginette-demi');
-    if (demiContainer) {
-        demiContainer.innerHTML =
-            '<div class="matches-section">' +
-                '<div class="section-header" onclick="toggleMatchSection(\'ginette-demi-principale-matches\')">' +
-                    '<h3 class="section-title">Principale</h3>' +
-                    '<span class="section-badge">' + demiPrincipale.length + ' matchs</span>' +
-                    '<span class="section-arrow">&#9660;</span>' +
-                '</div>' +
-                '<div id="ginette-demi-principale-matches" class="section-collapsible">' +
-                    renderGinetteMatchCards(demiPrincipale) +
-                '</div>' +
-            '</div>' +
-            '<div class="matches-section" style="margin-top: 16px;">' +
-                '<div class="section-header" onclick="toggleMatchSection(\'ginette-demi-consolante-matches\')">' +
-                    '<h3 class="section-title">Consolante</h3>' +
-                    '<span class="section-badge">' + demiConsolante.length + ' matchs</span>' +
-                    '<span class="section-arrow">&#9660;</span>' +
-                '</div>' +
-                '<div id="ginette-demi-consolante-matches" class="section-collapsible">' +
-                    renderGinetteMatchCards(demiConsolante) +
-                '</div>' +
-            '</div>';
-    }
-
-    // Finale
-    var finaleContainer = document.getElementById('ginette-finale');
-    if (finaleContainer) {
-        finaleContainer.innerHTML =
-            '<div class="matches-section">' +
-                '<div class="section-header" onclick="toggleMatchSection(\'ginette-finale-principale-matches\')">' +
-                    '<h3 class="section-title">Principale</h3>' +
-                    '<span class="section-badge">' + finalePrincipale.length + ' match' + (finalePrincipale.length > 1 ? 's' : '') + '</span>' +
-                    '<span class="section-arrow">&#9660;</span>' +
-                '</div>' +
-                '<div id="ginette-finale-principale-matches" class="section-collapsible">' +
-                    renderGinetteMatchCards(finalePrincipale) +
-                '</div>' +
-            '</div>' +
-            '<div class="matches-section" style="margin-top: 16px;">' +
-                '<div class="section-header" onclick="toggleMatchSection(\'ginette-finale-consolante-matches\')">' +
-                    '<h3 class="section-title">Consolante</h3>' +
-                    '<span class="section-badge">' + finaleConsolante.length + ' match' + (finaleConsolante.length > 1 ? 's' : '') + '</span>' +
-                    '<span class="section-arrow">&#9660;</span>' +
-                '</div>' +
-                '<div id="ginette-finale-consolante-matches" class="section-collapsible">' +
-                    renderGinetteMatchCards(finaleConsolante) +
-                '</div>' +
-            '</div>';
-    }
 }
 
 function renderGinette() {
@@ -1590,8 +1555,12 @@ document.addEventListener('click', function(e) {
     var row = e.target.closest('.standings-row');
     if (!row || window.matchMedia('(max-width: 760px)').matches) return;
     var team = row.getAttribute('data-team');
-    var cal = row.parentNode.querySelector('.standings-calendar[data-team="' + team + '"]');
-    if (!cal) return;   // e.g. Ginette standings: no calendar
+    var cal = row.nextElementSibling;
+    while (cal && !cal.classList.contains('standings-calendar')) {
+        if (cal.classList.contains('standings-row')) { cal = null; break; }
+        cal = cal.nextElementSibling;
+    }
+    if (!cal) return;
     standingsCalendarOpen[team] = !standingsCalendarOpen[team];
     row.classList.toggle('cal-open', standingsCalendarOpen[team]);
     cal.classList.toggle('open', standingsCalendarOpen[team]);
