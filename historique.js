@@ -5691,8 +5691,10 @@ const BilanView = {
                 currentRoleMap[sub.player1] = r1;
                 currentRoleMap[sub.player2] = r2;
             } else {
-                // Substitution normale : playerOut sort, playerIn entre a la meme position
-                var inheritedRole = posRoles[sub.position] || currentRoleMap[sub.playerOut] || 'Autre';
+                // Substitution normale : playerOut sort, playerIn reprend son poste.
+                // V29.69 : le poste du sortant prime sur sub.position, parfois incohérent
+                // (Kiki Team 2025-26 S3 : Omar, passeur, noté position 1 → doublon R4).
+                var inheritedRole = currentRoleMap[sub.playerOut] || posRoles[sub.position] || 'Autre';
                 delete currentRoleMap[sub.playerOut];
                 if (sub.playerIn) currentRoleMap[sub.playerIn] = inheritedRole;
             }
@@ -6776,32 +6778,114 @@ const ImpactView = {
         var calc = PlusMinusCalculator;
         var byRole = {};
         var rosterSum = {}, rosterW = {};
+        var exact = {};
+        Object.keys(this.AWAY_ROLE_ROWS).forEach(function(r) {
+            exact[self.AWAY_ROLE_ROWS[r]] = { ptsPlayed: 0, teamScored: 0, teamConceded: 0 };
+        });
+        function add(rowName, src, f, rip) {
+            if (!byRole[rowName]) { byRole[rowName] = calc._initRecord(); rosterSum[rowName] = 0; rosterW[rowName] = 0; }
+            var dst = byRole[rowName];
+            calc.RAW_FIELDS.forEach(function(k) { dst[k] += (src[k] || 0) * f; });
+            if (rip > 0) {
+                rosterSum[rowName] += rip * src.ptsPlayed * f;
+                rosterW[rowName] += src.ptsPlayed * f;
+            }
+        }
         matches.forEach(function(match) {
             var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
             var rallies = 0;
             completedSets.forEach(function(s) { if (s.points) rallies += s.points.length; });
             if (rallies === 0) return;
-            var data = calc.compute(completedSets, 'away');
-            var players = Object.keys(data);
-            if (players.length === 0) return;
-            var roles = self._awayRoles(match);
-            var rosterIP = self._computeRosterIP(match, 'away', players, self._ensureOpponentIP(match.opponent));
-            players.forEach(function(name) {
-                var role = roles[name] && roles[name].primaryRole;
-                var rowName = self.AWAY_ROLE_ROWS[role] || 'Sans poste';
-                if (!byRole[rowName]) { byRole[rowName] = calc._initRecord(); rosterSum[rowName] = 0; rosterW[rowName] = 0; }
-                var dst = byRole[rowName], src = data[name];
-                calc.RAW_FIELDS.forEach(function(k) { dst[k] += src[k] || 0; });
-                if (rosterIP[name] > 0) {
-                    rosterSum[rowName] += rosterIP[name] * src.ptsPlayed;
-                    rosterW[rowName] += src.ptsPlayed;
+            var matchRoles = self._awayRoles(match);
+            var allPlayers = Object.keys(calc.compute(completedSets, 'away'));
+            var rosterIP = self._computeRosterIP(match, 'away', allPlayers, self._ensureOpponentIP(match.opponent));
+            // Set par set : chaque point est rattache au poste que le joueur occupait
+            // a ce moment-la (un joueur peut changer de poste d'un set a l'autre ou en cours de set)
+            completedSets.forEach(function(set) {
+                var data = calc.compute([set], 'away');
+                // Chaque poste est occupe a chaque point : points joues et +/- d'un poste
+                // = ceux de l'equipe sur le set (evite les arrondis des changements de poste)
+                var setPts = 0, setScored = 0, setConceded = 0;
+                if (set.points && set.points.length > 0) {
+                    // Meme regle que PlusMinusCalculator.compute : point a Jen si son score monte
+                    setPts = set.points.length;
+                    set.points.forEach(function(pt, pi) {
+                        var prevHome = pi > 0 ? set.points[pi - 1].homeScore : (set.initialHomeScore || 0);
+                        if (pt.homeScore > prevHome) setConceded++; else setScored++;
+                    });
+                } else if (set.initialAwayLineup || set.awayLineup) {
+                    setScored = Math.max(set.awayScore || 0, set.finalAwayScore || 0);
+                    setConceded = Math.max(set.homeScore || 0, set.finalHomeScore || 0);
+                    setPts = setScored + setConceded;
                 }
+                Object.keys(exact).forEach(function(r) {
+                    exact[r].ptsPlayed += setPts; exact[r].teamScored += setScored; exact[r].teamConceded += setConceded;
+                });
+                var ptsByRole = {}; // name -> { role: nbPoints }
+                if (set.points && set.points.length > 0) {
+                    var iv = BilanView.buildRoleIntervals(set, 'away');
+                    Object.keys(iv).forEach(function(name) {
+                        iv[name].forEach(function(it) {
+                            if (!it.role || it.end <= it.start) return;
+                            if (!ptsByRole[name]) ptsByRole[name] = {};
+                            ptsByRole[name][it.role] = (ptsByRole[name][it.role] || 0) + (it.end - it.start);
+                        });
+                    });
+                } else {
+                    var lu = set.initialAwayLineup || set.awayLineup || {};
+                    Object.keys(lu).forEach(function(pos) {
+                        var role = BilanView.POSITION_ROLES_AWAY[pos];
+                        if (lu[pos] && role) { ptsByRole[lu[pos]] = {}; ptsByRole[lu[pos]][role] = 1; }
+                    });
+                }
+                // Points de chaque poste deja couverts par les joueurs au poste connu
+                var nPts = (set.points && set.points.length) || 0;
+                var roleFill = { Passeur: 0, R4: 0, Pointu: 0, Centre: 0 };
+                var known = [], unknown = [];
+                Object.keys(data).forEach(function(name) {
+                    var src = data[name];
+                    if (!src.ptsPlayed && !src.setsPlayed) return;
+                    var split = ptsByRole[name];
+                    var total = 0;
+                    if (split) Object.keys(split).forEach(function(r) { total += split[r]; });
+                    if (!split || total === 0) { unknown.push(name); return; }
+                    known.push(name);
+                    Object.keys(split).forEach(function(role) {
+                        var f = split[role] / total;
+                        if (roleFill[role] !== undefined) roleFill[role] += src.ptsPlayed * f;
+                        add(self.AWAY_ROLE_ROWS[role] || 'Sans poste', src, f, rosterIP[name] || 0);
+                    });
+                });
+                // Remplacant non saisi dans les substitutions (vu seulement dans les rallies) :
+                // il a pris le poste laisse vacant, celui dont il manque le plus de points
+                unknown.sort(function(a, b) { return data[b].ptsPlayed - data[a].ptsPlayed; });
+                unknown.forEach(function(name) {
+                    var src = data[name];
+                    var role = null;
+                    if (nPts > 0) {
+                        var best = 0;
+                        Object.keys(roleFill).forEach(function(r) {
+                            var gap = nPts - roleFill[r];
+                            if (gap > best) { best = gap; role = r; }
+                        });
+                    }
+                    if (!role) role = matchRoles[name] && matchRoles[name].primaryRole;
+                    if (role && roleFill[role] !== undefined) roleFill[role] += src.ptsPlayed;
+                    add(self.AWAY_ROLE_ROWS[role] || 'Sans poste', src, 1, rosterIP[name] || 0);
+                });
             });
         });
         var rowNames = Object.keys(byRole);
         if (rowNames.length === 0) return null;
         var playerRoles = {};
+        // Changement de poste en cours de set : stats reparties au prorata des points,
+        // on arrondit les compteurs (les sets proratises restent decimaux)
+        var KEEP_DECIMAL = { proratedSets: 1, filmedProratedSets: 1, setsPlayed: 1, recSumAdv: 1 };
         rowNames.forEach(function(rowName) {
+            calc.RAW_FIELDS.forEach(function(k) {
+                if (!KEEP_DECIMAL[k]) byRole[rowName][k] = Math.round(byRole[rowName][k]);
+            });
+            if (exact[rowName]) Object.assign(byRole[rowName], exact[rowName]);
             calc._computeDerived(byRole[rowName]);
             byRole[rowName].rosterIP = rosterW[rowName] > 0 ? Math.round(rosterSum[rowName] / rosterW[rowName]) : 0;
             var role = Object.keys(self.AWAY_ROLE_ROWS).filter(function(r) { return self.AWAY_ROLE_ROWS[r] === rowName; })[0];
