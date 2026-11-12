@@ -6727,6 +6727,31 @@ const ImpactView = {
         return ips;
     },
 
+    // Postes adverses d'un match. getPlayerRoles ne voit que la feuille de match
+    // et le lineup final : un remplacant entre puis ressorti dans le meme set
+    // n'y figure pas. On complete avec le poste occupe point par point (substitutions).
+    _awayRoles(match) {
+        var roles = BilanView.getPlayerRoles(match, 'away');
+        var pts = {};
+        (match.sets || []).filter(function(s) { return s.completed; }).forEach(function(set) {
+            var iv = BilanView.buildRoleIntervals(set, 'away');
+            Object.keys(iv).forEach(function(name) {
+                if (roles[name] && roles[name].primaryRole) return;
+                iv[name].forEach(function(it) {
+                    if (!it.role) return;
+                    if (!pts[name]) pts[name] = {};
+                    pts[name][it.role] = (pts[name][it.role] || 0) + Math.max(1, it.end - it.start);
+                });
+            });
+        });
+        Object.keys(pts).forEach(function(name) {
+            var r = pts[name];
+            var primary = Object.keys(r).sort(function(a, b) { return r[b] - r[a]; })[0];
+            roles[name] = { primaryRole: primary, roles: r };
+        });
+        return roles;
+    },
+
     // Impact de l'equipe adverse sur un match (une ligne par joueur adverse)
     _buildAwayMatch(match, completedSets) {
         var data = PlusMinusCalculator.compute(completedSets, 'away');
@@ -6736,7 +6761,7 @@ const ImpactView = {
         players.forEach(function(name) { data[name].rosterIP = rosterIP[name] || 0; });
         return {
             data: data,
-            playerRoles: BilanView.getPlayerRoles(match, 'away'),
+            playerRoles: this._awayRoles(match),
             label: match.opponent || 'Adversaire'
         };
     },
@@ -6759,7 +6784,7 @@ const ImpactView = {
             var data = calc.compute(completedSets, 'away');
             var players = Object.keys(data);
             if (players.length === 0) return;
-            var roles = BilanView.getPlayerRoles(match, 'away');
+            var roles = self._awayRoles(match);
             var rosterIP = self._computeRosterIP(match, 'away', players, self._ensureOpponentIP(match.opponent));
             players.forEach(function(name) {
                 var role = roles[name] && roles[name].primaryRole;
