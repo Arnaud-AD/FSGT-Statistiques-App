@@ -965,19 +965,17 @@ function buildGinetteCtx() {
     return GINETTE_CTX;
 }
 
-// Matchs tab: three phases (Tours 1-2, Principale, Consolante), each with Résultats + À venir
+// Matchs tab. Before the 1/8 draw: just Résultats + À venir for the Tours.
+// Once the 1/8 are drawn: three folding menus (Tours 1-2, Principale, Consolante), each with Résultats + À venir.
 var GINETTE_PHASES = [
-    { id: 'tours', label: 'Tours 1-2', match: function(r) { return r === 'Tour 1' || r === 'Tour 2'; },
-      empty: '' },
-    { id: 'principale', label: 'Principale', match: function(r) { return / Principale$/.test(r); },
-      empty: 'Le tableau principal (1-16) sera connu après le Tour 2.' },
-    { id: 'consolante', label: 'Consolante', match: function(r) { return / Consolante$/.test(r); },
-      empty: 'Le tableau consolante (17-32) sera connu après le Tour 2.' }
+    { id: 'tours', label: 'Tours 1-2', match: function(r) { return r === 'Tour 1' || r === 'Tour 2'; } },
+    { id: 'principale', label: 'Principale', match: function(r) { return / Principale$/.test(r); } },
+    { id: 'consolante', label: 'Consolante', match: function(r) { return / Consolante$/.test(r); } }
 ];
-var ginetteMatchPhase = null;   // phase shown (kept across re-renders)
+var ginettePhaseOpen = null;   // phase id → open (kept across re-renders)
 
 function ginettePhaseStatus(round) {
-    // Within a phase tab the suffix is redundant: "1/8 Principale" → "1/8ème"
+    // Within a phase the suffix is redundant: "1/8 Principale" → "1/8ème"
     return ginetteRoundLabel(String(round).replace(/ (Principale|Consolante)$/, ''));
 }
 
@@ -992,45 +990,51 @@ function renderGinetteMatches() {
         }
         return { ph: ph, ctx: { played: pick(GINETTE_CTX.played), upcoming: pick(GINETTE_CTX.upcoming), teams: GINETTE_CTX.teams } };
     });
-
-    // Default: the phase in progress (first one with matches to come), else the last one with results
-    if (!ginetteMatchPhase) {
-        var current = phases.find(function(x) { return x.ctx.upcoming.length; }) ||
-            phases.slice().reverse().find(function(x) { return x.ctx.played.length; }) || phases[0];
-        ginetteMatchPhase = current.ph.id;
+    function body(x) {
+        return buildMatchesTab(x.ctx, {
+            idPrefix: 'ginette-' + x.ph.id + '-',
+            // Alternating backgrounds by round
+            groupOf: function(m) {
+                var i = GINETTE_ROUND_ORDER.indexOf(m.round);
+                return i === -1 ? null : i;
+            }
+        });
     }
 
-    var tabs = '<div class="sub-tabs ginette-phase-tabs">' + phases.map(function(x) {
-        return '<button class="sub-tab' + (x.ph.id === ginetteMatchPhase ? ' active' : '') + '" onclick="showGinetteMatchPhase(\'' + x.ph.id + '\', this)">' + x.ph.label + '</button>';
-    }).join('') + '</div>';
+    var drawn = phases.slice(1).some(function(x) { return x.ctx.played.length || x.ctx.upcoming.length; });
+    if (!drawn) {
+        container.innerHTML = body(phases[0]);
+        return;
+    }
 
-    var panels = phases.map(function(x) {
-        var body;
-        if (!x.ctx.played.length && !x.ctx.upcoming.length) {
-            body = '<p class="ginette-standings-note">' + esc(x.ph.empty || 'Aucun match pour l’instant.') + '</p>';
-        } else {
-            body = buildMatchesTab(x.ctx, {
-                idPrefix: 'ginette-' + x.ph.id + '-',
-                // Alternating backgrounds by round
-                groupOf: function(m) {
-                    var i = GINETTE_ROUND_ORDER.indexOf(m.round);
-                    return i === -1 ? null : i;
-                }
-            });
-        }
-        return '<div class="ginette-phase-content' + (x.ph.id === ginetteMatchPhase ? ' active' : '') + '" data-phase="' + x.ph.id + '">' + body + '</div>';
+    // Open by default: the phase in progress (matches to come), else the last one with results
+    if (!ginettePhaseOpen) {
+        var current = phases.find(function(x) { return x.ctx.upcoming.length; }) ||
+            phases.slice().reverse().find(function(x) { return x.ctx.played.length; }) || phases[0];
+        ginettePhaseOpen = {};
+        ginettePhaseOpen[current.ph.id] = true;
+    }
+
+    container.innerHTML = phases.map(function(x) {
+        var open = !!ginettePhaseOpen[x.ph.id];
+        var id = 'ginette-phase-' + x.ph.id;
+        var n = x.ctx.played.length + x.ctx.upcoming.length;
+        return '<div class="matches-section ginette-phase">' +
+            '<div class="section-header ginette-phase-header' + (open ? '' : ' header-collapsed') + '" onclick="toggleGinettePhase(\'' + x.ph.id + '\')">' +
+                '<h3 class="section-title">' + x.ph.label + '</h3>' +
+                '<span class="section-badge">' + n + ' matchs</span>' +
+                '<span class="section-arrow' + (open ? '' : ' collapsed') + '">&#9660;</span>' +
+            '</div>' +
+            '<div id="' + id + '" class="section-collapsible ginette-phase-body' + (open ? '' : ' collapsed') + '">' +
+                (n ? body(x) : '<p class="ginette-standings-note">Aucun match pour l’instant.</p>') +
+            '</div>' +
+        '</div>';
     }).join('');
-
-    container.innerHTML = tabs + panels;
 }
 
-function showGinetteMatchPhase(phaseId, btn) {
-    ginetteMatchPhase = phaseId;
-    btn.parentElement.querySelectorAll('.sub-tab').forEach(function(t) { t.classList.remove('active'); });
-    btn.classList.add('active');
-    document.querySelectorAll('.ginette-phase-content').forEach(function(c) {
-        c.classList.toggle('active', c.getAttribute('data-phase') === phaseId);
-    });
+function toggleGinettePhase(phaseId) {
+    ginettePhaseOpen[phaseId] = !ginettePhaseOpen[phaseId];
+    toggleMatchSection('ginette-phase-' + phaseId);
 }
 
 // Classement après les tours 1 et 2, calculé comme en championnat :

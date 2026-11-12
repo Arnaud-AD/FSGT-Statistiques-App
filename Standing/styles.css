@@ -1690,6 +1690,19 @@
             background: rgba(249, 115, 22, 0.1);
         }
 
-        /* Ginette Matchs: Tours 1-2 / Principale / Consolante */
-        .ginette-phase-content { display: none; }
-        .ginette-phase-content.active { display: block; }
+        /* Ginette Matchs: folding menus Tours 1-2 / Principale / Consolante, each with Résultats + À venir */
+        .ginette-phase > .ginette-phase-header {
+            background: var(--text-primary);
+            border-bottom-color: var(--text-primary);
+        }
+        .ginette-phase > .ginette-phase-header:hover { background: #3c4043; }
+        .ginette-phase > .ginette-phase-header .section-title,
+        .ginette-phase > .ginette-phase-header .section-arrow { color: #fff; }
+        .ginette-phase > .ginette-phase-header .section-badge {
+            background: transparent;
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        .ginette-phase-body { padding: 12px 12px 0; max-height: 20000px; }
+        .ginette-phase-body.collapsed { padding: 0 12px; }
+        .ginette-phase-body > .ginette-standings-note { margin: 0 0 12px; }
