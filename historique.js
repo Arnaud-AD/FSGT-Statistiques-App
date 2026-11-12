@@ -12636,8 +12636,21 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Rendu initial avec données locales (rapide)
     TabNav.switchTo(TabNav.currentTab);
 
+    // V29.64 : écran de chargement. Sans données locales (visiteurs), on garde la barre
+    // de chargement jusqu'à la réponse Firebase au lieu d'afficher « Aucun match enregistré ».
+    // Avec des données locales (appareil admin), affichage immédiat comme avant.
+    // Filet de sécurité : au bout de 20 s, on montre ce qu'on a (le rafraîchissement suit).
+    var hideLoader = function() { document.body.classList.remove('hist-is-loading'); };
+    var waitForFirebase = HistoriqueData.getCompletedMatches().length === 0
+        && typeof FirebaseSync !== 'undefined' && FirebaseSync.isConfigured();
+    var loaderTimer = null;
+    if (waitForFirebase) loaderTimer = setTimeout(hideLoader, 20000);
+    else hideLoader();
+
     // Charger les données Firebase en arrière-plan puis rafraîchir
     const hasFirebaseData = await HistoriqueData.loadFromFirebase();
+    if (loaderTimer) clearTimeout(loaderTimer);
+    hideLoader();
     if (hasFirebaseData) {
         MatchStatsView._rendered = false;
         YearStatsView._rendered = false;
