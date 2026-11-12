@@ -1515,12 +1515,6 @@
                 font-variant-numeric: tabular-nums;
             }
 
-            .detail-diff {
-                font-weight: 700;
-            }
-
-            .detail-diff.diff-pos { color: var(--win-color); }
-            .detail-diff.diff-neg { color: var(--loss-color); }
 
             @media (max-width: 360px) {
                 .standings-detail td { padding-left: 24px; }

@@ -431,12 +431,11 @@ function renderStandings() {
     '</div>';
 }
 
-// Mobile detail: signed difference (DS, DP), green when positive, red when negative
+// Mobile detail: signed difference (DS, DP)
 function detailDiffStat(label, value) {
     var n = parseInt(value, 10) || 0;
-    var cls = n > 0 ? ' diff-pos' : (n < 0 ? ' diff-neg' : '');
     var txt = n > 0 ? '+' + n : String(n);
-    return '<span class="detail-stat detail-diff' + cls + '"><em>' + label + '</em> ' + txt + '</span>';
+    return '<span class="detail-stat"><em>' + label + '</em> ' + txt + '</span>';
 }
 
 // "dd/mm/yyyy" → Date (null for "N/C" or anything unparsable)
