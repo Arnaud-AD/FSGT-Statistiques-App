@@ -140,6 +140,15 @@ const FirebaseSync = {
                 return;
             }
 
+            // V17.4 : match terminé des deux côtés → Firebase gagne toujours.
+            // Les corrections de données (réparations en console admin) ne sont faites que dans
+            // Firestore et ne changent souvent ni le nombre de sets ni le nombre de points :
+            // sans cette règle, l'appareil qui a saisi le match gardait sa vieille copie locale.
+            if (fbMatch.status === 'completed' && localMatch.status === 'completed') {
+                merged.set(fbMatch.id, fbMatch);
+                return;
+            }
+
             // Match existe des deux côtés → garder le plus avancé
             const localSets = localMatch.sets?.length || 0;
             const fbSets = fbMatch.sets?.length || 0;
