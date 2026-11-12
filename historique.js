@@ -7263,6 +7263,23 @@ const RankingView = {
     _equipesSort: { col: 'ipStarters', asc: false },
     _joueursSort: { col: 'ip', asc: false },
     _joueursGroupMode: 'tous', // 'tous' | 'poste'
+    _joueursAxis: 'ip', // V29.65 : 'ip' (IP général) ou une clé d'axe (attaque, bloc, ...)
+
+    // V29.65 : axes proposés dans le menu « Trier par » du Ranking Joueurs.
+    // minVol = volume minimum pour être classé sur l'axe (= IP_VOLUME_K, le volume à partir
+    // duquel l'axe pèse au moins à moitié dans l'IP ; service abaissé à 15 car à 40, aucun
+    // adversaire (2 à 4 matchs) n'était classé). En dessous, le joueur est listé en fin de
+    // tableau, grisé, sans rang.
+    RANKING_AXES: [
+        { key: 'ip',        label: 'IP général' },
+        { key: 'service',   label: 'Service',   unit: 'services', minVol: 15 },
+        { key: 'reception', label: 'Réception', unit: 'réceptions', minVol: 6 },
+        { key: 'passe',     label: 'Passe',     unit: 'passes notées', minVol: 10 },
+        { key: 'attaque',   label: 'Attaque',   unit: 'attaques', minVol: 8 },
+        { key: 'bloc',      label: 'Bloc',      unit: 'blocs', minVol: 4 },
+        { key: 'relance',   label: 'Relance',   unit: 'relances', minVol: 5 },
+        { key: 'defense',   label: 'Défense',   unit: 'défenses', minVol: 6 }
+    ],
 
     render() {
         var container = document.getElementById('content-ranking');
@@ -7642,8 +7659,48 @@ const RankingView = {
         var isPoste = this._joueursGroupMode === 'poste';
         var isTous = !isPoste;
 
-        // Toggle Tous/Poste
+        // V29.65 : tri par axe d'IP. La colonne « IP » affiche la note de l'axe choisi.
+        var axisKey = this._joueursAxis || 'ip';
+        var axisDef = this.RANKING_AXES.find(function(a) { return a.key === axisKey; }) || this.RANKING_AXES[0];
+        var isAxis = axisKey !== 'ip';
+        var minVol = isAxis ? (axisDef.minVol || 1) : 0;
+        var cards = data.allPlayerCards.map(function(p) {
+            if (!isAxis) return Object.assign({}, p, { val: p.ip, ranked: true });
+            var vol = (p.scores && p.scores._tots && p.scores._tots[axisKey]) || 0;
+            var v = (p.scores && p.scores[axisKey]) || 0;
+            return Object.assign({}, p, { val: v, vol: vol, ranked: vol >= minVol && v > 0 });
+        });
+        if (isAxis) {
+            // Pas d'action sur l'axe = pas de ligne
+            cards = cards.filter(function(p) { return p.vol > 0; });
+        }
+        var sortCol = (s.col === 'ip') ? 'val' : s.col;
+        // Classés d'abord (tri actif), puis volume insuffisant (par volume décroissant)
+        function sortCards(list) {
+            var ranked = self._sortData(list.filter(function(p) { return p.ranked; }), sortCol, s.asc);
+            var others = list.filter(function(p) { return !p.ranked; }).sort(function(a, b) { return b.vol - a.vol; });
+            return ranked.concat(others);
+        }
+        function rowHtml(p, rank) {
+            var teamColor = getTeamColor(p.teamName);
+            var r = '<tr class="ranking-row ranking-player-row' + (p.ranked ? '' : ' ranking-row-lowvol') + '" data-player-name="' + p.name.replace(/"/g, '&quot;') + '" data-player-team="' + p.teamName.replace(/"/g, '&quot;') + '" data-player-role="' + p.role + '">';
+            r += '<td>' + (p.ranked ? rank : '–') + '</td>';
+            r += '<td><span class="bilan-role-dot" style="background:' + p.roleColor + '"></span> ' + p.name + '</td>';
+            r += '<td class="ranking-matchcount"><span class="ranking-team-badge ranking-team-badge-sm" style="background:' + teamColor + '">' + p.teamName + '</span></td>';
+            r += '<td class="ranking-ip-cell">' + p.val;
+            if (isAxis) r += '<span class="ranking-axis-vol" title="' + p.vol + ' ' + axisDef.unit + '">' + p.vol + '</span>';
+            r += '</td>';
+            r += '</tr>';
+            return r;
+        }
+
+        // Menu « Trier par » + toggle Tous/Poste
         var html = '<div class="ranking-group-toggle-bar">';
+        html += '<select class="ranking-axis-select" data-ranking-axis aria-label="Trier par">';
+        this.RANKING_AXES.forEach(function(a) {
+            html += '<option value="' + a.key + '"' + (a.key === axisKey ? ' selected' : '') + '>' + a.label + '</option>';
+        });
+        html += '</select>';
         html += '<div class="display-mode-toggle avg-mode-toggle">';
         html += '<button class="avg-mode-btn' + (isTous ? ' active' : '') + '" data-ranking-group="tous">Tous</button>';
         html += '<button class="avg-mode-btn' + (isPoste ? ' active' : '') + '" data-ranking-group="poste">Poste</button>';
@@ -7655,7 +7712,7 @@ const RankingView = {
         html += '<th>#</th>';
         html += '<th data-sort-col="ip">Joueur' + self._sortIcon('ip', s) + '</th>';
         html += '<th data-sort-col="teamName">Équipe' + self._sortIcon('teamName', s) + '</th>';
-        html += '<th data-sort-col="ip">IP' + self._sortIcon('ip', s) + '</th>';
+        html += '<th data-sort-col="ip">' + (isAxis ? axisDef.label : 'IP') + self._sortIcon('ip', s) + '</th>';
         html += '</tr></thead>';
         html += '<tbody>';
 
@@ -7668,14 +7725,9 @@ const RankingView = {
 
             var groups = {};
             FAMILY_ORDER.forEach(function(f) { groups[f] = []; });
-            data.allPlayerCards.forEach(function(p) {
+            cards.forEach(function(p) {
                 var fam = roleToFamily[p.role] || 'Ailier';
                 if (groups[fam]) groups[fam].push(p);
-            });
-
-            // Trier chaque groupe par IP desc (ou par le sort actif)
-            FAMILY_ORDER.forEach(function(fam) {
-                groups[fam] = self._sortData(groups[fam], s.col, s.asc);
             });
 
             FAMILY_ORDER.forEach(function(fam) {
@@ -7687,32 +7739,23 @@ const RankingView = {
                 html += '</td></tr>';
 
                 var rank = 1; // # repart a 1 pour chaque poste
-                groups[fam].forEach(function(p) {
-                    var teamColor = getTeamColor(p.teamName);
-                    html += '<tr class="ranking-row ranking-player-row" data-player-name="' + p.name.replace(/"/g, '&quot;') + '" data-player-team="' + p.teamName.replace(/"/g, '&quot;') + '" data-player-role="' + p.role + '">';
-                    html += '<td>' + rank + '</td>';
-                    html += '<td><span class="bilan-role-dot" style="background:' + p.roleColor + '"></span> ' + p.name + '</td>';
-                    html += '<td class="ranking-matchcount"><span class="ranking-team-badge ranking-team-badge-sm" style="background:' + teamColor + '">' + p.teamName + '</span></td>';
-                    html += '<td class="ranking-ip-cell">' + p.ip + '</td>';
-                    html += '</tr>';
-                    rank++;
+                sortCards(groups[fam]).forEach(function(p) {
+                    html += rowHtml(p, rank);
+                    if (p.ranked) rank++;
                 });
             });
         } else {
             // Mode Tous : tri global
-            var sorted = this._sortData(data.allPlayerCards, s.col, s.asc);
-            sorted.forEach(function(p, idx) {
-                var teamColor = getTeamColor(p.teamName);
-                html += '<tr class="ranking-row ranking-player-row" data-player-name="' + p.name.replace(/"/g, '&quot;') + '" data-player-team="' + p.teamName.replace(/"/g, '&quot;') + '" data-player-role="' + p.role + '">';
-                html += '<td>' + (idx + 1) + '</td>';
-                html += '<td><span class="bilan-role-dot" style="background:' + p.roleColor + '"></span> ' + p.name + '</td>';
-                html += '<td class="ranking-matchcount"><span class="ranking-team-badge ranking-team-badge-sm" style="background:' + teamColor + '">' + p.teamName + '</span></td>';
-                html += '<td class="ranking-ip-cell">' + p.ip + '</td>';
-                html += '</tr>';
+            sortCards(cards).forEach(function(p, idx) {
+                html += rowHtml(p, idx + 1);
             });
         }
 
         html += '</tbody></table></div>';
+        if (isAxis) {
+            html += '<div class="ranking-axis-note">Petit chiffre gris : nombre de ' + axisDef.unit +
+                '. Classé à partir de ' + minVol + ' ; en dessous, joueur en fin de liste, sans rang.</div>';
+        }
         return html;
     },
 
@@ -7827,6 +7870,15 @@ const RankingView = {
 
         // Toggle Tous/Poste (joueurs only)
         if (subTab === 'joueurs') {
+            // V29.65 : menu « Trier par » (IP général / axe)
+            var axisSel = container.querySelector('#rankingJoueurs [data-ranking-axis]');
+            if (axisSel) {
+                axisSel.addEventListener('change', function() {
+                    self._joueursAxis = axisSel.value;
+                    self._joueursSort = { col: 'ip', asc: false };
+                    self._rerenderTable('joueurs');
+                });
+            }
             container.querySelectorAll('#rankingJoueurs [data-ranking-group]').forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     var mode = btn.dataset.rankingGroup;
