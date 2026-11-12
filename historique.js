@@ -4879,6 +4879,9 @@ const BilanView = {
                 // Verifier seuil minimum via _tots
                 var tot = d.axes._tots ? d.axes._tots[axisKey] : undefined;
                 if (tot !== undefined && minActions[axisKey] && tot < minActions[axisKey]) return;
+                // V29.71 : Meilleur Passeur = au moins 10 passes notees (IP_VOLUME_K.passe), sinon
+                // 5 bonnes passes de depannage d'un non-passeur battaient le passeur (7 matchs sur 20 en 2025-26)
+                if (axisKey === 'passe' && (tot || 0) < self.DISTINCTION_MIN_PASSES) return;
                 // Seuil proportionnel : au moins 5% du total des actions de la categorie
                 if (totalActions > 0 && tot !== undefined && tot / totalActions < 0.05) return;
                 candidates.push({ name: name, score: score });
@@ -6198,6 +6201,9 @@ const BilanView = {
 
     // Seuils minimums d'actions par axe (V20.25). V29.45 : ne servent plus a l'IP,
     // seulement aux Distinctions (meilleur joueur sur un axe).
+    // V29.71 : volume minimum (passes notees) pour la distinction Meilleur Passeur (match et saison)
+    DISTINCTION_MIN_PASSES: 10,
+
     IP_MIN_ACTIONS: {
         service: 5,
         reception: 2,
