@@ -7391,18 +7391,22 @@ const RankingView = {
         teams.sort(function(a, b) { return b.ipStarters - a.ipStarters; });
 
         // V22.05 : exclure les joueurs avec trop peu d'actions (non significatif)
-        var MIN_TOTAL_ACTIONS = 15;
-        allPlayerCards = allPlayerCards.filter(function(p) {
-            var t = p.scores && p.scores._tots ? p.scores._tots : {};
-            var total = (t.service||0) + (t.reception||0) + (t.passe||0) + (t.attaque||0) + (t.bloc||0) + (t.relance||0) + (t.defense||0);
-            return total >= MIN_TOTAL_ACTIONS;
-        });
+        allPlayerCards = allPlayerCards.filter(function(p) { return self._hasEnoughActions(p.scores); });
 
         // Tri joueurs par IP decroissant
         allPlayerCards.sort(function(a, b) { return b.ip - a.ip; });
 
         self._seasonMatches = prevSeasonMatches;
         return { teams: teams, allPlayerCards: allPlayerCards };
+    },
+
+    // V22.05 / V29.66 : seuil d'actions pour figurer dans le Ranking (liste Joueurs, IP Équipe,
+    // titulaires). Total des actions sur les 7 axes.
+    MIN_TOTAL_ACTIONS: 15,
+    _hasEnoughActions(scores) {
+        var t = scores && scores._tots ? scores._tots : {};
+        var total = (t.service||0) + (t.reception||0) + (t.passe||0) + (t.attaque||0) + (t.bloc||0) + (t.relance||0) + (t.defense||0);
+        return total >= this.MIN_TOTAL_ACTIONS;
     },
 
     // V29.28 : fusionne les contributions d'un joueur transféré (même famille de poste).
@@ -7566,9 +7570,14 @@ const RankingView = {
             });
         }
 
+        // V29.66 : IP Équipe et Titulaires ne comptent que les joueurs avec assez d'actions,
+        // même règle que la liste Joueurs (MIN_TOTAL_ACTIONS). Sinon un joueur qui n'a fait que
+        // quelques actions (ex. Baptiste, Kiki Team : 8 actions, IP 100) devenait titulaire.
+        var eligible = allPlayers.filter(function(p) { return RankingView._hasEnoughActions(p.scores); });
+
         // --- IP EQUIPE = moyenne de tous les IP joueurs ---
-        var ipAll = allPlayers.length > 0
-            ? Math.round(allPlayers.reduce(function(s, p) { return s + p.ip; }, 0) / allPlayers.length)
+        var ipAll = eligible.length > 0
+            ? Math.round(eligible.reduce(function(s, p) { return s + p.ip; }, 0) / eligible.length)
             : 0;
 
         // --- IP TITULAIRES = meilleur lineup 4 joueurs DISTINCTS, IP moyen ---
@@ -7576,7 +7585,7 @@ const RankingView = {
         var POSITIONS = ['Passeur', 'R4', 'Centre', 'Pointu'];
         var candidatesByPos = {};
         POSITIONS.forEach(function(pos) {
-            candidatesByPos[pos] = allPlayers
+            candidatesByPos[pos] = eligible
                 .filter(function(p) { return p.role === pos; })
                 .sort(function(a, b) { return b.ip - a.ip; });
         });
