@@ -396,17 +396,18 @@ function renderStandings() {
         // Mobile: details shown under the team when its row is expanded
         '<tr class="standings-detail rank-' + s.rank + (expanded ? ' expanded' : '') + '" data-team="' + s.team + '">' +
             '<td colspan="6">' +
-                '<div class="detail-line">' +
+                '<div class="detail-line detail-grid">' +
                     '<span class="detail-label">Sets</span>' +
                     '<span class="detail-stat"><em>Set+</em> ' + s.setPlus + '</span>' +
                     '<span class="detail-stat"><em>Set-</em> ' + s.setMinus + '</span>' +
+                    detailDiffStat('DS', s.ds) +
                     '<span class="detail-stat"><em>Coef</em> ' + s.coefSet + '</span>' +
                 '</div>' +
-                '<div class="detail-line">' +
+                '<div class="detail-line detail-grid">' +
                     '<span class="detail-label">Points</span>' +
                     '<span class="detail-stat"><em>Pts+</em> ' + s.ptsPlus + '</span>' +
                     '<span class="detail-stat"><em>Pts-</em> ' + s.ptsMinus + '</span>' +
-                    '<span class="detail-stat"><em>DP</em> ' + s.dp + '</span>' +
+                    detailDiffStat('DP', s.dp) +
                     '<span class="detail-stat"><em>Coef</em> ' + s.coefPts + '</span>' +
                 '</div>' +
                 '<div class="detail-line">' +
@@ -428,6 +429,14 @@ function renderStandings() {
             '<tbody>' + rows + '</tbody>' +
         '</table>' +
     '</div>';
+}
+
+// Mobile detail: signed difference (DS, DP), green when positive, red when negative
+function detailDiffStat(label, value) {
+    var n = parseInt(value, 10) || 0;
+    var cls = n > 0 ? ' diff-pos' : (n < 0 ? ' diff-neg' : '');
+    var txt = n > 0 ? '+' + n : String(n);
+    return '<span class="detail-stat detail-diff' + cls + '"><em>' + label + '</em> ' + txt + '</span>';
 }
 
 // "dd/mm/yyyy" → Date (null for "N/C" or anything unparsable)

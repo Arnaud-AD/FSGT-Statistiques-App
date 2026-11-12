@@ -1503,6 +1503,33 @@
                 color: var(--text-secondary);
             }
 
+            /* Sets / Points: label + 4 aligned columns (x+, x-, diff, coef) */
+            .detail-grid {
+                display: grid;
+                grid-template-columns: 52px repeat(4, minmax(0, 1fr));
+                gap: 4px 8px;
+            }
+
+            .detail-stat {
+                white-space: nowrap;
+                font-variant-numeric: tabular-nums;
+            }
+
+            .detail-diff {
+                font-weight: 700;
+            }
+
+            .detail-diff.diff-pos { color: var(--win-color); }
+            .detail-diff.diff-neg { color: var(--loss-color); }
+
+            @media (max-width: 360px) {
+                .standings-detail td { padding-left: 24px; }
+                .detail-grid { grid-template-columns: 44px repeat(4, minmax(0, 1fr)); gap: 4px 4px; }
+                .detail-line { font-size: 12px; }
+                .detail-label { width: 44px; font-size: 10px; }
+                .detail-stat em { font-size: 10px; }
+            }
+
             .detail-stat em {
                 font-style: normal;
                 font-size: 11px;
