@@ -3689,3 +3689,16 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
         border-top: none;
     }
 }
+
+/* V29.44 — Modal équipe Ranking sur écran large : 4 radars sur une ligne
+   pour que les 4 titulaires tiennent dans l'écran sans défilement */
+@media (min-width: 900px) and (min-aspect-ratio: 4/3) {
+    .ranking-modal {
+        max-width: min(1100px, calc((92vh - 110px) * 2.9));
+        max-height: 92vh;
+    }
+    .ranking-modal-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+    }
+}
