@@ -324,6 +324,11 @@ const WorkflowEngine = {
         // Si le set est terminé, ne pas démarrer un nouveau point
         if (gameState.setEnded) {
             this._resetRallyState();
+            // V29.71 : vider la pile d'undo, sinon après « ← Corriger » le bouton Retour
+            // (popState) rouvrait le rally du point déjà enregistré sans le retirer :
+            // re-valider l'enregistrait une 2e fois (Bières 2026-27, set 2 : 25-21 ×3).
+            // Le retour dans ce point passe par « Reprendre le point » (stack caché sur le point).
+            this.clearStack();
             return;
         }
 
