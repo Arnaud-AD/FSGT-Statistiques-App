@@ -8400,6 +8400,8 @@ const ProgressionView = {
     _data: null,
     _selectedPlayers: {},   // { name: true/false }
     _currentMetric: 'ip',
+    _focusPlayer: null,     // V29.75 : joueur mis en avant au toucher/clic (null = tous)
+    DOTS_MAX_PLAYERS: 4,    // au-delà, courbes sans points (sauf joueur mis en avant)
     _currentSubTab: 'evolution', // 'evolution' | 'statsVisuelles'
     _currentTeamMetric: 'ip',
 
@@ -8878,6 +8880,7 @@ const ProgressionView = {
         });
         html += '</div>';
         html += '<div class="prog-chart-wrap"><canvas id="progMainChart"></canvas><div class="prog-tooltip" style="display:none"></div></div>';
+        html += '<div class="prog-chart-hint"></div>';
         html += '</div>';
         return html;
     },
@@ -9052,28 +9055,37 @@ const ProgressionView = {
 
     // Lignes verticales entre deux saisons + nom de la saison en haut de chaque segment.
     // Rien n'est dessiné quand le graphique ne couvre qu'une saison.
+    // Bornes x des segments de saison : [left, sep1, sep2, ..., right]
+    // (séparateur à mi-chemin entre le dernier match d'une saison et le premier de la suivante)
+    _seasonBounds(xPos, left, right) {
+        var segs = this._seasonSegments();
+        var bounds = [left];
+        for (var i = 1; i < segs.length; i++) {
+            bounds.push(Math.round((xPos(segs[i - 1].end) + xPos(segs[i].start)) / 2) + 0.5);
+        }
+        bounds.push(right);
+        return bounds;
+    },
+
     _drawSeasonDividers(ctx, xPos, top, bottom, left, right) {
         var segs = this._seasonSegments();
         if (segs.length < 2) return;
         ctx.save();
-        // Séparateurs à mi-chemin entre le dernier match d'une saison et le premier de la suivante
-        ctx.strokeStyle = '#9aa0a6';
+        ctx.strokeStyle = '#c4c7cc';
         ctx.lineWidth = 1;
-        ctx.setLineDash([3, 3]);
-        var bounds = [left];
+        ctx.setLineDash([2, 4]);
+        var bounds = this._seasonBounds(xPos, left, right);
         for (var i = 1; i < segs.length; i++) {
-            var x = Math.round((xPos(segs[i - 1].end) + xPos(segs[i].start)) / 2) + 0.5;
-            bounds.push(x);
+            var x = bounds[i];
             ctx.beginPath();
             ctx.moveTo(x, top - 14);
             ctx.lineTo(x, bottom);
             ctx.stroke();
         }
-        bounds.push(right);
         ctx.setLineDash([]);
         // Libellés « 2024-25 » centrés sur chaque saison (seulement s'ils tiennent)
-        ctx.font = '600 10px Roboto, sans-serif';
-        ctx.fillStyle = '#80868b';
+        ctx.font = '500 10px Roboto, sans-serif';
+        ctx.fillStyle = '#9aa0a6';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'alphabetic';
         segs.forEach(function(seg, si) {
@@ -9081,6 +9093,97 @@ const ProgressionView = {
             var x0 = bounds[si], x1 = bounds[si + 1];
             if (ctx.measureText(label).width + 8 > x1 - x0) return;
             ctx.fillText(label, (x0 + x1) / 2, top - 7);
+        });
+        ctx.restore();
+    },
+
+    // ----- Style des courbes (DA des cartes radar : traits fins, points creux, fonds légers) -----
+
+    _drawGrid(ctx, yPos, yMin, yMax, left, right, w, fmt) {
+        ctx.save();
+        ctx.strokeStyle = '#eef0f2';
+        ctx.lineWidth = 1;
+        ctx.fillStyle = '#9aa0a6';
+        ctx.font = '10px Roboto, sans-serif';
+        ctx.textAlign = 'right';
+        for (var gi = 0; gi <= 4; gi++) {
+            var gv = yMin + (gi / 4) * (yMax - yMin);
+            var gy = Math.round(yPos(gv)) + 0.5;
+            ctx.beginPath();
+            ctx.moveTo(left, gy);
+            ctx.lineTo(right, gy);
+            ctx.stroke();
+            ctx.fillText(fmt(gv), w - 2, gy + 3);
+        }
+        ctx.restore();
+    },
+
+    // Fond dégradé sous la courbe (un seul joueur / une seule série visible)
+    _drawSeriesArea(ctx, pts, color, top, bottom) {
+        if (pts.length < 2) return;
+        var grad = ctx.createLinearGradient(0, top, 0, bottom);
+        grad.addColorStop(0, color + '26');
+        grad.addColorStop(1, color + '03');
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, bottom);
+        pts.forEach(function(pt) { ctx.lineTo(pt.x, pt.y); });
+        ctx.lineTo(pts[pts.length - 1].x, bottom);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+    },
+
+    // Trait fin + points creux (fond blanc, contour couleur) comme les sommets des radars
+    // opts.dots === false : trait seul ; opts.faded : trait estompé (un autre joueur est mis en avant)
+    _drawSeriesLine(ctx, pts, color, opts) {
+        opts = opts || {};
+        ctx.save();
+        ctx.beginPath();
+        pts.forEach(function(pt, i) { i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y); });
+        ctx.strokeStyle = opts.faded ? color + '30' : color;
+        ctx.lineWidth = opts.faded ? 1.25 : (opts.bold ? 2 : 1.5);
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        // Un seul match : on garde le point, sinon la série serait invisible
+        if (opts.dots === false && pts.length > 1) { ctx.restore(); return; }
+        pts.forEach(function(pt) {
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.25;
+            ctx.stroke();
+        });
+        ctx.restore();
+    },
+
+    // Ligne de moyenne en pointillé : une par saison (Saisons ALL), sinon une sur toute la largeur.
+    // vals : valeurs déjà à l'échelle (null = pas joué). refFn(season) : référence radar ou null.
+    // V29.75
+    _drawSeasonAverages(ctx, vals, color, xPos, yPos, left, right, refFn) {
+        var segs = this._seasonSegments();
+        var multi = segs.length > 1;
+        if (!multi) segs = [{ season: null, start: 0, end: vals.length - 1 }];
+        var bounds = multi ? this._seasonBounds(xPos, left, right) : [left, right];
+        ctx.save();
+        ctx.setLineDash([3, 4]);
+        ctx.strokeStyle = color + '80';
+        ctx.lineWidth = 1;
+        segs.forEach(function(seg, si) {
+            var segVals = vals.slice(seg.start, seg.end + 1).filter(function(v) { return v !== null; });
+            if (segVals.length < (multi ? 1 : 2)) return;
+            var ref = refFn ? refFn(seg.season) : null;
+            var avg = (ref != null) ? ref : segVals.reduce(function(a, b) { return a + b; }, 0) / segVals.length;
+            var y = Math.round(yPos(avg)) + 0.5;
+            // Petit retrait pour ne pas toucher les séparateurs de saison
+            var x0 = bounds[si] + (multi && si > 0 ? 4 : 0);
+            var x1 = bounds[si + 1] - (multi && si < segs.length - 1 ? 4 : 0);
+            ctx.beginPath();
+            ctx.moveTo(x0, y);
+            ctx.lineTo(x1, y);
+            ctx.stroke();
         });
         ctx.restore();
     },
@@ -9174,20 +9277,7 @@ const ProgressionView = {
         function yPos(v) { return pad.top + (1 - (v - yMin) / (yMax - yMin)) * chartH; }
 
         // Grille Y
-        ctx.strokeStyle = '#e8eaed';
-        ctx.lineWidth = 0.5;
-        ctx.fillStyle = '#5f6368';
-        ctx.font = '11px Roboto, sans-serif';
-        ctx.textAlign = 'right';
-        for (var gi = 0; gi <= 4; gi++) {
-            var gv = yMin + (gi / 4) * (yMax - yMin);
-            var gy = yPos(gv);
-            ctx.beginPath();
-            ctx.moveTo(pad.left, gy);
-            ctx.lineTo(w - pad.right, gy);
-            ctx.stroke();
-            ctx.fillText(gv.toFixed(decimals) + unit, w - 2, gy + 3);
-        }
+        this._drawGrid(ctx, yPos, yMin, yMax, pad.left, w - pad.right, w, function(v) { return v.toFixed(decimals) + unit; });
 
         // Séparation des saisons (Saisons ALL)
         this._drawSeasonDividers(ctx, xPos, pad.top, pad.top + chartH, pad.left, w - pad.right);
@@ -9224,7 +9314,7 @@ const ProgressionView = {
             var res = this._data.matchResults[li];
             if (res) {
                 ctx.beginPath();
-                ctx.arc(lx, dotY, 3, 0, Math.PI * 2);
+                ctx.arc(lx, dotY, 2.5, 0, Math.PI * 2);
                 ctx.fillStyle = res === 'win' ? '#34a853' : res === 'loss' ? '#ea4335' : '#f59e0b';
                 ctx.fill();
                 ctx.fillStyle = '#5f6368';
@@ -9246,7 +9336,7 @@ const ProgressionView = {
         if (!el) return;
         var html = '<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:8px 0 4px;font-size:12px;color:var(--text-secondary)">';
         series.forEach(function(s) {
-            html += '<span><span style="display:inline-block;width:12px;height:3px;background:' + s.color + ';vertical-align:middle;margin-right:4px;border-radius:2px"></span>' + s.label + '</span>';
+            html += '<span><span style="display:inline-block;width:12px;height:2px;background:' + s.color + ';vertical-align:middle;margin-right:4px;border-radius:2px"></span>' + s.label + '</span>';
         });
         html += '</div>';
         el.innerHTML = html;
@@ -9260,40 +9350,14 @@ const ProgressionView = {
         });
         if (pts.length < 1) return;
 
-        // Ligne
-        ctx.beginPath();
-        pts.forEach(function(pt, i) { i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y); });
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2.5;
-        ctx.lineJoin = 'round';
-        ctx.stroke();
+        // Moyenne (une par saison en Saisons ALL), sous la courbe
+        this._drawSeasonAverages(ctx, vals, color, xPos, yPos, pad.left, w - pad.right, null);
 
-        // Points
+        // Ligne + points
+        this._drawSeriesLine(ctx, pts, color);
         pts.forEach(function(pt) {
-            ctx.beginPath();
-            ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
-            ctx.fillStyle = color;
-            ctx.fill();
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
-            ctx.stroke();
             self._teamChartPoints.push({ x: pt.x, y: pt.y, val: pt.val, matchIdx: pt.idx, team: team, color: color });
         });
-
-        // Moyenne saison (pointillé)
-        var nonNull = vals.filter(function(v) { return v !== null; });
-        if (nonNull.length > 1) {
-            var avg = nonNull.reduce(function(a, b) { return a + b; }, 0) / nonNull.length;
-            var avgY = yPos(avg);
-            ctx.setLineDash([4, 4]);
-            ctx.strokeStyle = color + '50';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(pad.left, avgY);
-            ctx.lineTo(w - pad.right, avgY);
-            ctx.stroke();
-            ctx.setLineDash([]);
-        }
     },
 
     // ========== CANVAS DRAWING ==========
@@ -9409,20 +9473,7 @@ const ProgressionView = {
         function yPos(v) { return pad.top + (1 - (v - yMin) / (yMax - yMin)) * chartH; }
 
         // Grid
-        ctx.strokeStyle = '#e8eaed';
-        ctx.lineWidth = 0.5;
-        ctx.fillStyle = '#5f6368';
-        ctx.font = '11px Roboto, sans-serif';
-        ctx.textAlign = 'right';
-        for (var gi = 0; gi <= 4; gi++) {
-            var gv = yMin + (gi / 4) * (yMax - yMin);
-            var gy = yPos(gv);
-            ctx.beginPath();
-            ctx.moveTo(pad.left, gy);
-            ctx.lineTo(w - pad.right, gy);
-            ctx.stroke();
-            ctx.fillText(gv.toFixed(metricDef.decimals), w - 2, gy + 3);
-        }
+        this._drawGrid(ctx, yPos, yMin, yMax, pad.left, w - pad.right, w, function(v) { return v.toFixed(metricDef.decimals); });
 
         // Séparation des saisons (Saisons ALL)
         this._drawSeasonDividers(ctx, xPos, pad.top, pad.top + chartH, pad.left, w - pad.right);
@@ -9431,9 +9482,20 @@ const ProgressionView = {
         this._chartPoints = [];
         this._chartMeta = { pad: pad, w: w, h: h, xPos: xPos, yPos: yPos, mul: mul, metricDef: metricDef };
 
+        // Joueurs visibles ; mise en avant (toucher/clic) seulement si le joueur est affiché
+        var visible = this._data.players.filter(function(pl) { return self._selectedPlayers[pl.name] !== false; });
+        var visibleCount = visible.length;
+        var focus = this._focusPlayer;
+        if (focus && !visible.some(function(pl) { return pl.name === focus; })) focus = this._focusPlayer = null;
+        var showDots = visibleCount <= this.DOTS_MAX_PLAYERS;
+        this._updateChartHint(container, visibleCount, focus);
+
+        // Le joueur mis en avant est dessiné en dernier (au-dessus des autres)
+        var order = visible.slice();
+        if (focus) order.sort(function(a, b) { return (a.name === focus) - (b.name === focus); });
+
         // Player lines
-        this._data.players.forEach(function(p) {
-            if (self._selectedPlayers[p.name] === false) return;
+        order.forEach(function(p) {
             var vals = self._getMetricValues(p.name, metricKey);
 
             // Collect visible points
@@ -9443,54 +9505,76 @@ const ProgressionView = {
             });
             if (pts.length < 1) return;
 
-            // Area fill (only when single player visible)
-            var visibleCount = self._data.players.filter(function(pl) { return self._selectedPlayers[pl.name] !== false; }).length;
-            if (visibleCount === 1) {
-                ctx.beginPath();
-                ctx.moveTo(pts[0].x, pad.top + chartH);
-                pts.forEach(function(pt) { ctx.lineTo(pt.x, pt.y); });
-                ctx.lineTo(pts[pts.length - 1].x, pad.top + chartH);
-                ctx.closePath();
-                ctx.fillStyle = p.color + '12';
-                ctx.fill();
+            var isFocus = focus === p.name;
+            if (focus && !isFocus) {
+                // Autres joueurs : trait estompé, sans points ni moyenne
+                self._drawSeriesLine(ctx, pts, p.color, { dots: false, faded: true });
+                pts.forEach(function(pt) {
+                    self._chartPoints.push({ x: pt.x, y: pt.y, val: pt.val, matchIdx: pt.idx, player: p.name, color: p.color });
+                });
+                return;
             }
 
-            // Line
-            ctx.beginPath();
-            pts.forEach(function(pt, i) { i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y); });
-            ctx.strokeStyle = p.color;
-            ctx.lineWidth = 2.5;
-            ctx.lineJoin = 'round';
-            ctx.stroke();
+            // Fond dégradé : un seul joueur visible ou joueur mis en avant
+            if (visibleCount === 1 || isFocus) self._drawSeriesArea(ctx, pts, p.color, pad.top, pad.top + chartH);
 
-            // Dots + store for tooltip
-            pts.forEach(function(pt) {
-                ctx.beginPath();
-                ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
-                ctx.fillStyle = p.color;
-                ctx.fill();
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                self._chartPoints.push({ x: pt.x, y: pt.y, val: pt.val, matchIdx: pt.idx, player: p.name, color: p.color });
+            // Moyenne saison en pointillé (une par saison en Saisons ALL), sous la courbe.
+            // Référence = profil radar de la saison si dispo, sinon moyenne des matchs.
+            var scaled = vals.map(function(v) { return v === null ? null : v * mul; });
+            self._drawSeasonAverages(ctx, scaled, p.color, xPos, yPos, pad.left, w - pad.right, function(season) {
+                return self._seasonRef(p.name, metricKey, season || undefined);
             });
 
-            // Season average dashed line
-            var nonNull = vals.filter(function(v) { return v !== null; });
-            if (nonNull.length > 1) {
-                var radarRef = self._seasonRef(p.name, metricKey);
-                var avg = (radarRef != null) ? radarRef : nonNull.reduce(function(a, b) { return a + b; }, 0) / nonNull.length * mul;
-                var avgY = yPos(avg);
-                ctx.setLineDash([4, 4]);
-                ctx.strokeStyle = p.color + '50';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(pad.left, avgY);
-                ctx.lineTo(w - pad.right, avgY);
-                ctx.stroke();
-                ctx.setLineDash([]);
+            // Line + dots (points masqués quand beaucoup de joueurs, sauf joueur mis en avant)
+            self._drawSeriesLine(ctx, pts, p.color, { dots: showDots || isFocus, bold: isFocus });
+            pts.forEach(function(pt) {
+                self._chartPoints.push({ x: pt.x, y: pt.y, val: pt.val, matchIdx: pt.idx, player: p.name, color: p.color });
+            });
+        });
+    },
+
+    // Petite aide sous le graphique : comment mettre un joueur en avant / revenir à tous
+    _updateChartHint(container, visibleCount, focus) {
+        var el = container && container.querySelector('.prog-chart-hint');
+        if (!el) return;
+        var verb = (window.matchMedia && window.matchMedia('(hover: hover)').matches) ? 'Cliquez' : 'Touchez';
+        if (focus) {
+            el.innerHTML = '<span class="prog-hint-name">' + Utils.escapeHtml(focus) + '</span> mis en avant · ' + verb.toLowerCase() + ' ailleurs pour revoir tout le monde';
+        } else if (visibleCount > 1) {
+            el.textContent = verb + ' une courbe pour mettre un joueur en avant';
+        } else {
+            el.textContent = '';
+        }
+    },
+
+    // Joueur le plus proche (points de la courbe, et segments entre deux points) dans un rayon donné
+    _hitPlayer(mx, my, radius) {
+        var best = null, bestDist = radius;
+        var byPlayer = {};
+        (this._chartPoints || []).forEach(function(pt) {
+            (byPlayer[pt.player] = byPlayer[pt.player] || []).push(pt);
+        });
+        Object.keys(byPlayer).forEach(function(name) {
+            var pts = byPlayer[name];
+            for (var i = 0; i < pts.length; i++) {
+                var a = pts[i], d;
+                if (i + 1 < pts.length) {
+                    var b = pts[i + 1], dx = b.x - a.x, dy = b.y - a.y;
+                    var len2 = dx * dx + dy * dy;
+                    var t = len2 ? Math.max(0, Math.min(1, ((mx - a.x) * dx + (my - a.y) * dy) / len2)) : 0;
+                    var px = a.x + t * dx, py = a.y + t * dy;
+                    // +3 px : un point touché l'emporte sur un segment qui passe à côté
+                    d = Math.sqrt((mx - px) * (mx - px) + (my - py) * (my - py)) + 3;
+                } else {
+                    d = Math.sqrt((mx - a.x) * (mx - a.x) + (my - a.y) * (my - a.y));
+                }
+                if (d < bestDist) { bestDist = d; best = name; }
+                // distance au point lui-même (prioritaire)
+                var dp = Math.sqrt((mx - a.x) * (mx - a.x) + (my - a.y) * (my - a.y));
+                if (dp < bestDist) { bestDist = dp; best = name; }
             }
         });
+        return best;
     },
 
     // ========== EVENTS ==========
@@ -9538,9 +9622,12 @@ const ProgressionView = {
                 var rect = canvas.getBoundingClientRect();
                 var mx = clientX - rect.left;
                 var my = clientY - rect.top;
-                // Find closest point within 20px
+                // Find closest point within 20px (joueur mis en avant prioritaire)
                 var best = null, bestDist = 20;
-                self._chartPoints.forEach(function(pt) {
+                var cand = self._focusPlayer
+                    ? self._chartPoints.filter(function(pt) { return pt.player === self._focusPlayer; })
+                    : self._chartPoints;
+                cand.forEach(function(pt) {
                     var d = Math.sqrt((pt.x - mx) * (pt.x - mx) + (pt.y - my) * (pt.y - my));
                     if (d < bestDist) { bestDist = d; best = pt; }
                 });
@@ -9566,6 +9653,16 @@ const ProgressionView = {
             }, { passive: true });
             canvas.addEventListener('touchend', function() {
                 setTimeout(function() { tooltip.style.display = 'none'; }, 2000);
+            });
+            // V29.75 : toucher/clic sur une courbe = mise en avant de ce joueur ; ailleurs = tous
+            canvas.style.cursor = 'pointer';
+            canvas.addEventListener('click', function(e) {
+                var rect = canvas.getBoundingClientRect();
+                var hit = self._hitPlayer(e.clientX - rect.left, e.clientY - rect.top, 14);
+                if (hit && hit === self._focusPlayer) return;
+                if (!hit && !self._focusPlayer) return;
+                self._focusPlayer = hit || null;
+                self._drawChart(container);
             });
         }
 
