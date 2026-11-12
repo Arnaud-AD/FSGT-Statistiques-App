@@ -3508,6 +3508,19 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
     font-size: 11px;
 }
 
+/* V29.75 : aide « mise en avant » sous le graphique Évolution */
+.prog-chart-hint {
+    min-height: 16px;
+    margin-top: 6px;
+    font-size: 11px;
+    color: #9aa0a6;
+    text-align: center;
+}
+.prog-chart-hint .prog-hint-name {
+    color: var(--text-primary, #202124);
+    font-weight: 500;
+}
+
 /* --- Tableaux Forme / Progression --- */
 .prog-table {
     width: 100%;

@@ -8400,6 +8400,8 @@ const ProgressionView = {
     _data: null,
     _selectedPlayers: {},   // { name: true/false }
     _currentMetric: 'ip',
+    _focusPlayer: null,     // V29.75 : joueur mis en avant au toucher/clic (null = tous)
+    DOTS_MAX_PLAYERS: 4,    // au-delà, courbes sans points (sauf joueur mis en avant)
     _currentSubTab: 'evolution', // 'evolution' | 'statsVisuelles'
     _currentTeamMetric: 'ip',
 
@@ -8878,6 +8880,7 @@ const ProgressionView = {
         });
         html += '</div>';
         html += '<div class="prog-chart-wrap"><canvas id="progMainChart"></canvas><div class="prog-tooltip" style="display:none"></div></div>';
+        html += '<div class="prog-chart-hint"></div>';
         html += '</div>';
         return html;
     },
@@ -9131,15 +9134,19 @@ const ProgressionView = {
     },
 
     // Trait fin + points creux (fond blanc, contour couleur) comme les sommets des radars
-    _drawSeriesLine(ctx, pts, color) {
+    // opts.dots === false : trait seul ; opts.faded : trait estompé (un autre joueur est mis en avant)
+    _drawSeriesLine(ctx, pts, color, opts) {
+        opts = opts || {};
         ctx.save();
         ctx.beginPath();
         pts.forEach(function(pt, i) { i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y); });
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = opts.faded ? color + '30' : color;
+        ctx.lineWidth = opts.faded ? 1.25 : (opts.bold ? 2 : 1.5);
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
         ctx.stroke();
+        // Un seul match : on garde le point, sinon la série serait invisible
+        if (opts.dots === false && pts.length > 1) { ctx.restore(); return; }
         pts.forEach(function(pt) {
             ctx.beginPath();
             ctx.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2);
@@ -9475,9 +9482,20 @@ const ProgressionView = {
         this._chartPoints = [];
         this._chartMeta = { pad: pad, w: w, h: h, xPos: xPos, yPos: yPos, mul: mul, metricDef: metricDef };
 
+        // Joueurs visibles ; mise en avant (toucher/clic) seulement si le joueur est affiché
+        var visible = this._data.players.filter(function(pl) { return self._selectedPlayers[pl.name] !== false; });
+        var visibleCount = visible.length;
+        var focus = this._focusPlayer;
+        if (focus && !visible.some(function(pl) { return pl.name === focus; })) focus = this._focusPlayer = null;
+        var showDots = visibleCount <= this.DOTS_MAX_PLAYERS;
+        this._updateChartHint(container, visibleCount, focus);
+
+        // Le joueur mis en avant est dessiné en dernier (au-dessus des autres)
+        var order = visible.slice();
+        if (focus) order.sort(function(a, b) { return (a.name === focus) - (b.name === focus); });
+
         // Player lines
-        this._data.players.forEach(function(p) {
-            if (self._selectedPlayers[p.name] === false) return;
+        order.forEach(function(p) {
             var vals = self._getMetricValues(p.name, metricKey);
 
             // Collect visible points
@@ -9487,9 +9505,18 @@ const ProgressionView = {
             });
             if (pts.length < 1) return;
 
-            // Area fill (only when single player visible)
-            var visibleCount = self._data.players.filter(function(pl) { return self._selectedPlayers[pl.name] !== false; }).length;
-            if (visibleCount === 1) self._drawSeriesArea(ctx, pts, p.color, pad.top, pad.top + chartH);
+            var isFocus = focus === p.name;
+            if (focus && !isFocus) {
+                // Autres joueurs : trait estompé, sans points ni moyenne
+                self._drawSeriesLine(ctx, pts, p.color, { dots: false, faded: true });
+                pts.forEach(function(pt) {
+                    self._chartPoints.push({ x: pt.x, y: pt.y, val: pt.val, matchIdx: pt.idx, player: p.name, color: p.color });
+                });
+                return;
+            }
+
+            // Fond dégradé : un seul joueur visible ou joueur mis en avant
+            if (visibleCount === 1 || isFocus) self._drawSeriesArea(ctx, pts, p.color, pad.top, pad.top + chartH);
 
             // Moyenne saison en pointillé (une par saison en Saisons ALL), sous la courbe.
             // Référence = profil radar de la saison si dispo, sinon moyenne des matchs.
@@ -9498,12 +9525,56 @@ const ProgressionView = {
                 return self._seasonRef(p.name, metricKey, season || undefined);
             });
 
-            // Line + dots
-            self._drawSeriesLine(ctx, pts, p.color);
+            // Line + dots (points masqués quand beaucoup de joueurs, sauf joueur mis en avant)
+            self._drawSeriesLine(ctx, pts, p.color, { dots: showDots || isFocus, bold: isFocus });
             pts.forEach(function(pt) {
                 self._chartPoints.push({ x: pt.x, y: pt.y, val: pt.val, matchIdx: pt.idx, player: p.name, color: p.color });
             });
         });
+    },
+
+    // Petite aide sous le graphique : comment mettre un joueur en avant / revenir à tous
+    _updateChartHint(container, visibleCount, focus) {
+        var el = container && container.querySelector('.prog-chart-hint');
+        if (!el) return;
+        var verb = (window.matchMedia && window.matchMedia('(hover: hover)').matches) ? 'Cliquez' : 'Touchez';
+        if (focus) {
+            el.innerHTML = '<span class="prog-hint-name">' + Utils.escapeHtml(focus) + '</span> mis en avant · ' + verb.toLowerCase() + ' ailleurs pour revoir tout le monde';
+        } else if (visibleCount > 1) {
+            el.textContent = verb + ' une courbe pour mettre un joueur en avant';
+        } else {
+            el.textContent = '';
+        }
+    },
+
+    // Joueur le plus proche (points de la courbe, et segments entre deux points) dans un rayon donné
+    _hitPlayer(mx, my, radius) {
+        var best = null, bestDist = radius;
+        var byPlayer = {};
+        (this._chartPoints || []).forEach(function(pt) {
+            (byPlayer[pt.player] = byPlayer[pt.player] || []).push(pt);
+        });
+        Object.keys(byPlayer).forEach(function(name) {
+            var pts = byPlayer[name];
+            for (var i = 0; i < pts.length; i++) {
+                var a = pts[i], d;
+                if (i + 1 < pts.length) {
+                    var b = pts[i + 1], dx = b.x - a.x, dy = b.y - a.y;
+                    var len2 = dx * dx + dy * dy;
+                    var t = len2 ? Math.max(0, Math.min(1, ((mx - a.x) * dx + (my - a.y) * dy) / len2)) : 0;
+                    var px = a.x + t * dx, py = a.y + t * dy;
+                    // +3 px : un point touché l'emporte sur un segment qui passe à côté
+                    d = Math.sqrt((mx - px) * (mx - px) + (my - py) * (my - py)) + 3;
+                } else {
+                    d = Math.sqrt((mx - a.x) * (mx - a.x) + (my - a.y) * (my - a.y));
+                }
+                if (d < bestDist) { bestDist = d; best = name; }
+                // distance au point lui-même (prioritaire)
+                var dp = Math.sqrt((mx - a.x) * (mx - a.x) + (my - a.y) * (my - a.y));
+                if (dp < bestDist) { bestDist = dp; best = name; }
+            }
+        });
+        return best;
     },
 
     // ========== EVENTS ==========
@@ -9551,9 +9622,12 @@ const ProgressionView = {
                 var rect = canvas.getBoundingClientRect();
                 var mx = clientX - rect.left;
                 var my = clientY - rect.top;
-                // Find closest point within 20px
+                // Find closest point within 20px (joueur mis en avant prioritaire)
                 var best = null, bestDist = 20;
-                self._chartPoints.forEach(function(pt) {
+                var cand = self._focusPlayer
+                    ? self._chartPoints.filter(function(pt) { return pt.player === self._focusPlayer; })
+                    : self._chartPoints;
+                cand.forEach(function(pt) {
                     var d = Math.sqrt((pt.x - mx) * (pt.x - mx) + (pt.y - my) * (pt.y - my));
                     if (d < bestDist) { bestDist = d; best = pt; }
                 });
@@ -9579,6 +9653,16 @@ const ProgressionView = {
             }, { passive: true });
             canvas.addEventListener('touchend', function() {
                 setTimeout(function() { tooltip.style.display = 'none'; }, 2000);
+            });
+            // V29.75 : toucher/clic sur une courbe = mise en avant de ce joueur ; ailleurs = tous
+            canvas.style.cursor = 'pointer';
+            canvas.addEventListener('click', function(e) {
+                var rect = canvas.getBoundingClientRect();
+                var hit = self._hitPlayer(e.clientX - rect.left, e.clientY - rect.top, 14);
+                if (hit && hit === self._focusPlayer) return;
+                if (!hit && !self._focusPlayer) return;
+                self._focusPlayer = hit || null;
+                self._drawChart(container);
             });
         }
 
