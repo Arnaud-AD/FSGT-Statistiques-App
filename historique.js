@@ -1066,7 +1066,9 @@ const PlusMinusCalculator = {
             roster: 0, onOff: null, influence: null,
             techServ: 0, techRec: 0, techPasse: 0, techAtt: 0, techRel: 0, techDef: 0, techBlc: 0, techDefBlc: 0,
             servImpact: 0, recImpact: 0, pasImpact: 0,
-            attImpact: 0, defImpact: 0, blcImpact: 0
+            attImpact: 0, defImpact: 0, blcImpact: 0,
+            // Volumes d'actions par categorie (set.stats .tot) : distinguer « 0 » (solde nul) de « − » (aucune action)
+            volServ: 0, volRec: 0, volPass: 0, volAtt: 0, volRel: 0, volDef: 0, volBlc: 0
         };
     },
 
@@ -1227,6 +1229,13 @@ const PlusMinusCalculator = {
                     r.defminus += (ps.defense && ps.defense.defminus) || 0;
                     r.fdef += (ps.defense && ps.defense.fdef) || 0;
                     r.defTot += (ps.defense && ps.defense.tot) || 0;
+                    r.volServ += (ps.service && ps.service.tot) || 0;
+                    r.volRec += (ps.reception && ps.reception.tot) || 0;
+                    r.volPass += (ps.pass && ps.pass.tot) || 0;
+                    r.volAtt += (ps.attack && ps.attack.tot) || 0;
+                    r.volRel += (ps.relance && ps.relance.tot) || 0;
+                    r.volDef += (ps.defense && ps.defense.tot) || 0;
+                    r.volBlc += (ps.block && ps.block.tot) || 0;
                 });
             }
         });
@@ -1524,7 +1533,8 @@ const PlusMinusCalculator = {
         'recWinner', 'passWinner', 'defWinner',
         'splus', 'r4', 'r3', 'r2', 'r1', 'p4', 'p3', 'p1',
         'relplus', 'relminus', 'frel', 'blcminus',
-        'servTot', 'recSumAdv', 'recCountAdv', 'defTot'],
+        'servTot', 'recSumAdv', 'recCountAdv', 'defTot',
+        'volServ', 'volRec', 'volPass', 'volAtt', 'volRel', 'volDef', 'volBlc'],
 
     aggregateAcrossMatches(matches, team) {
         var self = this;
@@ -1548,14 +1558,7 @@ const PlusMinusCalculator = {
                 if (!combined[name]) combined[name] = self._initRecord();
                 var dst = combined[name];
                 var src = matchData[name];
-                var rawFields = ['ptsPlayed', 'setsPlayed', 'proratedSets', 'filmedProratedSets', 'teamScored', 'teamConceded',
-                    'offPtsPlayed', 'offTeamScored', 'offTeamConceded',
-                    'ace', 'attplus', 'blcplus', 'defplus', 'fser', 'fatt', 'bp', 'frec', 'fdef', 'defminus', 'fblc', 'fp',
-                    'recWinner', 'passWinner', 'defWinner',
-                    'splus', 'r4', 'r3', 'r2', 'r1', 'p4', 'p3', 'p1',
-                    'relplus', 'relminus', 'frel', 'blcminus',
-                    'servTot', 'recSumAdv', 'recCountAdv', 'defTot'];
-                rawFields.forEach(function(k) { dst[k] += src[k]; });
+                self.RAW_FIELDS.forEach(function(k) { dst[k] += src[k] || 0; });
             });
         });
 
@@ -7143,7 +7146,9 @@ const ImpactView = {
     _teamTotals(data, players) {
         var fields = ['ptsPlayed', 'plusMinus', 'direct', 'indirect',
             'techServ', 'techRec', 'techPasse', 'techAtt', 'techRel', 'techDef', 'techBlc', 'techDefBlc',
-            'servImpact', 'recImpact', 'pasImpact', 'attImpact', 'defImpact', 'blcImpact'];
+            'servImpact', 'recImpact', 'pasImpact', 'attImpact', 'defImpact', 'blcImpact',
+            'volServ', 'volRec', 'volPass', 'volAtt', 'volRel', 'volDef', 'volBlc',
+            'ace', 'fser', 'attplus', 'fatt', 'bp', 'blcplus', 'fblc', 'frec', 'recWinner', 'fp', 'passWinner', 'defWinner'];
         var t = { setsPlayed: 0, proratedSets: 0, filmedProratedSets: 0, onOff: null, influence: null };
         fields.forEach(function(f) { t[f] = 0; });
         players.forEach(function(name) {
@@ -7154,6 +7159,27 @@ const ImpactView = {
             if ((r.filmedProratedSets || 0) > t.filmedProratedSets) t.filmedProratedSets = r.filmedProratedSets;
         });
         return t;
+    },
+
+    // A-t-il au moins une action dans la colonne ? (oui → solde nul affiché « 0 », non → « − »)
+    _hasActions(r, col) {
+        var serv = (r.volServ || 0) + (r.ace || 0) + (r.fser || 0);
+        var rec = (r.volRec || 0) + (r.frec || 0) + (r.recWinner || 0);
+        var pass = (r.volPass || 0) + (r.fp || 0) + (r.passWinner || 0);
+        var att = (r.volAtt || 0) + (r.attplus || 0) + (r.fatt || 0) + (r.bp || 0);
+        var def = (r.volDef || 0) + (r.volRel || 0) + (r.defWinner || 0);
+        var blc = (r.volBlc || 0) + (r.blcplus || 0) + (r.fblc || 0);
+        switch (col) {
+            case 'serv': return serv > 0;
+            case 'rec': return rec > 0;
+            case 'passe': return pass > 0;
+            case 'att': return att > 0;
+            case 'def': return def > 0;
+            case 'blc': return blc > 0;
+            case 'dir': return serv + att + blc > 0;
+            case 'indirect': return serv + rec + pass + def + blc > 0;
+        }
+        return false;
     },
 
     // colorMode: undefined=vert/rouge, 'dark'=noir, 'infl'=violet/parme
@@ -7259,8 +7285,8 @@ const ImpactView = {
             var ptsDisplay = isMoy && sp > 1 ? (r.ptsPlayed / sp).toFixed(1) : r.ptsPlayed;
             html += '<td><span class="impact-dark">' + ptsDisplay + '</span></td>';
             html += '<td class="impact-col-main">' + self._fmtVal(r.plusMinus, sp, true, 'dark') + '</td>';
-            html += '<td>' + self._fmtVal(r.direct, spF) + '</td>';
-            html += '<td>' + self._fmtVal(r.indirect, spF) + '</td>';
+            html += '<td>' + self._fmtVal(r.direct, spF, self._hasActions(r, 'dir')) + '</td>';
+            html += '<td>' + self._fmtVal(r.indirect, spF, self._hasActions(r, 'indirect')) + '</td>';
             html += '<td>' + self._fmtIP(r.rosterIP) + '</td>';
             html += '</tr>';
         });
@@ -7280,8 +7306,8 @@ const ImpactView = {
         html += '<tr class="total-row"><td>Total</td>';
         html += '<td><span class="impact-dark">' + totalPtsDisplay + '</span></td>';
         html += '<td class="impact-col-main">' + self._fmtVal(t.plusMinus, tsp, true, 'dark') + '</td>';
-        html += '<td>' + self._fmtVal(t.direct, tspF) + '</td>';
-        html += '<td>' + self._fmtVal(t.indirect, tspF) + '</td>';
+        html += '<td>' + self._fmtVal(t.direct, tspF, self._hasActions(t, 'dir')) + '</td>';
+        html += '<td>' + self._fmtVal(t.indirect, tspF, self._hasActions(t, 'indirect')) + '</td>';
         html += '<td>' + self._fmtIP(teamRosterIP) + '</td>';
         html += '</tr>';
 
@@ -7323,12 +7349,12 @@ const ImpactView = {
             var spF = self._filmedSets(r);
             html += '<tr>';
             html += '<td>' + self._renderPlayerCell(name, playerRoles) + '</td>';
-            html += '<td>' + self._fmtVal(r.techServ, spF) + '</td>';
-            html += '<td>' + self._fmtVal(r.techRec, spF) + '</td>';
-            html += '<td>' + self._fmtVal(r.techPasse, spF) + '</td>';
-            html += '<td>' + self._fmtVal(r.techAtt, spF) + '</td>';
-            html += '<td>' + self._fmtVal(r.techDef, spF) + '</td>';
-            html += '<td>' + self._fmtVal(r.techBlc, spF) + '</td>';
+            html += '<td>' + self._fmtVal(r.techServ, spF, self._hasActions(r, 'serv')) + '</td>';
+            html += '<td>' + self._fmtVal(r.techRec, spF, self._hasActions(r, 'rec')) + '</td>';
+            html += '<td>' + self._fmtVal(r.techPasse, spF, self._hasActions(r, 'passe')) + '</td>';
+            html += '<td>' + self._fmtVal(r.techAtt, spF, self._hasActions(r, 'att')) + '</td>';
+            html += '<td>' + self._fmtVal(r.techDef, spF, self._hasActions(r, 'def')) + '</td>';
+            html += '<td>' + self._fmtVal(r.techBlc, spF, self._hasActions(r, 'blc')) + '</td>';
             html += '</tr>';
         });
 
@@ -7337,12 +7363,12 @@ const ImpactView = {
         var tsp = t.proratedSets || t.setsPlayed || 1;
         var tspF = self._filmedSets(t);
         html += '<tr class="total-row"><td>Total</td>';
-        html += '<td>' + self._fmtVal(t.techServ, tspF) + '</td>';
-        html += '<td>' + self._fmtVal(t.techRec, tspF) + '</td>';
-        html += '<td>' + self._fmtVal(t.techPasse, tspF) + '</td>';
-        html += '<td>' + self._fmtVal(t.techAtt, tspF) + '</td>';
-        html += '<td>' + self._fmtVal(t.techDef, tspF) + '</td>';
-        html += '<td>' + self._fmtVal(t.techBlc, tspF) + '</td>';
+        html += '<td>' + self._fmtVal(t.techServ, tspF, self._hasActions(t, 'serv')) + '</td>';
+        html += '<td>' + self._fmtVal(t.techRec, tspF, self._hasActions(t, 'rec')) + '</td>';
+        html += '<td>' + self._fmtVal(t.techPasse, tspF, self._hasActions(t, 'passe')) + '</td>';
+        html += '<td>' + self._fmtVal(t.techAtt, tspF, self._hasActions(t, 'att')) + '</td>';
+        html += '<td>' + self._fmtVal(t.techDef, tspF, self._hasActions(t, 'def')) + '</td>';
+        html += '<td>' + self._fmtVal(t.techBlc, tspF, self._hasActions(t, 'blc')) + '</td>';
         html += '</tr>';
 
         html += '</tbody></table>';
