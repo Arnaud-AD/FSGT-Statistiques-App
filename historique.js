@@ -154,6 +154,11 @@ const Utils = {
 };
 
 // ==================== DATA LAYER ====================
+// V29.67 : joueurs adverses saisis sous deux orthographes. Équipe (nom actuel) → { ancien nom : nom retenu }.
+const PLAYER_NAME_ALIASES = {
+    'Bières et le loup': { 'Nolwenn': 'Nolwen' }
+};
+
 const HistoriqueData = {
     _cache: null,
     _firebaseLoaded: false,
@@ -165,8 +170,8 @@ const HistoriqueData = {
      */
     getCompletedMatches() {
         if (!this._cache) {
-            this._cache = this._normalizeServiceStats(
-                Storage.getAllMatches().filter(m => m.status === 'completed'));
+            this._cache = this._normalizeServiceStats(this._applyPlayerAliases(
+                Storage.getAllMatches().filter(m => m.status === 'completed')));
         }
         return this._cache;
     },
@@ -177,6 +182,42 @@ const HistoriqueData = {
      * (réception « Faute » enregistrée sur chaque ace). Les sets sans points (saisie
      * ancienne) ne l'incluaient pas → ajout en mémoire, une seule fois (marqueur sur le set).
      */
+    /**
+     * V29.67 : un même joueur adverse saisi sous deux orthographes selon les matchs.
+     * Renomme en mémoire (Firestore inchangé) toutes les occurrences exactes de l'ancien nom
+     * (valeurs et clés : compos, stats, points, liste adverse) dans les matchs contre l'équipe,
+     * pour que toutes les vues cumulent ses stats sous un seul nom.
+     */
+    _applyPlayerAliases(matches) {
+        matches.forEach(function(m) {
+            if (!m || m._playerAliasesApplied) return;
+            var team = (typeof canonicalTeamName === 'function') ? canonicalTeamName(m.opponent || '') : (m.opponent || '');
+            var aliases = PLAYER_NAME_ALIASES[team];
+            if (!aliases) return;
+            function walk(o) {
+                if (Array.isArray(o)) {
+                    for (var i = 0; i < o.length; i++) {
+                        if (typeof o[i] === 'string') { if (aliases[o[i]]) o[i] = aliases[o[i]]; }
+                        else if (o[i] && typeof o[i] === 'object') walk(o[i]);
+                    }
+                    return;
+                }
+                Object.keys(o).forEach(function(k) {
+                    var v = o[k];
+                    if (typeof v === 'string') { if (aliases[v]) o[k] = aliases[v]; }
+                    else if (v && typeof v === 'object') walk(v);
+                    if (aliases[k] && !(aliases[k] in o)) {
+                        o[aliases[k]] = o[k];
+                        delete o[k];
+                    }
+                });
+            }
+            walk(m);
+            m._playerAliasesApplied = true;
+        });
+        return matches;
+    },
+
     _normalizeServiceStats(matches) {
         matches.forEach(function(m) {
             (m.sets || []).forEach(function(set) {
@@ -205,7 +246,7 @@ const HistoriqueData = {
         try {
             const local = Storage.getAllMatches().filter(m => m.status === 'completed');
             const remote = await FirebaseSync.getCompletedMatches();
-            this._cache = this._normalizeServiceStats(FirebaseSync.mergeMatches(local, remote));
+            this._cache = this._normalizeServiceStats(this._applyPlayerAliases(FirebaseSync.mergeMatches(local, remote)));
             this._firebaseLoaded = true;
             return remote.length > 0;
         } catch (err) {
@@ -7684,10 +7725,10 @@ const RankingView = {
             cards = cards.filter(function(p) { return p.vol > 0; });
         }
         var sortCol = (s.col === 'ip') ? 'val' : s.col;
-        // Classés d'abord (tri actif), puis volume insuffisant (par volume décroissant)
+        // Classés d'abord, puis volume insuffisant ; les deux blocs suivent le tri actif (V29.67)
         function sortCards(list) {
             var ranked = self._sortData(list.filter(function(p) { return p.ranked; }), sortCol, s.asc);
-            var others = list.filter(function(p) { return !p.ranked; }).sort(function(a, b) { return b.vol - a.vol; });
+            var others = self._sortData(list.filter(function(p) { return !p.ranked; }), sortCol, s.asc);
             return ranked.concat(others);
         }
         function rowHtml(p, rank) {
