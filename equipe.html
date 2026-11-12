@@ -168,6 +168,17 @@
             color: #7c3aed;
         }
 
+        .poste-penetrant {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .form-hint {
+            margin: 6px 0 0;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
         .poste-r4 {
             background: #dbeafe;
             color: #2563eb;
@@ -491,6 +502,14 @@
                         </label>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label class="form-label">Style de jeu</label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" id="passeurPenetrant">
+                        <span class="checkbox-label">Passeur pénétrant</span>
+                    </label>
+                    <p class="form-hint">Ses blocs (de fortune) ne comptent pas dans son IP quand il joue passeur. Ils restent visibles dans les stats.</p>
+                </div>
                 <div class="modal-actions">
                     <button type="button" class="btn-cancel" onclick="closeModal()">Annuler</button>
                     <button type="submit" class="btn-save">Enregistrer</button>
@@ -532,7 +551,9 @@
                     const postes = Array.isArray(player.poste) ? player.poste : [player.poste];
                     const posteBadges = postes.map(p =>
                         `<span class="poste-badge poste-${getPosteClass(p)}">${escapeHtml(p)}</span>`
-                    ).join('');
+                    ).join('') + (player.passeurPenetrant
+                        ? '<span class="poste-badge poste-penetrant" title="Passeur pénétrant : bloc hors IP">Pénétrant</span>'
+                        : '');
                     return `
                     <tr>
                         <td>${escapeHtml(player.prenom)}</td>
@@ -577,6 +598,8 @@
 
             // Reset checkboxes
             checkboxes.forEach(cb => cb.checked = false);
+            const penetrant = document.getElementById('passeurPenetrant');
+            penetrant.checked = false;
 
             if (editIdx >= 0) {
                 title.textContent = 'Modifier le joueur';
@@ -590,6 +613,7 @@
                         cb.checked = true;
                     }
                 });
+                penetrant.checked = players[editIdx].passeurPenetrant === true;
             } else {
                 title.textContent = 'Ajouter un joueur';
                 editIndex.value = -1;
@@ -621,10 +645,19 @@
                 return;
             }
 
+            // V29.74 : passeur pénétrant → bloc hors IP (historique.js, IpPlayerFlags)
+            const passeurPenetrant = document.getElementById('passeurPenetrant').checked;
+
             if (editIndex >= 0) {
-                players[editIndex] = { prenom, poste: postes };
+                // Garder les autres champs du joueur
+                const updated = Object.assign({}, players[editIndex], { prenom, poste: postes });
+                if (passeurPenetrant) updated.passeurPenetrant = true;
+                else delete updated.passeurPenetrant;
+                players[editIndex] = updated;
             } else {
-                players.push({ prenom, poste: postes });
+                const added = { prenom, poste: postes };
+                if (passeurPenetrant) added.passeurPenetrant = true;
+                players.push(added);
             }
 
             localStorage.setItem('volleyball_players', JSON.stringify(players));

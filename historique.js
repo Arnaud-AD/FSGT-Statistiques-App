@@ -181,6 +181,27 @@ const PLAYER_NAME_ALIASES = {
     'Bières et le loup': { 'Nolwenn': 'Nolwen' }
 };
 
+// V29.74 : réglages par joueur de Jen saisis dans Équipe Manager (roster Firestore config/roster).
+// passeurPenetrant : passeur qui pénètre, ses rares blocs sont des blocs de fortune → quand il joue
+// passeur, l'axe bloc ne compte pas dans son IP (il reste affiché sur le radar et dans les stats).
+// Ne concerne que les joueurs de Jen (stats 'home') : un adversaire du même prénom n'est pas touché.
+const IpPlayerFlags = {
+    noBloc: {},
+    setRoster(players) {
+        var noBloc = {};
+        (players || []).forEach(function(p) {
+            if (p && p.prenom && p.passeurPenetrant === true) noBloc[p.prenom] = true;
+        });
+        this.noBloc = noBloc;
+    },
+    // Marque les stats agrégées d'un joueur de Jen (lu par computeAxisScores)
+    tag(stats, teamKey, name) {
+        if (stats && teamKey === 'home' && this.noBloc[name]) stats._ipNoBloc = true;
+        return stats;
+    }
+};
+try { IpPlayerFlags.setRoster(Storage.getPlayers()); } catch (e) { /* pas de roster local */ }
+
 const HistoriqueData = {
     _cache: null,
     _firebaseLoaded: false,
@@ -267,7 +288,11 @@ const HistoriqueData = {
 
         try {
             const local = Storage.getAllMatches().filter(m => m.status === 'completed');
+            // V29.74 : roster (réglages IP par joueur) chargé en même temps que les matchs
+            const rosterP = FirebaseSync.getRoster().catch(() => null);
             const remote = await FirebaseSync.getCompletedMatches();
+            const roster = await rosterP;
+            if (roster && roster.length) IpPlayerFlags.setRoster(roster);
             const merged = FirebaseSync.mergeMatches(local, remote);
             this._refreshLocalCopies(local, merged);
             this._cache = this._normalizeServiceStats(this._applyPlayerAliases(merged));
@@ -3300,6 +3325,7 @@ const StatsAggregator = {
                 if (!playerTotals[name]) {
                     playerTotals[name] = StatsAggregator.initPlayerStats();
                     playerTotals[name]._setsPlayed = 0;
+                    IpPlayerFlags.tag(playerTotals[name], teamKey, name); // V29.74
                 }
                 const t = playerTotals[name];
                 // V21.1 : prorata par points joués (comme Impact) au lieu de +1 entier
@@ -3404,6 +3430,7 @@ const StatsAggregator = {
     aggregateStatsByPointIntervals(match, teamKey, pointIntervals, playerName) {
         var self = this;
         var merged = self.initPlayerStats();
+        IpPlayerFlags.tag(merged, teamKey, playerName); // V29.74
         if (!pointIntervals || pointIntervals.length === 0) return merged;
 
         var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
@@ -5923,6 +5950,7 @@ const BilanView = {
 
     _mergePlayerStats(target, source) {
         target._setsPlayed = (target._setsPlayed || 0) + (source._setsPlayed || 0); // V29.49
+        if (source._ipNoBloc) target._ipNoBloc = true; // V29.74
         var cats = ['service', 'reception', 'attack', 'relance', 'defense', 'block'];
         cats.forEach(function(cat) {
             if (!source[cat]) return;
@@ -6280,6 +6308,9 @@ const BilanView = {
             scores.defense = 0;
         }
 
+        // V29.74 : passeur pénétrant (Équipe Manager) : bloc hors IP, voir IpPlayerFlags
+        if (s._ipNoBloc) scores._ipNoBloc = true;
+
         // Stocker les volumes bruts par axe (V20.25)
         // Utilises par computeIP pour le seuil minimum d'echantillon
         scores._tots = {
@@ -6338,6 +6369,8 @@ const BilanView = {
             var n = tots[key] || 0;
             if (n <= 0) return;
             actions += n;
+            // V29.74 : passeur pénétrant → son axe bloc ne pèse pas dans l'IP
+            if (key === 'bloc' && role === 'Passeur' && axisScores._ipNoBloc) return;
             var score = axisScores[key] || 0;
             if (score <= 0) return; // sous le seuil de la formule (ex : < 3 services) : pas de note
             var w = weights[key] * n / (n + K[key]);
