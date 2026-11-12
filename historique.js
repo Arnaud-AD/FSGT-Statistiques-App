@@ -321,6 +321,7 @@ const SeasonSelector = {
         ProgressionView._rendered = false;
         StatsVisuellesView._container = null; // forcer re-render stats visuelles
         ImpactView._seasonIP = null; // invalider le cache IP saison
+        ImpactView._oppIP = {};
 
         // Adapter les onglets selon la saison
         this._updateTabs();
@@ -1474,6 +1475,57 @@ const PlusMinusCalculator = {
         return true;
     },
 
+    // Derives (Direct, Indirect, Technique, On/Off) a partir des champs bruts cumules
+    _computeDerived(r) {
+        r.plusMinus = r.teamScored - r.teamConceded;
+        r.neutralDef = Math.max(0, r.defTot - r.defplus - r.defminus - r.fdef);
+        // New Direct
+        r.dirPlus = (r.ace + r.splus) + r.attplus + r.blcplus;
+        r.dirMinus = r.fser + (r.fatt + r.bp) + r.fblc;
+        r.direct = r.dirPlus - r.dirMinus;
+        // Service bonus
+        // V29.24 : recCountAdv inclut déjà les aces (note 0) — ne pas les recompter
+        var moyRecAdv = r.recCountAdv > 0 ? r.recSumAdv / r.recCountAdv : 3;
+        r.servBonus = r.servTot > 0 ? r.servTot * (3 - moyRecAdv) / 19 : 0;
+        // New Indirect (passe /3, R2 negatif, D neutre = 0)
+        var indPlus = (r.r4 + r.r3) + (r.p4 + r.p3) / 3 + r.relplus + r.relminus + r.defplus + r.blcminus;
+        var indMinus = r.r2 + r.r1 + r.frec + (r.p1 + r.fp) / 3 + r.frel + r.defminus + r.fdef;
+        r.indirect = indPlus - indMinus + r.servBonus;
+        // Impact Technique
+        r.techServ = (r.ace + r.splus - r.fser) + r.servBonus;
+        r.techRec = r.r4 + r.r3 - r.r2 - r.r1 - r.frec;
+        r.techPasse = r.p4 + r.p3 - r.p1 - r.fp;
+        r.techAtt = r.attplus - r.fatt - r.bp;
+        r.techRel = r.relplus + r.relminus - r.frel;
+        r.techDef = (r.relplus + r.relminus - r.frel) + (r.defplus - r.defminus - r.fdef);
+        r.techBlc = r.blcplus + r.blcminus - r.fblc;
+        r.techDefBlc = r.techDef + r.techBlc;
+        // On/Off (conserve pour backward compat)
+        if (r.offPtsPlayed > 0 && r.ptsPlayed > 0) {
+            var offRate = (r.offTeamScored - r.offTeamConceded) / r.offPtsPlayed;
+            r.onOff = r.plusMinus - offRate * r.ptsPlayed;
+            r.influence = r.onOff - 0.5 * (r.dirPlus - r.dirMinus);
+        } else {
+            r.onOff = null;
+            r.influence = null;
+        }
+        r.servImpact = r.ace - r.fser;
+        r.recImpact = r.recWinner - r.frec;
+        r.pasImpact = r.passWinner - r.fp;
+        r.attImpact = r.attplus - r.fatt - r.bp;
+        r.defImpact = r.defplus + r.defWinner - r.fdef - r.defminus;
+        r.blcImpact = r.blcplus - r.fblc;
+    },
+
+    // Champs bruts additionnables entre matchs
+    RAW_FIELDS: ['ptsPlayed', 'setsPlayed', 'proratedSets', 'filmedProratedSets', 'teamScored', 'teamConceded',
+        'offPtsPlayed', 'offTeamScored', 'offTeamConceded',
+        'ace', 'attplus', 'blcplus', 'defplus', 'fser', 'fatt', 'bp', 'frec', 'fdef', 'defminus', 'fblc', 'fp',
+        'recWinner', 'passWinner', 'defWinner',
+        'splus', 'r4', 'r3', 'r2', 'r1', 'p4', 'p3', 'p1',
+        'relplus', 'relminus', 'frel', 'blcminus',
+        'servTot', 'recSumAdv', 'recCountAdv', 'defTot'],
+
     aggregateAcrossMatches(matches, team) {
         var self = this;
         var combined = {};
@@ -1508,47 +1560,7 @@ const PlusMinusCalculator = {
         });
 
         // Recalcul des derives
-        Object.keys(combined).forEach(function(name) {
-            var r = combined[name];
-            r.plusMinus = r.teamScored - r.teamConceded;
-            r.neutralDef = Math.max(0, r.defTot - r.defplus - r.defminus - r.fdef);
-            // New Direct
-            r.dirPlus = (r.ace + r.splus) + r.attplus + r.blcplus;
-            r.dirMinus = r.fser + (r.fatt + r.bp) + r.fblc;
-            r.direct = r.dirPlus - r.dirMinus;
-            // Service bonus
-            // V29.24 : recCountAdv inclut déjà les aces (note 0) — ne pas les recompter
-            var moyRecAdv = r.recCountAdv > 0 ? r.recSumAdv / r.recCountAdv : 3;
-            r.servBonus = r.servTot > 0 ? r.servTot * (3 - moyRecAdv) / 19 : 0;
-            // New Indirect (passe /3, R2 negatif, D neutre = 0)
-            var indPlus = (r.r4 + r.r3) + (r.p4 + r.p3) / 3 + r.relplus + r.relminus + r.defplus + r.blcminus;
-            var indMinus = r.r2 + r.r1 + r.frec + (r.p1 + r.fp) / 3 + r.frel + r.defminus + r.fdef;
-            r.indirect = indPlus - indMinus + r.servBonus;
-            // Impact Technique
-            r.techServ = (r.ace + r.splus - r.fser) + r.servBonus;
-            r.techRec = r.r4 + r.r3 - r.r2 - r.r1 - r.frec;
-            r.techPasse = r.p4 + r.p3 - r.p1 - r.fp;
-            r.techAtt = r.attplus - r.fatt - r.bp;
-            r.techRel = r.relplus + r.relminus - r.frel;
-            r.techDef = (r.relplus + r.relminus - r.frel) + (r.defplus - r.defminus - r.fdef);
-            r.techBlc = r.blcplus + r.blcminus - r.fblc;
-            r.techDefBlc = r.techDef + r.techBlc;
-            // On/Off (conserve pour backward compat)
-            if (r.offPtsPlayed > 0 && r.ptsPlayed > 0) {
-                var offRate = (r.offTeamScored - r.offTeamConceded) / r.offPtsPlayed;
-                r.onOff = r.plusMinus - offRate * r.ptsPlayed;
-                r.influence = r.onOff - 0.5 * (r.dirPlus - r.dirMinus);
-            } else {
-                r.onOff = null;
-                r.influence = null;
-            }
-            r.servImpact = r.ace - r.fser;
-            r.recImpact = r.recWinner - r.frec;
-            r.pasImpact = r.passWinner - r.fp;
-            r.attImpact = r.attplus - r.fatt - r.bp;
-            r.defImpact = r.defplus + r.defWinner - r.fdef - r.defminus;
-            r.blcImpact = r.blcplus - r.fblc;
-        });
+        Object.keys(combined).forEach(function(name) { self._computeDerived(combined[name]); });
 
         // --- Roster saisonnier : force des coequipiers point-par-point ---
         // Phase 1 : seasonDirectPerSet pour chaque joueur
@@ -6694,8 +6706,111 @@ const ImpactView = {
     _showToggle: false, // visible si multi-sets
     _caches: {}, // cache re-render par contexte : { match: {...}, year: {...} }
     _seasonIP: null, // cache IP saison par joueur
+    _oppIP: {}, // cache IP saison des joueurs adverses, par equipe adverse (nom canonique)
     _sortCol: null, // null = tri par defaut (role + pm), sinon colKey
     _sortAsc: false, // desc par defaut pour valeurs numeriques
+
+    // IP saison des joueurs d'une equipe adverse : stats cumulees sur les matchs
+    // de la saison filtree contre cette equipe (meme calcul que l'IP saison Jen)
+    _ensureOpponentIP(opponent) {
+        var key = canonicalTeamName(opponent || '');
+        if (this._oppIP[key]) return this._oppIP[key];
+        var matches = (SeasonSelector.getFilteredMatches() || []).filter(function(m) {
+            return canonicalTeamName(m.opponent || '') === key;
+        });
+        var roles = BilanView.getPlayerRolesYear(matches, 'away');
+        var ips = {};
+        Object.keys(roles).forEach(function(name) {
+            ips[name] = BilanView.computeIPForPlayer(matches, name, 'away', roles[name].primaryRole);
+        });
+        this._oppIP[key] = ips;
+        return ips;
+    },
+
+    // Postes adverses d'un match. getPlayerRoles ne voit que la feuille de match
+    // et le lineup final : un remplacant entre puis ressorti dans le meme set
+    // n'y figure pas. On complete avec le poste occupe point par point (substitutions).
+    _awayRoles(match) {
+        var roles = BilanView.getPlayerRoles(match, 'away');
+        var pts = {};
+        (match.sets || []).filter(function(s) { return s.completed; }).forEach(function(set) {
+            var iv = BilanView.buildRoleIntervals(set, 'away');
+            Object.keys(iv).forEach(function(name) {
+                if (roles[name] && roles[name].primaryRole) return;
+                iv[name].forEach(function(it) {
+                    if (!it.role) return;
+                    if (!pts[name]) pts[name] = {};
+                    pts[name][it.role] = (pts[name][it.role] || 0) + Math.max(1, it.end - it.start);
+                });
+            });
+        });
+        Object.keys(pts).forEach(function(name) {
+            var r = pts[name];
+            var primary = Object.keys(r).sort(function(a, b) { return r[b] - r[a]; })[0];
+            roles[name] = { primaryRole: primary, roles: r };
+        });
+        return roles;
+    },
+
+    // Impact de l'equipe adverse sur un match (une ligne par joueur adverse)
+    _buildAwayMatch(match, completedSets) {
+        var data = PlusMinusCalculator.compute(completedSets, 'away');
+        var players = Object.keys(data);
+        if (players.length === 0) return null;
+        var rosterIP = this._computeRosterIP(match, 'away', players, this._ensureOpponentIP(match.opponent));
+        players.forEach(function(name) { data[name].rosterIP = rosterIP[name] || 0; });
+        return {
+            data: data,
+            playerRoles: this._awayRoles(match),
+            label: match.opponent || 'Adversaire'
+        };
+    },
+
+    // Impact adverse sur la saison : tous les adversaires comme une seule equipe,
+    // une ligne par poste (comme « Adversaire moyen » des profils radar).
+    // Le poste de chaque joueur est celui qu'il occupe dans le match concerne.
+    AWAY_ROLE_ROWS: { 'Passeur': 'Passeurs', 'R4': 'R4', 'Pointu': 'Pointus', 'Centre': 'Centres' },
+
+    _buildAwayYear(matches) {
+        var self = this;
+        var calc = PlusMinusCalculator;
+        var byRole = {};
+        var rosterSum = {}, rosterW = {};
+        matches.forEach(function(match) {
+            var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+            var rallies = 0;
+            completedSets.forEach(function(s) { if (s.points) rallies += s.points.length; });
+            if (rallies === 0) return;
+            var data = calc.compute(completedSets, 'away');
+            var players = Object.keys(data);
+            if (players.length === 0) return;
+            var roles = self._awayRoles(match);
+            var rosterIP = self._computeRosterIP(match, 'away', players, self._ensureOpponentIP(match.opponent));
+            players.forEach(function(name) {
+                var role = roles[name] && roles[name].primaryRole;
+                var rowName = self.AWAY_ROLE_ROWS[role] || 'Sans poste';
+                if (!byRole[rowName]) { byRole[rowName] = calc._initRecord(); rosterSum[rowName] = 0; rosterW[rowName] = 0; }
+                var dst = byRole[rowName], src = data[name];
+                calc.RAW_FIELDS.forEach(function(k) { dst[k] += src[k] || 0; });
+                if (rosterIP[name] > 0) {
+                    rosterSum[rowName] += rosterIP[name] * src.ptsPlayed;
+                    rosterW[rowName] += src.ptsPlayed;
+                }
+            });
+        });
+        var rowNames = Object.keys(byRole);
+        if (rowNames.length === 0) return null;
+        var playerRoles = {};
+        rowNames.forEach(function(rowName) {
+            calc._computeDerived(byRole[rowName]);
+            byRole[rowName].rosterIP = rosterW[rowName] > 0 ? Math.round(rosterSum[rowName] / rosterW[rowName]) : 0;
+            var role = Object.keys(self.AWAY_ROLE_ROWS).filter(function(r) { return self.AWAY_ROLE_ROWS[r] === rowName; })[0];
+            var counts = {};
+            if (role) counts[role] = 1;
+            playerRoles[rowName] = { primaryRole: role || null, roles: counts };
+        });
+        return { data: byRole, playerRoles: playerRoles, label: 'Adversaires (cumul de la saison)' };
+    },
 
     // Calcule et cache les IP saison pour chaque joueur (mediane par match)
     _ensureSeasonIP(team) {
@@ -6716,8 +6831,8 @@ const ImpactView = {
     // Un joueur avec un bon +/- mais un roster faible a plus de merite
     // Un joueur avec un mauvais +/- mais un roster fort sous-performe
     // Parcourt point par point pour tenir compte des substitutions
-    _computeRosterIP(match, team, players) {
-        var seasonIP = this._seasonIP || {};
+    _computeRosterIP(match, team, players, ipMap) {
+        var seasonIP = ipMap || this._seasonIP || {};
         var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
         var ipSum = {};
         var ipWeight = {};
@@ -6800,7 +6915,8 @@ const ImpactView = {
 
         var playerRoles = BilanView.getPlayerRoles(match, team);
         this._showToggle = completedSets.filter(function(s) { return Utils.setHasStats(s); }).length > 1;
-        return this._renderSection(data, playerRoles, 'match');
+        var away = this._buildAwayMatch(match, completedSets);
+        return this._renderSection(data, playerRoles, 'match', away);
     },
 
     renderForYear(matches, team) {
@@ -6819,18 +6935,28 @@ const ImpactView = {
         });
 
         this._showToggle = true;
-        return this._renderSection(data, playerRoles, 'year');
+        var away = this._buildAwayYear(matches);
+        return this._renderSection(data, playerRoles, 'year', away);
     },
 
-    _renderSection(data, playerRoles, ctx) {
-        this._caches[ctx] = { data: data, playerRoles: playerRoles, showToggle: this._showToggle };
+    _renderSection(data, playerRoles, ctx, away) {
+        this._caches[ctx] = { data: data, playerRoles: playerRoles, showToggle: this._showToggle, away: away || null };
         var html = '<div class="hist-section impact-section collapsed" data-impact-ctx="' + ctx + '">';
         html += '<div class="hist-section-title">Impact +/\u2212</div>';
+        if (away) html += '<div class="impact-team-title impact-team-home">Jen et ses Saints</div>';
         // Global + Technique : empilés sur mobile, côte à côte en large (container query)
         html += '<div class="impact-tables">';
         html += this._renderClaudeTable(data, playerRoles);
         html += this._renderArnaudTable(data, playerRoles);
         html += '</div>';
+        // Equipe adverse : memes tableaux, a la suite
+        if (away) {
+            html += '<div class="impact-team-title impact-team-away">' + Utils.escapeHtml(away.label) + '</div>';
+            html += '<div class="impact-tables">';
+            html += this._renderClaudeTable(away.data, away.playerRoles);
+            html += this._renderArnaudTable(away.data, away.playerRoles);
+            html += '</div>';
+        }
         html += '</div>';
         return html;
     },
@@ -12761,6 +12887,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         ProgressionView._rendered = false;
         StatsVisuellesView._container = null;
         ImpactView._seasonIP = null;
+        ImpactView._oppIP = {};
         TabNav.switchTo(TabNav.currentTab);
     }
 
@@ -12912,7 +13039,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (cache) {
             ImpactView._showToggle = cache.showToggle;
             var wasOpen = !section.classList.contains('collapsed');
-            var html = ImpactView._renderSection(cache.data, cache.playerRoles, section.dataset.impactCtx);
+            var html = ImpactView._renderSection(cache.data, cache.playerRoles, section.dataset.impactCtx, cache.away);
             var temp = document.createElement('div');
             temp.innerHTML = html;
             var newSection = temp.firstChild;
@@ -12945,7 +13072,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (cache) {
             ImpactView._showToggle = cache.showToggle;
             var wasOpen = !section.classList.contains('collapsed');
-            var html = ImpactView._renderSection(cache.data, cache.playerRoles, section.dataset.impactCtx);
+            var html = ImpactView._renderSection(cache.data, cache.playerRoles, section.dataset.impactCtx, cache.away);
             var temp = document.createElement('div');
             temp.innerHTML = html;
             var newSection = temp.firstChild;

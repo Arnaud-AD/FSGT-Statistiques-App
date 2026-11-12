@@ -2172,6 +2172,22 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
 }
 .impact-table-label > span { flex: 1; }
 
+/* Titre d'équipe (Jen / adversaire) au-dessus de chaque paire de tableaux */
+.impact-team-title {
+    font-family: 'Google Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    padding: 2px 0 8px;
+}
+.impact-team-home { color: #0056D2; }
+.impact-team-away {
+    color: #ea4335;
+    margin-top: 20px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-color);
+}
+
 .impact-table {
     table-layout: fixed;
     width: 100%;
