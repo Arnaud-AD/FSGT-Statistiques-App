@@ -1675,3 +1675,17 @@
             .cal-postponed .team-name { color: var(--text-secondary); }
             .cal-empty { padding: 10px 12px; color: var(--text-secondary); font-size: 12px; }
         }
+
+        /* Ginette: forfeit results greyed in the Matchs tab */
+        .match-card-forfeit .match-score,
+        .match-card-forfeit .team-name { opacity: 0.6; }
+        .forfeit-badge {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 0 6px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #ea580c;
+            background: rgba(249, 115, 22, 0.1);
+        }
