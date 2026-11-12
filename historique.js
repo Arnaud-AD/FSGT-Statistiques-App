@@ -115,6 +115,28 @@ const Utils = {
         return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
     },
 
+    /**
+     * V29.73 : pourcentages d'une repartition qui font toujours 100 % une fois arrondis
+     * (methode du plus fort reste). Si les valeurs ne couvrent pas tout le total
+     * (repartition partielle), arrondi classique de chaque valeur.
+     * @param {number[]} values
+     * @param {number} total
+     * @returns {number[]} pourcentages entiers, dans le meme ordre
+     */
+    pctParts(values, total) {
+        if (!total || total <= 0) return values.map(function() { return 0; });
+        var sum = values.reduce(function(a, v) { return a + (v || 0); }, 0);
+        if (sum !== total) return values.map(function(v) { return Math.round((v || 0) / total * 100); });
+        var raw = values.map(function(v) { return (v || 0) / total * 100; });
+        var out = raw.map(Math.floor);
+        var missing = 100 - out.reduce(function(a, v) { return a + v; }, 0);
+        raw.map(function(r, i) { return { i: i, rest: r - out[i] }; })
+            .sort(function(a, b) { return b.rest - a.rest || a.i - b.i; })
+            .slice(0, missing)
+            .forEach(function(x) { out[x.i]++; });
+        return out;
+    },
+
     formatPercent(value, total) {
         if (!total || total === 0) return '-';
         return Math.round(value / total * 100) + '%';
@@ -2061,12 +2083,13 @@ const PassAttackAnalyzer = {
             var qualSum = 0;
             scored.forEach(function(s) { qualSum += s.passScore; });
             var quality = scored.length > 0 ? Math.round(qualSum / scored.length * 10) / 10 : null;
+            var parts = Utils.pctParts([aplus, aminus, fabp], total);
             return {
                 total: total, quality: quality,
                 aplus: aplus, aminus: aminus, fabp: fabp,
-                aplusPct: Math.round(aplus / total * 100),
-                aminusPct: Math.round(aminus / total * 100),
-                fabpPct: Math.round(fabp / total * 100)
+                aplusPct: parts[0],
+                aminusPct: parts[1],
+                fabpPct: parts[2]
             };
         }
 
@@ -2455,14 +2478,15 @@ const PassAttackAnalyzer = {
         html += '<tbody>';
 
         var rolesMap = SharedComponents.playerRolesMap || {};
-        Object.keys(self.ZONE_COLORS).forEach(function(zone) {
+        var zoneKeys = Object.keys(self.ZONE_COLORS);
+        var zoneShares = Utils.pctParts(zoneKeys.map(function(k) { return dist.zones[k].total; }), dist.total);
+        zoneKeys.forEach(function(zone, zoneIdx) {
             var z = dist.zones[zone];
-            var pct = dist.total > 0 ? Math.round(z.total / dist.total * 100) : 0;
+            var pct = zoneShares[zoneIdx];
             var fabp = (z.attackCats.fa || 0) + (z.attackCats.bp || 0);
             var plusMinus = (z.attackCats.aplus || 0) - fabp;
-            var zAplusPct = z.total > 0 ? Math.round((z.attackCats.aplus || 0) / z.total * 100) : 0;
-            var zAminusPct = z.total > 0 ? Math.round((z.attackCats.aminus || 0) / z.total * 100) : 0;
-            var zFabpPct = z.total > 0 ? Math.round(fabp / z.total * 100) : 0;
+            var zParts = Utils.pctParts([z.attackCats.aplus || 0, z.attackCats.aminus || 0, fabp], z.total);
+            var zAplusPct = zParts[0], zAminusPct = zParts[1], zFabpPct = zParts[2];
             html += '<tr class="pa-zone-row">';
             html += '<td><span class="pt-role-header-bar" style="background:' + self.ZONE_COLORS[zone] + '"></span> ' + zone + '</td>';
             html += '<td>' + z.total + '</td>';
@@ -2497,9 +2521,8 @@ const PassAttackAnalyzer = {
                 var aPct = dist.total > 0 ? Math.round(a.total / dist.total * 100) : 0;
                 var aFabp = (a.attackCats.fa || 0) + (a.attackCats.bp || 0);
                 var aPlusMinus = (a.attackCats.aplus || 0) - aFabp;
-                var aAplusPct = a.total > 0 ? Math.round((a.attackCats.aplus || 0) / a.total * 100) : 0;
-                var aAminusPct = a.total > 0 ? Math.round((a.attackCats.aminus || 0) / a.total * 100) : 0;
-                var aFabpPct = a.total > 0 ? Math.round(aFabp / a.total * 100) : 0;
+                var aParts = Utils.pctParts([a.attackCats.aplus || 0, a.attackCats.aminus || 0, aFabp], a.total);
+                var aAplusPct = aParts[0], aAminusPct = aParts[1], aFabpPct = aParts[2];
                 html += '<tr class="pa-player-row">';
                 html += '<td><div class="player-cell">' + SharedComponents.renderRoleDots(name) + Utils.escapeHtml(name) + '</div></td>';
                 html += '<td>' + a.total + '</td>';
@@ -2565,14 +2588,15 @@ const PassAttackAnalyzer = {
         html += '<tbody>';
 
         var rolesMap = SharedComponents.playerRolesMap || {};
-        Object.keys(self.ZONE_COLORS).forEach(function(zone) {
+        var zoneKeys = Object.keys(self.ZONE_COLORS);
+        var zoneShares = Utils.pctParts(zoneKeys.map(function(k) { return dist.zones[k].total; }), dist.total);
+        zoneKeys.forEach(function(zone, zoneIdx) {
             var z = dist.zones[zone];
-            var pct = dist.total > 0 ? Math.round(z.total / dist.total * 100) : 0;
+            var pct = zoneShares[zoneIdx];
             var fabp = (z.attackCats.fa || 0) + (z.attackCats.bp || 0);
             var plusMinus = (z.attackCats.aplus || 0) - fabp;
-            var zAplusPct = z.total > 0 ? Math.round((z.attackCats.aplus || 0) / z.total * 100) : 0;
-            var zAminusPct = z.total > 0 ? Math.round((z.attackCats.aminus || 0) / z.total * 100) : 0;
-            var zFabpPct = z.total > 0 ? Math.round(fabp / z.total * 100) : 0;
+            var zParts = Utils.pctParts([z.attackCats.aplus || 0, z.attackCats.aminus || 0, fabp], z.total);
+            var zAplusPct = zParts[0], zAminusPct = zParts[1], zFabpPct = zParts[2];
             html += '<tr class="pa-zone-row">';
             html += '<td><span class="pt-role-header-bar" style="background:' + self.ZONE_COLORS[zone] + '"></span> ' + zone + '</td>';
             html += '<td>' + z.total + '</td>';
@@ -2605,9 +2629,8 @@ const PassAttackAnalyzer = {
                 var aPct = dist.total > 0 ? Math.round(a.total / dist.total * 100) : 0;
                 var aFabp = (a.attackCats.fa || 0) + (a.attackCats.bp || 0);
                 var aPlusMinus = (a.attackCats.aplus || 0) - aFabp;
-                var aAplusPct = a.total > 0 ? Math.round((a.attackCats.aplus || 0) / a.total * 100) : 0;
-                var aAminusPct = a.total > 0 ? Math.round((a.attackCats.aminus || 0) / a.total * 100) : 0;
-                var aFabpPct = a.total > 0 ? Math.round(aFabp / a.total * 100) : 0;
+                var aParts = Utils.pctParts([a.attackCats.aplus || 0, a.attackCats.aminus || 0, aFabp], a.total);
+                var aAplusPct = aParts[0], aAminusPct = aParts[1], aFabpPct = aParts[2];
                 html += '<tr class="pa-player-row">';
                 html += '<td><div class="player-cell">' + SharedComponents.renderRoleDots(name) + Utils.escapeHtml(name) + '</div></td>';
                 html += '<td>' + a.total + '</td>';
@@ -2863,8 +2886,9 @@ const PassAttackAnalyzer = {
         names.forEach(function(name) {
             var d = data[name];
             if (d.total === 0) return;
-            var reFeedPct = Math.round(d.reFeed / d.total * 100);
-            var switchPct = Math.round(d.switch_ / d.total * 100);
+            var rsParts = Utils.pctParts([d.reFeed, d.switch_], d.total);
+            var reFeedPct = rsParts[0];
+            var switchPct = rsParts[1];
             var reFeedSucc = d.reFeed > 0 ? Math.round(d.reFeedSuccess / d.reFeed * 100) : 0;
             var switchSucc = d.switch_ > 0 ? Math.round(d.switchSuccess / d.switch_ * 100) : 0;
 
@@ -2903,8 +2927,9 @@ const PassAttackAnalyzer = {
 
         // Ligne pression (header)
         html += '<tr class="pa-zone-row"><td><strong>Serr\u00e9</strong> \ud83d\udd25</td>';
-        zones.forEach(function(z) {
-            var pct = data.pressure.total > 0 ? Math.round((data.pressure[z] || 0) / data.pressure.total * 100) : 0;
+        var rowParts = Utils.pctParts(zones.map(function(z) { return data.pressure[z] || 0; }), data.pressure.total);
+        zones.forEach(function(z, zi) {
+            var pct = rowParts[zi];
             html += '<td>' + pct + '%</td>';
         });
         html += '</tr>';
@@ -2914,8 +2939,9 @@ const PassAttackAnalyzer = {
             var setData = data.pressureBySet[setNum];
             if (!setData || setData.total === 0) return;
             html += '<tr class="pa-player-row"><td>\u2514 Set ' + (setNum + 1) + ' <span class="pa-stat-detail">(' + setData.total + ')</span></td>';
-            zones.forEach(function(z) {
-                var pct = setData.total > 0 ? Math.round((setData[z] || 0) / setData.total * 100) : 0;
+            var setParts = Utils.pctParts(zones.map(function(z) { return setData[z] || 0; }), setData.total);
+            zones.forEach(function(z, zi) {
+                var pct = setParts[zi];
                 html += '<td>' + pct + '%</td>';
             });
             html += '</tr>';
@@ -2923,8 +2949,9 @@ const PassAttackAnalyzer = {
 
         // Ligne confort (header)
         html += '<tr class="pa-zone-row"><td><strong>Confort</strong> \ud83c\udf3f</td>';
-        zones.forEach(function(z) {
-            var pct = data.normal.total > 0 ? Math.round((data.normal[z] || 0) / data.normal.total * 100) : 0;
+        var rowParts = Utils.pctParts(zones.map(function(z) { return data.normal[z] || 0; }), data.normal.total);
+        zones.forEach(function(z, zi) {
+            var pct = rowParts[zi];
             html += '<td>' + pct + '%</td>';
         });
         html += '</tr>';
@@ -2934,8 +2961,9 @@ const PassAttackAnalyzer = {
             var setData = data.normalBySet[setNum];
             if (!setData || setData.total === 0) return;
             html += '<tr class="pa-player-row"><td>\u2514 Set ' + (setNum + 1) + ' <span class="pa-stat-detail">(' + setData.total + ')</span></td>';
-            zones.forEach(function(z) {
-                var pct = setData.total > 0 ? Math.round((setData[z] || 0) / setData.total * 100) : 0;
+            var setParts = Utils.pctParts(zones.map(function(z) { return setData[z] || 0; }), setData.total);
+            zones.forEach(function(z, zi) {
+                var pct = setParts[zi];
                 html += '<td>' + pct + '%</td>';
             });
             html += '</tr>';
@@ -3080,9 +3108,10 @@ const PassAttackAnalyzer = {
                     html += '<td class="pa-funnel-sep" colspan="2">\u2014</td>';
                     html += '<td class="pa-funnel-sep" colspan="2">\u2014</td>';
                 } else {
-                    var rfPct = Math.round(s.rf / s.total * 100);
+                    var rsw = Utils.pctParts([s.rf, s.sw], s.total);
+                    var rfPct = rsw[0];
                     var rfAplusPct = s.rf > 0 ? Math.round(s.rfAplus / s.rf * 100) : 0;
-                    var swPct = Math.round(s.sw / s.total * 100);
+                    var swPct = rsw[1];
                     var swAplusPct = s.sw > 0 ? Math.round(s.swAplus / s.sw * 100) : 0;
 
                     var rfBold = rfPct >= swPct ? ' style="font-weight:700"' : '';
@@ -3972,6 +4001,36 @@ const SharedComponents = {
     },
 
     /**
+     * V29.73 : colonnes qui se partagent le total de chaque famille (somme = Tot).
+     * Leurs pourcentages sont arrondis ensemble pour faire exactement 100 %.
+     * Le service n'y est pas : Ace et FS ne couvrent pas tous les services.
+     */
+    PCT_GROUPS: {
+        reception: [['r4'], ['r3'], ['r2'], ['r1', 'frec']],
+        pass: [['p4'], ['p3'], ['p2'], ['p1', 'fp']],
+        attack: [['attplus'], ['attminus'], ['fatt', 'bp']],
+        relance: [['relplus'], ['relminus'], ['frel']],
+        defense: [['defplus'], ['defneutral'], ['defminus'], ['fdef']],
+        block: [['blcplus'], ['blcminus'], ['fblc']]
+    },
+    PCT_GROUP_COL: {
+        r4: 0, r3: 1, r2: 2, r1Fr: 3, p4: 0, p3: 1, p2: 2, p1Fp: 3,
+        attplus: 0, attminus: 1, faBp: 2, relplus: 0, relminus: 1, frel: 2,
+        defplus: 0, defneutral: 1, defminus: 2, fdef: 3, blcplus: 0, blcminus: 1, fblc: 2
+    },
+
+    /** Pourcentage arrondi au plus fort reste pour une colonne d'une famille, ou null. */
+    _balancedPct(catData, dataKey, colId) {
+        var groups = this.PCT_GROUPS[dataKey];
+        var idx = this.PCT_GROUP_COL[colId];
+        if (!groups || idx === undefined || !catData || !(catData.tot > 0)) return null;
+        var values = groups.map(function(keys) {
+            return keys.reduce(function(a, k) { return a + (catData[k] || 0); }, 0);
+        });
+        return Utils.pctParts(values, catData.tot)[idx];
+    },
+
+    /**
      * Genere une cellule de stat.
      * Supporte: colonnes normales, colonnes avec %, colonnes calculees (acePlus, faBp).
      */
@@ -4025,7 +4084,10 @@ const SharedComponents = {
             if (col.computed === 'acePlus') tot = (playerStats.service || {}).tot || 0;
             // Pour faBp, le tot est dans attack
             if (col.computed === 'faBp') tot = (playerStats.attack || {}).tot || 0;
-            if (tot > 0) pctVal = Math.round(val / tot * 100);
+            if (tot > 0) {
+                var balanced = SharedComponents._balancedPct(catData, dataKey, col.computed || col.key);
+                pctVal = balanced !== null ? balanced : Math.round(val / tot * 100);
+            }
         }
 
         // Mode Moy : diviser par sets joues
@@ -4188,7 +4250,8 @@ const SharedComponents = {
             if (v <= 0) return '<td class="">-</td>';
             var pctVal = null;
             if (col.key !== 'tot' && bucket.tot > 0) {
-                pctVal = Math.round(v / bucket.tot * 100);
+                var balanced = SharedComponents._balancedPct(bucket, 'pass', col.computed || col.key);
+                pctVal = balanced !== null ? balanced : Math.round(v / bucket.tot * 100);
             }
             // Mode Moy : diviser par sets joues
             var detailMoy = detail;
