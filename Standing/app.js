@@ -747,6 +747,13 @@ function prScoreFromElo(elo) {
     return Math.max(0, Math.min(100, v));
 }
 
+// Couleur de la barre selon la position relative dans le tableau : 10 teintes (bleu → rouge)
+// réparties sur toutes les équipes, quel que soit leur nombre (64 en Ginette).
+function prBarClass(rank, count) {
+    if (!count || count <= 10) return 'bar-rank-' + Math.min(Math.max(rank, 1), 10);
+    return 'bar-rank-' + Math.min(10, Math.max(1, Math.ceil(rank * 10 / count)));
+}
+
 function renderPRTeams() {
     const container = document.getElementById('pr-equipes-content');
     if (!container || !DATA) return;
@@ -764,7 +771,7 @@ function renderPRTeams() {
         const team = DATA.teams[r.team];
         if (!team) return;
         r = Object.assign({}, r, { rank: i + 1 });
-        const barClass = r.rank <= 10 ? 'bar-rank-' + r.rank : 'bar-rank-rest';
+        const barClass = prBarClass(r.rank, played.length);
         const power = (typeof r.elo === 'number') ? prScoreFromElo(r.elo) : r.power;
         const score = Math.round(power);
         // Mvt sur la même échelle que le Score : écart entre le score avant et après le dernier match
@@ -1177,7 +1184,7 @@ function renderGinette() {
     var rows = '';
     ranking.forEach(function(r) {
         var divColor = GINETTE_DIV_COLORS[r.divSlug] || '#999';
-        var barClass = r.rank <= 10 ? 'bar-rank-' + r.rank : 'bar-rank-rest';
+        var barClass = prBarClass(r.rank, ranking.length);
         var deltaClass = r.delta > 0 ? 'elo-up' : r.delta < 0 ? 'elo-down' : 'elo-neutral';
         var deltaArrow = r.delta > 0 ? '\u25b2' : r.delta < 0 ? '\u25bc' : '';
         var deltaText = r.delta > 0 ? '+' + r.delta : r.delta < 0 ? '' + r.delta : '-';
