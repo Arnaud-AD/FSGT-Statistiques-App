@@ -5,10 +5,10 @@
     "name": "Easy",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/16",
-    "lastUpdated": "2026-11-12T16:32:33",
+    "lastUpdated": "2026-11-13T14:36:48",
     "teamCount": 8,
-    "matchesPlayed": 7,
-    "matchesUpcoming": 49
+    "matchesPlayed": 8,
+    "matchesUpcoming": 48
   },
   "teams": {
     "ours": {
@@ -16,19 +16,19 @@
       "short": "OM",
       "color": "#e74c3c"
     },
+    "daiq": {
+      "name": "Daïquibrie",
+      "short": "DA",
+      "color": "#3498db"
+    },
     "fata": {
       "name": "FATALS FURETS",
       "short": "FF",
-      "color": "#3498db"
+      "color": "#2ecc71"
     },
     "coco": {
       "name": "Les Coconuts",
       "short": "CO",
-      "color": "#2ecc71"
-    },
-    "daiq": {
-      "name": "Daïquibrie",
-      "short": "DA",
       "color": "#f39c12"
     },
     "coc2": {
@@ -89,6 +89,40 @@
     },
     {
       "rank": 2,
+      "team": "daiq",
+      "mj": 3,
+      "g": 2,
+      "p": 1,
+      "setPlus": 6,
+      "setMinus": 6,
+      "ds": 0,
+      "coefSet": "1.00",
+      "ptsPlus": 241,
+      "ptsMinus": 250,
+      "dp": "-9",
+      "coefPts": "0.96",
+      "pts": 7,
+      "formAller": [
+        "W",
+        "L",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "D",
+        "D",
+        "D",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 3,
       "team": "fata",
       "mj": 2,
       "g": 1,
@@ -122,7 +156,7 @@
       ]
     },
     {
-      "rank": 3,
+      "rank": 4,
       "team": "coco",
       "mj": 2,
       "g": 0,
@@ -143,40 +177,6 @@
         "P",
         "P",
         "D",
-        "P"
-      ],
-      "formRetour": [
-        "D",
-        "D",
-        "D",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 4,
-      "team": "daiq",
-      "mj": 2,
-      "g": 1,
-      "p": 1,
-      "setPlus": 3,
-      "setMinus": 5,
-      "ds": -2,
-      "coefSet": "0.60",
-      "ptsPlus": 145,
-      "ptsMinus": 178,
-      "dp": "-33",
-      "coefPts": "0.81",
-      "pts": 4,
-      "formAller": [
-        "W",
-        "L",
-        "D",
-        "P",
-        "P",
-        "P",
         "P"
       ],
       "formRetour": [
@@ -260,22 +260,22 @@
     {
       "rank": 7,
       "team": "punc",
-      "mj": 2,
+      "mj": 3,
       "g": 0,
-      "p": 2,
-      "setPlus": 1,
-      "setMinus": 6,
-      "ds": -5,
-      "coefSet": "0.17",
-      "ptsPlus": 145,
-      "ptsMinus": 175,
-      "dp": "-30",
-      "coefPts": "0.83",
-      "pts": 2,
+      "p": 3,
+      "setPlus": 2,
+      "setMinus": 9,
+      "ds": -7,
+      "coefSet": "0.22",
+      "ptsPlus": 217,
+      "ptsMinus": 271,
+      "dp": "-54",
+      "coefPts": "0.80",
+      "pts": 3,
       "formAller": [
         "L",
         "L",
-        "D",
+        "L",
         "P",
         "P",
         "P",
@@ -361,6 +361,38 @@
       "total": [
         102,
         100
+      ]
+    },
+    {
+      "date": "09/11/2026",
+      "home": "daiq",
+      "away": "punc",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé",
+      "time": "20:00",
+      "sets": [
+        [
+          21,
+          25
+        ],
+        [
+          25,
+          13
+        ],
+        [
+          25,
+          16
+        ],
+        [
+          25,
+          18
+        ]
+      ],
+      "total": [
+        96,
+        72
       ]
     },
     {
@@ -572,13 +604,6 @@
       "time": "20:00"
     },
     {
-      "date": "09/11/2026",
-      "home": "daiq",
-      "away": "punc",
-      "status": "Reporté",
-      "time": "20:00"
-    },
-    {
       "date": "23/11/2026",
       "home": "punc",
       "away": "gail",
@@ -629,15 +654,15 @@
     },
     {
       "date": "07/12/2026",
-      "home": "fata",
-      "away": "gail",
+      "home": "daiq",
+      "away": "miel",
       "status": "Sem. 6",
       "time": "20:00"
     },
     {
       "date": "07/12/2026",
-      "home": "daiq",
-      "away": "miel",
+      "home": "fata",
+      "away": "gail",
       "status": "Sem. 6",
       "time": "20:00"
     },
@@ -762,17 +787,17 @@
     },
     {
       "date": "15/03/2027",
-      "home": "miel",
-      "away": "coco",
-      "status": "Reporté",
-      "time": "20:20"
-    },
-    {
-      "date": "15/03/2027",
       "home": "punc",
       "away": "daiq",
       "status": "Reporté",
       "time": "20:00"
+    },
+    {
+      "date": "15/03/2027",
+      "home": "miel",
+      "away": "coco",
+      "status": "Reporté",
+      "time": "20:20"
     },
     {
       "date": "17/03/2027",
@@ -846,17 +871,17 @@
     },
     {
       "date": "26/04/2027",
-      "home": "coco",
-      "away": "coc2",
-      "status": "Sem. 13",
-      "time": "20:00"
-    },
-    {
-      "date": "26/04/2027",
       "home": "miel",
       "away": "daiq",
       "status": "Sem. 13",
       "time": "20:20"
+    },
+    {
+      "date": "26/04/2027",
+      "home": "coco",
+      "away": "coc2",
+      "status": "Sem. 13",
+      "time": "20:00"
     },
     {
       "date": "28/04/2027",
@@ -867,15 +892,15 @@
     },
     {
       "date": "10/05/2027",
-      "home": "fata",
-      "away": "coco",
+      "home": "daiq",
+      "away": "gail",
       "status": "Sem. 14",
       "time": "20:00"
     },
     {
       "date": "10/05/2027",
-      "home": "daiq",
-      "away": "gail",
+      "home": "fata",
+      "away": "coco",
       "status": "Sem. 14",
       "time": "20:00"
     },
@@ -945,12 +970,12 @@
     {
       "rank": 5,
       "team": "daiq",
-      "elo": 1483.5,
-      "movement": -34.8,
-      "record": "1-1",
-      "power": 35.7,
-      "calendar": "D vs Coco",
-      "diffClass": "diff-hard"
+      "elo": 1506.9,
+      "movement": 23.4,
+      "record": "2-1",
+      "power": 54.6,
+      "calendar": "V vs Punchline",
+      "diffClass": "diff-easy"
     },
     {
       "rank": 6,
@@ -975,11 +1000,11 @@
     {
       "rank": 8,
       "team": "punc",
-      "elo": 1442.2,
-      "movement": -28.3,
-      "record": "0-2",
+      "elo": 1418.8,
+      "movement": -23.4,
+      "record": "0-3",
       "power": 0.0,
-      "calendar": "D vs FATALS",
+      "calendar": "D x3",
       "diffClass": "diff-hard"
     }
   ],
@@ -991,6 +1016,12 @@
       1555.7,
       1575.8
     ],
+    "daiq": [
+      1500,
+      1518.3,
+      1483.5,
+      1506.9
+    ],
     "fata": [
       1500,
       1528.3,
@@ -1000,11 +1031,6 @@
       1500,
       1481.7,
       1458.7
-    ],
-    "daiq": [
-      1500,
-      1518.3,
-      1483.5
     ],
     "coc2": [
       1500,
@@ -1017,7 +1043,8 @@
     "punc": [
       1500,
       1470.5,
-      1442.2
+      1442.2,
+      1418.8
     ],
     "miel": [
       1500,
@@ -1035,26 +1062,27 @@
         ],
         "rank": 1
       },
+      "daiq": {
+        "points": [
+          0,
+          3,
+          4,
+          7
+        ],
+        "rank": 2
+      },
       "fata": {
         "points": [
           0,
           3,
           5
         ],
-        "rank": 2
+        "rank": 3
       },
       "coco": {
         "points": [
           0,
           2,
-          4
-        ],
-        "rank": 3
-      },
-      "daiq": {
-        "points": [
-          0,
-          3,
           4
         ],
         "rank": 4
@@ -1077,7 +1105,8 @@
         "points": [
           0,
           1,
-          2
+          2,
+          3
         ],
         "rank": 7
       },

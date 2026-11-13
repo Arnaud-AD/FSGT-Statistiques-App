@@ -5,10 +5,10 @@
     "name": "Argent",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/5",
-    "lastUpdated": "2026-11-12T16:32:44",
+    "lastUpdated": "2026-11-13T14:37:00",
     "teamCount": 11,
-    "matchesPlayed": 12,
-    "matchesUpcoming": 98
+    "matchesPlayed": 13,
+    "matchesUpcoming": 97
   },
   "teams": {
     "go": {
@@ -41,14 +41,14 @@
       "short": "EA",
       "color": "#1abc9c"
     },
+    "bier": {
+      "name": "Bières & Sucy-sson",
+      "short": "B&",
+      "color": "#e67e22"
+    },
     "bryc": {
       "name": "Les Bry-Colo",
       "short": "BR",
-      "color": "#e67e22"
-    },
-    "vil2": {
-      "name": "Villiers Basta",
-      "short": "VB",
       "color": "#f1c40f"
     },
     "ping": {
@@ -56,9 +56,9 @@
       "short": "PM",
       "color": "#95a5a6"
     },
-    "bier": {
-      "name": "Bières & Sucy-sson",
-      "short": "B&",
+    "vil2": {
+      "name": "Villiers Basta",
+      "short": "VB",
       "color": "#34495e"
     },
     "affr": {
@@ -310,6 +310,46 @@
     },
     {
       "rank": 7,
+      "team": "bier",
+      "mj": 2,
+      "g": 1,
+      "p": 1,
+      "setPlus": 3,
+      "setMinus": 4,
+      "ds": -1,
+      "coefSet": "0.75",
+      "ptsPlus": 150,
+      "ptsMinus": 164,
+      "dp": "-14",
+      "coefPts": "0.91",
+      "pts": 4,
+      "formAller": [
+        "L",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 8,
       "team": "bryc",
       "mj": 1,
       "g": 1,
@@ -349,8 +389,8 @@
       ]
     },
     {
-      "rank": 8,
-      "team": "vil2",
+      "rank": 9,
+      "team": "ping",
       "mj": 3,
       "g": 0,
       "p": 3,
@@ -358,10 +398,10 @@
       "setMinus": 9,
       "ds": -8,
       "coefSet": "0.11",
-      "ptsPlus": 205,
-      "ptsMinus": 255,
-      "dp": "-50",
-      "coefPts": "0.80",
+      "ptsPlus": 211,
+      "ptsMinus": 247,
+      "dp": "-36",
+      "coefPts": "0.85",
       "pts": 3,
       "formAller": [
         "L",
@@ -389,64 +429,24 @@
       ]
     },
     {
-      "rank": 9,
-      "team": "ping",
-      "mj": 2,
-      "g": 0,
-      "p": 2,
-      "setPlus": 0,
-      "setMinus": 6,
-      "ds": -6,
-      "coefSet": "0.00",
-      "ptsPlus": 123,
-      "ptsMinus": 151,
-      "dp": "-28",
-      "coefPts": "0.81",
-      "pts": 2,
-      "formAller": [
-        "L",
-        "L",
-        "D",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
       "rank": 10,
-      "team": "bier",
-      "mj": 1,
+      "team": "vil2",
+      "mj": 3,
       "g": 0,
-      "p": 1,
-      "setPlus": 0,
-      "setMinus": 3,
-      "ds": -3,
-      "coefSet": "0.00",
-      "ptsPlus": 54,
-      "ptsMinus": 76,
-      "dp": "-22",
-      "coefPts": "0.71",
-      "pts": 1,
+      "p": 3,
+      "setPlus": 1,
+      "setMinus": 9,
+      "ds": -8,
+      "coefSet": "0.11",
+      "ptsPlus": 205,
+      "ptsMinus": 255,
+      "dp": "-50",
+      "coefPts": "0.80",
+      "pts": 3,
       "formAller": [
         "L",
-        "D",
-        "P",
+        "L",
+        "L",
         "P",
         "P",
         "P",
@@ -510,6 +510,38 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "12/11/2026",
+      "home": "ping",
+      "away": "bier",
+      "scoreHome": 1,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé",
+      "time": "20:00",
+      "sets": [
+        [
+          25,
+          21
+        ],
+        [
+          21,
+          25
+        ],
+        [
+          21,
+          25
+        ],
+        [
+          21,
+          25
+        ]
+      ],
+      "total": [
+        88,
+        96
+      ]
+    },
     {
       "date": "10/11/2026",
       "home": "smas",
@@ -881,25 +913,18 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "N/C",
-      "home": "affr",
-      "away": "eagl",
-      "status": "Reporté",
-      "time": null
-    },
-    {
-      "date": "12/11/2026",
-      "home": "ping",
-      "away": "bier",
-      "status": "Reporté",
-      "time": "20:00"
-    },
-    {
       "date": "17/11/2026",
       "home": "smas",
       "away": "bryc",
       "status": "Reporté",
       "time": "19:45"
+    },
+    {
+      "date": "18/11/2026",
+      "home": "affr",
+      "away": "eagl",
+      "status": "Reporté",
+      "time": "20:00"
     },
     {
       "date": "23/11/2026",
@@ -1630,22 +1655,22 @@
     },
     {
       "rank": 7,
+      "team": "bier",
+      "elo": 1494.4,
+      "movement": 26.5,
+      "record": "1-1",
+      "power": 46.8,
+      "calendar": "V vs Les",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 8,
       "team": "ball",
       "elo": 1482.5,
       "movement": -28.3,
       "record": "1-2",
-      "power": 39.7,
+      "power": 39.9,
       "calendar": "D vs Villyé-ball",
-      "diffClass": "diff-hard"
-    },
-    {
-      "rank": 8,
-      "team": "bier",
-      "elo": 1467.9,
-      "movement": -32.1,
-      "record": "0-1",
-      "power": 0.0,
-      "calendar": "D vs GO",
       "diffClass": "diff-hard"
     },
     {
@@ -1660,19 +1685,19 @@
     },
     {
       "rank": 10,
-      "team": "ping",
-      "elo": 1440.0,
-      "movement": -23.8,
-      "record": "0-2",
+      "team": "vil2",
+      "elo": 1414.7,
+      "movement": -21.2,
+      "record": "0-3",
       "power": 0.0,
-      "calendar": "D vs GO",
+      "calendar": "D x3",
       "diffClass": "diff-hard"
     },
     {
       "rank": 11,
-      "team": "vil2",
-      "elo": 1414.7,
-      "movement": -21.2,
+      "team": "ping",
+      "elo": 1413.6,
+      "movement": -26.5,
       "record": "0-3",
       "power": 0.0,
       "calendar": "D x3",
@@ -1715,24 +1740,26 @@
       1528.7,
       1496.7
     ],
+    "bier": [
+      1500,
+      1467.9,
+      1494.4
+    ],
     "bryc": [
       1500,
       1532.9
+    ],
+    "ping": [
+      1500,
+      1463.8,
+      1440.0,
+      1413.6
     ],
     "vil2": [
       1500,
       1475.3,
       1435.9,
       1414.7
-    ],
-    "ping": [
-      1500,
-      1463.8,
-      1440.0
-    ],
-    "bier": [
-      1500,
-      1467.9
     ],
     "affr": [
       1500,
@@ -1793,18 +1820,17 @@
         ],
         "rank": 6
       },
-      "bryc": {
-        "points": [
-          0,
-          3
-        ],
-        "rank": 7
-      },
-      "vil2": {
+      "bier": {
         "points": [
           0,
           1,
-          2,
+          4
+        ],
+        "rank": 7
+      },
+      "bryc": {
+        "points": [
+          0,
           3
         ],
         "rank": 8
@@ -1813,14 +1839,17 @@
         "points": [
           0,
           1,
-          2
+          2,
+          3
         ],
         "rank": 9
       },
-      "bier": {
+      "vil2": {
         "points": [
           0,
-          1
+          1,
+          2,
+          3
         ],
         "rank": 10
       },

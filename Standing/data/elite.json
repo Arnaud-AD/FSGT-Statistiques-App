@@ -5,10 +5,10 @@
     "name": "Elite",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/2",
-    "lastUpdated": "2026-11-12T16:32:22",
+    "lastUpdated": "2026-11-13T14:36:37",
     "teamCount": 9,
-    "matchesPlayed": 10,
-    "matchesUpcoming": 62
+    "matchesPlayed": 11,
+    "matchesUpcoming": 61
   },
   "teams": {
     "punc": {
@@ -26,19 +26,19 @@
       "short": "CO",
       "color": "#2ecc71"
     },
-    "olym": {
-      "name": "Olympe BB volley",
-      "short": "OB",
-      "color": "#f39c12"
-    },
     "neku": {
       "name": "Nekutā",
       "short": "NE",
-      "color": "#9b59b6"
+      "color": "#f39c12"
     },
     "padn": {
       "name": "Padnom",
       "short": "PA",
+      "color": "#9b59b6"
+    },
+    "olym": {
+      "name": "Olympe BB volley",
+      "short": "OB",
       "color": "#1abc9c"
     },
     "team": {
@@ -168,23 +168,23 @@
     },
     {
       "rank": 4,
-      "team": "olym",
-      "mj": 2,
-      "g": 1,
+      "team": "neku",
+      "mj": 3,
+      "g": 2,
       "p": 1,
-      "setPlus": 5,
-      "setMinus": 5,
+      "setPlus": 6,
+      "setMinus": 6,
       "ds": 0,
       "coefSet": "1.00",
-      "ptsPlus": 189,
-      "ptsMinus": 196,
-      "dp": "-7",
-      "coefPts": "0.96",
-      "pts": 5,
+      "ptsPlus": 275,
+      "ptsMinus": 263,
+      "dp": "+12",
+      "coefPts": "1.05",
+      "pts": 7,
       "formAller": [
-        "C",
         "W",
-        "P",
+        "L",
+        "W",
         "P",
         "P",
         "P",
@@ -204,23 +204,23 @@
     },
     {
       "rank": 5,
-      "team": "neku",
-      "mj": 2,
+      "team": "padn",
+      "mj": 3,
       "g": 1,
-      "p": 1,
-      "setPlus": 3,
-      "setMinus": 4,
-      "ds": -1,
-      "coefSet": "0.75",
-      "ptsPlus": 161,
-      "ptsMinus": 161,
-      "dp": "0",
-      "coefPts": "1.00",
-      "pts": 4,
+      "p": 2,
+      "setPlus": 5,
+      "setMinus": 8,
+      "ds": -3,
+      "coefSet": "0.62",
+      "ptsPlus": 260,
+      "ptsMinus": 292,
+      "dp": "-32",
+      "coefPts": "0.89",
+      "pts": 6,
       "formAller": [
         "W",
         "L",
-        "D",
+        "C",
         "P",
         "P",
         "P",
@@ -240,23 +240,23 @@
     },
     {
       "rank": 6,
-      "team": "padn",
+      "team": "olym",
       "mj": 2,
       "g": 1,
       "p": 1,
-      "setPlus": 3,
+      "setPlus": 5,
       "setMinus": 5,
-      "ds": -2,
-      "coefSet": "0.60",
-      "ptsPlus": 158,
-      "ptsMinus": 178,
-      "dp": "-20",
-      "coefPts": "0.89",
-      "pts": 4,
+      "ds": 0,
+      "coefSet": "1.00",
+      "ptsPlus": 189,
+      "ptsMinus": 196,
+      "dp": "-7",
+      "coefPts": "0.96",
+      "pts": 5,
       "formAller": [
+        "C",
         "W",
-        "L",
-        "D",
+        "P",
         "P",
         "P",
         "P",
@@ -414,6 +414,42 @@
       "total": [
         96,
         67
+      ]
+    },
+    {
+      "date": "10/11/2026",
+      "home": "padn",
+      "away": "neku",
+      "scoreHome": 2,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé",
+      "time": "20:00",
+      "sets": [
+        [
+          25,
+          23
+        ],
+        [
+          13,
+          25
+        ],
+        [
+          27,
+          25
+        ],
+        [
+          24,
+          26
+        ],
+        [
+          13,
+          15
+        ]
+      ],
+      "total": [
+        102,
+        114
       ]
     },
     {
@@ -711,23 +747,16 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "10/11/2026",
-      "home": "padn",
+      "date": "23/11/2026",
+      "home": "team",
       "away": "neku",
-      "status": "Reporté",
+      "status": "Sem. 4",
       "time": "20:00"
     },
     {
       "date": "23/11/2026",
       "home": "go",
       "away": "olym",
-      "status": "Sem. 4",
-      "time": "20:00"
-    },
-    {
-      "date": "23/11/2026",
-      "home": "team",
-      "away": "neku",
       "status": "Sem. 4",
       "time": "20:00"
     },
@@ -817,15 +846,15 @@
     },
     {
       "date": "04/01/2027",
-      "home": "olym",
-      "away": "team",
+      "home": "go",
+      "away": "padn",
       "status": "Sem. 7",
       "time": "20:00"
     },
     {
       "date": "04/01/2027",
-      "home": "go",
-      "away": "padn",
+      "home": "olym",
+      "away": "team",
       "status": "Sem. 7",
       "time": "20:00"
     },
@@ -1178,6 +1207,16 @@
     },
     {
       "rank": 4,
+      "team": "neku",
+      "elo": 1517.1,
+      "movement": 22.6,
+      "record": "2-1",
+      "power": 60.6,
+      "calendar": "V vs Padnom",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 5,
       "team": "olym",
       "elo": 1500.4,
       "movement": 22.1,
@@ -1187,33 +1226,23 @@
       "diffClass": "diff-easy"
     },
     {
-      "rank": 5,
-      "team": "neku",
-      "elo": 1494.5,
-      "movement": -30.4,
-      "record": "1-1",
-      "power": 44.6,
-      "calendar": "D vs Cochonou",
-      "diffClass": "diff-hard"
-    },
-    {
       "rank": 6,
-      "team": "padn",
-      "elo": 1480.1,
-      "movement": -41.6,
-      "record": "1-1",
-      "power": 30.5,
-      "calendar": "D vs Yip",
-      "diffClass": "diff-hard"
-    },
-    {
-      "rank": 7,
       "team": "sucy",
       "elo": 1477.9,
       "movement": -22.1,
       "record": "0-1",
       "power": 0.0,
       "calendar": "D vs Olympe",
+      "diffClass": "diff-hard"
+    },
+    {
+      "rank": 7,
+      "team": "padn",
+      "elo": 1457.4,
+      "movement": -22.6,
+      "record": "1-2",
+      "power": 8.2,
+      "calendar": "D vs Nekutā",
       "diffClass": "diff-hard"
     },
     {
@@ -1257,20 +1286,22 @@
       1553.5,
       1520.8
     ],
-    "olym": [
-      1500,
-      1478.3,
-      1500.4
-    ],
     "neku": [
       1500,
       1524.9,
-      1494.5
+      1494.5,
+      1517.1
     ],
     "padn": [
       1500,
       1521.7,
-      1480.1
+      1480.1,
+      1457.4
+    ],
+    "olym": [
+      1500,
+      1478.3,
+      1500.4
     ],
     "team": [
       1500,
@@ -1316,27 +1347,29 @@
         ],
         "rank": 3
       },
-      "olym": {
-        "points": [
-          0,
-          2,
-          5
-        ],
-        "rank": 4
-      },
       "neku": {
         "points": [
           0,
           3,
-          4
+          4,
+          7
         ],
-        "rank": 5
+        "rank": 4
       },
       "padn": {
         "points": [
           0,
           3,
-          4
+          4,
+          6
+        ],
+        "rank": 5
+      },
+      "olym": {
+        "points": [
+          0,
+          2,
+          5
         ],
         "rank": 6
       },
