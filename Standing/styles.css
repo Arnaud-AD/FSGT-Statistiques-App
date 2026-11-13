@@ -828,8 +828,6 @@
         /* Mobile-only expandable team details in the standings */
         .row-chevron, .standings-detail { display: none; }
         .player-name { font-size: 13px; }
-        #pr-joueurs .pr-table td { padding: 4px 8px; }
-        #pr-joueurs .pr-table .team-logo { margin: 0; }
 
         .difficulty-badge {
             display: inline-flex;
