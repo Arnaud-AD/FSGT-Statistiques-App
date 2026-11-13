@@ -765,11 +765,14 @@ function renderPRTeams() {
         if (!team) return;
         r = Object.assign({}, r, { rank: i + 1 });
         const barClass = r.rank <= 10 ? 'bar-rank-' + r.rank : 'bar-rank-rest';
-        const mvtClass = r.movement > 0 ? 'elo-up' : r.movement < 0 ? 'elo-down' : 'elo-neutral';
-        const mvtArrow = r.movement > 0 ? '\u25b2' : r.movement < 0 ? '\u25bc' : '';
-        const mvtText = r.movement > 0 ? '+' + r.movement : r.movement < 0 ? '' + r.movement : '-';
         const power = (typeof r.elo === 'number') ? prScoreFromElo(r.elo) : r.power;
         const score = Math.round(power);
+        // Mvt sur la même échelle que le Score : écart entre le score avant et après le dernier match
+        const mvt = (typeof r.elo === 'number' && typeof r.movement === 'number')
+            ? score - Math.round(prScoreFromElo(r.elo - r.movement)) : 0;
+        const mvtClass = mvt > 0 ? 'elo-up' : mvt < 0 ? 'elo-down' : 'elo-neutral';
+        const mvtArrow = mvt > 0 ? '\u25b2' : mvt < 0 ? '\u25bc' : '';
+        const mvtText = mvt > 0 ? '+' + mvt : mvt < 0 ? '' + mvt : '-';
         rows += '<tr>' +
             '<td class="pr-rank">' + r.rank + '</td>' +
             '<td><div class="team-cell"><div class="team-logo logo-' + r.team + '">' + esc(team.short) + '</div><span class="team-name">' + esc(team.name) + '</span></div></td>' +
