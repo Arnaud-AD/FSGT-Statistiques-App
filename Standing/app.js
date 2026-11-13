@@ -146,7 +146,6 @@ function renderAll() {
     renderStandings();
     renderMatches();
     renderPRTeams();
-    renderPRPlayers();
     drawEvolutionChart();
 }
 
@@ -243,13 +242,6 @@ function showTab(tabId) {
     document.getElementById(tabId).classList.add('active');
     event.target.classList.add('active');
     if (tabId === 'classement') setTimeout(drawEvolutionChart, 100);
-}
-
-function showSubTab(subTabId, btn) {
-    document.querySelectorAll('.sub-tab-content').forEach(function(c) { c.classList.remove('active'); });
-    document.querySelectorAll('.sub-tab').forEach(function(t) { t.classList.remove('active'); });
-    document.getElementById(subTabId).classList.add('active');
-    btn.classList.add('active');
 }
 
 function showClassementSubTab(subTabId, btn) {
@@ -745,6 +737,16 @@ function buildMatchesTab(ctx, opts) {
         '</div>';
 }
 
+// Score du Power Ranking sur une échelle fixe : 1500 (ELO de départ) = 50, ±200 points
+// d'ELO = ±50. Remplace le « power » du script (min/max de la poule, 0 forcé sans victoire),
+// qui affichait beaucoup de 0 et mettait toujours le premier à 100.
+var PR_ELO_CENTER = 1500;
+var PR_ELO_SPAN = 200;
+function prScoreFromElo(elo) {
+    var v = 50 + (elo - PR_ELO_CENTER) / PR_ELO_SPAN * 50;
+    return Math.max(0, Math.min(100, v));
+}
+
 function renderPRTeams() {
     const container = document.getElementById('pr-equipes-content');
     if (!container || !DATA) return;
@@ -766,13 +768,14 @@ function renderPRTeams() {
         const mvtClass = r.movement > 0 ? 'elo-up' : r.movement < 0 ? 'elo-down' : 'elo-neutral';
         const mvtArrow = r.movement > 0 ? '\u25b2' : r.movement < 0 ? '\u25bc' : '';
         const mvtText = r.movement > 0 ? '+' + r.movement : r.movement < 0 ? '' + r.movement : '-';
-        const score = Math.round(r.power);
+        const power = (typeof r.elo === 'number') ? prScoreFromElo(r.elo) : r.power;
+        const score = Math.round(power);
         rows += '<tr>' +
             '<td class="pr-rank">' + r.rank + '</td>' +
             '<td><div class="team-cell"><div class="team-logo logo-' + r.team + '">' + esc(team.short) + '</div><span class="team-name">' + esc(team.name) + '</span></div></td>' +
             '<td class="center"><span class="record-text">' + esc(r.record) + '</span></td>' +
             '<td class="center"><span class="pr-value">' + score + '</span></td>' +
-            '<td class="center col-opt"><div class="pr-bar-container"><div class="pr-bar"><div class="pr-bar-fill ' + barClass + '" style="width: ' + r.power + '%;"></div></div></div></td>' +
+            '<td class="center col-opt"><div class="pr-bar-container"><div class="pr-bar"><div class="pr-bar-fill ' + barClass + '" style="width: ' + power.toFixed(1) + '%;"></div></div></div></td>' +
             '<td class="center"><span class="elo-movement ' + mvtClass + '">' + mvtArrow + ' ' + mvtText + '</span></td>' +
             '<td class="center col-opt"><span class="difficulty-badge ' + r.diffClass + '">' + esc(r.calendar) + '</span></td>' +
         '</tr>';
@@ -805,50 +808,6 @@ function renderPRTeams() {
             '<tbody>' + rows + '</tbody>' +
         '</table>' +
     '</div>';
-}
-
-function renderPRPlayers() {
-    const container = document.getElementById('pr-joueurs-content');
-    if (!container || !DATA) return;
-
-    // Hide/show Joueurs tab based on data availability
-    const joueursTab = document.getElementById('pr-joueurs-tab');
-    if (!DATA.prPlayers || DATA.prPlayers.length === 0) {
-        if (joueursTab) joueursTab.style.display = 'none';
-        container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 40px;">Pas de classement joueurs disponible pour ce championnat.</p>';
-        return;
-    }
-    if (joueursTab) joueursTab.style.display = '';
-
-    let rows = '';
-    DATA.prPlayers.forEach(function(p) {
-        const team = DATA.teams[p.team];
-        if (!team) return;
-        const barClass = p.rank <= 10 ? 'bar-rank-' + p.rank : 'bar-rank-rest';
-        rows += '<tr>' +
-            '<td class="pr-rank">' + p.rank + '</td>' +
-            '<td><span class="player-name">' + esc(p.name) + '</span></td>' +
-            '<td class="center"><div class="team-logo logo-' + p.team + '">' + esc(team.short) + '</div></td>' +
-            '<td class="center">' + esc(p.pos) + '</td>' +
-            '<td class="center"><span class="pr-value">' + p.power + '</span></td>' +
-            '<td class="center col-opt"><div class="pr-bar-container"><div class="pr-bar"><div class="pr-bar-fill ' + barClass + '" style="width: ' + p.power + '%;"></div></div></div></td>' +
-        '</tr>';
-    });
-
-    container.innerHTML = '<div class="table-container">' +
-        '<table class="pr-table">' +
-            '<thead><tr>' +
-                '<th style="width: 40px;">#</th>' +
-                '<th>Joueur</th>' +
-                '<th class="center">\u00c9quipe</th>' +
-                '<th class="center">Poste</th>' +
-                '<th class="center">Power</th>' +
-                '<th class="center col-opt" style="width: 150px;">Barre</th>' +
-            '</tr></thead>' +
-            '<tbody>' + rows + '</tbody>' +
-        '</table>' +
-    '</div>' +
-    '<p style="text-align: center; color: var(--text-secondary); font-size: 12px; margin-top: 16px;">' + DATA.prPlayers.length + ' joueurs class\u00e9s</p>';
 }
 
 // ------------------------------------------------------------
