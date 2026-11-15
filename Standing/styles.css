@@ -1674,6 +1674,13 @@
             .cal-empty { padding: 10px 12px; color: var(--text-secondary); font-size: 12px; }
         }
 
+        /* Narrow desktop / landscape phone: two half-season columns leave no room for the
+           opponent name (the result disc then overlaps its logo), so stack them */
+        @media (min-width: 761px) and (max-width: 1219px) {
+            .cal-grid { grid-template-columns: 1fr; }
+            .cal-col + .cal-col { border-left: none; border-top: 1px solid var(--border-color); }
+        }
+
         /* Ginette: forfeit results greyed in the Matchs tab */
         .match-card-forfeit .match-score,
         .match-card-forfeit .team-name { opacity: 0.6; }
