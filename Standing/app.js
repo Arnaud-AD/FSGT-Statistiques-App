@@ -17,7 +17,7 @@ let currentSlug = null;   // Currently loaded championship slug
 var standingsSort = { col: null, asc: true };
 
 // Columns where "less is better" → default sort is ascending
-var ASC_DEFAULT_COLS = { p: true, setMinus: true, ptsMinus: true, pp: true };
+var ASC_DEFAULT_COLS = { p: true, setMinus: true, ptsMinus: true, pp: true, penalty: true };
 
 // Points perdus : ce qu'une équipe a laissé filer sur ses matchs joués (3 par match max)
 function pointsPerdus(s) { return 3 * s.mj - s.pts; }
@@ -58,6 +58,7 @@ async function loadChampionship(slug) {
             if (!resp.ok) throw new Error('Failed to load ginette');
             GINETTE_DATA = await resp.json();
             currentSlug = slug;
+            standingsSort = { col: null, asc: true };
 
             const url = new URL(window.location);
             url.searchParams.set('champ', slug);
@@ -1133,6 +1134,18 @@ function renderGinetteStandings() {
         }).join('');
     }
 
+    // Column sort, same behaviour as the championships (3rd click = official order)
+    if (standingsSort.col) {
+        var sc = standingsSort.col, sa = standingsSort.asc;
+        list = list.slice().sort(function(a, b) {
+            var va = getStandingSortValue(a, sc), vb = getStandingSortValue(b, sc);
+            if (va !== vb) return sa ? va - vb : vb - va;
+            if (sc === 'pp' && a.setAvg !== b.setAvg) return b.setAvg - a.setAvg;
+            return a.rank - b.rank;
+        });
+    }
+    var sorted = !!standingsSort.col;
+
     var rows = '';
     list.forEach(function(t) {
         var key = 'ginette:' + t.team;
@@ -1140,7 +1153,7 @@ function renderGinetteStandings() {
         var divColor = GINETTE_DIV_COLORS[t.division] || '#999';
         var divLabel = DIV_LABELS_JS[t.division] || t.division || '';
         var played = t.mj > 0;
-        var zoneBreak = (t.rank === 17 || t.rank === 33) ? ' ginette-zone-break' : '';
+        var zoneBreak = (!sorted && (t.rank === 17 || t.rank === 33)) ? ' ginette-zone-break' : '';
         var calOpen = !!standingsCalendarOpen[key];
         var teamKey = GINETTE_CTX ? GINETTE_CTX.keyOf(t.team) : null;
         rows += '<tr class="standings-row ginette-zone-' + t.zone + zoneBreak + (expanded ? ' expanded' : '') + (calOpen ? ' cal-open' : '') + '" data-team="' + esc(key) + '">' +
@@ -1192,15 +1205,24 @@ function renderGinetteStandings() {
         '</tr>' : '');
     });
 
+    function ginetteThead() {
+        var cols = [['MJ', 'mj', ''], ['V', 'g', ''], ['D', 'p', ''], ['Set+', 'setPlus', 'col-opt'], ['Set-', 'setMinus', 'col-opt'],
+            ['Set avg', 'setAvg', ''], ['Pts+', 'ptsPlus', 'col-opt'], ['Pts-', 'ptsMinus', 'col-opt'], ['Pts avg', 'ptsAvg', 'col-opt'],
+            ['Pén.', 'penalty', 'col-opt'], ['Pts', 'pts', 'bold-col']];
+        var h = '<th class="standings-sortable" data-sort-col="pp" title="Trier par points perdus">Équipe' +
+            (standingsSort.col === 'pp' ? standingsSortIcon('pp') : '') + '</th>';
+        cols.forEach(function(c) {
+            h += '<th class="standings-sortable' + (c[2] ? ' ' + c[2] : '') + '" data-sort-col="' + c[1] + '">' + c[0] + standingsSortIcon(c[1]) + '</th>';
+        });
+        return h + '<th class="col-opt">Forme</th>';
+    }
+
     container.innerHTML =
         (anyPlayed ? '' : '<p class="ginette-standings-note">Aucun match joué pour l’instant : les équipes sont dans l’ordre du tirage.</p>') +
         '<div class="table-container standings-table ginette-standings">' +
             '<table>' +
                 '<thead><tr>' +
-                    '<th>Équipe</th><th>MJ</th><th>V</th><th>D</th>' +
-                    '<th class="col-opt">Set+</th><th class="col-opt">Set-</th><th>Set avg</th>' +
-                    '<th class="col-opt">Pts+</th><th class="col-opt">Pts-</th><th class="col-opt">Pts avg</th><th class="col-opt">Pén.</th>' +
-                    '<th class="bold-col">Pts</th><th class="col-opt">Forme</th>' +
+                    ginetteThead() +
                 '</tr></thead>' +
                 '<tbody>' + rows + '</tbody>' +
             '</table>' +
@@ -1605,5 +1627,6 @@ document.addEventListener('click', function(e) {
         // New column: default direction (desc, or asc for "less is better")
         standingsSort = { col: col, asc: !!ASC_DEFAULT_COLS[col] };
     }
-    renderStandings();
+    if (th.closest('.ginette-standings')) renderGinetteStandings();
+    else renderStandings();
 });

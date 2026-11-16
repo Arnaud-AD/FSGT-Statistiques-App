@@ -595,7 +595,10 @@
             font-size: 13px;
         }
 
-        .match-team .team-label { display: flex; align-items: center; gap: 8px; min-width: 0; }
+        .match-team .team-label { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 0 1 auto; }
+        .match-team .team-label .team-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        /* Ginette: name + division pill need more room than a championship name */
+        .match-team:has(.team-label) { width: 260px; }
 
         .match-score {
             display: flex;
@@ -1325,6 +1328,8 @@
 
             /* Ginette: division pill under the name */
             .match-team .team-label { flex-direction: column; gap: 3px; min-width: 0; }
+            .match-team:has(.team-label) { width: auto; }
+            .match-team .team-label .team-name { white-space: normal; overflow: visible; }
             .match-team.home .team-label { align-items: flex-end; }
             .match-team.away .team-label { align-items: flex-start; }
             .match-team.home .team-label .team-div { order: 2; }
@@ -1584,13 +1589,11 @@
             }
         }
         /* Ginette — classement des tours 1 et 2 */
-        .ginette-standings .rank-indicator { width: 4px; }
+        /* Même hauteur de ligne que les championnats (logo 20px + forme A/R) */
+        .ginette-standings tr.standings-row > td { height: 43px; }
         .ginette-zone-principale .rank-indicator { background: var(--ginette-principale); }
         .ginette-zone-consolante .rank-indicator { background: var(--ginette-consolante); }
         .ginette-zone-elimine .rank-indicator { background: var(--ginette-elimine); }
-        .ginette-zone-principale .rank-number { color: var(--ginette-principale); font-weight: 700; }
-        .ginette-zone-consolante .rank-number { color: var(--ginette-consolante); font-weight: 700; }
-        .ginette-zone-elimine .rank-number { color: var(--ginette-elimine); font-weight: 700; }
         .ginette-standings tr.ginette-zone-break td { border-top: 2px solid var(--text-secondary); }
         .ginette-standings .team-cell .division-badge { flex-shrink: 0; }
         .ginette-standings .detail-stat .form-item { display: inline-block; vertical-align: middle; margin-right: 4px; }
