@@ -514,6 +514,7 @@ function buildTeamCalendar(teamKey, ctx) {
             '<span class="cal-opp">' +
                 '<span class="team-logo logo-' + esc(oppKey) + '">' + esc(opp.short) + '</span>' +
                 '<span class="team-name">' + esc(opp.name) + '</span>' +
+                teamDivBadge(opp) +
             '</span>' +
             '<span class="cal-result">' + result + '</span>' +
             '<span class="cal-sets">' + sets + '</span>' +
@@ -611,6 +612,20 @@ function renderMatches() {
     });
 }
 
+// Division pill for Ginette teams (they come from every division); '' for championship teams
+function teamDivBadge(t) {
+    if (!t || !t.division) return '';
+    return '<span class="division-badge division-badge-sm team-div" style="background: ' +
+        (GINETTE_DIV_COLORS[t.division] || '#999') + ';">' + esc(DIV_LABELS_JS[t.division] || t.division) + '</span>';
+}
+// Name (+ division pill for Ginette teams); the pill sits on the outer side, and under the name on mobile
+function teamLabel(t, isHome) {
+    var name = '<span class="team-name">' + esc(t.name) + '</span>';
+    var badge = teamDivBadge(t);
+    if (!badge) return name;
+    return '<span class="team-label">' + (isHome ? badge + name : name + badge) + '</span>';
+}
+
 // "Résultats" (folded) + "À venir" sections, shared by the championships and the Ginette.
 // ctx: { played, upcoming, teams }; opts: { idPrefix, groupOf(m) → number for alternating backgrounds, badgeOf(m) }
 function buildMatchesTab(ctx, opts) {
@@ -631,7 +646,7 @@ function buildMatchesTab(ctx, opts) {
             '<div class="match-date">' + esc(m.date) + (m.forfeit ? '<span class="forfeit-badge">Forfait</span>' : '') + '</div>' +
             '<div class="match-teams">' +
                 '<div class="match-team home">' +
-                    '<span class="team-name">' + esc(homeTeam.name) + '</span>' +
+                    teamLabel(homeTeam, true) +
                     '<div class="team-logo logo-' + esc(m.home) + '">' + esc(homeTeam.short) + '</div>' +
                 '</div>' +
                 '<div class="match-score">' +
@@ -641,7 +656,7 @@ function buildMatchesTab(ctx, opts) {
                 '</div>' +
                 '<div class="match-team away">' +
                     '<div class="team-logo logo-' + esc(m.away) + '">' + esc(awayTeam.short) + '</div>' +
-                    '<span class="team-name">' + esc(awayTeam.name) + '</span>' +
+                    teamLabel(awayTeam, false) +
                 '</div>' +
             '</div>' +
             '<div class="match-status"><span class="status-played">' + esc(m.status) + '</span>' +
@@ -691,7 +706,7 @@ function buildMatchesTab(ctx, opts) {
             '<div class="match-date">' + esc(m.date) + (opts.badgeOf ? opts.badgeOf(m) : '') + '</div>' +
             '<div class="match-teams">' +
                 '<div class="match-team home">' +
-                    '<span class="team-name">' + esc(homeTeam.name) + '</span>' +
+                    teamLabel(homeTeam, true) +
                     '<div class="team-logo logo-' + esc(m.home) + '">' + esc(homeTeam.short) + '</div>' +
                 '</div>' +
                 '<div class="match-score">' +
@@ -699,7 +714,7 @@ function buildMatchesTab(ctx, opts) {
                 '</div>' +
                 '<div class="match-team away">' +
                     '<div class="team-logo logo-' + esc(m.away) + '">' + esc(awayTeam.short) + '</div>' +
-                    '<span class="team-name">' + esc(awayTeam.name) + '</span>' +
+                    teamLabel(awayTeam, false) +
                 '</div>' +
             '</div>' +
             '<div class="match-status"><span class="' + statusClass + '">' + esc(m.status) + '</span></div>' +
@@ -886,7 +901,8 @@ function buildGinetteCtx() {
         teams[key] = {
             name: name,
             short: i.short || ginetteInitials(name),
-            color: i.color || GINETTE_DIV_COLORS[division] || '#999'
+            color: i.color || GINETTE_DIV_COLORS[division] || '#999',
+            division: division
         };
         return key;
     }
