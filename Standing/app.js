@@ -1086,7 +1086,7 @@ function renderGinetteStandings() {
 
     function fmtAvg(v, played) {
         if (!played) return '-';
-        return v === Infinity ? 'MAX' : v.toFixed(2);
+        return v === Infinity ? '∞' : v.toFixed(2);
     }
     var statusLabels = { W: 'V', C: 'D', L: 'D', F: 'Forfait', P: 'À venir' };
     function resultsHtml(t) {
