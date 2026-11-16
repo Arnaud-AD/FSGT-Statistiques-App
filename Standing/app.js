@@ -1114,6 +1114,15 @@ function renderGinetteStandings() {
         }).join('');
     }
 
+    // Forme: one disc per Ginette match, in round order (same codes as the championships)
+    function formItemsHtml(t) {
+        return t.results.map(function(r) {
+            var cls = r.status === 'W' ? 'form-win' : (r.status === 'C' ? 'form-close' :
+                (r.status === 'P' ? 'form-pending' : 'form-loss'));
+            return '<span class="form-item form-item-sm ' + cls + '" title="' + esc(r.round + ' vs ' + r.opponent) + '"></span>';
+        }).join('');
+    }
+
     var rows = '';
     list.forEach(function(t) {
         var key = 'ginette:' + t.team;
@@ -1145,6 +1154,7 @@ function renderGinetteStandings() {
             '<td class="col-opt">' + fmtAvg(t.ptsAvg, played) + '</td>' +
             '<td class="col-opt">' + (t.penalty ? '-' + t.penalty : '0') + '</td>' +
             '<td class="bold-val">' + t.pts + '</td>' +
+            '<td class="col-opt"><div class="form-container">' + formItemsHtml(t) + '</div></td>' +
         '</tr>' +
         '<tr class="standings-detail ginette-zone-' + t.zone + (expanded ? ' expanded' : '') + '" data-team="' + esc(key) + '">' +
             '<td colspan="6">' +
@@ -1168,7 +1178,7 @@ function renderGinetteStandings() {
         '</tr>' +
         // Desktop: the team's Ginette calendar, as in the championships
         (teamKey ? '<tr class="standings-calendar ginette-zone-' + t.zone + (calOpen ? ' open' : '') + '" data-team="' + esc(key) + '">' +
-            '<td colspan="12">' + buildTeamCalendar(teamKey, GINETTE_CTX) + '</td>' +
+            '<td colspan="13">' + buildTeamCalendar(teamKey, GINETTE_CTX) + '</td>' +
         '</tr>' : '');
     });
 
@@ -1180,7 +1190,7 @@ function renderGinetteStandings() {
                     '<th>Équipe</th><th>MJ</th><th>V</th><th>D</th>' +
                     '<th class="col-opt">Set+</th><th class="col-opt">Set-</th><th>Set avg</th>' +
                     '<th class="col-opt">Pts+</th><th class="col-opt">Pts-</th><th class="col-opt">Pts avg</th><th class="col-opt">Pén.</th>' +
-                    '<th class="bold-col">Pts</th>' +
+                    '<th class="bold-col">Pts</th><th class="col-opt">Forme</th>' +
                 '</tr></thead>' +
                 '<tbody>' + rows + '</tbody>' +
             '</table>' +
