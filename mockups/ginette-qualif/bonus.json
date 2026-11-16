@@ -1,0 +1,261 @@
+{
+ "_doc": "Bonus ELO « saison passée » : 1er de sa division en 2025-26 +150, dernier -150, linéaire entre les deux (300 x (0,5 - (place-1)/(n-1))). Équipe nouvelle (absente de 2025-26) +125. Équipe connue sans classement (Starter 2025-26) 0. Calé sur les matchs Ginette 2024-25 et 2025-26 (archives volley-fsgt94.fr).",
+ "teams": {
+  "Agent K": {
+   "bonus": 64,
+   "why": "Medium 3/8"
+  },
+  "Alambic": {
+   "bonus": -117,
+   "why": "Elite 9/10"
+  },
+  "BALLES PERDUES": {
+   "bonus": -17,
+   "why": "Argent 6/10"
+  },
+  "Bachateam": {
+   "bonus": 107,
+   "why": "Easy 2/8"
+  },
+  "Batstreet Back": {
+   "bonus": -21,
+   "why": "Medium 5/8"
+  },
+  "Bières et le loup": {
+   "bonus": -83,
+   "why": "Ultimate 8/10"
+  },
+  "Boîte de 4": {
+   "bonus": 75,
+   "why": "Hard 3/9"
+  },
+  "Choisy 4TW": {
+   "bonus": 125,
+   "why": "nouvelle"
+  },
+  "Clodo d'Ivry": {
+   "bonus": 125,
+   "why": "nouvelle"
+  },
+  "Cochonou": {
+   "bonus": 150,
+   "why": "Hard 1/9"
+  },
+  "Coco & co": {
+   "bonus": 125,
+   "why": "nouvelle"
+  },
+  "Cret'1": {
+   "bonus": -17,
+   "why": "Or 6/10"
+  },
+  "Daïquibrie": {
+   "bonus": -21,
+   "why": "Easy 5/8"
+  },
+  "Dodos 4 ever": {
+   "bonus": -50,
+   "why": "Ultimate 7/10"
+  },
+  "Eagle+4à6": {
+   "bonus": -150,
+   "why": "Medium 8/8"
+  },
+  "FATALS FURETS": {
+   "bonus": -64,
+   "why": "Medium 6/8"
+  },
+  "GO ELAN": {
+   "bonus": -150,
+   "why": "Or 10/10"
+  },
+  "GO Team Apero": {
+   "bonus": -50,
+   "why": "Elite 7/10"
+  },
+  "Ginto": {
+   "bonus": 0,
+   "why": "Hard 5/9"
+  },
+  "Gold Digger": {
+   "bonus": -64,
+   "why": "Easy 6/8"
+  },
+  "Inarizaki": {
+   "bonus": 150,
+   "why": "Argent 1/10"
+  },
+  "Ivry One": {
+   "bonus": 117,
+   "why": "Argent 2/10"
+  },
+  "Jen et ses Saints": {
+   "bonus": 150,
+   "why": "Ultimate 1/10"
+  },
+  "Kiki Team": {
+   "bonus": 17,
+   "why": "Ultimate 5/10"
+  },
+  "Krokeur Squad": {
+   "bonus": 125,
+   "why": "nouvelle"
+  },
+  "LES DÉMENTS": {
+   "bonus": -83,
+   "why": "Elite 8/10"
+  },
+  "Les Bry-Colo": {
+   "bonus": 125,
+   "why": "nouvelle"
+  },
+  "Les Coconuts": {
+   "bonus": 64,
+   "why": "Easy 3/8"
+  },
+  "Les Filets O'Fish": {
+   "bonus": 125,
+   "why": "nouvelle"
+  },
+  "Les Fûts furieux": {
+   "bonus": 125,
+   "why": "nouvelle"
+  },
+  "Les Gaillards": {
+   "bonus": 21,
+   "why": "Easy 4/8"
+  },
+  "Les Indécis": {
+   "bonus": 150,
+   "why": "Elite 1/10"
+  },
+  "Les Loups-Phoques": {
+   "bonus": 117,
+   "why": "Elite 2/10"
+  },
+  "Les Marsupilamyyy": {
+   "bonus": 21,
+   "why": "Medium 4/8"
+  },
+  "Les Ours Mal Léchés": {
+   "bonus": 125,
+   "why": "nouvelle"
+  },
+  "Les Pingouins Manchots": {
+   "bonus": -50,
+   "why": "Argent 7/10"
+  },
+  "Les Rhum'Antik": {
+   "bonus": -75,
+   "why": "Hard 7/9"
+  },
+  "Les Tigres & Gorilles": {
+   "bonus": -150,
+   "why": "Hard 9/9"
+  },
+  "Les Vendangeurs": {
+   "bonus": 83,
+   "why": "Argent 3/10"
+  },
+  "Les punchers": {
+   "bonus": -17,
+   "why": "Elite 6/10"
+  },
+  "Los Americanos": {
+   "bonus": -150,
+   "why": "Easy 8/8"
+  },
+  "Marvels 4": {
+   "bonus": 83,
+   "why": "Ultimate 3/10"
+  },
+  "Miel In Black": {
+   "bonus": 125,
+   "why": "nouvelle"
+  },
+  "Morts de Soif": {
+   "bonus": -38,
+   "why": "Hard 6/9"
+  },
+  "Nekutā": {
+   "bonus": 150,
+   "why": "Medium 1/8"
+  },
+  "Neuilly Sa Mère": {
+   "bonus": 17,
+   "why": "Or 5/10"
+  },
+  "No s(o)ucy": {
+   "bonus": 83,
+   "why": "Or 3/10"
+  },
+  "Olympe BB volley": {
+   "bonus": 112,
+   "why": "Hard 2/9"
+  },
+  "Oss 226": {
+   "bonus": -50,
+   "why": "Or 7/10"
+  },
+  "Padnom": {
+   "bonus": 50,
+   "why": "Elite 4/10"
+  },
+  "Punchline": {
+   "bonus": -107,
+   "why": "Medium 7/8"
+  },
+  "Pythons Collés": {
+   "bonus": 107,
+   "why": "Medium 2/8"
+  },
+  "RSC Champigny 1": {
+   "bonus": -17,
+   "why": "Ultimate 6/10"
+  },
+  "RYŌIKI TENKAI": {
+   "bonus": -112,
+   "why": "Hard 8/9"
+  },
+  "Red Hot Sucy Pépère": {
+   "bonus": 50,
+   "why": "Ultimate 4/10"
+  },
+  "Rhinos Féroces": {
+   "bonus": -117,
+   "why": "Ultimate 9/10"
+  },
+  "SUCY N'EST PAS TROMPÉ": {
+   "bonus": 17,
+   "why": "Elite 5/10"
+  },
+  "Smash or Pass": {
+   "bonus": 50,
+   "why": "Argent 4/10"
+  },
+  "Smashmallow": {
+   "bonus": -83,
+   "why": "Argent 8/10"
+  },
+  "StarPAFF": {
+   "bonus": -150,
+   "why": "Ultimate 10/10"
+  },
+  "Team Glouglou": {
+   "bonus": 38,
+   "why": "Hard 4/9"
+  },
+  "Villiers Basta": {
+   "bonus": 125,
+   "why": "nouvelle"
+  },
+  "Villyé-ball": {
+   "bonus": -117,
+   "why": "Or 9/10"
+  },
+  "Yip Yip": {
+   "bonus": 83,
+   "why": "Elite 3/10"
+  }
+ }
+}
