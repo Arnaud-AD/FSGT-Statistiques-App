@@ -439,7 +439,15 @@ var CAL_MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'ao
 
 // ctx: { played, upcoming, teams } — the championship (DATA) by default, or the Ginette (ginetteMatchCtx)
 function champMatchCtx() {
-    return { played: DATA.matchesPlayed, upcoming: DATA.matchesUpcoming, teams: DATA.teams };
+    // A forfeit shows on the site as 3-0 with 75-0 points (sets 25-0)
+    var played = DATA.matchesPlayed.map(function(m) {
+        if (m.forfeit == null && Array.isArray(m.total) && m.total.length === 2 &&
+            Math.min(m.total[0], m.total[1]) === 0 && Math.max(m.total[0], m.total[1]) > 0) {
+            return Object.assign({}, m, { forfeit: true });
+        }
+        return m;
+    });
+    return { played: played, upcoming: DATA.matchesUpcoming, teams: DATA.teams };
 }
 
 function buildTeamCalendar(teamKey, ctx) {
@@ -478,7 +486,8 @@ function buildTeamCalendar(teamKey, ctx) {
             var own = isHome ? m.scoreHome : m.scoreAway;
             var other = isHome ? m.scoreAway : m.scoreHome;
             var won = isHome ? !!m.homeWin : !m.homeWin;
-            var formCls = won ? 'form-win' : (other - own <= 1 ? 'form-close' : 'form-loss');
+            var formCls = m.forfeit ? (won ? 'form-forfeit-win' : 'form-forfeit-loss')
+                : (won ? 'form-win' : (other - own <= 1 ? 'form-close' : 'form-loss'));
             result = '<span class="form-item form-item-sm ' + formCls + '"></span>' + (m.forfeit
                 ? '<span class="cal-score cal-forfeit ' + (won ? 'winner' : 'forfeit-loser') + '">Forfait</span>'
                 : '<span class="cal-score ' + (won ? 'winner' : 'loser') + '">' + own + '<span class="separator">-</span>' + other + '</span>');
@@ -1060,7 +1069,7 @@ function computeGinetteStandings(matches, penalties) {
             t.ptsPlus += sum(x[3]);
             t.ptsMinus += sum(x[4]);
             var status;
-            if (win) { t.g++; t.pts += 3; status = 'W'; }
+            if (win) { t.g++; t.pts += 3; status = m.forfeit ? 'FW' : 'W'; }
             else {
                 t.p++;
                 if (m.forfeit) status = 'F';
@@ -1105,11 +1114,12 @@ function renderGinetteStandings() {
         if (!played) return '-';
         return v === Infinity ? '∞' : v.toFixed(2);
     }
-    var statusLabels = { W: 'V', C: 'D', L: 'D', F: 'Forfait', P: 'À venir' };
+    var statusLabels = { W: 'V', FW: 'V par forfait', C: 'D', L: 'D', F: 'Forfait', P: 'À venir' };
+    var statusClass = { W: 'form-win', FW: 'form-forfeit-win', C: 'form-close', L: 'form-loss', F: 'form-forfeit-loss', P: 'form-pending' };
     function resultsHtml(t) {
         return t.results.map(function(r) {
-            var cls = r.status === 'W' ? 'form-win' : (r.status === 'C' ? 'form-close' : (r.status === 'P' ? 'form-pending' : 'form-loss'));
-            var label = statusLabels[r.status] + (r.sets && r.status !== 'F' ? ' ' + r.sets : '');
+            var cls = statusClass[r.status] || 'form-loss';
+            var label = statusLabels[r.status] + (r.sets && r.status !== 'F' && r.status !== 'FW' ? ' ' + r.sets : '');
             return '<span class="detail-stat"><span class="form-item form-item-sm ' + cls + '"></span>' +
                 '<em>' + r.round + '</em> ' + esc(label) + ' vs ' + esc(r.opponent) + '</span>';
         }).join('');
@@ -1118,8 +1128,7 @@ function renderGinetteStandings() {
     // Forme: one disc per Ginette match, in round order (same codes as the championships)
     function formItemsHtml(t) {
         return t.results.map(function(r) {
-            var cls = r.status === 'W' ? 'form-win' : (r.status === 'C' ? 'form-close' :
-                (r.status === 'P' ? 'form-pending' : 'form-loss'));
+            var cls = statusClass[r.status] || 'form-loss';
             return '<span class="form-item form-item-sm ' + cls + '" title="' + esc(r.round + ' vs ' + r.opponent) + '"></span>';
         }).join('');
     }

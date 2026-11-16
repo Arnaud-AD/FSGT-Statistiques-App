@@ -394,6 +394,32 @@
             font-size: 12px;
         }
 
+        /* Forfait gagné : rond blanc cerclé de vert, coche verte */
+        .form-forfeit-win {
+            background: #fff;
+            border: 1.5px solid var(--win-color);
+            box-sizing: border-box;
+        }
+        .form-forfeit-win::after {
+            content: '✓';
+            color: var(--win-color);
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .form-item-sm.form-forfeit-win::after { font-size: 8px; }
+
+        /* Forfait perdu : comme une défaite, en noir */
+        .form-forfeit-loss {
+            background: #202124;
+        }
+        .form-forfeit-loss::after {
+            content: '✕';
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .form-item-sm.form-forfeit-loss::after { font-size: 8px; }
+
         .form-pending {
             background: #e8e8e8;
             border: 1.5px solid #d0d0d0;
