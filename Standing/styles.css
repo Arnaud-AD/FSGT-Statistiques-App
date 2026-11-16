@@ -1663,6 +1663,8 @@
             .cal-score .separator { color: var(--text-secondary); margin: 0 2px; font-weight: 400; }
             .cal-score.winner { color: var(--win-color); }
             .cal-score.loser { color: var(--text-secondary); }
+            .cal-score.cal-forfeit { font-size: 12px; letter-spacing: 0.2px; }
+            .cal-score.forfeit-loser { color: var(--loss-color); }
             .cal-vs { color: #bdc1c6; padding-left: 17px; }
 
             .cal-sets { white-space: nowrap; overflow: hidden; }

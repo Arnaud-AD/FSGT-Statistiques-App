@@ -479,8 +479,9 @@ function buildTeamCalendar(teamKey, ctx) {
             var other = isHome ? m.scoreAway : m.scoreHome;
             var won = isHome ? !!m.homeWin : !m.homeWin;
             var formCls = won ? 'form-win' : (other - own <= 1 ? 'form-close' : 'form-loss');
-            result = '<span class="form-item form-item-sm ' + formCls + '"></span>' +
-                '<span class="cal-score ' + (won ? 'winner' : 'loser') + '">' + own + '<span class="separator">-</span>' + other + '</span>';
+            result = '<span class="form-item form-item-sm ' + formCls + '"></span>' + (m.forfeit
+                ? '<span class="cal-score cal-forfeit ' + (won ? 'winner' : 'forfeit-loser') + '">Forfait</span>'
+                : '<span class="cal-score ' + (won ? 'winner' : 'loser') + '">' + own + '<span class="separator">-</span>' + other + '</span>');
             if (Array.isArray(m.sets) && m.sets.length) {
                 sets = m.sets.map(function(st) {
                     var a = isHome ? st[0] : st[1];
