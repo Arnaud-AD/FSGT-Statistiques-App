@@ -394,6 +394,32 @@
             font-size: 12px;
         }
 
+        /* Forfait gagné : rond blanc cerclé de vert, coche verte */
+        .form-forfeit-win {
+            background: #fff;
+            border: 1.5px solid var(--win-color);
+            box-sizing: border-box;
+        }
+        .form-forfeit-win::after {
+            content: '✓';
+            color: var(--win-color);
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .form-item-sm.form-forfeit-win::after { font-size: 8px; }
+
+        /* Forfait perdu : comme une défaite, en noir */
+        .form-forfeit-loss {
+            background: #202124;
+        }
+        .form-forfeit-loss::after {
+            content: '✕';
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .form-item-sm.form-forfeit-loss::after { font-size: 8px; }
+
         .form-pending {
             background: #e8e8e8;
             border: 1.5px solid #d0d0d0;
@@ -568,6 +594,8 @@
         .match-team .team-name {
             font-size: 13px;
         }
+
+        .match-team .team-label { display: flex; align-items: center; gap: 8px; min-width: 0; }
 
         .match-score {
             display: flex;
@@ -1295,6 +1323,12 @@
                 text-align: right;
             }
 
+            /* Ginette: division pill under the name */
+            .match-team .team-label { flex-direction: column; gap: 3px; min-width: 0; }
+            .match-team.home .team-label { align-items: flex-end; }
+            .match-team.away .team-label { align-items: flex-start; }
+            .match-team.home .team-label .team-div { order: 2; }
+
             .match-team .team-name,
             .ginette-match-card .team-name {
                 max-width: none;
@@ -1646,6 +1680,8 @@
             .cal-opp { display: flex; align-items: center; gap: 6px; min-width: 0; }
             .cal-opp .team-logo { width: 18px; height: 18px; font-size: 7px; flex-shrink: 0; border-radius: 4px; }
             .cal-opp .team-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
+            .cal-opp .team-div { flex-shrink: 0; }
+            .match-team .team-div { flex-shrink: 0; }
 
             .cal-result { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
             .cal-result .form-item { flex-shrink: 0; margin: 0; }
@@ -1653,6 +1689,8 @@
             .cal-score .separator { color: var(--text-secondary); margin: 0 2px; font-weight: 400; }
             .cal-score.winner { color: var(--win-color); }
             .cal-score.loser { color: var(--text-secondary); }
+            .cal-score.cal-forfeit { font-size: 12px; letter-spacing: 0.2px; }
+            .cal-score.forfeit-loser { color: var(--loss-color); }
             .cal-vs { color: #bdc1c6; padding-left: 17px; }
 
             .cal-sets { white-space: nowrap; overflow: hidden; }

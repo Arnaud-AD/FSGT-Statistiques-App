@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self';">
     <title>FSGT94 Volley</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=2026.11.16a">
+    <link rel="stylesheet" href="styles.css?v=2026.11.17a">
 </head>
 <body>
     <div class="container">
@@ -66,6 +66,8 @@
                     <div class="legend-item"><span class="form-item form-item-sm form-close"></span>D&#233;faite serr&#233;e</div>
                     <div class="legend-item"><span class="form-item form-item-sm form-loss"></span>D&#233;faite</div>
                     <div class="legend-item"><span class="form-item form-item-sm form-postponed"></span>Report&#233;</div>
+                    <div class="legend-item"><span class="form-item form-item-sm form-forfeit-win"></span>Victoire par forfait</div>
+                    <div class="legend-item"><span class="form-item form-item-sm form-forfeit-loss"></span>Forfait</div>
                 </div>
             </div>
             <div id="classement-evolution" class="classement-sub-tab-content">
@@ -98,6 +100,13 @@
                     <div class="legend-item"><div class="legend-bar" style="background: var(--ginette-consolante);"></div>17-32 : poule consolante</div>
                     <div class="legend-item"><div class="legend-bar" style="background: var(--ginette-elimine);"></div>33 et + : &#233;limin&#233;</div>
                 </div>
+                <div class="legend legend-form">
+                    <div class="legend-item"><span class="form-item form-item-sm form-win"></span>Victoire</div>
+                    <div class="legend-item"><span class="form-item form-item-sm form-close"></span>D&#233;faite serr&#233;e</div>
+                    <div class="legend-item"><span class="form-item form-item-sm form-loss"></span>D&#233;faite</div>
+                    <div class="legend-item"><span class="form-item form-item-sm form-forfeit-win"></span>Victoire par forfait</div>
+                    <div class="legend-item"><span class="form-item form-item-sm form-forfeit-loss"></span>Forfait</div>
+                </div>
                 <p class="ginette-standings-note">Comme en championnat : victoire 3 pts, d&#233;faite serr&#233;e (1 set d'&#233;cart ou 2-2) 2 pts, d&#233;faite 1 pt, forfait 0. &#201;galit&#233; d&#233;partag&#233;e au set average puis au points average. Les p&#233;nalit&#233;s (colonne P&#233;n.) sont d&#233;duites des points.</p>
             </div>
 
@@ -120,6 +129,6 @@
         </div>
     </div>
 
-    <script src="app.js?v=2026.11.13c"></script>
+    <script src="app.js?v=2026.11.17a"></script>
 </body>
 </html>

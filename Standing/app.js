@@ -439,7 +439,15 @@ var CAL_MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'ao
 
 // ctx: { played, upcoming, teams } — the championship (DATA) by default, or the Ginette (ginetteMatchCtx)
 function champMatchCtx() {
-    return { played: DATA.matchesPlayed, upcoming: DATA.matchesUpcoming, teams: DATA.teams };
+    // A forfeit shows on the site as 3-0 with 75-0 points (sets 25-0)
+    var played = DATA.matchesPlayed.map(function(m) {
+        if (m.forfeit == null && Array.isArray(m.total) && m.total.length === 2 &&
+            Math.min(m.total[0], m.total[1]) === 0 && Math.max(m.total[0], m.total[1]) > 0) {
+            return Object.assign({}, m, { forfeit: true });
+        }
+        return m;
+    });
+    return { played: played, upcoming: DATA.matchesUpcoming, teams: DATA.teams };
 }
 
 function buildTeamCalendar(teamKey, ctx) {
@@ -478,9 +486,11 @@ function buildTeamCalendar(teamKey, ctx) {
             var own = isHome ? m.scoreHome : m.scoreAway;
             var other = isHome ? m.scoreAway : m.scoreHome;
             var won = isHome ? !!m.homeWin : !m.homeWin;
-            var formCls = won ? 'form-win' : (other - own <= 1 ? 'form-close' : 'form-loss');
-            result = '<span class="form-item form-item-sm ' + formCls + '"></span>' +
-                '<span class="cal-score ' + (won ? 'winner' : 'loser') + '">' + own + '<span class="separator">-</span>' + other + '</span>';
+            var formCls = m.forfeit ? (won ? 'form-forfeit-win' : 'form-forfeit-loss')
+                : (won ? 'form-win' : (other - own <= 1 ? 'form-close' : 'form-loss'));
+            result = '<span class="form-item form-item-sm ' + formCls + '"></span>' + (m.forfeit
+                ? '<span class="cal-score cal-forfeit ' + (won ? 'winner' : 'forfeit-loser') + '">Forfait</span>'
+                : '<span class="cal-score ' + (won ? 'winner' : 'loser') + '">' + own + '<span class="separator">-</span>' + other + '</span>');
             if (Array.isArray(m.sets) && m.sets.length) {
                 sets = m.sets.map(function(st) {
                     var a = isHome ? st[0] : st[1];
@@ -514,6 +524,7 @@ function buildTeamCalendar(teamKey, ctx) {
             '<span class="cal-opp">' +
                 '<span class="team-logo logo-' + esc(oppKey) + '">' + esc(opp.short) + '</span>' +
                 '<span class="team-name">' + esc(opp.name) + '</span>' +
+                teamDivBadge(opp) +
             '</span>' +
             '<span class="cal-result">' + result + '</span>' +
             '<span class="cal-sets">' + sets + '</span>' +
@@ -611,6 +622,20 @@ function renderMatches() {
     });
 }
 
+// Division pill for Ginette teams (they come from every division); '' for championship teams
+function teamDivBadge(t) {
+    if (!t || !t.division) return '';
+    return '<span class="division-badge division-badge-sm team-div" style="background: ' +
+        (GINETTE_DIV_COLORS[t.division] || '#999') + ';">' + esc(DIV_LABELS_JS[t.division] || t.division) + '</span>';
+}
+// Name (+ division pill for Ginette teams); the pill sits on the outer side, and under the name on mobile
+function teamLabel(t, isHome) {
+    var name = '<span class="team-name">' + esc(t.name) + '</span>';
+    var badge = teamDivBadge(t);
+    if (!badge) return name;
+    return '<span class="team-label">' + (isHome ? badge + name : name + badge) + '</span>';
+}
+
 // "Résultats" (folded) + "À venir" sections, shared by the championships and the Ginette.
 // ctx: { played, upcoming, teams }; opts: { idPrefix, groupOf(m) → number for alternating backgrounds, badgeOf(m) }
 function buildMatchesTab(ctx, opts) {
@@ -631,7 +656,7 @@ function buildMatchesTab(ctx, opts) {
             '<div class="match-date">' + esc(m.date) + (m.forfeit ? '<span class="forfeit-badge">Forfait</span>' : '') + '</div>' +
             '<div class="match-teams">' +
                 '<div class="match-team home">' +
-                    '<span class="team-name">' + esc(homeTeam.name) + '</span>' +
+                    teamLabel(homeTeam, true) +
                     '<div class="team-logo logo-' + esc(m.home) + '">' + esc(homeTeam.short) + '</div>' +
                 '</div>' +
                 '<div class="match-score">' +
@@ -641,7 +666,7 @@ function buildMatchesTab(ctx, opts) {
                 '</div>' +
                 '<div class="match-team away">' +
                     '<div class="team-logo logo-' + esc(m.away) + '">' + esc(awayTeam.short) + '</div>' +
-                    '<span class="team-name">' + esc(awayTeam.name) + '</span>' +
+                    teamLabel(awayTeam, false) +
                 '</div>' +
             '</div>' +
             '<div class="match-status"><span class="status-played">' + esc(m.status) + '</span>' +
@@ -691,7 +716,7 @@ function buildMatchesTab(ctx, opts) {
             '<div class="match-date">' + esc(m.date) + (opts.badgeOf ? opts.badgeOf(m) : '') + '</div>' +
             '<div class="match-teams">' +
                 '<div class="match-team home">' +
-                    '<span class="team-name">' + esc(homeTeam.name) + '</span>' +
+                    teamLabel(homeTeam, true) +
                     '<div class="team-logo logo-' + esc(m.home) + '">' + esc(homeTeam.short) + '</div>' +
                 '</div>' +
                 '<div class="match-score">' +
@@ -699,7 +724,7 @@ function buildMatchesTab(ctx, opts) {
                 '</div>' +
                 '<div class="match-team away">' +
                     '<div class="team-logo logo-' + esc(m.away) + '">' + esc(awayTeam.short) + '</div>' +
-                    '<span class="team-name">' + esc(awayTeam.name) + '</span>' +
+                    teamLabel(awayTeam, false) +
                 '</div>' +
             '</div>' +
             '<div class="match-status"><span class="' + statusClass + '">' + esc(m.status) + '</span></div>' +
@@ -886,7 +911,8 @@ function buildGinetteCtx() {
         teams[key] = {
             name: name,
             short: i.short || ginetteInitials(name),
-            color: i.color || GINETTE_DIV_COLORS[division] || '#999'
+            color: i.color || GINETTE_DIV_COLORS[division] || '#999',
+            division: division
         };
         return key;
     }
@@ -1043,7 +1069,7 @@ function computeGinetteStandings(matches, penalties) {
             t.ptsPlus += sum(x[3]);
             t.ptsMinus += sum(x[4]);
             var status;
-            if (win) { t.g++; t.pts += 3; status = 'W'; }
+            if (win) { t.g++; t.pts += 3; status = m.forfeit ? 'FW' : 'W'; }
             else {
                 t.p++;
                 if (m.forfeit) status = 'F';
@@ -1086,15 +1112,24 @@ function renderGinetteStandings() {
 
     function fmtAvg(v, played) {
         if (!played) return '-';
-        return v === Infinity ? 'MAX' : v.toFixed(2);
+        return v === Infinity ? '∞' : v.toFixed(2);
     }
-    var statusLabels = { W: 'V', C: 'D', L: 'D', F: 'Forfait', P: 'À venir' };
+    var statusLabels = { W: 'V', FW: 'V par forfait', C: 'D', L: 'D', F: 'Forfait', P: 'À venir' };
+    var statusClass = { W: 'form-win', FW: 'form-forfeit-win', C: 'form-close', L: 'form-loss', F: 'form-forfeit-loss', P: 'form-pending' };
     function resultsHtml(t) {
         return t.results.map(function(r) {
-            var cls = r.status === 'W' ? 'form-win' : (r.status === 'C' ? 'form-close' : (r.status === 'P' ? 'form-pending' : 'form-loss'));
-            var label = statusLabels[r.status] + (r.sets && r.status !== 'F' ? ' ' + r.sets : '');
+            var cls = statusClass[r.status] || 'form-loss';
+            var label = statusLabels[r.status] + (r.sets && r.status !== 'F' && r.status !== 'FW' ? ' ' + r.sets : '');
             return '<span class="detail-stat"><span class="form-item form-item-sm ' + cls + '"></span>' +
                 '<em>' + r.round + '</em> ' + esc(label) + ' vs ' + esc(r.opponent) + '</span>';
+        }).join('');
+    }
+
+    // Forme: one disc per Ginette match, in round order (same codes as the championships)
+    function formItemsHtml(t) {
+        return t.results.map(function(r) {
+            var cls = statusClass[r.status] || 'form-loss';
+            return '<span class="form-item form-item-sm ' + cls + '" title="' + esc(r.round + ' vs ' + r.opponent) + '"></span>';
         }).join('');
     }
 
@@ -1129,6 +1164,7 @@ function renderGinetteStandings() {
             '<td class="col-opt">' + fmtAvg(t.ptsAvg, played) + '</td>' +
             '<td class="col-opt">' + (t.penalty ? '-' + t.penalty : '0') + '</td>' +
             '<td class="bold-val">' + t.pts + '</td>' +
+            '<td class="col-opt"><div class="form-container">' + formItemsHtml(t) + '</div></td>' +
         '</tr>' +
         '<tr class="standings-detail ginette-zone-' + t.zone + (expanded ? ' expanded' : '') + '" data-team="' + esc(key) + '">' +
             '<td colspan="6">' +
@@ -1152,7 +1188,7 @@ function renderGinetteStandings() {
         '</tr>' +
         // Desktop: the team's Ginette calendar, as in the championships
         (teamKey ? '<tr class="standings-calendar ginette-zone-' + t.zone + (calOpen ? ' open' : '') + '" data-team="' + esc(key) + '">' +
-            '<td colspan="12">' + buildTeamCalendar(teamKey, GINETTE_CTX) + '</td>' +
+            '<td colspan="13">' + buildTeamCalendar(teamKey, GINETTE_CTX) + '</td>' +
         '</tr>' : '');
     });
 
@@ -1164,7 +1200,7 @@ function renderGinetteStandings() {
                     '<th>Équipe</th><th>MJ</th><th>V</th><th>D</th>' +
                     '<th class="col-opt">Set+</th><th class="col-opt">Set-</th><th>Set avg</th>' +
                     '<th class="col-opt">Pts+</th><th class="col-opt">Pts-</th><th class="col-opt">Pts avg</th><th class="col-opt">Pén.</th>' +
-                    '<th class="bold-col">Pts</th>' +
+                    '<th class="bold-col">Pts</th><th class="col-opt">Forme</th>' +
                 '</tr></thead>' +
                 '<tbody>' + rows + '</tbody>' +
             '</table>' +
