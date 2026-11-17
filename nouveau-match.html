@@ -435,16 +435,19 @@
                     <label class="form-label" for="ginetteLevel">Niveau de l’équipe</label>
                     <select class="form-select" id="ginetteLevel" required>
                         <option value="">Sélectionner un niveau</option>
-                        <optgroup label="Compétition">
-                            <option value="Élite">Élite</option>
+                        <!-- Niveaux saison 2026-2027 (championnats volley-fsgt94.fr).
+                             Les matchs 2025-2026 gardent leur ancien libellé (Élite, OR, ARGENT…) : il est seulement affiché. -->
+                        <optgroup label="Championnat">
+                            <option value="Ultimate">Ultimate</option>
+                            <option value="Elite">Elite</option>
                             <option value="Hard">Hard</option>
                             <option value="Medium">Medium</option>
                             <option value="Easy">Easy</option>
                             <option value="Starter">Starter</option>
                         </optgroup>
-                        <optgroup label="Tableau">
-                            <option value="OR">OR</option>
-                            <option value="ARGENT">ARGENT</option>
+                        <optgroup label="Championnat 6x6">
+                            <option value="Or 6x6">Or 6x6</option>
+                            <option value="Argent 6x6">Argent 6x6</option>
                         </optgroup>
                     </select>
                 </div>
