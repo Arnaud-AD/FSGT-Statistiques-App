@@ -4,9 +4,9 @@
     "name": "Coupe Ginette",
     "season": "2026-2027",
     "format": "coupe",
-    "lastUpdated": "2026-11-16T23:47:39",
+    "lastUpdated": "2026-11-18T00:12:12",
     "teamCount": 64,
-    "matchCount": 15,
+    "matchCount": 18,
     "forfeitCount": 1,
     "rounds": [
       "Tour 1",
@@ -85,6 +85,29 @@
     },
     {
       "rank": 4,
+      "name": "Red Hot Sucy Pépère",
+      "division": "Ultimate",
+      "divSlug": "ultimate",
+      "elo": 1920.5,
+      "delta": 10.6,
+      "record": "1-0",
+      "wins": 1,
+      "losses": 0,
+      "power": 97.3,
+      "form": [
+        "W"
+      ],
+      "matches": [
+        {
+          "opponent": "Les Rhum'Antik",
+          "result": "W",
+          "score": "3-0",
+          "delta": 10.6
+        }
+      ]
+    },
+    {
+      "rank": 5,
       "name": "Kiki Team",
       "division": "Ultimate",
       "divSlug": "ultimate",
@@ -105,20 +128,6 @@
           "delta": 11.6
         }
       ]
-    },
-    {
-      "rank": 5,
-      "name": "Red Hot Sucy Pépère",
-      "division": "Ultimate",
-      "divSlug": "ultimate",
-      "elo": 1909.9,
-      "delta": 0.0,
-      "record": "0-0",
-      "wins": 0,
-      "losses": 0,
-      "power": 95.8,
-      "form": [],
-      "matches": []
     },
     {
       "rank": 6,
@@ -275,6 +284,29 @@
     },
     {
       "rank": 15,
+      "name": "Les Loups-Phoques",
+      "division": "Hard",
+      "divSlug": "hard",
+      "elo": 1783.2,
+      "delta": 11.9,
+      "record": "1-0",
+      "wins": 1,
+      "losses": 0,
+      "power": 78.4,
+      "form": [
+        "W"
+      ],
+      "matches": [
+        {
+          "opponent": "Les Tigres & Gorilles",
+          "result": "W",
+          "score": "3-1",
+          "delta": 11.9
+        }
+      ]
+    },
+    {
+      "rank": 16,
       "name": "GO Team Apero",
       "division": "Elite",
       "divSlug": "elite",
@@ -295,20 +327,6 @@
           "delta": 23.9
         }
       ]
-    },
-    {
-      "rank": 16,
-      "name": "Les Loups-Phoques",
-      "division": "Hard",
-      "divSlug": "hard",
-      "elo": 1771.3,
-      "delta": 0.0,
-      "record": "0-0",
-      "wins": 0,
-      "losses": 0,
-      "power": 76.7,
-      "form": [],
-      "matches": []
     },
     {
       "rank": 17,
@@ -349,6 +367,29 @@
     },
     {
       "rank": 19,
+      "name": "No s(o)ucy",
+      "division": "Or 6x6",
+      "divSlug": "or6x6",
+      "elo": 1727.4,
+      "delta": 6.4,
+      "record": "1-0",
+      "wins": 1,
+      "losses": 0,
+      "power": 70.7,
+      "form": [
+        "W"
+      ],
+      "matches": [
+        {
+          "opponent": "GO ELAN",
+          "result": "W",
+          "score": "3-0",
+          "delta": 6.4
+        }
+      ]
+    },
+    {
+      "rank": 20,
       "name": "Pythons Collés",
       "division": "Hard",
       "divSlug": "hard",
@@ -369,20 +410,6 @@
           "delta": 4.1
         }
       ]
-    },
-    {
-      "rank": 20,
-      "name": "No s(o)ucy",
-      "division": "Or 6x6",
-      "divSlug": "or6x6",
-      "elo": 1721.0,
-      "delta": 0.0,
-      "record": "0-0",
-      "wins": 0,
-      "losses": 0,
-      "power": 69.8,
-      "form": [],
-      "matches": []
     },
     {
       "rank": 21,
@@ -583,14 +610,23 @@
       "name": "Les Rhum'Antik",
       "division": "Medium",
       "divSlug": "medium",
-      "elo": 1631.7,
-      "delta": 0.0,
-      "record": "0-0",
+      "elo": 1621.1,
+      "delta": -10.6,
+      "record": "0-1",
       "wins": 0,
-      "losses": 0,
-      "power": 57.5,
-      "form": [],
-      "matches": []
+      "losses": 1,
+      "power": 56.1,
+      "form": [
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Red Hot Sucy Pépère",
+          "result": "L",
+          "score": "0-3",
+          "delta": -10.6
+        }
+      ]
     },
     {
       "rank": 32,
@@ -696,20 +732,6 @@
     },
     {
       "rank": 38,
-      "name": "Les Tigres & Gorilles",
-      "division": "Medium",
-      "divSlug": "medium",
-      "elo": 1577.5,
-      "delta": 0.0,
-      "record": "0-0",
-      "wins": 0,
-      "losses": 0,
-      "power": 50.1,
-      "form": [],
-      "matches": []
-    },
-    {
-      "rank": 39,
       "name": "Les Ours Mal Léchés",
       "division": "Easy",
       "divSlug": "easy",
@@ -721,6 +743,29 @@
       "power": 49.8,
       "form": [],
       "matches": []
+    },
+    {
+      "rank": 39,
+      "name": "Les Tigres & Gorilles",
+      "division": "Medium",
+      "divSlug": "medium",
+      "elo": 1565.6,
+      "delta": -11.9,
+      "record": "0-1",
+      "wins": 0,
+      "losses": 1,
+      "power": 48.4,
+      "form": [
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Les Loups-Phoques",
+          "result": "L",
+          "score": "1-3",
+          "delta": -11.9
+        }
+      ]
     },
     {
       "rank": 40,
@@ -978,20 +1023,6 @@
     },
     {
       "rank": 53,
-      "name": "GO ELAN",
-      "division": "Argent",
-      "divSlug": "argent",
-      "elo": 1378.4,
-      "delta": 0.0,
-      "record": "0-0",
-      "wins": 0,
-      "losses": 0,
-      "power": 22.7,
-      "form": [],
-      "matches": []
-    },
-    {
-      "rank": 54,
       "name": "Gold Digger",
       "division": "Starter",
       "divSlug": "starter",
@@ -1003,6 +1034,29 @@
       "power": 22.1,
       "form": [],
       "matches": []
+    },
+    {
+      "rank": 54,
+      "name": "GO ELAN",
+      "division": "Argent",
+      "divSlug": "argent",
+      "elo": 1372.0,
+      "delta": -6.4,
+      "record": "0-1",
+      "wins": 0,
+      "losses": 1,
+      "power": 21.8,
+      "form": [
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "No s(o)ucy",
+          "result": "L",
+          "score": "0-3",
+          "delta": -6.4
+        }
+      ]
     },
     {
       "rank": 55,
@@ -1195,10 +1249,10 @@
       "slug": "ultimate",
       "name": "Ultimate",
       "teams": 8,
-      "avgElo": 1903.1,
+      "avgElo": 1904.4,
       "maxElo": 1940.5,
       "minElo": 1843.1,
-      "wins": 4,
+      "wins": 5,
       "losses": 0,
       "winPct": 100.0
     },
@@ -1217,22 +1271,22 @@
       "slug": "or6x6",
       "name": "Or 6x6",
       "teams": 7,
-      "avgElo": 1644.9,
-      "maxElo": 1721.0,
+      "avgElo": 1645.8,
+      "maxElo": 1727.4,
       "minElo": 1592.2,
-      "wins": 1,
+      "wins": 2,
       "losses": 1,
-      "winPct": 50.0
+      "winPct": 66.7
     },
     {
-      "slug": "medium",
-      "name": "Medium",
+      "slug": "hard",
+      "name": "Hard",
       "teams": 8,
-      "avgElo": 1600.7,
-      "maxElo": 1663.2,
-      "minElo": 1540.9,
-      "wins": 1,
-      "losses": 1,
+      "avgElo": 1696.3,
+      "maxElo": 1783.2,
+      "minElo": 1649.2,
+      "wins": 3,
+      "losses": 3,
       "winPct": 50.0
     },
     {
@@ -1247,15 +1301,15 @@
       "winPct": 50.0
     },
     {
-      "slug": "hard",
-      "name": "Hard",
+      "slug": "medium",
+      "name": "Medium",
       "teams": 8,
-      "avgElo": 1694.8,
-      "maxElo": 1771.3,
-      "minElo": 1649.2,
-      "wins": 2,
+      "avgElo": 1597.9,
+      "maxElo": 1663.2,
+      "minElo": 1540.9,
+      "wins": 1,
       "losses": 3,
-      "winPct": 40.0
+      "winPct": 25.0
     },
     {
       "slug": "easy",
@@ -1272,11 +1326,11 @@
       "slug": "argent",
       "name": "Argent",
       "teams": 9,
-      "avgElo": 1299.9,
-      "maxElo": 1378.4,
+      "avgElo": 1299.2,
+      "maxElo": 1372.0,
       "minElo": 1213.6,
       "wins": 0,
-      "losses": 4,
+      "losses": 5,
       "winPct": 0.0
     }
   ],
@@ -1393,17 +1447,24 @@
       "round": "Tour 1",
       "home": "Les Rhum'Antik",
       "away": "Red Hot Sucy Pépère",
-      "homeSets": null,
-      "awaySets": null,
-      "homeScores": [],
-      "awayScores": [],
+      "homeSets": 0,
+      "awaySets": 3,
+      "homeScores": [
+        21,
+        11,
+        11
+      ],
+      "awayScores": [
+        25,
+        25,
+        25
+      ],
       "homeDivision": "medium",
       "awayDivision": "ultimate",
-      "winner": null,
+      "winner": "Red Hot Sucy Pépère",
       "forfeit": false,
-      "deltaHome": 0,
-      "deltaAway": 0,
-      "upcoming": true,
+      "deltaHome": -10.6,
+      "deltaAway": 10.6,
       "date": "17/11/2026",
       "time": "20:30",
       "venue": "Gymnase Budé",
@@ -1463,17 +1524,24 @@
       "round": "Tour 1",
       "home": "No s(o)ucy",
       "away": "GO ELAN",
-      "homeSets": null,
-      "awaySets": null,
-      "homeScores": [],
-      "awayScores": [],
+      "homeSets": 3,
+      "awaySets": 0,
+      "homeScores": [
+        25,
+        25,
+        25
+      ],
+      "awayScores": [
+        19,
+        9,
+        14
+      ],
       "homeDivision": "or6x6",
       "awayDivision": "argent",
-      "winner": null,
+      "winner": "No s(o)ucy",
       "forfeit": false,
-      "deltaHome": 0,
-      "deltaAway": 0,
-      "upcoming": true,
+      "deltaHome": 6.4,
+      "deltaAway": -6.4,
       "date": "17/11/2026",
       "time": "20:30",
       "venue": "Clarisse Agbegnenou",
@@ -2005,17 +2073,26 @@
       "round": "Tour 1",
       "home": "Les Tigres & Gorilles",
       "away": "Les Loups-Phoques",
-      "homeSets": null,
-      "awaySets": null,
-      "homeScores": [],
-      "awayScores": [],
+      "homeSets": 1,
+      "awaySets": 3,
+      "homeScores": [
+        25,
+        18,
+        14,
+        18
+      ],
+      "awayScores": [
+        15,
+        25,
+        25,
+        25
+      ],
       "homeDivision": "medium",
       "awayDivision": "hard",
-      "winner": null,
+      "winner": "Les Loups-Phoques",
       "forfeit": false,
-      "deltaHome": 0,
-      "deltaAway": 0,
-      "upcoming": true,
+      "deltaHome": -11.9,
+      "deltaAway": 11.9,
       "date": "17/11/2026",
       "time": "20:45",
       "venue": "GYMNASE DELAUNE",
