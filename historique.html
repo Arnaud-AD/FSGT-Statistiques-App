@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Historique - Jen et ses Saints</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="historique.css?v=29.47">
+    <link rel="stylesheet" href="historique.css?v=29.48">
     <link rel="stylesheet" href="recap.css?v=5">
     <script>
       // Mode recap : masquer l'historique dès le 1er paint pour ne jamais
@@ -54,7 +54,12 @@
         <!-- Chargement des données (V29.64) : visible tant que Firebase n'a pas répondu,
              pour ne pas afficher « Aucun match enregistré » pendant le chargement -->
         <div class="hist-loading" id="histLoading" role="status" aria-live="polite">
-            <div class="hist-loading-bar"><div class="hist-loading-bar-fill"></div></div>
+            <div class="hist-loading-court" aria-hidden="true">
+                <div class="hist-loading-ball-x">
+                    <div class="hist-loading-ball-shadow"></div>
+                    <div class="hist-loading-ball"><span class="hist-loading-ball-spin">🏐</span></div>
+                </div>
+            </div>
             <div class="hist-loading-text">Chargement des matchs…</div>
             <div class="hist-loading-sub">Les statistiques arrivent, quelques secondes.</div>
         </div>
