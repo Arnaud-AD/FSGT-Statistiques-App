@@ -4,9 +4,9 @@
     "name": "Coupe Ginette",
     "season": "2026-2027",
     "format": "coupe",
-    "lastUpdated": "2026-11-18T00:12:12",
+    "lastUpdated": "2026-11-18T19:31:09",
     "teamCount": 64,
-    "matchCount": 18,
+    "matchCount": 19,
     "forfeitCount": 1,
     "rounds": [
       "Tour 1",
@@ -356,14 +356,23 @@
       "name": "Padnom",
       "division": "Elite",
       "divSlug": "elite",
-      "elo": 1757.4,
-      "delta": 0.0,
-      "record": "0-0",
+      "elo": 1735.7,
+      "delta": -21.7,
+      "record": "0-1",
       "wins": 0,
-      "losses": 0,
-      "power": 74.8,
-      "form": [],
-      "matches": []
+      "losses": 1,
+      "power": 71.8,
+      "form": [
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Alambic",
+          "result": "L",
+          "score": "2-3",
+          "delta": -21.7
+        }
+      ]
     },
     {
       "rank": 19,
@@ -482,6 +491,29 @@
     },
     {
       "rank": 24,
+      "name": "Alambic",
+      "division": "Hard",
+      "divSlug": "hard",
+      "elo": 1693.2,
+      "delta": 21.7,
+      "record": "1-0",
+      "wins": 1,
+      "losses": 0,
+      "power": 66.0,
+      "form": [
+        "W"
+      ],
+      "matches": [
+        {
+          "opponent": "Padnom",
+          "result": "W",
+          "score": "3-2",
+          "delta": 21.7
+        }
+      ]
+    },
+    {
+      "rank": 25,
       "name": "StarPAFF",
       "division": "Hard",
       "divSlug": "hard",
@@ -502,20 +534,6 @@
           "delta": 11.5
         }
       ]
-    },
-    {
-      "rank": 25,
-      "name": "Alambic",
-      "division": "Hard",
-      "divSlug": "hard",
-      "elo": 1671.5,
-      "delta": 0.0,
-      "record": "0-0",
-      "wins": 0,
-      "losses": 0,
-      "power": 63.0,
-      "form": [],
-      "matches": []
     },
     {
       "rank": 26,
@@ -1260,12 +1278,12 @@
       "slug": "elite",
       "name": "Elite",
       "teams": 9,
-      "avgElo": 1806.2,
+      "avgElo": 1803.8,
       "maxElo": 1882.5,
-      "minElo": 1757.4,
+      "minElo": 1735.7,
       "wins": 4,
-      "losses": 0,
-      "winPct": 100.0
+      "losses": 1,
+      "winPct": 80.0
     },
     {
       "slug": "or6x6",
@@ -1282,12 +1300,12 @@
       "slug": "hard",
       "name": "Hard",
       "teams": 8,
-      "avgElo": 1696.3,
+      "avgElo": 1699.1,
       "maxElo": 1783.2,
       "minElo": 1649.2,
-      "wins": 3,
+      "wins": 4,
       "losses": 3,
-      "winPct": 50.0
+      "winPct": 57.1
     },
     {
       "slug": "starter",
@@ -1674,17 +1692,28 @@
       "round": "Tour 1",
       "home": "Padnom",
       "away": "Alambic",
-      "homeSets": null,
-      "awaySets": null,
-      "homeScores": [],
-      "awayScores": [],
+      "homeSets": 2,
+      "awaySets": 3,
+      "homeScores": [
+        25,
+        13,
+        17,
+        25,
+        13
+      ],
+      "awayScores": [
+        21,
+        25,
+        25,
+        13,
+        15
+      ],
       "homeDivision": "elite",
       "awayDivision": "hard",
-      "winner": null,
+      "winner": "Alambic",
       "forfeit": false,
-      "deltaHome": 0,
-      "deltaAway": 0,
-      "upcoming": true,
+      "deltaHome": -21.7,
+      "deltaAway": 21.7,
       "date": "17/11/2026",
       "time": "20:00",
       "venue": "Mistral",
@@ -2827,6 +2856,14 @@
       "loser": "Daïquibrie",
       "loserDiv": "Easy",
       "score": "2-2"
+    },
+    {
+      "gap": 1,
+      "winner": "Alambic",
+      "winnerDiv": "Hard",
+      "loser": "Padnom",
+      "loserDiv": "Elite",
+      "score": "2-3"
     }
   ]
 }
