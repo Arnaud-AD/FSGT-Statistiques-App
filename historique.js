@@ -8417,7 +8417,7 @@ const ProgressionView = {
         'Arnaud':    '#48D0FA',  // Cyan
         'Tom':       '#3b82f6',  // Bleu R4
         'Mikael':    '#e6b800',  // Jaune
-        'Lenny':     '#e65c00',  // Orange foncé
+        'Lenny':     '#ff8800',  // Orange fluo (distinct du rouge d'Assum)
         'Antoine':   '#4ade80',  // Vert clair
         'Jennifer':  '#ff69b4',  // Rose barbie
         'Assum':     '#ef4444',  // Rouge vif (Centre)
