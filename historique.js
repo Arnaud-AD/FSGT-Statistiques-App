@@ -9730,8 +9730,8 @@ const StatsVisuellesView = {
     _selectedPlayers: {},   // { name: true/false }
     _selectedSet: 'all',    // 'all' | set index number
     _heatmapMode: 'both',   // 'start' | 'end' | 'both'
-    _hmBoth:   { radius: 0.10, gamma: 0.95, alpha: 235, cutoff: 0.02, alphaFloor: 0.45 },
-    _hmSingle: { radius: 0.10, gamma: 0.95, alpha: 235, cutoff: 0.02, alphaFloor: 0.45 },
+    _hmBoth:   { radius: 0.10, gamma: 0.8, alpha: 235, cutoff: 0.02, alphaFloor: 0.35 },
+    _hmSingle: { radius: 0.10, gamma: 0.8, alpha: 235, cutoff: 0.02, alphaFloor: 0.35 },
     _trajectories: [],
 
     _layout: null,    // measured element rects for coordinate mapping
