@@ -9751,8 +9751,8 @@ const StatsVisuellesView = {
         'block-touch': '#ff1493'      // rose
     },
 
-    // Catégories affichées en heatmap (les autres en flèches : blocs)
-    HEATMAP_TYPES: { service: true, reception: true, pass: true, attack: true, relance: true, defense: true },
+    // Catégories affichées en heatmap (toutes)
+    HEATMAP_TYPES: { service: true, reception: true, pass: true, attack: true, relance: true, defense: true, block: true },
 
     CATEGORY_LABELS: [
         { key: 'service', label: 'Serv' },
@@ -10120,7 +10120,7 @@ const StatsVisuellesView = {
                             startPos: startSvg,
                             endPos: endSvg,
                             hasArrow: hasStart,
-                            startCourtSide: (effectiveType === 'block') ? 'net' : (hasStart ? startPos.courtSide : null),
+                            startCourtSide: (effectiveType === 'block') ? 'bottom' : (hasStart ? startPos.courtSide : null),
                             endCourtSide: endPos.courtSide
                         });
 
@@ -10606,7 +10606,7 @@ const StatsVisuellesView = {
         // Adapt labels to active heatmap categories
         var sel = this._selectedCategories;
         var heatCats = Object.keys(this.HEATMAP_TYPES).filter(function(c) { return sel[c]; });
-        var startTextFor = { service: 'où on sert', reception: 'où on réceptionne', pass: 'où on fait la passe', defense: 'où on défend', attack: 'où on attaque', relance: 'où on relance' };
+        var startTextFor = { service: 'où on sert', reception: 'où on réceptionne', pass: 'où on fait la passe', defense: 'où on défend', attack: 'où on attaque', relance: 'où on relance', block: 'où on bloque' };
         var startInner = heatCats.length > 1 ? 'position du joueur' : (startTextFor[heatCats[0]] || 'position du joueur');
         var startLabel = 'Départ (' + startInner + ')';
         var endLabel = 'Arrivée (où va la balle)';
@@ -10615,7 +10615,7 @@ const StatsVisuellesView = {
             div.innerHTML =
                 '<div class="sv-legend-compact"><span>Faible</span><span class="sv-legend-bar"></span><span>Forte</span></div>';
         } else {
-            var startTextSingle = { service: 'Où on sert', reception: 'Où on réceptionne', pass: 'Où on fait la passe', defense: 'Où on défend', attack: 'Où on attaque', relance: 'Où on relance' };
+            var startTextSingle = { service: 'Où on sert', reception: 'Où on réceptionne', pass: 'Où on fait la passe', defense: 'Où on défend', attack: 'Où on attaque', relance: 'Où on relance', block: 'Où on bloque' };
             var startText = heatCats.length > 1 ? 'Position du joueur' : (startTextSingle[heatCats[0]] || 'Position du joueur');
             var label = mode === 'start' ? startText : 'Où va la balle';
             div.innerHTML =
@@ -10768,7 +10768,7 @@ const StatsVisuellesView = {
                 // Label based on active heatmap categories
                 var hmTypes = {};
                 heatmapTrajs.forEach(function(t) { hmTypes[t.type] = true; });
-                var hmNames = { service: 'service', reception: 'réception', pass: 'passe', attack: 'attaque', relance: 'relance', defense: 'défense' };
+                var hmNames = { service: 'service', reception: 'réception', pass: 'passe', attack: 'attaque', relance: 'relance', defense: 'défense', block: 'bloc' };
                 var hmKeys = Object.keys(hmTypes);
                 var hmLabel = hmKeys.length > 1 ? 'actions' :
                               (hmNames[hmKeys[0]] || 'action') + (heatmapTrajs.length > 1 ? 's' : '');
