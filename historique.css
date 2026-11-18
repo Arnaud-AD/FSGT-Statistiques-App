@@ -3413,6 +3413,34 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
     padding-bottom: 12px;
 }
 
+/* « Les deux » : terrains Départ et Arrivée côte à côte */
+.sv-court-duo {
+    display: flex;
+    gap: 8px;
+}
+
+.sv-duo-col {
+    flex: 1;
+    min-width: 0;
+}
+
+.sv-duo-title {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.sv-court-duo .sv-court-wrapper {
+    padding: 12px 6px;
+    margin: 0;
+}
+
+.sv-court-duo .sv-court {
+    max-width: min(66%, 220px);
+}
+
 /* Desktop: slightly wider court */
 @media (min-width: 768px) {
     .sv-court {
