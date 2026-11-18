@@ -10663,13 +10663,6 @@ const StatsVisuellesView = {
             duo.parentNode.insertBefore(wrapper, duo);
             duo.remove();
         }
-        if (duo && on) {
-            // Titre du terrain Départ selon la catégorie (où on sert, où on réceptionne…)
-            var heatCats = Object.keys(this.HEATMAP_TYPES).filter(function(k) { return this._selectedCategories[k]; }, this);
-            var titles = { service: 'Où on sert', reception: 'Où on réceptionne', pass: 'Où on fait la passe', defense: 'Où on défend', attack: 'Où on attaque', relance: 'Où on relance' };
-            duo.querySelectorAll('.sv-duo-title')[0].textContent = heatCats.length === 1 ? titles[heatCats[0]] : 'Départ';
-            duo.querySelectorAll('.sv-duo-title')[1].textContent = 'Où va la balle';
-        }
     },
 
     _updateArrows() {
