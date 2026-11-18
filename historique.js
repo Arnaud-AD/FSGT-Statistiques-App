@@ -10046,11 +10046,13 @@ const StatsVisuellesView = {
                         // Only home team actions
                         if (action.team !== 'home') return;
 
-                        // Distinguish relance from attack for category filtering
+                        // Relances : même périmètre que les tableaux de stats (R+ / R− / FR)
+                        // = nos défenses sur les relances adverses + nos relances qui finissent le point
                         var effectiveType = action.type;
-                        if (action.type === 'attack' && action.attackType === 'relance') {
-                            effectiveType = 'relance';
-                        }
+                        var relance = (action.type === 'defense' || (action.type === 'attack' && action.attackType === 'relance'))
+                            ? self._relanceStat(action, point.rally, actionIdx) : null;
+                        if (relance === 'skip') return; // non compté dans les tableaux (ex. défense après bloc out)
+                        if (relance) effectiveType = 'relance';
 
                         // Category filter (using effective type)
                         if (!self._selectedCategories[effectiveType]) return;
@@ -10063,7 +10065,7 @@ const StatsVisuellesView = {
                         // Need at least endPos
                         if (!action.endPos) return;
 
-                        var result = self._classifyResult(action, point.rally, actionIdx, cameraSide);
+                        var result = relance || self._classifyResult(action, point.rally, actionIdx, cameraSide);
                         // Result filter
                         if (self._selectedResult !== 'all' && result !== self._selectedResult) return;
 
@@ -10082,8 +10084,7 @@ const StatsVisuellesView = {
                         var normStart = hasStart ? self._normalizePos(startPos, cameraSide) : null;
                         // Attaque directe sur la réception adverse : match-live reprend comme départ la fin
                         // de la réception, enregistrée dans le terrain adverse → départ placé au filet
-                        if (normStart && normStart.courtSide === 'top' &&
-                            (effectiveType === 'attack' || effectiveType === 'relance')) {
+                        if (normStart && normStart.courtSide === 'top' && action.type === 'attack') {
                             normStart = { x: normStart.x, y: 0, courtSide: 'bottom' };
                         }
                         var startSvg = normStart ? self._posToSvg(normStart) : null;
@@ -10126,7 +10127,7 @@ const StatsVisuellesView = {
 
                         // Block-touch : si l'attaque touche le filet/bloc, chercher le bloc qui suit
                         // pour tracer la continuation (filet → terrain adverse)
-                        if ((effectiveType === 'attack' || effectiveType === 'relance') &&
+                        if (action.type === 'attack' &&
                             action.endPos && action.endPos.courtSide === 'net') {
                             // Chercher le block action suivant dans le rally
                             for (var bi = actionIdx + 1; bi < point.rally.length; bi++) {
@@ -10237,6 +10238,41 @@ const StatsVisuellesView = {
                     y: (L.net.top - cR.top) + L.net.height / 2
                 };
         }
+    },
+
+    // Relance au sens des tableaux de stats (port de StatsRepair, case 'attack' relance / 'defense').
+    // Retourne 'positive' (R+), 'neutral' (R−), 'negative' (FR), null (pas une relance) ou 'skip' (non compté).
+    _relanceStat(action, rally, i) {
+        var team = action.team;
+        var opp = team === 'home' ? 'away' : 'home';
+        if (action.type === 'attack') {
+            // Nos relances : seuls les cas terminaux sont comptés (les relances défendues le sont côté défenseur adverse)
+            if (action.result === 'point' || action.result === 'bloc_out') return 'positive';
+            if (action.attackType === 'faute' || action.result === 'fault_net' || action.result === 'out') return 'negative';
+            if (action.result === 'blocked') return 'neutral';
+            return 'skip';
+        }
+        // Défense : bloc juste avant ?
+        var blockBeforeType = null;
+        for (var bj = i - 1; bj >= 0; bj--) {
+            var b = rally[bj];
+            if (b.type === 'block' && b.team === team) { blockBeforeType = b.result === 'bloc_out' ? 'bloc_out' : 'normal'; break; }
+            if ((b.type === 'pass' || b.type === 'attack') && b.team === team) break;
+        }
+        if (blockBeforeType === 'bloc_out') return 'skip';
+        // La balle défendue vient-elle d'une relance adverse ?
+        var afterRelance = false;
+        for (var dj = i - 1; dj >= 0; dj--) {
+            var a = rally[dj];
+            if (a.type === 'attack' && a.team === opp) { afterRelance = a.attackType === 'relance'; break; }
+            if (a.type === 'pass' && a.team === opp && a.passType === 'relance' && a.isDirectReturn) { afterRelance = true; break; }
+            if (a.type === 'block' || (a.type === 'defense' && a.team === team)) break;
+        }
+        if (!afterRelance) return null;
+        if (action.isDirectReturn && !action.isDirectReturnWinner && StatsRepair._isDirectReturnExploited(rally, i, team)) return 'negative';
+        if (action.isDirectReturn) return 'neutral';
+        if (action.result === 'fault') return blockBeforeType === 'normal' ? 'neutral' : 'negative';
+        return action.defenseQuality === 'positive' ? 'positive' : 'neutral';
     },
 
     // Note de passe P4..P1 (non stockée sur l'action) : même calcul que match-live à la saisie
@@ -10606,7 +10642,7 @@ const StatsVisuellesView = {
         // Adapt labels to active heatmap categories
         var sel = this._selectedCategories;
         var heatCats = Object.keys(this.HEATMAP_TYPES).filter(function(c) { return sel[c]; });
-        var startTextFor = { service: 'où on sert', reception: 'où on réceptionne', pass: 'où on fait la passe', defense: 'où on défend', attack: 'où on attaque', relance: 'où on relance', block: 'où on bloque' };
+        var startTextFor = { service: 'où on sert', reception: 'où on réceptionne', pass: 'où on fait la passe', defense: 'où on défend', attack: 'où on attaque', relance: 'où on prend la relance', block: 'où on bloque' };
         var startInner = heatCats.length > 1 ? 'position du joueur' : (startTextFor[heatCats[0]] || 'position du joueur');
         var startLabel = 'Départ (' + startInner + ')';
         var endLabel = 'Arrivée (où va la balle)';
@@ -10615,7 +10651,7 @@ const StatsVisuellesView = {
             div.innerHTML =
                 '<div class="sv-legend-compact"><span>Faible</span><span class="sv-legend-bar"></span><span>Forte</span></div>';
         } else {
-            var startTextSingle = { service: 'Où on sert', reception: 'Où on réceptionne', pass: 'Où on fait la passe', defense: 'Où on défend', attack: 'Où on attaque', relance: 'Où on relance', block: 'Où on bloque' };
+            var startTextSingle = { service: 'Où on sert', reception: 'Où on réceptionne', pass: 'Où on fait la passe', defense: 'Où on défend', attack: 'Où on attaque', relance: 'Où on prend la relance', block: 'Où on bloque' };
             var startText = heatCats.length > 1 ? 'Position du joueur' : (startTextSingle[heatCats[0]] || 'Position du joueur');
             var label = mode === 'start' ? startText : 'Où va la balle';
             div.innerHTML =
