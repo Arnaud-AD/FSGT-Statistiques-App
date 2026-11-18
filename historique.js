@@ -10610,21 +10610,13 @@ const StatsVisuellesView = {
 
         if (mode === 'both') {
             div.innerHTML =
-                '<div class="sv-legend-bar-container">' +
-                '<div class="sv-legend-bar"></div>' +
-                '<div class="sv-legend-labels">' +
-                '<span>Faible</span><span>Densité (échelle propre à chaque terrain)</span><span>Forte</span>' +
-                '</div></div>';
+                '<div class="sv-legend-compact"><span>Faible</span><span class="sv-legend-bar"></span><span>Forte</span></div>';
         } else {
             var startTextSingle = { service: 'Où on sert', reception: 'Où on réceptionne', pass: 'Où on fait la passe', defense: 'Où on défend', attack: 'Où on attaque', relance: 'Où on relance' };
             var startText = heatCats.length > 1 ? 'Position du joueur' : (startTextSingle[heatCats[0]] || 'Position du joueur');
             var label = mode === 'start' ? startText : 'Où va la balle';
             div.innerHTML =
-                '<div class="sv-legend-bar-container">' +
-                '<div class="sv-legend-bar"></div>' +
-                '<div class="sv-legend-labels">' +
-                '<span>Faible</span><span>' + label + '</span><span>Forte</span>' +
-                '</div></div>';
+                '<div class="sv-legend-compact"><span>' + label + ' :</span><span>Faible</span><span class="sv-legend-bar"></span><span>Forte</span></div>';
         }
 
         // Insert after the court wrapper (or after the two courts in « Les deux »)

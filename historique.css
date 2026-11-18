@@ -3314,8 +3314,8 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
 
 /* Heatmap legend */
 .sv-heatmap-legend {
-    padding: 8px 16px;
-    margin: 6px auto 0;
+    padding: 6px 16px 0;
+    margin: 4px auto 0;
     max-width: 520px;
 }
 
@@ -3412,6 +3412,23 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
     color: var(--text-secondary);
     margin-top: 8px;
     padding-bottom: 12px;
+}
+
+/* Légende compacte : Faible [barre courte] Forte, centrée */
+.sv-legend-compact {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.sv-legend-compact .sv-legend-bar {
+    width: 90px;
+    height: 6px;
+    margin: 0;
+    border-radius: 3px;
 }
 
 /* Filtres compacts (4 lignes) */
