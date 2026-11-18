@@ -5,10 +5,10 @@
     "name": "Medium",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/3",
-    "lastUpdated": "2026-11-16T03:18:38",
+    "lastUpdated": "2026-11-18T19:32:43",
     "teamCount": 8,
-    "matchesPlayed": 8,
-    "matchesUpcoming": 48
+    "matchesPlayed": 9,
+    "matchesUpcoming": 47
   },
   "teams": {
     "rhum": {
@@ -31,19 +31,19 @@
       "short": "BB",
       "color": "#f39c12"
     },
+    "mars": {
+      "name": "Les Marsupilamyyy",
+      "short": "MA",
+      "color": "#9b59b6"
+    },
     "ryoi": {
       "name": "RYŌIKI TENKAI",
       "short": "RT",
-      "color": "#9b59b6"
+      "color": "#1abc9c"
     },
     "boit": {
       "name": "Boîte de 4",
       "short": "B4",
-      "color": "#1abc9c"
-    },
-    "mars": {
-      "name": "Les Marsupilamyyy",
-      "short": "MA",
       "color": "#e67e22"
     },
     "tigr": {
@@ -191,6 +191,40 @@
     },
     {
       "rank": 5,
+      "team": "mars",
+      "mj": 3,
+      "g": 1,
+      "p": 2,
+      "setPlus": 4,
+      "setMinus": 6,
+      "ds": -2,
+      "coefSet": "0.67",
+      "ptsPlus": 232,
+      "ptsMinus": 230,
+      "dp": "+2",
+      "coefPts": "1.01",
+      "pts": 5,
+      "formAller": [
+        "L",
+        "L",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 6,
       "team": "ryoi",
       "mj": 1,
       "g": 1,
@@ -224,58 +258,24 @@
       ]
     },
     {
-      "rank": 6,
-      "team": "mars",
-      "mj": 2,
-      "g": 0,
-      "p": 2,
-      "setPlus": 1,
-      "setMinus": 6,
-      "ds": -5,
-      "coefSet": "0.17",
-      "ptsPlus": 157,
-      "ptsMinus": 176,
-      "dp": "-19",
-      "coefPts": "0.89",
-      "pts": 2,
-      "formAller": [
-        "L",
-        "L",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
       "rank": 7,
       "team": "boit",
-      "mj": 2,
+      "mj": 3,
       "g": 0,
-      "p": 2,
+      "p": 3,
       "setPlus": 1,
-      "setMinus": 6,
-      "ds": -5,
-      "coefSet": "0.17",
-      "ptsPlus": 127,
-      "ptsMinus": 172,
-      "dp": "-45",
-      "coefPts": "0.74",
-      "pts": 2,
+      "setMinus": 9,
+      "ds": -8,
+      "coefSet": "0.11",
+      "ptsPlus": 181,
+      "ptsMinus": 247,
+      "dp": "-66",
+      "coefPts": "0.73",
+      "pts": 3,
       "formAller": [
         "L",
         "L",
-        "P",
+        "L",
         "P",
         "P",
         "P",
@@ -327,6 +327,34 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "17/11/2026",
+      "home": "boit",
+      "away": "mars",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé",
+      "time": "20:00",
+      "sets": [
+        [
+          14,
+          25
+        ],
+        [
+          22,
+          25
+        ],
+        [
+          18,
+          25
+        ]
+      ],
+      "total": [
+        54,
+        75
+      ]
+    },
     {
       "date": "10/11/2026",
       "home": "rhum",
@@ -577,13 +605,6 @@
     }
   ],
   "matchesUpcoming": [
-    {
-      "date": "17/11/2026",
-      "home": "boit",
-      "away": "mars",
-      "status": "Sem. 3",
-      "time": "20:00"
-    },
     {
       "date": "24/11/2026",
       "home": "rhum",
@@ -967,6 +988,16 @@
     },
     {
       "rank": 6,
+      "team": "mars",
+      "elo": 1483.6,
+      "movement": 37.4,
+      "record": "1-2",
+      "power": 41.5,
+      "calendar": "V vs Boîte",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 7,
       "team": "tigr",
       "elo": 1477.5,
       "movement": -22.5,
@@ -976,23 +1007,13 @@
       "diffClass": "diff-hard"
     },
     {
-      "rank": 7,
-      "team": "mars",
-      "elo": 1446.3,
-      "movement": -23.7,
-      "record": "0-2",
-      "power": 0.0,
-      "calendar": "D vs Agent",
-      "diffClass": "diff-hard"
-    },
-    {
       "rank": 8,
       "team": "boit",
-      "elo": 1440.9,
-      "movement": -32.7,
-      "record": "0-2",
+      "elo": 1403.6,
+      "movement": -37.4,
+      "record": "0-3",
       "power": 0.0,
-      "calendar": "D vs Morts",
+      "calendar": "D x3",
       "diffClass": "diff-hard"
     }
   ],
@@ -1020,6 +1041,12 @@
       1530.0,
       1506.2
     ],
+    "mars": [
+      1500,
+      1470.0,
+      1446.3,
+      1483.6
+    ],
     "ryoi": [
       1500,
       1517.2
@@ -1027,12 +1054,8 @@
     "boit": [
       1500,
       1473.6,
-      1440.9
-    ],
-    "mars": [
-      1500,
-      1470.0,
-      1446.3
+      1440.9,
+      1403.6
     ],
     "tigr": [
       1500,
@@ -1075,28 +1098,30 @@
         ],
         "rank": 4
       },
+      "mars": {
+        "points": [
+          0,
+          1,
+          2,
+          5
+        ],
+        "rank": 5
+      },
       "ryoi": {
         "points": [
           0,
           3
         ],
-        "rank": 5
+        "rank": 6
       },
       "boit": {
         "points": [
           0,
           1,
-          2
+          2,
+          3
         ],
         "rank": 7
-      },
-      "mars": {
-        "points": [
-          0,
-          1,
-          2
-        ],
-        "rank": 6
       },
       "tigr": {
         "points": [

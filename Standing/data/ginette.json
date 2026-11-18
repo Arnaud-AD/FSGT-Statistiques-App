@@ -4,7 +4,7 @@
     "name": "Coupe Ginette",
     "season": "2026-2027",
     "format": "coupe",
-    "lastUpdated": "2026-11-18T19:31:09",
+    "lastUpdated": "2026-11-18T19:33:26",
     "teamCount": 64,
     "matchCount": 19,
     "forfeitCount": 1,
@@ -148,8 +148,8 @@
       "name": "Les punchers",
       "division": "Elite",
       "divSlug": "elite",
-      "elo": 1882.5,
-      "delta": 2.1,
+      "elo": 1882.3,
+      "delta": 1.9,
       "record": "1-0",
       "wins": 1,
       "losses": 0,
@@ -162,7 +162,7 @@
           "opponent": "Les Bry-Colo",
           "result": "W",
           "score": "3-0",
-          "delta": 2.1
+          "delta": 1.9
         }
       ]
     },
@@ -750,6 +750,20 @@
     },
     {
       "rank": 38,
+      "name": "Les Marsupilamyyy",
+      "division": "Medium",
+      "divSlug": "medium",
+      "elo": 1583.6,
+      "delta": 0.0,
+      "record": "0-0",
+      "wins": 0,
+      "losses": 0,
+      "power": 50.9,
+      "form": [],
+      "matches": []
+    },
+    {
+      "rank": 39,
       "name": "Les Ours Mal Léchés",
       "division": "Easy",
       "divSlug": "easy",
@@ -763,7 +777,7 @@
       "matches": []
     },
     {
-      "rank": 39,
+      "rank": 40,
       "name": "Les Tigres & Gorilles",
       "division": "Medium",
       "divSlug": "medium",
@@ -786,35 +800,7 @@
       ]
     },
     {
-      "rank": 40,
-      "name": "Les Marsupilamyyy",
-      "division": "Medium",
-      "divSlug": "medium",
-      "elo": 1546.3,
-      "delta": 0.0,
-      "record": "0-0",
-      "wins": 0,
-      "losses": 0,
-      "power": 45.8,
-      "form": [],
-      "matches": []
-    },
-    {
       "rank": 41,
-      "name": "Boîte de 4",
-      "division": "Medium",
-      "divSlug": "medium",
-      "elo": 1540.9,
-      "delta": 0.0,
-      "record": "0-0",
-      "wins": 0,
-      "losses": 0,
-      "power": 45.0,
-      "form": [],
-      "matches": []
-    },
-    {
-      "rank": 42,
       "name": "Coco & co",
       "division": "Easy",
       "divSlug": "easy",
@@ -828,7 +814,7 @@
       "matches": []
     },
     {
-      "rank": 43,
+      "rank": 42,
       "name": "Les Gaillards",
       "division": "Easy",
       "divSlug": "easy",
@@ -838,6 +824,20 @@
       "wins": 0,
       "losses": 0,
       "power": 42.6,
+      "form": [],
+      "matches": []
+    },
+    {
+      "rank": 43,
+      "name": "Boîte de 4",
+      "division": "Medium",
+      "divSlug": "medium",
+      "elo": 1503.6,
+      "delta": 0.0,
+      "record": "0-0",
+      "wins": 0,
+      "losses": 0,
+      "power": 39.9,
       "form": [],
       "matches": []
     },
@@ -1078,6 +1078,20 @@
     },
     {
       "rank": 55,
+      "name": "Smashmallow",
+      "division": "Argent",
+      "divSlug": "argent",
+      "elo": 1369.6,
+      "delta": 0.0,
+      "record": "0-0",
+      "wins": 0,
+      "losses": 0,
+      "power": 21.5,
+      "form": [],
+      "matches": []
+    },
+    {
+      "rank": 56,
       "name": "Los Americanos",
       "division": "Starter",
       "divSlug": "starter",
@@ -1091,44 +1105,7 @@
       "matches": []
     },
     {
-      "rank": 56,
-      "name": "Smashmallow",
-      "division": "Argent",
-      "divSlug": "argent",
-      "elo": 1353.2,
-      "delta": 0.0,
-      "record": "0-0",
-      "wins": 0,
-      "losses": 0,
-      "power": 19.2,
-      "form": [],
-      "matches": []
-    },
-    {
       "rank": 57,
-      "name": "Les Bry-Colo",
-      "division": "Argent",
-      "divSlug": "argent",
-      "elo": 1330.8,
-      "delta": -2.1,
-      "record": "0-1",
-      "wins": 0,
-      "losses": 1,
-      "power": 16.1,
-      "form": [
-        "L"
-      ],
-      "matches": [
-        {
-          "opponent": "Les punchers",
-          "result": "L",
-          "score": "0-3",
-          "delta": -2.1
-        }
-      ]
-    },
-    {
-      "rank": 58,
       "name": "Les Vendangeurs",
       "division": "Argent",
       "divSlug": "argent",
@@ -1151,7 +1128,7 @@
       ]
     },
     {
-      "rank": 59,
+      "rank": 58,
       "name": "Villyé-ball",
       "division": "Argent",
       "divSlug": "argent",
@@ -1170,6 +1147,29 @@
           "result": "L",
           "score": "0-3",
           "delta": -20.8
+        }
+      ]
+    },
+    {
+      "rank": 59,
+      "name": "Les Bry-Colo",
+      "division": "Argent",
+      "divSlug": "argent",
+      "elo": 1314.6,
+      "delta": -1.9,
+      "record": "0-1",
+      "wins": 0,
+      "losses": 1,
+      "power": 13.9,
+      "form": [
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Les punchers",
+          "result": "L",
+          "score": "0-3",
+          "delta": -1.9
         }
       ]
     },
@@ -1279,7 +1279,7 @@
       "name": "Elite",
       "teams": 9,
       "avgElo": 1803.8,
-      "maxElo": 1882.5,
+      "maxElo": 1882.3,
       "minElo": 1735.7,
       "wins": 4,
       "losses": 1,
@@ -1324,7 +1324,7 @@
       "teams": 8,
       "avgElo": 1597.9,
       "maxElo": 1663.2,
-      "minElo": 1540.9,
+      "minElo": 1503.6,
       "wins": 1,
       "losses": 3,
       "winPct": 25.0
@@ -1344,7 +1344,7 @@
       "slug": "argent",
       "name": "Argent",
       "teams": 9,
-      "avgElo": 1299.2,
+      "avgElo": 1299.3,
       "maxElo": 1372.0,
       "minElo": 1213.6,
       "wins": 0,
@@ -1659,8 +1659,8 @@
       "awayDivision": "argent",
       "winner": "Les punchers",
       "forfeit": false,
-      "deltaHome": 2.1,
-      "deltaAway": -2.1,
+      "deltaHome": 1.9,
+      "deltaAway": -1.9,
       "date": "16/11/2026",
       "time": "20:15",
       "venue": "Yves Querlier",
