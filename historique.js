@@ -9730,8 +9730,8 @@ const StatsVisuellesView = {
     _selectedPlayers: {},   // { name: true/false }
     _selectedSet: 'all',    // 'all' | set index number
     _heatmapMode: 'both',   // 'start' | 'end' | 'both'
-    _hmBoth:   { radius: 0.10, gamma: 0.65, alpha: 240, cutoff: 0.01 },
-    _hmSingle: { radius: 0.10, gamma: 0.65, alpha: 240, cutoff: 0.01 },
+    _hmBoth:   { radius: 0.10, gamma: 0.95, alpha: 235, cutoff: 0.02, alphaFloor: 0.45 },
+    _hmSingle: { radius: 0.10, gamma: 0.95, alpha: 235, cutoff: 0.02, alphaFloor: 0.45 },
     _trajectories: [],
 
     _layout: null,    // measured element rects for coordinate mapping
@@ -10539,12 +10539,15 @@ const StatsVisuellesView = {
                 data[i + 3] = 0;
                 continue;
             }
-            var t = Math.pow(val / maxVal, hmGamma);
+            var v = val / maxVal;
+            // Couleur : gamma proche de 1 → les zones peu denses restent bleues (au lieu de virer au vert)
+            var t = Math.pow(v, hmGamma);
             var rgb = self._interpolatePalette(palette, t);
             data[i] = Math.round(rgb[0]);
             data[i + 1] = Math.round(rgb[1]);
             data[i + 2] = Math.round(rgb[2]);
-            var alpha = Math.min(1, t * 1.5);
+            // Opacité : plancher pour que le bleu se voie franchement sur le terrain orange
+            var alpha = Math.min(1, (hmConf.alphaFloor || 0) + Math.sqrt(v) * 1.2);
             data[i + 3] = Math.round(alpha * hmAlpha * maxOpacity);
         }
         ctx.putImageData(imgData, 0, 0);
