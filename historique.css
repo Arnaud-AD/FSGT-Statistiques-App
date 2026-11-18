@@ -3315,7 +3315,8 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
 /* Heatmap legend */
 .sv-heatmap-legend {
     padding: 8px 16px;
-    margin-top: 6px;
+    margin: 6px auto 0;
+    max-width: 520px;
 }
 
 .sv-legend-row {
@@ -3413,10 +3414,99 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
     padding-bottom: 12px;
 }
 
+/* Filtres compacts (4 lignes) */
+.sv-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.sv-filters .sv-filter-group {
+    margin-bottom: 0;
+}
+
+.sv-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sv-grow {
+    flex: 1;
+    min-width: 0;
+}
+
+.sv-filters .sv-match-select {
+    padding: 6px 26px 6px 10px;
+}
+
+.sv-set-select {
+    width: auto;
+}
+
+.sv-filters .sv-cat-pills {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+}
+
+.sv-filters .sv-cat-pill {
+    padding: 5px 0;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.sv-filters .sv-result-pill {
+    padding: 4px 0;
+    min-width: 28px;
+    border-radius: 8px;
+}
+
+.sv-filters .sv-result-pill[data-result="all"] {
+    padding: 4px 7px;
+}
+
+.sv-filters .sv-heatmap-toggle {
+    margin-left: auto;
+}
+
+.sv-filters .sv-heatmap-pills,
+.sv-filters .sv-result-pills {
+    gap: 3px;
+}
+
+.sv-filters .sv-heatmap-pill {
+    padding: 4px 7px;
+    white-space: nowrap;
+    font-size: 12px;
+    border-radius: 8px;
+}
+
+.sv-filters .sv-player-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding: 2px 1px;
+}
+
+.sv-filters .sv-player-chips::-webkit-scrollbar {
+    display: none;
+}
+
+.sv-filters .sv-player-chip {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 3px 9px;
+}
+
 /* « Les deux » : terrains Départ et Arrivée côte à côte */
 .sv-court-duo {
     display: flex;
     gap: 8px;
+    max-width: 520px;
+    margin: 0 auto;
 }
 
 .sv-duo-col {
@@ -3433,12 +3523,13 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
 }
 
 .sv-court-duo .sv-court-wrapper {
-    padding: 12px 6px;
+    padding: 8px 4px;
     margin: 0;
 }
 
 .sv-court-duo .sv-court {
-    max-width: min(66%, 220px);
+    /* Les deux terrains doivent tenir dans l'écran sous les filtres (mobile et desktop) */
+    max-width: min(66%, 160px);
 }
 
 /* Desktop: slightly wider court */

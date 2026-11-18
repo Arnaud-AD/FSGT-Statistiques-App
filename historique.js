@@ -9795,8 +9795,12 @@ const StatsVisuellesView = {
         var html = '<div class="sv-container">';
 
         // Match selector
+        // Filtres compacts : 1) match + set  2) catégories  3) résultat + mode heatmap  4) joueurs
         html += '<div class="sv-filters">';
+        html += '<div class="sv-row">';
         html += this._buildMatchSelector(matches);
+        html += this._buildSetFilter(matches);
+        html += '</div>';
 
         // Category pills
         html += '<div class="sv-filter-group">';
@@ -9808,7 +9812,8 @@ const StatsVisuellesView = {
         });
         html += '</div></div>';
 
-        // Result filter
+        // Result filter (+ mode heatmap sur la même ligne)
+        html += '<div class="sv-row">';
         html += '<div class="sv-filter-group">';
         html += '<div class="sv-result-pills">';
         var results = [
@@ -9825,21 +9830,6 @@ const StatsVisuellesView = {
         });
         html += '</div></div>';
 
-        // Player chips
-        html += '<div class="sv-filter-group">';
-        html += '<div class="sv-player-chips">';
-        players.forEach(function(p) {
-            var active = self._selectedPlayers[p.name] !== false ? ' active' : '';
-            html += '<button class="sv-player-chip' + active + '" data-player="' + p.name + '" style="--sv-player-color:' + p.color + '">';
-            html += '<span class="sv-role-dot" style="background:' + p.roleColor + '"></span>';
-            html += p.name;
-            html += '</button>';
-        });
-        html += '</div></div>';
-
-        // Set filter
-        html += this._buildSetFilter(matches);
-
         // Heatmap mode toggle (for reception)
         html += '<div class="sv-filter-group sv-heatmap-toggle" id="svHeatmapToggle">';
         html += '<div class="sv-heatmap-pills">';
@@ -9853,6 +9843,20 @@ const StatsVisuellesView = {
             html += '<button class="sv-heatmap-pill' + active + '" data-hm="' + m.key + '">' + m.label + '</button>';
         });
         html += '</div></div>';
+        html += '</div>'; // sv-row résultat + mode
+
+        // Player chips
+        html += '<div class="sv-filter-group sv-players-group">';
+        html += '<div class="sv-player-chips">';
+        players.forEach(function(p) {
+            var active = self._selectedPlayers[p.name] !== false ? ' active' : '';
+            html += '<button class="sv-player-chip' + active + '" data-player="' + p.name + '" style="--sv-player-color:' + p.color + '">';
+            html += '<span class="sv-role-dot" style="background:' + p.roleColor + '"></span>';
+            html += p.name;
+            html += '</button>';
+        });
+        html += '</div></div>';
+
 
         // Heatmap tuner panel (visible with ?tuner in URL)
         if (window.location.search.indexOf('tuner') !== -1) {
@@ -9891,7 +9895,7 @@ const StatsVisuellesView = {
     },
 
     _buildMatchSelector(matches) {
-        var html = '<div class="sv-filter-group">';
+        var html = '<div class="sv-filter-group sv-grow">';
         html += '<select class="sv-match-select" id="svMatchSelect">';
         html += '<option value="all"' + (this._selectedMatch === 'all' ? ' selected' : '') + '>Tous les matchs</option>';
         matches.forEach(function(m) {
@@ -9912,12 +9916,13 @@ const StatsVisuellesView = {
             if (m.sets) maxSets = Math.max(maxSets, m.sets.length);
         });
 
-        var html = '<div class="sv-filter-group"><div class="sv-set-pills">';
-        html += '<button class="sv-set-pill' + (this._selectedSet === 'all' ? ' active' : '') + '" data-set="all">Tout</button>';
+        var html = '<div class="sv-filter-group">';
+        html += '<select class="sv-match-select sv-set-select" id="svSetSelect">';
+        html += '<option value="all"' + (this._selectedSet === 'all' ? ' selected' : '') + '>Tous les sets</option>';
         for (var i = 0; i < maxSets; i++) {
-            html += '<button class="sv-set-pill' + (this._selectedSet === i ? ' active' : '') + '" data-set="' + i + '">S' + (i + 1) + '</button>';
+            html += '<option value="' + i + '"' + (this._selectedSet === i ? ' selected' : '') + '>Set ' + (i + 1) + '</option>';
         }
-        html += '</div></div>';
+        html += '</select></div>';
         return html;
     },
 
@@ -10836,17 +10841,14 @@ const StatsVisuellesView = {
             });
         });
 
-        // Set pills
-        container.querySelectorAll('.sv-set-pill').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                self._selectedSet = btn.dataset.set === 'all' ? 'all' : parseInt(btn.dataset.set);
-                container.querySelectorAll('.sv-set-pill').forEach(function(b) {
-                    var val = b.dataset.set === 'all' ? 'all' : parseInt(b.dataset.set);
-                    b.classList.toggle('active', val === self._selectedSet);
-                });
+        // Set selector
+        var setSelect = container.querySelector('#svSetSelect');
+        if (setSelect) {
+            setSelect.addEventListener('change', function() {
+                self._selectedSet = setSelect.value === 'all' ? 'all' : parseInt(setSelect.value);
                 self._updateArrows();
             });
-        });
+        }
 
         // Heatmap mode pills
         container.querySelectorAll('.sv-heatmap-pill').forEach(function(btn) {
