@@ -8089,9 +8089,6 @@ const RankingView = {
         });
 
         html += '</tbody></table></div>';
-        html += '<div class="ranking-axis-note">Profil : stats ' + (self.PROFILE_KEY === 'starterScores' ? 'des 4 titulaires (IP Titulaires)' : 'de tous les joueurs de l\'équipe') + ' additionnées, puis notées comme un joueur. ' +
-            'Échelle zoomée axe par axe : centre = équipe la plus faible, bord = la meilleure (valeurs au survol). ' +
-            'Pointillé gris : moyenne des équipes. ▲ / ▼ : axe le plus au-dessus / en dessous de cette moyenne (relance exclue).</div>';
         return html;
     },
 
@@ -8099,7 +8096,7 @@ const RankingView = {
     // Les axes n'ont pas la même échelle (la relance est haute pour tout le monde, le bloc bas) :
     // les points forts / faibles se lisent donc par écart à cette moyenne, pas en valeur brute.
     // Source du radar d'équipe : 'starterScores' (4 titulaires de l'IP Titulaires) ou 'teamScores' (tous les joueurs)
-    PROFILE_KEY: 'starterScores',
+    PROFILE_KEY: 'teamScores',
 
     _teamProfileAverage(teams) {
         var avg = {};
