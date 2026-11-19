@@ -8137,14 +8137,26 @@ const RankingView = {
         var svg = '<svg class="ranking-profile-radar" viewBox="0 0 120 108" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">';
         // Remplissage d'abord, grille par-dessus (même rendu que les cartes joueurs)
         var poly = axes.map(function(a, i) { return fmt(pc(rad(a.key, vals[i]), a.angle)); }).join(' ');
-        svg += '<polygon points="' + poly + '" fill="' + color + '" fill-opacity="0.28"/>';
+        // V29.91 : opacité du remplissage selon la luminance de la couleur, pour que la grille
+        // reste lisible de la même façon sur un bleu foncé (Indécis) que sur un jaune (Bières)
+        var fillOp = 0.24;
+        var hx = /^#?([0-9a-f]{6})$/i.exec(String(color).trim());
+        if (hx) {
+            var lum = [0, 2, 4].map(function(k) {
+                var c = parseInt(hx[1].substr(k, 2), 16) / 255;
+                return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+            });
+            var L = 0.2126 * lum[0] + 0.7152 * lum[1] + 0.0722 * lum[2];
+            fillOp = 0.13 + 0.2 * Math.min(1, L / 0.6);
+        }
+        svg += '<polygon points="' + poly + '" fill="' + color + '" fill-opacity="' + fillOp.toFixed(2) + '"/>';
         [1 / 3, 2 / 3, 1].forEach(function(sc) {
             svg += '<polygon points="' + axes.map(function(a) { return fmt(pc(maxR * sc, a.angle)); }).join(' ') +
-                '" fill="none" stroke="#c4c8cd" stroke-opacity="0.75" stroke-width="' + (sc === 1 ? 0.9 : 0.6) + '"/>';
+                '" fill="none" stroke="#a9aeb4" stroke-opacity="0.8" stroke-width="' + (sc === 1 ? 0.9 : 0.6) + '"/>';
         });
         axes.forEach(function(a) {
             var pt = pc(maxR, a.angle);
-            svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + pt.x.toFixed(1) + '" y2="' + pt.y.toFixed(1) + '" stroke="#c4c8cd" stroke-opacity="0.6" stroke-width="0.5"/>';
+            svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + pt.x.toFixed(1) + '" y2="' + pt.y.toFixed(1) + '" stroke="#a9aeb4" stroke-opacity="0.7" stroke-width="0.5"/>';
         });
         if (avg) {
             var avgPoly = axes.map(function(a) { return fmt(pc(rad(a.key, avg[a.key] || 0), a.angle)); }).join(' ');
