@@ -8179,11 +8179,13 @@ const RankingView = {
             return NAMES[a.key] + ' ' + (vals[i] || '–') + (avg && vals[i] ? ' (moy. ' + avg[a.key] + ')' : '');
         }).join(' · ');
         var html = '<div class="ranking-profile" title="' + title + '">' + svg;
-        if (rated.length >= 2) {
-            var best = rated[0], worst = rated[rated.length - 1];
+        // ▲ seulement si l'axe est au-dessus de la moyenne, ▼ seulement s'il est en dessous
+        var best = rated[0], worst = rated[rated.length - 1];
+        var showUp = best && best.d > 0, showDown = worst && worst.d < 0;
+        if (showUp || showDown) {
             html += '<div class="ranking-profile-keys">';
-            html += '<span class="ranking-profile-key"><span class="ranking-profile-sign up">▲</span>' + NAMES[best.key] + ' <b>' + best.v + '</b> <span class="ranking-profile-delta">' + sgn(best.d) + '</span></span>';
-            html += '<span class="ranking-profile-key"><span class="ranking-profile-sign down">▼</span>' + NAMES[worst.key] + ' <b>' + worst.v + '</b> <span class="ranking-profile-delta">' + sgn(worst.d) + '</span></span>';
+            if (showUp) html += '<span class="ranking-profile-key"><span class="ranking-profile-sign up">▲</span>' + NAMES[best.key] + ' <b>' + best.v + '</b> <span class="ranking-profile-delta">' + sgn(best.d) + '</span></span>';
+            if (showDown) html += '<span class="ranking-profile-key"><span class="ranking-profile-sign down">▼</span>' + NAMES[worst.key] + ' <b>' + worst.v + '</b> <span class="ranking-profile-delta">' + sgn(worst.d) + '</span></span>';
             html += '</div>';
         }
         html += '</div>';
