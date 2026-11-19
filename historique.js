@@ -8085,6 +8085,7 @@ const RankingView = {
 
         html += '</tbody></table></div>';
         html += '<div class="ranking-axis-note">Profil : stats de tous les joueurs de l\'équipe additionnées, puis notées comme un joueur. ' +
+            'Échelle zoomée axe par axe : centre = équipe la plus faible, bord = la meilleure (valeurs au survol). ' +
             'Pointillé gris : moyenne des équipes. ▲ / ▼ : axe le plus au-dessus / en dessous de cette moyenne.</div>';
         return html;
     },
@@ -8098,6 +8099,10 @@ const RankingView = {
             var v = teams.map(function(t) { return t.teamScores ? (t.teamScores[a.key] || 0) : 0; })
                 .filter(function(x) { return x > 0; });
             avg[a.key] = v.length ? Math.round(v.reduce(function(x, y) { return x + y; }, 0) / v.length) : 0;
+            // Échelle zoomée par axe (V29.86) : plage réelle des équipes
+            avg._min = avg._min || {}; avg._max = avg._max || {};
+            avg._min[a.key] = v.length ? Math.min.apply(null, v) : 0;
+            avg._max[a.key] = v.length ? Math.max.apply(null, v) : 100;
         });
         return avg;
     },
@@ -8114,10 +8119,19 @@ const RankingView = {
         var cx = 60, cy = 56, maxR = 40;
         var pc = function(r, ang) { return BilanView.polarToCartesian(cx, cy, r, ang); };
         var fmt = function(pt) { return pt.x.toFixed(1) + ',' + pt.y.toFixed(1); };
+        // V29.86 : échelle zoomée par axe. Centre (15 % du rayon) = équipe la plus faible sur l'axe,
+        // bord = la meilleure. Sans moyenne (ou une seule équipe) : échelle 0-100 classique.
+        var rad = function(key, v) {
+            if (!v) return 0;
+            if (!avg || !avg._min) return maxR * v / 100;
+            var lo = avg._min[key], hi = avg._max[key];
+            if (!(hi > lo)) return maxR * 0.6;
+            return maxR * (0.15 + 0.85 * Math.max(0, Math.min(1, (v - lo) / (hi - lo))));
+        };
 
         var svg = '<svg class="ranking-profile-radar" viewBox="0 0 120 108" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">';
         // Remplissage d'abord, grille par-dessus (même rendu que les cartes joueurs)
-        var poly = axes.map(function(a, i) { return fmt(pc(maxR * vals[i] / 100, a.angle)); }).join(' ');
+        var poly = axes.map(function(a, i) { return fmt(pc(rad(a.key, vals[i]), a.angle)); }).join(' ');
         svg += '<polygon points="' + poly + '" fill="' + color + '" fill-opacity="0.28"/>';
         [1 / 3, 2 / 3, 1].forEach(function(sc) {
             svg += '<polygon points="' + axes.map(function(a) { return fmt(pc(maxR * sc, a.angle)); }).join(' ') +
@@ -8128,13 +8142,13 @@ const RankingView = {
             svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + pt.x.toFixed(1) + '" y2="' + pt.y.toFixed(1) + '" stroke="#c4c8cd" stroke-opacity="0.6" stroke-width="0.5"/>';
         });
         if (avg) {
-            var avgPoly = axes.map(function(a) { return fmt(pc(maxR * (avg[a.key] || 0) / 100, a.angle)); }).join(' ');
+            var avgPoly = axes.map(function(a) { return fmt(pc(rad(a.key, avg[a.key] || 0), a.angle)); }).join(' ');
             svg += '<polygon points="' + avgPoly + '" fill="none" stroke="#80868b" stroke-width="0.9" stroke-dasharray="2.5,2"/>';
         }
         svg += '<polygon points="' + poly + '" fill="none" stroke="' + color + '" stroke-width="1.4" stroke-linejoin="round"/>';
         axes.forEach(function(a, i) {
             if (vals[i] <= 0) return;
-            var pt = pc(maxR * vals[i] / 100, a.angle);
+            var pt = pc(rad(a.key, vals[i]), a.angle);
             svg += '<circle cx="' + pt.x.toFixed(1) + '" cy="' + pt.y.toFixed(1) + '" r="1.8" fill="#fff" stroke="' + color + '" stroke-width="1"/>';
         });
         axes.forEach(function(a, i) {
