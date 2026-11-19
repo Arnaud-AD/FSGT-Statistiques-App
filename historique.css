@@ -2803,6 +2803,61 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
     font-size: 12px;
 }
 
+/* V29.85 : radar d'équipe agrégé (colonne Profil, Ranking > Équipes) */
+.ranking-table th.ranking-profile-th {
+    text-align: left;
+}
+.ranking-table td.ranking-profile-cell {
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+.ranking-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.ranking-profile-radar {
+    width: 128px;
+    height: auto;
+    flex: none;
+    display: block;
+}
+.ranking-profile-keys {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+    color: #5f6368;
+    white-space: nowrap;
+}
+.ranking-profile-key b {
+    color: #202124;
+    font-weight: 700;
+}
+.ranking-profile-sign {
+    display: inline-block;
+    width: 14px;
+    font-size: 9px;
+}
+.ranking-profile-delta {
+    font-size: 11px;
+    color: #80868b;
+}
+.ranking-profile-sign.up { color: #16a34a; }
+.ranking-profile-sign.down { color: #dc2626; }
+@media (max-width: 700px) {
+    .ranking-profile-keys { display: none; }
+    .ranking-profile-radar { width: 84px; }
+}
+@media (max-width: 480px) {
+    .ranking-profile-radar { width: 64px; }
+    .ranking-profile-radar text { display: none; }
+    /* Place pour le radar : la colonne Matchs (reprise dans la fiche équipe) est masquée */
+    .ranking-table[data-ranking-table="equipes"] th:nth-child(3),
+    .ranking-table[data-ranking-table="equipes"] td:nth-child(3) { display: none; }
+    .ranking-table td.ranking-profile-cell { padding-left: 2px; padding-right: 0; }
+}
+
 /* Mobile : le tableau Équipes dépassait de ~12 px (colonne IP Titulaires coupée) */
 @media (max-width: 480px) {
     .ranking-table th {

@@ -7861,7 +7861,7 @@ const RankingView = {
 
         if (matchesWithSets.length === 0) {
             return { name: teamName, isHome: !isAway, matchCount: matches.length,
-                     allPlayers: [], starters: [], ipAll: 0, ipStarters: 0 };
+                     allPlayers: [], starters: [], ipAll: 0, ipStarters: 0, teamScores: null };
         }
 
         // --- Approche Profils Radar Annee : scores agreges pour le visuel, IP mediane par match ---
@@ -7900,7 +7900,8 @@ const RankingView = {
                     allPlayers.push({
                         name: name, role: familyPrimaryRole, roleColor: roleColor,
                         scores: scores, ip: 0, effectiveRole: familyIpRole, ipRole: playerIpRole,
-                        matchCount: famData.matchSets.length
+                        matchCount: famData.matchSets.length,
+                        stats: stats // V29.85 : stats brutes pour le radar d'équipe agrégé
                     });
                 });
             });
@@ -8031,6 +8032,14 @@ const RankingView = {
             ? Math.round(posValues.reduce(function(s, v) { return s + v; }, 0) / posValues.length)
             : 0;
 
+        // V29.85 : radar d'équipe agrégé. Les stats brutes de TOUS les joueurs de l'équipe sont
+        // additionnées, puis chaque axe est noté avec la même formule que pour un joueur
+        // (pas de moyenne des notes individuelles). Bloc et défense restent « par joueur et par set »
+        // (sets joués cumulés), donc sur la même échelle que les radars des joueurs.
+        var teamStats = StatsAggregator.initPlayerStats();
+        allPlayers.forEach(function(p) { if (p.stats) BilanView._mergePlayerStats(teamStats, p.stats); });
+        var teamScores = BilanView.computeAxisScores(teamStats, null);
+
         return {
             name: teamName,
             isHome: !isAway,
@@ -8038,7 +8047,8 @@ const RankingView = {
             allPlayers: allPlayers,
             starters: Object.values(bestByPos),
             ipAll: ipAll,
-            ipStarters: ipStarters
+            ipStarters: ipStarters,
+            teamScores: teamScores
         };
     },
 
@@ -8047,6 +8057,7 @@ const RankingView = {
         var self = this;
         var s = this._equipesSort;
         var sorted = this._sortData(data.teams, s.col, s.asc);
+        var profileAvg = this._teamProfileAverage(data.teams);
 
         var html = '<div class="ranking-table-wrap">';
         html += '<table class="ranking-table" data-ranking-table="equipes">';
@@ -8056,6 +8067,7 @@ const RankingView = {
         html += '<th data-sort-col="matchCount">Matchs' + self._sortIcon('matchCount', s) + '</th>';
         html += '<th data-sort-col="ipAll">IP Équipe' + self._sortIcon('ipAll', s) + '</th>';
         html += '<th data-sort-col="ipStarters">IP Titulaires' + self._sortIcon('ipStarters', s) + '</th>';
+        html += '<th class="ranking-profile-th">Profil</th>';
         html += '</tr></thead>';
         html += '<tbody>';
 
@@ -8067,10 +8079,92 @@ const RankingView = {
             html += '<td class="ranking-matchcount">' + team.matchCount + '</td>';
             html += '<td class="ranking-ip-cell">' + team.ipAll + '</td>';
             html += '<td class="ranking-ip-cell">' + team.ipStarters + '</td>';
+            html += '<td class="ranking-profile-cell">' + self._renderTeamProfile(team.teamScores, teamColor, profileAvg) + '</td>';
             html += '</tr>';
         });
 
         html += '</tbody></table></div>';
+        html += '<div class="ranking-axis-note">Profil : stats de tous les joueurs de l\'équipe additionnées, puis notées comme un joueur. ' +
+            'Pointillé gris : moyenne des équipes. ▲ / ▼ : axe le plus au-dessus / en dessous de cette moyenne.</div>';
+        return html;
+    },
+
+    // V29.85 : moyenne de chaque axe sur les équipes du tableau (repère du radar d'équipe).
+    // Les axes n'ont pas la même échelle (la relance est haute pour tout le monde, le bloc bas) :
+    // les points forts / faibles se lisent donc par écart à cette moyenne, pas en valeur brute.
+    _teamProfileAverage(teams) {
+        var avg = {};
+        BilanView.SPIDER_AXES.forEach(function(a) {
+            var v = teams.map(function(t) { return t.teamScores ? (t.teamScores[a.key] || 0) : 0; })
+                .filter(function(x) { return x > 0; });
+            avg[a.key] = v.length ? Math.round(v.reduce(function(x, y) { return x + y; }, 0) / v.length) : 0;
+        });
+        return avg;
+    },
+
+    // V29.85 : radar d'équipe agrégé (colonne « Profil »), couleur du badge de l'équipe.
+    // Pointillé gris = moyenne des équipes. Point fort / faible = plus grand écart (+ / −) à cette moyenne.
+    _renderTeamProfile(scores, color, avg) {
+        if (!scores) return '';
+        var axes = BilanView.SPIDER_AXES;
+        var NAMES = { attaque: 'Attaque', bloc: 'Bloc', relance: 'Relance', service: 'Service',
+            passe: 'Passe', defense: 'Défense', reception: 'Réception' };
+        var vals = axes.map(function(a) { return scores[a.key] || 0; });
+        if (!vals.some(function(v) { return v > 0; })) return '';
+        var cx = 60, cy = 56, maxR = 40;
+        var pc = function(r, ang) { return BilanView.polarToCartesian(cx, cy, r, ang); };
+        var fmt = function(pt) { return pt.x.toFixed(1) + ',' + pt.y.toFixed(1); };
+
+        var svg = '<svg class="ranking-profile-radar" viewBox="0 0 120 108" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">';
+        // Remplissage d'abord, grille par-dessus (même rendu que les cartes joueurs)
+        var poly = axes.map(function(a, i) { return fmt(pc(maxR * vals[i] / 100, a.angle)); }).join(' ');
+        svg += '<polygon points="' + poly + '" fill="' + color + '" fill-opacity="0.28"/>';
+        [1 / 3, 2 / 3, 1].forEach(function(sc) {
+            svg += '<polygon points="' + axes.map(function(a) { return fmt(pc(maxR * sc, a.angle)); }).join(' ') +
+                '" fill="none" stroke="#c4c8cd" stroke-opacity="0.75" stroke-width="' + (sc === 1 ? 0.9 : 0.6) + '"/>';
+        });
+        axes.forEach(function(a) {
+            var pt = pc(maxR, a.angle);
+            svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + pt.x.toFixed(1) + '" y2="' + pt.y.toFixed(1) + '" stroke="#c4c8cd" stroke-opacity="0.6" stroke-width="0.5"/>';
+        });
+        if (avg) {
+            var avgPoly = axes.map(function(a) { return fmt(pc(maxR * (avg[a.key] || 0) / 100, a.angle)); }).join(' ');
+            svg += '<polygon points="' + avgPoly + '" fill="none" stroke="#80868b" stroke-width="0.9" stroke-dasharray="2.5,2"/>';
+        }
+        svg += '<polygon points="' + poly + '" fill="none" stroke="' + color + '" stroke-width="1.4" stroke-linejoin="round"/>';
+        axes.forEach(function(a, i) {
+            if (vals[i] <= 0) return;
+            var pt = pc(maxR * vals[i] / 100, a.angle);
+            svg += '<circle cx="' + pt.x.toFixed(1) + '" cy="' + pt.y.toFixed(1) + '" r="1.8" fill="#fff" stroke="' + color + '" stroke-width="1"/>';
+        });
+        axes.forEach(function(a, i) {
+            var pt = pc(maxR + 4, a.angle);
+            var cos = Math.cos(a.angle * Math.PI / 180), sin = Math.sin(a.angle * Math.PI / 180);
+            var anchor = cos > 0.3 ? 'start' : (cos < -0.3 ? 'end' : 'middle');
+            var dy = sin < -0.7 ? -1 : (sin > 0.7 ? 7 : 3);
+            svg += '<text x="' + pt.x.toFixed(1) + '" y="' + (pt.y + dy).toFixed(1) + '" text-anchor="' + anchor +
+                '" font-size="7.5" font-weight="500" font-family="Google Sans, Roboto, sans-serif" fill="' +
+                (vals[i] > 0 ? '#5f6368' : '#bdc1c6') + '">' + a.label + '</text>';
+        });
+        svg += '</svg>';
+
+        var rated = axes.map(function(a, i) {
+            return { key: a.key, v: vals[i], d: vals[i] - ((avg && avg[a.key]) || 0) };
+        }).filter(function(x) { return x.v > 0; });
+        rated.sort(function(a, b) { return b.d - a.d; });
+        var sgn = function(d) { return (d > 0 ? '+' : d < 0 ? '−' : '±') + Math.abs(d); };
+        var title = axes.map(function(a, i) {
+            return NAMES[a.key] + ' ' + (vals[i] || '–') + (avg && vals[i] ? ' (moy. ' + avg[a.key] + ')' : '');
+        }).join(' · ');
+        var html = '<div class="ranking-profile" title="' + title + '">' + svg;
+        if (rated.length >= 2) {
+            var best = rated[0], worst = rated[rated.length - 1];
+            html += '<div class="ranking-profile-keys">';
+            html += '<span class="ranking-profile-key"><span class="ranking-profile-sign up">▲</span>' + NAMES[best.key] + ' <b>' + best.v + '</b> <span class="ranking-profile-delta">' + sgn(best.d) + '</span></span>';
+            html += '<span class="ranking-profile-key"><span class="ranking-profile-sign down">▼</span>' + NAMES[worst.key] + ' <b>' + worst.v + '</b> <span class="ranking-profile-delta">' + sgn(worst.d) + '</span></span>';
+            html += '</div>';
+        }
+        html += '</div>';
         return html;
     },
 
