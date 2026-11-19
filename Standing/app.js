@@ -602,9 +602,17 @@ function renderMatches() {
     const container = document.getElementById('matchs-content');
     if (!container || !DATA) return;
 
-    // Build rank lookup for clash detection
+    // Rang de force pour les 🔥/⚡ : ordre du Power Ranking (ELO), pas le classement brut,
+    // qui favorise les équipes ayant joué plus de matchs. Seules les équipes ayant joué
+    // sont classées (une équipe à 0-0 reste à l'ELO de départ, elle n'est pas « au sommet »).
     var teamRank = {};
-    DATA.standings.forEach(function(s) { teamRank[s.team] = s.rank; });
+    var prRank = 0;
+    (DATA.prTeams || []).forEach(function(r) {
+        var played = (r.record || '0-0').split('-').some(function(n) { return parseInt(n, 10) > 0; });
+        if (played) teamRank[r.team] = ++prRank;
+    });
+    // Repli sur le classement si le Power Ranking est absent ou vide (début de saison)
+    if (!prRank) DATA.standings.forEach(function(s) { teamRank[s.team] = s.rank; });
 
     container.innerHTML = buildMatchesTab(champMatchCtx(), {
         idPrefix: '',
