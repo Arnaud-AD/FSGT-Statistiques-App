@@ -8089,9 +8089,6 @@ const RankingView = {
         });
 
         html += '</tbody></table></div>';
-        html += '<div class="ranking-axis-note">Profil : stats ' + (self.PROFILE_KEY === 'starterScores' ? 'des 4 titulaires (IP Titulaires)' : 'de tous les joueurs de l\'équipe') + ' additionnées, puis notées comme un joueur. ' +
-            'Échelle zoomée axe par axe : centre = équipe la plus faible, bord = la meilleure (valeurs au survol). ' +
-            'Pointillé gris : moyenne des équipes. ▲ / ▼ : axe le plus au-dessus / en dessous de cette moyenne (relance exclue).</div>';
         return html;
     },
 
