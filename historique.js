@@ -8091,7 +8091,7 @@ const RankingView = {
         html += '</tbody></table></div>';
         html += '<div class="ranking-axis-note">Profil : stats ' + (self.PROFILE_KEY === 'starterScores' ? 'des 4 titulaires (IP Titulaires)' : 'de tous les joueurs de l\'équipe') + ' additionnées, puis notées comme un joueur. ' +
             'Échelle zoomée axe par axe : centre = équipe la plus faible, bord = la meilleure (valeurs au survol). ' +
-            'Pointillé gris : moyenne des équipes. ▲ / ▼ : axe le plus au-dessus / en dessous de cette moyenne.</div>';
+            'Pointillé gris : moyenne des équipes. ▲ / ▼ : axe le plus au-dessus / en dessous de cette moyenne (relance exclue).</div>';
         return html;
     },
 
@@ -8172,7 +8172,7 @@ const RankingView = {
 
         var rated = axes.map(function(a, i) {
             return { key: a.key, v: vals[i], d: vals[i] - ((avg && avg[a.key]) || 0) };
-        }).filter(function(x) { return x.v > 0; });
+        }).filter(function(x) { return x.v > 0 && x.key !== 'relance'; }); // relance : sur le radar, pas dans ▲ / ▼
         rated.sort(function(a, b) { return b.d - a.d; });
         var sgn = function(d) { return (d > 0 ? '+' : d < 0 ? '−' : '±') + Math.abs(d); };
         var title = axes.map(function(a, i) {
