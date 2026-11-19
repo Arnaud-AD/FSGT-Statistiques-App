@@ -8096,7 +8096,7 @@ const RankingView = {
     // Les axes n'ont pas la même échelle (la relance est haute pour tout le monde, le bloc bas) :
     // les points forts / faibles se lisent donc par écart à cette moyenne, pas en valeur brute.
     // Source du radar d'équipe : 'starterScores' (4 titulaires de l'IP Titulaires) ou 'teamScores' (tous les joueurs)
-    PROFILE_KEY: 'starterScores',
+    PROFILE_KEY: 'teamScores',
 
     _teamProfileAverage(teams) {
         var avg = {};
