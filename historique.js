@@ -8039,6 +8039,10 @@ const RankingView = {
         var teamStats = StatsAggregator.initPlayerStats();
         allPlayers.forEach(function(p) { if (p.stats) BilanView._mergePlayerStats(teamStats, p.stats); });
         var teamScores = BilanView.computeAxisScores(teamStats, null);
+        // Variante titulaires seuls : les 4 joueurs de l'IP Titulaires
+        var starterStats = StatsAggregator.initPlayerStats();
+        Object.values(bestByPos).forEach(function(p) { if (p.stats) BilanView._mergePlayerStats(starterStats, p.stats); });
+        var starterScores = BilanView.computeAxisScores(starterStats, null);
 
         return {
             name: teamName,
@@ -8048,7 +8052,8 @@ const RankingView = {
             starters: Object.values(bestByPos),
             ipAll: ipAll,
             ipStarters: ipStarters,
-            teamScores: teamScores
+            teamScores: teamScores,
+            starterScores: starterScores
         };
     },
 
@@ -8079,12 +8084,12 @@ const RankingView = {
             html += '<td class="ranking-matchcount">' + team.matchCount + '</td>';
             html += '<td class="ranking-ip-cell">' + team.ipAll + '</td>';
             html += '<td class="ranking-ip-cell">' + team.ipStarters + '</td>';
-            html += '<td class="ranking-profile-cell">' + self._renderTeamProfile(team.teamScores, teamColor, profileAvg) + '</td>';
+            html += '<td class="ranking-profile-cell">' + self._renderTeamProfile(team[self.PROFILE_KEY], teamColor, profileAvg) + '</td>';
             html += '</tr>';
         });
 
         html += '</tbody></table></div>';
-        html += '<div class="ranking-axis-note">Profil : stats de tous les joueurs de l\'équipe additionnées, puis notées comme un joueur. ' +
+        html += '<div class="ranking-axis-note">Profil : stats ' + (self.PROFILE_KEY === 'starterScores' ? 'des 4 titulaires (IP Titulaires)' : 'de tous les joueurs de l\'équipe') + ' additionnées, puis notées comme un joueur. ' +
             'Échelle zoomée axe par axe : centre = équipe la plus faible, bord = la meilleure (valeurs au survol). ' +
             'Pointillé gris : moyenne des équipes. ▲ / ▼ : axe le plus au-dessus / en dessous de cette moyenne.</div>';
         return html;
@@ -8093,10 +8098,13 @@ const RankingView = {
     // V29.85 : moyenne de chaque axe sur les équipes du tableau (repère du radar d'équipe).
     // Les axes n'ont pas la même échelle (la relance est haute pour tout le monde, le bloc bas) :
     // les points forts / faibles se lisent donc par écart à cette moyenne, pas en valeur brute.
+    // Source du radar d'équipe : 'starterScores' (4 titulaires de l'IP Titulaires) ou 'teamScores' (tous les joueurs)
+    PROFILE_KEY: 'starterScores',
+
     _teamProfileAverage(teams) {
         var avg = {};
         BilanView.SPIDER_AXES.forEach(function(a) {
-            var v = teams.map(function(t) { return t.teamScores ? (t.teamScores[a.key] || 0) : 0; })
+            var v = teams.map(function(t) { var sc = t[RankingView.PROFILE_KEY]; return sc ? (sc[a.key] || 0) : 0; })
                 .filter(function(x) { return x > 0; });
             avg[a.key] = v.length ? Math.round(v.reduce(function(x, y) { return x + y; }, 0) / v.length) : 0;
             // Échelle zoomée par axe (V29.86) : plage réelle des équipes
