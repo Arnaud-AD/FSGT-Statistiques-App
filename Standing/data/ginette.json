@@ -4,10 +4,10 @@
     "name": "Coupe Ginette",
     "season": "2026-2027",
     "format": "coupe",
-    "lastUpdated": "2026-11-19T00:30:20",
+    "lastUpdated": "2026-11-20T01:08:27",
     "teamCount": 64,
-    "matchCount": 26,
-    "forfeitCount": 1,
+    "matchCount": 30,
+    "forfeitCount": 2,
     "rounds": [
       "Tour 1",
       "Tour 2",
@@ -140,20 +140,6 @@
     },
     {
       "rank": 6,
-      "name": "Marvels 4",
-      "division": "Ultimate",
-      "divSlug": "ultimate",
-      "elo": 1889.3,
-      "delta": 0.0,
-      "record": "0-0",
-      "wins": 0,
-      "losses": 0,
-      "power": 93.0,
-      "form": [],
-      "matches": []
-    },
-    {
-      "rank": 7,
       "name": "Les punchers",
       "division": "Elite",
       "divSlug": "elite",
@@ -176,21 +162,76 @@
       ]
     },
     {
+      "rank": 7,
+      "name": "Yip Yip",
+      "division": "Elite",
+      "divSlug": "elite",
+      "elo": 1875.0,
+      "delta": 32.2,
+      "record": "1-0",
+      "wins": 1,
+      "losses": 0,
+      "power": 91.0,
+      "form": [
+        "W"
+      ],
+      "matches": [
+        {
+          "opponent": "Marvels 4",
+          "result": "W",
+          "score": "3-0",
+          "delta": 32.2
+        }
+      ]
+    },
+    {
       "rank": 8,
-      "name": "Bières et le loup",
+      "name": "Marvels 4",
       "division": "Ultimate",
       "divSlug": "ultimate",
-      "elo": 1864.9,
-      "delta": 0.0,
-      "record": "0-0",
+      "elo": 1857.1,
+      "delta": -32.2,
+      "record": "0-1",
       "wins": 0,
-      "losses": 0,
-      "power": 89.7,
-      "form": [],
-      "matches": []
+      "losses": 1,
+      "power": 88.6,
+      "form": [
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Yip Yip",
+          "result": "L",
+          "score": "0-3",
+          "delta": -32.2
+        }
+      ]
     },
     {
       "rank": 9,
+      "name": "Bières et le loup",
+      "division": "Ultimate",
+      "divSlug": "ultimate",
+      "elo": 1845.4,
+      "delta": -19.5,
+      "record": "0-1",
+      "wins": 0,
+      "losses": 1,
+      "power": 87.0,
+      "form": [
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Nekutā",
+          "result": "L",
+          "score": "2-3",
+          "delta": -19.5
+        }
+      ]
+    },
+    {
+      "rank": 10,
       "name": "RSC Champigny 1",
       "division": "Ultimate",
       "divSlug": "ultimate",
@@ -213,21 +254,30 @@
       ]
     },
     {
-      "rank": 10,
-      "name": "Yip Yip",
+      "rank": 11,
+      "name": "Nekutā",
       "division": "Elite",
       "divSlug": "elite",
-      "elo": 1842.8,
-      "delta": 0.0,
-      "record": "0-0",
-      "wins": 0,
+      "elo": 1836.6,
+      "delta": 19.5,
+      "record": "1-0",
+      "wins": 1,
       "losses": 0,
-      "power": 86.6,
-      "form": [],
-      "matches": []
+      "power": 85.8,
+      "form": [
+        "W"
+      ],
+      "matches": [
+        {
+          "opponent": "Bières et le loup",
+          "result": "W",
+          "score": "3-2",
+          "delta": 19.5
+        }
+      ]
     },
     {
-      "rank": 11,
+      "rank": 12,
       "name": "Cochonou",
       "division": "Elite",
       "divSlug": "elite",
@@ -248,20 +298,6 @@
           "delta": 3.6
         }
       ]
-    },
-    {
-      "rank": 12,
-      "name": "Nekutā",
-      "division": "Elite",
-      "divSlug": "elite",
-      "elo": 1817.1,
-      "delta": 0.0,
-      "record": "0-0",
-      "wins": 0,
-      "losses": 0,
-      "power": 83.1,
-      "form": [],
-      "matches": []
     },
     {
       "rank": 13,
@@ -613,14 +649,23 @@
       "name": "Morts de Soif",
       "division": "Medium",
       "divSlug": "medium",
-      "elo": 1663.2,
-      "delta": 0.0,
-      "record": "0-0",
-      "wins": 0,
+      "elo": 1666.8,
+      "delta": 3.6,
+      "record": "1-0",
+      "wins": 1,
       "losses": 0,
-      "power": 62.1,
-      "form": [],
-      "matches": []
+      "power": 62.5,
+      "form": [
+        "W"
+      ],
+      "matches": [
+        {
+          "opponent": "Les Pingouins Manchots",
+          "result": "W",
+          "score": "3-1",
+          "delta": 3.6
+        }
+      ]
     },
     {
       "rank": 29,
@@ -848,14 +893,23 @@
       "name": "Les Ours Mal Léchés",
       "division": "Easy",
       "divSlug": "easy",
-      "elo": 1575.8,
-      "delta": 0.0,
-      "record": "0-0",
-      "wins": 0,
+      "elo": 1580.8,
+      "delta": 5.0,
+      "record": "1-0",
+      "wins": 1,
       "losses": 0,
-      "power": 50.1,
-      "form": [],
-      "matches": []
+      "power": 50.8,
+      "form": [
+        "W"
+      ],
+      "matches": [
+        {
+          "opponent": "Los Americanos",
+          "result": "W",
+          "score": "3-0",
+          "delta": 5
+        }
+      ]
     },
     {
       "rank": 40,
@@ -1212,14 +1266,23 @@
       "name": "Los Americanos",
       "division": "Starter",
       "divSlug": "starter",
-      "elo": 1357.5,
-      "delta": 0.0,
-      "record": "0-0",
+      "elo": 1352.5,
+      "delta": -5.0,
+      "record": "0-1",
       "wins": 0,
-      "losses": 0,
-      "power": 20.2,
-      "form": [],
-      "matches": []
+      "losses": 1,
+      "power": 19.5,
+      "form": [
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Les Ours Mal Léchés",
+          "result": "L",
+          "score": "0-3",
+          "delta": -5
+        }
+      ]
     },
     {
       "rank": 57,
@@ -1355,14 +1418,23 @@
       "name": "Les Pingouins Manchots",
       "division": "Argent",
       "divSlug": "argent",
-      "elo": 1213.6,
-      "delta": 0.0,
-      "record": "0-0",
+      "elo": 1210.0,
+      "delta": -3.6,
+      "record": "0-1",
       "wins": 0,
-      "losses": 0,
-      "power": 0.5,
-      "form": [],
-      "matches": []
+      "losses": 1,
+      "power": 0.0,
+      "form": [
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Morts de Soif",
+          "result": "L",
+          "score": "1-3",
+          "delta": -3.6
+        }
+      ]
     },
     {
       "rank": 64,
@@ -1390,26 +1462,26 @@
   ],
   "divisionStats": [
     {
-      "slug": "ultimate",
-      "name": "Ultimate",
-      "teams": 8,
-      "avgElo": 1905.4,
-      "maxElo": 1940.5,
-      "minElo": 1843.1,
-      "wins": 6,
-      "losses": 0,
-      "winPct": 100.0
-    },
-    {
       "slug": "elite",
       "name": "Elite",
       "teams": 9,
-      "avgElo": 1805.8,
+      "avgElo": 1811.5,
       "maxElo": 1882.3,
       "minElo": 1735.7,
-      "wins": 6,
+      "wins": 8,
       "losses": 1,
-      "winPct": 85.7
+      "winPct": 88.9
+    },
+    {
+      "slug": "ultimate",
+      "name": "Ultimate",
+      "teams": 8,
+      "avgElo": 1899.0,
+      "maxElo": 1940.5,
+      "minElo": 1843.1,
+      "wins": 6,
+      "losses": 2,
+      "winPct": 75.0
     },
     {
       "slug": "hard",
@@ -1434,23 +1506,23 @@
       "winPct": 57.1
     },
     {
-      "slug": "starter",
-      "name": "Starter",
-      "teams": 7,
-      "avgElo": 1398.1,
-      "maxElo": 1479.5,
-      "minElo": 1304.8,
-      "wins": 2,
-      "losses": 3,
-      "winPct": 40.0
-    },
-    {
       "slug": "medium",
       "name": "Medium",
       "teams": 8,
-      "avgElo": 1597.5,
-      "maxElo": 1663.2,
+      "avgElo": 1598.0,
+      "maxElo": 1666.8,
       "minElo": 1485.5,
+      "wins": 3,
+      "losses": 4,
+      "winPct": 42.9
+    },
+    {
+      "slug": "starter",
+      "name": "Starter",
+      "teams": 7,
+      "avgElo": 1397.3,
+      "maxElo": 1479.5,
+      "minElo": 1304.8,
       "wins": 2,
       "losses": 4,
       "winPct": 33.3
@@ -1459,22 +1531,22 @@
       "slug": "easy",
       "name": "Easy",
       "teams": 8,
-      "avgElo": 1495.9,
-      "maxElo": 1575.8,
+      "avgElo": 1496.6,
+      "maxElo": 1580.8,
       "minElo": 1413.5,
-      "wins": 1,
+      "wins": 2,
       "losses": 5,
-      "winPct": 16.7
+      "winPct": 28.6
     },
     {
       "slug": "argent",
       "name": "Argent",
       "teams": 9,
-      "avgElo": 1298.3,
+      "avgElo": 1297.9,
       "maxElo": 1372.0,
       "minElo": 1209.6,
       "wins": 0,
-      "losses": 7,
+      "losses": 8,
       "winPct": 0.0
     }
   ],
@@ -1512,17 +1584,24 @@
       "round": "Tour 1",
       "home": "Marvels 4",
       "away": "Yip Yip",
-      "homeSets": null,
-      "awaySets": null,
-      "homeScores": [],
-      "awayScores": [],
+      "homeSets": 0,
+      "awaySets": 3,
+      "homeScores": [
+        18,
+        19,
+        21
+      ],
+      "awayScores": [
+        25,
+        25,
+        25
+      ],
       "homeDivision": "ultimate",
       "awayDivision": "elite",
-      "winner": null,
+      "winner": "Yip Yip",
       "forfeit": false,
-      "deltaHome": 0,
-      "deltaAway": 0,
-      "upcoming": true,
+      "deltaHome": -32.2,
+      "deltaAway": 32.2,
       "date": "19/11/2026",
       "time": "20:30",
       "venue": "Espace du Sport",
@@ -1703,17 +1782,24 @@
       "round": "Tour 1",
       "home": "Les Ours Mal Léchés",
       "away": "Los Americanos",
-      "homeSets": null,
-      "awaySets": null,
-      "homeScores": [],
-      "awayScores": [],
+      "homeSets": 3,
+      "awaySets": 0,
+      "homeScores": [
+        25,
+        25,
+        25
+      ],
+      "awayScores": [
+        0,
+        0,
+        0
+      ],
       "homeDivision": "easy",
       "awayDivision": "starter",
-      "winner": null,
-      "forfeit": false,
-      "deltaHome": 0,
-      "deltaAway": 0,
-      "upcoming": true,
+      "winner": "Les Ours Mal Léchés",
+      "forfeit": true,
+      "deltaHome": 5,
+      "deltaAway": -5,
       "date": "19/11/2026",
       "time": "20:00",
       "venue": "Lycée Louis Armand 2",
@@ -1926,17 +2012,26 @@
       "round": "Tour 1",
       "home": "Les Pingouins Manchots",
       "away": "Morts de Soif",
-      "homeSets": null,
-      "awaySets": null,
-      "homeScores": [],
-      "awayScores": [],
+      "homeSets": 1,
+      "awaySets": 3,
+      "homeScores": [
+        14,
+        20,
+        25,
+        16
+      ],
+      "awayScores": [
+        25,
+        25,
+        23,
+        25
+      ],
       "homeDivision": "argent",
       "awayDivision": "medium",
-      "winner": null,
+      "winner": "Morts de Soif",
       "forfeit": false,
-      "deltaHome": 0,
-      "deltaAway": 0,
-      "upcoming": true,
+      "deltaHome": -3.6,
+      "deltaAway": 3.6,
       "date": "19/11/2026",
       "time": "20:00",
       "venue": "Lycée Louis Armand 2",
@@ -2199,17 +2294,28 @@
       "round": "Tour 1",
       "home": "Nekutā",
       "away": "Bières et le loup",
-      "homeSets": null,
-      "awaySets": null,
-      "homeScores": [],
-      "awayScores": [],
+      "homeSets": 3,
+      "awaySets": 2,
+      "homeScores": [
+        28,
+        25,
+        21,
+        25,
+        15
+      ],
+      "awayScores": [
+        30,
+        15,
+        25,
+        16,
+        10
+      ],
       "homeDivision": "elite",
       "awayDivision": "ultimate",
-      "winner": null,
+      "winner": "Nekutā",
       "forfeit": false,
-      "deltaHome": 0,
-      "deltaAway": 0,
-      "upcoming": true,
+      "deltaHome": 19.5,
+      "deltaAway": -19.5,
       "date": "19/11/2026",
       "time": "20:20",
       "venue": "Gymnase Georges Pompidou",
@@ -3032,6 +3138,14 @@
   "upsets": [
     {
       "gap": 1,
+      "winner": "Yip Yip",
+      "winnerDiv": "Elite",
+      "loser": "Marvels 4",
+      "loserDiv": "Ultimate",
+      "score": "0-3"
+    },
+    {
+      "gap": 1,
       "winner": "Krokeur Squad",
       "winnerDiv": "Starter",
       "loser": "Daïquibrie",
@@ -3053,6 +3167,14 @@
       "loser": "Padnom",
       "loserDiv": "Elite",
       "score": "2-3"
+    },
+    {
+      "gap": 1,
+      "winner": "Nekutā",
+      "winnerDiv": "Elite",
+      "loser": "Bières et le loup",
+      "loserDiv": "Ultimate",
+      "score": "3-2"
     }
   ]
 }
