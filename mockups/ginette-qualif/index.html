@@ -66,6 +66,10 @@ tr:last-child td{border-bottom:none}
 td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
 tr.jen td{background:var(--jen)}
 tr.jen td:first-child{box-shadow:inset 3px 0 0 var(--jen-line)}
+:root{--played1:#ece6fb;--played2:#d4c6f6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--played1:#2a2540;--played2:#3d3366}}
+:root[data-theme="dark"]{--played1:#2a2540;--played2:#3d3366}
+tr.played1 td{background:var(--played1)} tr.played2 td{background:var(--played2)}
 .team{display:flex;gap:8px;align-items:center;min-width:0}
 .team .n{font-weight:500}
 .split{display:flex;height:10px;border-radius:3px;overflow:hidden;min-width:120px;background:var(--soft)}
@@ -155,6 +159,7 @@ tr.jen td:first-child{box-shadow:inset 3px 0 0 var(--jen-line)}
   <div class="controls" id="divfilter" role="group" aria-label="Filtrer par division"></div>
   <div class="controls">
     <div class="legend"><span style="--c:var(--princ)">Principale (1-16)</span><span style="--c:var(--conso)">Consolante (17-32)</span><span style="--c:var(--elim)">Éliminé (33+)</span></div>
+    <div class="legend"><span style="--c:var(--played1)">1 match joué</span><span style="--c:var(--played2)">2 matchs joués</span></div>
   </div>
   <div class="tablewrap">
     <table>
@@ -244,13 +249,20 @@ function renderJen(S){
     return '<div><small>'+lab[k]+' · arrive '+pct(s.prob)+' du temps</small><b>'+out+'</b><small>'+(s.p<50&&s.c<50&&s.prob>0?'aucune place':'')+'</small></div>';
   }).join('');
 }
+function playedCount(S){
+  var n={};
+  S.matches.forEach(function(m){ if(m.played){ n[m.home]=(n[m.home]||0)+1; n[m.away]=(n[m.away]||0)+1; } });
+  return n;
+}
 function renderRows(S){
+  var nPlayed=playedCount(S);
   var list=S.teams.slice().sort(function(a,b){return (b.p-a.p)||((b.p+b.c)-(a.p+a.c))});
   var rows='';
   list.forEach(function(t,i){
     if(state.div!=='all'&&t.div!==state.div) return;
     var cut=(state.div==='all'&&(i===16||i===32))?' cut':'';
-    rows+='<tr class="'+(t.team===JEN?'jen':'')+cut+'"><td class="r num">'+(i+1)+'</td>'+
+    var np=nPlayed[t.team]||0;
+    rows+='<tr class="'+(t.team===JEN?'jen':'')+(np?' played'+Math.min(np,2):'')+cut+'" title="'+np+' match'+(np>1?'s':'')+' joué'+(np>1?'s':'')+'"><td class="r num">'+(i+1)+'</td>'+
       '<td><div class="team">'+badge(t.div)+'<span class="n">'+esc(t.team)+'</span></div></td>'+
       '<td class="r num hide-s">'+t.elo+'</td>'+
       '<td class="r num bonusonly">'+(t.bonus>0?'+':'')+(t.bonus||0)+'<span class="why">'+esc(t.why||'')+'</span></td>'+
