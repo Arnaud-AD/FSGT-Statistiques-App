@@ -70,6 +70,10 @@ tr.jen td:first-child{box-shadow:inset 3px 0 0 var(--jen-line)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--played1:#2a2540;--played2:#3d3366}}
 :root[data-theme="dark"]{--played1:#2a2540;--played2:#3d3366}
 tr.played1 td{background:var(--played1)} tr.played2 td{background:var(--played2)}
+:root{--jen2:#f5df92}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--jen2:#5c4c1e}}
+:root[data-theme="dark"]{--jen2:#5c4c1e}
+tr.jen.played1 td{background:var(--jen)} tr.jen.played2 td{background:var(--jen2)}
 .team{display:flex;gap:8px;align-items:center;min-width:0}
 .team .n{font-weight:500}
 .split{display:flex;height:10px;border-radius:3px;overflow:hidden;min-width:120px;background:var(--soft)}
