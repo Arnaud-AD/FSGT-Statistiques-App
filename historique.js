@@ -4526,14 +4526,10 @@ const SharedComponents = {
             var totalMixBlocks = mixHome + mixAway;
             var totalAll = totalPoints + totalMixBlocks;
             var mixRuns = (mixHome > 0 ? 1 : 0) + (mixAway > 0 ? 1 : 0);
-            // Largeur fluide (CSS) : la section est souvent repliee (display:none)
-            // au moment du rendu, donc clientWidth vaut 0 -> on ne mesure plus rien.
-            // Chaque serie a flex-grow = nb de points et flex-basis = ses gaps internes,
-            // donc tous les blocs ont la meme largeur et remplissent la ligne.
+            // Largeur en CSS : la section est souvent repliee (display:none) au moment
+            // du rendu, donc clientWidth vaut 0 -> on ne mesure plus rien en JS.
+            // Barres fines (6-10px) et series reparties sur toute la largeur.
             var gapsTotal = Math.max(0, runs.length + mixRuns - 1) * 4 + (totalAll - runs.length - mixRuns);
-            var runStyle = function(n) {
-                return ' style="flex:' + n + ' 1 ' + (n - 1) + 'px;min-width:' + (n * 6 + n - 1) + 'px;"';
-            };
 
             var homeScore = set.finalHomeScore || set.homeScore || 0;
             var awayScore = set.finalAwayScore || set.awayScore || 0;
@@ -4553,10 +4549,10 @@ const SharedComponents = {
 
             // Blocs mixité gris au début
             if (mixHome > 0) {
-                html += '<div class="timeline-run"' + runStyle(mixHome) + '>';
+                html += '<div class="timeline-run">';
                 html += '<div class="timeline-row">';
                 for (var m = 1; m <= mixHome; m++) {
-                    html += '<div class="tl-block mixite">' + m + '</div>';
+                    html += '<div class="tl-block mixite"></div>';
                 }
                 html += '</div>';
                 html += '<div class="timeline-row">';
@@ -4566,7 +4562,7 @@ const SharedComponents = {
                 html += '</div></div>';
             }
             if (mixAway > 0) {
-                html += '<div class="timeline-run"' + runStyle(mixAway) + '>';
+                html += '<div class="timeline-run">';
                 html += '<div class="timeline-row">';
                 for (var m = 0; m < mixAway; m++) {
                     html += '<div class="tl-block empty"></div>';
@@ -4574,18 +4570,18 @@ const SharedComponents = {
                 html += '</div>';
                 html += '<div class="timeline-row">';
                 for (var m = 1; m <= mixAway; m++) {
-                    html += '<div class="tl-block mixite">' + m + '</div>';
+                    html += '<div class="tl-block mixite"></div>';
                 }
                 html += '</div></div>';
             }
 
             runs.forEach(function(run) {
-                html += '<div class="timeline-run"' + runStyle(run.points.length) + '>';
+                html += '<div class="timeline-run">';
                 // Top row (home)
                 html += '<div class="timeline-row">';
                 run.points.forEach(function(pt) {
                     if (run.team === 'home') {
-                        html += '<div class="tl-block home">' + pt.teamScore + '</div>';
+                        html += '<div class="tl-block home"></div>';
                     } else {
                         html += '<div class="tl-block empty"></div>';
                     }
@@ -4595,7 +4591,7 @@ const SharedComponents = {
                 html += '<div class="timeline-row">';
                 run.points.forEach(function(pt) {
                     if (run.team === 'away') {
-                        html += '<div class="tl-block away">' + pt.teamScore + '</div>';
+                        html += '<div class="tl-block away"></div>';
                     } else {
                         html += '<div class="tl-block empty"></div>';
                     }

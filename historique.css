@@ -696,6 +696,7 @@ body {
 .timeline-chart {
     display: flex;
     align-items: stretch;
+    justify-content: space-between;
     gap: 4px;
     position: relative;
     overflow-x: auto;
@@ -727,14 +728,13 @@ body {
     gap: 1px;
 }
 
-/* Blocs fluides : la largeur suit le conteneur (desktop et mobile).
-   Le numero n'apparait que si le bloc fait au moins ~11px (sinon font-size 0). */
+/* Barres fines (largeur max 10px, sans numero) ; les series s'etalent sur
+   toute la largeur (space-between). Si la ligne est trop etroite, les barres
+   se reduisent jusqu'a 6px puis defilement horizontal. */
 .timeline-row > .tl-block {
-    flex: 1 1 0;
-    min-width: 6px;
+    flex: none;
+    width: clamp(6px, (100cqi - var(--tl-gaps, 0px)) / var(--tl-n, 1), 10px);
     height: 20px;
-    overflow: hidden;
-    font-size: clamp(0px, ((100cqi - var(--tl-gaps, 0px)) / var(--tl-n, 1) - 10.5px) * 100, 9px);
 }
 
 .tl-block {
