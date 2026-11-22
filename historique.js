@@ -4528,7 +4528,7 @@ const SharedComponents = {
             var mixRuns = (mixHome > 0 ? 1 : 0) + (mixAway > 0 ? 1 : 0);
             // Largeur en CSS : la section est souvent repliee (display:none) au moment
             // du rendu, donc clientWidth vaut 0 -> on ne mesure plus rien en JS.
-            // Barres elargies pour remplir la ligne, espacement d'origine.
+            // Barres elargies pour remplir la ligne (numeros blancs), espacement d'origine.
             var gapsTotal = Math.max(0, runs.length + mixRuns - 1) * 4 + (totalAll - runs.length - mixRuns);
 
             var homeScore = set.finalHomeScore || set.homeScore || 0;
@@ -4552,7 +4552,7 @@ const SharedComponents = {
                 html += '<div class="timeline-run">';
                 html += '<div class="timeline-row">';
                 for (var m = 1; m <= mixHome; m++) {
-                    html += '<div class="tl-block mixite"></div>';
+                    html += '<div class="tl-block mixite">' + m + '</div>';
                 }
                 html += '</div>';
                 html += '<div class="timeline-row">';
@@ -4570,7 +4570,7 @@ const SharedComponents = {
                 html += '</div>';
                 html += '<div class="timeline-row">';
                 for (var m = 1; m <= mixAway; m++) {
-                    html += '<div class="tl-block mixite"></div>';
+                    html += '<div class="tl-block mixite">' + m + '</div>';
                 }
                 html += '</div></div>';
             }
@@ -4581,7 +4581,7 @@ const SharedComponents = {
                 html += '<div class="timeline-row">';
                 run.points.forEach(function(pt) {
                     if (run.team === 'home') {
-                        html += '<div class="tl-block home"></div>';
+                        html += '<div class="tl-block home">' + pt.teamScore + '</div>';
                     } else {
                         html += '<div class="tl-block empty"></div>';
                     }
@@ -4591,7 +4591,7 @@ const SharedComponents = {
                 html += '<div class="timeline-row">';
                 run.points.forEach(function(pt) {
                     if (run.team === 'away') {
-                        html += '<div class="tl-block away"></div>';
+                        html += '<div class="tl-block away">' + pt.teamScore + '</div>';
                     } else {
                         html += '<div class="tl-block empty"></div>';
                     }
