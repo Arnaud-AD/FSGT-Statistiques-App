@@ -696,7 +696,7 @@ body {
 .timeline-chart {
     display: flex;
     align-items: stretch;
-    gap: 4px;
+    gap: 1px; /* = gap interne : chaque point joue occupe exactement la meme largeur */
     position: relative;
     overflow-x: auto;
     padding: 2px 0;
@@ -727,18 +727,24 @@ body {
     gap: 1px;
 }
 
-/* Espacement d'origine (1px dans une serie, 4px entre series) ; les barres
-   s'elargissent pour remplir toute la ligne et grandissent en hauteur pour
-   rester des barres (plus hautes que larges). Numero blanc des ~10px de large.
-   Mini 6px, puis defilement horizontal si la ligne est trop etroite. */
+/* Largeur par point (--tl-w) commune a tous les sets du match, calee sur le
+   set le plus long ; hauteur proportionnelle (barres plus hautes que larges),
+   numero blanc des ~10px de large. */
 .timeline-row > .tl-block {
-    --tl-w: max(6px, (100cqi - var(--tl-gaps, 0px)) / var(--tl-n, 1));
     flex: none;
     width: var(--tl-w);
     height: clamp(20px, var(--tl-w) * 1.7, 56px);
     border-radius: 3px;
     overflow: hidden;
     font-size: clamp(0px, (var(--tl-w) - 9.5px) * 100, clamp(7px, var(--tl-w) * 0.42, 13px));
+}
+
+/* Mobile : affichage precedent (barres fines de 20px de haut, sans numero). */
+@container (max-width: 599px) {
+    .timeline-row > .tl-block {
+        height: 20px;
+        font-size: 0;
+    }
 }
 
 .tl-block {

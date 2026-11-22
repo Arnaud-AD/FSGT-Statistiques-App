@@ -4513,6 +4513,7 @@ const SharedComponents = {
         if (section) section.style.display = 'block';
 
         var html = '';
+        var setDims = []; // largeur dispo par point de chaque set (expression CSS)
         setsToShow.forEach(function(set, i) {
             // Retrouver l'index reel du set pour le label
             var realIndex = (setFilter !== undefined && setFilter !== 'all') ? setFilter : completedSets.indexOf(set);
@@ -4529,7 +4530,7 @@ const SharedComponents = {
             // Largeur en CSS : la section est souvent repliee (display:none) au moment
             // du rendu, donc clientWidth vaut 0 -> on ne mesure plus rien en JS.
             // Barres elargies pour remplir la ligne (numeros blancs), espacement d'origine.
-            var gapsTotal = Math.max(0, runs.length + mixRuns - 1) * 4 + (totalAll - runs.length - mixRuns);
+            var gapsTotal = Math.max(0, totalAll - 1); // 1px entre chaque point
 
             var homeScore = set.finalHomeScore || set.homeScore || 0;
             var awayScore = set.finalAwayScore || set.awayScore || 0;
@@ -4545,7 +4546,8 @@ const SharedComponents = {
             html += '<span class="tl-score-opponent">' + awayScore + '</span>';
             html += '</span></div>';
 
-            html += '<div class="timeline-chart" style="--tl-n:' + totalAll + ';--tl-gaps:' + gapsTotal + 'px;">';
+            setDims.push('(100cqi - ' + gapsTotal + 'px) / ' + totalAll);
+            html += '<div class="timeline-chart">';
 
             // Blocs mixité gris au début
             if (mixHome > 0) {
@@ -4602,6 +4604,12 @@ const SharedComponents = {
             html += '</div></div>';
         });
 
+        // Meme largeur de barre pour tous les sets (celle du set le plus long) :
+        // le 10e point du set 1 tombe au meme endroit que le 10e du set 3.
+        if (setDims.length) {
+            var tlW = 'max(4px, min(' + setDims.join(', ') + '))';
+            html = '<div class="timeline-sets" style="--tl-w:' + tlW + ';">' + html + '</div>';
+        }
         container.innerHTML = html;
     },
 
