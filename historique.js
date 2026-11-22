@@ -4528,7 +4528,7 @@ const SharedComponents = {
             var mixRuns = (mixHome > 0 ? 1 : 0) + (mixAway > 0 ? 1 : 0);
             // Largeur en CSS : la section est souvent repliee (display:none) au moment
             // du rendu, donc clientWidth vaut 0 -> on ne mesure plus rien en JS.
-            // Barres fines (6-10px) et series reparties sur toute la largeur.
+            // Barres elargies pour remplir la ligne, espacement d'origine.
             var gapsTotal = Math.max(0, runs.length + mixRuns - 1) * 4 + (totalAll - runs.length - mixRuns);
 
             var homeScore = set.finalHomeScore || set.homeScore || 0;

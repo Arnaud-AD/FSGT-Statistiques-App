@@ -696,7 +696,6 @@ body {
 .timeline-chart {
     display: flex;
     align-items: stretch;
-    justify-content: space-between;
     gap: 4px;
     position: relative;
     overflow-x: auto;
@@ -728,12 +727,12 @@ body {
     gap: 1px;
 }
 
-/* Barres fines (largeur max 10px, sans numero) ; les series s'etalent sur
-   toute la largeur (space-between). Si la ligne est trop etroite, les barres
-   se reduisent jusqu'a 6px puis defilement horizontal. */
+/* Espacement d'origine (1px dans une serie, 4px entre series) ; les barres
+   s'elargissent pour remplir toute la ligne, sans numero. Mini 6px, puis
+   defilement horizontal si la ligne est trop etroite. */
 .timeline-row > .tl-block {
     flex: none;
-    width: clamp(6px, (100cqi - var(--tl-gaps, 0px)) / var(--tl-n, 1), 10px);
+    width: max(6px, (100cqi - var(--tl-gaps, 0px)) / var(--tl-n, 1));
     height: 20px;
 }
 
