@@ -278,9 +278,17 @@ function standingsSortIcon(col) {
 }
 
 function getStandingSortValue(s, col) {
-    if (col === 'coefSet' || col === 'coefPts') return parseFloat(s[col]) || 0;
+    if (col === 'coefSet' || col === 'coefPts') return coefSortValue(s[col]);
     if (col === 'pp') return pointsPerdus(s);
     return s[col];
+}
+
+// Coef (ratio) as a sortable number: "∞" (nothing conceded) beats any finite ratio
+function coefSortValue(v) {
+    if (typeof v === 'number') return isNaN(v) ? 0 : v;
+    var str = String(v == null ? '' : v).trim();
+    if (str === '∞' || /^inf/i.test(str)) return Infinity;
+    return parseFloat(str.replace(',', '.')) || 0;
 }
 
 function renderStandings() {
@@ -1094,6 +1102,7 @@ function computeGinetteStandings(matches, penalties) {
         var t = byTeam[n];
         t.penalty = (penalties && penalties[n]) || 0;
         t.pts -= t.penalty;
+        t.ds = t.setPlus - t.setMinus;
         t.setAvg = ratio(t.setPlus, t.setMinus);
         t.ptsAvg = ratio(t.ptsPlus, t.ptsMinus);
         return t;
@@ -1179,7 +1188,8 @@ function renderGinetteStandings() {
             '<td>' + t.p + '</td>' +
             '<td class="col-opt">' + t.setPlus + '</td>' +
             '<td class="col-opt">' + t.setMinus + '</td>' +
-            '<td>' + fmtAvg(t.setAvg, played) + '</td>' +
+            '<td class="bold-val">' + t.ds + '</td>' +
+            '<td class="col-opt">' + fmtAvg(t.setAvg, played) + '</td>' +
             '<td class="col-opt">' + t.ptsPlus + '</td>' +
             '<td class="col-opt">' + t.ptsMinus + '</td>' +
             '<td class="col-opt">' + fmtAvg(t.ptsAvg, played) + '</td>' +
@@ -1193,6 +1203,7 @@ function renderGinetteStandings() {
                     '<span class="detail-label">Sets</span>' +
                     '<span class="detail-stat"><em>Set+</em> ' + t.setPlus + '</span>' +
                     '<span class="detail-stat"><em>Set-</em> ' + t.setMinus + '</span>' +
+                    detailDiffStat('DS', t.ds) +
                     '<span class="detail-stat"><em>Avg</em> ' + fmtAvg(t.setAvg, played) + '</span>' +
                 '</div>' +
                 '<div class="detail-line">' +
@@ -1209,13 +1220,13 @@ function renderGinetteStandings() {
         '</tr>' +
         // Desktop: the team's Ginette calendar, as in the championships
         (teamKey ? '<tr class="standings-calendar ginette-zone-' + t.zone + (calOpen ? ' open' : '') + '" data-team="' + esc(key) + '">' +
-            '<td colspan="13">' + buildTeamCalendar(teamKey, GINETTE_CTX) + '</td>' +
+            '<td colspan="14">' + buildTeamCalendar(teamKey, GINETTE_CTX) + '</td>' +
         '</tr>' : '');
     });
 
     function ginetteThead() {
         var cols = [['MJ', 'mj', ''], ['V', 'g', ''], ['D', 'p', ''], ['Set+', 'setPlus', 'col-opt'], ['Set-', 'setMinus', 'col-opt'],
-            ['Set avg', 'setAvg', ''], ['Pts+', 'ptsPlus', 'col-opt'], ['Pts-', 'ptsMinus', 'col-opt'], ['Pts avg', 'ptsAvg', 'col-opt'],
+            ['DS', 'ds', 'bold-col'], ['Set avg', 'setAvg', 'col-opt'], ['Pts+', 'ptsPlus', 'col-opt'], ['Pts-', 'ptsMinus', 'col-opt'], ['Pts avg', 'ptsAvg', 'col-opt'],
             ['Pén.', 'penalty', 'col-opt'], ['Pts', 'pts', 'bold-col']];
         var h = '<th class="standings-sortable" data-sort-col="pp" title="Trier par points perdus">Équipe' +
             (standingsSort.col === 'pp' ? standingsSortIcon('pp') : '') + '</th>';
