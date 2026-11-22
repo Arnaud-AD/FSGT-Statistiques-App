@@ -661,6 +661,7 @@ body {
 
 .timeline-set {
     margin-bottom: 14px;
+    container-type: inline-size;
 }
 
 .timeline-set:last-child {
@@ -724,6 +725,16 @@ body {
 .timeline-row {
     display: flex;
     gap: 1px;
+}
+
+/* Blocs fluides : la largeur suit le conteneur (desktop et mobile).
+   Le numero n'apparait que si le bloc fait au moins ~11px (sinon font-size 0). */
+.timeline-row > .tl-block {
+    flex: 1 1 0;
+    min-width: 6px;
+    height: 20px;
+    overflow: hidden;
+    font-size: clamp(0px, ((100cqi - var(--tl-gaps, 0px)) / var(--tl-n, 1) - 10.5px) * 100, 9px);
 }
 
 .tl-block {
