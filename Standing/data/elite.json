@@ -5,40 +5,40 @@
     "name": "Elite",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/2",
-    "lastUpdated": "2026-11-18T19:32:22",
+    "lastUpdated": "2026-11-24T00:31:37",
     "teamCount": 9,
-    "matchesPlayed": 11,
-    "matchesUpcoming": 61
+    "matchesPlayed": 13,
+    "matchesUpcoming": 59
   },
   "teams": {
+    "neku": {
+      "name": "Nekutā",
+      "short": "NE",
+      "color": "#e74c3c"
+    },
     "punc": {
       "name": "Les punchers",
       "short": "PU",
-      "color": "#e74c3c"
+      "color": "#3498db"
     },
     "yip": {
       "name": "Yip Yip",
       "short": "YY",
-      "color": "#3498db"
-    },
-    "coch": {
-      "name": "Cochonou",
-      "short": "CO",
       "color": "#2ecc71"
-    },
-    "neku": {
-      "name": "Nekutā",
-      "short": "NE",
-      "color": "#f39c12"
-    },
-    "padn": {
-      "name": "Padnom",
-      "short": "PA",
-      "color": "#9b59b6"
     },
     "olym": {
       "name": "Olympe BB volley",
       "short": "OB",
+      "color": "#f39c12"
+    },
+    "coch": {
+      "name": "Cochonou",
+      "short": "CO",
+      "color": "#9b59b6"
+    },
+    "padn": {
+      "name": "Padnom",
+      "short": "PA",
       "color": "#1abc9c"
     },
     "team": {
@@ -46,20 +46,56 @@
       "short": "TG",
       "color": "#e67e22"
     },
-    "sucy": {
-      "name": "SUCY N'EST PAS TROMPÉ",
-      "short": "SN",
-      "color": "#f1c40f"
-    },
     "go": {
       "name": "GO Team Apero",
       "short": "GT",
+      "color": "#f1c40f"
+    },
+    "sucy": {
+      "name": "SUCY N'EST PAS TROMPÉ",
+      "short": "SN",
       "color": "#95a5a6"
     }
   },
   "standings": [
     {
       "rank": 1,
+      "team": "neku",
+      "mj": 4,
+      "g": 3,
+      "p": 1,
+      "setPlus": 9,
+      "setMinus": 8,
+      "ds": 1,
+      "coefSet": "1.12",
+      "ptsPlus": 381,
+      "ptsMinus": 353,
+      "dp": "+28",
+      "coefPts": "1.08",
+      "pts": 10,
+      "formAller": [
+        "W",
+        "L",
+        "W",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 2,
       "team": "punc",
       "mj": 3,
       "g": 3,
@@ -95,7 +131,7 @@
       ]
     },
     {
-      "rank": 2,
+      "rank": 3,
       "team": "yip",
       "mj": 3,
       "g": 2,
@@ -131,7 +167,43 @@
       ]
     },
     {
-      "rank": 3,
+      "rank": 4,
+      "team": "olym",
+      "mj": 3,
+      "g": 2,
+      "p": 1,
+      "setPlus": 8,
+      "setMinus": 7,
+      "ds": 1,
+      "coefSet": "1.14",
+      "ptsPlus": 293,
+      "ptsMinus": 300,
+      "dp": "-7",
+      "coefPts": "0.98",
+      "pts": 8,
+      "formAller": [
+        "C",
+        "W",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 5,
       "team": "coch",
       "mj": 3,
       "g": 2,
@@ -167,43 +239,7 @@
       ]
     },
     {
-      "rank": 4,
-      "team": "neku",
-      "mj": 3,
-      "g": 2,
-      "p": 1,
-      "setPlus": 6,
-      "setMinus": 6,
-      "ds": 0,
-      "coefSet": "1.00",
-      "ptsPlus": 275,
-      "ptsMinus": 263,
-      "dp": "+12",
-      "coefPts": "1.05",
-      "pts": 7,
-      "formAller": [
-        "W",
-        "L",
-        "W",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 5,
+      "rank": 6,
       "team": "padn",
       "mj": 3,
       "g": 1,
@@ -239,60 +275,24 @@
       ]
     },
     {
-      "rank": 6,
-      "team": "olym",
-      "mj": 2,
-      "g": 1,
-      "p": 1,
+      "rank": 7,
+      "team": "team",
+      "mj": 3,
+      "g": 0,
+      "p": 3,
       "setPlus": 5,
-      "setMinus": 5,
-      "ds": 0,
-      "coefSet": "1.00",
-      "ptsPlus": 189,
-      "ptsMinus": 196,
-      "dp": "-7",
-      "coefPts": "0.96",
+      "setMinus": 9,
+      "ds": -4,
+      "coefSet": "0.56",
+      "ptsPlus": 256,
+      "ptsMinus": 301,
+      "dp": "-45",
+      "coefPts": "0.85",
       "pts": 5,
       "formAller": [
         "C",
-        "W",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 7,
-      "team": "team",
-      "mj": 2,
-      "g": 0,
-      "p": 2,
-      "setPlus": 3,
-      "setMinus": 6,
-      "ds": -3,
-      "coefSet": "0.50",
-      "ptsPlus": 166,
-      "ptsMinus": 195,
-      "dp": "-29",
-      "coefPts": "0.85",
-      "pts": 3,
-      "formAller": [
-        "C",
         "L",
-        "P",
+        "C",
         "P",
         "P",
         "P",
@@ -312,6 +312,42 @@
     },
     {
       "rank": 8,
+      "team": "go",
+      "mj": 3,
+      "g": 0,
+      "p": 3,
+      "setPlus": 4,
+      "setMinus": 9,
+      "ds": -5,
+      "coefSet": "0.44",
+      "ptsPlus": 280,
+      "ptsMinus": 309,
+      "dp": "-29",
+      "coefPts": "0.91",
+      "pts": 4,
+      "formAller": [
+        "L",
+        "L",
+        "D",
+        "C",
+        "P",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 9,
       "team": "sucy",
       "mj": 1,
       "g": 0,
@@ -345,75 +381,79 @@
         "P",
         "P"
       ]
-    },
-    {
-      "rank": 9,
-      "team": "go",
-      "mj": 2,
-      "g": 0,
-      "p": 2,
-      "setPlus": 2,
-      "setMinus": 6,
-      "ds": -4,
-      "coefSet": "0.33",
-      "ptsPlus": 176,
-      "ptsMinus": 205,
-      "dp": "-29",
-      "coefPts": "0.86",
-      "pts": 2,
-      "formAller": [
-        "L",
-        "L",
-        "D",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
     }
   ],
   "matchesPlayed": [
     {
-      "date": "10/11/2026",
-      "home": "yip",
-      "away": "team",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
+      "date": "23/11/2026",
+      "home": "team",
+      "away": "neku",
+      "scoreHome": 2,
+      "scoreAway": 3,
+      "homeWin": false,
       "status": "Terminé",
       "time": "20:00",
       "sets": [
         [
-          21,
+          15,
           25
         ],
         [
           25,
-          16
+          22
         ],
         [
           25,
-          14
+          19
         ],
         [
-          25,
-          12
+          16,
+          25
+        ],
+        [
+          9,
+          15
         ]
       ],
       "total": [
-        96,
-        67
+        90,
+        106
+      ]
+    },
+    {
+      "date": "23/11/2026",
+      "home": "go",
+      "away": "olym",
+      "scoreHome": 2,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé",
+      "time": "20:00",
+      "sets": [
+        [
+          25,
+          18
+        ],
+        [
+          19,
+          25
+        ],
+        [
+          19,
+          25
+        ],
+        [
+          25,
+          18
+        ],
+        [
+          16,
+          18
+        ]
+      ],
+      "total": [
+        104,
+        104
       ]
     },
     {
@@ -450,6 +490,38 @@
       "total": [
         102,
         114
+      ]
+    },
+    {
+      "date": "10/11/2026",
+      "home": "yip",
+      "away": "team",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé",
+      "time": "20:00",
+      "sets": [
+        [
+          21,
+          25
+        ],
+        [
+          25,
+          16
+        ],
+        [
+          25,
+          14
+        ],
+        [
+          25,
+          12
+        ]
+      ],
+      "total": [
+        96,
+        67
       ]
     },
     {
@@ -747,20 +819,6 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "23/11/2026",
-      "home": "team",
-      "away": "neku",
-      "status": "Sem. 4",
-      "time": "20:00"
-    },
-    {
-      "date": "23/11/2026",
-      "home": "go",
-      "away": "olym",
-      "status": "Sem. 4",
-      "time": "20:00"
-    },
-    {
       "date": "24/11/2026",
       "home": "padn",
       "away": "punc",
@@ -790,17 +848,17 @@
     },
     {
       "date": "01/12/2026",
-      "home": "padn",
-      "away": "sucy",
+      "home": "neku",
+      "away": "yip",
       "status": "Sem. 5",
       "time": "20:00"
     },
     {
-      "date": "03/12/2026",
-      "home": "neku",
-      "away": "yip",
+      "date": "01/12/2026",
+      "home": "padn",
+      "away": "sucy",
       "status": "Sem. 5",
-      "time": "20:20"
+      "time": "20:00"
     },
     {
       "date": "07/12/2026",
@@ -846,15 +904,15 @@
     },
     {
       "date": "04/01/2027",
-      "home": "go",
-      "away": "padn",
+      "home": "olym",
+      "away": "team",
       "status": "Sem. 7",
       "time": "20:00"
     },
     {
       "date": "04/01/2027",
-      "home": "olym",
-      "away": "team",
+      "home": "go",
+      "away": "padn",
       "status": "Sem. 7",
       "time": "20:00"
     },
@@ -888,6 +946,13 @@
     },
     {
       "date": "18/01/2027",
+      "home": "olym",
+      "away": "neku",
+      "status": "Sem. 9",
+      "time": "20:00"
+    },
+    {
+      "date": "18/01/2027",
       "home": "sucy",
       "away": "punc",
       "status": "Sem. 9",
@@ -897,13 +962,6 @@
       "date": "18/01/2027",
       "home": "go",
       "away": "yip",
-      "status": "Sem. 9",
-      "time": "20:00"
-    },
-    {
-      "date": "18/01/2027",
-      "home": "olym",
-      "away": "neku",
       "status": "Sem. 9",
       "time": "20:00"
     },
@@ -923,15 +981,15 @@
     },
     {
       "date": "01/03/2027",
-      "home": "olym",
-      "away": "punc",
+      "home": "go",
+      "away": "neku",
       "status": "Sem. 10",
       "time": "20:00"
     },
     {
       "date": "01/03/2027",
-      "home": "go",
-      "away": "neku",
+      "home": "olym",
+      "away": "punc",
       "status": "Sem. 10",
       "time": "20:00"
     },
@@ -1014,17 +1072,17 @@
     },
     {
       "date": "29/03/2027",
-      "home": "sucy",
-      "away": "coch",
-      "status": "Sem. 13",
-      "time": "20:30"
-    },
-    {
-      "date": "29/03/2027",
       "home": "olym",
       "away": "go",
       "status": "Sem. 13",
       "time": "20:00"
+    },
+    {
+      "date": "29/03/2027",
+      "home": "sucy",
+      "away": "coch",
+      "status": "Sem. 13",
+      "time": "20:30"
     },
     {
       "date": "01/04/2027",
@@ -1070,15 +1128,15 @@
     },
     {
       "date": "26/04/2027",
-      "home": "go",
-      "away": "coch",
+      "home": "olym",
+      "away": "padn",
       "status": "Sem. 15",
       "time": "20:00"
     },
     {
       "date": "26/04/2027",
-      "home": "olym",
-      "away": "padn",
+      "home": "go",
+      "away": "coch",
       "status": "Sem. 15",
       "time": "20:00"
     },
@@ -1119,17 +1177,17 @@
     },
     {
       "date": "17/05/2027",
-      "home": "olym",
-      "away": "yip",
-      "status": "Sem. 17",
-      "time": "20:00"
-    },
-    {
-      "date": "17/05/2027",
       "home": "sucy",
       "away": "neku",
       "status": "Sem. 17",
       "time": "20:30"
+    },
+    {
+      "date": "17/05/2027",
+      "home": "olym",
+      "away": "yip",
+      "status": "Sem. 17",
+      "time": "20:00"
     },
     {
       "date": "17/05/2027",
@@ -1197,6 +1255,16 @@
     },
     {
       "rank": 3,
+      "team": "neku",
+      "elo": 1537.5,
+      "movement": 20.3,
+      "record": "3-1",
+      "power": 73.3,
+      "calendar": "V vs Team",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 4,
       "team": "coch",
       "elo": 1520.8,
       "movement": -32.7,
@@ -1206,23 +1274,13 @@
       "diffClass": "diff-hard"
     },
     {
-      "rank": 4,
-      "team": "neku",
-      "elo": 1517.1,
-      "movement": 22.6,
-      "record": "2-1",
-      "power": 60.6,
-      "calendar": "V vs Padnom",
-      "diffClass": "diff-easy"
-    },
-    {
       "rank": 5,
       "team": "olym",
-      "elo": 1500.4,
-      "movement": 22.1,
-      "record": "1-1",
-      "power": 50.2,
-      "calendar": "V vs SUCY",
+      "elo": 1519.2,
+      "movement": 18.8,
+      "record": "2-1",
+      "power": 61.9,
+      "calendar": "V vs GO",
       "diffClass": "diff-easy"
     },
     {
@@ -1241,33 +1299,40 @@
       "elo": 1457.4,
       "movement": -22.6,
       "record": "1-2",
-      "power": 8.2,
+      "power": 19.4,
       "calendar": "D vs Nekutā",
       "diffClass": "diff-hard"
     },
     {
       "rank": 8,
       "team": "team",
-      "elo": 1454.0,
-      "movement": -24.3,
-      "record": "0-2",
+      "elo": 1433.7,
+      "movement": -20.3,
+      "record": "0-3",
       "power": 0.0,
-      "calendar": "D vs Yip",
+      "calendar": "D x3",
       "diffClass": "diff-hard"
     },
     {
       "rank": 9,
       "team": "go",
-      "elo": 1449.1,
-      "movement": -26.0,
-      "record": "0-2",
+      "elo": 1430.3,
+      "movement": -18.8,
+      "record": "0-3",
       "power": 0.0,
-      "calendar": "D vs Les",
+      "calendar": "D x3",
       "diffClass": "diff-hard"
     }
   ],
   "prPlayers": [],
   "eloHistory": {
+    "neku": [
+      1500,
+      1524.9,
+      1494.5,
+      1517.1,
+      1537.5
+    ],
     "punc": [
       1500,
       1521.7,
@@ -1280,17 +1345,17 @@
       1518.5,
       1542.8
     ],
+    "olym": [
+      1500,
+      1478.3,
+      1500.4,
+      1519.2
+    ],
     "coch": [
       1500,
       1523.1,
       1553.5,
       1520.8
-    ],
-    "neku": [
-      1500,
-      1524.9,
-      1494.5,
-      1517.1
     ],
     "padn": [
       1500,
@@ -1298,28 +1363,35 @@
       1480.1,
       1457.4
     ],
-    "olym": [
-      1500,
-      1478.3,
-      1500.4
-    ],
     "team": [
       1500,
       1478.3,
-      1454.0
-    ],
-    "sucy": [
-      1500,
-      1477.9
+      1454.0,
+      1433.7
     ],
     "go": [
       1500,
       1475.1,
-      1449.1
+      1449.1,
+      1430.3
+    ],
+    "sucy": [
+      1500,
+      1477.9
     ]
   },
   "evolutionData": {
     "teams": {
+      "neku": {
+        "points": [
+          0,
+          3,
+          4,
+          7,
+          10
+        ],
+        "rank": 1
+      },
       "punc": {
         "points": [
           0,
@@ -1327,7 +1399,7 @@
           6,
           9
         ],
-        "rank": 1
+        "rank": 2
       },
       "yip": {
         "points": [
@@ -1336,7 +1408,16 @@
           5,
           8
         ],
-        "rank": 2
+        "rank": 3
+      },
+      "olym": {
+        "points": [
+          0,
+          2,
+          5,
+          8
+        ],
+        "rank": 4
       },
       "coch": {
         "points": [
@@ -1345,16 +1426,7 @@
           6,
           7
         ],
-        "rank": 3
-      },
-      "neku": {
-        "points": [
-          0,
-          3,
-          4,
-          7
-        ],
-        "rank": 4
+        "rank": 5
       },
       "padn": {
         "points": [
@@ -1363,35 +1435,29 @@
           4,
           6
         ],
-        "rank": 5
-      },
-      "olym": {
-        "points": [
-          0,
-          2,
-          5
-        ],
         "rank": 6
       },
       "team": {
         "points": [
           0,
           2,
-          3
+          3,
+          5
         ],
         "rank": 7
-      },
-      "sucy": {
-        "points": [
-          0,
-          2
-        ],
-        "rank": 8
       },
       "go": {
         "points": [
           0,
           1,
+          2,
+          4
+        ],
+        "rank": 8
+      },
+      "sucy": {
+        "points": [
+          0,
           2
         ],
         "rank": 9

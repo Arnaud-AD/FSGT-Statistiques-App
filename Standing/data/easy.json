@@ -5,10 +5,10 @@
     "name": "Easy",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/16",
-    "lastUpdated": "2026-11-18T19:32:53",
+    "lastUpdated": "2026-11-24T00:32:09",
     "teamCount": 8,
-    "matchesPlayed": 8,
-    "matchesUpcoming": 48
+    "matchesPlayed": 9,
+    "matchesUpcoming": 47
   },
   "teams": {
     "ours": {
@@ -21,29 +21,29 @@
       "short": "DA",
       "color": "#3498db"
     },
+    "gail": {
+      "name": "Les Gaillards",
+      "short": "GA",
+      "color": "#2ecc71"
+    },
     "fata": {
       "name": "FATALS FURETS",
       "short": "FF",
-      "color": "#2ecc71"
+      "color": "#f39c12"
     },
     "coco": {
       "name": "Les Coconuts",
       "short": "CO",
-      "color": "#f39c12"
-    },
-    "coc2": {
-      "name": "Coco & co",
-      "short": "C&",
       "color": "#9b59b6"
-    },
-    "gail": {
-      "name": "Les Gaillards",
-      "short": "GA",
-      "color": "#1abc9c"
     },
     "punc": {
       "name": "Punchline",
       "short": "PU",
+      "color": "#1abc9c"
+    },
+    "coc2": {
+      "name": "Coco & co",
+      "short": "C&",
       "color": "#e67e22"
     },
     "miel": {
@@ -123,6 +123,40 @@
     },
     {
       "rank": 3,
+      "team": "gail",
+      "mj": 2,
+      "g": 2,
+      "p": 0,
+      "setPlus": 6,
+      "setMinus": 2,
+      "ds": 4,
+      "coefSet": "3.00",
+      "ptsPlus": 185,
+      "ptsMinus": 159,
+      "dp": "+26",
+      "coefPts": "1.16",
+      "pts": 6,
+      "formAller": [
+        "D",
+        "W",
+        "D",
+        "W",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "D",
+        "D",
+        "D",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 4,
       "team": "fata",
       "mj": 2,
       "g": 1,
@@ -156,7 +190,7 @@
       ]
     },
     {
-      "rank": 4,
+      "rank": 5,
       "team": "coco",
       "mj": 2,
       "g": 0,
@@ -190,7 +224,41 @@
       ]
     },
     {
-      "rank": 5,
+      "rank": 6,
+      "team": "punc",
+      "mj": 4,
+      "g": 0,
+      "p": 4,
+      "setPlus": 2,
+      "setMinus": 12,
+      "ds": -10,
+      "coefSet": "0.17",
+      "ptsPlus": 283,
+      "ptsMinus": 348,
+      "dp": "-65",
+      "coefPts": "0.81",
+      "pts": 4,
+      "formAller": [
+        "L",
+        "L",
+        "L",
+        "L",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "D",
+        "D",
+        "D",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 7,
       "team": "coc2",
       "mj": 1,
       "g": 1,
@@ -208,74 +276,6 @@
         "D",
         "W",
         "D",
-        "P",
-        "P",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "D",
-        "D",
-        "D",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 6,
-      "team": "gail",
-      "mj": 1,
-      "g": 1,
-      "p": 0,
-      "setPlus": 3,
-      "setMinus": 2,
-      "ds": 1,
-      "coefSet": "1.50",
-      "ptsPlus": 108,
-      "ptsMinus": 93,
-      "dp": "+15",
-      "coefPts": "1.16",
-      "pts": 3,
-      "formAller": [
-        "D",
-        "W",
-        "D",
-        "P",
-        "P",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "D",
-        "D",
-        "D",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 7,
-      "team": "punc",
-      "mj": 3,
-      "g": 0,
-      "p": 3,
-      "setPlus": 2,
-      "setMinus": 9,
-      "ds": -7,
-      "coefSet": "0.22",
-      "ptsPlus": 217,
-      "ptsMinus": 271,
-      "dp": "-54",
-      "coefPts": "0.80",
-      "pts": 3,
-      "formAller": [
-        "L",
-        "L",
-        "L",
         "P",
         "P",
         "P",
@@ -327,6 +327,34 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "23/11/2026",
+      "home": "punc",
+      "away": "gail",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé",
+      "time": "20:00",
+      "sets": [
+        [
+          23,
+          25
+        ],
+        [
+          18,
+          25
+        ],
+        [
+          25,
+          27
+        ]
+      ],
+      "total": [
+        66,
+        77
+      ]
+    },
     {
       "date": "09/11/2026",
       "home": "fata",
@@ -457,38 +485,6 @@
     },
     {
       "date": "02/11/2026",
-      "home": "punc",
-      "away": "fata",
-      "scoreHome": 1,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé",
-      "time": "20:00",
-      "sets": [
-        [
-          16,
-          25
-        ],
-        [
-          14,
-          25
-        ],
-        [
-          25,
-          22
-        ],
-        [
-          23,
-          25
-        ]
-      ],
-      "total": [
-        78,
-        97
-      ]
-    },
-    {
-      "date": "02/11/2026",
       "home": "coco",
       "away": "gail",
       "scoreHome": 2,
@@ -521,6 +517,38 @@
       "total": [
         93,
         108
+      ]
+    },
+    {
+      "date": "02/11/2026",
+      "home": "punc",
+      "away": "fata",
+      "scoreHome": 1,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé",
+      "time": "20:00",
+      "sets": [
+        [
+          16,
+          25
+        ],
+        [
+          14,
+          25
+        ],
+        [
+          25,
+          22
+        ],
+        [
+          23,
+          25
+        ]
+      ],
+      "total": [
+        78,
+        97
       ]
     },
     {
@@ -601,13 +629,6 @@
       "home": "fata",
       "away": "coc2",
       "status": "Reporté",
-      "time": "20:00"
-    },
-    {
-      "date": "23/11/2026",
-      "home": "punc",
-      "away": "gail",
-      "status": "Sem. 4",
       "time": "20:00"
     },
     {
@@ -939,22 +960,22 @@
     },
     {
       "rank": 2,
+      "team": "gail",
+      "elo": 1548.5,
+      "movement": 25.5,
+      "record": "2-0",
+      "power": 82.0,
+      "calendar": "V vs Punchline",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 3,
       "team": "coc2",
       "elo": 1534.8,
       "movement": 34.8,
       "record": "1-0",
       "power": 73.0,
       "calendar": "V vs Daïquibrie",
-      "diffClass": "diff-easy"
-    },
-    {
-      "rank": 3,
-      "team": "gail",
-      "elo": 1523.0,
-      "movement": 23.0,
-      "record": "1-0",
-      "power": 65.2,
-      "calendar": "V vs Les",
       "diffClass": "diff-easy"
     },
     {
@@ -1000,11 +1021,11 @@
     {
       "rank": 8,
       "team": "punc",
-      "elo": 1418.8,
-      "movement": -23.4,
-      "record": "0-3",
+      "elo": 1393.3,
+      "movement": -25.5,
+      "record": "0-4",
       "power": 0.0,
-      "calendar": "D x3",
+      "calendar": "D x4",
       "diffClass": "diff-hard"
     }
   ],
@@ -1022,6 +1043,11 @@
       1483.5,
       1506.9
     ],
+    "gail": [
+      1500,
+      1523.0,
+      1548.5
+    ],
     "fata": [
       1500,
       1528.3,
@@ -1032,19 +1058,16 @@
       1481.7,
       1458.7
     ],
-    "coc2": [
-      1500,
-      1534.8
-    ],
-    "gail": [
-      1500,
-      1523.0
-    ],
     "punc": [
       1500,
       1470.5,
       1442.2,
-      1418.8
+      1418.8,
+      1393.3
+    ],
+    "coc2": [
+      1500,
+      1534.8
     ],
     "miel": [
       1500,
@@ -1071,13 +1094,21 @@
         ],
         "rank": 2
       },
+      "gail": {
+        "points": [
+          0,
+          3,
+          6
+        ],
+        "rank": 3
+      },
       "fata": {
         "points": [
           0,
           3,
           5
         ],
-        "rank": 3
+        "rank": 4
       },
       "coco": {
         "points": [
@@ -1085,27 +1116,21 @@
           2,
           4
         ],
-        "rank": 4
-      },
-      "coc2": {
-        "points": [
-          0,
-          3
-        ],
         "rank": 5
-      },
-      "gail": {
-        "points": [
-          0,
-          3
-        ],
-        "rank": 6
       },
       "punc": {
         "points": [
           0,
           1,
           2,
+          3,
+          4
+        ],
+        "rank": 6
+      },
+      "coc2": {
+        "points": [
+          0,
           3
         ],
         "rank": 7

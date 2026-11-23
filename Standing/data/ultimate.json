@@ -5,10 +5,10 @@
     "name": "Ultimate",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/1",
-    "lastUpdated": "2026-11-18T19:32:11",
+    "lastUpdated": "2026-11-24T00:31:26",
     "teamCount": 9,
-    "matchesPlayed": 8,
-    "matchesUpcoming": 64
+    "matchesPlayed": 9,
+    "matchesUpcoming": 63
   },
   "teams": {
     "red": {
@@ -61,23 +61,23 @@
     {
       "rank": 1,
       "team": "red",
-      "mj": 2,
-      "g": 1,
+      "mj": 3,
+      "g": 2,
       "p": 1,
-      "setPlus": 5,
-      "setMinus": 3,
-      "ds": 2,
-      "coefSet": "1.67",
-      "ptsPlus": 204,
-      "ptsMinus": 196,
-      "dp": "+8",
-      "coefPts": "1.04",
-      "pts": 5,
+      "setPlus": 8,
+      "setMinus": 4,
+      "ds": 4,
+      "coefSet": "2.00",
+      "ptsPlus": 302,
+      "ptsMinus": 276,
+      "dp": "+26",
+      "coefPts": "1.09",
+      "pts": 8,
       "formAller": [
         "C",
         "W",
         "D",
-        "P",
+        "W",
         "P",
         "P",
         "P",
@@ -349,23 +349,23 @@
     {
       "rank": 9,
       "team": "rsc",
-      "mj": 2,
+      "mj": 3,
       "g": 0,
-      "p": 2,
-      "setPlus": 1,
-      "setMinus": 6,
-      "ds": -5,
-      "coefSet": "0.17",
-      "ptsPlus": 135,
-      "ptsMinus": 174,
-      "dp": "-39",
-      "coefPts": "0.78",
-      "pts": 2,
+      "p": 3,
+      "setPlus": 2,
+      "setMinus": 9,
+      "ds": -7,
+      "coefSet": "0.22",
+      "ptsPlus": 215,
+      "ptsMinus": 272,
+      "dp": "-57",
+      "coefPts": "0.79",
+      "pts": 3,
       "formAller": [
         "L",
         "L",
         "D",
-        "P",
+        "L",
         "P",
         "P",
         "P",
@@ -384,6 +384,38 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "23/11/2026",
+      "home": "red",
+      "away": "rsc",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé",
+      "time": "20:30",
+      "sets": [
+        [
+          23,
+          25
+        ],
+        [
+          25,
+          21
+        ],
+        [
+          25,
+          17
+        ],
+        [
+          25,
+          17
+        ]
+      ],
+      "total": [
+        98,
+        80
+      ]
+    },
     {
       "date": "10/11/2026",
       "home": "bier",
@@ -636,13 +668,6 @@
       "away": "red",
       "status": "Reporté",
       "time": "20:00"
-    },
-    {
-      "date": "23/11/2026",
-      "home": "red",
-      "away": "rsc",
-      "status": "Sem. 4",
-      "time": "20:30"
     },
     {
       "date": "24/11/2026",
@@ -1113,11 +1138,11 @@
     {
       "rank": 4,
       "team": "red",
-      "elo": 1509.9,
-      "movement": 25.9,
-      "record": "1-1",
-      "power": 63.5,
-      "calendar": "V vs Kiki",
+      "elo": 1529.9,
+      "movement": 20.0,
+      "record": "2-1",
+      "power": 90.8,
+      "calendar": "V vs RSC",
       "diffClass": "diff-easy"
     },
     {
@@ -1136,7 +1161,7 @@
       "elo": 1497.6,
       "movement": -32.4,
       "record": "1-1",
-      "power": 48.1,
+      "power": 48.5,
       "calendar": "D vs Les",
       "diffClass": "diff-hard"
     },
@@ -1146,7 +1171,7 @@
       "elo": 1489.3,
       "movement": -26.7,
       "record": "1-1",
-      "power": 41.4,
+      "power": 43.5,
       "calendar": "D vs Kiki",
       "diffClass": "diff-hard"
     },
@@ -1156,18 +1181,18 @@
       "elo": 1464.9,
       "movement": -36.6,
       "record": "1-2",
-      "power": 21.8,
+      "power": 28.6,
       "calendar": "D vs Jen",
       "diffClass": "diff-hard"
     },
     {
       "rank": 9,
       "team": "rsc",
-      "elo": 1437.8,
-      "movement": -31.5,
-      "record": "0-2",
+      "elo": 1417.8,
+      "movement": -20.0,
+      "record": "0-3",
       "power": 0.0,
-      "calendar": "D vs Bières",
+      "calendar": "D x3",
       "diffClass": "diff-hard"
     }
   ],
@@ -1176,7 +1201,8 @@
     "red": [
       1500,
       1484.0,
-      1509.9
+      1509.9,
+      1529.9
     ],
     "bier": [
       1500,
@@ -1214,7 +1240,8 @@
     "rsc": [
       1500,
       1469.3,
-      1437.8
+      1437.8,
+      1417.8
     ]
   },
   "evolutionData": {
@@ -1223,7 +1250,8 @@
         "points": [
           0,
           2,
-          5
+          5,
+          8
         ],
         "rank": 1
       },
@@ -1285,7 +1313,8 @@
         "points": [
           0,
           1,
-          2
+          2,
+          3
         ],
         "rank": 9
       }

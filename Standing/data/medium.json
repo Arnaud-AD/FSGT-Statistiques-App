@@ -5,7 +5,7 @@
     "name": "Medium",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/3",
-    "lastUpdated": "2026-11-18T19:32:43",
+    "lastUpdated": "2026-11-24T00:31:59",
     "teamCount": 8,
     "matchesPlayed": 9,
     "matchesUpcoming": 47
@@ -72,7 +72,7 @@
         "W",
         "C",
         "W",
-        "P",
+        "D",
         "P",
         "P",
         "P"
@@ -174,7 +174,7 @@
         "W",
         "D",
         "C",
-        "P",
+        "D",
         "P",
         "P",
         "P"
@@ -208,7 +208,7 @@
         "L",
         "L",
         "W",
-        "P",
+        "D",
         "P",
         "P",
         "P"
@@ -242,7 +242,7 @@
         "D",
         "W",
         "D",
-        "P",
+        "D",
         "P",
         "P",
         "P"
@@ -607,13 +607,6 @@
   "matchesUpcoming": [
     {
       "date": "24/11/2026",
-      "home": "rhum",
-      "away": "bats",
-      "status": "Sem. 4",
-      "time": "20:30"
-    },
-    {
-      "date": "24/11/2026",
       "home": "tigr",
       "away": "mort",
       "status": "Sem. 4",
@@ -625,13 +618,6 @@
       "away": "agen",
       "status": "Sem. 4",
       "time": "20:30"
-    },
-    {
-      "date": "25/11/2026",
-      "home": "ryoi",
-      "away": "mars",
-      "status": "Sem. 4",
-      "time": "20:00"
     },
     {
       "date": "01/12/2026",
@@ -681,6 +667,13 @@
       "away": "mort",
       "status": "Sem. 6",
       "time": "20:45"
+    },
+    {
+      "date": "09/12/2026",
+      "home": "ryoi",
+      "away": "mars",
+      "status": "Reporté",
+      "time": "20:00"
     },
     {
       "date": "09/12/2026",
@@ -737,6 +730,13 @@
       "away": "ryoi",
       "status": "Reporté",
       "time": "20:45"
+    },
+    {
+      "date": "02/02/2027",
+      "home": "rhum",
+      "away": "bats",
+      "status": "Reporté",
+      "time": "20:30"
     },
     {
       "date": "02/03/2027",

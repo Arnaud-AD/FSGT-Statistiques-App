@@ -5,7 +5,7 @@
     "name": "Starter",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/17",
-    "lastUpdated": "2026-11-18T19:33:04",
+    "lastUpdated": "2026-11-24T00:32:20",
     "teamCount": 8,
     "matchesPlayed": 12,
     "matchesUpcoming": 44
@@ -72,7 +72,7 @@
         "W",
         "W",
         "W",
-        "P",
+        "D",
         "P",
         "P",
         "P"
@@ -276,7 +276,7 @@
         "W",
         "L",
         "L",
-        "P",
+        "D",
         "P",
         "P",
         "P"
@@ -701,7 +701,7 @@
       "date": "23/11/2026",
       "home": "clod",
       "away": "los",
-      "status": "Sem. 4",
+      "status": "Reporté",
       "time": "20:30"
     },
     {

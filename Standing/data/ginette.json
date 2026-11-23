@@ -4,7 +4,7 @@
     "name": "Coupe Ginette",
     "season": "2026-2027",
     "format": "coupe",
-    "lastUpdated": "2026-11-21T03:20:57",
+    "lastUpdated": "2026-11-24T00:32:43",
     "teamCount": 64,
     "matchCount": 32,
     "forfeitCount": 2,
@@ -71,6 +71,29 @@
     },
     {
       "rank": 3,
+      "name": "Red Hot Sucy Pépère",
+      "division": "Ultimate",
+      "divSlug": "ultimate",
+      "elo": 1939.6,
+      "delta": 9.7,
+      "record": "1-0",
+      "wins": 1,
+      "losses": 0,
+      "power": 99.9,
+      "form": [
+        "W"
+      ],
+      "matches": [
+        {
+          "opponent": "Les Rhum'Antik",
+          "result": "W",
+          "score": "3-0",
+          "delta": 9.7
+        }
+      ]
+    },
+    {
+      "rank": 4,
       "name": "Dodos 4 ever",
       "division": "Ultimate",
       "divSlug": "ultimate",
@@ -89,29 +112,6 @@
           "result": "W",
           "score": "3-0",
           "delta": 1.4
-        }
-      ]
-    },
-    {
-      "rank": 4,
-      "name": "Red Hot Sucy Pépère",
-      "division": "Ultimate",
-      "divSlug": "ultimate",
-      "elo": 1920.5,
-      "delta": 10.6,
-      "record": "1-0",
-      "wins": 1,
-      "losses": 0,
-      "power": 97.3,
-      "form": [
-        "W"
-      ],
-      "matches": [
-        {
-          "opponent": "Les Rhum'Antik",
-          "result": "W",
-          "score": "3-0",
-          "delta": 10.6
         }
       ]
     },
@@ -143,12 +143,12 @@
       "name": "Les punchers",
       "division": "Elite",
       "divSlug": "elite",
-      "elo": 1882.3,
-      "delta": 1.9,
+      "elo": 1882.8,
+      "delta": 2.4,
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 92.0,
+      "power": 92.1,
       "form": [
         "W"
       ],
@@ -157,7 +157,7 @@
           "opponent": "Les Bry-Colo",
           "result": "W",
           "score": "3-0",
-          "delta": 1.9
+          "delta": 2.4
         }
       ]
     },
@@ -209,61 +209,15 @@
     },
     {
       "rank": 9,
-      "name": "Bières et le loup",
-      "division": "Ultimate",
-      "divSlug": "ultimate",
-      "elo": 1845.4,
-      "delta": -19.5,
-      "record": "0-1",
-      "wins": 0,
-      "losses": 1,
-      "power": 87.0,
-      "form": [
-        "L"
-      ],
-      "matches": [
-        {
-          "opponent": "Nekutā",
-          "result": "L",
-          "score": "2-3",
-          "delta": -19.5
-        }
-      ]
-    },
-    {
-      "rank": 10,
-      "name": "RSC Champigny 1",
-      "division": "Ultimate",
-      "divSlug": "ultimate",
-      "elo": 1843.1,
-      "delta": 5.3,
-      "record": "1-0",
-      "wins": 1,
-      "losses": 0,
-      "power": 86.7,
-      "form": [
-        "W"
-      ],
-      "matches": [
-        {
-          "opponent": "Punchline",
-          "result": "W",
-          "score": "3-0",
-          "delta": 5.3
-        }
-      ]
-    },
-    {
-      "rank": 11,
       "name": "Nekutā",
       "division": "Elite",
       "divSlug": "elite",
-      "elo": 1836.6,
-      "delta": 19.5,
+      "elo": 1855.9,
+      "delta": 18.4,
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 85.8,
+      "power": 88.4,
       "form": [
         "W"
       ],
@@ -272,44 +226,44 @@
           "opponent": "Bières et le loup",
           "result": "W",
           "score": "3-2",
-          "delta": 19.5
+          "delta": 18.4
         }
       ]
     },
     {
-      "rank": 12,
-      "name": "Cochonou",
-      "division": "Elite",
-      "divSlug": "elite",
-      "elo": 1824.4,
-      "delta": 3.6,
-      "record": "1-0",
-      "wins": 1,
-      "losses": 0,
-      "power": 84.1,
+      "rank": 10,
+      "name": "Bières et le loup",
+      "division": "Ultimate",
+      "divSlug": "ultimate",
+      "elo": 1846.5,
+      "delta": -18.4,
+      "record": "0-1",
+      "wins": 0,
+      "losses": 1,
+      "power": 87.1,
       "form": [
-        "W"
+        "L"
       ],
       "matches": [
         {
-          "opponent": "Smashmallow",
-          "result": "W",
-          "score": "3-0",
-          "delta": 3.6
+          "opponent": "Nekutā",
+          "result": "L",
+          "score": "2-3",
+          "delta": -18.4
         }
       ]
     },
     {
-      "rank": 13,
+      "rank": 11,
       "name": "Olympe BB volley",
       "division": "Elite",
       "divSlug": "elite",
-      "elo": 1807.2,
-      "delta": 6.8,
+      "elo": 1825.4,
+      "delta": 6.2,
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 81.8,
+      "power": 84.2,
       "form": [
         "W"
       ],
@@ -318,7 +272,53 @@
           "opponent": "Coco & co",
           "result": "W",
           "score": "3-2",
-          "delta": 6.8
+          "delta": 6.2
+        }
+      ]
+    },
+    {
+      "rank": 12,
+      "name": "Cochonou",
+      "division": "Elite",
+      "divSlug": "elite",
+      "elo": 1824.8,
+      "delta": 4.0,
+      "record": "1-0",
+      "wins": 1,
+      "losses": 0,
+      "power": 84.2,
+      "form": [
+        "W"
+      ],
+      "matches": [
+        {
+          "opponent": "Smashmallow",
+          "result": "W",
+          "score": "3-0",
+          "delta": 4.0
+        }
+      ]
+    },
+    {
+      "rank": 13,
+      "name": "RSC Champigny 1",
+      "division": "Ultimate",
+      "divSlug": "ultimate",
+      "elo": 1822.9,
+      "delta": 5.1,
+      "record": "1-0",
+      "wins": 1,
+      "losses": 0,
+      "power": 83.9,
+      "form": [
+        "W"
+      ],
+      "matches": [
+        {
+          "opponent": "Punchline",
+          "result": "W",
+          "score": "3-0",
+          "delta": 5.1
         }
       ]
     },
@@ -350,12 +350,12 @@
       "name": "Les Loups-Phoques",
       "division": "Hard",
       "divSlug": "hard",
-      "elo": 1783.2,
-      "delta": 11.9,
+      "elo": 1759.5,
+      "delta": 13.2,
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 78.5,
+      "power": 75.2,
       "form": [
         "W"
       ],
@@ -364,7 +364,7 @@
           "opponent": "Les Tigres & Gorilles",
           "result": "W",
           "score": "3-1",
-          "delta": 11.9
+          "delta": 13.2
         }
       ]
     },
@@ -373,12 +373,12 @@
       "name": "Team Glouglou",
       "division": "Elite",
       "divSlug": "elite",
-      "elo": 1774.0,
-      "delta": 20.0,
+      "elo": 1754.8,
+      "delta": 21.1,
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 77.2,
+      "power": 74.6,
       "form": [
         "W"
       ],
@@ -387,21 +387,44 @@
           "opponent": "LES DÉMENTS",
           "result": "W",
           "score": "3-1",
-          "delta": 20.0
+          "delta": 21.1
         }
       ]
     },
     {
       "rank": 17,
-      "name": "GO Team Apero",
-      "division": "Elite",
-      "divSlug": "elite",
-      "elo": 1773.0,
-      "delta": 23.9,
+      "name": "Pythons Collés",
+      "division": "Hard",
+      "divSlug": "hard",
+      "elo": 1754.7,
+      "delta": 4.0,
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 77.1,
+      "power": 74.6,
+      "form": [
+        "W"
+      ],
+      "matches": [
+        {
+          "opponent": "Les Vendangeurs",
+          "result": "W",
+          "score": "3-1",
+          "delta": 4.0
+        }
+      ]
+    },
+    {
+      "rank": 18,
+      "name": "GO Team Apero",
+      "division": "Elite",
+      "divSlug": "elite",
+      "elo": 1754.5,
+      "delta": 24.2,
+      "record": "1-0",
+      "wins": 1,
+      "losses": 0,
+      "power": 74.5,
       "form": [
         "W"
       ],
@@ -410,12 +433,12 @@
           "opponent": "Rhinos Féroces",
           "result": "W",
           "score": "3-0",
-          "delta": 23.9
+          "delta": 24.2
         }
       ]
     },
     {
-      "rank": 18,
+      "rank": 19,
       "name": "Padnom",
       "division": "Elite",
       "divSlug": "elite",
@@ -438,7 +461,7 @@
       ]
     },
     {
-      "rank": 19,
+      "rank": 20,
       "name": "No s(o)ucy",
       "division": "Or 6x6",
       "divSlug": "or6x6",
@@ -461,53 +484,7 @@
       ]
     },
     {
-      "rank": 20,
-      "name": "Pythons Collés",
-      "division": "Hard",
-      "divSlug": "hard",
-      "elo": 1726.9,
-      "delta": 4.1,
-      "record": "1-0",
-      "wins": 1,
-      "losses": 0,
-      "power": 70.8,
-      "form": [
-        "W"
-      ],
-      "matches": [
-        {
-          "opponent": "Les Vendangeurs",
-          "result": "W",
-          "score": "3-1",
-          "delta": 4.1
-        }
-      ]
-    },
-    {
       "rank": 21,
-      "name": "Rhinos Féroces",
-      "division": "Hard",
-      "divSlug": "hard",
-      "elo": 1707.9,
-      "delta": -23.9,
-      "record": "0-1",
-      "wins": 0,
-      "losses": 1,
-      "power": 68.2,
-      "form": [
-        "L"
-      ],
-      "matches": [
-        {
-          "opponent": "GO Team Apero",
-          "result": "L",
-          "score": "0-3",
-          "delta": -23.9
-        }
-      ]
-    },
-    {
-      "rank": 22,
       "name": "Inarizaki",
       "division": "Or 6x6",
       "divSlug": "or6x6",
@@ -516,7 +493,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 66.6,
+      "power": 66.5,
       "form": [
         "W"
       ],
@@ -530,11 +507,11 @@
       ]
     },
     {
-      "rank": 23,
+      "rank": 22,
       "name": "Alambic",
       "division": "Hard",
       "divSlug": "hard",
-      "elo": 1693.2,
+      "elo": 1693.3,
       "delta": 21.7,
       "record": "1-0",
       "wins": 1,
@@ -553,16 +530,62 @@
       ]
     },
     {
-      "rank": 24,
-      "name": "LES DÉMENTS",
+      "rank": 23,
+      "name": "Rhinos Féroces",
       "division": "Hard",
       "divSlug": "hard",
-      "elo": 1692.1,
-      "delta": -20.0,
+      "elo": 1692.7,
+      "delta": -24.2,
       "record": "0-1",
       "wins": 0,
       "losses": 1,
+      "power": 66.1,
+      "form": [
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "GO Team Apero",
+          "result": "L",
+          "score": "0-3",
+          "delta": -24.2
+        }
+      ]
+    },
+    {
+      "rank": 24,
+      "name": "Ginto",
+      "division": "Hard",
+      "divSlug": "hard",
+      "elo": 1691.9,
+      "delta": 16.3,
+      "record": "1-0",
+      "wins": 1,
+      "losses": 0,
       "power": 66.0,
+      "form": [
+        "W"
+      ],
+      "matches": [
+        {
+          "opponent": "Boîte de 4",
+          "result": "W",
+          "score": "3-0",
+          "delta": 16.3
+        }
+      ]
+    },
+    {
+      "rank": 25,
+      "name": "LES DÉMENTS",
+      "division": "Hard",
+      "divSlug": "hard",
+      "elo": 1689.5,
+      "delta": -21.1,
+      "record": "0-1",
+      "wins": 0,
+      "losses": 1,
+      "power": 65.6,
       "form": [
         "L"
       ],
@@ -571,30 +594,7 @@
           "opponent": "Team Glouglou",
           "result": "L",
           "score": "1-3",
-          "delta": -20.0
-        }
-      ]
-    },
-    {
-      "rank": 25,
-      "name": "StarPAFF",
-      "division": "Hard",
-      "divSlug": "hard",
-      "elo": 1675.3,
-      "delta": 11.5,
-      "record": "1-0",
-      "wins": 1,
-      "losses": 0,
-      "power": 63.7,
-      "form": [
-        "W"
-      ],
-      "matches": [
-        {
-          "opponent": "Clodo d'Ivry",
-          "result": "W",
-          "score": "3-0",
-          "delta": 11.5
+          "delta": -21.1
         }
       ]
     },
@@ -623,29 +623,6 @@
     },
     {
       "rank": 27,
-      "name": "Ginto",
-      "division": "Hard",
-      "divSlug": "hard",
-      "elo": 1667.3,
-      "delta": 18.1,
-      "record": "1-0",
-      "wins": 1,
-      "losses": 0,
-      "power": 62.6,
-      "form": [
-        "W"
-      ],
-      "matches": [
-        {
-          "opponent": "Boîte de 4",
-          "result": "W",
-          "score": "3-0",
-          "delta": 18.1
-        }
-      ]
-    },
-    {
-      "rank": 28,
       "name": "Morts de Soif",
       "division": "Medium",
       "divSlug": "medium",
@@ -668,11 +645,11 @@
       ]
     },
     {
-      "rank": 29,
+      "rank": 28,
       "name": "Bachateam",
       "division": "Hard",
       "divSlug": "hard",
-      "elo": 1657.3,
+      "elo": 1657.2,
       "delta": -17.3,
       "record": "0-1",
       "wins": 0,
@@ -687,6 +664,29 @@
           "result": "L",
           "score": "0-3",
           "delta": -17.3
+        }
+      ]
+    },
+    {
+      "rank": 29,
+      "name": "StarPAFF",
+      "division": "Hard",
+      "divSlug": "hard",
+      "elo": 1649.9,
+      "delta": 13.0,
+      "record": "1-0",
+      "wins": 1,
+      "losses": 0,
+      "power": 60.2,
+      "form": [
+        "W"
+      ],
+      "matches": [
+        {
+          "opponent": "Clodo d'Ivry",
+          "result": "W",
+          "score": "3-0",
+          "delta": 13.0
         }
       ]
     },
@@ -741,12 +741,12 @@
       "name": "Les Rhum'Antik",
       "division": "Medium",
       "divSlug": "medium",
-      "elo": 1621.1,
-      "delta": -10.6,
+      "elo": 1622.0,
+      "delta": -9.7,
       "record": "0-1",
       "wins": 0,
       "losses": 1,
-      "power": 56.3,
+      "power": 56.4,
       "form": [
         "L"
       ],
@@ -755,7 +755,7 @@
           "opponent": "Red Hot Sucy Pépère",
           "result": "L",
           "score": "0-3",
-          "delta": -10.6
+          "delta": -9.7
         }
       ]
     },
@@ -792,7 +792,7 @@
       "record": "0-1",
       "wins": 0,
       "losses": 1,
-      "power": 55.1,
+      "power": 55.0,
       "form": [
         "L"
       ],
@@ -833,12 +833,12 @@
       "name": "Cret'1",
       "division": "Or 6x6",
       "divSlug": "or6x6",
-      "elo": 1597.3,
-      "delta": 5.1,
+      "elo": 1598.0,
+      "delta": 5.8,
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 53.0,
+      "power": 53.1,
       "form": [
         "W"
       ],
@@ -847,7 +847,7 @@
           "opponent": "Villiers Basta",
           "result": "W",
           "score": "3-0",
-          "delta": 5.1
+          "delta": 5.8
         }
       ]
     },
@@ -925,12 +925,12 @@
       "name": "Les Tigres & Gorilles",
       "division": "Medium",
       "divSlug": "medium",
-      "elo": 1565.6,
-      "delta": -11.9,
+      "elo": 1564.3,
+      "delta": -13.2,
       "record": "0-1",
       "wins": 0,
       "losses": 1,
-      "power": 48.7,
+      "power": 48.5,
       "form": [
         "L"
       ],
@@ -939,7 +939,7 @@
           "opponent": "Les Loups-Phoques",
           "result": "L",
           "score": "1-3",
-          "delta": -11.9
+          "delta": -13.2
         }
       ]
     },
@@ -948,8 +948,8 @@
       "name": "Coco & co",
       "division": "Easy",
       "divSlug": "easy",
-      "elo": 1528.0,
-      "delta": -6.8,
+      "elo": 1528.6,
+      "delta": -6.2,
       "record": "0-1",
       "wins": 0,
       "losses": 1,
@@ -962,12 +962,35 @@
           "opponent": "Olympe BB volley",
           "result": "L",
           "score": "2-3",
-          "delta": -6.8
+          "delta": -6.2
         }
       ]
     },
     {
       "rank": 42,
+      "name": "Les Gaillards",
+      "division": "Easy",
+      "divSlug": "easy",
+      "elo": 1520.8,
+      "delta": -27.7,
+      "record": "0-1",
+      "wins": 0,
+      "losses": 1,
+      "power": 42.5,
+      "form": [
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Eagle+4à6",
+          "result": "L",
+          "score": "1-2",
+          "delta": -27.7
+        }
+      ]
+    },
+    {
+      "rank": 43,
       "name": "FATALS FURETS",
       "division": "Easy",
       "divSlug": "easy",
@@ -976,7 +999,7 @@
       "record": "0-1",
       "wins": 0,
       "losses": 1,
-      "power": 39.4,
+      "power": 39.3,
       "form": [
         "L"
       ],
@@ -990,29 +1013,6 @@
       ]
     },
     {
-      "rank": 43,
-      "name": "Les Gaillards",
-      "division": "Easy",
-      "divSlug": "easy",
-      "elo": 1496.3,
-      "delta": -26.7,
-      "record": "0-1",
-      "wins": 0,
-      "losses": 1,
-      "power": 39.2,
-      "form": [
-        "L"
-      ],
-      "matches": [
-        {
-          "opponent": "Eagle+4à6",
-          "result": "L",
-          "score": "1-2",
-          "delta": -26.7
-        }
-      ]
-    },
-    {
       "rank": 44,
       "name": "Daïquibrie",
       "division": "Easy",
@@ -1022,7 +1022,7 @@
       "record": "0-1",
       "wins": 0,
       "losses": 1,
-      "power": 38.3,
+      "power": 38.2,
       "form": [
         "L"
       ],
@@ -1037,6 +1037,29 @@
     },
     {
       "rank": 45,
+      "name": "Boîte de 4",
+      "division": "Medium",
+      "divSlug": "medium",
+      "elo": 1487.3,
+      "delta": -16.3,
+      "record": "0-1",
+      "wins": 0,
+      "losses": 1,
+      "power": 38.0,
+      "form": [
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Ginto",
+          "result": "L",
+          "score": "0-3",
+          "delta": -16.3
+        }
+      ]
+    },
+    {
+      "rank": 46,
       "name": "Miel In Black",
       "division": "Easy",
       "divSlug": "easy",
@@ -1045,7 +1068,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 37.8,
+      "power": 37.7,
       "form": [
         "W"
       ],
@@ -1059,39 +1082,16 @@
       ]
     },
     {
-      "rank": 46,
-      "name": "Boîte de 4",
-      "division": "Medium",
-      "divSlug": "medium",
-      "elo": 1485.5,
-      "delta": -18.1,
-      "record": "0-1",
-      "wins": 0,
-      "losses": 1,
-      "power": 37.7,
-      "form": [
-        "L"
-      ],
-      "matches": [
-        {
-          "opponent": "Ginto",
-          "result": "L",
-          "score": "0-3",
-          "delta": -18.1
-        }
-      ]
-    },
-    {
       "rank": 47,
       "name": "Les Fûts furieux",
       "division": "Starter",
       "divSlug": "starter",
-      "elo": 1479.5,
-      "delta": 20.8,
+      "elo": 1478.0,
+      "delta": 19.3,
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 36.9,
+      "power": 36.7,
       "form": [
         "W"
       ],
@@ -1100,7 +1100,7 @@
           "opponent": "Villyé-ball",
           "result": "W",
           "score": "3-0",
-          "delta": 20.8
+          "delta": 19.3
         }
       ]
     },
@@ -1132,12 +1132,12 @@
       "name": "Clodo d'Ivry",
       "division": "Starter",
       "divSlug": "starter",
-      "elo": 1452.2,
-      "delta": -11.5,
+      "elo": 1450.7,
+      "delta": -13.0,
       "record": "0-1",
       "wins": 0,
       "losses": 1,
-      "power": 33.2,
+      "power": 33.0,
       "form": [
         "L"
       ],
@@ -1146,7 +1146,7 @@
           "opponent": "StarPAFF",
           "result": "L",
           "score": "0-3",
-          "delta": -11.5
+          "delta": -13.0
         }
       ]
     },
@@ -1160,7 +1160,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 32.0,
+      "power": 31.9,
       "form": [
         "W"
       ],
@@ -1178,12 +1178,12 @@
       "name": "Punchline",
       "division": "Easy",
       "divSlug": "easy",
-      "elo": 1413.5,
-      "delta": -5.3,
+      "elo": 1388.2,
+      "delta": -5.1,
       "record": "0-1",
       "wins": 0,
       "losses": 1,
-      "power": 27.9,
+      "power": 24.4,
       "form": [
         "L"
       ],
@@ -1192,12 +1192,35 @@
           "opponent": "RSC Champigny 1",
           "result": "L",
           "score": "0-3",
-          "delta": -5.3
+          "delta": -5.1
         }
       ]
     },
     {
       "rank": 52,
+      "name": "Smashmallow",
+      "division": "Argent",
+      "divSlug": "argent",
+      "elo": 1386.2,
+      "delta": -4.0,
+      "record": "0-1",
+      "wins": 0,
+      "losses": 1,
+      "power": 24.1,
+      "form": [
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Cochonou",
+          "result": "L",
+          "score": "0-3",
+          "delta": -4.0
+        }
+      ]
+    },
+    {
+      "rank": 53,
       "name": "Les Filets O'Fish",
       "division": "Starter",
       "divSlug": "starter",
@@ -1220,7 +1243,7 @@
       ]
     },
     {
-      "rank": 53,
+      "rank": 54,
       "name": "GO ELAN",
       "division": "Argent",
       "divSlug": "argent",
@@ -1243,29 +1266,6 @@
       ]
     },
     {
-      "rank": 54,
-      "name": "Smashmallow",
-      "division": "Argent",
-      "divSlug": "argent",
-      "elo": 1366.0,
-      "delta": -3.6,
-      "record": "0-1",
-      "wins": 0,
-      "losses": 1,
-      "power": 21.4,
-      "form": [
-        "L"
-      ],
-      "matches": [
-        {
-          "opponent": "Cochonou",
-          "result": "L",
-          "score": "0-3",
-          "delta": -3.6
-        }
-      ]
-    },
-    {
       "rank": 55,
       "name": "Gold Digger",
       "division": "Starter",
@@ -1275,7 +1275,7 @@
       "record": "0-1",
       "wins": 0,
       "losses": 1,
-      "power": 20.7,
+      "power": 20.6,
       "form": [
         "L"
       ],
@@ -1290,6 +1290,29 @@
     },
     {
       "rank": 56,
+      "name": "Les Bry-Colo",
+      "division": "Argent",
+      "divSlug": "argent",
+      "elo": 1354.8,
+      "delta": -2.4,
+      "record": "0-1",
+      "wins": 0,
+      "losses": 1,
+      "power": 19.8,
+      "form": [
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Les punchers",
+          "result": "L",
+          "score": "0-3",
+          "delta": -2.4
+        }
+      ]
+    },
+    {
+      "rank": 57,
       "name": "Los Americanos",
       "division": "Starter",
       "divSlug": "starter",
@@ -1312,39 +1335,16 @@
       ]
     },
     {
-      "rank": 57,
-      "name": "Eagle+4à6",
-      "division": "Argent",
-      "divSlug": "argent",
-      "elo": 1323.4,
-      "delta": 26.7,
-      "record": "1-0",
-      "wins": 1,
-      "losses": 0,
-      "power": 15.6,
-      "form": [
-        "W"
-      ],
-      "matches": [
-        {
-          "opponent": "Les Gaillards",
-          "result": "W",
-          "score": "2-1",
-          "delta": 26.7
-        }
-      ]
-    },
-    {
       "rank": 58,
       "name": "Les Vendangeurs",
       "division": "Argent",
       "divSlug": "argent",
-      "elo": 1322.7,
-      "delta": -4.1,
+      "elo": 1345.8,
+      "delta": -4.0,
       "record": "0-1",
       "wins": 0,
       "losses": 1,
-      "power": 15.5,
+      "power": 18.6,
       "form": [
         "L"
       ],
@@ -1353,58 +1353,35 @@
           "opponent": "Pythons Collés",
           "result": "L",
           "score": "1-3",
-          "delta": -4.1
+          "delta": -4.0
         }
       ]
     },
     {
       "rank": 59,
-      "name": "Villyé-ball",
+      "name": "Eagle+4à6",
       "division": "Argent",
       "divSlug": "argent",
-      "elo": 1318.9,
-      "delta": -20.8,
-      "record": "0-1",
-      "wins": 0,
-      "losses": 1,
+      "elo": 1319.2,
+      "delta": 27.7,
+      "record": "1-0",
+      "wins": 1,
+      "losses": 0,
       "power": 14.9,
       "form": [
-        "L"
+        "W"
       ],
       "matches": [
         {
-          "opponent": "Les Fûts furieux",
-          "result": "L",
-          "score": "0-3",
-          "delta": -20.8
+          "opponent": "Les Gaillards",
+          "result": "W",
+          "score": "2-1",
+          "delta": 27.7
         }
       ]
     },
     {
       "rank": 60,
-      "name": "Les Bry-Colo",
-      "division": "Argent",
-      "divSlug": "argent",
-      "elo": 1314.6,
-      "delta": -1.9,
-      "record": "0-1",
-      "wins": 0,
-      "losses": 1,
-      "power": 14.4,
-      "form": [
-        "L"
-      ],
-      "matches": [
-        {
-          "opponent": "Les punchers",
-          "result": "L",
-          "score": "0-3",
-          "delta": -1.9
-        }
-      ]
-    },
-    {
-      "rank": 61,
       "name": "Choisy 4TW",
       "division": "Starter",
       "divSlug": "starter",
@@ -1423,6 +1400,29 @@
           "result": "L",
           "score": "0-3",
           "delta": -1.4
+        }
+      ]
+    },
+    {
+      "rank": 61,
+      "name": "Villyé-ball",
+      "division": "Argent",
+      "divSlug": "argent",
+      "elo": 1299.8,
+      "delta": -19.3,
+      "record": "0-1",
+      "wins": 0,
+      "losses": 1,
+      "power": 12.3,
+      "form": [
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Les Fûts furieux",
+          "result": "L",
+          "score": "0-3",
+          "delta": -19.3
         }
       ]
     },
@@ -1451,6 +1451,29 @@
     },
     {
       "rank": 63,
+      "name": "Villiers Basta",
+      "division": "Argent",
+      "divSlug": "argent",
+      "elo": 1235.8,
+      "delta": -5.8,
+      "record": "0-1",
+      "wins": 0,
+      "losses": 1,
+      "power": 3.5,
+      "form": [
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Cret'1",
+          "result": "L",
+          "score": "0-3",
+          "delta": -5.8
+        }
+      ]
+    },
+    {
+      "rank": 64,
       "name": "Les Pingouins Manchots",
       "division": "Argent",
       "divSlug": "argent",
@@ -1471,29 +1494,6 @@
           "delta": -3.6
         }
       ]
-    },
-    {
-      "rank": 64,
-      "name": "Villiers Basta",
-      "division": "Argent",
-      "divSlug": "argent",
-      "elo": 1209.6,
-      "delta": -5.1,
-      "record": "0-1",
-      "wins": 0,
-      "losses": 1,
-      "power": 0.0,
-      "form": [
-        "L"
-      ],
-      "matches": [
-        {
-          "opponent": "Cret'1",
-          "result": "L",
-          "score": "0-3",
-          "delta": -5.1
-        }
-      ]
     }
   ],
   "divisionStats": [
@@ -1501,8 +1501,8 @@
       "slug": "elite",
       "name": "Elite",
       "teams": 9,
-      "avgElo": 1811.5,
-      "maxElo": 1882.3,
+      "avgElo": 1811.6,
+      "maxElo": 1882.8,
       "minElo": 1735.7,
       "wins": 8,
       "losses": 1,
@@ -1512,9 +1512,9 @@
       "slug": "ultimate",
       "name": "Ultimate",
       "teams": 8,
-      "avgElo": 1899.0,
+      "avgElo": 1898.9,
       "maxElo": 1940.5,
-      "minElo": 1843.1,
+      "minElo": 1822.9,
       "wins": 6,
       "losses": 2,
       "winPct": 75.0
@@ -1523,9 +1523,9 @@
       "slug": "hard",
       "name": "Hard",
       "teams": 8,
-      "avgElo": 1700.4,
-      "maxElo": 1783.2,
-      "minElo": 1657.3,
+      "avgElo": 1698.6,
+      "maxElo": 1759.5,
+      "minElo": 1649.9,
       "wins": 5,
       "losses": 3,
       "winPct": 62.5
@@ -1534,7 +1534,7 @@
       "slug": "or6x6",
       "name": "Or 6x6",
       "teams": 7,
-      "avgElo": 1645.2,
+      "avgElo": 1645.3,
       "maxElo": 1727.4,
       "minElo": 1585.7,
       "wins": 4,
@@ -1545,9 +1545,9 @@
       "slug": "medium",
       "name": "Medium",
       "teams": 8,
-      "avgElo": 1599.5,
+      "avgElo": 1599.6,
       "maxElo": 1666.8,
-      "minElo": 1485.5,
+      "minElo": 1487.3,
       "wins": 4,
       "losses": 4,
       "winPct": 50.0
@@ -1556,8 +1556,8 @@
       "slug": "starter",
       "name": "Starter",
       "teams": 7,
-      "avgElo": 1395.6,
-      "maxElo": 1479.5,
+      "avgElo": 1395.2,
+      "maxElo": 1478.0,
       "minElo": 1304.8,
       "wins": 2,
       "losses": 5,
@@ -1569,7 +1569,7 @@
       "teams": 8,
       "avgElo": 1493.2,
       "maxElo": 1580.8,
-      "minElo": 1413.5,
+      "minElo": 1388.2,
       "wins": 2,
       "losses": 6,
       "winPct": 25.0
@@ -1578,9 +1578,9 @@
       "slug": "argent",
       "name": "Argent",
       "teams": 9,
-      "avgElo": 1300.9,
-      "maxElo": 1372.0,
-      "minElo": 1209.6,
+      "avgElo": 1310.5,
+      "maxElo": 1386.2,
+      "minElo": 1210.0,
       "wins": 1,
       "losses": 8,
       "winPct": 11.1
@@ -1607,8 +1607,8 @@
       "awayDivision": "starter",
       "winner": "StarPAFF",
       "forfeit": false,
-      "deltaHome": 11.5,
-      "deltaAway": -11.5,
+      "deltaHome": 13.0,
+      "deltaAway": -13.0,
       "date": "16/11/2026",
       "time": "20:00",
       "venue": "Alice Milliat",
@@ -1694,8 +1694,8 @@
       "awayDivision": "ultimate",
       "winner": "RSC Champigny 1",
       "forfeit": false,
-      "deltaHome": -5.3,
-      "deltaAway": 5.3,
+      "deltaHome": -5.1,
+      "deltaAway": 5.1,
       "date": "16/11/2026",
       "time": "20:00",
       "venue": "Gymnase Pierre de Coubertin",
@@ -1722,8 +1722,8 @@
       "awayDivision": "ultimate",
       "winner": "Red Hot Sucy Pépère",
       "forfeit": false,
-      "deltaHome": -10.6,
-      "deltaAway": 10.6,
+      "deltaHome": -9.7,
+      "deltaAway": 9.7,
       "date": "17/11/2026",
       "time": "20:30",
       "venue": "Gymnase Budé",
@@ -1750,8 +1750,8 @@
       "awayDivision": "starter",
       "winner": "Les Fûts furieux",
       "forfeit": false,
-      "deltaHome": -20.8,
-      "deltaAway": 20.8,
+      "deltaHome": -19.3,
+      "deltaAway": 19.3,
       "date": "16/11/2026",
       "time": "20:15",
       "venue": "Yves Querlier",
@@ -1923,8 +1923,8 @@
       "awayDivision": "argent",
       "winner": "Les punchers",
       "forfeit": false,
-      "deltaHome": 1.9,
-      "deltaAway": -1.9,
+      "deltaHome": 2.4,
+      "deltaAway": -2.4,
       "date": "16/11/2026",
       "time": "20:15",
       "venue": "Yves Querlier",
@@ -2045,8 +2045,8 @@
       "awayDivision": "elite",
       "winner": "Olympe BB volley",
       "forfeit": false,
-      "deltaHome": -6.8,
-      "deltaAway": 6.8,
+      "deltaHome": -6.2,
+      "deltaAway": 6.2,
       "date": "18/11/2026",
       "time": "20:30",
       "venue": "Venise Gosnat",
@@ -2161,8 +2161,8 @@
       "awayDivision": "elite",
       "winner": "Team Glouglou",
       "forfeit": false,
-      "deltaHome": -20.0,
-      "deltaAway": 20.0,
+      "deltaHome": -21.1,
+      "deltaAway": 21.1,
       "date": "16/11/2026",
       "time": "20:00",
       "venue": "Collège/Lycée Saint Michel de Saint-Mandé",
@@ -2189,8 +2189,8 @@
       "awayDivision": "easy",
       "winner": "Eagle+4à6",
       "forfeit": false,
-      "deltaHome": 26.7,
-      "deltaAway": -26.7,
+      "deltaHome": 27.7,
+      "deltaAway": -27.7,
       "date": "20/11/2026",
       "time": "20:00",
       "venue": "Léo Lagrange",
@@ -2246,8 +2246,8 @@
       "awayDivision": "argent",
       "winner": "Cochonou",
       "forfeit": false,
-      "deltaHome": 3.6,
-      "deltaAway": -3.6,
+      "deltaHome": 4.0,
+      "deltaAway": -4.0,
       "date": "18/11/2026",
       "time": "20:00",
       "venue": "gymnase Eugene Delacroix",
@@ -2304,8 +2304,8 @@
       "awayDivision": "hard",
       "winner": "Ginto",
       "forfeit": false,
-      "deltaHome": -18.1,
-      "deltaAway": 18.1,
+      "deltaHome": -16.3,
+      "deltaAway": 16.3,
       "date": "18/11/2026",
       "time": "20:30",
       "venue": "Clarisse Agbegnenou",
@@ -2334,8 +2334,8 @@
       "awayDivision": "hard",
       "winner": "Pythons Collés",
       "forfeit": false,
-      "deltaHome": -4.1,
-      "deltaAway": 4.1,
+      "deltaHome": -4.0,
+      "deltaAway": 4.0,
       "date": "16/11/2026",
       "time": "20:30",
       "venue": "Gymnase des Sablons",
@@ -2366,8 +2366,8 @@
       "awayDivision": "ultimate",
       "winner": "Nekutā",
       "forfeit": false,
-      "deltaHome": 19.5,
-      "deltaAway": -19.5,
+      "deltaHome": 18.4,
+      "deltaAway": -18.4,
       "date": "19/11/2026",
       "time": "20:20",
       "venue": "Gymnase Georges Pompidou",
@@ -2422,8 +2422,8 @@
       "awayDivision": "hard",
       "winner": "GO Team Apero",
       "forfeit": false,
-      "deltaHome": 23.9,
-      "deltaAway": -23.9,
+      "deltaHome": 24.2,
+      "deltaAway": -24.2,
       "date": "16/11/2026",
       "time": "20:00",
       "venue": "Gymnase Pierre de Coubertin",
@@ -2452,8 +2452,8 @@
       "awayDivision": "hard",
       "winner": "Les Loups-Phoques",
       "forfeit": false,
-      "deltaHome": -11.9,
-      "deltaAway": 11.9,
+      "deltaHome": -13.2,
+      "deltaAway": 13.2,
       "date": "17/11/2026",
       "time": "20:45",
       "venue": "GYMNASE DELAUNE",
@@ -2480,8 +2480,8 @@
       "awayDivision": "argent",
       "winner": "Cret'1",
       "forfeit": false,
-      "deltaHome": 5.1,
-      "deltaAway": -5.1,
+      "deltaHome": 5.8,
+      "deltaAway": -5.8,
       "date": "18/11/2026",
       "time": "20:00",
       "venue": "Guyard",

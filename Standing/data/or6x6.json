@@ -5,10 +5,10 @@
     "name": "Or 6x6",
     "format": "6x6",
     "url": "https://volley-fsgt94.fr/championnat/4",
-    "lastUpdated": "2026-11-18T19:33:15",
+    "lastUpdated": "2026-11-24T00:32:32",
     "teamCount": 11,
-    "matchesPlayed": 13,
-    "matchesUpcoming": 97
+    "matchesPlayed": 14,
+    "matchesUpcoming": 96
   },
   "teams": {
     "cout": {
@@ -41,14 +41,14 @@
       "short": "N2",
       "color": "#1abc9c"
     },
-    "raia": {
-      "name": "La Raïa",
-      "short": "RA",
-      "color": "#e67e22"
-    },
     "marv": {
       "name": "Marvels 6",
       "short": "M6",
+      "color": "#e67e22"
+    },
+    "raia": {
+      "name": "La Raïa",
+      "short": "RA",
       "color": "#f1c40f"
     },
     "ivry": {
@@ -71,23 +71,23 @@
     {
       "rank": 1,
       "team": "cout",
-      "mj": 3,
-      "g": 3,
+      "mj": 4,
+      "g": 4,
       "p": 0,
-      "setPlus": 8,
+      "setPlus": 11,
       "setMinus": 1,
-      "ds": 7,
-      "coefSet": "8.00",
-      "ptsPlus": 225,
+      "ds": 10,
+      "coefSet": "11.00",
+      "ptsPlus": 300,
       "ptsMinus": 172,
-      "dp": "+53",
-      "coefPts": "1.31",
-      "pts": 9,
+      "dp": "+128",
+      "coefPts": "1.74",
+      "pts": 12,
       "formAller": [
         "W",
         "W",
         "W",
-        "P",
+        "W",
         "P",
         "P",
         "P",
@@ -207,7 +207,7 @@
         "L",
         "W",
         "W",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -310,46 +310,6 @@
     },
     {
       "rank": 7,
-      "team": "raia",
-      "mj": 2,
-      "g": 1,
-      "p": 1,
-      "setPlus": 4,
-      "setMinus": 4,
-      "ds": 0,
-      "coefSet": "1.00",
-      "ptsPlus": 159,
-      "ptsMinus": 166,
-      "dp": "-7",
-      "coefPts": "0.96",
-      "pts": 4,
-      "formAller": [
-        "W",
-        "D",
-        "L",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 8,
       "team": "marv",
       "mj": 2,
       "g": 1,
@@ -389,6 +349,46 @@
       ]
     },
     {
+      "rank": 8,
+      "team": "raia",
+      "mj": 3,
+      "g": 1,
+      "p": 2,
+      "setPlus": 4,
+      "setMinus": 7,
+      "ds": -3,
+      "coefSet": "0.57",
+      "ptsPlus": 159,
+      "ptsMinus": 241,
+      "dp": "-82",
+      "coefPts": "0.66",
+      "pts": 4,
+      "formAller": [
+        "W",
+        "D",
+        "L",
+        "L",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
       "rank": 9,
       "team": "cret",
       "mj": 2,
@@ -406,7 +406,7 @@
       "formAller": [
         "L",
         "L",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -510,6 +510,34 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "23/11/2026",
+      "home": "cout",
+      "away": "raia",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Forfait",
+      "time": "20:30",
+      "sets": [
+        [
+          25,
+          0
+        ],
+        [
+          25,
+          0
+        ],
+        [
+          25,
+          0
+        ]
+      ],
+      "total": [
+        75,
+        0
+      ]
+    },
     {
       "date": "10/11/2026",
       "home": "marv",
@@ -920,20 +948,6 @@
       "time": null
     },
     {
-      "date": "23/11/2026",
-      "home": "cout",
-      "away": "raia",
-      "status": "Sem. 4",
-      "time": "20:30"
-    },
-    {
-      "date": "25/11/2026",
-      "home": "cret",
-      "away": "smas",
-      "status": "Sem. 4",
-      "time": "20:00"
-    },
-    {
       "date": "25/11/2026",
       "home": "bloc",
       "away": "neui",
@@ -1163,6 +1177,13 @@
       "away": "raia",
       "status": "Sem. 10",
       "time": "20:30"
+    },
+    {
+      "date": "03/02/2027",
+      "home": "cret",
+      "away": "smas",
+      "status": "Reporté",
+      "time": "20:00"
     },
     {
       "date": "22/02/2027",
@@ -1596,11 +1617,11 @@
     {
       "rank": 1,
       "team": "cout",
-      "elo": 1576.8,
-      "movement": 13.9,
-      "record": "3-0",
+      "elo": 1598.2,
+      "movement": 21.4,
+      "record": "4-0",
       "power": 100.0,
-      "calendar": "V x3",
+      "calendar": "V x4",
       "diffClass": "diff-easy"
     },
     {
@@ -1609,7 +1630,7 @@
       "elo": 1571.0,
       "movement": 23.2,
       "record": "3-0",
-      "power": 96.2,
+      "power": 86.2,
       "calendar": "V x3",
       "diffClass": "diff-easy"
     },
@@ -1619,7 +1640,7 @@
       "elo": 1541.1,
       "movement": 22.2,
       "record": "2-0",
-      "power": 76.8,
+      "power": 70.9,
       "calendar": "V vs Oss",
       "diffClass": "diff-easy"
     },
@@ -1629,22 +1650,12 @@
       "elo": 1532.3,
       "movement": 39.7,
       "record": "2-1",
-      "power": 71.0,
+      "power": 66.4,
       "calendar": "V vs Marvels",
       "diffClass": "diff-easy"
     },
     {
       "rank": 5,
-      "team": "raia",
-      "elo": 1504.8,
-      "movement": -23.2,
-      "record": "1-1",
-      "power": 53.1,
-      "calendar": "D vs No",
-      "diffClass": "diff-hard"
-    },
-    {
-      "rank": 6,
       "team": "oss",
       "elo": 1488.9,
       "movement": -22.2,
@@ -1654,13 +1665,23 @@
       "diffClass": "diff-hard"
     },
     {
-      "rank": 7,
+      "rank": 6,
       "team": "marv",
       "elo": 1486.5,
       "movement": -39.7,
       "record": "1-1",
       "power": 38.3,
       "calendar": "D vs Smash",
+      "diffClass": "diff-hard"
+    },
+    {
+      "rank": 7,
+      "team": "raia",
+      "elo": 1483.4,
+      "movement": -21.4,
+      "record": "1-2",
+      "power": 35.6,
+      "calendar": "D vs Coutiao",
       "diffClass": "diff-hard"
     },
     {
@@ -1710,7 +1731,8 @@
       1500,
       1539.1,
       1562.9,
-      1576.8
+      1576.8,
+      1598.2
     ],
     "no": [
       1500,
@@ -1741,15 +1763,16 @@
       1464.4,
       1450.5
     ],
-    "raia": [
-      1500,
-      1528.0,
-      1504.8
-    ],
     "marv": [
       1500,
       1526.2,
       1486.5
+    ],
+    "raia": [
+      1500,
+      1528.0,
+      1504.8,
+      1483.4
     ],
     "ivry": [
       1500,
@@ -1773,7 +1796,8 @@
           0,
           3,
           6,
-          9
+          9,
+          12
         ],
         "rank": 1
       },
@@ -1821,7 +1845,7 @@
         ],
         "rank": 6
       },
-      "raia": {
+      "marv": {
         "points": [
           0,
           3,
@@ -1829,10 +1853,11 @@
         ],
         "rank": 7
       },
-      "marv": {
+      "raia": {
         "points": [
           0,
           3,
+          4,
           4
         ],
         "rank": 8
