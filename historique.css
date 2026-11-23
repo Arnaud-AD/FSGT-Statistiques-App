@@ -349,6 +349,51 @@ body {
 .detail-result-label.loss { color: var(--loss-color); }
 .detail-result-label.draw { color: var(--draw-color); }
 
+/* V29.94 : profils radar d'équipe de part et d'autre du score (carte du match).
+   Les puces de sets restent en dessous, sur toute la largeur (matchs en 5 sets). */
+.detail-header-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: 6px;
+}
+.detail-team-profile {
+    display: flex;
+    justify-content: center;
+    min-width: 0;
+}
+.detail-team-profile:empty { visibility: hidden; }
+.ranking-profile.compact {
+    flex-direction: column;
+    gap: 2px;
+}
+.ranking-profile.compact .ranking-profile-radar {
+    width: 132px;
+    max-width: 100%;
+}
+.ranking-profile.compact .ranking-profile-keys {
+    display: flex;
+    font-size: 11px;
+    gap: 1px;
+}
+.ranking-profile.compact .ranking-profile-delta { font-size: 10px; }
+.ranking-profile.compact .ranking-profile-radar.tight { display: none; }
+@media (max-width: 700px) {
+    /* Radars calés en bas (à hauteur du score), loin du rouage et de la croix */
+    .detail-team-profile { align-self: end; }
+    .ranking-profile.compact .ranking-profile-radar { width: 112px; }
+    .ranking-profile.compact .ranking-profile-keys { display: none; }
+}
+/* Téléphone : radar sans libellés, cadré au plus près (les libellés seraient illisibles) */
+@media (max-width: 480px) {
+    .ranking-profile.compact .ranking-profile-radar { display: none; }
+    .ranking-profile.compact .ranking-profile-radar.tight { display: block; width: 84px; }
+    .detail-header.has-profiles { padding-left: 10px; padding-right: 10px; }
+    .detail-header.has-profiles .detail-header-score { gap: 6px; }
+    .detail-header.has-profiles .detail-header-team { min-width: 0; }
+    .detail-header.has-profiles .detail-header-team-name { max-width: 92px; }
+}
+
 /* Score sets dans le header */
 .detail-header-score {
     display: flex;
@@ -3079,9 +3124,24 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
     .detail-header > .detail-result-icon,
     .detail-header > .detail-result-label,
     .detail-header > .detail-opponent,
-    .detail-header > .detail-meta {
+    .detail-header > .detail-meta,
+    .detail-header-center > .detail-result-icon,
+    .detail-header-center > .detail-result-label {
         margin-bottom: 0;
     }
+    /* V29.94 : radar | trophée + résultat + score | radar sur une ligne, le reste en dessous */
+    .detail-header-top {
+        flex: 1 1 100%;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        column-gap: 28px;
+    }
+    .detail-header-center {
+        display: flex;
+        align-items: center;
+        gap: 6px 28px;
+    }
+    .detail-team-profile.home { justify-content: flex-end; }
+    .detail-team-profile.away { justify-content: flex-start; }
 
 }
 
@@ -4043,4 +4103,9 @@ th[data-sort-col]:hover .sort-arrow:not(.active) {
         grid-template-columns: repeat(4, 1fr);
         gap: 10px;
     }
+}
+
+/* V29.94 : très petits écrans, pas la place pour les radars d'équipe à côté du score */
+@media (max-width: 340px) {
+    .detail-header-top .detail-team-profile { display: none; }
 }
