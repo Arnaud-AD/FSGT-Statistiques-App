@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Historique - Jen et ses Saints</title>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="historique.css?v=29.54">
+    <link rel="stylesheet" href="historique.css?v=29.55">
     <link rel="stylesheet" href="recap.css?v=5">
     <script>
       // Mode recap : masquer l'historique dès le 1er paint pour ne jamais
@@ -108,6 +108,10 @@
                         </div>
                     </div>
                     <button class="detail-close-btn" id="detailCloseBtn">✕</button>
+                    <!-- V29.94 : profil radar d'équipe à gauche (Jen) et à droite (adversaire) -->
+                    <div class="detail-header-top">
+                    <div class="detail-team-profile home" id="detailHomeProfile"></div>
+                    <div class="detail-header-center">
                     <div class="detail-result-icon" id="detailResultIcon">🏆</div>
                     <div class="detail-result-label" id="detailResultLabel">Victoire</div>
 
@@ -122,6 +126,9 @@
                             <div class="detail-header-team-name" id="detailAwayName">Adversaire</div>
                             <div class="detail-header-team-score" id="detailAwaySets">0</div>
                         </div>
+                    </div>
+                    </div>
+                    <div class="detail-team-profile away" id="detailAwayProfile"></div>
                     </div>
 
                     <!-- Detail sets chips -->
@@ -253,7 +260,7 @@
     </div>
 
     <script src="storage.js?v=20.287"></script>
-    <script src="historique.js?v=29.93"></script>
+    <script src="historique.js?v=29.94"></script>
     <!-- Filet de sécurité : ne jamais rester bloqué sur l'écran de chargement -->
     <script>setTimeout(function() { document.body.classList.remove('hist-is-loading'); }, 25000);</script>
     <script src="recap.js?v=7"></script>

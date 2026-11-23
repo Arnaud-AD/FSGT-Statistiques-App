@@ -8110,16 +8110,70 @@ const RankingView = {
         return avg;
     },
 
+    // V29.94 : profils d'équipe d'UN match (carte du match, en-tête). Même calcul que la colonne
+    // Profil (stats brutes de tous les joueurs additionnées), sur ce seul match. Échelle et
+    // pointillé = ceux du Ranking Équipes de la saison du match (tous types de match), élargis
+    // si une valeur du match sort de la plage des équipes, pour rester comparable au Ranking.
+    matchProfiles(match) {
+        if (!match || !(match.sets || []).some(function(s) { return s.completed; })) return null;
+        var opp = canonicalTeamName(match.opponent || 'Adversaire');
+        var self = this;
+        var prev = self._seasonMatches;
+        var home, away;
+        try {
+            self._seasonMatches = [match];
+            home = self._computeTeamData([match], 'home', 'Jen et ses Saints');
+            away = self._computeTeamData([match], 'away', opp);
+        } finally {
+            self._seasonMatches = prev;
+        }
+        var ref = this._seasonProfileRef(match.season || '2025-2026');
+        var scale = { _min: {}, _max: {} };
+        BilanView.SPIDER_AXES.forEach(function(a) {
+            var vals = [home, away].map(function(t) { return t[self.PROFILE_KEY] ? (t[self.PROFILE_KEY][a.key] || 0) : 0; })
+                .filter(function(v) { return v > 0; });
+            var lo = ref ? ref._min[a.key] : 0, hi = ref ? ref._max[a.key] : 100;
+            if (!(hi > lo)) { lo = 0; hi = 100; }
+            scale[a.key] = ref ? ref[a.key] : 0;
+            scale._min[a.key] = Math.min.apply(null, [lo].concat(vals));
+            scale._max[a.key] = Math.max.apply(null, [hi].concat(vals));
+        });
+        return {
+            home: { name: 'Jen et ses Saints', scores: home[self.PROFILE_KEY] },
+            away: { name: opp, scores: away[self.PROFILE_KEY] },
+            scale: scale
+        };
+    },
+
+    // Moyenne / plage des radars d'équipe du Ranking pour une saison (mise en cache)
+    _seasonProfileRef(season) {
+        var src = (typeof HistoriqueData !== 'undefined') ? HistoriqueData._cache : null;
+        if (!this._profileRefCache || this._profileRefCache.src !== src) this._profileRefCache = { src: src, bySeason: {} };
+        if (this._profileRefCache.bySeason[season] !== undefined) return this._profileRefCache.bySeason[season];
+        var matches = HistoriqueData.getCompletedMatches().filter(function(m) { return (m.season || '2025-2026') === season; });
+        var ref = null;
+        if (matches.length > 0) {
+            var data = this._computeRankingData(matches);
+            var teams = data.teams.filter(function(t) { return t[RankingView.PROFILE_KEY]; });
+            if (teams.length >= 2) ref = this._teamProfileAverage(teams);
+        }
+        this._profileRefCache.bySeason[season] = ref;
+        return ref;
+    },
+
     // V29.85 : radar d'équipe agrégé (colonne « Profil »), couleur du badge de l'équipe.
     // Pointillé gris = moyenne des équipes. Point fort / faible = plus grand écart (+ / −) à cette moyenne.
-    _renderTeamProfile(scores, color, avg) {
+    // opts.compact (V29.94, carte du match) : radar plus serré, libellés plus gros, ▲ / ▼ sous le radar
+    _renderTeamProfile(scores, color, avg, opts) {
+        opts = opts || {};
         if (!scores) return '';
         var axes = BilanView.SPIDER_AXES;
         var NAMES = { attaque: 'Attaque', bloc: 'Bloc', relance: 'Relance', service: 'Service',
             passe: 'Passe', defense: 'Défense', reception: 'Réception' };
         var vals = axes.map(function(a) { return scores[a.key] || 0; });
         if (!vals.some(function(v) { return v > 0; })) return '';
-        var cx = 60, cy = 56, maxR = 40;
+        var cx = 60, cy = 56, maxR = opts.compact ? 33 : 40;
+        var fontSize = opts.compact ? 10.5 : 7.5;
         var pc = function(r, ang) { return BilanView.polarToCartesian(cx, cy, r, ang); };
         var fmt = function(pt) { return pt.x.toFixed(1) + ',' + pt.y.toFixed(1); };
         // V29.86 : échelle zoomée par axe. Centre (15 % du rayon) = équipe la plus faible sur l'axe,
@@ -8166,13 +8220,18 @@ const RankingView = {
             var pt = pc(rad(a.key, vals[i]), a.angle);
             svg += '<circle cx="' + pt.x.toFixed(1) + '" cy="' + pt.y.toFixed(1) + '" r="1.8" fill="#fff" stroke="' + color + '" stroke-width="1"/>';
         });
+        // V29.94 : variante sans libellés, cadrée sur le radar (carte du match sur téléphone)
+        var tightSvg = opts.compact
+            ? svg.replace('class="ranking-profile-radar" viewBox="0 0 120 108"',
+                'class="ranking-profile-radar tight" viewBox="' + (cx - maxR - 3) + ' ' + (cy - maxR - 3) + ' ' + (2 * maxR + 6) + ' ' + (2 * maxR + 4) + '"') + '</svg>'
+            : '';
         axes.forEach(function(a, i) {
             var pt = pc(maxR + 4, a.angle);
             var cos = Math.cos(a.angle * Math.PI / 180), sin = Math.sin(a.angle * Math.PI / 180);
             var anchor = cos > 0.3 ? 'start' : (cos < -0.3 ? 'end' : 'middle');
-            var dy = sin < -0.7 ? -1 : (sin > 0.7 ? 7 : 3);
+            var dy = opts.compact ? (sin < -0.7 ? -1.5 : (sin > 0.7 ? 9 : 4)) : (sin < -0.7 ? -1 : (sin > 0.7 ? 7 : 3));
             svg += '<text x="' + pt.x.toFixed(1) + '" y="' + (pt.y + dy).toFixed(1) + '" text-anchor="' + anchor +
-                '" font-size="7.5" font-weight="500" font-family="Google Sans, Roboto, sans-serif" fill="' +
+                '" font-size="' + fontSize + '" font-weight="500" font-family="Google Sans, Roboto, sans-serif" fill="' +
                 (vals[i] > 0 ? '#5f6368' : '#bdc1c6') + '">' + a.label + '</text>';
         });
         svg += '</svg>';
@@ -8185,7 +8244,7 @@ const RankingView = {
         var title = axes.map(function(a, i) {
             return NAMES[a.key] + ' ' + (vals[i] || '–') + (avg && vals[i] ? ' (moy. ' + avg[a.key] + ')' : '');
         }).join(' · ');
-        var html = '<div class="ranking-profile" title="' + title + '">' + svg;
+        var html = '<div class="ranking-profile' + (opts.compact ? ' compact' : '') + '" title="' + title + '">' + svg + tightSvg;
         // ▲ seulement si l'axe est au-dessus de la moyenne, ▼ seulement s'il est en dessous
         var best = rated[0], worst = rated[rated.length - 1];
         var showUp = best && best.d > 0, showDown = worst && worst.d < 0;
@@ -11226,6 +11285,9 @@ const MatchStatsView = {
         // Detail sets chips
         this.renderHeaderSets(match);
 
+        // V29.94 : profils radar d'équipe (Jen à gauche, adversaire à droite)
+        this.renderHeaderProfiles(match);
+
         // Lien YouTube
         this.renderYoutubeLink(match);
 
@@ -11262,6 +11324,20 @@ const MatchStatsView = {
             var html = BilanView.renderDistinctions(homeTotals, homeRoles, homePlayers, completedSets, [match]);
             DistinctionsModal.open(html, 'Distinctions \u2014 vs ' + (match.opponent || 'Adversaire'));
         });
+    },
+
+    renderHeaderProfiles(match) {
+        var homeEl = document.getElementById('detailHomeProfile');
+        var awayEl = document.getElementById('detailAwayProfile');
+        if (!homeEl || !awayEl) return;
+        var p = null;
+        try { p = RankingView.matchProfiles(match); } catch (e) { console.warn('Profil équipe', e); }
+        var homeHtml = p ? RankingView._renderTeamProfile(p.home.scores, getTeamColor(p.home.name), p.scale, { compact: true }) : '';
+        var awayHtml = p ? RankingView._renderTeamProfile(p.away.scores, getTeamColor(p.away.name), p.scale, { compact: true }) : '';
+        homeEl.innerHTML = homeHtml;
+        awayEl.innerHTML = awayHtml;
+        var header = homeEl.closest('.detail-header');
+        if (header) header.classList.toggle('has-profiles', !!(homeHtml || awayHtml));
     },
 
     renderHeaderSets(match) {
