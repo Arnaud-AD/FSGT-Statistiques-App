@@ -295,10 +295,33 @@ function renderStandings() {
     const container = document.getElementById('classement-table-content');
     if (!container || !DATA) return;
 
+    // Forfeits: the scraper's form only knows W/L/C. The team's played matches,
+    // sorted by date, line up with its played form items (W/L/C) in order, so a
+    // forfeit match turns its item into FW (won by forfeit) or F (forfeit).
+    var forfeitPlayed = champMatchCtx().played;
+    function forfeitForm(team, aller, retour) {
+        var mine = forfeitPlayed.filter(function(m) { return m.home === team || m.away === team; });
+        if (!mine.some(function(m) { return m.forfeit; })) return [aller, retour];
+        mine.sort(function(a, b) { return (parseFrDate(a.date) || 0) - (parseFrDate(b.date) || 0); });
+        var all = aller.concat(retour), k = 0;
+        all = all.map(function(f) {
+            if (f !== 'W' && f !== 'L' && f !== 'C') return f;
+            var m = mine[k++];
+            if (!m || !m.forfeit) return f;
+            var won = (m.home === team) === !!m.homeWin;
+            if (won && f === 'W') return 'FW';
+            if (!won && f !== 'W') return 'F';
+            return f;
+        });
+        return [all.slice(0, aller.length), all.slice(aller.length)];
+    }
+
     function buildFormItems(formArray) {
         return formArray.map(function(f) {
             let cls = 'form-pending';
-            if (f === 'W') cls = 'form-win';
+            if (f === 'FW') cls = 'form-forfeit-win';
+            else if (f === 'F') cls = 'form-forfeit-loss';
+            else if (f === 'W') cls = 'form-win';
             else if (f === 'L') cls = 'form-loss';
             else if (f === 'C') cls = 'form-close';   // défaite serrée (1 set d'écart)
             else if (f === 'D') cls = 'form-postponed';
@@ -352,8 +375,9 @@ function renderStandings() {
     sorted.forEach(function(s) {
         const team = DATA.teams[s.team];
         if (!team) return;
-        const allerItems = buildFormItems(s.formAller);
-        const retourItems = buildFormItems(s.formRetour);
+        const ff = forfeitForm(s.team, s.formAller || [], s.formRetour || []);
+        const allerItems = buildFormItems(ff[0]);
+        const retourItems = buildFormItems(ff[1]);
 
         const expanded = !!standingsExpanded[s.team];
         rows += '<tr class="rank-' + s.rank + ' standings-row' + (expanded ? ' expanded' : '') + (standingsCalendarOpen[s.team] ? ' cal-open' : '') + '" data-team="' + s.team + '">' +
