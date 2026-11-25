@@ -5,20 +5,20 @@
     "name": "Elite",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/2",
-    "lastUpdated": "2026-11-24T00:31:37",
+    "lastUpdated": "2026-11-25T03:12:42",
     "teamCount": 9,
-    "matchesPlayed": 13,
-    "matchesUpcoming": 59
+    "matchesPlayed": 14,
+    "matchesUpcoming": 58
   },
   "teams": {
-    "neku": {
-      "name": "Nekutā",
-      "short": "NE",
-      "color": "#e74c3c"
-    },
     "punc": {
       "name": "Les punchers",
       "short": "PU",
+      "color": "#e74c3c"
+    },
+    "neku": {
+      "name": "Nekutā",
+      "short": "NE",
       "color": "#3498db"
     },
     "yip": {
@@ -60,6 +60,42 @@
   "standings": [
     {
       "rank": 1,
+      "team": "punc",
+      "mj": 4,
+      "g": 4,
+      "p": 0,
+      "setPlus": 12,
+      "setMinus": 4,
+      "ds": 8,
+      "coefSet": "3.00",
+      "ptsPlus": 387,
+      "ptsMinus": 321,
+      "dp": "+66",
+      "coefPts": "1.21",
+      "pts": 12,
+      "formAller": [
+        "W",
+        "W",
+        "W",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "D",
+        "D",
+        "D",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 2,
       "team": "neku",
       "mj": 4,
       "g": 3,
@@ -84,45 +120,9 @@
         "P"
       ],
       "formRetour": [
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 2,
-      "team": "punc",
-      "mj": 3,
-      "g": 3,
-      "p": 0,
-      "setPlus": 9,
-      "setMinus": 3,
-      "ds": 6,
-      "coefSet": "3.00",
-      "ptsPlus": 288,
-      "ptsMinus": 227,
-      "dp": "+61",
-      "coefPts": "1.27",
-      "pts": 9,
-      "formAller": [
-        "W",
-        "W",
-        "W",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "P",
-        "P",
-        "P",
+        "D",
+        "D",
+        "D",
         "P",
         "P",
         "P",
@@ -156,9 +156,9 @@
         "P"
       ],
       "formRetour": [
-        "P",
-        "P",
-        "P",
+        "D",
+        "D",
+        "D",
         "P",
         "P",
         "P",
@@ -192,8 +192,8 @@
         "P"
       ],
       "formRetour": [
-        "P",
-        "P",
+        "D",
+        "D",
         "P",
         "P",
         "P",
@@ -221,16 +221,16 @@
         "W",
         "W",
         "L",
-        "P",
+        "D",
         "P",
         "P",
         "P",
         "P"
       ],
       "formRetour": [
-        "P",
-        "P",
-        "P",
+        "D",
+        "D",
+        "D",
         "P",
         "P",
         "P",
@@ -241,32 +241,32 @@
     {
       "rank": 6,
       "team": "padn",
-      "mj": 3,
+      "mj": 4,
       "g": 1,
-      "p": 2,
-      "setPlus": 5,
-      "setMinus": 8,
-      "ds": -3,
-      "coefSet": "0.62",
-      "ptsPlus": 260,
-      "ptsMinus": 292,
-      "dp": "-32",
-      "coefPts": "0.89",
-      "pts": 6,
+      "p": 3,
+      "setPlus": 6,
+      "setMinus": 11,
+      "ds": -5,
+      "coefSet": "0.55",
+      "ptsPlus": 354,
+      "ptsMinus": 391,
+      "dp": "-37",
+      "coefPts": "0.91",
+      "pts": 7,
       "formAller": [
         "W",
         "L",
         "C",
-        "P",
+        "L",
         "P",
         "P",
         "P",
         "P"
       ],
       "formRetour": [
-        "P",
-        "P",
-        "P",
+        "D",
+        "D",
+        "D",
         "P",
         "P",
         "P",
@@ -300,8 +300,8 @@
         "P"
       ],
       "formRetour": [
-        "P",
-        "P",
+        "D",
+        "D",
         "P",
         "P",
         "P",
@@ -336,9 +336,9 @@
         "P"
       ],
       "formRetour": [
-        "P",
-        "P",
-        "P",
+        "D",
+        "D",
+        "D",
         "P",
         "P",
         "P",
@@ -364,7 +364,7 @@
       "formAller": [
         "C",
         "D",
-        "P",
+        "D",
         "P",
         "P",
         "P",
@@ -372,8 +372,8 @@
         "P"
       ],
       "formRetour": [
-        "P",
-        "P",
+        "D",
+        "D",
         "P",
         "P",
         "P",
@@ -384,6 +384,38 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "24/11/2026",
+      "home": "padn",
+      "away": "punc",
+      "scoreHome": 1,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé",
+      "time": "20:00",
+      "sets": [
+        [
+          25,
+          27
+        ],
+        [
+          25,
+          22
+        ],
+        [
+          23,
+          25
+        ],
+        [
+          21,
+          25
+        ]
+      ],
+      "total": [
+        94,
+        99
+      ]
+    },
     {
       "date": "23/11/2026",
       "home": "team",
@@ -819,17 +851,10 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "24/11/2026",
-      "home": "padn",
-      "away": "punc",
-      "status": "Sem. 4",
-      "time": "20:00"
-    },
-    {
       "date": "25/11/2026",
       "home": "coch",
       "away": "sucy",
-      "status": "Sem. 4",
+      "status": "Reporté",
       "time": "20:00"
     },
     {
@@ -946,17 +971,17 @@
     },
     {
       "date": "18/01/2027",
-      "home": "olym",
-      "away": "neku",
-      "status": "Sem. 9",
-      "time": "20:00"
-    },
-    {
-      "date": "18/01/2027",
       "home": "sucy",
       "away": "punc",
       "status": "Sem. 9",
       "time": "20:30"
+    },
+    {
+      "date": "18/01/2027",
+      "home": "olym",
+      "away": "neku",
+      "status": "Sem. 9",
+      "time": "20:00"
     },
     {
       "date": "18/01/2027",
@@ -980,95 +1005,95 @@
       "time": "20:30"
     },
     {
-      "date": "01/03/2027",
-      "home": "go",
-      "away": "neku",
-      "status": "Sem. 10",
-      "time": "20:00"
+      "date": "25/01/2027",
+      "home": "punc",
+      "away": "padn",
+      "status": "Sem. 13",
+      "time": "20:15"
     },
     {
       "date": "01/03/2027",
       "home": "olym",
       "away": "punc",
-      "status": "Sem. 10",
+      "status": "Reporté",
+      "time": "20:00"
+    },
+    {
+      "date": "01/03/2027",
+      "home": "go",
+      "away": "neku",
+      "status": "Reporté",
       "time": "20:00"
     },
     {
       "date": "02/03/2027",
       "home": "padn",
       "away": "team",
-      "status": "Sem. 10",
+      "status": "Reporté",
       "time": "20:00"
     },
     {
       "date": "03/03/2027",
       "home": "coch",
       "away": "yip",
-      "status": "Sem. 10",
+      "status": "Reporté",
       "time": "20:00"
     },
     {
       "date": "08/03/2027",
       "home": "punc",
       "away": "go",
-      "status": "Sem. 11",
+      "status": "Reporté",
       "time": "20:15"
     },
     {
       "date": "08/03/2027",
       "home": "sucy",
       "away": "olym",
-      "status": "Sem. 11",
+      "status": "Reporté",
       "time": "20:30"
     },
     {
       "date": "10/03/2027",
       "home": "yip",
       "away": "padn",
-      "status": "Sem. 11",
+      "status": "Reporté",
       "time": "20:30"
     },
     {
       "date": "11/03/2027",
       "home": "neku",
       "away": "coch",
-      "status": "Sem. 11",
+      "status": "Reporté",
       "time": "20:20"
     },
     {
       "date": "15/03/2027",
       "home": "team",
       "away": "yip",
-      "status": "Sem. 12",
+      "status": "Reporté",
       "time": "20:00"
     },
     {
       "date": "15/03/2027",
       "home": "go",
       "away": "sucy",
-      "status": "Sem. 12",
+      "status": "Reporté",
       "time": "20:00"
     },
     {
       "date": "17/03/2027",
       "home": "coch",
       "away": "punc",
-      "status": "Sem. 12",
+      "status": "Reporté",
       "time": "20:00"
     },
     {
       "date": "18/03/2027",
       "home": "neku",
       "away": "padn",
-      "status": "Sem. 12",
+      "status": "Reporté",
       "time": "20:20"
-    },
-    {
-      "date": "29/03/2027",
-      "home": "punc",
-      "away": "padn",
-      "status": "Sem. 13",
-      "time": "20:15"
     },
     {
       "date": "29/03/2027",
@@ -1236,11 +1261,11 @@
     {
       "rank": 1,
       "team": "punc",
-      "elo": 1580.4,
-      "movement": 32.7,
-      "record": "3-0",
+      "elo": 1599.5,
+      "movement": 19.0,
+      "record": "4-0",
       "power": 100.0,
-      "calendar": "V x3",
+      "calendar": "V x4",
       "diffClass": "diff-easy"
     },
     {
@@ -1249,7 +1274,7 @@
       "elo": 1542.8,
       "movement": 24.3,
       "record": "2-1",
-      "power": 76.6,
+      "power": 71.5,
       "calendar": "V vs Team",
       "diffClass": "diff-easy"
     },
@@ -1259,7 +1284,7 @@
       "elo": 1537.5,
       "movement": 20.3,
       "record": "3-1",
-      "power": 73.3,
+      "power": 68.8,
       "calendar": "V vs Team",
       "diffClass": "diff-easy"
     },
@@ -1269,7 +1294,7 @@
       "elo": 1520.8,
       "movement": -32.7,
       "record": "2-1",
-      "power": 62.9,
+      "power": 60.5,
       "calendar": "D vs Les",
       "diffClass": "diff-hard"
     },
@@ -1279,7 +1304,7 @@
       "elo": 1519.2,
       "movement": 18.8,
       "record": "2-1",
-      "power": 61.9,
+      "power": 59.6,
       "calendar": "V vs GO",
       "diffClass": "diff-easy"
     },
@@ -1296,11 +1321,11 @@
     {
       "rank": 7,
       "team": "padn",
-      "elo": 1457.4,
-      "movement": -22.6,
-      "record": "1-2",
-      "power": 19.4,
-      "calendar": "D vs Nekutā",
+      "elo": 1438.4,
+      "movement": -19.0,
+      "record": "1-3",
+      "power": 5.8,
+      "calendar": "D x3",
       "diffClass": "diff-hard"
     },
     {
@@ -1326,18 +1351,19 @@
   ],
   "prPlayers": [],
   "eloHistory": {
+    "punc": [
+      1500,
+      1521.7,
+      1547.7,
+      1580.4,
+      1599.5
+    ],
     "neku": [
       1500,
       1524.9,
       1494.5,
       1517.1,
       1537.5
-    ],
-    "punc": [
-      1500,
-      1521.7,
-      1547.7,
-      1580.4
     ],
     "yip": [
       1500,
@@ -1361,7 +1387,8 @@
       1500,
       1521.7,
       1480.1,
-      1457.4
+      1457.4,
+      1438.4
     ],
     "team": [
       1500,
@@ -1382,6 +1409,16 @@
   },
   "evolutionData": {
     "teams": {
+      "punc": {
+        "points": [
+          0,
+          3,
+          6,
+          9,
+          12
+        ],
+        "rank": 1
+      },
       "neku": {
         "points": [
           0,
@@ -1389,15 +1426,6 @@
           4,
           7,
           10
-        ],
-        "rank": 1
-      },
-      "punc": {
-        "points": [
-          0,
-          3,
-          6,
-          9
         ],
         "rank": 2
       },
@@ -1433,7 +1461,8 @@
           0,
           3,
           4,
-          6
+          6,
+          7
         ],
         "rank": 6
       },
