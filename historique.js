@@ -7576,7 +7576,8 @@ const TEAM_COLORS = {
     'Rhinos Féroces': '#607d8b',
     'StarPAFF': '#455a64',
     'Olympe BB volley': '#e91e8c',
-    'Morts de Soif': '#16a085'
+    'Morts de Soif': '#16a085',
+    'Les Indécis': '#2a35de' // V29.95 : bleu de l'ex-"Indécis" (Ginette 2025-26, fusionné), loin du violet de Jen
 };
 
 // Génération de couleurs vives pour les équipes non référencées dans TEAM_COLORS
@@ -8530,17 +8531,27 @@ const RankingView = {
 
     _equalizeBadges(container) {
         // Pour chaque groupe visible, trouver le badge le plus large et appliquer à tous
+        var hidden = false;
         ['rankingEquipes', 'rankingJoueurs'].forEach(function(id) {
             var section = container.querySelector('#' + id);
             if (!section || section.style.display === 'none') return;
             var badges = section.querySelectorAll('.ranking-team-badge');
             if (badges.length === 0) return;
             // Reset pour mesurer la taille naturelle
-            badges.forEach(function(b) { b.style.width = ''; });
+            badges.forEach(function(b) { b.style.width = ''; b.style.minWidth = ''; });
             var maxW = 0;
             badges.forEach(function(b) { if (b.offsetWidth > maxW) maxW = b.offsetWidth; });
-            badges.forEach(function(b) { b.style.width = maxW + 'px'; });
+            // V29.95 : min-width (et non width) + rien si la section est encore masquée (écran de
+            // chargement) : la mesure valait 0 et coupait les noms ("Je", "Le") jusqu'au rendu suivant.
+            if (maxW > 0) badges.forEach(function(b) { b.style.minWidth = maxW + 'px'; });
+            else hidden = true;
         });
+        // Section encore masquée : on réessaie quand elle est affichée (max ~5 s)
+        var tries = (arguments[1] || 0);
+        if (hidden && tries < 20) {
+            var self = this;
+            setTimeout(function() { self._equalizeBadges(container, tries + 1); }, 250);
+        }
     },
 
     bindEvents(container) {
