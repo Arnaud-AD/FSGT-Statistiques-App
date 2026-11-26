@@ -5,10 +5,10 @@
     "name": "Easy",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/16",
-    "lastUpdated": "2026-11-26T02:58:28",
+    "lastUpdated": "2026-11-27T00:57:45",
     "teamCount": 8,
-    "matchesPlayed": 10,
-    "matchesUpcoming": 46
+    "matchesPlayed": 11,
+    "matchesUpcoming": 45
   },
   "teams": {
     "ours": {
@@ -56,23 +56,23 @@
     {
       "rank": 1,
       "team": "ours",
-      "mj": 3,
-      "g": 3,
+      "mj": 4,
+      "g": 4,
       "p": 0,
-      "setPlus": 9,
-      "setMinus": 3,
-      "ds": 6,
+      "setPlus": 12,
+      "setMinus": 4,
+      "ds": 8,
       "coefSet": "3.00",
-      "ptsPlus": 273,
-      "ptsMinus": 257,
-      "dp": "+16",
-      "coefPts": "1.06",
-      "pts": 9,
+      "ptsPlus": 372,
+      "ptsMinus": 342,
+      "dp": "+30",
+      "coefPts": "1.09",
+      "pts": 12,
       "formAller": [
         "W",
         "W",
         "W",
-        "P",
+        "W",
         "P",
         "D",
         "P"
@@ -90,23 +90,23 @@
     {
       "rank": 2,
       "team": "daiq",
-      "mj": 3,
+      "mj": 4,
       "g": 2,
-      "p": 1,
-      "setPlus": 6,
-      "setMinus": 6,
-      "ds": 0,
-      "coefSet": "1.00",
-      "ptsPlus": 241,
-      "ptsMinus": 250,
-      "dp": "-9",
-      "coefPts": "0.96",
-      "pts": 7,
+      "p": 2,
+      "setPlus": 7,
+      "setMinus": 9,
+      "ds": -2,
+      "coefSet": "0.78",
+      "ptsPlus": 326,
+      "ptsMinus": 349,
+      "dp": "-23",
+      "coefPts": "0.93",
+      "pts": 8,
       "formAller": [
         "W",
         "L",
         "W",
-        "P",
+        "L",
         "P",
         "P",
         "P"
@@ -327,6 +327,38 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "26/11/2026",
+      "home": "ours",
+      "away": "daiq",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé",
+      "time": "20:00",
+      "sets": [
+        [
+          24,
+          26
+        ],
+        [
+          25,
+          22
+        ],
+        [
+          25,
+          17
+        ],
+        [
+          25,
+          20
+        ]
+      ],
+      "total": [
+        99,
+        85
+      ]
+    },
     {
       "date": "25/11/2026",
       "home": "coco",
@@ -657,13 +689,6 @@
       "time": null
     },
     {
-      "date": "26/11/2026",
-      "home": "ours",
-      "away": "daiq",
-      "status": "Sem. 4",
-      "time": "20:00"
-    },
-    {
       "date": "30/11/2026",
       "home": "fata",
       "away": "daiq",
@@ -976,11 +1001,11 @@
     {
       "rank": 1,
       "team": "ours",
-      "elo": 1575.8,
-      "movement": 20.2,
-      "record": "3-0",
+      "elo": 1595.5,
+      "movement": 19.7,
+      "record": "4-0",
       "power": 100.0,
-      "calendar": "V x3",
+      "calendar": "V x4",
       "diffClass": "diff-easy"
     },
     {
@@ -989,7 +1014,7 @@
       "elo": 1553.4,
       "movement": 18.6,
       "record": "2-0",
-      "power": 85.2,
+      "power": 78.0,
       "calendar": "V vs Les",
       "diffClass": "diff-easy"
     },
@@ -999,7 +1024,7 @@
       "elo": 1548.5,
       "movement": 25.5,
       "record": "2-0",
-      "power": 82.0,
+      "power": 75.4,
       "calendar": "V vs Punchline",
       "diffClass": "diff-easy"
     },
@@ -1009,19 +1034,19 @@
       "elo": 1508.1,
       "movement": -20.2,
       "record": "1-1",
-      "power": 55.3,
+      "power": 54.2,
       "calendar": "D vs Les",
       "diffClass": "diff-hard"
     },
     {
       "rank": 5,
       "team": "daiq",
-      "elo": 1506.9,
-      "movement": 23.4,
-      "record": "2-1",
-      "power": 54.6,
-      "calendar": "V vs Punchline",
-      "diffClass": "diff-easy"
+      "elo": 1487.1,
+      "movement": -19.7,
+      "record": "2-2",
+      "power": 44.0,
+      "calendar": "D vs Les",
+      "diffClass": "diff-hard"
     },
     {
       "rank": 6,
@@ -1060,13 +1085,15 @@
       1500,
       1529.5,
       1555.7,
-      1575.8
+      1575.8,
+      1595.5
     ],
     "daiq": [
       1500,
       1518.3,
       1483.5,
-      1506.9
+      1506.9,
+      1487.1
     ],
     "coco": [
       1500,
@@ -1108,7 +1135,8 @@
           0,
           3,
           6,
-          9
+          9,
+          12
         ],
         "rank": 1
       },
@@ -1117,7 +1145,8 @@
           0,
           3,
           4,
-          7
+          7,
+          8
         ],
         "rank": 2
       },
