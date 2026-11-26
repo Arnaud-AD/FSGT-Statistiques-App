@@ -7576,7 +7576,8 @@ const TEAM_COLORS = {
     'Rhinos Féroces': '#607d8b',
     'StarPAFF': '#455a64',
     'Olympe BB volley': '#e91e8c',
-    'Morts de Soif': '#16a085'
+    'Morts de Soif': '#16a085',
+    'Les Indécis': '#2a35de' // V29.95 : bleu de l'ex-"Indécis" (Ginette 2025-26, fusionné), loin du violet de Jen
 };
 
 // Génération de couleurs vives pour les équipes non référencées dans TEAM_COLORS
