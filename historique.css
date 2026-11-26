@@ -871,6 +871,11 @@ body {
     display: block;
 }
 
+/* Detail d'un match : meme taille que dans l'onglet Annee sur ordinateur */
+#momentumMatchSection .momentum-chart {
+    max-width: 640px;
+}
+
 /* ==================== SEGMENTED TABS (shared) ==================== */
 .segmented-tabs {
     display: flex;

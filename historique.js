@@ -11582,6 +11582,7 @@ const MatchStatsView = {
             this.renderSubstitutions(this.currentMatch, filter);
             SharedComponents.renderSideOutBlock(this.currentMatch, filter, 'sideoutContainer');
             SharedComponents.renderTimeline(this.currentMatch, 'timelineContainer', filter);
+            YearStatsView.renderMatchMomentum(this.currentMatch, filter);
         }
     },
 
@@ -11596,6 +11597,8 @@ const MatchStatsView = {
         if (sideout) sideout.style.display = 'none';
         if (timeline) timeline.style.display = 'none';
         if (remplacements) remplacements.style.display = 'none';
+        var momentum = document.getElementById('momentumMatchSection');
+        if (momentum) momentum.style.display = 'none';
 
         // Afficher et rendre le bilan
         var bilanContainer = document.getElementById('bilanContainer');
@@ -12402,27 +12405,21 @@ const YearStatsView = {
         return html;
     },
 
-    renderYearMomentum(matches) {
-        // Collecter les courbes d'ecart de chaque set
-        var curves = [];
-        var totalCompletedSets = 0;
-        matches.forEach(function(m) {
-            (m.sets || []).forEach(function(s) { if (s.completed) totalCompletedSets++; });
-            (m.sets || []).filter(function(s) { return s.completed && s.points && s.points.length >= 20; }).forEach(function(s) {
-                var pts = s.points;
-                var ih = s.initialHomeScore || 0;
-                var ia = s.initialAwayScore || 0;
-                var curve = [0];
-                for (var i = 0; i < pts.length; i++) {
-                    curve.push((pts[i].homeScore - ih) - (pts[i].awayScore - ia));
-                }
-                curves.push(curve);
-            });
-        });
-        if (curves.length === 0) return '';
+    // Courbe d'ecart (Jen - Adv) point par point d'un set, depuis le score de depart
+    _momentumSetCurve(s) {
+        var pts = s.points || [];
+        var ih = s.initialHomeScore || 0;
+        var ia = s.initialAwayScore || 0;
+        var curve = [0];
+        for (var i = 0; i < pts.length; i++) {
+            curve.push((pts[i].homeScore - ih) - (pts[i].awayScore - ia));
+        }
+        return curve;
+    },
 
-        // Normaliser chaque set sur RESOLUTION positions (0% a 100%)
-        // Echantillonnage "nearest" (pas d'interpolation) pour garder les a-coups
+    // Moyenne de plusieurs sets normalises sur RESOLUTION positions (0% a 100%)
+    // Echantillonnage "nearest" (pas d'interpolation) pour garder les a-coups
+    _momentumAverage(curves) {
         var RESOLUTION = 50;
         var rawCurve = [];
         for (var pct = 0; pct <= RESOLUTION; pct++) {
@@ -12434,6 +12431,79 @@ const YearStatsView = {
             }
             rawCurve.push(sum / curves.length);
         }
+        return rawCurve;
+    },
+
+    renderYearMomentum(matches) {
+        // Collecter les courbes d'ecart de chaque set
+        var self = this;
+        var curves = [];
+        var totalCompletedSets = 0;
+        matches.forEach(function(m) {
+            (m.sets || []).forEach(function(s) { if (s.completed) totalCompletedSets++; });
+            (m.sets || []).filter(function(s) { return s.completed && s.points && s.points.length >= 20; }).forEach(function(s) {
+                curves.push(self._momentumSetCurve(s));
+            });
+        });
+        if (curves.length === 0) return '';
+
+        var html = '<div class="hist-section momentum-section collapsed">';
+        html += '<div class="hist-section-title">Momentum <span class="momentum-subtitle">' + curves.length + ' sets filmés (sur ' + totalCompletedSets + ' sets joués)</span></div>';
+        html += this.buildMomentumSvg(this._momentumAverage(curves));
+        html += '</div>';
+        return html;
+    },
+
+    // Momentum d'un match (detail Matchs) : Set ALL = moyenne des sets du match
+    // (meme calcul que l'onglet Annee), Sn = courbe point par point du set.
+    renderMatchMomentum(match, setFilter) {
+        var section = document.getElementById('momentumMatchSection');
+        var container = document.getElementById('momentumMatchContainer');
+        var subtitle = document.getElementById('momentumMatchSubtitle');
+        if (!section || !container) return;
+
+        var completedSets = (match.sets || []).filter(function(s) { return s.completed; });
+        var MIN_POINTS = 10;
+        var hasPoints = function(s) { return s && s.points && s.points.length >= MIN_POINTS; };
+        var html = '';
+        var sub = '';
+
+        if (setFilter !== undefined && setFilter !== 'all' && setFilter !== 'bilan') {
+            var set = completedSets[setFilter];
+            if (hasPoints(set)) {
+                var hs = set.finalHomeScore != null ? set.finalHomeScore : (set.homeScore != null ? set.homeScore : null);
+                var as = set.finalAwayScore != null ? set.finalAwayScore : (set.awayScore != null ? set.awayScore : null);
+                if (hs == null || as == null) {
+                    var last = set.points[set.points.length - 1];
+                    hs = last.homeScore; as = last.awayScore;
+                }
+                sub = 'Set ' + (setFilter + 1) + ' · ' + hs + '-' + as + ' · ' + set.points.length + ' points';
+                html = this.buildMomentumSvg(this._momentumSetCurve(set), { integerScale: true });
+            }
+        } else {
+            var filmed = completedSets.filter(hasPoints);
+            if (filmed.length > 0) {
+                var self = this;
+                var curves = filmed.map(function(s) { return self._momentumSetCurve(s); });
+                sub = filmed.length + ' sets filmés (sur ' + completedSets.length + ' sets joués)';
+                html = this.buildMomentumSvg(this._momentumAverage(curves));
+            }
+        }
+
+        if (!html) {
+            section.style.display = 'none';
+            container.innerHTML = '';
+            return;
+        }
+        section.style.display = '';
+        if (subtitle) subtitle.textContent = sub;
+        container.innerHTML = html;
+    },
+
+    // Graphique SVG du momentum a partir d'une courbe d'ecart (Jen - Adv).
+    // Couleur des segments selon la pente : rouge = Jen chauffe, bleu = l'adversaire (voulu, echelle de chaleur).
+    buildMomentumSvg(rawCurve, opts) {
+        opts = opts || {};
 
         // EMA (Exponential Moving Average) pour lisser legerement
         // alpha bas = plus lisse, alpha haut = plus nerveux
@@ -12450,7 +12520,8 @@ const YearStatsView = {
             if (a > absMax) absMax = a;
         }
         if (absMax === 0) absMax = 1;
-        var scaleMax = Math.ceil(absMax * 2) / 2;
+        // Set seul : marge et echelle paire pour que la courbe ne touche pas les labels Jen + / Adv +
+        var scaleMax = opts.integerScale ? Math.ceil((absMax + 1) / 2) * 2 : Math.ceil(absMax * 2) / 2;
 
         var n = avgCurve.length - 1;
 
@@ -12487,10 +12558,7 @@ const YearStatsView = {
             return 'rgb(' + r + ',' + g + ',' + b + ')';
         }
 
-        var html = '<div class="hist-section momentum-section collapsed">';
-        html += '<div class="hist-section-title">Momentum <span class="momentum-subtitle">' + curves.length + ' sets filmés (sur ' + totalCompletedSets + ' sets joués)</span></div>';
-
-        html += '<svg class="momentum-chart" viewBox="0 0 ' + svgWidth + ' ' + svgHeight + '">';
+        var html = '<svg class="momentum-chart" viewBox="0 0 ' + svgWidth + ' ' + svgHeight + '">';
 
         // Grilles legeres
         html += '<line x1="' + padLeft + '" y1="' + topY + '" x2="' + (svgWidth - padRight) + '" y2="' + topY + '" stroke="#e8eaed" stroke-width="0.5"/>';
@@ -12547,7 +12615,6 @@ const YearStatsView = {
         html += '<text x="' + (svgWidth - padRight) + '" y="' + (botY - 1) + '" text-anchor="end" font-size="7" fill="#0056D2" opacity="0.6">Adv +</text>';
 
         html += '</svg>';
-        html += '</div>';
         return html;
     },
 
