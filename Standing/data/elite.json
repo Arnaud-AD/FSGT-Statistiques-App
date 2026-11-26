@@ -5,10 +5,10 @@
     "name": "Elite",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/2",
-    "lastUpdated": "2026-11-25T03:12:42",
+    "lastUpdated": "2026-11-26T02:57:56",
     "teamCount": 9,
-    "matchesPlayed": 14,
-    "matchesUpcoming": 58
+    "matchesPlayed": 15,
+    "matchesUpcoming": 57
   },
   "teams": {
     "punc": {
@@ -16,24 +16,24 @@
       "short": "PU",
       "color": "#e74c3c"
     },
+    "coch": {
+      "name": "Cochonou",
+      "short": "CO",
+      "color": "#3498db"
+    },
     "neku": {
       "name": "Nekutā",
       "short": "NE",
-      "color": "#3498db"
+      "color": "#2ecc71"
     },
     "yip": {
       "name": "Yip Yip",
       "short": "YY",
-      "color": "#2ecc71"
+      "color": "#f39c12"
     },
     "olym": {
       "name": "Olympe BB volley",
       "short": "OB",
-      "color": "#f39c12"
-    },
-    "coch": {
-      "name": "Cochonou",
-      "short": "CO",
       "color": "#9b59b6"
     },
     "padn": {
@@ -96,6 +96,42 @@
     },
     {
       "rank": 2,
+      "team": "coch",
+      "mj": 4,
+      "g": 3,
+      "p": 1,
+      "setPlus": 9,
+      "setMinus": 5,
+      "ds": 4,
+      "coefSet": "1.80",
+      "ptsPlus": 312,
+      "ptsMinus": 287,
+      "dp": "+25",
+      "coefPts": "1.09",
+      "pts": 10,
+      "formAller": [
+        "W",
+        "W",
+        "L",
+        "W",
+        "P",
+        "P",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "D",
+        "D",
+        "D",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 3,
       "team": "neku",
       "mj": 4,
       "g": 3,
@@ -131,7 +167,7 @@
       ]
     },
     {
-      "rank": 3,
+      "rank": 4,
       "team": "yip",
       "mj": 3,
       "g": 2,
@@ -167,7 +203,7 @@
       ]
     },
     {
-      "rank": 4,
+      "rank": 5,
       "team": "olym",
       "mj": 3,
       "g": 2,
@@ -195,42 +231,6 @@
         "D",
         "D",
         "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
-      "rank": 5,
-      "team": "coch",
-      "mj": 3,
-      "g": 2,
-      "p": 1,
-      "setPlus": 6,
-      "setMinus": 5,
-      "ds": 1,
-      "coefSet": "1.20",
-      "ptsPlus": 237,
-      "ptsMinus": 236,
-      "dp": "+1",
-      "coefPts": "1.00",
-      "pts": 7,
-      "formAller": [
-        "W",
-        "W",
-        "L",
-        "D",
-        "P",
-        "P",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "D",
-        "D",
-        "D",
         "P",
         "P",
         "P",
@@ -349,22 +349,22 @@
     {
       "rank": 9,
       "team": "sucy",
-      "mj": 1,
+      "mj": 2,
       "g": 0,
-      "p": 1,
+      "p": 2,
       "setPlus": 2,
-      "setMinus": 3,
-      "ds": -1,
-      "coefSet": "0.67",
-      "ptsPlus": 88,
-      "ptsMinus": 105,
-      "dp": "-17",
-      "coefPts": "0.84",
-      "pts": 2,
+      "setMinus": 6,
+      "ds": -4,
+      "coefSet": "0.33",
+      "ptsPlus": 139,
+      "ptsMinus": 180,
+      "dp": "-41",
+      "coefPts": "0.77",
+      "pts": 3,
       "formAller": [
         "C",
         "D",
-        "D",
+        "L",
         "P",
         "P",
         "P",
@@ -384,6 +384,34 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "25/11/2026",
+      "home": "coch",
+      "away": "sucy",
+      "scoreHome": 3,
+      "scoreAway": 0,
+      "homeWin": true,
+      "status": "Terminé",
+      "time": "20:00",
+      "sets": [
+        [
+          25,
+          14
+        ],
+        [
+          25,
+          16
+        ],
+        [
+          25,
+          21
+        ]
+      ],
+      "total": [
+        75,
+        51
+      ]
+    },
     {
       "date": "24/11/2026",
       "home": "padn",
@@ -851,13 +879,6 @@
   ],
   "matchesUpcoming": [
     {
-      "date": "25/11/2026",
-      "home": "coch",
-      "away": "sucy",
-      "status": "Reporté",
-      "time": "20:00"
-    },
-    {
       "date": "30/11/2026",
       "home": "punc",
       "away": "team",
@@ -1097,17 +1118,17 @@
     },
     {
       "date": "29/03/2027",
-      "home": "olym",
-      "away": "go",
-      "status": "Sem. 13",
-      "time": "20:00"
-    },
-    {
-      "date": "29/03/2027",
       "home": "sucy",
       "away": "coch",
       "status": "Sem. 13",
       "time": "20:30"
+    },
+    {
+      "date": "29/03/2027",
+      "home": "olym",
+      "away": "go",
+      "status": "Sem. 13",
+      "time": "20:00"
     },
     {
       "date": "01/04/2027",
@@ -1132,17 +1153,17 @@
     },
     {
       "date": "21/04/2027",
-      "home": "yip",
-      "away": "neku",
-      "status": "Sem. 14",
-      "time": "20:30"
-    },
-    {
-      "date": "21/04/2027",
       "home": "coch",
       "away": "olym",
       "status": "Sem. 14",
       "time": "20:00"
+    },
+    {
+      "date": "21/04/2027",
+      "home": "yip",
+      "away": "neku",
+      "status": "Sem. 14",
+      "time": "20:30"
     },
     {
       "date": "26/04/2027",
@@ -1153,15 +1174,15 @@
     },
     {
       "date": "26/04/2027",
-      "home": "olym",
-      "away": "padn",
+      "home": "go",
+      "away": "coch",
       "status": "Sem. 15",
       "time": "20:00"
     },
     {
       "date": "26/04/2027",
-      "home": "go",
-      "away": "coch",
+      "home": "olym",
+      "away": "padn",
       "status": "Sem. 15",
       "time": "20:00"
     },
@@ -1270,6 +1291,16 @@
     },
     {
       "rank": 2,
+      "team": "coch",
+      "elo": 1549.1,
+      "movement": 28.3,
+      "record": "3-1",
+      "power": 74.7,
+      "calendar": "V vs SUCY",
+      "diffClass": "diff-easy"
+    },
+    {
+      "rank": 3,
       "team": "yip",
       "elo": 1542.8,
       "movement": 24.3,
@@ -1279,7 +1310,7 @@
       "diffClass": "diff-easy"
     },
     {
-      "rank": 3,
+      "rank": 4,
       "team": "neku",
       "elo": 1537.5,
       "movement": 20.3,
@@ -1287,16 +1318,6 @@
       "power": 68.8,
       "calendar": "V vs Team",
       "diffClass": "diff-easy"
-    },
-    {
-      "rank": 4,
-      "team": "coch",
-      "elo": 1520.8,
-      "movement": -32.7,
-      "record": "2-1",
-      "power": 60.5,
-      "calendar": "D vs Les",
-      "diffClass": "diff-hard"
     },
     {
       "rank": 5,
@@ -1311,11 +1332,11 @@
     {
       "rank": 6,
       "team": "sucy",
-      "elo": 1477.9,
-      "movement": -22.1,
-      "record": "0-1",
+      "elo": 1449.6,
+      "movement": -28.3,
+      "record": "0-2",
       "power": 0.0,
-      "calendar": "D vs Olympe",
+      "calendar": "D vs Cochonou",
       "diffClass": "diff-hard"
     },
     {
@@ -1358,6 +1379,13 @@
       1580.4,
       1599.5
     ],
+    "coch": [
+      1500,
+      1523.1,
+      1553.5,
+      1520.8,
+      1549.1
+    ],
     "neku": [
       1500,
       1524.9,
@@ -1376,12 +1404,6 @@
       1478.3,
       1500.4,
       1519.2
-    ],
-    "coch": [
-      1500,
-      1523.1,
-      1553.5,
-      1520.8
     ],
     "padn": [
       1500,
@@ -1404,7 +1426,8 @@
     ],
     "sucy": [
       1500,
-      1477.9
+      1477.9,
+      1449.6
     ]
   },
   "evolutionData": {
@@ -1419,6 +1442,16 @@
         ],
         "rank": 1
       },
+      "coch": {
+        "points": [
+          0,
+          3,
+          6,
+          7,
+          10
+        ],
+        "rank": 2
+      },
       "neku": {
         "points": [
           0,
@@ -1427,7 +1460,7 @@
           7,
           10
         ],
-        "rank": 2
+        "rank": 3
       },
       "yip": {
         "points": [
@@ -1436,7 +1469,7 @@
           5,
           8
         ],
-        "rank": 3
+        "rank": 4
       },
       "olym": {
         "points": [
@@ -1444,15 +1477,6 @@
           2,
           5,
           8
-        ],
-        "rank": 4
-      },
-      "coch": {
-        "points": [
-          0,
-          3,
-          6,
-          7
         ],
         "rank": 5
       },
@@ -1487,7 +1511,8 @@
       "sucy": {
         "points": [
           0,
-          2
+          2,
+          3
         ],
         "rank": 9
       }

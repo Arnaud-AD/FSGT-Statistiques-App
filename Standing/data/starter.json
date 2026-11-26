@@ -5,20 +5,20 @@
     "name": "Starter",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/17",
-    "lastUpdated": "2026-11-25T03:13:25",
+    "lastUpdated": "2026-11-26T02:58:39",
     "teamCount": 8,
-    "matchesPlayed": 12,
-    "matchesUpcoming": 44
+    "matchesPlayed": 13,
+    "matchesUpcoming": 43
   },
   "teams": {
-    "clod": {
-      "name": "Clodo d'Ivry",
-      "short": "CD",
-      "color": "#e74c3c"
-    },
     "futs": {
       "name": "Les Fûts furieux",
       "short": "FF",
+      "color": "#e74c3c"
+    },
+    "clod": {
+      "name": "Clodo d'Ivry",
+      "short": "CD",
       "color": "#3498db"
     },
     "bler": {
@@ -55,6 +55,40 @@
   "standings": [
     {
       "rank": 1,
+      "team": "futs",
+      "mj": 4,
+      "g": 3,
+      "p": 1,
+      "setPlus": 11,
+      "setMinus": 2,
+      "ds": 9,
+      "coefSet": "5.50",
+      "ptsPlus": 309,
+      "ptsMinus": 249,
+      "dp": "+60",
+      "coefPts": "1.24",
+      "pts": 11,
+      "formAller": [
+        "C",
+        "W",
+        "W",
+        "W",
+        "D",
+        "P",
+        "P"
+      ],
+      "formRetour": [
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P",
+        "P"
+      ]
+    },
+    {
+      "rank": 2,
       "team": "clod",
       "mj": 3,
       "g": 3,
@@ -88,40 +122,6 @@
       ]
     },
     {
-      "rank": 2,
-      "team": "futs",
-      "mj": 3,
-      "g": 2,
-      "p": 1,
-      "setPlus": 8,
-      "setMinus": 2,
-      "ds": 6,
-      "coefSet": "4.00",
-      "ptsPlus": 234,
-      "ptsMinus": 202,
-      "dp": "+32",
-      "coefPts": "1.16",
-      "pts": 8,
-      "formAller": [
-        "C",
-        "W",
-        "W",
-        "P",
-        "D",
-        "P",
-        "P"
-      ],
-      "formRetour": [
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P",
-        "P"
-      ]
-    },
-    {
       "rank": 3,
       "team": "krok",
       "mj": 3,
@@ -140,7 +140,7 @@
         "W",
         "L",
         "W",
-        "P",
+        "D",
         "P",
         "P",
         "P"
@@ -242,7 +242,7 @@
         "W",
         "L",
         "C",
-        "P",
+        "D",
         "P",
         "P",
         "P"
@@ -294,23 +294,23 @@
     {
       "rank": 8,
       "team": "choi",
-      "mj": 3,
+      "mj": 4,
       "g": 0,
-      "p": 3,
+      "p": 4,
       "setPlus": 1,
-      "setMinus": 9,
-      "ds": -8,
-      "coefSet": "0.11",
-      "ptsPlus": 180,
-      "ptsMinus": 241,
-      "dp": "-61",
-      "coefPts": "0.75",
-      "pts": 3,
+      "setMinus": 12,
+      "ds": -11,
+      "coefSet": "0.08",
+      "ptsPlus": 227,
+      "ptsMinus": 316,
+      "dp": "-89",
+      "coefPts": "0.72",
+      "pts": 4,
       "formAller": [
         "L",
         "L",
         "L",
-        "P",
+        "L",
         "P",
         "P",
         "P"
@@ -327,6 +327,34 @@
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "25/11/2026",
+      "home": "choi",
+      "away": "futs",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé",
+      "time": "20:00",
+      "sets": [
+        [
+          12,
+          25
+        ],
+        [
+          15,
+          25
+        ],
+        [
+          20,
+          25
+        ]
+      ],
+      "total": [
+        47,
+        75
+      ]
+    },
     {
       "date": "13/11/2026",
       "home": "choi",
@@ -393,6 +421,34 @@
     },
     {
       "date": "09/11/2026",
+      "home": "los",
+      "away": "futs",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé",
+      "time": "20:00",
+      "sets": [
+        [
+          17,
+          25
+        ],
+        [
+          20,
+          25
+        ],
+        [
+          22,
+          25
+        ]
+      ],
+      "total": [
+        59,
+        75
+      ]
+    },
+    {
+      "date": "09/11/2026",
       "home": "clod",
       "away": "gold",
       "scoreHome": 3,
@@ -425,34 +481,6 @@
       "total": [
         101,
         99
-      ]
-    },
-    {
-      "date": "09/11/2026",
-      "home": "los",
-      "away": "futs",
-      "scoreHome": 0,
-      "scoreAway": 3,
-      "homeWin": false,
-      "status": "Terminé",
-      "time": "20:00",
-      "sets": [
-        [
-          17,
-          25
-        ],
-        [
-          20,
-          25
-        ],
-        [
-          22,
-          25
-        ]
-      ],
-      "total": [
-        59,
-        75
       ]
     },
     {
@@ -705,20 +733,6 @@
       "time": "20:30"
     },
     {
-      "date": "25/11/2026",
-      "home": "choi",
-      "away": "futs",
-      "status": "Sem. 4",
-      "time": "20:00"
-    },
-    {
-      "date": "26/11/2026",
-      "home": "krok",
-      "away": "gold",
-      "status": "Sem. 4",
-      "time": "20:20"
-    },
-    {
       "date": "27/11/2026",
       "home": "file",
       "away": "bler",
@@ -748,17 +762,17 @@
     },
     {
       "date": "07/12/2026",
-      "home": "clod",
-      "away": "file",
-      "status": "Sem. 6",
-      "time": "20:30"
-    },
-    {
-      "date": "07/12/2026",
       "home": "bler",
       "away": "futs",
       "status": "Sem. 6",
       "time": null
+    },
+    {
+      "date": "07/12/2026",
+      "home": "clod",
+      "away": "file",
+      "status": "Sem. 6",
+      "time": "20:30"
     },
     {
       "date": "09/12/2026",
@@ -801,6 +815,13 @@
       "away": "gold",
       "status": "Sem. 7",
       "time": "20:30"
+    },
+    {
+      "date": "28/01/2027",
+      "home": "krok",
+      "away": "gold",
+      "status": "Reporté",
+      "time": "20:20"
     },
     {
       "date": "29/01/2027",
@@ -979,17 +1000,17 @@
     },
     {
       "date": "10/05/2027",
-      "home": "clod",
-      "away": "bler",
-      "status": "Sem. 14",
-      "time": "20:30"
-    },
-    {
-      "date": "10/05/2027",
       "home": "choi",
       "away": "futs",
       "status": "Sem. 14",
       "time": null
+    },
+    {
+      "date": "10/05/2027",
+      "home": "clod",
+      "away": "bler",
+      "status": "Sem. 14",
+      "time": "20:30"
     },
     {
       "date": "10/05/2027",
@@ -1009,22 +1030,22 @@
   "prTeams": [
     {
       "rank": 1,
-      "team": "clod",
-      "elo": 1563.7,
-      "movement": 15.2,
-      "record": "3-0",
+      "team": "futs",
+      "elo": 1582.5,
+      "movement": 23.8,
+      "record": "3-1",
       "power": 100.0,
       "calendar": "V x3",
       "diffClass": "diff-easy"
     },
     {
       "rank": 2,
-      "team": "futs",
-      "elo": 1558.7,
-      "movement": 33.1,
-      "record": "2-1",
-      "power": 96.1,
-      "calendar": "V vs Los",
+      "team": "clod",
+      "elo": 1563.7,
+      "movement": 15.2,
+      "record": "3-0",
+      "power": 88.6,
+      "calendar": "V x3",
       "diffClass": "diff-easy"
     },
     {
@@ -1033,7 +1054,7 @@
       "elo": 1525.6,
       "movement": 24.5,
       "record": "2-1",
-      "power": 70.1,
+      "power": 65.5,
       "calendar": "V vs Choisy",
       "diffClass": "diff-easy"
     },
@@ -1043,7 +1064,7 @@
       "elo": 1525.6,
       "movement": 19.1,
       "record": "2-1",
-      "power": 70.1,
+      "power": 65.5,
       "calendar": "V vs Les",
       "diffClass": "diff-easy"
     },
@@ -1053,7 +1074,7 @@
       "elo": 1488.3,
       "movement": -19.1,
       "record": "1-2",
-      "power": 43.8,
+      "power": 45.0,
       "calendar": "D vs Krokeur",
       "diffClass": "diff-hard"
     },
@@ -1063,7 +1084,7 @@
       "elo": 1474.5,
       "movement": -15.2,
       "record": "1-2",
-      "power": 36.4,
+      "power": 39.2,
       "calendar": "D vs Clodo",
       "diffClass": "diff-hard"
     },
@@ -1073,34 +1094,35 @@
       "elo": 1457.5,
       "movement": -33.1,
       "record": "1-2",
-      "power": 27.3,
+      "power": 31.9,
       "calendar": "D vs Les",
       "diffClass": "diff-hard"
     },
     {
       "rank": 8,
       "team": "choi",
-      "elo": 1406.2,
-      "movement": -24.5,
-      "record": "0-3",
+      "elo": 1382.3,
+      "movement": -23.8,
+      "record": "0-4",
       "power": 0.0,
-      "calendar": "D x3",
+      "calendar": "D x4",
       "diffClass": "diff-hard"
     }
   ],
   "prPlayers": [],
   "eloHistory": {
+    "futs": [
+      1500,
+      1484.1,
+      1525.6,
+      1558.7,
+      1582.5
+    ],
     "clod": [
       1500,
       1515.9,
       1548.5,
       1563.7
-    ],
-    "futs": [
-      1500,
-      1484.1,
-      1525.6,
-      1558.7
     ],
     "bler": [
       1500,
@@ -1136,26 +1158,28 @@
       1500,
       1460.9,
       1430.6,
-      1406.2
+      1406.2,
+      1382.3
     ]
   },
   "evolutionData": {
     "teams": {
+      "futs": {
+        "points": [
+          0,
+          2,
+          5,
+          8,
+          11
+        ],
+        "rank": 1
+      },
       "clod": {
         "points": [
           0,
           3,
           6,
           9
-        ],
-        "rank": 1
-      },
-      "futs": {
-        "points": [
-          0,
-          2,
-          5,
-          8
         ],
         "rank": 2
       },
@@ -1209,7 +1233,8 @@
           0,
           1,
           2,
-          3
+          3,
+          4
         ],
         "rank": 8
       }

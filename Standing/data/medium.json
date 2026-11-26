@@ -5,25 +5,25 @@
     "name": "Medium",
     "format": "4x4",
     "url": "https://volley-fsgt94.fr/championnat/3",
-    "lastUpdated": "2026-11-25T03:13:04",
+    "lastUpdated": "2026-11-26T02:58:17",
     "teamCount": 8,
-    "matchesPlayed": 10,
-    "matchesUpcoming": 46
+    "matchesPlayed": 11,
+    "matchesUpcoming": 45
   },
   "teams": {
+    "agen": {
+      "name": "Agent K",
+      "short": "AK",
+      "color": "#e74c3c"
+    },
     "rhum": {
       "name": "Les Rhum'Antik",
       "short": "RH",
-      "color": "#e74c3c"
+      "color": "#3498db"
     },
     "mort": {
       "name": "Morts de Soif",
       "short": "MS",
-      "color": "#3498db"
-    },
-    "agen": {
-      "name": "Agent K",
-      "short": "AK",
       "color": "#2ecc71"
     },
     "bats": {
@@ -41,20 +41,54 @@
       "short": "T&",
       "color": "#1abc9c"
     },
-    "ryoi": {
-      "name": "RYŌIKI TENKAI",
-      "short": "RT",
-      "color": "#e67e22"
-    },
     "boit": {
       "name": "Boîte de 4",
       "short": "B4",
+      "color": "#e67e22"
+    },
+    "ryoi": {
+      "name": "RYŌIKI TENKAI",
+      "short": "RT",
       "color": "#f1c40f"
     }
   },
   "standings": [
     {
       "rank": 1,
+      "team": "agen",
+      "mj": 4,
+      "g": 3,
+      "p": 1,
+      "setPlus": 9,
+      "setMinus": 6,
+      "ds": 3,
+      "coefSet": "1.50",
+      "ptsPlus": 346,
+      "ptsMinus": 346,
+      "dp": "0",
+      "coefPts": "1.00",
+      "pts": 10,
+      "formAller": [
+        "L",
+        "W",
+        "W",
+        "W",
+        "P",
+        "D",
+        "D"
+      ],
+      "formRetour": [
+        "D",
+        "D",
+        "D",
+        "D",
+        "D",
+        "D",
+        "P"
+      ]
+    },
+    {
+      "rank": 2,
       "team": "rhum",
       "mj": 3,
       "g": 2,
@@ -88,7 +122,7 @@
       ]
     },
     {
-      "rank": 2,
+      "rank": 3,
       "team": "mort",
       "mj": 3,
       "g": 2,
@@ -107,40 +141,6 @@
         "W",
         "D",
         "L",
-        "P",
-        "D",
-        "D"
-      ],
-      "formRetour": [
-        "D",
-        "D",
-        "D",
-        "D",
-        "D",
-        "D",
-        "P"
-      ]
-    },
-    {
-      "rank": 3,
-      "team": "agen",
-      "mj": 3,
-      "g": 2,
-      "p": 1,
-      "setPlus": 6,
-      "setMinus": 6,
-      "ds": 0,
-      "coefSet": "1.00",
-      "ptsPlus": 270,
-      "ptsMinus": 282,
-      "dp": "-12",
-      "coefPts": "0.96",
-      "pts": 7,
-      "formAller": [
-        "L",
-        "W",
-        "W",
-        "D",
         "P",
         "D",
         "D"
@@ -259,6 +259,40 @@
     },
     {
       "rank": 7,
+      "team": "boit",
+      "mj": 4,
+      "g": 0,
+      "p": 4,
+      "setPlus": 1,
+      "setMinus": 12,
+      "ds": -11,
+      "coefSet": "0.08",
+      "ptsPlus": 245,
+      "ptsMinus": 323,
+      "dp": "-78",
+      "coefPts": "0.76",
+      "pts": 4,
+      "formAller": [
+        "L",
+        "L",
+        "L",
+        "L",
+        "P",
+        "D",
+        "D"
+      ],
+      "formRetour": [
+        "D",
+        "D",
+        "D",
+        "D",
+        "D",
+        "D",
+        "P"
+      ]
+    },
+    {
+      "rank": 8,
       "team": "ryoi",
       "mj": 1,
       "g": 1,
@@ -290,43 +324,37 @@
         "D",
         "P"
       ]
-    },
-    {
-      "rank": 8,
-      "team": "boit",
-      "mj": 3,
-      "g": 0,
-      "p": 3,
-      "setPlus": 1,
-      "setMinus": 9,
-      "ds": -8,
-      "coefSet": "0.11",
-      "ptsPlus": 181,
-      "ptsMinus": 247,
-      "dp": "-66",
-      "coefPts": "0.73",
-      "pts": 3,
-      "formAller": [
-        "L",
-        "L",
-        "L",
-        "D",
-        "P",
-        "D",
-        "D"
-      ],
-      "formRetour": [
-        "D",
-        "D",
-        "D",
-        "D",
-        "D",
-        "D",
-        "P"
-      ]
     }
   ],
   "matchesPlayed": [
+    {
+      "date": "25/11/2026",
+      "home": "boit",
+      "away": "agen",
+      "scoreHome": 0,
+      "scoreAway": 3,
+      "homeWin": false,
+      "status": "Terminé",
+      "time": "20:30",
+      "sets": [
+        [
+          17,
+          25
+        ],
+        [
+          24,
+          26
+        ],
+        [
+          23,
+          25
+        ]
+      ],
+      "total": [
+        64,
+        76
+      ]
+    },
     {
       "date": "24/11/2026",
       "home": "tigr",
@@ -385,38 +413,6 @@
     },
     {
       "date": "10/11/2026",
-      "home": "rhum",
-      "away": "tigr",
-      "scoreHome": 3,
-      "scoreAway": 1,
-      "homeWin": true,
-      "status": "Terminé",
-      "time": "20:30",
-      "sets": [
-        [
-          16,
-          25
-        ],
-        [
-          25,
-          20
-        ],
-        [
-          25,
-          22
-        ],
-        [
-          25,
-          22
-        ]
-      ],
-      "total": [
-        91,
-        89
-      ]
-    },
-    {
-      "date": "10/11/2026",
       "home": "bats",
       "away": "agen",
       "scoreHome": 2,
@@ -449,6 +445,38 @@
       "total": [
         112,
         109
+      ]
+    },
+    {
+      "date": "10/11/2026",
+      "home": "rhum",
+      "away": "tigr",
+      "scoreHome": 3,
+      "scoreAway": 1,
+      "homeWin": true,
+      "status": "Terminé",
+      "time": "20:30",
+      "sets": [
+        [
+          16,
+          25
+        ],
+        [
+          25,
+          20
+        ],
+        [
+          25,
+          22
+        ],
+        [
+          25,
+          22
+        ]
+      ],
+      "total": [
+        91,
+        89
       ]
     },
     {
@@ -641,13 +669,6 @@
       "time": "20:45"
     },
     {
-      "date": "25/11/2026",
-      "home": "boit",
-      "away": "agen",
-      "status": "Reporté",
-      "time": "20:30"
-    },
-    {
       "date": "01/12/2026",
       "home": "agen",
       "away": "ryoi",
@@ -677,6 +698,13 @@
     },
     {
       "date": "08/12/2026",
+      "home": "tigr",
+      "away": "agen",
+      "status": "Reporté",
+      "time": "20:45"
+    },
+    {
+      "date": "08/12/2026",
       "home": "rhum",
       "away": "mars",
       "status": "Reporté",
@@ -686,13 +714,6 @@
       "date": "08/12/2026",
       "home": "bats",
       "away": "mort",
-      "status": "Reporté",
-      "time": "20:45"
-    },
-    {
-      "date": "08/12/2026",
-      "home": "tigr",
-      "away": "agen",
       "status": "Reporté",
       "time": "20:45"
     },
@@ -768,15 +789,15 @@
     },
     {
       "date": "02/03/2027",
-      "home": "rhum",
-      "away": "mars",
+      "home": "agen",
+      "away": "mort",
       "status": "Reporté",
       "time": "20:30"
     },
     {
       "date": "02/03/2027",
-      "home": "agen",
-      "away": "mort",
+      "home": "rhum",
+      "away": "mars",
       "status": "Reporté",
       "time": "20:30"
     },
@@ -796,15 +817,15 @@
     },
     {
       "date": "09/03/2027",
-      "home": "rhum",
-      "away": "ryoi",
+      "home": "agen",
+      "away": "boit",
       "status": "Reporté",
       "time": "20:30"
     },
     {
       "date": "09/03/2027",
-      "home": "agen",
-      "away": "boit",
+      "home": "rhum",
+      "away": "ryoi",
       "status": "Reporté",
       "time": "20:30"
     },
@@ -824,17 +845,17 @@
     },
     {
       "date": "16/03/2027",
-      "home": "tigr",
-      "away": "rhum",
-      "status": "Reporté",
-      "time": "20:45"
-    },
-    {
-      "date": "16/03/2027",
       "home": "agen",
       "away": "bats",
       "status": "Reporté",
       "time": "20:30"
+    },
+    {
+      "date": "16/03/2027",
+      "home": "tigr",
+      "away": "rhum",
+      "status": "Reporté",
+      "time": "20:45"
     },
     {
       "date": "17/03/2027",
@@ -852,17 +873,17 @@
     },
     {
       "date": "30/03/2027",
-      "home": "bats",
-      "away": "rhum",
-      "status": "Reporté",
-      "time": "20:45"
-    },
-    {
-      "date": "30/03/2027",
       "home": "agen",
       "away": "mars",
       "status": "Reporté",
       "time": "20:30"
+    },
+    {
+      "date": "30/03/2027",
+      "home": "bats",
+      "away": "rhum",
+      "status": "Reporté",
+      "time": "20:45"
     },
     {
       "date": "31/03/2027",
@@ -959,42 +980,42 @@
   "prTeams": [
     {
       "rank": 1,
-      "team": "rhum",
-      "elo": 1531.7,
-      "movement": 22.5,
-      "record": "2-1",
+      "team": "agen",
+      "elo": 1541.9,
+      "movement": 24.9,
+      "record": "3-1",
       "power": 100.0,
-      "calendar": "V vs Les",
+      "calendar": "V x3",
       "diffClass": "diff-easy"
     },
     {
       "rank": 2,
-      "team": "mort",
-      "elo": 1525.1,
-      "movement": -38.1,
+      "team": "rhum",
+      "elo": 1531.7,
+      "movement": 22.5,
       "record": "2-1",
-      "power": 89.6,
-      "calendar": "D vs Les",
-      "diffClass": "diff-hard"
-    },
-    {
-      "rank": 3,
-      "team": "ryoi",
-      "elo": 1517.2,
-      "movement": 17.2,
-      "record": "1-0",
-      "power": 77.1,
+      "power": 87.8,
       "calendar": "V vs Les",
       "diffClass": "diff-easy"
     },
     {
-      "rank": 4,
-      "team": "agen",
-      "elo": 1517.1,
-      "movement": 23.8,
+      "rank": 3,
+      "team": "mort",
+      "elo": 1525.1,
+      "movement": -38.1,
       "record": "2-1",
-      "power": 77.0,
-      "calendar": "V vs Batstreet",
+      "power": 80.0,
+      "calendar": "D vs Les",
+      "diffClass": "diff-hard"
+    },
+    {
+      "rank": 4,
+      "team": "ryoi",
+      "elo": 1517.2,
+      "movement": 17.2,
+      "record": "1-0",
+      "power": 70.5,
+      "calendar": "V vs Les",
       "diffClass": "diff-easy"
     },
     {
@@ -1003,7 +1024,7 @@
       "elo": 1515.6,
       "movement": 38.1,
       "record": "1-1",
-      "power": 74.6,
+      "power": 68.6,
       "calendar": "V vs Morts",
       "diffClass": "diff-easy"
     },
@@ -1013,7 +1034,7 @@
       "elo": 1506.2,
       "movement": -23.8,
       "record": "1-1",
-      "power": 59.8,
+      "power": 57.4,
       "calendar": "D vs Agent",
       "diffClass": "diff-hard"
     },
@@ -1023,23 +1044,30 @@
       "elo": 1483.6,
       "movement": 37.4,
       "record": "1-2",
-      "power": 41.5,
+      "power": 43.2,
       "calendar": "V vs Boîte",
       "diffClass": "diff-easy"
     },
     {
       "rank": 8,
       "team": "boit",
-      "elo": 1403.6,
-      "movement": -37.4,
-      "record": "0-3",
+      "elo": 1378.7,
+      "movement": -24.9,
+      "record": "0-4",
       "power": 0.0,
-      "calendar": "D x3",
+      "calendar": "D x4",
       "diffClass": "diff-hard"
     }
   ],
   "prPlayers": [],
   "eloHistory": {
+    "agen": [
+      1500,
+      1469.5,
+      1493.3,
+      1517.1,
+      1541.9
+    ],
     "rhum": [
       1500,
       1526.4,
@@ -1051,12 +1079,6 @@
       1530.5,
       1563.2,
       1525.1
-    ],
-    "agen": [
-      1500,
-      1469.5,
-      1493.3,
-      1517.1
     ],
     "bats": [
       1500,
@@ -1074,19 +1096,30 @@
       1477.5,
       1515.6
     ],
-    "ryoi": [
-      1500,
-      1517.2
-    ],
     "boit": [
       1500,
       1473.6,
       1440.9,
-      1403.6
+      1403.6,
+      1378.7
+    ],
+    "ryoi": [
+      1500,
+      1517.2
     ]
   },
   "evolutionData": {
     "teams": {
+      "agen": {
+        "points": [
+          0,
+          1,
+          4,
+          7,
+          10
+        ],
+        "rank": 1
+      },
       "rhum": {
         "points": [
           0,
@@ -1094,22 +1127,13 @@
           5,
           8
         ],
-        "rank": 1
+        "rank": 2
       },
       "mort": {
         "points": [
           0,
           3,
           6,
-          7
-        ],
-        "rank": 2
-      },
-      "agen": {
-        "points": [
-          0,
-          1,
-          4,
           7
         ],
         "rank": 3
@@ -1139,18 +1163,19 @@
         ],
         "rank": 6
       },
-      "ryoi": {
-        "points": [
-          0,
-          3
-        ],
-        "rank": 7
-      },
       "boit": {
         "points": [
           0,
           1,
           2,
+          3,
+          4
+        ],
+        "rank": 7
+      },
+      "ryoi": {
+        "points": [
+          0,
           3
         ],
         "rank": 8
