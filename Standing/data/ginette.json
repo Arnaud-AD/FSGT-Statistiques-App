@@ -4,7 +4,7 @@
     "name": "Coupe Ginette",
     "season": "2026-2027",
     "format": "coupe",
-    "lastUpdated": "2026-11-27T00:58:18",
+    "lastUpdated": "2026-11-28T02:10:38",
     "teamCount": 64,
     "matchCount": 32,
     "forfeitCount": 2,
@@ -28,8 +28,8 @@
       "name": "Les Indécis",
       "division": "Ultimate",
       "divSlug": "ultimate",
-      "elo": 1956.7,
-      "delta": 7.5,
+      "elo": 1956.0,
+      "delta": 6.8,
       "record": "1-0",
       "wins": 1,
       "losses": 0,
@@ -42,7 +42,7 @@
           "opponent": "Oss 226",
           "result": "W",
           "score": "3-0",
-          "delta": 7.5
+          "delta": 6.8
         }
       ]
     },
@@ -56,7 +56,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 99.2,
+      "power": 99.3,
       "form": [
         "W"
       ],
@@ -79,7 +79,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 95.6,
+      "power": 95.7,
       "form": [
         "W"
       ],
@@ -102,7 +102,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 94.8,
+      "power": 94.9,
       "form": [
         "W"
       ],
@@ -125,7 +125,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 94.1,
+      "power": 94.2,
       "form": [
         "W"
       ],
@@ -148,7 +148,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 92.6,
+      "power": 92.7,
       "form": [
         "W"
       ],
@@ -171,7 +171,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 88.8,
+      "power": 88.9,
       "form": [
         "W"
       ],
@@ -194,7 +194,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 86.4,
+      "power": 86.5,
       "form": [
         "W"
       ],
@@ -240,7 +240,7 @@
       "record": "0-1",
       "wins": 0,
       "losses": 1,
-      "power": 84.0,
+      "power": 84.1,
       "form": [
         "L"
       ],
@@ -263,7 +263,7 @@
       "record": "0-1",
       "wins": 0,
       "losses": 1,
-      "power": 82.8,
+      "power": 82.9,
       "form": [
         "L"
       ],
@@ -286,7 +286,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 82.5,
+      "power": 82.6,
       "form": [
         "W"
       ],
@@ -332,7 +332,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 75.1,
+      "power": 75.2,
       "form": [
         "W"
       ],
@@ -355,7 +355,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 73.9,
+      "power": 74.0,
       "form": [
         "W"
       ],
@@ -378,7 +378,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 73.0,
+      "power": 73.1,
       "form": [
         "W"
       ],
@@ -401,7 +401,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 73.0,
+      "power": 73.1,
       "form": [
         "W"
       ],
@@ -424,7 +424,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 72.6,
+      "power": 72.7,
       "form": [
         "W"
       ],
@@ -442,12 +442,12 @@
       "name": "No s(o)ucy",
       "division": "Or 6x6",
       "divSlug": "or6x6",
-      "elo": 1727.8,
-      "delta": 6.8,
+      "elo": 1746.7,
+      "delta": 6.2,
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 69.4,
+      "power": 72.0,
       "form": [
         "W"
       ],
@@ -456,7 +456,7 @@
           "opponent": "GO ELAN",
           "result": "W",
           "score": "3-0",
-          "delta": 6.8
+          "delta": 6.2
         }
       ]
     },
@@ -470,7 +470,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 69.1,
+      "power": 69.2,
       "form": [
         "W"
       ],
@@ -493,7 +493,7 @@
       "record": "0-1",
       "wins": 0,
       "losses": 1,
-      "power": 68.2,
+      "power": 68.3,
       "form": [
         "L"
       ],
@@ -508,29 +508,6 @@
     },
     {
       "rank": 22,
-      "name": "Inarizaki",
-      "division": "Or 6x6",
-      "divSlug": "or6x6",
-      "elo": 1696.1,
-      "delta": 5.0,
-      "record": "1-0",
-      "wins": 1,
-      "losses": 0,
-      "power": 65.1,
-      "form": [
-        "W"
-      ],
-      "matches": [
-        {
-          "opponent": "Agent K",
-          "result": "W",
-          "score": "3-0",
-          "delta": 5
-        }
-      ]
-    },
-    {
-      "rank": 23,
       "name": "Ginto",
       "division": "Hard",
       "divSlug": "hard",
@@ -553,7 +530,7 @@
       ]
     },
     {
-      "rank": 24,
+      "rank": 23,
       "name": "LES DÉMENTS",
       "division": "Hard",
       "divSlug": "hard",
@@ -576,7 +553,7 @@
       ]
     },
     {
-      "rank": 25,
+      "rank": 24,
       "name": "Bachateam",
       "division": "Hard",
       "divSlug": "hard",
@@ -599,7 +576,7 @@
       ]
     },
     {
-      "rank": 26,
+      "rank": 25,
       "name": "Smash or Pass",
       "division": "Or 6x6",
       "divSlug": "or6x6",
@@ -608,7 +585,7 @@
       "record": "0-1",
       "wins": 0,
       "losses": 1,
-      "power": 61.7,
+      "power": 61.8,
       "form": [
         "L"
       ],
@@ -622,7 +599,7 @@
       ]
     },
     {
-      "rank": 27,
+      "rank": 26,
       "name": "Rhinos Féroces",
       "division": "Hard",
       "divSlug": "hard",
@@ -641,6 +618,29 @@
           "result": "L",
           "score": "0-3",
           "delta": -21.6
+        }
+      ]
+    },
+    {
+      "rank": 27,
+      "name": "Inarizaki",
+      "division": "Or 6x6",
+      "divSlug": "or6x6",
+      "elo": 1654.5,
+      "delta": 5.0,
+      "record": "1-0",
+      "wins": 1,
+      "losses": 0,
+      "power": 59.6,
+      "form": [
+        "W"
+      ],
+      "matches": [
+        {
+          "opponent": "Agent K",
+          "result": "W",
+          "score": "3-0",
+          "delta": 5
         }
       ]
     },
@@ -677,7 +677,7 @@
       "record": "0-1",
       "wins": 0,
       "losses": 1,
-      "power": 57.2,
+      "power": 57.3,
       "form": [
         "L"
       ],
@@ -700,7 +700,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 56.8,
+      "power": 56.9,
       "form": [
         "W"
       ],
@@ -715,29 +715,6 @@
     },
     {
       "rank": 31,
-      "name": "Oss 226",
-      "division": "Or 6x6",
-      "divSlug": "or6x6",
-      "elo": 1631.4,
-      "delta": -7.5,
-      "record": "0-1",
-      "wins": 0,
-      "losses": 1,
-      "power": 56.5,
-      "form": [
-        "L"
-      ],
-      "matches": [
-        {
-          "opponent": "Les Indécis",
-          "result": "L",
-          "score": "0-3",
-          "delta": -7.5
-        }
-      ]
-    },
-    {
-      "rank": 32,
       "name": "Morts de Soif",
       "division": "Medium",
       "divSlug": "medium",
@@ -746,7 +723,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 56.2,
+      "power": 56.3,
       "form": [
         "W"
       ],
@@ -760,7 +737,7 @@
       ]
     },
     {
-      "rank": 33,
+      "rank": 32,
       "name": "Les Rhum'Antik",
       "division": "Medium",
       "divSlug": "medium",
@@ -783,7 +760,7 @@
       ]
     },
     {
-      "rank": 34,
+      "rank": 33,
       "name": "Neuilly Sa Mère",
       "division": "Or 6x6",
       "divSlug": "or6x6",
@@ -806,7 +783,7 @@
       ]
     },
     {
-      "rank": 35,
+      "rank": 34,
       "name": "Batstreet Back",
       "division": "Medium",
       "divSlug": "medium",
@@ -825,6 +802,29 @@
           "result": "W",
           "score": "2-2",
           "delta": 10.8
+        }
+      ]
+    },
+    {
+      "rank": 35,
+      "name": "Oss 226",
+      "division": "Or 6x6",
+      "divSlug": "or6x6",
+      "elo": 1612.5,
+      "delta": -6.8,
+      "record": "0-1",
+      "wins": 0,
+      "losses": 1,
+      "power": 54.0,
+      "form": [
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Les Indécis",
+          "result": "L",
+          "score": "0-3",
+          "delta": -6.8
         }
       ]
     },
@@ -861,7 +861,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 52.3,
+      "power": 52.4,
       "form": [
         "W"
       ],
@@ -884,7 +884,7 @@
       "record": "0-1",
       "wins": 0,
       "losses": 1,
-      "power": 52.3,
+      "power": 52.4,
       "form": [
         "L"
       ],
@@ -907,7 +907,7 @@
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 52.0,
+      "power": 52.1,
       "form": [
         "W"
       ],
@@ -925,12 +925,12 @@
       "name": "Les Marsupilamyyy",
       "division": "Medium",
       "divSlug": "medium",
-      "elo": 1595.6,
-      "delta": 12.0,
+      "elo": 1597.0,
+      "delta": 13.4,
       "record": "1-0",
       "wins": 1,
       "losses": 0,
-      "power": 51.7,
+      "power": 51.9,
       "form": [
         "W"
       ],
@@ -939,7 +939,7 @@
           "opponent": "Les Filets O'Fish",
           "result": "W",
           "score": "3-1",
-          "delta": 12.0
+          "delta": 13.4
         }
       ]
     },
@@ -953,7 +953,7 @@
       "record": "0-1",
       "wins": 0,
       "losses": 1,
-      "power": 45.1,
+      "power": 45.2,
       "form": [
         "L"
       ],
@@ -1022,7 +1022,7 @@
       "record": "0-1",
       "wins": 0,
       "losses": 1,
-      "power": 38.5,
+      "power": 38.6,
       "form": [
         "L"
       ],
@@ -1068,7 +1068,7 @@
       "record": "0-1",
       "wins": 0,
       "losses": 1,
-      "power": 34.9,
+      "power": 35.0,
       "form": [
         "L"
       ],
@@ -1175,6 +1175,29 @@
     },
     {
       "rank": 51,
+      "name": "Les Filets O'Fish",
+      "division": "Starter",
+      "divSlug": "starter",
+      "elo": 1401.6,
+      "delta": -13.4,
+      "record": "0-1",
+      "wins": 0,
+      "losses": 1,
+      "power": 25.8,
+      "form": [
+        "L"
+      ],
+      "matches": [
+        {
+          "opponent": "Les Marsupilamyyy",
+          "result": "L",
+          "score": "1-3",
+          "delta": -13.4
+        }
+      ]
+    },
+    {
+      "rank": 52,
       "name": "Punchline",
       "division": "Easy",
       "divSlug": "easy",
@@ -1183,7 +1206,7 @@
       "record": "0-1",
       "wins": 0,
       "losses": 1,
-      "power": 23.9,
+      "power": 24.0,
       "form": [
         "L"
       ],
@@ -1197,7 +1220,7 @@
       ]
     },
     {
-      "rank": 52,
+      "rank": 53,
       "name": "Smashmallow",
       "division": "Argent",
       "divSlug": "argent",
@@ -1220,16 +1243,16 @@
       ]
     },
     {
-      "rank": 53,
+      "rank": 54,
       "name": "GO ELAN",
       "division": "Argent",
       "divSlug": "argent",
-      "elo": 1385.4,
-      "delta": -6.8,
+      "elo": 1386.0,
+      "delta": -6.2,
       "record": "0-1",
       "wins": 0,
       "losses": 1,
-      "power": 23.6,
+      "power": 23.7,
       "form": [
         "L"
       ],
@@ -1238,30 +1261,7 @@
           "opponent": "No s(o)ucy",
           "result": "L",
           "score": "0-3",
-          "delta": -6.8
-        }
-      ]
-    },
-    {
-      "rank": 54,
-      "name": "Les Filets O'Fish",
-      "division": "Starter",
-      "divSlug": "starter",
-      "elo": 1376.3,
-      "delta": -12.0,
-      "record": "0-1",
-      "wins": 0,
-      "losses": 1,
-      "power": 22.4,
-      "form": [
-        "L"
-      ],
-      "matches": [
-        {
-          "opponent": "Les Marsupilamyyy",
-          "result": "L",
-          "score": "1-3",
-          "delta": -12.0
+          "delta": -6.2
         }
       ]
     },
@@ -1513,7 +1513,7 @@
       "name": "Ultimate",
       "teams": 8,
       "avgElo": 1893.5,
-      "maxElo": 1956.7,
+      "maxElo": 1956.0,
       "minElo": 1821.2,
       "wins": 6,
       "losses": 2,
@@ -1534,8 +1534,8 @@
       "slug": "or6x6",
       "name": "Or 6x6",
       "teams": 7,
-      "avgElo": 1650.4,
-      "maxElo": 1727.8,
+      "avgElo": 1644.5,
+      "maxElo": 1746.7,
       "minElo": 1598.0,
       "wins": 4,
       "losses": 3,
@@ -1545,7 +1545,7 @@
       "slug": "medium",
       "name": "Medium",
       "teams": 8,
-      "avgElo": 1599.7,
+      "avgElo": 1599.9,
       "maxElo": 1636.9,
       "minElo": 1464.0,
       "wins": 4,
@@ -1556,7 +1556,7 @@
       "slug": "starter",
       "name": "Starter",
       "teams": 7,
-      "avgElo": 1394.9,
+      "avgElo": 1398.5,
       "maxElo": 1500.0,
       "minElo": 1281.2,
       "wins": 2,
@@ -1778,8 +1778,8 @@
       "awayDivision": "or6x6",
       "winner": "Les Indécis",
       "forfeit": false,
-      "deltaHome": 7.5,
-      "deltaAway": -7.5,
+      "deltaHome": 6.8,
+      "deltaAway": -6.8,
       "date": "18/11/2026",
       "time": "20:45",
       "venue": "Gymnase de la Citadelle",
@@ -1806,8 +1806,8 @@
       "awayDivision": "argent",
       "winner": "No s(o)ucy",
       "forfeit": false,
-      "deltaHome": 6.8,
-      "deltaAway": -6.8,
+      "deltaHome": 6.2,
+      "deltaAway": -6.2,
       "date": "17/11/2026",
       "time": "20:30",
       "venue": "Clarisse Agbegnenou",
@@ -1953,8 +1953,8 @@
       "awayDivision": "medium",
       "winner": "Les Marsupilamyyy",
       "forfeit": false,
-      "deltaHome": -12.0,
-      "deltaAway": 12.0,
+      "deltaHome": -13.4,
+      "deltaAway": 13.4,
       "date": "20/11/2026",
       "time": "20:30",
       "venue": "Lycée Louis Armand 3",
